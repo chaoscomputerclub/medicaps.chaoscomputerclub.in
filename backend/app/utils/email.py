@@ -2,8 +2,9 @@
 Chaos Computer Club — Medi-Caps Chapter
 utils/email.py — Async SMTP email dispatcher
 Branded email template based on Chaos Computer Club India design system.
-Production v4: Minimal, void-black only (immune to OS theme flips),
+Production v5: Minimal, void-black only (immune to OS theme flips),
 tag-cut dual chamfer acid container, 6-digit segmented hardware-authenticator UI,
+anti-inversion protections for Gmail & cross-client parity,
 RFC-compliant multipart/alternative (HTML + plaintext).
 """
 import asyncio
@@ -45,10 +46,11 @@ ESTABLISHED 2026 · OPEN BY DEFAULT · PEER DRIVEN
 
 def _otp_email_template(otp_code: str) -> str:
     """
-    Chaos Computer Club India — Production Email Template
+    Chaos Computer Club India — Production Email Template v5
     - Void black only — immune to OS light mode inversions
     - tag-cut dual-chamfer acid-lime container matching root application geometry
     - 6 segmented tactile digit cells with black text on acid-lime
+    - Anti-inversion protections for Gmail dark mode and cross-client rendering
     - Ultra-minimal copy and hacker-grade typography hierarchy
     """
     digits = list(otp_code.strip()) if len(otp_code.strip()) == 6 else ["7", "3", "9", "1", "0", "4"]
@@ -56,10 +58,12 @@ def _otp_email_template(otp_code: str) -> str:
 
     digit_cells_html = ""
     for d in digits:
-        digit_cells_html += f"""<td align="center" valign="middle" width="44" style="width:44px;padding:0 3px;">
+        digit_cells_html += f"""<td align="center" valign="middle" width="44" class="digit-cell" bgcolor="#ccff00" style="width:44px;padding:0 3px;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="44" style="width:44px;border-collapse:collapse;">
             <tr>
-              <td align="center" valign="middle" height="54" bgcolor="#ccff00" style="height:54px;width:44px;background-color:#ccff00;border:2px solid #080808;text-align:center;font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:32px;font-weight:900;color:#080808;line-height:54px;mso-line-height-rule:exactly;">{d}</td>
+              <td align="center" valign="middle" height="54" bgcolor="#ccff00" class="digit-cell" style="height:54px;width:44px;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);border:2px solid #080808;text-align:center;">
+                <span class="digit-char" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:32px;font-weight:900;color:#080808 !important;-webkit-text-fill-color:#080808 !important;line-height:54px;display:inline-block;mso-line-height-rule:exactly;">{d}</span>
+              </td>
             </tr>
           </table>
         </td>"""
@@ -132,7 +136,7 @@ def _otp_email_template(otp_code: str) -> str:
         background-color: #0a0a0c !important;
         background-image: linear-gradient(#0a0a0c, #0a0a0c) !important;
       }}
-      .acid-hero {{
+      .acid-hero, .digit-cell {{
         background-color: #ccff00 !important;
         background-image: linear-gradient(#ccff00, #ccff00) !important;
         color: #080808 !important;
@@ -152,9 +156,28 @@ def _otp_email_template(otp_code: str) -> str:
       background-color: #0a0a0c !important;
       background-image: linear-gradient(#0a0a0c, #0a0a0c) !important;
     }}
-    [data-ogsc] .acid-hero {{
+    [data-ogsc] .acid-hero, [data-ogsc] .digit-cell {{
       background-color: #ccff00 !important;
       background-image: linear-gradient(#ccff00, #ccff00) !important;
+    }}
+
+    /* Gmail iOS / Android Dark Mode Inversion Protections */
+    u + .body .session-title,
+    u + .body .session-title span {{
+      color: #f0f0f2 !important;
+      -webkit-text-fill-color: #f0f0f2 !important;
+    }}
+    u + .body .digit-cell {{
+      background-color: #ccff00 !important;
+      background-image: linear-gradient(#ccff00, #ccff00) !important;
+    }}
+    u + .body .digit-char {{
+      color: #080808 !important;
+      -webkit-text-fill-color: #080808 !important;
+    }}
+    u + .body .acid-meta {{
+      color: #080808 !important;
+      -webkit-text-fill-color: #080808 !important;
     }}
 
     /* Modern client polygon: exact tag-cut geometry from root app */
@@ -170,7 +193,7 @@ def _otp_email_template(otp_code: str) -> str:
     }}
   </style>
 </head>
-<body bgcolor="#080808" class="body-canvas" style="margin:0;padding:0;background-color:#080808;background-image:linear-gradient(#080808,#080808);color:#eaeaea;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
+<body bgcolor="#080808" class="body body-canvas" style="margin:0;padding:0;background-color:#080808;background-image:linear-gradient(#080808,#080808);color:#eaeaea;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
 
   <!-- Preheader preview text -->
   <div style="display:none;font-size:1px;color:#080808;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">
@@ -221,10 +244,10 @@ def _otp_email_template(otp_code: str) -> str:
           <tr>
             <td style="padding:28px 28px 24px 28px;">
 
-              <!-- Headline -->
-              <h1 style="margin:0 0 8px 0;padding:0;font-family:'Inter Tight','Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#ffffff;line-height:1.2;">
-                Authenticate session
-              </h1>
+              <!-- Headline (Div + span with off-white anti-inversion) -->
+              <div class="session-title" style="margin:0 0 8px 0;padding:0;font-family:'Inter Tight','Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#f0f0f2 !important;line-height:1.2;">
+                <span style="color:#f0f0f2 !important;-webkit-text-fill-color:#f0f0f2 !important;">Authenticate session</span>
+              </div>
 
               <!-- Minimal instruction -->
               <p style="margin:0 0 24px 0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:#7e7e88;line-height:1.5;">
@@ -245,7 +268,7 @@ def _otp_email_template(otp_code: str) -> str:
                               {digit_cells_html}
                             </tr>
                           </table>
-                          <div style="font-family:'JetBrains Mono',Consolas,monospace;font-size:10px;font-weight:bold;letter-spacing:1.6px;color:#181800;text-transform:uppercase;margin-top:12px;">
+                          <div style="font-family:'JetBrains Mono',Consolas,monospace;font-size:10px;font-weight:bold;letter-spacing:1.6px;color:#080808;text-transform:uppercase;margin-top:12px;">
                             EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
                           </div>
                         </td>
@@ -254,21 +277,20 @@ def _otp_email_template(otp_code: str) -> str:
                     <![endif]-->
 
                     <!--[if !mso]><!-- -->
-                    <div class="tag-cut-container acid-hero" style="position:relative;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);padding:20px 16px 18px 16px;overflow:hidden;border:1px solid #ccff00;">
-
-                      <!-- Top-Right Diagonal Cut Notch (Simulated via rotated div matching card background) -->
-                      <div style="position:absolute;top:-13px;right:-13px;width:26px;height:26px;background-color:#0e0e10;background-image:linear-gradient(#0e0e10,#0e0e10);transform:rotate(45deg);border-bottom:1px solid #1e1e26;"></div>
-                      <!-- Bottom-Left Diagonal Cut Notch (Matches root app tag-cut) -->
-                      <div style="position:absolute;bottom:-13px;left:-13px;width:26px;height:26px;background-color:#0e0e10;background-image:linear-gradient(#0e0e10,#0e0e10);transform:rotate(45deg);border-top:1px solid #1e1e26;"></div>
+                    <div class="tag-cut-container acid-hero" style="position:relative;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);padding:20px 16px 18px 16px;border:1px solid #ccff00;">
 
                       <!-- Micro-Telemetry Top Row -->
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
                         <tr>
-                          <td align="left" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#080808;text-transform:uppercase;">
-                            [ TOKEN // 06-DIGIT ]
+                          <td align="left">
+                            <span class="acid-meta" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#080808 !important;-webkit-text-fill-color:#080808 !important;text-transform:uppercase;">
+                              [ TOKEN // 06-DIGIT ]
+                            </span>
                           </td>
-                          <td align="right" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#181800;text-transform:uppercase;">
-                            TTL 300S &bull; ACTIVE
+                          <td align="right">
+                            <span class="acid-meta" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#080808 !important;-webkit-text-fill-color:#080808 !important;text-transform:uppercase;">
+                              TTL 300S &bull; ACTIVE
+                            </span>
                           </td>
                         </tr>
                       </table>
@@ -282,7 +304,7 @@ def _otp_email_template(otp_code: str) -> str:
 
                       <!-- Subtext within container -->
                       <div style="text-align:center;margin-top:12px;">
-                        <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:800;letter-spacing:1.8px;color:#141400;text-transform:uppercase;">
+                        <span class="acid-meta" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:800;letter-spacing:1.8px;color:#080808 !important;-webkit-text-fill-color:#080808 !important;text-transform:uppercase;">
                           EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
                         </span>
                       </div>
