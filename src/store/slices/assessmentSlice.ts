@@ -108,7 +108,7 @@ export const runCodeThunk = createAsyncThunk<
       problem_id: problemId,
       language,
       code,
-      custom_stdin: customStdin ? customStdin : undefined,
+      ...(customStdin ? { custom_stdin: customStdin } : {}),
     });
   } catch (err: any) {
     return rejectWithValue(err?.message || "Execution failed.");

@@ -1,3 +1,4 @@
+import { ProfileSkeleton } from '@/organization/components/skeletons';
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Award, ExternalLink, LockKeyhole, ShieldCheck, Zap } from "lucide-react";
@@ -23,6 +24,7 @@ export const Route=createFileRoute("/portal/profile")({
     }
     return Promise.all([context.queryClient.ensureQueryData(qs[0]),context.queryClient.ensureQueryData(qs[1]),context.queryClient.ensureQueryData(qs[2]),context.queryClient.ensureQueryData(qs[3]),context.queryClient.ensureQueryData(qs[4]),context.queryClient.ensureQueryData(qs[5])]);
   },
+  pendingComponent:ProfileSkeleton,
   component:Profile
 });
 function Profile(){

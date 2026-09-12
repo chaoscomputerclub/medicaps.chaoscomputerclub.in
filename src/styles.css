@@ -54,3 +54,44 @@
 .auth-back{color:var(--muted)}
 .auth-back:hover{color:var(--foreground)}
 @media(max-width:768px){.auth-shell{grid-template-columns:1fr}.auth-brand{display:none}.auth-form-panel{padding:40px 24px}}
+
+/* ── Cyber Skeleton Loading System ────────────────────────────────────────── */
+@keyframes cyberSkeletonSweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.cyber-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(22, 22, 22, 0.8) 0%,
+    rgba(34, 34, 34, 0.95) 25%,
+    rgba(200, 255, 54, 0.09) 50%,
+    rgba(34, 34, 34, 0.95) 75%,
+    rgba(22, 22, 22, 0.8) 100%
+  );
+  background-size: 250% 100%;
+  animation: cyberSkeletonSweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-skeleton-subtle {
+  background: linear-gradient(
+    90deg,
+    rgba(18, 18, 18, 0.6) 0%,
+    rgba(28, 28, 28, 0.85) 25%,
+    rgba(200, 255, 54, 0.06) 50%,
+    rgba(28, 28, 28, 0.85) 75%,
+    rgba(18, 18, 18, 0.6) 100%
+  );
+  background-size: 250% 100%;
+  animation: cyberSkeletonSweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  border-radius: 1px;
+}

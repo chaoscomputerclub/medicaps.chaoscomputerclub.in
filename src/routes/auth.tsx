@@ -192,7 +192,7 @@ function Auth() {
       verifyOtpThunk({
         email,
         code: codeToVerify,
-        transaction_id: transactionId || undefined,
+        transaction_id: transactionId || '',
       })
     );
     if (verifyOtpThunk.fulfilled.match(resultAction)) {

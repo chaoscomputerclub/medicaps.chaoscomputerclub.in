@@ -1,3 +1,4 @@
+import { AssessmentLeaderboardSkeleton } from '@/organization/components/skeletons';
 /**
  * Chaos Computer Club India — Phase 1 Screening Leaderboard & Top 30 Qualifiers
  */
@@ -18,10 +19,13 @@ export const Route = createFileRoute("/portal/assessments/$contestSlug/leaderboa
       },
     ],
   }),
+  pendingComponent: AssessmentLeaderboardSkeleton,
   component: AssessmentLeaderboardView,
 });
 
 function AssessmentLeaderboardView() {
+  // Render skeleton while loading
+
   const { contestSlug } = Route.useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -63,12 +67,16 @@ function AssessmentLeaderboardView() {
     }
   }
 
+  if (loading && !data) {
+    return <AssessmentLeaderboardSkeleton />;
+  }
+
   return (
     <div className="page-wrap">
       <header className="page-header">
         <div>
           <Link
-            to="/portal/contests"
+            to="/portal/contests" search={{ status: "all" }}
             className="inline-flex items-center gap-1 font-mono text-xs text-subtle-foreground hover:text-accent mb-2 transition-colors"
           >
             <ArrowLeft size={13} /> Back to Contests

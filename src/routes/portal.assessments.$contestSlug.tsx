@@ -1,3 +1,4 @@
+import { AssessmentStudioSkeleton } from '@/organization/components/skeletons';
 /**
  * Chaos Computer Club India — Phase 1 Online Screening Assessment Studio
  * Powered by Interleet Code Execution Engine
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/portal/assessments/$contestSlug")({
       },
     ],
   }),
+  pendingComponent: AssessmentStudioSkeleton,
   component: AssessmentStudio,
 });
 
@@ -145,7 +147,7 @@ function AssessmentStudio() {
         problemId: activeProblem.id,
         language: selectedLanguage,
         code: currentCode,
-        customStdin: activeConsoleTab === "testcases" ? undefined : customStdin,
+        customStdin: activeConsoleTab === "testcases" ? "" : customStdin || "",
       })
     );
   }
@@ -165,16 +167,12 @@ function AssessmentStudio() {
   async function handleFinish() {
     if (confirm("Are you sure you want to finalize and submit your assessment?")) {
       await dispatch(finishAssessmentThunk(contestSlug));
-      void navigate({ to: "/portal/contests" });
+      void navigate({ to: "/portal/contests", search: { status: "all" } });
     }
   }
 
   if (isLoading && !assessment) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#070707] text-[#888] font-mono text-sm">
-        Initializing CCC assessment environment…
-      </div>
-    );
+    return <AssessmentStudioSkeleton />;
   }
 
   if (error) {
@@ -203,7 +201,7 @@ function AssessmentStudio() {
               </Button>
             </a>
           ) : null}
-          <Link to="/portal/contests">
+          <Link to="/portal/contests" search={{ status: "all" }}>
             <Button variant="outline" className="font-mono text-xs border-[#333] hover:bg-[#181818]">
               Return to Contests
             </Button>

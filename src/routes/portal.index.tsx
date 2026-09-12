@@ -1,3 +1,4 @@
+import { DashboardSkeleton } from '@/organization/components/skeletons';
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarClock, MapPin, Radio, ShieldCheck } from "lucide-react";
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/portal/")({
       context.queryClient.ensureQueryData(queries[3]),
       context.queryClient.ensureQueryData(queries[4]),
     ]),
+  pendingComponent: DashboardSkeleton,
   component: Dashboard,
 });
 
@@ -119,7 +121,7 @@ function Dashboard() {
             </p>
             <div className="button-row">
               <Button asChild variant="outline">
-                <Link to="/portal/contests">Browse Contests <ArrowRight /></Link>
+                <Link to="/portal/contests" search={{ status: "all" }}>Browse Contests <ArrowRight /></Link>
               </Button>
             </div>
           </div>
