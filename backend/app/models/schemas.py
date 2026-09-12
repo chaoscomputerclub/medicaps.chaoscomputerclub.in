@@ -138,11 +138,13 @@ class RatingHistoryResponse(BaseModel):
 
 
 class LeaderboardRow(BaseModel):
+    id: Optional[str] = None
     rank: int
     university_rank: int = 1
     previous_rank: int = 1
     handle: str = "anonymous"
     full_name: str = "Anonymous Member"
+    avatar_url: Optional[str] = None
     prn: str = "0827CS231000"
     department: str = "CSE"
     batch: str = "2024-28"

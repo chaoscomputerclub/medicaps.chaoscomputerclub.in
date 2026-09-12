@@ -97,6 +97,8 @@ async def get_university_leaderboard(
 
         rows.append(
             LeaderboardRow(
+                id=m.id,
+                avatar_url=m.avatar_url,
                 rank=current_rank,
                 university_rank=current_rank,
                 previous_rank=current_rank + (1 if current_rank % 2 == 0 else -1 if current_rank > 1 else 0),

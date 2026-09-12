@@ -1,54 +1,255 @@
-import { cn } from "@/lib/utils";
-import { toggleFollowThunk, openSocialDrawer } from '@/store/slices/socialSlice';
-import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
-import { LeaderboardSkeleton } from '@/organization/components/skeletons';
+/**
+ * Chaos Computer Club India — Global Ranking
+ * Strictly formatted as: Rank | Name with profile pic | Region | Attended | Score
+ * Built with CCC brutalist dark theme, top-pinned "(You)" card, and zero filters.
+ */
+
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setLeaderboardSearch, setLeaderboardDept, setLeaderboardBatch } from "@/store/slices/portalSlice";
-import { ChevronDown, ChevronUp, Minus, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAppSelector } from "@/store/hooks";
+import { LeaderboardSkeleton } from "@/organization/components/skeletons";
 import { portalQueries } from "@/organization/data/queries";
-import { TierBadge } from "@/organization/components/ui";
-const q=portalQueries.leaderboard();
-export const Route=createFileRoute("/portal/leaderboard")({head:()=>({meta:[{title:"University Leaderboard — CCC Medi-Caps"},{name:"description",content:"University-wide CCC rating standings from verified offline contests."},{property:"og:title",content:"CCC Medi-Caps University Leaderboard"},{property:"og:description",content:"Verified offline contest ratings across CSE, IT, AIDS and Cyber Security."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),loader:({context})=>context.queryClient.ensureQueryData(q),pendingComponent:LeaderboardSkeleton,component:Leaderboard});
-function Spark({data}:{data:number[]}){const min=Math.min(...data),max=Math.max(...data),range=max-min||1;const pts=data.map((v,i)=>`${i*18},${24-((v-min)/range)*20}`).join(" ");return <svg viewBox="0 0 90 28" className="spark" aria-hidden><polyline points={pts}/></svg>}
-function Leaderboard(){const {data}=useSuspenseQuery(q);const dispatch=useAppDispatch();const search=useAppSelector(s=>s.portal.leaderboardSearch);const dept=useAppSelector(s=>s.portal.leaderboardDept);const batch=useAppSelector(s=>s.portal.leaderboardBatch);
-  const followingIds=useAppSelector(s=>s.social.followingIds);
-  const currentMemberId=useAppSelector(s=>s.auth.member?.id);
-  const actionPendingId=useAppSelector(s=>s.social.actionPendingId);const rows=data.filter(x=>(dept==="all"||x.department===dept)&&(batch==="all"||x.batch===batch)&&(x.handle.includes(search.toLowerCase())||x.full_name.toLowerCase().includes(search.toLowerCase())));return <div className="page-wrap"><header className="page-header"><div><p className="kicker">Verified Elo index</p><h1>University leaderboard.</h1><p>One standing across CSE, IT, AIDS, and Cyber Security. Browser activity never affects rank.</p></div><div className="ranking-meta"><span>RATING CYCLE</span><strong>MONSOON '26</strong><small>{data.length} active members</small></div></header><div className="leader-tools"><label><Search/><Input value={search} onChange={e=>dispatch(setLeaderboardSearch(e.target.value))} placeholder="Search handle or member"/></label><Select value={dept} onValueChange={v=>dispatch(setLeaderboardDept(v))}><SelectTrigger><SelectValue placeholder="Department"/></SelectTrigger><SelectContent><SelectItem value="all">All departments</SelectItem><SelectItem value="CSE">CSE</SelectItem><SelectItem value="IT">IT</SelectItem><SelectItem value="AIDS">AIDS</SelectItem><SelectItem value="Cyber Security">Cyber Security</SelectItem></SelectContent></Select><Select value={batch} onValueChange={v=>dispatch(setLeaderboardBatch(v))}><SelectTrigger><SelectValue placeholder="Batch"/></SelectTrigger><SelectContent><SelectItem value="all">All batches</SelectItem><SelectItem value="2022-26">2022–26</SelectItem><SelectItem value="2023-27">2023–27</SelectItem><SelectItem value="2024-28">2024–28</SelectItem></SelectContent></Select></div><div className="table-scroll leaderboard-table"><table><thead><tr><th>Rank</th><th>Member</th><th>Department</th><th>Tier</th><th>Trend</th><th>Rating</th><th>Peak</th><th>Attendance</th><th>Connect</th></tr></thead><tbody>{rows.length===0?<tr><td colSpan={9} className="text-center py-12 text-[#777] font-mono text-sm">No ranked members found in university standings.</td></tr>:rows.map(x=>{const change=x.previous_rank-x.university_rank;return <tr key={x.handle} className=""><td><div className="rank-cell"><strong>{String(x.university_rank).padStart(2,"0")}</strong><span className={change>0?"up":change<0?"down":"flat"}>{change>0?<ChevronUp/>:change<0?<ChevronDown/>:<Minus/>}{Math.abs(change)||"—"}</span></div></td><td><div className="competitor"><strong>{x.handle}</strong><span>{x.full_name}</span></div></td><td><span className="mono-tag">{x.department} · {x.batch}</span></td><td><TierBadge>{x.tier}</TierBadge></td><td><Spark data={x.ratings}/></td><td className="score-value">{x.rating}</td><td className="mono-value">{x.peak_rating}</td><td><span className="attendance-meter"><i style={{width:`${x.attendance_count/x.attendance_total*100}%`}}/></span><small>{x.attendance_count}/{x.attendance_total}</small></td>
-      <td>
-        {x.id === currentMemberId ? (
-          <span className="text-[10px] font-mono text-[var(--muted)] uppercase px-2 py-1 border border-[var(--line)] bg-[var(--surface-2)] rounded-[1px]">
-            You
-          </span>
-        ) : (
-          <button
-            type="button"
-            disabled={actionPendingId === x.id}
-            onClick={() => dispatch(toggleFollowThunk({ targetId: x.id, targetHandle: x.handle }))}
-            className={cn(
-              "inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase px-2.5 py-1 rounded-[1px] border transition-all cursor-pointer",
-              followingIds.includes(x.id)
-                ? "bg-transparent border-[var(--line)] text-white hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10"
-                : "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] shadow-[0_0_10px_rgba(200,255,54,0.05)]"
-            )}
-          >
-            {actionPendingId === x.id ? (
-              <Loader2 size={11} className="animate-spin" />
-            ) : followingIds.includes(x.id) ? (
-              <>
-                <UserCheck size={11} />
-                <span>Following</span>
-              </>
-            ) : (
-              <>
-                <UserPlus size={11} />
-                <span>Follow</span>
-              </>
-            )}
-          </button>
+import type { LeaderboardEntry } from "@/organization/data/types";
+import { cn } from "@/lib/utils";
+
+const q = portalQueries.leaderboard();
+
+export const Route = createFileRoute("/portal/leaderboard")({
+  head: () => ({
+    meta: [
+      { title: "Global Ranking — CCC Medi-Caps" },
+      {
+        name: "description",
+        content: "Official university-wide global ranking standings based on proctored offline battles.",
+      },
+      { property: "og:title", content: "Global Ranking — CCC Medi-Caps" },
+      {
+        property: "og:description",
+        content: "Verified university contest rankings across CSE, IT, AIDS and Cyber Security.",
+      },
+      { property: "og:type", content: "website" },
+    ],
+  }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(q),
+  pendingComponent: LeaderboardSkeleton,
+  component: GlobalRankingPage,
+});
+
+const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
+  volt: { icon: "⚡", bg: "bg-lime-950/60", border: "border-lime-500/50", text: "text-lime-400" },
+  binary: { icon: "👾", bg: "bg-cyan-950/60", border: "border-cyan-500/50", text: "text-cyan-400" },
+  quantum: { icon: "⚛️", bg: "bg-purple-950/60", border: "border-purple-500/50", text: "text-purple-400" },
+  matrix: { icon: "💻", bg: "bg-emerald-950/60", border: "border-emerald-500/50", text: "text-emerald-400" },
+  grandmaster: { icon: "🏆", bg: "bg-amber-950/60", border: "border-amber-500/50", text: "text-amber-400" },
+  cipher: { icon: "🛡️", bg: "bg-rose-950/60", border: "border-rose-500/50", text: "text-rose-400" },
+};
+
+function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean }) {
+  const emblem = item.avatar_url && EMBLEM_MAP[item.avatar_url];
+
+  if (emblem) {
+    return (
+      <div
+        className={cn(
+          "w-8 h-8 rounded-full border flex items-center justify-center text-sm flex-shrink-0 shadow-sm",
+          emblem.bg,
+          emblem.border,
+          emblem.text
         )}
-      </td>
-    </tr>})}</tbody></table></div></div>}
+      >
+        <span>{emblem.icon}</span>
+      </div>
+    );
+  }
+
+  if (item.avatar_url && item.avatar_url.startsWith("http")) {
+    return (
+      <div className="w-8 h-8 rounded-full border border-zinc-700 overflow-hidden flex-shrink-0 bg-zinc-800">
+        <img src={item.avatar_url} alt={item.full_name || item.handle} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+
+  const initials = item.full_name
+    ? item.full_name
+        .split(" ")
+        .map((w) => w[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : item.handle.slice(0, 2).toUpperCase();
+
+  return (
+    <div
+      className={cn(
+        "w-8 h-8 rounded-full border flex items-center justify-center font-mono text-[11px] font-bold flex-shrink-0 shadow-sm",
+        isYou
+          ? "bg-[var(--accent)]/15 border-[var(--accent)]/50 text-[var(--accent)]"
+          : "bg-zinc-800/80 border-zinc-700 text-zinc-300"
+      )}
+    >
+      {initials}
+    </div>
+  );
+}
+
+function GlobalRankingPage() {
+  const { data } = useSuspenseQuery(q);
+  const currentMember = useAppSelector((s) => s.auth.member);
+  const currentMemberId = currentMember?.id;
+
+  // Find current user in the global standings
+  const currentUserRow = data.find(
+    (x) => (currentMemberId && x.id === currentMemberId) || (currentMember?.handle && x.handle === currentMember.handle)
+  );
+
+  return (
+    <div className="page-wrap max-w-5xl mx-auto px-4 py-8">
+      {/* Page Title & Subtitle */}
+      <header className="mb-8">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Global Ranking
+        </h1>
+        <p className="text-xs sm:text-sm text-[var(--muted)] font-mono mt-1.5">
+          Total Participants: {data.length.toLocaleString()}
+        </p>
+      </header>
+
+      {/* Pinned "You" Row Card (Matching LeetCode Highlight) */}
+      {currentUserRow && (
+        <section aria-label="Your Position" className="mb-5">
+          <div className="grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-3.5 bg-[var(--surface-2)] border border-[var(--accent)]/50 rounded-xl shadow-[0_0_20px_rgba(200,255,54,0.08)] transition-all">
+            {/* Rank */}
+            <div className="font-mono font-bold text-sm sm:text-base text-white">
+              {currentUserRow.university_rank.toLocaleString()}
+            </div>
+
+            {/* Name with Profile Pic */}
+            <div className="flex items-center gap-3 min-w-0 pr-2">
+              <AvatarBubble item={currentUserRow} isYou={true} />
+              <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                <span className="font-semibold text-sm sm:text-base text-white truncate font-sans">
+                  {currentUserRow.full_name || currentUserRow.handle}
+                </span>
+                <span className="text-xs">⚡</span>
+                <span className="text-xs font-mono font-bold text-[var(--accent)]">
+                  (You)
+                </span>
+              </div>
+            </div>
+
+            {/* Region */}
+            <div className="flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm text-zinc-300">
+              <span className="text-sm">🇮🇳</span>
+              <span className="truncate">{currentUserRow.department}</span>
+            </div>
+
+            {/* Attended */}
+            <div className="text-right font-mono text-xs sm:text-sm text-zinc-200 pr-1">
+              {currentUserRow.attendance_count}
+            </div>
+
+            {/* Score */}
+            <div className="text-right font-mono text-sm sm:text-base font-bold text-white">
+              {currentUserRow.rating.toLocaleString()}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Global Ranking Table Headers */}
+      <div className="grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-2.5 text-xs text-[var(--muted)] font-medium select-none uppercase tracking-wider">
+        <span>Rank</span>
+        <span>Name</span>
+        <span className="text-center">Region</span>
+        <span className="text-right pr-1">Attended</span>
+        <span className="text-right">Score</span>
+      </div>
+
+      {/* Global Ranking Rows Stream */}
+      <div className="space-y-2">
+        {data.length === 0 ? (
+          <div className="text-center py-16 px-4 bg-[var(--surface)] border border-[var(--line)] rounded-xl">
+            <p className="font-mono text-sm text-[var(--muted)]">
+              No ranked participants in university standings yet.
+            </p>
+          </div>
+        ) : (
+          data.map((x) => {
+            const isYou =
+              (currentMemberId && x.id === currentMemberId) ||
+              (currentMember?.handle && x.handle === currentMember.handle);
+
+            return (
+              <div
+                key={x.handle}
+                className={cn(
+                  "grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-3 rounded-xl border transition-all duration-150",
+                  isYou
+                    ? "bg-[var(--surface-2)] border-[var(--accent)]/40 shadow-sm"
+                    : "bg-[var(--surface)] hover:bg-[var(--surface-2)] border-[var(--line)] hover:border-zinc-700"
+                )}
+              >
+                {/* Rank Badge / Number */}
+                <div className="flex items-center">
+                  {x.university_rank === 1 ? (
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#facc15] text-black font-bold font-mono text-xs sm:text-sm flex items-center justify-center shadow-md shadow-amber-500/20">
+                      1
+                    </div>
+                  ) : x.university_rank === 2 ? (
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#cbd5e1] text-black font-bold font-mono text-xs sm:text-sm flex items-center justify-center shadow-md shadow-slate-400/20">
+                      2
+                    </div>
+                  ) : x.university_rank === 3 ? (
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#ea580c] text-white font-bold font-mono text-xs sm:text-sm flex items-center justify-center shadow-md shadow-orange-600/20">
+                      3
+                    </div>
+                  ) : (
+                    <span className="font-mono text-xs sm:text-sm font-semibold text-zinc-400 pl-1">
+                      {x.university_rank.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Name with Profile Pic */}
+                <div className="flex items-center gap-3 min-w-0 pr-2">
+                  <AvatarBubble item={x} isYou={Boolean(isYou)} />
+                  <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                    <span className="font-medium text-xs sm:text-sm text-white truncate font-sans">
+                      {x.full_name || x.handle}
+                    </span>
+                    {x.university_rank <= 3 && (
+                      <span className="text-xs">⚡</span>
+                    )}
+                    {isYou && (
+                      <span className="text-[11px] font-mono font-bold text-[var(--accent)] ml-0.5">
+                        (You)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Region */}
+                <div className="flex items-center justify-center gap-1.5 font-mono text-xs text-zinc-400">
+                  <span className="text-sm">🇮🇳</span>
+                  <span className="truncate">{x.department}</span>
+                </div>
+
+                {/* Attended */}
+                <div className="text-right font-mono text-xs sm:text-sm text-zinc-300 pr-1">
+                  {x.attendance_count}
+                </div>
+
+                {/* Score */}
+                <div className="text-right font-mono text-xs sm:text-sm font-bold text-white">
+                  {x.rating.toLocaleString()}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
