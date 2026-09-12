@@ -92,7 +92,15 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(`${apiBase}${path}`, { ...init, headers });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Request failed" }));
-      throw new Error(err.detail || "Request failed");
+      let msg = "Request failed";
+      if (typeof err.detail === "string") {
+        msg = err.detail;
+      } else if (Array.isArray(err.detail) && err.detail.length > 0) {
+        msg = err.detail[0]?.msg?.replace(/^Value error,\s*/i, "") || err.detail[0]?.msg || "Validation error";
+      } else if (err.message) {
+        msg = err.message;
+      }
+      throw new Error(msg);
     }
     return res.json();
   } catch (err: any) {
@@ -101,6 +109,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     }
     throw err;
   }
+}
+
+
+export function isMedicapsEmail(email: string): boolean {
+  if (!email || !email.includes("@")) return false;
+  const domain = email.split("@")[1]?.trim().toLowerCase();
+  return domain === "medicaps.ac.in" || Boolean(domain?.endsWith(".medicaps.ac.in"));
 }
 
 // ── Email OTP ──────────────────────────────────────────────────────────────

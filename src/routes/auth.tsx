@@ -95,6 +95,26 @@ function Auth() {
     const onboardedParam = params.get("is_onboarded") ?? params.get("onboarding");
     const emailParam = params.get("email");
 
+    const errorParam = params.get("error");
+    if (errorParam) {
+      if (errorParam === "unauthorized_domain") {
+        const rejectedEmail = params.get("email");
+        dispatch(
+          setMessage(
+            rejectedEmail
+              ? `Access restricted: ${rejectedEmail} is not a Medi-Caps institutional account. Only official @medicaps.ac.in organization emails are permitted. Gmail and external companies are strictly blocked.`
+              : "Access restricted: Only official @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are not allowed."
+          )
+        );
+      } else if (errorParam === "google_cancelled") {
+        dispatch(setMessage("Google sign-in was cancelled."));
+      } else {
+        dispatch(setMessage("Google authentication failed. Please try again or use institutional email verification."));
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
     if (tokenParam) {
       dispatch(setTokenDirect(tokenParam));
       if (emailParam) dispatch(setEmail(emailParam));
@@ -126,12 +146,20 @@ function Auth() {
     }
   }, [dispatch, navigate, authed]);
 
-  // Step 1: Send OTP via Redux Thunk
+  // Step 1: Send OTP via Redux Thunk (Restricted strictly to @medicaps.ac.in)
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !cleanEmail.includes("@")) {
-      dispatch(setMessage("Please enter a valid campus email address."));
+      dispatch(setMessage("Please enter your university email address."));
+      return;
+    }
+    if (!isMedicapsEmail(cleanEmail)) {
+      dispatch(
+        setMessage(
+          "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail, Yahoo, and personal accounts are strictly prohibited."
+        )
+      );
       return;
     }
     await dispatch(sendOtpThunk(cleanEmail));
@@ -156,7 +184,10 @@ function Auth() {
 
   async function handleResendOtp() {
     const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail) return;
+    if (!cleanEmail || !isMedicapsEmail(cleanEmail)) {
+      dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted."));
+      return;
+    }
     await dispatch(sendOtpThunk(cleanEmail));
   }
 
@@ -213,10 +244,15 @@ function Auth() {
         <>
           <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
             <div>
-              <Label htmlFor="email" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
-                Institutional email
-              </Label>
-              <div className="input-icon mt-1.5">
+              <div className="flex items-center justify-between mb-1.5">
+                <Label htmlFor="email" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+                  Institutional email
+                </Label>
+                <span className="font-mono text-[0.625rem] text-[#ccff00] font-semibold tracking-wider uppercase">
+                  @medicaps.ac.in only
+                </span>
+              </div>
+              <div className="input-icon">
                 <Mail className="size-4" />
                 <Input
                   id="email"
@@ -229,9 +265,16 @@ function Auth() {
                   className="font-mono text-sm"
                 />
               </div>
+              <p className="mt-1.5 text-[0.6875rem] text-muted-foreground font-mono">
+                Must be an official student/faculty address. Personal emails (Gmail, Yahoo, etc.) are strictly disallowed.
+              </p>
             </div>
 
-            {message && <p className="auth-message text-xs">{message}</p>}
+            {message && (
+              <div className="p-2.5 rounded border border-red-500/40 bg-red-950/20 text-red-400 font-mono text-xs leading-relaxed">
+                {message}
+              </div>
+            )}
 
             <Button className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold" disabled={pending} type="submit">
               {pending ? <Loader2 className="spin size-4" /> : "Continue"}
@@ -244,16 +287,16 @@ function Auth() {
 
           <Button
             type="button"
-            className="w-full font-mono text-xs tracking-wider h-10"
+            className="w-full font-mono text-xs tracking-wider h-10 border-border/80 hover:border-[#ccff00]/40 transition-colors"
             variant="outline"
             onClick={handleGoogle}
             disabled={pending}
           >
-            <Chrome className="size-4 mr-2" /> Continue with Google
+            <Chrome className="size-4 mr-2 text-[#ccff00]" /> Continue with Medi-Caps Google Workspace
           </Button>
 
-          <p className="auth-boundary mt-4 text-[0.6875rem] text-muted-foreground text-center">
-            Only verified Medi-Caps identities receive member access.
+          <p className="auth-boundary mt-4 text-[0.6875rem] text-muted-foreground text-center font-mono">
+            Only verified Medi-Caps institutional identities receive member access.
           </p>
         </>
       )}

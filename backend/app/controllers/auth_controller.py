@@ -1,3 +1,6 @@
+import httpx
+from fastapi import Request
+from fastapi.responses import RedirectResponse
 """
 Chaos Computer Club — Medi-Caps Chapter
 controllers/auth_controller.py — Authentication business logic
@@ -41,6 +44,41 @@ def _to_member_public(member: MemberProfile) -> MemberPublic:
     )
 
 
+
+from app.core.config import settings
+
+def is_allowed_organization_email(email: str) -> bool:
+    if not email or "@" not in email:
+        return False
+    domain = email.split("@")[-1].lower().strip()
+    return domain == "medicaps.ac.in" or domain.endswith(".medicaps.ac.in")
+
+
+def _is_local_dev(request: Request) -> bool:
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+    return "localhost" in host or "127.0.0.1" in host
+
+
+def _get_redirect_uri(request: Request) -> str:
+    if getattr(settings, "GOOGLE_REDIRECT_URI", None):
+        return settings.GOOGLE_REDIRECT_URI
+    proto = request.headers.get("x-forwarded-proto", "http" if _is_local_dev(request) else "https")
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host", "localhost:8000")
+    return f"{proto}://{host}/api/auth/google/callback"
+
+
+def _get_frontend_url(request: Request) -> str:
+    proto = request.headers.get("x-forwarded-proto", "http" if _is_local_dev(request) else "https")
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+    if "medicaps.chaoscomputerclub.in" in host:
+        return f"{proto}://medicaps.chaoscomputerclub.in"
+    if "ccc-medicaps.sharexpress.in" in host:
+        return f"{proto}://ccc-medicaps.sharexpress.in"
+    if _is_local_dev(request):
+        return getattr(settings, "FRONTEND_URL", "http://localhost:8081")
+    return getattr(settings, "FRONTEND_URL", "https://medicaps.chaoscomputerclub.in")
+
+
 class AuthController:
 
     @staticmethod
@@ -49,9 +87,14 @@ class AuthController:
         Step 1 — OTP Request.
         Generates OTP, stores in Redis with transactionID, dispatches email.
         """
-        email = payload.email
+        email = payload.email.strip().lower()
         if not email:
             raise HTTPException(status_code=400, detail="Email is required.")
+        if not is_allowed_organization_email(email):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are strictly prohibited."
+            )
 
         otp = generate_otp()
 
@@ -93,9 +136,14 @@ class AuthController:
                 detail=result.get("reason", "Invalid OTP.")
             )
 
-        email = result.get("email")
+        email = (result.get("email") or "").strip().lower()
         if not email:
             raise HTTPException(status_code=500, detail="Session corrupted. Please restart.")
+        if not is_allowed_organization_email(email):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access restricted: Only @medicaps.ac.in organization emails are permitted."
+            )
 
         # Find or create member
         row = await db.execute(select(MemberProfile).where(MemberProfile.email == email))
@@ -223,3 +271,129 @@ class AuthController:
                 "contest_id": None,
             },
         }
+
+    @staticmethod
+    async def google_login(request: Request):
+        """
+        Step 1 of Google OAuth flow.
+        Redirects user to Google consent screen restricted to @medicaps.ac.in hosted domain.
+        """
+        if not settings.GOOGLE_CLIENT_ID:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Google OAuth is not configured on this server.",
+            )
+
+        redirect_uri = _get_redirect_uri(request)
+        google_auth_url = (
+            "https://accounts.google.com/o/oauth2/v2/auth"
+            f"?client_id={settings.GOOGLE_CLIENT_ID}"
+            f"&redirect_uri={redirect_uri}"
+            f"&response_type=code"
+            f"&scope=openid%20email%20profile"
+            f"&access_type=offline"
+            f"&prompt=select_account"
+            f"&hd=medicaps.ac.in"
+        )
+        return RedirectResponse(url=google_auth_url)
+
+    @staticmethod
+    async def google_callback(request: Request, db: AsyncSession):
+        """
+        Step 2 of Google OAuth flow.
+        Validates token, enforces @medicaps.ac.in organization email, upserts member record.
+        """
+        code = request.query_params.get("code")
+        error = request.query_params.get("error")
+        frontend_url = _get_frontend_url(request)
+
+        if error or not code:
+            return RedirectResponse(url=f"{frontend_url}/auth?error=google_cancelled")
+
+        redirect_uri = _get_redirect_uri(request)
+
+        try:
+            async with httpx.AsyncClient(timeout=15) as client:
+                token_resp = await client.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "code": code,
+                        "client_id": settings.GOOGLE_CLIENT_ID,
+                        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                        "redirect_uri": redirect_uri,
+                        "grant_type": "authorization_code",
+                    },
+                )
+                if token_resp.status_code != 200:
+                    logger.error("Google token exchange error: %s", token_resp.text)
+                    return RedirectResponse(url=f"{frontend_url}/auth?error=google_token_failed")
+
+                token_data = token_resp.json()
+                access_token_google = token_data.get("access_token")
+
+                userinfo_resp = await client.get(
+                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                    headers={"Authorization": f"Bearer {access_token_google}"},
+                )
+                if userinfo_resp.status_code != 200:
+                    logger.error("Google userinfo fetch failed: %s", userinfo_resp.text)
+                    return RedirectResponse(url=f"{frontend_url}/auth?error=google_userinfo_failed")
+
+                userinfo = userinfo_resp.json()
+        except Exception as e:
+            logger.error("Google OAuth network error: %s", e)
+            return RedirectResponse(url=f"{frontend_url}/auth?error=google_network_error")
+
+        google_id = userinfo.get("id")
+        email = (userinfo.get("email") or "").strip().lower()
+        name = userinfo.get("name") or ""
+        picture = userinfo.get("picture") or ""
+
+        if not email or not google_id:
+            return RedirectResponse(url=f"{frontend_url}/auth?error=google_no_email")
+
+        # STRICT ENFORCEMENT: Reject any non-organization email!
+        if not is_allowed_organization_email(email):
+            logger.warning("Rejected non-organization Google account: %s", email)
+            return RedirectResponse(
+                url=f"{frontend_url}/auth?error=unauthorized_domain&email={email}"
+            )
+
+        # Upsert member in database
+        m_result = await db.execute(
+            select(MemberProfile).where(
+                (MemberProfile.email == email) | (MemberProfile.google_id == google_id)
+            )
+        )
+        member = m_result.scalars().first()
+        is_new = False
+
+        if not member:
+            is_new = True
+            member = MemberProfile(
+                email=email,
+                google_id=google_id,
+                avatar_url=picture or None,
+                full_name=name or None,
+                rating=1200,
+                peak_rating=1200,
+                is_onboarded=False,
+            )
+            db.add(member)
+            await db.commit()
+            await db.refresh(member)
+            logger.info("New member registered via Google OAuth: %s", email)
+        else:
+            member.google_id = google_id
+            if picture:
+                member.avatar_url = picture
+            member.updated_at = datetime.now(timezone.utc)
+            await db.commit()
+            await db.refresh(member)
+
+        jwt_token = create_access_token({"sub": member.id, "email": member.email})
+        needs_onboarding = is_new or not member.is_onboarded
+        return RedirectResponse(
+            url=f"{frontend_url}/auth?token={jwt_token}&is_onboarded={'false' if needs_onboarding else 'true'}&onboarding={'1' if needs_onboarding else '0'}&email={member.email}"
+        )
+

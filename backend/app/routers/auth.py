@@ -28,6 +28,16 @@ from app.controllers.auth_controller import AuthController
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
+@router.get("/google/login", summary="Initiate Google OAuth flow restricted to @medicaps.ac.in")
+async def google_login(request: Request):
+    return await AuthController.google_login(request)
+
+
+@router.get("/google/callback", summary="Google OAuth callback with @medicaps.ac.in validation")
+async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
+    return await AuthController.google_callback(request, db)
+
+
 @router.post("/send-otp", summary="Request OTP verification email")
 async def send_otp(payload: SendOTPRequest):
     return await AuthController.send_otp(payload)

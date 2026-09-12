@@ -12,7 +12,16 @@ class SendOTPRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def normalise_email(cls, v: str) -> str:
-        return v.strip().lower()
+        clean = v.strip().lower()
+        if "@" not in clean:
+            raise ValueError("A valid institutional email address is required.")
+        domain = clean.split("@")[-1].strip()
+        if domain != "medicaps.ac.in" and not domain.endswith(".medicaps.ac.in"):
+            raise ValueError(
+                "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are strictly prohibited."
+            )
+        return clean
+
 
 
 class SendOTPResponse(BaseModel):
