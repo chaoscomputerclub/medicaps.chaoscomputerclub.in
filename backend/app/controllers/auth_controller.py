@@ -232,7 +232,7 @@ class AuthController:
     async def get_full_profile(current_member: MemberProfile, db: AsyncSession) -> dict:
         """Return full member profile with computed stats."""
         from sqlalchemy import func
-        from app.models.db_models import ScoreboardEntry, OfflineContest, CampusPass
+        from app.models.db_models import ScoreboardEntry, OfflineContest, CampusPass, StudentFollow
 
         # Active campus pass
         pass_row = await db.execute(
@@ -241,6 +241,13 @@ class AuthController:
             ).order_by(CampusPass.issued_at.desc())
         )
         campus_pass = pass_row.scalars().first()
+
+        followers_count = await db.scalar(
+            select(func.count(StudentFollow.id)).where(StudentFollow.following_id == current_member.id)
+        ) or 0
+        following_count = await db.scalar(
+            select(func.count(StudentFollow.id)).where(StudentFollow.follower_id == current_member.id)
+        ) or 0
 
         total_contests = await db.scalar(select(func.count(OfflineContest.id)))
         attended = await db.scalar(

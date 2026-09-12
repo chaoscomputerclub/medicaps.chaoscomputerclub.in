@@ -6,6 +6,7 @@ SQLAlchemy Declarative ORM Database Models
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
+    UniqueConstraint,
     Boolean,
     Column,
     DateTime,
@@ -286,3 +287,20 @@ class AssessmentSubmission(Base):
 
     # Relationships
     session = relationship("AssessmentSession", back_populates="submissions")
+
+
+class StudentFollow(Base):
+    """Peer follow relationship between two Medi-Caps students."""
+    __tablename__ = "student_follows"
+
+    id = Column(String(36), primary_key=True, default=get_uuid)
+    follower_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    following_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("follower_id", "following_id", name="uq_student_follower_following"),
+    )
+
+    follower = relationship("MemberProfile", foreign_keys=[follower_id], backref="following_relations")
+    following = relationship("MemberProfile", foreign_keys=[following_id], backref="follower_relations")

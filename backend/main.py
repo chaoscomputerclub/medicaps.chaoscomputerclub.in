@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
-from app.routers import assessment, auth, contests, feed, leaderboard, passes, scoreboards, verify
+from app.routers import assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, verify
 
 
 @asynccontextmanager

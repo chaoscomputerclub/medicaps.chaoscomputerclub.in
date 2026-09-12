@@ -1,3 +1,5 @@
+import { SocialDrawer } from './SocialDrawer';
+import { fetchMyFollowingIdsThunk } from '@/store/slices/socialSlice';
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import {
   Archive,
@@ -41,6 +43,7 @@ export function PortalShell() {
     }
     if (!member) {
       dispatch(fetchCurrentUserThunk());
+      dispatch(fetchMyFollowingIdsThunk());
     }
   }, [dispatch, member]);
 
@@ -140,6 +143,7 @@ export function PortalShell() {
       <main className="portal-main">
         <Outlet />
       </main>
+      <SocialDrawer />
     </div>
   );
 }

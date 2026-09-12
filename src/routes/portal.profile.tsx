@@ -1,3 +1,6 @@
+import { openSocialDrawer } from '@/store/slices/socialSlice';
+import { useAppDispatch } from '@/store/hooks';
+import { Users } from 'lucide-react';
 import { ProfileSkeleton } from '@/organization/components/skeletons';
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -28,6 +31,7 @@ export const Route=createFileRoute("/portal/profile")({
   component:Profile
 });
 function Profile(){
+  const dispatch = useAppDispatch();
   if (typeof window !== "undefined" && !isAuthenticated()) {
     window.location.href = "/auth";
     return null;
@@ -38,4 +42,22 @@ const initials = m.full_name
   : m.handle
   ? m.handle.slice(0, 2).toUpperCase()
   : "CC";
-return <div className="page-wrap"><header className="profile-header"><div className="profile-mark">{initials}</div><div><p className="kicker">Competitive identity</p><h1>{m.full_name}</h1><p>@{m.handle} · {m.department} · {m.batch}</p><div><TierBadge>{m.tier}</TierBadge>{m.is_core_member&&<span className="proof-seal"><ShieldCheck/> CORE MEMBER</span>}</div></div><dl><div><dt>PRN</dt><dd>{m.prn}</dd></div><div><dt>Institutional mail</dt><dd>{m.email}</dd></div></dl></header><section className="metrics-grid"><Metric label="Rating" value={m.rating} detail={`Peak ${m.peak_rating}`}/><Metric label="University rank" value={`#${m.university_rank}`} detail={`of ${m.active_members}`}/><Metric label="Podiums" value={m.podiums} detail="Verified finishes"/><Metric label="Attendance" value={`${m.attendance_count}/${m.attendance_total}`} detail="Offline contests"/></section><section className="content-grid"><div className="panel wide"><SectionHeader kicker="Rating archive" title="Competitive trajectory"/><RatingChart data={history}/></div><div><CampusPassCard pass={pass}/></div></section><section className="panel"><SectionHeader kicker="Permanent record" title="Offline battle history"/><div className="battle-history">{battles.length===0?<div className="text-center py-8 text-[#777] font-mono text-xs">No offline battles recorded yet. Attend an offline contest to establish a permanent record.</div>:battles.map(b=><article key={b.certificate_id}><time>{new Date(b.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</time><div><h3>{b.contest}</h3><code>{b.certificate_id}</code></div><span>RANK <strong>#{b.rank}</strong></span><span>SOLVED <strong>{b.solved}</strong></span><span>PENALTY <strong>{b.penalty}</strong></span><em className={b.delta>=0?"positive":"negative"}>{b.delta>0?"+":""}{b.delta}</em></article>)}</div></section><section className="content-grid"><div className="panel"><SectionHeader kicker="Milestones" title="Achievement ledger"/><div className="achievement-grid">{achievements.length===0?<div className="text-center py-8 text-[#777] font-mono text-xs col-span-2">No achievements unlocked yet.</div>:achievements.map(a=><article key={a.code} className={a.earned?"earned":"locked"}>{a.earned?<Award/>:<LockKeyhole/>}<span>{a.code}</span><h3>{a.name}</h3><p>{a.description}</p></article>)}</div></div><div><SectionHeader kicker="Cryptographic result" title="Latest proof"/>{proofs[0]&&<ProofBadge proof={proofs[0]}/>}<Link className="text-link proof-link" to="/portal/verify" search={{proof:proofs[0]?.certificate_id??""}}>Open verification console <ExternalLink/></Link></div></section><footer className="trust-footer"><Zap/><p>Your profile only reflects attended, proctored sessions. Practice streaks and browser activity are intentionally excluded.</p></footer></div>}
+return <div className="page-wrap"><header className="profile-header"><div className="profile-mark">{initials}</div><div><p className="kicker">Competitive identity</p><h1>{m.full_name}</h1><p>@{m.handle} · {m.department} · {m.batch}</p><div className="flex items-center gap-2 flex-wrap">
+          <TierBadge>{m.tier}</TierBadge>
+          {m.is_core_member && <span className="proof-seal"><ShieldCheck /> CORE MEMBER</span>}
+          <button
+            type="button"
+            onClick={() => dispatch(openSocialDrawer({ targetHandle: m.handle, targetName: m.full_name, type: "followers" }))}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-[#141414] hover:bg-[#202020] text-accent border border-[#2a2a2a] hover:border-accent/50 rounded-[1px] transition-all cursor-pointer"
+          >
+            <Users size={12} />
+            <strong>{m.followers_count ?? 0}</strong> Followers
+          </button>
+          <button
+            type="button"
+            onClick={() => dispatch(openSocialDrawer({ targetHandle: m.handle, targetName: m.full_name, type: "following" }))}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-[#141414] hover:bg-[#202020] text-muted hover:text-white border border-[#2a2a2a] hover:border-[#444] rounded-[1px] transition-all cursor-pointer"
+          >
+            <strong>{m.following_count ?? 0}</strong> Following
+          </button>
+        </div></div><dl><div><dt>PRN</dt><dd>{m.prn}</dd></div><div><dt>Institutional mail</dt><dd>{m.email}</dd></div></dl></header><section className="metrics-grid"><Metric label="Rating" value={m.rating} detail={`Peak ${m.peak_rating}`}/><Metric label="University rank" value={`#${m.university_rank}`} detail={`of ${m.active_members}`}/><Metric label="Podiums" value={m.podiums} detail="Verified finishes"/><Metric label="Attendance" value={`${m.attendance_count}/${m.attendance_total}`} detail="Offline contests"/></section><section className="content-grid"><div className="panel wide"><SectionHeader kicker="Rating archive" title="Competitive trajectory"/><RatingChart data={history}/></div><div><CampusPassCard pass={pass}/></div></section><section className="panel"><SectionHeader kicker="Permanent record" title="Offline battle history"/><div className="battle-history">{battles.length===0?<div className="text-center py-8 text-[#777] font-mono text-xs">No offline battles recorded yet. Attend an offline contest to establish a permanent record.</div>:battles.map(b=><article key={b.certificate_id}><time>{new Date(b.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</time><div><h3>{b.contest}</h3><code>{b.certificate_id}</code></div><span>RANK <strong>#{b.rank}</strong></span><span>SOLVED <strong>{b.solved}</strong></span><span>PENALTY <strong>{b.penalty}</strong></span><em className={b.delta>=0?"positive":"negative"}>{b.delta>0?"+":""}{b.delta}</em></article>)}</div></section><section className="content-grid"><div className="panel"><SectionHeader kicker="Milestones" title="Achievement ledger"/><div className="achievement-grid">{achievements.length===0?<div className="text-center py-8 text-[#777] font-mono text-xs col-span-2">No achievements unlocked yet.</div>:achievements.map(a=><article key={a.code} className={a.earned?"earned":"locked"}>{a.earned?<Award/>:<LockKeyhole/>}<span>{a.code}</span><h3>{a.name}</h3><p>{a.description}</p></article>)}</div></div><div><SectionHeader kicker="Cryptographic result" title="Latest proof"/>{proofs[0]&&<ProofBadge proof={proofs[0]}/>}<Link className="text-link proof-link" to="/portal/verify" search={{proof:proofs[0]?.certificate_id??""}}>Open verification console <ExternalLink/></Link></div></section><footer className="trust-footer"><Zap/><p>Your profile only reflects attended, proctored sessions. Practice streaks and browser activity are intentionally excluded.</p></footer></div>}
