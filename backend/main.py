@@ -10,8 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
-from app.routers import auth, contests, feed, leaderboard, passes, scoreboards, verify
-from app.services.seed_service import seed_database
+from app.routers import assessment, auth, contests, feed, leaderboard, passes, scoreboards, verify
 
 
 @asynccontextmanager
@@ -19,8 +18,8 @@ async def lifespan(app: FastAPI):
     """Application lifespan: initialize database tables and seed realistic data on start."""
     print(f"⚡ Starting {settings.PROJECT_NAME} (v{settings.VERSION})...")
     await init_db()
-    async with AsyncSessionLocal() as session:
-        await seed_database(session)
+    # Completely blank database policy: zero dummy data seeded
+    pass
     print("✓ Database verified & initialized successfully.")
     yield
     print(f"🛑 Shutting down {settings.PROJECT_NAME}...")
@@ -40,7 +39,8 @@ app = FastAPI(
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=settings.cors_origins_list,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|.*\.sharexpress\.in|.*\.chaoscomputerclub\.in|.*\.shaxpress\.in)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,6 +65,7 @@ app.include_router(leaderboard.router, prefix=settings.API_PREFIX)
 app.include_router(verify.router, prefix=settings.API_PREFIX)
 app.include_router(passes.router, prefix=settings.API_PREFIX)
 app.include_router(feed.router, prefix=settings.API_PREFIX)
+app.include_router(assessment.router, prefix=settings.API_PREFIX)
 
 
 if __name__ == "__main__":

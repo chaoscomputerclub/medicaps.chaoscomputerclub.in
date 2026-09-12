@@ -3,7 +3,7 @@ Chaos Computer Club India — Medi-Caps Chapter Backend
 Trust-of-Proof Cryptographic Verification Router
 """
 
-from typing import Optional
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +12,16 @@ from app.models.db_models import TrustProof
 from app.models.schemas import TrustProofResponse, VerifyRequest, VerifyResponse
 
 router = APIRouter(prefix="/verify", tags=["Trust of Proof Verification"])
+
+@router.get("/proofs", response_model=List[TrustProofResponse])
+async def list_proofs(
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+):
+    """Fetch live cryptographic trust proofs from database."""
+    stmt = select(TrustProof).order_by(TrustProof.issued_at.desc()).limit(limit)
+    res = await db.execute(stmt)
+    return res.scalars().all()
 
 
 @router.get("/cert/{certificate_id}", response_model=TrustProofResponse)

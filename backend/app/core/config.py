@@ -1,11 +1,11 @@
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
-Configuration settings inspired by Desktop/sharexpress/interleet
+Configuration settings
 """
 
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -36,17 +36,61 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    GOOGLE_REDIRECT_URI: Union[str, None] = os.getenv("GOOGLE_REDIRECT_URI", None)
+
+    # Email (SMTP) for OTP
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.hostinger.com")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "465"))
+    SMTP_USER: str = os.getenv("SMTP_USER") or os.getenv("SMTP_USERNAME", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM: str = os.getenv("SMTP_FROM") or os.getenv("SMTP_FROM_EMAIL", "")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Chaos Computer Club")
+
+    # URLs
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:8081")
+    BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000")
+
+    # OTP expiry (minutes)
+    OTP_EXPIRE_MINUTES: int = 10
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        env_origins = os.getenv("CORS_ORIGINS", "")
+        origins = list(self.CORS_ORIGINS)
+        if env_origins:
+            for o in env_origins.split(","):
+                clean = o.strip()
+                if clean and clean not in origins:
+                    origins.append(clean)
+        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
+            origins.append(self.FRONTEND_URL)
+        return origins
+
     # CORS
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:8081",
+    CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:8080",
+        "http://localhost:8081",
+        "http://localhost:8082",
+        "http://localhost:8083",
+        "http://localhost:8084",
+        "http://localhost:8085",
         "http://localhost:5173",
         "http://localhost:3000",
-        "http://127.0.0.1:8081",
         "http://127.0.0.1:8080",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:8082",
+        "http://127.0.0.1:8083",
+        "http://127.0.0.1:8084",
+        "http://127.0.0.1:8085",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
         "https://medicaps.chaoscomputerclub.in",
         "https://chaoscomputerclub.in",
-        "*"
+        "https://www.chaoscomputerclub.in",
+        "https://api.medicaps.chaoscomputerclub.in",
     ]
 
     class Config:

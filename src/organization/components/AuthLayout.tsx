@@ -9,7 +9,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-/** Instrumental auth chrome: hairline frame, mono metadata, no cinematic motion. */
+/** Instrumental auth chrome: centered emblem logo, hairline frame, no clutter. */
 export function AuthLayout({
   title,
   description,
@@ -22,37 +22,36 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-16">
-      <div className="w-full max-w-md">
-        <Link
-          to="/"
-          className="group inline-flex items-center gap-3 font-mono text-[0.5625rem] tracking-[0.2em] text-muted-foreground uppercase transition-colors duration-150 hover:text-accent"
-        >
-          <img
-            src="/logo.png"
-            alt="Chaos Computer Club Logo"
-            className="size-8 shrink-0 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform duration-200 group-hover:scale-105"
-          />
-          <div className="flex flex-col leading-tight">
-            <span className="font-bold tracking-widest text-[0.6875rem] text-foreground transition-colors group-hover:text-accent">
-              CHAOS COMPUTER CLUB
-            </span>
-            <span className="text-[0.5rem] tracking-wider text-muted-foreground">
-              Medi-Caps Chapter <span className="text-accent/90">[member portal]</span>
-            </span>
-          </div>
-        </Link>
+    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 py-16">
+      {/* Subtle ambient lighting */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent/[0.04] via-transparent to-transparent" />
 
-        <div className="mt-4 border border-border bg-surface">
-          <div className="border-b border-border px-5 py-4">
-            <h1 className="font-display text-xl tracking-tight text-foreground">{title}</h1>
-            <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
+      <div className="relative w-full max-w-md">
+        {/* Centered logo only */}
+        <div className="mb-6 flex justify-center">
+          <Link
+            to="/"
+            className="group flex size-14 items-center justify-center rounded-full border border-border/80 bg-surface p-2.5 shadow-[0_0_24px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-105 hover:border-accent/60 hover:shadow-[0_0_24px_rgba(255,255,255,0.15)]"
+          >
+            <img
+              src="/logo.png"
+              alt="Chaos Computer Club Logo"
+              className="size-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-transform duration-300 group-hover:scale-110"
+            />
+          </Link>
+        </div>
+
+        {/* Card */}
+        <div className="border border-border bg-surface shadow-2xl">
+          <div className="border-b border-border px-6 py-5">
+            <h1 className="font-display text-xl font-bold tracking-tight text-foreground">{title}</h1>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
               {description}
             </p>
           </div>
-          <div className="p-5">{children}</div>
+          <div className="p-6">{children}</div>
           {footer ? (
-            <div className="border-t border-border px-5 py-4 text-[0.8125rem] text-muted-foreground">
+            <div className="border-t border-border px-6 py-4 text-xs text-muted-foreground">
               {footer}
             </div>
           ) : null}

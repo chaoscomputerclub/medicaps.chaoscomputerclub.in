@@ -1,12 +1,426 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Chrome, Eye, EyeOff, Loader2, LockKeyhole, Mail } from "lucide-react";
+/**
+ * Chaos Computer Club India — Medi-Caps Chapter
+ * medicaps.chaoscomputerclub.in
+ *
+ * Strict Redux Toolkit global state management.
+ * Copyright (c) 2026 Chaos Computer Club India
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ */
+
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Chrome, Loader2, Mail, ArrowLeft } from "lucide-react";
 import { AuthLayout } from "@/organization/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
-export const Route=createFileRoute("/auth")({head:()=>({meta:[{title:"Member Sign In — CCC Medi-Caps"},{name:"description",content:"Sign in to the CCC Medi-Caps offline contest portal."},{property:"og:title",content:"CCC Medi-Caps Member Sign In"},{property:"og:description",content:"Institutional access to campus contests, ratings and verified records."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Auth});
-function Auth(){const navigate=useNavigate();const [mode,setMode]=useState<"signin"|"signup">("signin");const [email,setEmail]=useState("");const [password,setPassword]=useState("");const [show,setShow]=useState(false);const [name,setName]=useState("");const [prn,setPrn]=useState("");const [department,setDepartment]=useState("CSE");const [batch,setBatch]=useState("2023-27");const [pending,setPending]=useState(false);const [message,setMessage]=useState<string|null>(null);async function submit(e:React.FormEvent){e.preventDefault();setPending(true);setMessage(null);if(!email.toLowerCase().endsWith("@medicaps.ac.in")){setMessage("Use your official @medicaps.ac.in address.");setPending(false);return}const result=mode==="signin"?await supabase.auth.signInWithPassword({email,password}):await supabase.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+"/auth",data:{full_name:name,prn,department,batch,handle:email.split("@")[0]}}});if(result.error)setMessage(result.error.message);else if(mode==="signup")setMessage("Check your institutional inbox to confirm enrollment.");else if(result.data.user){const metadata=result.data.user.user_metadata??{};if(typeof metadata["full_name"]==="string"&&typeof metadata["prn"]==="string"&&typeof metadata["department"]==="string"&&typeof metadata["batch"]==="string"){await supabase.from("member_profiles").upsert({id:result.data.user.id,email:result.data.user.email??email,full_name:metadata["full_name"],prn:metadata["prn"],department:metadata["department"],batch:metadata["batch"],handle:typeof metadata["handle"]==="string"?metadata["handle"]:email.split("@")[0]??email},{onConflict:"id",ignoreDuplicates:true})}void navigate({to:"/portal"})}setPending(false)}async function google(){setPending(true);const result=await lovable.auth.signInWithOAuth("google",{redirect_uri:window.location.origin+"/auth"});if(result.error){setMessage(result.error.message);setPending(false);return}if(!result.redirected)void navigate({to:"/portal"})}return <AuthLayout title={mode==="signin"?"Enter member operations":"Request chapter access"} description="Campus credentials unlock registrations, issued passes, private rating history, and attendance-backed proofs." footer={<span>Need public validation? <Link to="/portal/verify" search={{proof:""}} className="text-link">Verify a result</Link></span>}><div className="auth-mode"><Button variant={mode==="signin"?"default":"ghost"} onClick={()=>setMode("signin")}>Sign in</Button><Button variant={mode==="signup"?"default":"ghost"} onClick={()=>setMode("signup")}>Enroll</Button></div><form className="auth-form" onSubmit={submit}>{mode==="signup"&&<><div><Label htmlFor="name">Full name</Label><Input id="name" value={name} onChange={e=>setName(e.target.value)} required/></div><div><Label htmlFor="prn">University PRN</Label><Input id="prn" value={prn} onChange={e=>setPrn(e.target.value.toUpperCase())} placeholder="0827CS221184" required pattern="[A-Z0-9]{8,16}"/></div><div className="auth-selects"><div><Label>Department</Label><Select value={department} onValueChange={setDepartment}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="CSE">CSE</SelectItem><SelectItem value="IT">IT</SelectItem><SelectItem value="AIDS">AIDS</SelectItem><SelectItem value="Cyber Security">Cyber Security</SelectItem></SelectContent></Select></div><div><Label>Batch</Label><Select value={batch} onValueChange={setBatch}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="2022-26">2022–26</SelectItem><SelectItem value="2023-27">2023–27</SelectItem><SelectItem value="2024-28">2024–28</SelectItem></SelectContent></Select></div></div></>}<div><Label htmlFor="email">Institutional email</Label><div className="input-icon"><Mail/><Input id="email" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@medicaps.ac.in" required/></div></div><div><Label htmlFor="password">Password</Label><div className="input-icon"><LockKeyhole/><Input id="password" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} minLength={8} required/><button type="button" onClick={()=>setShow(v=>!v)} aria-label={show?"Hide password":"Show password"}>{show?<EyeOff/>:<Eye/>}</button></div>{mode==="signin"&&<Link to="/recover" className="auth-recover">Forgot credentials?</Link>}</div>{message&&<p className="auth-message">{message}</p>}<Button className="w-full" disabled={pending}>{pending?<Loader2 className="spin"/>:mode==="signin"?"SIGN IN":"CREATE ACCOUNT"}</Button></form><div className="auth-divider"><span>or</span></div><Button className="w-full" variant="outline" onClick={google} disabled={pending}><Chrome/> Continue with Google</Button><p className="auth-boundary">Only verified Medi-Caps identities receive member access. Public result verification remains open.</p></AuthLayout>}
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  setEmail,
+  setOtp,
+  setName,
+  setHandle,
+  setPrn,
+  setDepartment,
+  setBatch,
+  setStep,
+  setMessage,
+  setTokenDirect,
+  sendOtpThunk,
+  verifyOtpThunk,
+  completeOnboardingThunk,
+  fetchCurrentUserThunk,
+} from "@/store/slices/authSlice";
+import { getGoogleLoginURL } from "@/lib/auth";
+
+export const Route = createFileRoute("/auth")({
+  head: () => ({
+    meta: [
+      { title: "Sign In — CCC Medi-Caps" },
+      {
+        name: "description",
+        content: "Sign in to the CCC Medi-Caps offline contest portal.",
+      },
+      { property: "og:title", content: "CCC Medi-Caps Member Sign In" },
+      {
+        property: "og:description",
+        content:
+          "Institutional access to campus contests, ratings and verified records.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Auth,
+});
+
+function Auth() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  // Strict Redux Toolkit state selectors
+  const {
+    step,
+    email,
+    otp,
+    name,
+    handle,
+    prn,
+    department,
+    batch,
+    pending,
+    message,
+    devOtp,
+    isAuthenticated: authed,
+  } = useAppSelector((state) => state.auth);
+
+  // Check URL query parameters (Google OAuth callback) & session validation
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const tokenParam = params.get("token");
+    const onboardedParam = params.get("is_onboarded") ?? params.get("onboarding");
+    const emailParam = params.get("email");
+
+    if (tokenParam) {
+      dispatch(setTokenDirect(tokenParam));
+      if (emailParam) dispatch(setEmail(emailParam));
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      if (onboardedParam === "true" || onboardedParam === "0") {
+        void navigate({ to: "/portal" });
+        return;
+      } else {
+        dispatch(setStep("onboarding"));
+        return;
+      }
+    }
+
+    if (authed) {
+      dispatch(fetchCurrentUserThunk())
+        .unwrap()
+        .then((m) => {
+          if (m.is_onboarded) {
+            void navigate({ to: "/portal" });
+          } else {
+            if (m.email) dispatch(setEmail(m.email));
+            if (m.full_name) dispatch(setName(m.full_name));
+            if (m.handle) dispatch(setHandle(m.handle));
+            dispatch(setStep("onboarding"));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [dispatch, navigate, authed]);
+
+  // Step 1: Send OTP via Redux Thunk
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      dispatch(setMessage("Please enter a valid campus email address."));
+      return;
+    }
+    await dispatch(sendOtpThunk(cleanEmail));
+  }
+
+  // Step 2: Verify OTP via Redux Thunk
+  async function triggerVerify(codeToVerify: string) {
+    if (!codeToVerify || codeToVerify.length !== 6) return;
+    const resultAction = await dispatch(verifyOtpThunk({ email, code: codeToVerify }));
+    if (verifyOtpThunk.fulfilled.match(resultAction)) {
+      const res = resultAction.payload;
+      if (!res.is_new_user && res.member?.is_onboarded) {
+        void navigate({ to: "/portal" });
+      }
+    }
+  }
+
+  function handleVerifyOtpSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    void triggerVerify(otp);
+  }
+
+  async function handleResendOtp() {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return;
+    await dispatch(sendOtpThunk(cleanEmail));
+  }
+
+  // Step 3: Complete Onboarding via Redux Thunk
+  async function handleOnboardingSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const fallbackHandle = email.split("@")[0] || "user";
+    const h = (handle.trim() || fallbackHandle).toLowerCase().replace(/[^a-z0-9_]/g, "");
+
+    if (!name.trim()) {
+      dispatch(setMessage("Full name is required."));
+      return;
+    }
+    if (!prn.trim()) {
+      dispatch(setMessage("University PRN is required."));
+      return;
+    }
+
+    const resultAction = await dispatch(
+      completeOnboardingThunk({
+        handle: h,
+        full_name: name.trim(),
+        prn: prn.trim().toUpperCase(),
+        department,
+        batch,
+      })
+    );
+
+    if (completeOnboardingThunk.fulfilled.match(resultAction)) {
+      void navigate({ to: "/portal" });
+    }
+  }
+
+  function handleGoogle() {
+    window.location.href = getGoogleLoginURL();
+  }
+
+  let title = "Enter member operations";
+  let description =
+    "Campus credentials unlock registrations, issued passes, private rating history, and attendance-backed proofs.";
+
+  if (step === "otp") {
+    title = "Verify authentication code";
+    description = `Enter the six-digit code sent to ${email}.`;
+  } else if (step === "onboarding") {
+    title = "Complete member registration";
+    description =
+      "First-time registration detected. Set your academic parameters to initialize your portal credential.";
+  }
+
+  return (
+    <AuthLayout title={title} description={description}>
+      {step === "email" && (
+        <>
+          <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
+            <div>
+              <Label htmlFor="email" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+                Institutional email
+              </Label>
+              <div className="input-icon mt-1.5">
+                <Mail className="size-4" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => dispatch(setEmail(e.target.value))}
+                  placeholder="name@medicaps.ac.in"
+                  required
+                  autoFocus
+                  className="font-mono text-sm"
+                />
+              </div>
+            </div>
+
+            {message && <p className="auth-message text-xs">{message}</p>}
+
+            <Button className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold" disabled={pending} type="submit">
+              {pending ? <Loader2 className="spin size-4" /> : "Continue"}
+            </Button>
+          </form>
+
+          <div className="auth-divider my-4">
+            <span>or</span>
+          </div>
+
+          <Button
+            type="button"
+            className="w-full font-mono text-xs tracking-wider h-10"
+            variant="outline"
+            onClick={handleGoogle}
+            disabled={pending}
+          >
+            <Chrome className="size-4 mr-2" /> Continue with Google
+          </Button>
+
+          <p className="auth-boundary mt-4 text-[0.6875rem] text-muted-foreground text-center">
+            Only verified Medi-Caps identities receive member access.
+          </p>
+        </>
+      )}
+
+      {step === "otp" && (
+        <form className="auth-form space-y-4" onSubmit={handleVerifyOtpSubmit}>
+          <div>
+            <Label htmlFor="otp" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+              Authentication code
+            </Label>
+            <div className="mt-3 flex justify-center">
+              <InputOTP
+                id="otp"
+                maxLength={6}
+                value={otp}
+                onChange={(val) => {
+                  dispatch(setOtp(val));
+                  if (val.length === 6) {
+                    setTimeout(() => {
+                      void triggerVerify(val);
+                    }, 50);
+                  }
+                }}
+                autoFocus
+              >
+                <InputOTPGroup>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <InputOTPSlot
+                      key={i}
+                      index={i}
+                      className="size-11 rounded-none border-border bg-background font-mono text-base tabular-nums"
+                    />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            <div className="mt-2.5 flex items-center justify-between font-mono text-[0.625rem] text-muted-foreground">
+              <span>Six digits · expires in 10 minutes</span>
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={pending}
+                className="hover:text-accent transition-colors underline-offset-4 hover:underline cursor-pointer"
+              >
+                Resend code
+              </button>
+            </div>
+          </div>
+
+          {devOtp && (
+            <div className="border border-dashed border-accent/40 bg-accent/10 px-3 py-2 text-center font-mono text-xs text-accent">
+              <span>[DEV OTP] {devOtp}</span>
+            </div>
+          )}
+
+          {message && <p className="auth-message text-xs">{message}</p>}
+
+          <Button
+            className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold"
+            disabled={pending || otp.length < 6}
+            type="submit"
+          >
+            {pending ? <Loader2 className="spin size-4" /> : "Continue"}
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => {
+              dispatch(setStep("email"));
+              dispatch(setOtp(""));
+              dispatch(setMessage(null));
+            }}
+            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-[0.625rem] tracking-[0.16em] text-muted-foreground uppercase transition-colors hover:text-accent cursor-pointer pt-1"
+          >
+            <ArrowLeft className="size-3" /> Use another email address
+          </button>
+        </form>
+      )}
+
+      {step === "onboarding" && (
+        <form className="auth-form space-y-4" onSubmit={handleOnboardingSubmit}>
+          <div>
+            <Label htmlFor="ob-name" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+              Full name
+            </Label>
+            <Input
+              id="ob-name"
+              value={name}
+              onChange={(e) => dispatch(setName(e.target.value))}
+              placeholder="Ada Lovelace"
+              required
+              autoFocus
+              className="mt-1 font-mono text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="ob-handle" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+              Member handle / alias
+            </Label>
+            <Input
+              id="ob-handle"
+              value={handle}
+              onChange={(e) =>
+                dispatch(
+                  setHandle(
+                    e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")
+                  )
+                )
+              }
+              placeholder="ada_core"
+              required
+              className="mt-1 font-mono text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="ob-prn" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+              University PRN
+            </Label>
+            <Input
+              id="ob-prn"
+              value={prn}
+              onChange={(e) => dispatch(setPrn(e.target.value.toUpperCase()))}
+              placeholder="0827CS221184"
+              required
+              pattern="[A-Z0-9]{8,16}"
+              className="mt-1 font-mono text-sm"
+            />
+          </div>
+          <div className="auth-selects">
+            <div>
+              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">Department</Label>
+              <Select value={department} onValueChange={(val) => dispatch(setDepartment(val))}>
+                <SelectTrigger className="mt-1 font-mono text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CSE">CSE</SelectItem>
+                  <SelectItem value="IT">IT</SelectItem>
+                  <SelectItem value="AIDS">AIDS</SelectItem>
+                  <SelectItem value="Cyber Security">Cyber Security</SelectItem>
+                  <SelectItem value="ECE">ECE</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">Batch</Label>
+              <Select value={batch} onValueChange={(val) => dispatch(setBatch(val))}>
+                <SelectTrigger className="mt-1 font-mono text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2022-26">2022–26</SelectItem>
+                  <SelectItem value="2023-27">2023–27</SelectItem>
+                  <SelectItem value="2024-28">2024–28</SelectItem>
+                  <SelectItem value="2025-29">2025–29</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {message && <p className="auth-message text-xs">{message}</p>}
+
+          <Button className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold" disabled={pending} type="submit">
+            {pending ? <Loader2 className="spin size-4" /> : "Continue"}
+          </Button>
+        </form>
+      )}
+    </AuthLayout>
+  );
+}

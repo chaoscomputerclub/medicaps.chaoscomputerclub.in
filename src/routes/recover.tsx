@@ -1,12 +1,2 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, Loader2, Mail } from "lucide-react";
-import { AuthLayout } from "@/organization/components/AuthLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
-
-export const Route=createFileRoute("/recover")({head:()=>({meta:[{title:"Recover Member Access — CCC Medi-Caps"},{name:"description",content:"Recover access to the CCC Medi-Caps offline contest portal."},{property:"og:title",content:"Recover CCC Medi-Caps Access"},{property:"og:description",content:"Request a secure password recovery link for your institutional account."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Recover});
-
-function Recover(){const [email,setEmail]=useState("");const [pending,setPending]=useState(false);const [message,setMessage]=useState<string|null>(null);async function submit(e:React.FormEvent){e.preventDefault();setPending(true);setMessage(null);if(!email.toLowerCase().endsWith("@medicaps.ac.in")){setMessage("Use your official @medicaps.ac.in address.");setPending(false);return}const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/auth"});setMessage(error?error.message:"Recovery instructions were sent to your institutional inbox.");setPending(false)}return <AuthLayout title="Recover member access" description="Request a secure recovery link for your institutional account." footer={<Link to="/auth" className="text-link"><ArrowLeft/> Return to sign in</Link>}><form className="auth-form" onSubmit={submit}><div><Label htmlFor="recovery-email">Institutional email</Label><div className="input-icon"><Mail/><Input id="recovery-email" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@medicaps.ac.in" required/></div></div>{message&&<p className="auth-message">{message}</p>}<Button className="w-full" disabled={pending}>{pending?<Loader2 className="spin"/>:"SEND RECOVERY LINK"}</Button></form></AuthLayout>}
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+export const Route = createFileRoute("/recover")({ component: () => <Navigate to="/auth" /> });

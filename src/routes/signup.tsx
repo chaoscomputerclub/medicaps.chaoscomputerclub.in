@@ -1,2 +1,2 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-export const Route=createFileRoute("/signup")({head:()=>({meta:[{title:"Member Enrollment — CCC Medi-Caps"},{name:"description",content:"Enroll in the CCC Medi-Caps offline contest portal."},{property:"og:title",content:"CCC Medi-Caps Enrollment"},{property:"og:description",content:"Create an institutional contest member account."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}]}),component:()=> <Navigate to="/auth"/>});
+export const Route = createFileRoute("/signup")({ component: () => <Navigate to="/auth" /> });

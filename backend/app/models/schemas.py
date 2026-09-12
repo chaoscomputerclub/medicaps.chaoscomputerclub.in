@@ -139,15 +139,20 @@ class RatingHistoryResponse(BaseModel):
 
 class LeaderboardRow(BaseModel):
     rank: int
-    handle: str
-    full_name: str
-    prn: str
-    department: str
-    batch: str
-    rating: int
-    peak_rating: int
-    attendance_rate: float
-    tier: str  # 5_star, 4_star, 3_star, 2_star, 1_star
+    university_rank: int = 1
+    previous_rank: int = 1
+    handle: str = "anonymous"
+    full_name: str = "Anonymous Member"
+    prn: str = "0827CS231000"
+    department: str = "CSE"
+    batch: str = "2024-28"
+    rating: int = 1200
+    peak_rating: int = 1200
+    attendance_rate: float = 0.0
+    attendance_count: int = 0
+    attendance_total: int = 0
+    tier: str = "1_star"  # 5_star, 4_star, 3_star, 2_star, 1_star
+    ratings: List[int] = []
     recent_deltas: List[int] = []
 
 
