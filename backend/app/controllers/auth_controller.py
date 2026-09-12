@@ -117,8 +117,10 @@ class AuthController:
         logger.info("OTP dispatched for %s (txn=%s)", email, result["transaction_id"])
         return SendOTPResponse(
             success=True,
+            sent=True,
             message=f"Verification code sent to {email}",
             transaction_id=result["transaction_id"],
+            email=email,
         )
 
     @staticmethod
@@ -126,9 +128,24 @@ class AuthController:
         """
         Step 2 — OTP Verification.
         Verifies against Redis (SHA-256, 5-attempt rate limit).
+        Accepts either transaction_id + otp OR email + code.
         Finds or creates member. Issues JWT.
         """
-        result = await redis_verify_otp(payload.transaction_id, payload.otp)
+        otp_code = payload.otp or payload.code
+        identifier = payload.transaction_id or payload.email
+
+        if not identifier:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Transaction identifier or institutional email is required."
+            )
+        if not otp_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Six-digit authentication code is required."
+            )
+
+        result = await redis_verify_otp(identifier, otp_code)
 
         if not result.get("valid"):
             raise HTTPException(

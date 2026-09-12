@@ -26,18 +26,32 @@ class SendOTPRequest(BaseModel):
 
 class SendOTPResponse(BaseModel):
     success: bool
+    sent: bool = True
     message: str
     transaction_id: str
+    email: Optional[str] = None
 
 
 class VerifyOTPRequest(BaseModel):
-    transaction_id: str
-    otp: str
+    # Support both Interleet (transaction_id + otp) and legacy/frontend (email + code)
+    transaction_id: Optional[str] = None
+    otp: Optional[str] = None
+    email: Optional[str] = None
+    code: Optional[str] = None
 
-    @field_validator("otp")
+    @field_validator("otp", "code", mode="before")
     @classmethod
-    def strip_otp(cls, v: str) -> str:
-        return v.strip()
+    def clean_code(cls, v):
+        if v is None:
+            return None
+        return str(v).strip()
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def clean_email(cls, v):
+        if v is None:
+            return None
+        return str(v).strip().lower()
 
 
 class MemberPublic(BaseModel):

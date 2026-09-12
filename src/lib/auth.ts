@@ -120,17 +120,22 @@ export function isMedicapsEmail(email: string): boolean {
 
 // ── Email OTP ──────────────────────────────────────────────────────────────
 
-export async function sendOTP(email: string): Promise<{ sent: boolean; email: string; dev_otp?: string }> {
+export async function sendOTP(email: string): Promise<{ sent: boolean; email: string; transaction_id?: string; dev_otp?: string }> {
   return apiFetch("/auth/send-otp", {
     method: "POST",
     body: JSON.stringify({ email }),
   });
 }
 
-export async function verifyOTP(email: string, code: string): Promise<AuthResult> {
+export async function verifyOTP(email: string, code: string, transaction_id?: string): Promise<AuthResult> {
   return apiFetch("/auth/verify-otp", {
     method: "POST",
-    body: JSON.stringify({ email, code }),
+    body: JSON.stringify({
+      email,
+      code,
+      otp: code,
+      transaction_id: transaction_id || undefined,
+    }),
   });
 }
 

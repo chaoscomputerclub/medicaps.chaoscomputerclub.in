@@ -82,6 +82,7 @@ function Auth() {
   const {
     step,
     email,
+    transactionId,
     otp,
     name,
     handle,
@@ -183,7 +184,13 @@ function Auth() {
   // Step 2: Verify OTP via Redux Thunk
   async function triggerVerify(codeToVerify: string) {
     if (!codeToVerify || codeToVerify.length !== 6) return;
-    const resultAction = await dispatch(verifyOtpThunk({ email, code: codeToVerify }));
+    const resultAction = await dispatch(
+      verifyOtpThunk({
+        email,
+        code: codeToVerify,
+        transaction_id: transactionId || undefined,
+      })
+    );
     if (verifyOtpThunk.fulfilled.match(resultAction)) {
       const res = resultAction.payload;
       if (!res.is_new_user && res.member?.is_onboarded) {
@@ -417,7 +424,17 @@ function Auth() {
             </div>
           )}
 
-          {message && <p className="auth-message text-xs">{message}</p>}
+          {message && (
+            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
+              <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+                <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
+                <span>[ AUTHENTICATION ERROR ]</span>
+              </div>
+              <p className="text-[0.6875rem] text-red-200 leading-relaxed">
+                {message}
+              </p>
+            </div>
+          )}
 
           <Button
             className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold"
@@ -522,7 +539,17 @@ function Auth() {
             </div>
           </div>
 
-          {message && <p className="auth-message text-xs">{message}</p>}
+          {message && (
+            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
+              <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+                <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
+                <span>[ AUTHENTICATION ERROR ]</span>
+              </div>
+              <p className="text-[0.6875rem] text-red-200 leading-relaxed">
+                {message}
+              </p>
+            </div>
+          )}
 
           <Button className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold" disabled={pending} type="submit">
             {pending ? <Loader2 className="spin size-4" /> : "Continue"}

@@ -17,6 +17,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   step: "email" | "otp" | "onboarding";
   email: string;
+  transactionId: string | null;
   otp: string;
   name: string;
   handle: string;
@@ -36,6 +37,7 @@ const initialState: AuthState = {
   isAuthenticated: Boolean(initialToken),
   step: "email",
   email: "",
+  transactionId: null,
   otp: "",
   name: "",
   handle: "",
@@ -49,7 +51,7 @@ const initialState: AuthState = {
 
 // Async Thunks
 export const sendOtpThunk = createAsyncThunk<
-  { sent: boolean; email: string; dev_otp?: string },
+  { sent: boolean; email: string; transaction_id?: string; dev_otp?: string },
   string,
   { rejectValue: string }
 >("auth/sendOtp", async (email, { rejectWithValue }) => {
@@ -62,11 +64,11 @@ export const sendOtpThunk = createAsyncThunk<
 
 export const verifyOtpThunk = createAsyncThunk<
   AuthResult,
-  { email: string; code: string },
+  { email: string; code: string; transaction_id?: string },
   { rejectValue: string }
->("auth/verifyOtp", async ({ email, code }, { rejectWithValue }) => {
+>("auth/verifyOtp", async ({ email, code, transaction_id }, { rejectWithValue }) => {
   try {
-    const res = await verifyOTP(email.trim().toLowerCase(), code.trim());
+    const res = await verifyOTP(email.trim().toLowerCase(), code.trim(), transaction_id);
     persistToken(res.access_token);
     return res;
   } catch (err: any) {
