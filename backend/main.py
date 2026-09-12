@@ -66,6 +66,7 @@ app.include_router(verify.router, prefix=settings.API_PREFIX)
 app.include_router(passes.router, prefix=settings.API_PREFIX)
 app.include_router(feed.router, prefix=settings.API_PREFIX)
 app.include_router(assessment.router, prefix=settings.API_PREFIX)
+app.include_router(social.router, prefix=settings.API_PREFIX)
 
 
 if __name__ == "__main__":
