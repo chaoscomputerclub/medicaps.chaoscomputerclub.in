@@ -46,23 +46,24 @@ ESTABLISHED 2026 · OPEN BY DEFAULT · PEER DRIVEN
 
 def _otp_email_template(otp_code: str) -> str:
     """
-    Chaos Computer Club India — Production Email Template v5
-    - Void black only — immune to OS light mode inversions
-    - tag-cut dual-chamfer acid-lime container matching root application geometry
-    - 6 segmented tactile digit cells with black text on acid-lime
-    - Anti-inversion protections for Gmail dark mode and cross-client rendering
-    - Ultra-minimal copy and hacker-grade typography hierarchy
+    Chaos Computer Club India — Production Email Template v6
+    Hardened for Mobile & Tablet Gmail / Cross-Client Consistency:
+    - Inset tactile void-black cells (#09090b) with linear-gradient background protection
+    - High-saturation acid-lime digits (#ccff00) completely immune to dark mode inversion
+    - Mobile-responsive max-width 460px block wrapper preventing table clipping on 375px+ screens
+    - Anti-inversion off-white typography hierarchy (#eaeaea) preventing dimmed headers
+    - tag-cut dual chamfer geometry with robust fallback
     """
     digits = list(otp_code.strip()) if len(otp_code.strip()) == 6 else ["7", "3", "9", "1", "0", "4"]
     preview_padding = "&#847; &zwnj; &nbsp; &#8199; &shy; " * 30
 
     digit_cells_html = ""
     for d in digits:
-        digit_cells_html += f"""<td align="center" valign="middle" width="44" class="digit-cell" bgcolor="#ccff00" style="width:44px;padding:0 3px;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="44" style="width:44px;border-collapse:collapse;">
+        digit_cells_html += f"""<td align="center" valign="middle" width="38" style="width:38px;padding:0 2px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="38" style="width:38px;border-collapse:collapse;">
             <tr>
-              <td align="center" valign="middle" height="54" bgcolor="#ccff00" class="digit-cell" style="height:54px;width:44px;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);border:2px solid #080808;text-align:center;">
-                <span class="digit-char" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:32px;font-weight:900;color:#080808 !important;-webkit-text-fill-color:#080808 !important;line-height:54px;display:inline-block;mso-line-height-rule:exactly;">{d}</span>
+              <td align="center" valign="middle" height="48" bgcolor="#09090b" style="height:48px;width:38px;background-color:#09090b;background-image:linear-gradient(#09090b,#09090b);border:2px solid #1a1a24;text-align:center;">
+                <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:26px;font-weight:900;color:#ccff00 !important;line-height:48px;display:inline-block;mso-line-height-rule:exactly;">{d}</span>
               </td>
             </tr>
           </table>
@@ -136,10 +137,9 @@ def _otp_email_template(otp_code: str) -> str:
         background-color: #0a0a0c !important;
         background-image: linear-gradient(#0a0a0c, #0a0a0c) !important;
       }}
-      .acid-hero, .digit-cell {{
+      .acid-hero {{
         background-color: #ccff00 !important;
         background-image: linear-gradient(#ccff00, #ccff00) !important;
-        color: #080808 !important;
       }}
     }}
 
@@ -156,28 +156,9 @@ def _otp_email_template(otp_code: str) -> str:
       background-color: #0a0a0c !important;
       background-image: linear-gradient(#0a0a0c, #0a0a0c) !important;
     }}
-    [data-ogsc] .acid-hero, [data-ogsc] .digit-cell {{
+    [data-ogsc] .acid-hero {{
       background-color: #ccff00 !important;
       background-image: linear-gradient(#ccff00, #ccff00) !important;
-    }}
-
-    /* Gmail iOS / Android Dark Mode Inversion Protections */
-    u + .body .session-title,
-    u + .body .session-title span {{
-      color: #f0f0f2 !important;
-      -webkit-text-fill-color: #f0f0f2 !important;
-    }}
-    u + .body .digit-cell {{
-      background-color: #ccff00 !important;
-      background-image: linear-gradient(#ccff00, #ccff00) !important;
-    }}
-    u + .body .digit-char {{
-      color: #080808 !important;
-      -webkit-text-fill-color: #080808 !important;
-    }}
-    u + .body .acid-meta {{
-      color: #080808 !important;
-      -webkit-text-fill-color: #080808 !important;
     }}
 
     /* Modern client polygon: exact tag-cut geometry from root app */
@@ -193,7 +174,7 @@ def _otp_email_template(otp_code: str) -> str:
     }}
   </style>
 </head>
-<body bgcolor="#080808" class="body body-canvas" style="margin:0;padding:0;background-color:#080808;background-image:linear-gradient(#080808,#080808);color:#eaeaea;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
+<body bgcolor="#080808" class="body-canvas" style="margin:0;padding:0;background-color:#080808;background-image:linear-gradient(#080808,#080808);color:#eaeaea;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
 
   <!-- Preheader preview text -->
   <div style="display:none;font-size:1px;color:#080808;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">
@@ -202,164 +183,169 @@ def _otp_email_template(otp_code: str) -> str:
   </div>
 
   <!-- Canvas wrapper table: 100% width, void black -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#080808" class="body-canvas" style="background-color:#080808;background-image:linear-gradient(#080808,#080808);width:100%;table-layout:fixed;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#080808" class="body-canvas" style="background-color:#080808;background-image:linear-gradient(#080808,#080808);width:100%;">
     <tr>
-      <td align="center" valign="top" bgcolor="#080808" class="body-canvas" style="padding:40px 16px 56px 16px;background-color:#080808;background-image:linear-gradient(#080808,#080808);">
+      <td align="center" valign="top" bgcolor="#080808" class="body-canvas" style="padding:24px 10px 36px 10px;background-color:#080808;background-image:linear-gradient(#080808,#080808);">
 
-        <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellspacing="0" cellpadding="0" width="500" bgcolor="#0e0e10" style="background-color:#0e0e10;">
-          <tr>
-            <td align="center" valign="top" width="500" bgcolor="#0e0e10" style="background-color:#0e0e10;">
-        <![endif]-->
+        <!-- Responsive Block Wrapper (Forces max-width clamping across all browsers) -->
+        <div style="max-width:460px;width:100%;margin:0 auto;">
 
-        <!-- Main Card Container: 500px fixed width -->
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0e0e10" class="card-box" style="max-width:500px;width:100%;margin:0 auto;background-color:#0e0e10;background-image:linear-gradient(#0e0e10,#0e0e10);border:1px solid #1e1e26;">
+          <!--[if (gte mso 9)|(IE)]>
+          <table align="center" border="0" cellspacing="0" cellpadding="0" width="460" bgcolor="#0e0e10" style="background-color:#0e0e10;">
+            <tr>
+              <td align="center" valign="top" width="460" bgcolor="#0e0e10" style="background-color:#0e0e10;">
+          <![endif]-->
 
-          <!-- Acid Lime Top Bar -->
-          <tr>
-            <td height="2" bgcolor="#ccff00" style="background-color:#ccff00;font-size:2px;line-height:2px;height:2px;">&nbsp;</td>
-          </tr>
+          <!-- Main Card Container -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0e0e10" class="card-box" style="width:100%;background-color:#0e0e10;background-image:linear-gradient(#0e0e10,#0e0e10);border:1px solid #1e1e26;">
 
-          <!-- Header: Logo Mark Only + Context Label -->
-          <tr>
-            <td style="padding:20px 28px;border-bottom:1px solid #181820;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="left" valign="middle">
-                    <a href="https://chaoscomputerclub.in" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-block;">
-                      <img src="https://chaoscomputerclub.in/logo.png" width="32" height="32" alt="Chaos Computer Club" border="0" style="display:block;width:32px;height:32px;border:0;outline:none;" />
-                    </a>
-                  </td>
-                  <td align="right" valign="middle">
-                    <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:1.8px;color:#5a5a64;text-transform:uppercase;">
-                      AUTH // OTP
-                    </span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+            <!-- Acid Lime Top Bar -->
+            <tr>
+              <td height="2" bgcolor="#ccff00" style="background-color:#ccff00;font-size:2px;line-height:2px;height:2px;">&nbsp;</td>
+            </tr>
 
-          <!-- Minimal Content Body -->
-          <tr>
-            <td style="padding:28px 28px 24px 28px;">
+            <!-- Header: Logo Mark Only + Context Label -->
+            <tr>
+              <td style="padding:16px 18px;border-bottom:1px solid #181820;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="left" valign="middle">
+                      <a href="https://chaoscomputerclub.in" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-block;">
+                        <img src="https://chaoscomputerclub.in/logo.png" width="30" height="30" alt="Chaos Computer Club" border="0" style="display:block;width:30px;height:30px;border:0;outline:none;" />
+                      </a>
+                    </td>
+                    <td align="right" valign="middle">
+                      <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:1.8px;color:#5a5a64;text-transform:uppercase;">
+                        AUTH // OTP
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
 
-              <!-- Headline (Div + span with off-white anti-inversion) -->
-              <div class="session-title" style="margin:0 0 8px 0;padding:0;font-family:'Inter Tight','Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#f0f0f2 !important;line-height:1.2;">
-                <span style="color:#f0f0f2 !important;-webkit-text-fill-color:#f0f0f2 !important;">Authenticate session</span>
-              </div>
+            <!-- Content Body -->
+            <tr>
+              <td style="padding:22px 18px 20px 18px;">
 
-              <!-- Minimal instruction -->
-              <p style="margin:0 0 24px 0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:#7e7e88;line-height:1.5;">
-                Enter the one-time authentication token below to complete verification.
-              </p>
+                <!-- Headline (Anti-inversion off-white) -->
+                <div style="margin:0 0 8px 0;padding:0;font-family:'Inter Tight','Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#eaeaea;line-height:1.2;">
+                  Authenticate session
+                </div>
 
-              <!-- HERO: RECTANGLE ACID CONTAINER WITH TAG-CUT CUTOUTS & SEGMENTED CELLS -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px 0;">
-                <tr>
-                  <td style="padding:0;">
+                <!-- Minimal instruction -->
+                <p style="margin:0 0 20px 0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:#7e7e88;line-height:1.5;">
+                  Enter the one-time authentication token below to complete verification.
+                </p>
 
-                    <!--[if mso]>
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ccff00" style="background-color:#ccff00;">
-                      <tr>
-                        <td align="center" valign="middle" style="padding:20px 16px 18px 16px;text-align:center;">
-                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
-                            <tr>
-                              {digit_cells_html}
-                            </tr>
-                          </table>
-                          <div style="font-family:'JetBrains Mono',Consolas,monospace;font-size:10px;font-weight:bold;letter-spacing:1.6px;color:#080808;text-transform:uppercase;margin-top:12px;">
+                <!-- HERO: RECTANGLE ACID CONTAINER WITH TACTILE HARDWARE CELLS -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;">
+                  <tr>
+                    <td style="padding:0;">
+
+                      <!--[if mso]>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ccff00" style="background-color:#ccff00;">
+                        <tr>
+                          <td align="center" valign="middle" style="padding:16px 10px 14px 10px;text-align:center;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                              <tr>
+                                {digit_cells_html}
+                              </tr>
+                            </table>
+                            <div style="font-family:'JetBrains Mono',Consolas,monospace;font-size:9px;font-weight:bold;letter-spacing:1.4px;color:#0e0e10;text-transform:uppercase;margin-top:10px;">
+                              EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                      <![endif]-->
+
+                      <!--[if !mso]><!-- -->
+                      <div class="tag-cut-container acid-hero" style="position:relative;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);padding:16px 10px 14px 10px;border:1px solid #ccff00;">
+
+                        <!-- Micro-Telemetry Top Row -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
+                          <tr>
+                            <td align="left" style="padding:0 2px;">
+                              <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#0e0e10;text-transform:uppercase;">
+                                [ TOKEN // 06-DIGIT ]
+                              </span>
+                            </td>
+                            <td align="right" style="padding:0 2px;">
+                              <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1px;color:#181800;text-transform:uppercase;">
+                                TTL 300S &bull; ACTIVE
+                              </span>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- 6 Segmented Digit Slots (Tactile Hardware Token Display) -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
+                          <tr>
+                            {digit_cells_html}
+                          </tr>
+                        </table>
+
+                        <!-- Subtext within container -->
+                        <div style="text-align:center;margin-top:10px;">
+                          <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#0e0e10;text-transform:uppercase;">
                             EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-                    <![endif]-->
+                          </span>
+                        </div>
 
-                    <!--[if !mso]><!-- -->
-                    <div class="tag-cut-container acid-hero" style="position:relative;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);padding:20px 16px 18px 16px;border:1px solid #ccff00;">
-
-                      <!-- Micro-Telemetry Top Row -->
-                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
-                        <tr>
-                          <td align="left">
-                            <span class="acid-meta" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#080808 !important;-webkit-text-fill-color:#080808 !important;text-transform:uppercase;">
-                              [ TOKEN // 06-DIGIT ]
-                            </span>
-                          </td>
-                          <td align="right">
-                            <span class="acid-meta" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#080808 !important;-webkit-text-fill-color:#080808 !important;text-transform:uppercase;">
-                              TTL 300S &bull; ACTIVE
-                            </span>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- 6 Segmented Digit Slots (Tactile Hardware Token Display) -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
-                        <tr>
-                          {digit_cells_html}
-                        </tr>
-                      </table>
-
-                      <!-- Subtext within container -->
-                      <div style="text-align:center;margin-top:12px;">
-                        <span class="acid-meta" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:800;letter-spacing:1.8px;color:#080808 !important;-webkit-text-fill-color:#080808 !important;text-transform:uppercase;">
-                          EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
-                        </span>
                       </div>
+                      <!--<![endif]-->
 
-                    </div>
-                    <!--<![endif]-->
+                    </td>
+                  </tr>
+                </table>
 
-                  </td>
-                </tr>
-              </table>
+                <!-- 1-line security disclaimer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="border-left:2px solid #22222a;padding:2px 0 2px 10px;">
+                      <p style="margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;color:#5a5a64;line-height:1.5;">
+                        If you did not initiate this request, ignore this transmission. Never disclose this token.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
 
-              <!-- 1-line security disclaimer -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="border-left:2px solid #22222a;padding:2px 0 2px 12px;">
-                    <p style="margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;color:#5a5a64;line-height:1.5;">
-                      If you did not initiate this request, ignore this transmission. Never disclose this token.
-                    </p>
-                  </td>
-                </tr>
-              </table>
+              </td>
+            </tr>
 
-            </td>
-          </tr>
+            <!-- Minimal Footer -->
+            <tr>
+              <td bgcolor="#0a0a0c" class="card-footer" style="padding:14px 18px;border-top:1px solid #181820;background-color:#0a0a0c;background-image:linear-gradient(#0a0a0c,#0a0a0c);">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="left" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:#ccff00;text-transform:uppercase;line-height:1.4;">
+                      EXPLORE &middot; BUILD &middot; COMPETE &middot; FAIL &middot; LEARN
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="left" style="padding-top:4px;font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:0.8px;color:#3e3e48;text-transform:uppercase;">
+                      medicaps.chaoscomputerclub.in
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
 
-          <!-- Minimal Footer -->
-          <tr>
-            <td bgcolor="#0a0a0c" class="card-footer" style="padding:16px 28px;border-top:1px solid #181820;background-color:#0a0a0c;background-image:linear-gradient(#0a0a0c,#0a0a0c);">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="left" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:1.8px;color:#ccff00;text-transform:uppercase;">
-                    EXPLORE &middot; BUILD &middot; COMPETE &middot; FAIL &middot; LEARN
-                  </td>
-                </tr>
-                <tr>
-                  <td align="left" style="padding-top:6px;font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:1px;color:#3e3e48;text-transform:uppercase;">
-                    medicaps.chaoscomputerclub.in
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+          </table>
 
-        </table>
+          <!-- Below-Card Tagline -->
+          <div style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:0.8px;color:#2e2e36;text-transform:uppercase;margin-top:12px;text-align:center;line-height:1.4;">
+            ESTABLISHED 2026 &bull; OPEN BY DEFAULT &bull; PEER DRIVEN
+          </div>
 
-        <!-- Below-Card Tagline -->
-        <div style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:1.2px;color:#2e2e36;text-transform:uppercase;margin-top:14px;text-align:center;">
-          ESTABLISHED 2026 &bull; OPEN BY DEFAULT &bull; PEER DRIVEN
+          <!--[if (gte mso 9)|(IE)]>
+              </td>
+            </tr>
+          </table>
+          <![endif]-->
+
         </div>
-
-        <!--[if (gte mso 9)|(IE)]>
-            </td>
-          </tr>
-        </table>
-        <![endif]-->
 
       </td>
     </tr>
@@ -367,8 +353,6 @@ def _otp_email_template(otp_code: str) -> str:
 
 </body>
 </html>"""
-
-
 def _smtp_send_sync(to_email: str, subject: str, html_body: str, plain_body: str) -> None:
     """
     Synchronous SMTP send — run via asyncio.to_thread to keep event loop free.
