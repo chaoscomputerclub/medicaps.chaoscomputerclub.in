@@ -9,7 +9,8 @@
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Chrome, Loader2, Mail, ArrowLeft } from "lucide-react";
+import { Chrome, Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { AuthLayout } from "@/organization/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ import {
   completeOnboardingThunk,
   fetchCurrentUserThunk,
 } from "@/store/slices/authSlice";
-import { getGoogleLoginURL } from "@/lib/auth";
+import { getGoogleLoginURL, isMedicapsEmail } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -66,6 +67,13 @@ export const Route = createFileRoute("/auth")({
   component: Auth,
 });
 
+
+function checkIsMedicapsEmail(email: string): boolean {
+  if (!email || !email.includes("@")) return false;
+  const domain = email.split("@")[1]?.trim().toLowerCase();
+  return domain === "medicaps.ac.in" || Boolean(domain?.endsWith(".medicaps.ac.in"));
+}
+
 function Auth() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -85,6 +93,13 @@ function Auth() {
     devOtp,
     isAuthenticated: authed,
   } = useAppSelector((state) => state.auth);
+
+  // Live real-time domain inspection
+  const cleanEmail = email.trim().toLowerCase();
+  const hasAt = cleanEmail.includes("@");
+  const typedDomain = hasAt ? cleanEmail.split("@")[1] || "" : "";
+  const isInvalidDomain = hasAt && typedDomain.length > 0 && !checkIsMedicapsEmail(cleanEmail);
+
 
   // Check URL query parameters (Google OAuth callback) & session validation
   useEffect(() => {
@@ -149,12 +164,12 @@ function Auth() {
   // Step 1: Send OTP via Redux Thunk (Restricted strictly to @medicaps.ac.in)
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes("@")) {
+    const clean = email.trim().toLowerCase();
+    if (!clean || !clean.includes("@")) {
       dispatch(setMessage("Please enter your university email address."));
       return;
     }
-    if (!isMedicapsEmail(cleanEmail)) {
+    if (!checkIsMedicapsEmail(clean)) {
       dispatch(
         setMessage(
           "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail, Yahoo, and personal accounts are strictly prohibited."
@@ -162,7 +177,7 @@ function Auth() {
       );
       return;
     }
-    await dispatch(sendOtpThunk(cleanEmail));
+    await dispatch(sendOtpThunk(clean));
   }
 
   // Step 2: Verify OTP via Redux Thunk
@@ -183,12 +198,12 @@ function Auth() {
   }
 
   async function handleResendOtp() {
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !isMedicapsEmail(cleanEmail)) {
+    const clean = email.trim().toLowerCase();
+    if (!clean || !checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted."));
       return;
     }
-    await dispatch(sendOtpThunk(cleanEmail));
+    await dispatch(sendOtpThunk(clean));
   }
 
   // Step 3: Complete Onboarding via Redux Thunk
@@ -242,42 +257,91 @@ function Auth() {
     <AuthLayout title={title} description={description}>
       {step === "email" && (
         <>
+          {/* Institutional Perimeter Status Banner */}
+          <div className="border border-border/80 bg-[#0a0a0c] p-3 mb-4 rounded-none">
+            <div className="flex items-center justify-between font-mono text-[0.6875rem] text-[#ccff00] uppercase tracking-wider mb-1.5">
+              <span className="flex items-center gap-1.5 font-bold">
+                <ShieldAlert className="size-3.5 text-[#ccff00]" />
+                [ GATEWAY // INSTITUTIONAL ACCESS ]
+              </span>
+              <span className="text-[0.625rem] text-[#ccff00] border border-[#ccff00]/40 px-1.5 py-0.5 font-semibold">
+                ENFORCED
+              </span>
+            </div>
+            <p className="font-mono text-[0.6875rem] text-zinc-400 leading-relaxed">
+              Access is restricted strictly to official <strong className="text-zinc-200">@medicaps.ac.in</strong> credentials. Commercial providers (<span className="text-zinc-500 line-through">Gmail</span>, <span className="text-zinc-500 line-through">Yahoo</span>, <span className="text-zinc-500 line-through">Outlook</span>) are blocked by the firewall.
+            </p>
+          </div>
+
           <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <Label htmlFor="email" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
-                  Institutional email
+                  Institutional email address
                 </Label>
                 <span className="font-mono text-[0.625rem] text-[#ccff00] font-semibold tracking-wider uppercase">
                   @medicaps.ac.in only
                 </span>
               </div>
               <div className="input-icon">
-                <Mail className="size-4" />
+                <Mail className="size-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => dispatch(setEmail(e.target.value))}
+                  onChange={(e) => {
+                    dispatch(setEmail(e.target.value));
+                    if (message) dispatch(setMessage(null));
+                  }}
                   placeholder="name@medicaps.ac.in"
                   required
                   autoFocus
-                  className="font-mono text-sm"
+                  className={cn(
+                    "font-mono text-sm",
+                    isInvalidDomain && "border-amber-500/80 focus-visible:ring-amber-500 text-amber-200 bg-amber-950/10"
+                  )}
                 />
               </div>
-              <p className="mt-1.5 text-[0.6875rem] text-muted-foreground font-mono">
-                Must be an official student/faculty address. Personal emails (Gmail, Yahoo, etc.) are strictly disallowed.
-              </p>
             </div>
 
-            {message && (
-              <div className="p-2.5 rounded border border-red-500/40 bg-red-950/20 text-red-400 font-mono text-xs leading-relaxed">
-                {message}
+            {/* Realtime Live Domain Warning */}
+            {isInvalidDomain && (
+              <div className="p-3 border border-amber-500/40 bg-amber-950/20 text-amber-300 font-mono text-xs leading-relaxed space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+                  <AlertTriangle className="size-3.5 text-amber-400 shrink-0" />
+                  <span>[ 403 // FORBIDDEN DOMAIN: @{typedDomain} ]</span>
+                </div>
+                <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
+                  Personal accounts are blocked by policy. Please switch to your registered <strong className="text-white">@medicaps.ac.in</strong> email address.
+                </p>
               </div>
             )}
 
-            <Button className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold" disabled={pending} type="submit">
-              {pending ? <Loader2 className="spin size-4" /> : "Continue"}
+            {/* General Rejection / Auth Message Banner */}
+            {message && !isInvalidDomain && (
+              <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
+                <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+                  <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
+                  <span>[ SECURITY RESTRICTION ]</span>
+                </div>
+                <p className="text-[0.6875rem] text-red-200 leading-relaxed">
+                  {message}
+                </p>
+              </div>
+            )}
+
+            <Button
+              className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold disabled:opacity-50"
+              disabled={pending || isInvalidDomain}
+              type="submit"
+            >
+              {pending ? (
+                <Loader2 className="spin size-4" />
+              ) : isInvalidDomain ? (
+                "Enter @medicaps.ac.in Address"
+              ) : (
+                "Continue with Email OTP"
+              )}
             </Button>
           </form>
 
@@ -295,9 +359,10 @@ function Auth() {
             <Chrome className="size-4 mr-2 text-[#ccff00]" /> Continue with Medi-Caps Google Workspace
           </Button>
 
-          <p className="auth-boundary mt-4 text-[0.6875rem] text-muted-foreground text-center font-mono">
-            Only verified Medi-Caps institutional identities receive member access.
-          </p>
+          <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-center gap-2 font-mono text-[0.625rem] text-muted-foreground uppercase tracking-wider">
+            <Lock className="size-3 text-[#ccff00]" />
+            <span>Medi-Caps University Realm &bull; Open By Default &bull; Peer Driven</span>
+          </div>
         </>
       )}
 
