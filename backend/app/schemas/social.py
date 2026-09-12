@@ -18,6 +18,7 @@ class StudentSummary(BaseModel):
     tier: str = "1★ Explorer"
     is_following: bool = False
     is_self: bool = False
+    avatar_url: Optional[str] = None
 
 
 class FollowResponse(BaseModel):

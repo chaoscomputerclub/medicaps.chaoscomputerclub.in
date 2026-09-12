@@ -1,3 +1,14 @@
+
+const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
+  volt: { icon: "⚡", bg: "bg-lime-500/10", border: "border-lime-500/40", text: "text-lime-400" },
+  binary: { icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
+  quantum: { icon: "⚛️", bg: "bg-purple-500/10", border: "border-purple-500/40", text: "text-purple-400" },
+  matrix: { icon: "💻", bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-400" },
+  grandmaster: { icon: "🏆", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
+  cipher: { icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
+};
+
+import { cn } from "@/lib/utils";
 import { openSocialDrawer } from '@/store/slices/socialSlice';
 import { openEditProfileModal } from '@/store/slices/uiSlice';
 import { useAppDispatch } from '@/store/hooks';
@@ -38,13 +49,39 @@ function Profile(){
     return null;
   }
   const {data:m}=useSuspenseQuery(qs[0]);const {data:history}=useSuspenseQuery(qs[1]);const {data:battles}=useSuspenseQuery(qs[2]);const {data:pass}=useSuspenseQuery(qs[3]);const {data:proofs}=useSuspenseQuery(qs[4]);const {data:achievements}=useSuspenseQuery(qs[5]);
+const activeEmblem = m.avatar_url ? EMBLEM_MAP[m.avatar_url] : null;
 const initials = m.full_name
   ? m.full_name.split(" ").map((w: string) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase()
   : m.handle
   ? m.handle.slice(0, 2).toUpperCase()
   : "CC";
 return <div className="page-wrap"><header className="profile-header">
-      <div className="profile-mark">{initials}</div>
+            {m.avatar_url && (m.avatar_url.startsWith("http") || m.avatar_url.startsWith("/media/") || m.avatar_url.startsWith("/")) ? (
+        <div className="profile-mark overflow-hidden bg-zinc-900 border border-[var(--line)]">
+          <img
+            src={m.avatar_url}
+            alt={m.full_name || m.handle}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = "none";
+              e.currentTarget.parentElement!.innerText = initials;
+            }}
+          />
+        </div>
+      ) : activeEmblem ? (
+        <div
+          className={cn(
+            "profile-mark flex items-center justify-center font-mono text-2xl border",
+            activeEmblem.bg,
+            activeEmblem.border,
+            activeEmblem.text
+          )}
+        >
+          <span>{activeEmblem.icon}</span>
+        </div>
+      ) : (
+        <div className="profile-mark">{initials}</div>
+      )}
       <div className="min-w-0 flex-1">
         <p className="kicker">Competitive identity</p>
         <div className="flex items-center gap-3 flex-wrap">

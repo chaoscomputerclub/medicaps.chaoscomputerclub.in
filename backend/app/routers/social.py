@@ -223,6 +223,7 @@ async def get_student_followers(
                 tier=tier_str,
                 is_following=m.id in my_following_set,
                 is_self=(m.id == current_member_id),
+                avatar_url=m.avatar_url,
             )
         )
 
@@ -281,6 +282,7 @@ async def get_student_following(
                 tier=tier_str,
                 is_following=m.id in my_following_set,
                 is_self=(m.id == current_member_id),
+                avatar_url=m.avatar_url,
             )
         )
 

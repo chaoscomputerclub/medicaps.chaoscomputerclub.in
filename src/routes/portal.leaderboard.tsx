@@ -62,10 +62,18 @@ function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean
     );
   }
 
-  if (item.avatar_url && item.avatar_url.startsWith("http")) {
+  if (item.avatar_url && (item.avatar_url.startsWith("http") || item.avatar_url.startsWith("/media/") || item.avatar_url.startsWith("/"))) {
     return (
       <div className="w-8 h-8 rounded-full border border-zinc-700 overflow-hidden flex-shrink-0 bg-zinc-800">
-        <img src={item.avatar_url} alt={item.full_name || item.handle} className="w-full h-full object-cover" />
+        <img
+          src={item.avatar_url}
+          alt={item.full_name || item.handle}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLElement).style.display = "none";
+            e.currentTarget.parentElement!.innerText = initials;
+          }}
+        />
       </div>
     );
   }

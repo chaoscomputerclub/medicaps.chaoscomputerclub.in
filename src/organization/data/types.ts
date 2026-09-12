@@ -27,4 +27,5 @@ export type StudentFollowItem = {
   tier: RatingTier;
   is_following: boolean;
   is_self: boolean;
+  avatar_url?: string | null;
 };

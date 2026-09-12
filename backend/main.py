@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
-from app.routers import assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, verify
+from app.routers import assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, storage, verify
 
 
 @asynccontextmanager
@@ -67,6 +67,7 @@ app.include_router(passes.router, prefix=settings.API_PREFIX)
 app.include_router(feed.router, prefix=settings.API_PREFIX)
 app.include_router(assessment.router, prefix=settings.API_PREFIX)
 app.include_router(social.router, prefix=settings.API_PREFIX)
+app.include_router(storage.router, prefix=settings.API_PREFIX)
 
 
 if __name__ == "__main__":

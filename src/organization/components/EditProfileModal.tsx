@@ -1,25 +1,30 @@
 /**
  * Chaos Computer Club India — Cyber Profile Editor Modal
  * Modeled after Interleet (interleet.sharexpress.in) developer profile suite.
- * Allows editing full name, department, batch, bio, github, linkedin, and avatar emblem
- * with real-time live card preview, immutable institutional locks, and Redux Toolkit state.
+ * Supports custom avatar image uploads to MinIO Object Storage, preset cyber emblems,
+ * real-time live card preview, immutable institutional locks, and Redux Toolkit state.
  */
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Award,
+  Camera,
   Check,
   Code2,
   ExternalLink,
   Github,
   Globe,
   GraduationCap,
+  Image as ImageIcon,
   Linkedin,
   Loader2,
   Lock,
   Mail,
+  RefreshCw,
   ShieldCheck,
   Sparkles,
+  Trash2,
+  Upload,
   User,
   X,
   Zap,
@@ -30,11 +35,20 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { closeEditProfileModal } from "@/store/slices/uiSlice";
 import { updateProfileThunk } from "@/store/slices/authSlice";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
+import { uploadMedia } from "@/lib/storage";
 import { TierBadge } from "./ui";
 import { cn } from "@/lib/utils";
 
 // Preset Cyber Emblems available to CCC members
-interface EmblemDef { id: string; label: string; icon: string; bg: string; border: string; text: string; }
+interface EmblemDef {
+  id: string;
+  label: string;
+  icon: string;
+  bg: string;
+  border: string;
+  text: string;
+}
+
 const PRESET_EMBLEMS: EmblemDef[] = [
   { id: "volt", label: "Volt Terminal", icon: "⚡", bg: "from-lime-500/20 to-lime-900/40", border: "border-lime-500/60", text: "text-lime-400" },
   { id: "binary", label: "Binary Spectre", icon: "👾", bg: "from-cyan-500/20 to-blue-900/40", border: "border-cyan-500/60", text: "text-cyan-400" },
@@ -65,6 +79,7 @@ const BATCHES = [
 export function EditProfileModal() {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditProfileOpen = useAppSelector((state) => state.ui.isEditProfileOpen);
   const member = useAppSelector((state) => state.auth.member);
@@ -76,7 +91,12 @@ export function EditProfileModal() {
   const [bio, setBio] = useState("");
   const [githubUsername, setGithubUsername] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+
+  // Avatar State: supports either custom MinIO image URL or preset cyber emblem
+  const [avatarMode, setAvatarMode] = useState<"custom" | "emblem">("emblem");
+  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
   const [avatarEmblem, setAvatarEmblem] = useState("volt");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Sync state whenever modal opens or member profile changes
@@ -88,8 +108,17 @@ export function EditProfileModal() {
       setBio(member.bio || "");
       setGithubUsername(member.github_username || "");
       setLinkedinUrl(member.linkedin_url || "");
-      if (member.avatar_url && PRESET_EMBLEMS.some((e) => e.id === member.avatar_url)) {
-        setAvatarEmblem(member.avatar_url);
+
+      const url = member.avatar_url;
+      if (url && (url.startsWith("http") || url.startsWith("/media/"))) {
+        setAvatarMode("custom");
+        setCustomAvatarUrl(url);
+      } else if (url && PRESET_EMBLEMS.some((e) => e.id === url)) {
+        setAvatarMode("emblem");
+        setAvatarEmblem(url);
+      } else {
+        setAvatarMode("emblem");
+        setAvatarEmblem("volt");
       }
     }
   }, [member, isEditProfileOpen]);
@@ -108,12 +137,50 @@ export function EditProfileModal() {
 
   if (!isEditProfileOpen) return null;
 
+  // Handle direct file upload to MinIO S3 bucket
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input value so re-selecting same file triggers change
+    e.target.value = "";
+
+    // Client validation
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (PNG, JPG, WebP, GIF).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File exceeds 10MB limit. Please upload a smaller image.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    const toastId = toast.loading("Uploading avatar to MinIO storage...");
+
+    try {
+      const res = await uploadMedia(file, "avatars");
+      setCustomAvatarUrl(res.public_url);
+      setAvatarMode("custom");
+      toast.success("Profile photo uploaded to MinIO!", { id: toastId });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload image. Try again.", { id: toastId });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || fullName.trim().length < 2) {
       toast.error("Full name must be at least 2 characters.");
       return;
     }
+
+    const finalAvatarUrl =
+      avatarMode === "custom" && customAvatarUrl
+        ? customAvatarUrl
+        : avatarEmblem;
 
     setSaving(true);
     try {
@@ -125,7 +192,7 @@ export function EditProfileModal() {
           bio: bio.trim(),
           github_username: githubUsername.trim().replace(/^@/, ""),
           linkedin_url: linkedinUrl.trim(),
-          avatar_url: avatarEmblem,
+          avatar_url: finalAvatarUrl,
         })
       ).unwrap();
 
@@ -143,121 +210,218 @@ export function EditProfileModal() {
     }
   };
 
-  const selectedEmblem: EmblemDef = PRESET_EMBLEMS.find((e) => e.id === avatarEmblem) || PRESET_EMBLEMS[0]!;
-
-  const initials = fullName
-    ? fullName
-        .split(" ")
-        .map((w) => w[0])
-        .filter(Boolean)
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
-    : member?.handle?.slice(0, 2).toUpperCase() || "CC";
+  const selectedEmblem: EmblemDef =
+    PRESET_EMBLEMS.find((e) => e.id === avatarEmblem) || PRESET_EMBLEMS[0]!;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Edit Profile"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
     >
-      {/* Click outside to close */}
-      <div
-        className="fixed inset-0"
-        onClick={() => !saving && dispatch(closeEditProfileModal())}
-      />
-
-      {/* Modal Dialog Window */}
-      <div className="relative z-10 w-full max-w-4xl bg-[var(--surface)] border border-[var(--line)] shadow-2xl rounded-[1px] overflow-hidden flex flex-col my-8 animate-in zoom-in-95 duration-200">
-        
-        {/* Top Accent Stripe */}
-        <div className="h-1 w-full bg-gradient-to-r from-[var(--accent)] via-emerald-400 to-[var(--accent)]" />
-
+      <div className="relative w-full max-w-3xl bg-[var(--surface)] border border-[var(--line)] shadow-2xl rounded-[1px] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-5 border-b border-[var(--line)] bg-[var(--surface-2)]/60 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-              <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--accent)]">
-                MEMBER IDENTITY CONFIGURATION
-              </p>
-            </div>
-            <h2 className="text-lg font-bold text-white uppercase tracking-tight mt-0.5">
+        <div className="p-4 border-b border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <User size={16} className="text-[var(--accent)]" />
+            <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-white">
               Edit Competitive Profile
             </h2>
+            <span className="proof-seal text-[9px] py-0.5">
+              <Sparkles size={10} />
+              INTERLEET V4
+            </span>
           </div>
 
           <button
             type="button"
-            disabled={saving}
             onClick={() => dispatch(closeEditProfileModal())}
-            className="p-1.5 text-[var(--muted)] hover:text-white border border-transparent hover:border-[var(--line)] rounded-[1px] hover:bg-[var(--surface-2)] transition-all cursor-pointer"
-            aria-label="Close"
+            className="p-1 text-[var(--muted)] hover:text-white border border-[var(--line)] hover:bg-[var(--surface-3)] rounded-[1px] transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Modal Body: 2 Columns on Desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_1fr] gap-6 p-6 max-h-[75vh] overflow-y-auto">
-          
+        {/* Modal Body: 2 Columns (Form on left, Real-Time Preview on right) */}
+        <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column: Form Fields */}
-          <form id="edit-profile-form" onSubmit={handleSave} className="space-y-5">
-            
+          <form id="edit-profile-form" onSubmit={handleSave} className="space-y-4">
+            {/* Avatar & Photo Identity Section with MinIO Upload */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] font-bold">
+                  Profile Avatar & Emblem
+                </label>
+                <div className="flex items-center gap-1 border border-[var(--line)] rounded-[1px] p-0.5 bg-[var(--surface-2)]">
+                  <button
+                    type="button"
+                    onClick={() => setAvatarMode("custom")}
+                    className={cn(
+                      "px-2 py-0.5 text-[9px] font-mono uppercase font-bold rounded-[1px] transition-all cursor-pointer flex items-center gap-1",
+                      avatarMode === "custom"
+                        ? "bg-[var(--accent)] text-[var(--accent-ink)]"
+                        : "text-[var(--muted)] hover:text-white"
+                    )}
+                  >
+                    <Camera size={10} />
+                    Custom Photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAvatarMode("emblem")}
+                    className={cn(
+                      "px-2 py-0.5 text-[9px] font-mono uppercase font-bold rounded-[1px] transition-all cursor-pointer flex items-center gap-1",
+                      avatarMode === "emblem"
+                        ? "bg-[var(--accent)] text-[var(--accent-ink)]"
+                        : "text-[var(--muted)] hover:text-white"
+                    )}
+                  >
+                    <Zap size={10} />
+                    Emblem
+                  </button>
+                </div>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                onChange={handleAvatarFileChange}
+                className="hidden"
+              />
+
+              {avatarMode === "custom" ? (
+                <div className="p-3 border border-[var(--line)] bg-[var(--surface-2)] rounded-[1px] flex items-center gap-3.5">
+                  <div className="relative w-14 h-14 rounded-[1px] border border-[var(--line)] bg-zinc-900 overflow-hidden flex-shrink-0 flex items-center justify-center group">
+                    {customAvatarUrl ? (
+                      <img
+                        src={customAvatarUrl}
+                        alt="Avatar Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon size={22} className="text-[var(--muted)]" />
+                    )}
+
+                    {uploadingAvatar && (
+                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                        <Loader2 size={16} className="text-[var(--accent)] animate-spin" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={uploadingAvatar}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-mono uppercase font-bold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/40 hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] rounded-[1px] transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {uploadingAvatar ? (
+                          <>
+                            <Loader2 size={10} className="animate-spin" />
+                            <span>Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={10} />
+                            <span>{customAvatarUrl ? "Change Photo" : "Upload to MinIO"}</span>
+                          </>
+                        )}
+                      </button>
+
+                      {customAvatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomAvatarUrl(null);
+                            setAvatarMode("emblem");
+                          }}
+                          className="p-1 text-[var(--muted)] hover:text-red-400 border border-[var(--line)] hover:border-red-500/50 rounded-[1px] transition-colors cursor-pointer"
+                          title="Remove custom photo and revert to emblem"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[9px] font-mono text-[var(--muted)] leading-tight">
+                      Stored on dedicated MinIO object storage. Max 10MB. JPG, PNG, WebP.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-6 gap-2">
+                  {PRESET_EMBLEMS.map((emblem) => (
+                    <button
+                      key={emblem.id}
+                      type="button"
+                      onClick={() => setAvatarEmblem(emblem.id)}
+                      className={cn(
+                        "h-11 rounded-[1px] border flex flex-col items-center justify-center text-sm transition-all cursor-pointer relative group",
+                        avatarEmblem === emblem.id
+                          ? cn("border-[var(--accent)] shadow-[0_0_10px_rgba(200,255,54,0.3)]", emblem.bg)
+                          : "border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))]"
+                      )}
+                      title={emblem.label}
+                    >
+                      <span className="text-base">{emblem.icon}</span>
+                      {avatarEmblem === emblem.id && (
+                        <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Full Name */}
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                <User size={12} className="text-[var(--accent)]" />
-                <span>Full Name</span>
-                <span className="text-red-400">*</span>
+            <div>
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] mb-1 font-bold">
+                Competitive Full Name <span className="text-[var(--accent)]">*</span>
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Santusht Kotai"
+                maxLength={60}
                 required
-                maxLength={100}
-                className="w-full h-9 px-3 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/50 focus:outline-none focus:border-[var(--accent)] transition-colors"
+                placeholder="e.g. Santusht Kotai"
+                className="w-full px-3 py-2 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] focus:border-[var(--accent)] text-white outline-none rounded-[1px] transition-colors"
               />
-              <p className="text-[10px] text-[var(--muted)] font-mono">
-                Official name shown on university leaderboards and verified certificates.
-              </p>
             </div>
 
             {/* Department & Batch */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                  <GraduationCap size={12} className="text-[var(--accent)]" />
-                  <span>Department</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] mb-1 font-bold">
+                  Department
                 </label>
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full h-9 px-3 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white focus:outline-none focus:border-[var(--accent)] transition-colors"
+                  className="w-full px-2.5 py-2 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] focus:border-[var(--accent)] text-white outline-none rounded-[1px] transition-colors cursor-pointer"
                 >
-                  {DEPARTMENTS.map((d) => (
-                    <option key={d} value={d} className="bg-[var(--surface)] text-white">
-                      {d}
+                  {DEPARTMENTS.map((dept) => (
+                    <option key={dept} value={dept} className="bg-zinc-900 text-white">
+                      {dept}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                  <Code2 size={12} className="text-[var(--accent)]" />
-                  <span>Batch Cohort</span>
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] mb-1 font-bold">
+                  Academic Batch
                 </label>
                 <select
                   value={batch}
                   onChange={(e) => setBatch(e.target.value)}
-                  className="w-full h-9 px-3 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white focus:outline-none focus:border-[var(--accent)] transition-colors"
+                  className="w-full px-2.5 py-2 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] focus:border-[var(--accent)] text-white outline-none rounded-[1px] transition-colors cursor-pointer"
                 >
                   {BATCHES.map((b) => (
-                    <option key={b} value={b} className="bg-[var(--surface)] text-white">
+                    <option key={b} value={b} className="bg-zinc-900 text-white">
                       {b}
                     </option>
                   ))}
@@ -265,35 +429,35 @@ export function EditProfileModal() {
               </div>
             </div>
 
-            {/* Bio / Tagline */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                  <Sparkles size={12} className="text-[var(--accent)]" />
-                  <span>Bio / Persona Tagline</span>
+            {/* Competitive Bio */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] font-bold">
+                  Developer Bio / Status Quote
                 </label>
-                <span className="text-[10px] font-mono text-[var(--muted)]">
-                  {bio.length}/300
+                <span className="text-[9px] font-mono text-[var(--muted)]">
+                  {bio.length}/280
                 </span>
               </div>
               <textarea
                 value={bio}
-                onChange={(e) => setBio(e.target.value.slice(0, 300))}
-                placeholder="e.g. Systems engineer & algorithm competitor at Medi-Caps. Focused on memory safety and graph dynamics."
+                onChange={(e) => setBio(e.target.value)}
+                maxLength={280}
                 rows={3}
-                className="w-full p-2.5 text-xs font-sans bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/50 focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+                placeholder="Share your algorithms trajectory, preferred languages, and competitive goals..."
+                className="w-full px-3 py-2 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] focus:border-[var(--accent)] text-white outline-none rounded-[1px] transition-colors resize-none leading-relaxed"
               />
             </div>
 
-            {/* Social Links: GitHub & LinkedIn */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                  <Github size={12} className="text-white" />
-                  <span>GitHub Handle</span>
+            {/* Social Handles */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] mb-1 font-bold flex items-center gap-1">
+                  <Github size={11} />
+                  <span>GitHub Username</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[var(--muted)]">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)] font-mono">
                     @
                   </span>
                   <input
@@ -301,18 +465,18 @@ export function EditProfileModal() {
                     value={githubUsername}
                     onChange={(e) => setGithubUsername(e.target.value)}
                     placeholder="octocat"
-                    className="w-full h-9 pl-7 pr-3 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/50 focus:outline-none focus:border-[var(--accent)] transition-colors"
+                    className="w-full pl-6 pr-3 py-1.5 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] focus:border-[var(--accent)] text-white outline-none rounded-[1px]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                  <Linkedin size={12} className="text-[#0a66c2]" />
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] mb-1 font-bold flex items-center gap-1">
+                  <Linkedin size={11} />
                   <span>LinkedIn Handle</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[var(--muted)]">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)] font-mono">
                     in/
                   </span>
                   <input
@@ -320,52 +484,19 @@ export function EditProfileModal() {
                     value={linkedinUrl}
                     onChange={(e) => setLinkedinUrl(e.target.value)}
                     placeholder="username"
-                    className="w-full h-9 pl-8 pr-3 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/50 focus:outline-none focus:border-[var(--accent)] transition-colors"
+                    className="w-full pl-7 pr-3 py-1.5 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] focus:border-[var(--accent)] text-white outline-none rounded-[1px]"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Avatar Emblem Picker */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase text-[var(--muted)]">
-                <ShieldCheck size={12} className="text-[var(--accent)]" />
-                <span>Cyber Emblem</span>
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {PRESET_EMBLEMS.map((emblem) => {
-                  const isSelected = avatarEmblem === emblem.id;
-                  return (
-                    <button
-                      key={emblem.id}
-                      type="button"
-                      onClick={() => setAvatarEmblem(emblem.id)}
-                      className={cn(
-                        "p-2.5 rounded-[1px] border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer bg-[var(--surface-2)]",
-                        isSelected
-                          ? "border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_10px_rgba(200,255,54,0.15)]"
-                          : "border-[var(--line)] hover:border-[var(--muted)] hover:bg-[var(--surface-3)]"
-                      )}
-                    >
-                      <span className="text-xl">{emblem.icon}</span>
-                      <span className="text-[9px] font-mono font-bold uppercase text-[var(--muted)] truncate w-full text-center">
-                        {emblem.id}
-                      </span>
-                    </button>
-                  );
-                })}
+            {/* Immutable Locked Fields Banner */}
+            <div className="p-3 bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] space-y-2">
+              <div className="flex items-center gap-2 text-[10px] font-mono uppercase font-bold text-[var(--accent)]">
+                <Lock size={12} />
+                <span>Cryptographically Locked Credentials</span>
               </div>
-            </div>
-
-            {/* Immutable Campus Identity Box (Locked) */}
-            <div className="p-3.5 bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] space-y-2.5">
-              <div className="flex items-center gap-2">
-                <Lock size={12} className="text-amber-400" />
-                <span className="font-mono text-[10px] font-bold uppercase text-amber-400 tracking-wider">
-                  Verified Institutional Identity (Locked)
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+              <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
                 <div className="p-2 bg-[var(--surface)] border border-[var(--line)] rounded-[1px]">
                   <span className="text-[9px] uppercase text-[var(--muted)] block">
                     Institutional Email
@@ -406,18 +537,28 @@ export function EditProfileModal() {
               {/* Background ambient gradient */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent)]/5 blur-3xl pointer-events-none" />
 
-              {/* Card Header with Emblem & Verified Identity */}
+              {/* Card Header with MinIO Photo / Emblem & Verified Identity */}
               <div className="flex items-start gap-3.5">
-                <div
-                  className={cn(
-                    "w-12 h-12 rounded-[1px] border flex items-center justify-center font-mono text-base font-bold flex-shrink-0 shadow-lg",
-                    selectedEmblem.bg,
-                    selectedEmblem.border,
-                    selectedEmblem.text
-                  )}
-                >
-                  <span>{selectedEmblem.icon}</span>
-                </div>
+                {avatarMode === "custom" && customAvatarUrl ? (
+                  <div className="w-12 h-12 rounded-[1px] border border-[var(--line)] bg-zinc-900 overflow-hidden flex-shrink-0 shadow-lg">
+                    <img
+                      src={customAvatarUrl}
+                      alt={fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className={cn(
+                      "w-12 h-12 rounded-[1px] border flex items-center justify-center font-mono text-base font-bold flex-shrink-0 shadow-lg",
+                      selectedEmblem.bg,
+                      selectedEmblem.border,
+                      selectedEmblem.text
+                    )}
+                  >
+                    <span>{selectedEmblem.icon}</span>
+                  </div>
+                )}
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -506,7 +647,7 @@ export function EditProfileModal() {
         <div className="p-4 border-t border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-end gap-3">
           <button
             type="button"
-            disabled={saving}
+            disabled={saving || uploadingAvatar}
             onClick={() => dispatch(closeEditProfileModal())}
             className="px-4 py-2 font-mono text-xs uppercase font-bold text-[var(--muted)] hover:text-white border border-[var(--line)] hover:bg-[var(--surface-3)] rounded-[1px] transition-all cursor-pointer"
           >
@@ -516,7 +657,7 @@ export function EditProfileModal() {
           <button
             type="submit"
             form="edit-profile-form"
-            disabled={saving}
+            disabled={saving || uploadingAvatar}
             className="px-5 py-2 font-mono text-xs uppercase font-bold bg-[var(--accent)] text-[var(--accent-ink)] hover:brightness-110 rounded-[1px] flex items-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(200,255,54,0.2)] disabled:opacity-50"
           >
             {saving ? (

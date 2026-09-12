@@ -257,9 +257,23 @@ export function SocialDrawer() {
                   className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))] hover:bg-[var(--surface)] transition-all rounded-[1px]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-[1px] bg-[var(--surface)] border border-[var(--line)] text-[var(--accent)] flex items-center justify-center font-mono text-xs font-bold flex-shrink-0 shadow-inner">
-                      {initials}
-                    </div>
+                    {student.avatar_url && (student.avatar_url.startsWith("http") || student.avatar_url.startsWith("/media/") || student.avatar_url.startsWith("/")) ? (
+                      <div className="w-9 h-9 rounded-[1px] bg-zinc-900 border border-[var(--line)] overflow-hidden flex-shrink-0 shadow-inner">
+                        <img
+                          src={student.avatar_url}
+                          alt={student.full_name || student.handle}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLElement).style.display = "none";
+                            e.currentTarget.parentElement!.innerText = initials;
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-9 h-9 rounded-[1px] bg-[var(--surface)] border border-[var(--line)] text-[var(--accent)] flex items-center justify-center font-mono text-xs font-bold flex-shrink-0 shadow-inner">
+                        {initials}
+                      </div>
+                    )}
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
