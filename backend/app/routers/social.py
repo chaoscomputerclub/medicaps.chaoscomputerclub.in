@@ -1,3 +1,4 @@
+from app.core.cache import get_cache, set_cache, delete_cache, delete_cache_pattern
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 Social Router: Student Following & Followers Network
@@ -69,6 +70,13 @@ async def follow_student(
         db.add(follow_record)
         await db.commit()
 
+        # Invalidate social & profile caches
+        await delete_cache(f"cache:profile:{target_member.id}")
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache(f"cache:social:my_following:{current_member.id}")
+        await delete_cache_pattern(f"cache:social:*{target_member.id}*")
+        await delete_cache_pattern(f"cache:social:*{current_member.id}*")
+
     # Recalculate target's followers count and current user's following count
     followers_count = await db.scalar(
         select(func.count(StudentFollow.id)).where(
@@ -113,6 +121,13 @@ async def unfollow_student(
         await db.delete(existing)
         await db.commit()
 
+        # Invalidate social & profile caches
+        await delete_cache(f"cache:profile:{target_member.id}")
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache(f"cache:social:my_following:{current_member.id}")
+        await delete_cache_pattern(f"cache:social:*{target_member.id}*")
+        await delete_cache_pattern(f"cache:social:*{current_member.id}*")
+
     followers_count = await db.scalar(
         select(func.count(StudentFollow.id)).where(
             StudentFollow.following_id == target_member.id
@@ -139,12 +154,18 @@ async def get_my_following_ids(
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieve IDs of all students currently followed by the authenticated user."""
+    """Retrieve IDs of all students currently followed by the authenticated user with Redis caching."""
+    cache_key = f"cache:social:my_following:{current_member.id}"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        return FollowingIdsResponse(following_ids=cached)
+
     stmt = select(StudentFollow.following_id).where(
         StudentFollow.follower_id == current_member.id
     )
     res = await db.execute(stmt)
     following_ids = [str(fid) for fid in res.scalars().all()]
+    await set_cache(cache_key, following_ids, ttl_seconds=60)
     return FollowingIdsResponse(following_ids=following_ids)
 
 

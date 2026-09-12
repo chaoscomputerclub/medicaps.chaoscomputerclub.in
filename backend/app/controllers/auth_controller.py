@@ -1,3 +1,4 @@
+from app.core.cache import get_cache, set_cache, delete_cache, delete_cache_pattern
 import httpx
 from fastapi import Request
 from fastapi.responses import RedirectResponse
@@ -231,6 +232,14 @@ class AuthController:
         await db.commit()
         await db.refresh(current_member)
 
+        # Invalidate profile and leaderboard caches
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+
+        # Invalidate profile and leaderboard caches
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+
         return {
             "success": True,
             "message": "Onboarding complete. Welcome to the arena.",
@@ -288,7 +297,12 @@ class AuthController:
 
     @staticmethod
     async def get_full_profile(current_member: MemberProfile, db: AsyncSession) -> dict:
-        """Return full member profile with computed stats."""
+        """Return full member profile with computed stats and Redis caching."""
+        cache_key = f"cache:profile:{current_member.id}"
+        cached = await get_cache(cache_key)
+        if cached is not None:
+            return cached
+
         from sqlalchemy import func
         from app.models.db_models import ScoreboardEntry, OfflineContest, CampusPass, StudentFollow
 
@@ -366,7 +380,7 @@ class AuthController:
             )
         )
 
-        return {
+        payload = {
             "member": {
                 "id": current_member.id,
                 "handle": current_member.handle or "cadet",
@@ -400,6 +414,8 @@ class AuthController:
             "achievements": [],
             "proofs": [],
         }
+        await set_cache(cache_key, payload, ttl_seconds=120)
+        return payload
 
     @staticmethod
     async def google_login(request: Request):

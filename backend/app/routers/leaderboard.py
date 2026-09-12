@@ -4,7 +4,8 @@ Leaderboard & Star Division Ladder Router
 """
 
 from typing import Dict, List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
+from app.core.cache import get_cache, set_cache
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
@@ -17,11 +18,23 @@ router = APIRouter(prefix="/leaderboard", tags=["Leaderboards & Ratings"])
 
 @router.get("", response_model=List[LeaderboardRow])
 async def get_university_leaderboard(
+    response: Response,
     department: Optional[str] = Query(None, description="Filter: CSE, IT, AIDS, Cyber Security"),
     batch: Optional[str] = Query(None, description="Filter: 2022-26, 2023-27, 2024-28"),
     tier: Optional[str] = Query(None, description="Filter: 5_star, 4_star, 3_star, 2_star, 1_star"),
     db: AsyncSession = Depends(get_db),
 ):
+    """
+    Fetch official Medi-Caps University rating standings with star division brackets.
+    Supports granular departmental and batch filters.
+    Protected by 60s Redis Cache-Aside with conditional HTTP headers.
+    """
+    cache_key = f"cache:leaderboard:{department or 'all'}:{batch or 'all'}:{tier or 'all'}"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+        return cached
     """
     Fetch official Medi-Caps University rating standings with star division brackets.
     Supports granular departmental and batch filters.
@@ -104,6 +117,10 @@ async def get_university_leaderboard(
         )
         current_rank += 1
 
+    rows_data = [r.model_dump() for r in rows]
+    await set_cache(cache_key, rows_data, ttl_seconds=60)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
     return rows
 
 
