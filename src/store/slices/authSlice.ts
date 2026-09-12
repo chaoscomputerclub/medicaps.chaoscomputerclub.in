@@ -78,19 +78,18 @@ export const verifyOtpThunk = createAsyncThunk<
   }
 });
 
-export const fetchCurrentUserThunk = createAsyncThunk<
-  Member,
-  void,
-  { rejectValue: string }
->("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
-  try {
-    const res = await getMe();
-    return res.member;
-  } catch (err: any) {
-    removePersistedToken();
-    return rejectWithValue(err?.message || "Session expired.");
-  }
-});
+export const fetchCurrentUserThunk = createAsyncThunk<Member, void, { rejectValue: string }>(
+  "auth/fetchCurrentUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getMe();
+      return res.member;
+    } catch (err: any) {
+      removePersistedToken();
+      return rejectWithValue(err?.message || "Session expired.");
+    }
+  },
+);
 
 export const completeOnboardingThunk = createAsyncThunk<
   Member,
@@ -104,7 +103,6 @@ export const completeOnboardingThunk = createAsyncThunk<
     return rejectWithValue(err?.message || "Failed to complete onboarding.");
   }
 });
-
 
 export const updateProfileThunk = createAsyncThunk<
   Member,
@@ -264,7 +262,6 @@ export const authSlice = createSlice({
       state.pending = false;
       state.message = action.payload || "Failed to update profile.";
     });
-
   },
 });
 

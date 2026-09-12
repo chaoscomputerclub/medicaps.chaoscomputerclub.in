@@ -81,10 +81,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "CCC Medi-Caps Offline Contest Portal" },
-      { name: "description", content: "Proctored campus contests, verified scoreboards, ratings, and cryptographic result proofs." },
+      {
+        name: "description",
+        content:
+          "Proctored campus contests, verified scoreboards, ratings, and cryptographic result proofs.",
+      },
       { name: "author", content: "Chaos Computer Club — Medi-Caps Chapter" },
       { property: "og:title", content: "CCC Medi-Caps Offline Contest Portal" },
-      { property: "og:description", content: "Proctored campus contests and verifiable competitive records." },
+      {
+        property: "og:description",
+        content: "Proctored campus contests and verifiable competitive records.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

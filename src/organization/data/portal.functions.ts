@@ -24,7 +24,8 @@ function getBackendUrl(): string {
     return process.env["BACKEND_URL"];
   }
   if (typeof window !== "undefined") {
-    return window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1")
+    return window.location.hostname.includes("localhost") ||
+      window.location.hostname.includes("127.0.0.1")
       ? "http://localhost:8002/api"
       : "https://ccc-medicaps-api.sharexpress.in/api";
   }
@@ -39,14 +40,22 @@ export const getPublicPortalData = createServerFn({ method: "GET" }).handler(asy
   const backendUrl = getBackendUrl();
 
   const [apiContests, apiAnnouncements, apiProofs] = await Promise.all([
-    fetch(`${backendUrl}/contests`).then((r) => (r.ok ? r.json() : [])).catch(() => []),
-    fetch(`${backendUrl}/feed/announcements`).then((r) => (r.ok ? r.json() : [])).catch(() => []),
-    fetch(`${backendUrl}/verify/proofs`).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+    fetch(`${backendUrl}/contests`)
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []),
+    fetch(`${backendUrl}/feed/announcements`)
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []),
+    fetch(`${backendUrl}/verify/proofs`)
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []),
   ]);
 
   const firstSlug = apiContests && apiContests.length > 0 ? apiContests[0].slug : null;
   const standings = firstSlug
-    ? await fetch(`${backendUrl}/scoreboards/${firstSlug}`).then((r) => (r.ok ? r.json() : [])).catch(() => [])
+    ? await fetch(`${backendUrl}/scoreboards/${firstSlug}`)
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => [])
     : [];
 
   const problems: any[] = (apiContests || []).flatMap((c: any) =>
@@ -59,7 +68,7 @@ export const getPublicPortalData = createServerFn({ method: "GET" }).handler(asy
       solved_count: p.solved_count ?? 0,
       first_ac_seconds: p.first_ac_seconds,
       editorial_summary: p.editorial_summary ?? "Editorial verified and sealed.",
-    }))
+    })),
   );
 
   return {

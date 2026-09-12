@@ -28,7 +28,7 @@ export interface PresignedUploadResponse {
  */
 export async function uploadMedia(
   file: File,
-  prefix: string = "avatars"
+  prefix: string = "avatars",
 ): Promise<StorageUploadResult> {
   const token = getToken();
   if (!token) {
@@ -74,7 +74,7 @@ export async function uploadMedia(
 export async function getPresignedUploadUrl(
   filename: string,
   contentType: string = "image/jpeg",
-  prefix: string = "avatars"
+  prefix: string = "avatars",
 ): Promise<PresignedUploadResponse> {
   const token = getToken();
   if (!token) {
@@ -106,10 +106,7 @@ export async function getPresignedUploadUrl(
 /**
  * Direct browser PUT upload using a presigned URL.
  */
-export async function uploadDirectToPresigned(
-  uploadUrl: string,
-  file: File
-): Promise<void> {
+export async function uploadDirectToPresigned(uploadUrl: string, file: File): Promise<void> {
   const res = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
@@ -128,17 +125,17 @@ export async function uploadDirectToPresigned(
  */
 export async function getPresignedDownloadUrl(
   objectName: string,
-  expiresMinutes: number = 60
+  expiresMinutes: number = 60,
 ): Promise<string> {
   const token = getToken();
   const apiBase = getApiBase();
   const res = await fetch(
     `${apiBase}/storage/presigned-url?object_name=${encodeURIComponent(
-      objectName
+      objectName,
     )}&expires_minutes=${expiresMinutes}`,
     {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-    }
+    },
   );
 
   if (!res.ok) {

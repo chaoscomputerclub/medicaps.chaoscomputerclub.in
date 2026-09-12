@@ -19,7 +19,9 @@ export function ProofBadge({
     <article className="proof-badge">
       <div className="proof-header">
         <div>
-          <span className="proof-seal"><ShieldCheck size={18} /> CCC VERIFIED</span>
+          <span className="proof-seal">
+            <ShieldCheck size={18} /> CCC VERIFIED
+          </span>
           <h3>{proof.contest_title}</h3>
         </div>
         <BadgeCheck className="accent-icon" size={28} />
@@ -31,7 +33,9 @@ export function ProofBadge({
         </div>
         <div>
           <dt>Result</dt>
-          <dd>Rank {proof.rank} · {proof.score} pts</dd>
+          <dd>
+            Rank {proof.rank} · {proof.score} pts
+          </dd>
         </div>
         {!compact && (
           <>

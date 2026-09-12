@@ -113,7 +113,10 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       if (typeof err.detail === "string") {
         msg = err.detail;
       } else if (Array.isArray(err.detail) && err.detail.length > 0) {
-        msg = err.detail[0]?.msg?.replace(/^Value error,\s*/i, "") || err.detail[0]?.msg || "Validation error";
+        msg =
+          err.detail[0]?.msg?.replace(/^Value error,\s*/i, "") ||
+          err.detail[0]?.msg ||
+          "Validation error";
       } else if (err.message) {
         msg = err.message;
       }
@@ -122,12 +125,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     return res.json();
   } catch (err: any) {
     if (err?.message === "Failed to fetch") {
-      throw new Error(`Unable to connect to authentication server (${apiBase}). Please check server status.`);
+      throw new Error(
+        `Unable to connect to authentication server (${apiBase}). Please check server status.`,
+      );
     }
     throw err;
   }
 }
-
 
 export function isMedicapsEmail(email: string): boolean {
   if (!email || !email.includes("@")) return false;
@@ -137,14 +141,20 @@ export function isMedicapsEmail(email: string): boolean {
 
 // ── Email OTP ──────────────────────────────────────────────────────────────
 
-export async function sendOTP(email: string): Promise<{ sent: boolean; email: string; transaction_id?: string; dev_otp?: string }> {
+export async function sendOTP(
+  email: string,
+): Promise<{ sent: boolean; email: string; transaction_id?: string; dev_otp?: string }> {
   return apiFetch("/auth/send-otp", {
     method: "POST",
     body: JSON.stringify({ email }),
   });
 }
 
-export async function verifyOTP(email: string, code: string, transaction_id?: string): Promise<AuthResult> {
+export async function verifyOTP(
+  email: string,
+  code: string,
+  transaction_id?: string,
+): Promise<AuthResult> {
   return apiFetch("/auth/verify-otp", {
     method: "POST",
     body: JSON.stringify({
@@ -196,7 +206,7 @@ export async function fetchAssessmentData(contestSlug: string): Promise<any> {
 
 export async function runAssessmentCode(
   contestSlug: string,
-  payload: { problem_id: string; language: string; code: string; custom_stdin?: string }
+  payload: { problem_id: string; language: string; code: string; custom_stdin?: string },
 ): Promise<any> {
   return apiFetch(`/assessment/${contestSlug}/run`, {
     method: "POST",
@@ -206,7 +216,7 @@ export async function runAssessmentCode(
 
 export async function submitAssessmentCode(
   contestSlug: string,
-  payload: { problem_id: string; language: string; code: string }
+  payload: { problem_id: string; language: string; code: string },
 ): Promise<any> {
   return apiFetch(`/assessment/${contestSlug}/submit`, {
     method: "POST",
@@ -216,7 +226,7 @@ export async function submitAssessmentCode(
 
 export async function sendAssessmentTelemetry(
   contestSlug: string,
-  eventType: string
+  eventType: string,
 ): Promise<any> {
   return apiFetch(`/assessment/${contestSlug}/telemetry`, {
     method: "POST",
@@ -235,7 +245,7 @@ export async function fetchAssessmentLeaderboard(contestSlug: string): Promise<a
 }
 
 export async function updateProfile(
-  data: UpdateProfilePayload
+  data: UpdateProfilePayload,
 ): Promise<{ success: boolean; message: string; member: Member }> {
   return apiFetch<{ success: boolean; message: string; member: Member }>("/auth/profile", {
     method: "PUT",

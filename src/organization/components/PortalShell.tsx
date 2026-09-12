@@ -1,6 +1,6 @@
-import { EditProfileModal } from './EditProfileModal';
-import { SocialDrawer } from './SocialDrawer';
-import { fetchMyFollowingIdsThunk } from '@/store/slices/socialSlice';
+import { EditProfileModal } from "./EditProfileModal";
+import { SocialDrawer } from "./SocialDrawer";
+import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import {
   Archive,
@@ -51,13 +51,13 @@ export function PortalShell() {
   const initials = member?.handle
     ? member.handle.slice(0, 2).toUpperCase()
     : member?.full_name
-    ? member.full_name
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "??";
+      ? member.full_name
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()
+      : "??";
 
   const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
 
@@ -79,11 +79,7 @@ export function PortalShell() {
       </header>
 
       <aside className={open ? "portal-sidebar open" : "portal-sidebar"}>
-        <Link
-          to="/portal"
-          className="brand-lockup"
-          onClick={() => dispatch(setSidebarOpen(false))}
-        >
+        <Link to="/portal" className="brand-lockup" onClick={() => dispatch(setSidebarOpen(false))}>
           <img src="/logo.png" alt="Chaos Computer Club Medi-Caps" />
           <div>
             <strong>CHAOS COMPUTER CLUB</strong>
@@ -116,19 +112,17 @@ export function PortalShell() {
 
         <div className="offline-manifest">
           <span>OFFLINE BY DESIGN</span>
-          <p>
-            No browser submissions. Every result begins at a proctored
-            Medi-Caps workstation.
-          </p>
+          <p>No browser submissions. Every result begins at a proctored Medi-Caps workstation.</p>
         </div>
 
         <div className="sidebar-user">
           <div className="avatar-code">{initials}</div>
           <div>
-            <strong>{member?.handle ?? (typeof window !== "undefined" && !getToken() ? "Sign in required" : "Loading…")}</strong>
-            <span>
-              {member ? `${member.rating} · ${member.department ?? "Member"}` : ""}
-            </span>
+            <strong>
+              {member?.handle ??
+                (typeof window !== "undefined" && !getToken() ? "Sign in required" : "Loading…")}
+            </strong>
+            <span>{member ? `${member.rating} · ${member.department ?? "Member"}` : ""}</span>
           </div>
           <button
             type="button"

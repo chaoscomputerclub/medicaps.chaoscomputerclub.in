@@ -4,7 +4,13 @@ import type { CampusPass } from "../data/types";
 import { formatContestDate } from "./ui";
 import { CampusPassSkeleton } from "./skeletons";
 
-export function CampusPassCard({ pass, loading = false }: { pass?: CampusPass; loading?: boolean }) {
+export function CampusPassCard({
+  pass,
+  loading = false,
+}: {
+  pass?: CampusPass;
+  loading?: boolean;
+}) {
   if (loading) {
     return <CampusPassSkeleton />;
   }
@@ -20,7 +26,8 @@ export function CampusPassCard({ pass, loading = false }: { pass?: CampusPass; l
           <ScanLine size={36} className="text-[#444]" />
           <h3 className="text-white font-mono text-sm font-bold mt-2">No Active Gate Pass</h3>
           <p className="text-[#666] font-mono text-xs max-w-xs">
-            Appear in an online screening round to qualify among the Top 30 for an offline physical lab seat pass.
+            Appear in an online screening round to qualify among the Top 30 for an offline physical
+            lab seat pass.
           </p>
         </div>
         <footer className="w-full text-center text-[#444] font-mono text-[10px]">
@@ -42,7 +49,9 @@ export function CampusPassCard({ pass, loading = false }: { pass?: CampusPass; l
         <div>
           <p className="kicker">Registered delegate</p>
           <h3>{pass.member_name}</h3>
-          <code>@{pass.handle} · {pass.prn_hash}</code>
+          <code>
+            @{pass.handle} · {pass.prn_hash}
+          </code>
           <dl>
             <div>
               <dt>Contest</dt>
@@ -53,7 +62,9 @@ export function CampusPassCard({ pass, loading = false }: { pass?: CampusPass; l
               <dd>{pass.seat}</dd>
             </div>
             <div>
-              <dt><MapPin size={12} /> Venue</dt>
+              <dt>
+                <MapPin size={12} /> Venue
+              </dt>
               <dd>{pass.venue}</dd>
             </div>
             <div>
@@ -63,8 +74,17 @@ export function CampusPassCard({ pass, loading = false }: { pass?: CampusPass; l
           </dl>
         </div>
         <div className="pass-qr">
-          <QRCodeSVG value={pass.pass_code} size={116} bgColor="transparent" fgColor="currentColor" level="H" />
-          <span><ScanLine size={13} />{pass.status}</span>
+          <QRCodeSVG
+            value={pass.pass_code}
+            size={116}
+            bgColor="transparent"
+            fgColor="currentColor"
+            level="H"
+          />
+          <span>
+            <ScanLine size={13} />
+            {pass.status}
+          </span>
         </div>
       </div>
       <footer>

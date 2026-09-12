@@ -1,4 +1,4 @@
-import { AssessmentLeaderboardSkeleton } from '@/organization/components/skeletons';
+import { AssessmentLeaderboardSkeleton } from "@/organization/components/skeletons";
 /**
  * Chaos Computer Club India — Phase 1 Screening Leaderboard & Top 30 Qualifiers
  */
@@ -56,7 +56,9 @@ function AssessmentLeaderboardView() {
       });
       const json = await res.json();
       if (json.success) {
-        setMessage(`Successfully qualified ${json.qualified_count} candidates and issued digital campus QR passes!`);
+        setMessage(
+          `Successfully qualified ${json.qualified_count} candidates and issued digital campus QR passes!`,
+        );
         const updated = await fetchAssessmentLeaderboard(contestSlug);
         setData(updated);
       }
@@ -76,7 +78,8 @@ function AssessmentLeaderboardView() {
       <header className="page-header">
         <div>
           <Link
-            to="/portal/contests" search={{ status: "all" }}
+            to="/portal/contests"
+            search={{ status: "all" }}
             className="inline-flex items-center gap-1 font-mono text-xs text-subtle-foreground hover:text-accent mb-2 transition-colors"
           >
             <ArrowLeft size={13} /> Back to Contests
@@ -84,7 +87,8 @@ function AssessmentLeaderboardView() {
           <p className="kicker">Phase 1 Screening Standings</p>
           <h1>{data?.assessment_title ?? "Assessment Leaderboard"}</h1>
           <p>
-            The top 30 rankers on this leaderboard qualify for the physical, proctored offline battle in CS Lab 401–404.
+            The top 30 rankers on this leaderboard qualify for the physical, proctored offline
+            battle in CS Lab 401–404.
           </p>
         </div>
 
@@ -115,7 +119,9 @@ function AssessmentLeaderboardView() {
       )}
 
       {loading ? (
-        <div className="p-8 text-center text-xs font-mono text-[#777]">Loading screening standings…</div>
+        <div className="p-8 text-center text-xs font-mono text-[#777]">
+          Loading screening standings…
+        </div>
       ) : (
         <div className="table-scroll leaderboard-table">
           <table>
@@ -137,7 +143,9 @@ function AssessmentLeaderboardView() {
                   <tr
                     key={row.handle}
                     className={isTop30 ? "is-you" : ""}
-                    style={row.rank === 30 ? { borderBottom: "2px dashed var(--accent)" } : undefined}
+                    style={
+                      row.rank === 30 ? { borderBottom: "2px dashed var(--accent)" } : undefined
+                    }
                   >
                     <td>
                       <div className="rank-cell">
@@ -151,7 +159,9 @@ function AssessmentLeaderboardView() {
                       </div>
                     </td>
                     <td>
-                      <span className="mono-tag">{row.department} · {row.batch}</span>
+                      <span className="mono-tag">
+                        {row.department} · {row.batch}
+                      </span>
                     </td>
                     <td className="score-value">
                       <strong>{row.total_score}</strong> pts

@@ -150,7 +150,9 @@ export const MonacoEditor = memo(function MonacoEditor({
   return (
     <div style={{ position: "relative", height, width: "100%", background: "#0d0d0d" }}>
       {!loaded && (
-        <div style={{ padding: "1rem", color: "#888", fontFamily: "monospace", fontSize: "0.8125rem" }}>
+        <div
+          style={{ padding: "1rem", color: "#888", fontFamily: "monospace", fontSize: "0.8125rem" }}
+        >
           Initializing terminal code editor…
         </div>
       )}

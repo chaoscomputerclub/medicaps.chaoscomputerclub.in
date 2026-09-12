@@ -53,7 +53,7 @@ export const fetchMyFollowingIdsThunk = createAsyncThunk<string[]>(
     } catch {
       return rejectWithValue("Failed to load following list.");
     }
-  }
+  },
 );
 
 // 2. Fetch followers list for a student
@@ -75,7 +75,7 @@ export const fetchFollowersThunk = createAsyncThunk<StudentFollowItem[], string>
     } catch (err: any) {
       return rejectWithValue(err?.message || "Failed to fetch followers");
     }
-  }
+  },
 );
 
 // 3. Fetch following list for a student
@@ -97,12 +97,18 @@ export const fetchFollowingThunk = createAsyncThunk<StudentFollowItem[], string>
     } catch (err: any) {
       return rejectWithValue(err?.message || "Failed to fetch following");
     }
-  }
+  },
 );
 
 // 4. Toggle Follow / Unfollow
 export const toggleFollowThunk = createAsyncThunk<
-  { targetId: string; targetHandle: string; isFollowing: boolean; followersCount: number; followingCount: number },
+  {
+    targetId: string;
+    targetHandle: string;
+    isFollowing: boolean;
+    followersCount: number;
+    followingCount: number;
+  },
   { targetId: string; targetHandle: string }
 >("social/toggleFollow", async ({ targetId, targetHandle }, { getState, rejectWithValue }) => {
   try {
@@ -148,7 +154,11 @@ export const socialSlice = createSlice({
   reducers: {
     openSocialDrawer: (
       state,
-      action: PayloadAction<{ targetHandle: string; targetName?: string | null; type: "followers" | "following" }>
+      action: PayloadAction<{
+        targetHandle: string;
+        targetName?: string | null;
+        type: "followers" | "following";
+      }>,
     ) => {
       state.drawerOpen = true;
       state.drawerType = action.payload.type;
@@ -247,11 +257,7 @@ export const socialSlice = createSlice({
   },
 });
 
-export const {
-  openSocialDrawer,
-  closeSocialDrawer,
-  setDrawerType,
-  setSocialSearchQuery,
-} = socialSlice.actions;
+export const { openSocialDrawer, closeSocialDrawer, setDrawerType, setSocialSearchQuery } =
+  socialSlice.actions;
 
 export default socialSlice.reducer;

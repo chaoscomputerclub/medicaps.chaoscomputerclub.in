@@ -86,50 +86,55 @@ const initialState: AssessmentState = {
 
 // ── Async Thunks ─────────────────────────────────────────────────────────────
 
-export const fetchAssessmentThunk = createAsyncThunk<
-  any,
-  string,
-  { rejectValue: string }
->("assessment/fetch", async (contestSlug, { rejectWithValue }) => {
-  try {
-    return await fetchAssessmentData(contestSlug);
-  } catch (err: any) {
-    return rejectWithValue(err?.message || "Failed to load assessment.");
-  }
-});
+export const fetchAssessmentThunk = createAsyncThunk<any, string, { rejectValue: string }>(
+  "assessment/fetch",
+  async (contestSlug, { rejectWithValue }) => {
+    try {
+      return await fetchAssessmentData(contestSlug);
+    } catch (err: any) {
+      return rejectWithValue(err?.message || "Failed to load assessment.");
+    }
+  },
+);
 
 export const runCodeThunk = createAsyncThunk<
   any,
   { contestSlug: string; problemId: string; language: string; code: string; customStdin?: string },
   { rejectValue: string }
->("assessment/runCode", async ({ contestSlug, problemId, language, code, customStdin }, { rejectWithValue }) => {
-  try {
-    return await runAssessmentCode(contestSlug, {
-      problem_id: problemId,
-      language,
-      code,
-      ...(customStdin ? { custom_stdin: customStdin } : {}),
-    });
-  } catch (err: any) {
-    return rejectWithValue(err?.message || "Execution failed.");
-  }
-});
+>(
+  "assessment/runCode",
+  async ({ contestSlug, problemId, language, code, customStdin }, { rejectWithValue }) => {
+    try {
+      return await runAssessmentCode(contestSlug, {
+        problem_id: problemId,
+        language,
+        code,
+        ...(customStdin ? { custom_stdin: customStdin } : {}),
+      });
+    } catch (err: any) {
+      return rejectWithValue(err?.message || "Execution failed.");
+    }
+  },
+);
 
 export const submitCodeThunk = createAsyncThunk<
   any,
   { contestSlug: string; problemId: string; language: string; code: string },
   { rejectValue: string }
->("assessment/submitCode", async ({ contestSlug, problemId, language, code }, { rejectWithValue }) => {
-  try {
-    return await submitAssessmentCode(contestSlug, {
-      problem_id: problemId,
-      language,
-      code,
-    });
-  } catch (err: any) {
-    return rejectWithValue(err?.message || "Submission evaluation failed.");
-  }
-});
+>(
+  "assessment/submitCode",
+  async ({ contestSlug, problemId, language, code }, { rejectWithValue }) => {
+    try {
+      return await submitAssessmentCode(contestSlug, {
+        problem_id: problemId,
+        language,
+        code,
+      });
+    } catch (err: any) {
+      return rejectWithValue(err?.message || "Submission evaluation failed.");
+    }
+  },
+);
 
 export const reportTelemetryThunk = createAsyncThunk<
   any,
@@ -143,17 +148,16 @@ export const reportTelemetryThunk = createAsyncThunk<
   }
 });
 
-export const finishAssessmentThunk = createAsyncThunk<
-  any,
-  string,
-  { rejectValue: string }
->("assessment/finish", async (contestSlug, { rejectWithValue }) => {
-  try {
-    return await finishAssessmentTest(contestSlug);
-  } catch (err: any) {
-    return rejectWithValue(err?.message || "Failed to finalize assessment.");
-  }
-});
+export const finishAssessmentThunk = createAsyncThunk<any, string, { rejectValue: string }>(
+  "assessment/finish",
+  async (contestSlug, { rejectWithValue }) => {
+    try {
+      return await finishAssessmentTest(contestSlug);
+    } catch (err: any) {
+      return rejectWithValue(err?.message || "Failed to finalize assessment.");
+    }
+  },
+);
 
 export const assessmentSlice = createSlice({
   name: "assessment",
@@ -264,7 +268,7 @@ export const assessmentSlice = createSlice({
         // recalculate best score locally
         state.session.total_score = Object.values(state.submissionsMap).reduce(
           (acc: number, curr: any) => acc + (curr.score || 0),
-          0
+          0,
         );
       }
     });

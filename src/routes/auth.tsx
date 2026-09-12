@@ -23,11 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setEmail,
@@ -58,8 +54,7 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: "CCC Medi-Caps Member Sign In" },
       {
         property: "og:description",
-        content:
-          "Institutional access to campus contests, ratings and verified records.",
+        content: "Institutional access to campus contests, ratings and verified records.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -67,7 +62,6 @@ export const Route = createFileRoute("/auth")({
   }),
   component: Auth,
 });
-
 
 function checkIsMedicapsEmail(email: string): boolean {
   if (!email || !email.includes("@")) return false;
@@ -102,7 +96,6 @@ function Auth() {
   const typedDomain = hasAt ? cleanEmail.split("@")[1] || "" : "";
   const isInvalidDomain = hasAt && typedDomain.length > 0 && !checkIsMedicapsEmail(cleanEmail);
 
-
   // Check URL query parameters (Google OAuth callback) & session validation
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -120,13 +113,17 @@ function Auth() {
           setMessage(
             rejectedEmail
               ? `Access restricted: ${rejectedEmail} is not a Medi-Caps institutional account. Only official @medicaps.ac.in organization emails are permitted. Gmail and external companies are strictly blocked.`
-              : "Access restricted: Only official @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are not allowed."
-          )
+              : "Access restricted: Only official @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are not allowed.",
+          ),
         );
       } else if (errorParam === "google_cancelled") {
         dispatch(setMessage("Google sign-in was cancelled."));
       } else {
-        dispatch(setMessage("Google authentication failed. Please try again or use institutional email verification."));
+        dispatch(
+          setMessage(
+            "Google authentication failed. Please try again or use institutional email verification.",
+          ),
+        );
       }
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
@@ -177,8 +174,8 @@ function Auth() {
     if (!checkIsMedicapsEmail(clean)) {
       dispatch(
         setMessage(
-          "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail, Yahoo, and personal accounts are strictly prohibited."
-        )
+          "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail, Yahoo, and personal accounts are strictly prohibited.",
+        ),
       );
       return;
     }
@@ -192,8 +189,8 @@ function Auth() {
       verifyOtpThunk({
         email,
         code: codeToVerify,
-        transaction_id: transactionId || '',
-      })
+        transaction_id: transactionId || "",
+      }),
     );
     if (verifyOtpThunk.fulfilled.match(resultAction)) {
       const res = resultAction.payload;
@@ -240,7 +237,7 @@ function Auth() {
         prn: prn.trim().toUpperCase(),
         department,
         batch,
-      })
+      }),
     );
 
     if (completeOnboardingThunk.fulfilled.match(resultAction)) {
@@ -253,15 +250,33 @@ function Auth() {
     window.location.href = getGoogleLoginURL();
   }
 
-  let title = "Enter member operations";
+  let title: React.ReactNode = (
+    <>
+      <span className="block whitespace-nowrap">ENTER</span>
+      <span className="block whitespace-nowrap">MEMBER</span>
+      <span className="block whitespace-nowrap">OPERATIONS</span>
+    </>
+  );
   let description =
     "Campus credentials unlock registrations, issued passes, private rating history, and attendance-backed proofs.";
 
   if (step === "otp") {
-    title = "Verify authentication code";
+    title = (
+      <>
+        <span className="block whitespace-nowrap">VERIFY</span>
+        <span className="block whitespace-nowrap">AUTHENTICATION</span>
+        <span className="block whitespace-nowrap">CODE</span>
+      </>
+    );
     description = `Enter the six-digit code sent to ${email}.`;
   } else if (step === "onboarding") {
-    title = "Complete member registration";
+    title = (
+      <>
+        <span className="block whitespace-nowrap">COMPLETE</span>
+        <span className="block whitespace-nowrap">MEMBER</span>
+        <span className="block whitespace-nowrap">REGISTRATION</span>
+      </>
+    );
     description =
       "First-time registration detected. Set your academic parameters to initialize your portal credential.";
   }
@@ -274,22 +289,30 @@ function Auth() {
           <div className="border border-border/80 bg-[#0a0a0c] p-3 mb-4 rounded-none">
             <div className="flex items-center justify-between font-mono text-[0.6875rem] text-[#ccff00] uppercase tracking-wider mb-1.5">
               <span className="flex items-center gap-1.5 font-bold">
-                <ShieldAlert className="size-3.5 text-[#ccff00]" />
-                [ GATEWAY // INSTITUTIONAL ACCESS ]
+                <ShieldAlert className="size-3.5 text-[#ccff00]" />[ GATEWAY // INSTITUTIONAL ACCESS
+                ]
               </span>
               <span className="text-[0.625rem] text-[#ccff00] border border-[#ccff00]/40 px-1.5 py-0.5 font-semibold">
                 ENFORCED
               </span>
             </div>
             <p className="font-mono text-[0.6875rem] text-zinc-400 leading-relaxed">
-              Access is restricted strictly to official <strong className="text-zinc-200">@medicaps.ac.in</strong> credentials. Commercial providers (<span className="text-zinc-500 line-through">Gmail</span>, <span className="text-zinc-500 line-through">Yahoo</span>, <span className="text-zinc-500 line-through">Outlook</span>) are blocked by the firewall.
+              Access is restricted strictly to official{" "}
+              <strong className="text-zinc-200">@medicaps.ac.in</strong> credentials. Commercial
+              providers (<span className="text-zinc-500 line-through">Gmail</span>,{" "}
+              <span className="text-zinc-500 line-through">Yahoo</span>,{" "}
+              <span className="text-zinc-500 line-through">Outlook</span>) are blocked by the
+              firewall.
             </p>
           </div>
 
           <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <Label htmlFor="email" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+                <Label
+                  htmlFor="email"
+                  className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+                >
                   Institutional email address
                 </Label>
                 <span className="font-mono text-[0.625rem] text-[#ccff00] font-semibold tracking-wider uppercase">
@@ -311,7 +334,8 @@ function Auth() {
                   autoFocus
                   className={cn(
                     "font-mono text-sm",
-                    isInvalidDomain && "border-amber-500/80 focus-visible:ring-amber-500 text-amber-200 bg-amber-950/10"
+                    isInvalidDomain &&
+                      "border-amber-500/80 focus-visible:ring-amber-500 text-amber-200 bg-amber-950/10",
                   )}
                 />
               </div>
@@ -325,7 +349,8 @@ function Auth() {
                   <span>[ 403 // FORBIDDEN DOMAIN: @{typedDomain} ]</span>
                 </div>
                 <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
-                  Personal accounts are blocked by policy. Please switch to your registered <strong className="text-white">@medicaps.ac.in</strong> email address.
+                  Personal accounts are blocked by policy. Please switch to your registered{" "}
+                  <strong className="text-white">@medicaps.ac.in</strong> email address.
                 </p>
               </div>
             )}
@@ -337,9 +362,7 @@ function Auth() {
                   <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                   <span>[ SECURITY RESTRICTION ]</span>
                 </div>
-                <p className="text-[0.6875rem] text-red-200 leading-relaxed">
-                  {message}
-                </p>
+                <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
               </div>
             )}
 
@@ -369,7 +392,8 @@ function Auth() {
             onClick={handleGoogle}
             disabled={pending}
           >
-            <Chrome className="size-4 mr-2 text-[#ccff00]" /> Continue with Medi-Caps Google Workspace
+            <Chrome className="size-4 mr-2 text-[#ccff00]" /> Continue with Medi-Caps Google
+            Workspace
           </Button>
 
           <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-center gap-2 font-mono text-[0.625rem] text-muted-foreground uppercase tracking-wider">
@@ -382,7 +406,10 @@ function Auth() {
       {step === "otp" && (
         <form className="auth-form space-y-4" onSubmit={handleVerifyOtpSubmit}>
           <div>
-            <Label htmlFor="otp" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="otp"
+              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+            >
               Authentication code
             </Label>
             <div className="mt-3 flex justify-center">
@@ -436,9 +463,7 @@ function Auth() {
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                 <span>[ AUTHENTICATION ERROR ]</span>
               </div>
-              <p className="text-[0.6875rem] text-red-200 leading-relaxed">
-                {message}
-              </p>
+              <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
             </div>
           )}
 
@@ -467,7 +492,10 @@ function Auth() {
       {step === "onboarding" && (
         <form className="auth-form space-y-4" onSubmit={handleOnboardingSubmit}>
           <div>
-            <Label htmlFor="ob-name" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="ob-name"
+              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+            >
               Full name
             </Label>
             <Input
@@ -481,18 +509,17 @@ function Auth() {
             />
           </div>
           <div>
-            <Label htmlFor="ob-handle" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="ob-handle"
+              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+            >
               Member handle / alias
             </Label>
             <Input
               id="ob-handle"
               value={handle}
               onChange={(e) =>
-                dispatch(
-                  setHandle(
-                    e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")
-                  )
-                )
+                dispatch(setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")))
               }
               placeholder="ada_core"
               required
@@ -500,7 +527,10 @@ function Auth() {
             />
           </div>
           <div>
-            <Label htmlFor="ob-prn" className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="ob-prn"
+              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+            >
               University PRN
             </Label>
             <Input
@@ -515,7 +545,9 @@ function Auth() {
           </div>
           <div className="auth-selects">
             <div>
-              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">Department</Label>
+              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+                Department
+              </Label>
               <Select value={department} onValueChange={(val) => dispatch(setDepartment(val))}>
                 <SelectTrigger className="mt-1 font-mono text-xs">
                   <SelectValue />
@@ -530,7 +562,9 @@ function Auth() {
               </Select>
             </div>
             <div>
-              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">Batch</Label>
+              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
+                Batch
+              </Label>
               <Select value={batch} onValueChange={(val) => dispatch(setBatch(val))}>
                 <SelectTrigger className="mt-1 font-mono text-xs">
                   <SelectValue />
@@ -551,13 +585,15 @@ function Auth() {
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                 <span>[ AUTHENTICATION ERROR ]</span>
               </div>
-              <p className="text-[0.6875rem] text-red-200 leading-relaxed">
-                {message}
-              </p>
+              <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
             </div>
           )}
 
-          <Button className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold" disabled={pending} type="submit">
+          <Button
+            className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold"
+            disabled={pending}
+            type="submit"
+          >
             {pending ? <Loader2 className="spin size-4" /> : "Continue"}
           </Button>
         </form>

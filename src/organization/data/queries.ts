@@ -217,7 +217,10 @@ async function publicRecords() {
           title: record.title,
           season: record.season,
           status: record.status as OfflineContest["status"],
-          division: record.division === "open" ? "overall" : (record.division as OfflineContest["division"]),
+          division:
+            record.division === "open"
+              ? "overall"
+              : (record.division as OfflineContest["division"]),
           starts_at: record.starts_at,
           ends_at: record.ends_at,
           check_in_opens_at: record.check_in_opens_at,
@@ -331,7 +334,8 @@ export const portalQueries = {
     queryOptions({
       queryKey: ["portal", "public-records"],
       queryFn: () => publicRecords(),
-      select: (data: any) => (data.contests as OfflineContest[]).find((c) => c.slug === slug) ?? null,
+      select: (data: any) =>
+        (data.contests as OfflineContest[]).find((c) => c.slug === slug) ?? null,
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
     }),

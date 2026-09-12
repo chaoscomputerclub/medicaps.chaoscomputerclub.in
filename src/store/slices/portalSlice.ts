@@ -47,7 +47,7 @@ export const portalSlice = createSlice({
     },
     setDivisionFilter(
       state,
-      action: PayloadAction<"all" | "division_1" | "division_2" | "division_3" | "overall">
+      action: PayloadAction<"all" | "division_1" | "division_2" | "division_3" | "overall">,
     ) {
       state.divisionFilter = action.payload;
     },

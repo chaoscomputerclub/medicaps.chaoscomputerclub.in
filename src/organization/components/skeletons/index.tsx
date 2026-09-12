@@ -20,11 +20,7 @@ export function SkeletonText({ className, lines = 1 }: { className?: string; lin
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton
           key={i}
-          className={cn(
-            "h-3 rounded-[1px]",
-            i === lines - 1 ? "w-4/5" : "w-full",
-            className
-          )}
+          className={cn("h-3 rounded-[1px]", i === lines - 1 ? "w-4/5" : "w-full", className)}
         />
       ))}
     </div>
@@ -90,20 +86,36 @@ export function CampusPassSkeleton() {
           <Skeleton className="h-3 w-36 mb-4" />
           <dl>
             <div>
-              <dt><Skeleton className="h-2.5 w-14" /></dt>
-              <dd><Skeleton className="h-3.5 w-36" /></dd>
+              <dt>
+                <Skeleton className="h-2.5 w-14" />
+              </dt>
+              <dd>
+                <Skeleton className="h-3.5 w-36" />
+              </dd>
             </div>
             <div>
-              <dt><Skeleton className="h-2.5 w-12" /></dt>
-              <dd><Skeleton className="h-3.5 w-24" /></dd>
+              <dt>
+                <Skeleton className="h-2.5 w-12" />
+              </dt>
+              <dd>
+                <Skeleton className="h-3.5 w-24" />
+              </dd>
             </div>
             <div>
-              <dt><Skeleton className="h-2.5 w-14" /></dt>
-              <dd><Skeleton className="h-3.5 w-28" /></dd>
+              <dt>
+                <Skeleton className="h-2.5 w-14" />
+              </dt>
+              <dd>
+                <Skeleton className="h-3.5 w-28" />
+              </dd>
             </div>
             <div>
-              <dt><Skeleton className="h-2.5 w-20" /></dt>
-              <dd><Skeleton className="h-3.5 w-36" /></dd>
+              <dt>
+                <Skeleton className="h-2.5 w-20" />
+              </dt>
+              <dd>
+                <Skeleton className="h-3.5 w-36" />
+              </dd>
             </div>
           </dl>
         </div>
@@ -132,22 +144,38 @@ export function ProofBadgeSkeleton({ compact = false }: { compact?: boolean }) {
       </div>
       <dl className="proof-grid">
         <div>
-          <dt><Skeleton className="h-2 w-14" /></dt>
-          <dd><Skeleton className="h-3 w-28" /></dd>
+          <dt>
+            <Skeleton className="h-2 w-14" />
+          </dt>
+          <dd>
+            <Skeleton className="h-3 w-28" />
+          </dd>
         </div>
         <div>
-          <dt><Skeleton className="h-2 w-14" /></dt>
-          <dd><Skeleton className="h-3 w-24" /></dd>
+          <dt>
+            <Skeleton className="h-2 w-14" />
+          </dt>
+          <dd>
+            <Skeleton className="h-3 w-24" />
+          </dd>
         </div>
         {!compact && (
           <>
             <div>
-              <dt><Skeleton className="h-2 w-20" /></dt>
-              <dd><Skeleton className="h-3 w-32" /></dd>
+              <dt>
+                <Skeleton className="h-2 w-20" />
+              </dt>
+              <dd>
+                <Skeleton className="h-3 w-32" />
+              </dd>
             </div>
             <div>
-              <dt><Skeleton className="h-2 w-20" /></dt>
-              <dd><Skeleton className="h-3 w-32" /></dd>
+              <dt>
+                <Skeleton className="h-2 w-20" />
+              </dt>
+              <dd>
+                <Skeleton className="h-3 w-32" />
+              </dd>
             </div>
           </>
         )}
@@ -184,21 +212,41 @@ export function ScoreboardMatrixSkeleton({ compact = false }: { compact?: boolea
         <tbody>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <tr key={i}>
-              <td><Skeleton className="h-4 w-5" /></td>
+              <td>
+                <Skeleton className="h-4 w-5" />
+              </td>
               <td>
                 <div className="flex flex-col gap-1.5">
                   <Skeleton className="h-3.5 w-28" />
                   <Skeleton className="h-2.5 w-36" />
                 </div>
               </td>
-              {!compact && <td><Skeleton className="h-3 w-16" /></td>}
-              <td><Skeleton className="h-5 w-8 mx-auto" /></td>
-              <td><Skeleton className="h-5 w-8 mx-auto" /></td>
-              <td><Skeleton className="h-5 w-8 mx-auto" /></td>
-              <td><Skeleton className="h-5 w-8 mx-auto" /></td>
-              <td><Skeleton className="h-4 w-6 mx-auto" /></td>
-              <td><Skeleton className="h-3 w-12 mx-auto" /></td>
-              <td><Skeleton className="h-3 w-8 mx-auto" /></td>
+              {!compact && (
+                <td>
+                  <Skeleton className="h-3 w-16" />
+                </td>
+              )}
+              <td>
+                <Skeleton className="h-5 w-8 mx-auto" />
+              </td>
+              <td>
+                <Skeleton className="h-5 w-8 mx-auto" />
+              </td>
+              <td>
+                <Skeleton className="h-5 w-8 mx-auto" />
+              </td>
+              <td>
+                <Skeleton className="h-5 w-8 mx-auto" />
+              </td>
+              <td>
+                <Skeleton className="h-4 w-6 mx-auto" />
+              </td>
+              <td>
+                <Skeleton className="h-3 w-12 mx-auto" />
+              </td>
+              <td>
+                <Skeleton className="h-3 w-8 mx-auto" />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -233,9 +281,15 @@ export function BattleHistorySkeleton() {
             <Skeleton className="h-4 w-48" />
             <Skeleton className="h-2.5 w-32" />
           </div>
-          <span><Skeleton className="h-3 w-16" /></span>
-          <span><Skeleton className="h-3 w-16" /></span>
-          <span><Skeleton className="h-3 w-16" /></span>
+          <span>
+            <Skeleton className="h-3 w-16" />
+          </span>
+          <span>
+            <Skeleton className="h-3 w-16" />
+          </span>
+          <span>
+            <Skeleton className="h-3 w-16" />
+          </span>
           <Skeleton className="h-4 w-10 ml-auto" />
         </article>
       ))}
@@ -322,10 +376,22 @@ export function DashboardSkeleton() {
           </div>
         </div>
         <div className="live-stats">
-          <div><Skeleton className="h-2.5 w-16 mb-2" /><Skeleton className="h-6 w-24" /></div>
-          <div><Skeleton className="h-2.5 w-16 mb-2" /><Skeleton className="h-6 w-20" /></div>
-          <div><Skeleton className="h-2.5 w-16 mb-2" /><Skeleton className="h-6 w-24" /></div>
-          <div><Skeleton className="h-2.5 w-16 mb-2" /><Skeleton className="h-6 w-16" /></div>
+          <div>
+            <Skeleton className="h-2.5 w-16 mb-2" />
+            <Skeleton className="h-6 w-24" />
+          </div>
+          <div>
+            <Skeleton className="h-2.5 w-16 mb-2" />
+            <Skeleton className="h-6 w-20" />
+          </div>
+          <div>
+            <Skeleton className="h-2.5 w-16 mb-2" />
+            <Skeleton className="h-6 w-24" />
+          </div>
+          <div>
+            <Skeleton className="h-2.5 w-16 mb-2" />
+            <Skeleton className="h-6 w-16" />
+          </div>
         </div>
       </div>
 
@@ -334,13 +400,19 @@ export function DashboardSkeleton() {
       <section className="content-grid">
         <div className="panel wide">
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-40" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-40" />
+            </div>
           </div>
           <RatingChartSkeleton />
         </div>
         <div className="panel">
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-36" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-36" />
+            </div>
           </div>
           <AnnouncementFeedSkeleton />
         </div>
@@ -378,7 +450,10 @@ export function ContestsSkeleton() {
       </div>
       <section className="contest-directory">
         <div className="section-heading mb-4">
-          <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-40" /></div>
+          <div>
+            <Skeleton className="h-2.5 w-24 mb-1" />
+            <Skeleton className="h-5 w-40" />
+          </div>
         </div>
         {[1, 2, 3].map((i) => (
           <ContestRowSkeleton key={i} />
@@ -400,10 +475,38 @@ export function ContestDetailSkeleton() {
           <Skeleton className="h-4 w-4/5" />
         </div>
         <dl>
-          <div><dt><Skeleton className="h-2.5 w-24" /></dt><dd><Skeleton className="h-4 w-36" /></dd></div>
-          <div><dt><Skeleton className="h-2.5 w-20" /></dt><dd><Skeleton className="h-4 w-32" /></dd></div>
-          <div><dt><Skeleton className="h-2.5 w-20" /></dt><dd><Skeleton className="h-4 w-28" /></dd></div>
-          <div><dt><Skeleton className="h-2.5 w-20" /></dt><dd><Skeleton className="h-4 w-36" /></dd></div>
+          <div>
+            <dt>
+              <Skeleton className="h-2.5 w-24" />
+            </dt>
+            <dd>
+              <Skeleton className="h-4 w-36" />
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <Skeleton className="h-2.5 w-20" />
+            </dt>
+            <dd>
+              <Skeleton className="h-4 w-32" />
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <Skeleton className="h-2.5 w-20" />
+            </dt>
+            <dd>
+              <Skeleton className="h-4 w-28" />
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <Skeleton className="h-2.5 w-20" />
+            </dt>
+            <dd>
+              <Skeleton className="h-4 w-36" />
+            </dd>
+          </div>
         </dl>
       </header>
       <div className="registration-band">
@@ -418,7 +521,10 @@ export function ContestDetailSkeleton() {
       </div>
       <section className="panel">
         <div className="section-heading mb-4">
-          <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-48" /></div>
+          <div>
+            <Skeleton className="h-2.5 w-24 mb-1" />
+            <Skeleton className="h-5 w-48" />
+          </div>
         </div>
         <div className="problem-list">
           {[1, 2, 3, 4].map((i) => (
@@ -437,7 +543,10 @@ export function ContestDetailSkeleton() {
       <section className="contest-lower">
         <div className="panel">
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-36" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-36" />
+            </div>
           </div>
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
@@ -450,7 +559,10 @@ export function ContestDetailSkeleton() {
         </div>
         <div className="panel">
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-36" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-36" />
+            </div>
           </div>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -500,19 +612,33 @@ export function LeaderboardSkeleton() {
           <tbody>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <tr key={i}>
-                <td><Skeleton className="h-5 w-10" /></td>
+                <td>
+                  <Skeleton className="h-5 w-10" />
+                </td>
                 <td>
                   <div className="flex flex-col gap-1.5">
                     <Skeleton className="h-3.5 w-28" />
                     <Skeleton className="h-2.5 w-36" />
                   </div>
                 </td>
-                <td><Skeleton className="h-3 w-24" /></td>
-                <td><Skeleton className="h-4 w-20" /></td>
-                <td><Skeleton className="h-4 w-16" /></td>
-                <td><Skeleton className="h-4 w-12" /></td>
-                <td><Skeleton className="h-4 w-12" /></td>
-                <td><Skeleton className="h-3 w-28" /></td>
+                <td>
+                  <Skeleton className="h-3 w-24" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-20" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-16" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-12" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-12" />
+                </td>
+                <td>
+                  <Skeleton className="h-3 w-28" />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -534,15 +660,32 @@ export function ProfileSkeleton() {
           <Skeleton className="h-4 w-28" />
         </div>
         <dl>
-          <div><dt><Skeleton className="h-2.5 w-16" /></dt><dd><Skeleton className="h-4 w-32" /></dd></div>
-          <div><dt><Skeleton className="h-2.5 w-24" /></dt><dd><Skeleton className="h-4 w-44" /></dd></div>
+          <div>
+            <dt>
+              <Skeleton className="h-2.5 w-16" />
+            </dt>
+            <dd>
+              <Skeleton className="h-4 w-32" />
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <Skeleton className="h-2.5 w-24" />
+            </dt>
+            <dd>
+              <Skeleton className="h-4 w-44" />
+            </dd>
+          </div>
         </dl>
       </header>
       <MetricsGridSkeleton />
       <section className="content-grid">
         <div className="panel wide">
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-44" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-44" />
+            </div>
           </div>
           <RatingChartSkeleton />
         </div>
@@ -552,20 +695,29 @@ export function ProfileSkeleton() {
       </section>
       <section className="panel">
         <div className="section-heading mb-4">
-          <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-44" /></div>
+          <div>
+            <Skeleton className="h-2.5 w-24 mb-1" />
+            <Skeleton className="h-5 w-44" />
+          </div>
         </div>
         <BattleHistorySkeleton />
       </section>
       <section className="content-grid">
         <div className="panel">
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-36" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-36" />
+            </div>
           </div>
           <AchievementGridSkeleton />
         </div>
         <div>
           <div className="section-heading mb-4">
-            <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-36" /></div>
+            <div>
+              <Skeleton className="h-2.5 w-24 mb-1" />
+              <Skeleton className="h-5 w-36" />
+            </div>
           </div>
           <ProofBadgeSkeleton />
         </div>
@@ -613,7 +765,10 @@ export function ProblemsSkeleton() {
       </header>
       <section className="panel">
         <div className="section-heading mb-4">
-          <div><Skeleton className="h-2.5 w-24 mb-1" /><Skeleton className="h-5 w-48" /></div>
+          <div>
+            <Skeleton className="h-2.5 w-24 mb-1" />
+            <Skeleton className="h-5 w-48" />
+          </div>
         </div>
         <div className="archive-list">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -779,14 +934,30 @@ export function AssessmentLeaderboardSkeleton() {
           <tbody>
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <tr key={i}>
-                <td><Skeleton className="h-4 w-6" /></td>
-                <td><Skeleton className="h-4 w-16" /></td>
-                <td><Skeleton className="h-3.5 w-28" /></td>
-                <td><Skeleton className="h-3.5 w-36" /></td>
-                <td><Skeleton className="h-3 w-16" /></td>
-                <td><Skeleton className="h-4 w-10" /></td>
-                <td><Skeleton className="h-4 w-8" /></td>
-                <td><Skeleton className="h-3 w-14" /></td>
+                <td>
+                  <Skeleton className="h-4 w-6" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-16" />
+                </td>
+                <td>
+                  <Skeleton className="h-3.5 w-28" />
+                </td>
+                <td>
+                  <Skeleton className="h-3.5 w-36" />
+                </td>
+                <td>
+                  <Skeleton className="h-3 w-16" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-10" />
+                </td>
+                <td>
+                  <Skeleton className="h-4 w-8" />
+                </td>
+                <td>
+                  <Skeleton className="h-3 w-14" />
+                </td>
               </tr>
             ))}
           </tbody>

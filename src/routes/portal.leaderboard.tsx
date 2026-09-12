@@ -20,7 +20,8 @@ export const Route = createFileRoute("/portal/leaderboard")({
       { title: "Global Ranking — CCC Medi-Caps" },
       {
         name: "description",
-        content: "Official university-wide global ranking standings based on proctored offline battles.",
+        content:
+          "Official university-wide global ranking standings based on proctored offline battles.",
       },
       { property: "og:title", content: "Global Ranking — CCC Medi-Caps" },
       {
@@ -38,9 +39,24 @@ export const Route = createFileRoute("/portal/leaderboard")({
 const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
   volt: { icon: "⚡", bg: "bg-lime-950/60", border: "border-lime-500/50", text: "text-lime-400" },
   binary: { icon: "👾", bg: "bg-cyan-950/60", border: "border-cyan-500/50", text: "text-cyan-400" },
-  quantum: { icon: "⚛️", bg: "bg-purple-950/60", border: "border-purple-500/50", text: "text-purple-400" },
-  matrix: { icon: "💻", bg: "bg-emerald-950/60", border: "border-emerald-500/50", text: "text-emerald-400" },
-  grandmaster: { icon: "🏆", bg: "bg-amber-950/60", border: "border-amber-500/50", text: "text-amber-400" },
+  quantum: {
+    icon: "⚛️",
+    bg: "bg-purple-950/60",
+    border: "border-purple-500/50",
+    text: "text-purple-400",
+  },
+  matrix: {
+    icon: "💻",
+    bg: "bg-emerald-950/60",
+    border: "border-emerald-500/50",
+    text: "text-emerald-400",
+  },
+  grandmaster: {
+    icon: "🏆",
+    bg: "bg-amber-950/60",
+    border: "border-amber-500/50",
+    text: "text-amber-400",
+  },
   cipher: { icon: "🛡️", bg: "bg-rose-950/60", border: "border-rose-500/50", text: "text-rose-400" },
 };
 
@@ -54,7 +70,7 @@ function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean
           "w-8 h-8 rounded-full border flex items-center justify-center text-sm flex-shrink-0 shadow-sm",
           emblem.bg,
           emblem.border,
-          emblem.text
+          emblem.text,
         )}
       >
         <span>{emblem.icon}</span>
@@ -62,7 +78,12 @@ function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean
     );
   }
 
-  if (item.avatar_url && (item.avatar_url.startsWith("http") || item.avatar_url.startsWith("/media/") || item.avatar_url.startsWith("/"))) {
+  if (
+    item.avatar_url &&
+    (item.avatar_url.startsWith("http") ||
+      item.avatar_url.startsWith("/media/") ||
+      item.avatar_url.startsWith("/"))
+  ) {
     return (
       <div className="w-8 h-8 rounded-full border border-zinc-700 overflow-hidden flex-shrink-0 bg-zinc-800">
         <img
@@ -94,7 +115,7 @@ function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean
         "w-8 h-8 rounded-full border flex items-center justify-center font-mono text-[11px] font-bold flex-shrink-0 shadow-sm",
         isYou
           ? "bg-[var(--accent)]/15 border-[var(--accent)]/50 text-[var(--accent)]"
-          : "bg-zinc-800/80 border-zinc-700 text-zinc-300"
+          : "bg-zinc-800/80 border-zinc-700 text-zinc-300",
       )}
     >
       {initials}
@@ -109,7 +130,9 @@ function GlobalRankingPage() {
 
   // Find current user in the global standings
   const currentUserRow = data.find(
-    (x) => (currentMemberId && x.id === currentMemberId) || (currentMember?.handle && x.handle === currentMember.handle)
+    (x) =>
+      (currentMemberId && x.id === currentMemberId) ||
+      (currentMember?.handle && x.handle === currentMember.handle),
   );
 
   return (
@@ -141,9 +164,7 @@ function GlobalRankingPage() {
                   {currentUserRow.full_name || currentUserRow.handle}
                 </span>
                 <span className="text-xs">⚡</span>
-                <span className="text-xs font-mono font-bold text-[var(--accent)]">
-                  (You)
-                </span>
+                <span className="text-xs font-mono font-bold text-[var(--accent)]">(You)</span>
               </div>
             </div>
 
@@ -196,7 +217,7 @@ function GlobalRankingPage() {
                   "grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-3 rounded-xl border transition-all duration-150",
                   isYou
                     ? "bg-[var(--surface-2)] border-[var(--accent)]/40 shadow-sm"
-                    : "bg-[var(--surface)] hover:bg-[var(--surface-2)] border-[var(--line)] hover:border-zinc-700"
+                    : "bg-[var(--surface)] hover:bg-[var(--surface-2)] border-[var(--line)] hover:border-zinc-700",
                 )}
               >
                 {/* Rank Badge / Number */}
@@ -227,9 +248,7 @@ function GlobalRankingPage() {
                     <span className="font-medium text-xs sm:text-sm text-white truncate font-sans">
                       {x.full_name || x.handle}
                     </span>
-                    {x.university_rank <= 3 && (
-                      <span className="text-xs">⚡</span>
-                    )}
+                    {x.university_rank <= 3 && <span className="text-xs">⚡</span>}
                     {isYou && (
                       <span className="text-[11px] font-mono font-bold text-[var(--accent)] ml-0.5">
                         (You)

@@ -50,31 +50,59 @@ interface EmblemDef {
 }
 
 const PRESET_EMBLEMS: EmblemDef[] = [
-  { id: "volt", label: "Volt Terminal", icon: "⚡", bg: "from-lime-500/20 to-lime-900/40", border: "border-lime-500/60", text: "text-lime-400" },
-  { id: "binary", label: "Binary Spectre", icon: "👾", bg: "from-cyan-500/20 to-blue-900/40", border: "border-cyan-500/60", text: "text-cyan-400" },
-  { id: "quantum", label: "Quantum Core", icon: "⚛️", bg: "from-purple-500/20 to-indigo-900/40", border: "border-purple-500/60", text: "text-purple-400" },
-  { id: "matrix", label: "Matrix Hacker", icon: "💻", bg: "from-emerald-500/20 to-teal-900/40", border: "border-emerald-500/60", text: "text-emerald-400" },
-  { id: "grandmaster", label: "Grandmaster", icon: "🏆", bg: "from-amber-500/20 to-orange-900/40", border: "border-amber-500/60", text: "text-amber-400" },
-  { id: "cipher", label: "Crypto Vault", icon: "🛡️", bg: "from-rose-500/20 to-red-900/40", border: "border-rose-500/60", text: "text-rose-400" },
+  {
+    id: "volt",
+    label: "Volt Terminal",
+    icon: "⚡",
+    bg: "from-lime-500/20 to-lime-900/40",
+    border: "border-lime-500/60",
+    text: "text-lime-400",
+  },
+  {
+    id: "binary",
+    label: "Binary Spectre",
+    icon: "👾",
+    bg: "from-cyan-500/20 to-blue-900/40",
+    border: "border-cyan-500/60",
+    text: "text-cyan-400",
+  },
+  {
+    id: "quantum",
+    label: "Quantum Core",
+    icon: "⚛️",
+    bg: "from-purple-500/20 to-indigo-900/40",
+    border: "border-purple-500/60",
+    text: "text-purple-400",
+  },
+  {
+    id: "matrix",
+    label: "Matrix Hacker",
+    icon: "💻",
+    bg: "from-emerald-500/20 to-teal-900/40",
+    border: "border-emerald-500/60",
+    text: "text-emerald-400",
+  },
+  {
+    id: "grandmaster",
+    label: "Grandmaster",
+    icon: "🏆",
+    bg: "from-amber-500/20 to-orange-900/40",
+    border: "border-amber-500/60",
+    text: "text-amber-400",
+  },
+  {
+    id: "cipher",
+    label: "Crypto Vault",
+    icon: "🛡️",
+    bg: "from-rose-500/20 to-red-900/40",
+    border: "border-rose-500/60",
+    text: "text-rose-400",
+  },
 ];
 
-const DEPARTMENTS = [
-  "CSE",
-  "IT",
-  "AIDS",
-  "Cyber Security",
-  "CSBS",
-  "ECE",
-  "Other",
-];
+const DEPARTMENTS = ["CSE", "IT", "AIDS", "Cyber Security", "CSBS", "ECE", "Other"];
 
-const BATCHES = [
-  "2022-26",
-  "2023-27",
-  "2024-28",
-  "2025-29",
-  "Faculty / Alumni",
-];
+const BATCHES = ["2022-26", "2023-27", "2024-28", "2025-29", "Faculty / Alumni"];
 
 export function EditProfileModal() {
   const dispatch = useAppDispatch();
@@ -178,9 +206,7 @@ export function EditProfileModal() {
     }
 
     const finalAvatarUrl =
-      avatarMode === "custom" && customAvatarUrl
-        ? customAvatarUrl
-        : avatarEmblem;
+      avatarMode === "custom" && customAvatarUrl ? customAvatarUrl : avatarEmblem;
 
     setSaving(true);
     try {
@@ -193,7 +219,7 @@ export function EditProfileModal() {
           github_username: githubUsername.trim().replace(/^@/, ""),
           linkedin_url: linkedinUrl.trim(),
           avatar_url: finalAvatarUrl,
-        })
+        }),
       ).unwrap();
 
       // Invalidate memoized caches
@@ -260,7 +286,7 @@ export function EditProfileModal() {
                       "px-2 py-0.5 text-[9px] font-mono uppercase font-bold rounded-[1px] transition-all cursor-pointer flex items-center gap-1",
                       avatarMode === "custom"
                         ? "bg-[var(--accent)] text-[var(--accent-ink)]"
-                        : "text-[var(--muted)] hover:text-white"
+                        : "text-[var(--muted)] hover:text-white",
                     )}
                   >
                     <Camera size={10} />
@@ -273,7 +299,7 @@ export function EditProfileModal() {
                       "px-2 py-0.5 text-[9px] font-mono uppercase font-bold rounded-[1px] transition-all cursor-pointer flex items-center gap-1",
                       avatarMode === "emblem"
                         ? "bg-[var(--accent)] text-[var(--accent-ink)]"
-                        : "text-[var(--muted)] hover:text-white"
+                        : "text-[var(--muted)] hover:text-white",
                     )}
                   >
                     <Zap size={10} />
@@ -361,8 +387,11 @@ export function EditProfileModal() {
                       className={cn(
                         "h-11 rounded-[1px] border flex flex-col items-center justify-center text-sm transition-all cursor-pointer relative group",
                         avatarEmblem === emblem.id
-                          ? cn("border-[var(--accent)] shadow-[0_0_10px_rgba(200,255,54,0.3)]", emblem.bg)
-                          : "border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))]"
+                          ? cn(
+                              "border-[var(--accent)] shadow-[0_0_10px_rgba(200,255,54,0.3)]",
+                              emblem.bg,
+                            )
+                          : "border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))]",
                       )}
                       title={emblem.label}
                     >
@@ -435,9 +464,7 @@ export function EditProfileModal() {
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--muted)] font-bold">
                   Developer Bio / Status Quote
                 </label>
-                <span className="text-[9px] font-mono text-[var(--muted)]">
-                  {bio.length}/280
-                </span>
+                <span className="text-[9px] font-mono text-[var(--muted)]">{bio.length}/280</span>
               </div>
               <textarea
                 value={bio}
@@ -509,13 +536,12 @@ export function EditProfileModal() {
                   <span className="text-[9px] uppercase text-[var(--muted)] block">
                     Medi-Caps PRN
                   </span>
-                  <strong className="text-white truncate block mt-0.5">
-                    {member?.prn || "—"}
-                  </strong>
+                  <strong className="text-white truncate block mt-0.5">{member?.prn || "—"}</strong>
                 </div>
               </div>
               <p className="text-[9px] text-[var(--muted)] font-mono leading-relaxed">
-                PRN and official @medicaps.ac.in emails are cryptographically verified and cannot be altered. Contact chapter administrators if corrections are required.
+                PRN and official @medicaps.ac.in emails are cryptographically verified and cannot be
+                altered. Contact chapter administrators if corrections are required.
               </p>
             </div>
           </form>
@@ -553,7 +579,7 @@ export function EditProfileModal() {
                       "w-12 h-12 rounded-[1px] border flex items-center justify-center font-mono text-base font-bold flex-shrink-0 shadow-lg",
                       selectedEmblem.bg,
                       selectedEmblem.border,
-                      selectedEmblem.text
+                      selectedEmblem.text,
                     )}
                   >
                     <span>{selectedEmblem.icon}</span>
@@ -587,7 +613,10 @@ export function EditProfileModal() {
               {/* Live Bio Quote */}
               <div className="p-2.5 bg-[var(--surface)] border border-[var(--line)] rounded-[1px]">
                 <p className="text-xs text-zinc-300 italic leading-relaxed line-clamp-3">
-                  "{bio || "No competitive bio written yet. Share your coding focus and algorithms trajectory."}"
+                  "
+                  {bio ||
+                    "No competitive bio written yet. Share your coding focus and algorithms trajectory."}
+                  "
                 </p>
               </div>
 
@@ -673,7 +702,6 @@ export function EditProfileModal() {
             )}
           </button>
         </div>
-
       </div>
     </div>
   );

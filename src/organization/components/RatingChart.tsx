@@ -1,8 +1,23 @@
-import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import type { RatingHistoryPoint } from "../data/types";
 import { RatingChartSkeleton } from "./skeletons";
 
-export function RatingChart({ data, loading = false }: { data?: RatingHistoryPoint[]; loading?: boolean }) {
+export function RatingChart({
+  data,
+  loading = false,
+}: {
+  data?: RatingHistoryPoint[];
+  loading?: boolean;
+}) {
   if (loading) {
     return <RatingChartSkeleton />;
   }
@@ -16,7 +31,11 @@ export function RatingChart({ data, loading = false }: { data?: RatingHistoryPoi
   }
 
   return (
-    <div className="rating-chart" role="img" aria-label="Rating progression across offline contests">
+    <div
+      className="rating-chart"
+      role="img"
+      aria-label="Rating progression across offline contests"
+    >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 18, right: 12, bottom: 2, left: -16 }}>
           <defs>
@@ -33,7 +52,12 @@ export function RatingChart({ data, loading = false }: { data?: RatingHistoryPoi
             fontSize={11}
           />
           <YAxis domain={[1400, 2050]} stroke="var(--muted)" fontSize={11} />
-          <ReferenceLine y={1800} stroke="var(--warning)" strokeDasharray="4 4" label={{ value: "MASTER", fill: "var(--warning)", fontSize: 10 }} />
+          <ReferenceLine
+            y={1800}
+            stroke="var(--warning)"
+            strokeDasharray="4 4"
+            label={{ value: "MASTER", fill: "var(--warning)", fontSize: 10 }}
+          />
           <Tooltip
             contentStyle={{
               background: "var(--surface-2)",

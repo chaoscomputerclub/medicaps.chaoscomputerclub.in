@@ -1,11 +1,17 @@
-import { DashboardSkeleton } from '@/organization/components/skeletons';
+import { DashboardSkeleton } from "@/organization/components/skeletons";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarClock, MapPin, Radio, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";
-import { Metric, SectionHeader, StatusDot, TierBadge, formatContestDate } from "@/organization/components/ui";
+import {
+  Metric,
+  SectionHeader,
+  StatusDot,
+  TierBadge,
+  formatContestDate,
+} from "@/organization/components/ui";
 import { portalQueries } from "@/organization/data/queries";
 
 const queries = [
@@ -30,10 +36,14 @@ export const Route = createFileRoute("/portal/")({
       { title: "Offline Contest Operations — CCC Medi-Caps" },
       {
         name: "description",
-        content: "Live operations, ratings, verified results and campus contest intelligence for CCC Medi-Caps.",
+        content:
+          "Live operations, ratings, verified results and campus contest intelligence for CCC Medi-Caps.",
       },
       { property: "og:title", content: "CCC Medi-Caps Offline Contest Operations" },
-      { property: "og:description", content: "Proctored campus contests, live standings and verifiable results." },
+      {
+        property: "og:description",
+        content: "Proctored campus contests, live standings and verifiable results.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -63,7 +73,11 @@ function Dashboard() {
 
   const live = contests.find((c) => c.status === "live") ?? contests[0];
   const next = contests.find((c) => c.status === "upcoming");
-  const greetingName = member?.full_name ? member.full_name.split(" ")[0] : member?.handle && member.handle.toLowerCase() !== "cadet" ? member.handle : "";
+  const greetingName = member?.full_name
+    ? member.full_name.split(" ")[0]
+    : member?.handle && member.handle.toLowerCase() !== "cadet"
+      ? member.handle
+      : "";
 
   return (
     <div className="page-wrap">
@@ -88,8 +102,14 @@ function Dashboard() {
             <h2>{live.title}</h2>
             <p>{live.summary}</p>
             <div className="event-facts">
-              <span><MapPin size={14} />{live.venue}</span>
-              <span><Radio size={14} />{live.environment}</span>
+              <span>
+                <MapPin size={14} />
+                {live.venue}
+              </span>
+              <span>
+                <Radio size={14} />
+                {live.environment}
+              </span>
             </div>
             <div className="button-row">
               <Button asChild>
@@ -103,9 +123,17 @@ function Dashboard() {
             </div>
           </div>
           <div className="live-stats">
-            <Metric label="Registered" value={`${live.registered_count}/${live.seat_capacity}`} detail="Physical seats" />
+            <Metric
+              label="Registered"
+              value={`${live.registered_count}/${live.seat_capacity}`}
+              detail="Physical seats"
+            />
             <Metric label="Problems" value={live.problem_count} detail="Sealed set" />
-            <Metric label="Your room" value={pass?.venue || "Standby"} detail={pass?.seat ? `Seat ${pass.seat}` : "Physical Lab"} />
+            <Metric
+              label="Your room"
+              value={pass?.venue || "Standby"}
+              detail={pass?.seat ? `Seat ${pass.seat}` : "Physical Lab"}
+            />
             <Metric label="Freeze" value="12:30" detail="IST today" />
           </div>
         </section>
@@ -116,12 +144,14 @@ function Dashboard() {
             <p className="kicker">Status · Standby</p>
             <h2>No Active Contest Session</h2>
             <p>
-              There are no live offline contests running right now. When an offline screening round or LAN battle
-              is scheduled, room allocations and registration links will appear here.
+              There are no live offline contests running right now. When an offline screening round
+              or LAN battle is scheduled, room allocations and registration links will appear here.
             </p>
             <div className="button-row">
               <Button asChild variant="outline">
-                <Link to="/portal/contests" search={{ status: "all" }}>Browse Contests <ArrowRight /></Link>
+                <Link to="/portal/contests" search={{ status: "all" }}>
+                  Browse Contests <ArrowRight />
+                </Link>
               </Button>
             </div>
           </div>
@@ -135,10 +165,26 @@ function Dashboard() {
       )}
 
       <section className="metrics-grid">
-        <Metric label="Current rating" value={member?.rating ?? 1200} detail={`Peak ${member?.peak_rating ?? 1200}`} />
-        <Metric label="University rank" value={`#${member?.university_rank ?? 0}`} detail={`of ${member?.active_members ?? 0} active`} />
-        <Metric label="Offline battles" value={member?.attendance_total ?? 0} detail={`${member?.attendance_count ?? 0} verified`} />
-        <Metric label="Podium finishes" value={member?.podiums ?? 0} detail={`${member?.streak ?? 0} battle streak`} />
+        <Metric
+          label="Current rating"
+          value={member?.rating ?? 1200}
+          detail={`Peak ${member?.peak_rating ?? 1200}`}
+        />
+        <Metric
+          label="University rank"
+          value={`#${member?.university_rank ?? 0}`}
+          detail={`of ${member?.active_members ?? 0} active`}
+        />
+        <Metric
+          label="Offline battles"
+          value={member?.attendance_total ?? 0}
+          detail={`${member?.attendance_count ?? 0} verified`}
+        />
+        <Metric
+          label="Podium finishes"
+          value={member?.podiums ?? 0}
+          detail={`${member?.streak ?? 0} battle streak`}
+        />
       </section>
 
       <section className="content-grid">
@@ -150,7 +196,9 @@ function Dashboard() {
           <SectionHeader kicker="Operations feed" title="Chapter signals" />
           <div className="feed-list">
             {feed.length === 0 ? (
-              <p className="text-xs text-[#777] font-mono py-8 text-center">No announcements published yet.</p>
+              <p className="text-xs text-[#777] font-mono py-8 text-center">
+                No announcements published yet.
+              </p>
             ) : (
               feed.map((item) => (
                 <article key={item.id}>
@@ -187,7 +235,9 @@ function Dashboard() {
             <span>
               <small>Next operation</small>
               <strong>{next.title}</strong>
-              <em>{formatContestDate(next.starts_at)} · {next.venue}</em>
+              <em>
+                {formatContestDate(next.starts_at)} · {next.venue}
+              </em>
             </span>
           </div>
           <Link to="/portal/contests/$contestSlug" params={{ contestSlug: next.slug }}>
@@ -199,8 +249,8 @@ function Dashboard() {
       <footer className="trust-footer">
         <ShieldCheck />
         <p>
-          <strong>Proof before prestige.</strong> Every score joins the public record only after attendance,
-          workstation, and proctor logs reconcile.
+          <strong>Proof before prestige.</strong> Every score joins the public record only after
+          attendance, workstation, and proctor logs reconcile.
         </p>
       </footer>
     </div>

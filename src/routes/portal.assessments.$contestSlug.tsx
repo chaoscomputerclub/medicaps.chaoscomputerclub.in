@@ -1,4 +1,4 @@
-import { AssessmentStudioSkeleton } from '@/organization/components/skeletons';
+import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 /**
  * Chaos Computer Club India — Phase 1 Online Screening Assessment Studio
  * Powered by Interleet Code Execution Engine
@@ -132,9 +132,9 @@ function AssessmentStudio() {
 
   const activeProblem = problems[activeProblemIndex];
   const currentCode = activeProblem
-    ? codeMap[`${activeProblem.id}_${selectedLanguage}`] ??
+    ? (codeMap[`${activeProblem.id}_${selectedLanguage}`] ??
       activeProblem.starter_codes?.[selectedLanguage] ??
-      ""
+      "")
     : "";
 
   const activeSubmission = activeProblem ? submissionsMap[activeProblem.id] : null;
@@ -148,7 +148,7 @@ function AssessmentStudio() {
         language: selectedLanguage,
         code: currentCode,
         customStdin: activeConsoleTab === "testcases" ? "" : customStdin || "",
-      })
+      }),
     );
   }
 
@@ -160,7 +160,7 @@ function AssessmentStudio() {
         problemId: activeProblem.id,
         language: selectedLanguage,
         code: currentCode,
-      })
+      }),
     );
   }
 
@@ -202,7 +202,10 @@ function AssessmentStudio() {
             </a>
           ) : null}
           <Link to="/portal/contests" search={{ status: "all" }}>
-            <Button variant="outline" className="font-mono text-xs border-[#333] hover:bg-[#181818]">
+            <Button
+              variant="outline"
+              className="font-mono text-xs border-[#333] hover:bg-[#181818]"
+            >
               Return to Contests
             </Button>
           </Link>
@@ -321,8 +324,8 @@ function AssessmentStudio() {
                       activeProblem.difficulty === "EASY"
                         ? "bg-emerald-950 text-emerald-400 border border-emerald-800/40"
                         : activeProblem.difficulty === "MEDIUM"
-                        ? "bg-amber-950 text-amber-400 border border-amber-800/40"
-                        : "bg-rose-950 text-rose-400 border border-rose-800/40"
+                          ? "bg-amber-950 text-amber-400 border border-amber-800/40"
+                          : "bg-rose-950 text-rose-400 border border-rose-800/40"
                     }`}
                   >
                     {activeProblem.difficulty}
@@ -334,7 +337,9 @@ function AssessmentStudio() {
                 {activeSubmission && (
                   <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#161616] border border-[#262626] font-mono text-xs">
                     <span className="text-[#777]">Best Score:</span>
-                    <strong className="text-accent">{activeSubmission.score} / {activeProblem.points} pts</strong>
+                    <strong className="text-accent">
+                      {activeSubmission.score} / {activeProblem.points} pts
+                    </strong>
                     <span className="text-[#555]">({activeSubmission.verdict})</span>
                   </div>
                 )}
@@ -460,7 +465,7 @@ function AssessmentStudio() {
                       problemId: activeProblem.id,
                       language: selectedLanguage,
                       code: val,
-                    })
+                    }),
                   );
                 }
               }}
@@ -623,18 +628,26 @@ function AssessmentStudio() {
                         >
                           <div className="flex justify-between items-center text-[0.6875rem]">
                             <span className="text-[#888]">{tr.name}</span>
-                            <span className={tr.passed ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                            <span
+                              className={
+                                tr.passed ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"
+                              }
+                            >
                               {tr.verdict}
                             </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 mt-1 text-[0.6875rem]">
                             <div>
                               <span className="text-[#666]">Your Output:</span>
-                              <pre className="p-1 rounded bg-[#090909] text-[#ccc]">{tr.stdout || "(empty)"}</pre>
+                              <pre className="p-1 rounded bg-[#090909] text-[#ccc]">
+                                {tr.stdout || "(empty)"}
+                              </pre>
                             </div>
                             <div>
                               <span className="text-[#666]">Expected:</span>
-                              <pre className="p-1 rounded bg-[#090909] text-[#ccc]">{tr.expected_output}</pre>
+                              <pre className="p-1 rounded bg-[#090909] text-[#ccc]">
+                                {tr.expected_output}
+                              </pre>
                             </div>
                           </div>
                         </div>
@@ -661,9 +674,7 @@ function AssessmentStudio() {
               <AlertTriangle size={24} />
               <h3 className="font-bold text-base text-[#f5f5f5]">Anti-Cheat Proctored Warning</h3>
             </div>
-            <p className="text-xs text-[#bbb] leading-relaxed">
-              {antiCheatWarningMessage}
-            </p>
+            <p className="text-xs text-[#bbb] leading-relaxed">{antiCheatWarningMessage}</p>
             <div className="p-3 rounded bg-[#0a0a0a] border border-[#222] text-[0.6875rem] font-mono text-[#888]">
               Switching tabs, opening developer tools, or losing window focus is logged by the CCC
               telemetry daemon. Exceeding limits will disqualify your screening session.

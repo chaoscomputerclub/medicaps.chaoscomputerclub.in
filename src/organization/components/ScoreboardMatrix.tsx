@@ -37,7 +37,9 @@ export function ScoreboardMatrix({
             <th>Contestant</th>
             {!compact && <th>Dept.</th>}
             {safeProblems.map((p) => (
-              <th key={p.index} title={p.title}>{p.index}</th>
+              <th key={p.index} title={p.title}>
+                {p.index}
+              </th>
             ))}
             <th>Solved</th>
             <th>Penalty</th>
@@ -47,20 +49,38 @@ export function ScoreboardMatrix({
         <tbody>
           {entries.map((row) => (
             <tr key={row.handle} className={cn(row.is_you && "is-you")}>
-              <td><strong>{row.rank}</strong></td>
+              <td>
+                <strong>{row.rank}</strong>
+              </td>
               <td>
                 <div className="competitor">
                   <strong>{row.handle}</strong>
                   <span>{row.full_name}</span>
                 </div>
               </td>
-              {!compact && <td><span className="mono-tag">{row.department} · {row.batch.slice(2)}</span></td>}
+              {!compact && (
+                <td>
+                  <span className="mono-tag">
+                    {row.department} · {row.batch.slice(2)}
+                  </span>
+                </td>
+              )}
               {safeProblems.map((p, i) => {
                 const cell = row.problems?.[i];
                 return (
                   <td key={p.index}>
-                    <span className={cn("problem-cell", cell?.solved ? "solved" : "missed", cell?.first_ac && "first-ac")}>
-                      {cell?.solved ? formatPenalty(cell.solve_seconds ?? 0).slice(3) : cell?.wrong_attempts ? `−${cell.wrong_attempts}` : "·"}
+                    <span
+                      className={cn(
+                        "problem-cell",
+                        cell?.solved ? "solved" : "missed",
+                        cell?.first_ac && "first-ac",
+                      )}
+                    >
+                      {cell?.solved
+                        ? formatPenalty(cell.solve_seconds ?? 0).slice(3)
+                        : cell?.wrong_attempts
+                          ? `−${cell.wrong_attempts}`
+                          : "·"}
                     </span>
                   </td>
                 );
@@ -68,7 +88,8 @@ export function ScoreboardMatrix({
               <td className="score-value">{row.solved}</td>
               <td className="mono-value">{formatPenalty(row.penalty_seconds)}</td>
               <td className={cn("delta", row.rating_delta >= 0 ? "positive" : "negative")}>
-                {row.rating_delta > 0 ? "+" : ""}{row.rating_delta}
+                {row.rating_delta > 0 ? "+" : ""}
+                {row.rating_delta}
               </td>
             </tr>
           ))}

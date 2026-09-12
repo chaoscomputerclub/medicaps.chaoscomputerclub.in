@@ -88,14 +88,10 @@ export function SocialDrawer() {
       className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
     >
       {/* Click outside backdrop */}
-      <div
-        className="absolute inset-0"
-        onClick={() => dispatch(closeSocialDrawer())}
-      />
+      <div className="absolute inset-0" onClick={() => dispatch(closeSocialDrawer())} />
 
       {/* Slide-over Drawer Panel */}
       <aside className="relative z-10 w-full max-w-md h-full bg-[var(--surface)] border-l border-[var(--line)] shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300">
-        
         {/* Header Section */}
         <header className="p-4 border-b border-[var(--line)] bg-[var(--bg)]/70 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
@@ -131,7 +127,7 @@ export function SocialDrawer() {
                 "py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer",
                 drawerType === "followers"
                   ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm"
-                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50"
+                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50",
               )}
             >
               <Users size={12} />
@@ -141,7 +137,7 @@ export function SocialDrawer() {
                   "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
                   drawerType === "followers"
                     ? "bg-black/20 text-black"
-                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]"
+                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]",
                 )}
               >
                 {drawerType === "followers" ? studentsList.length : "•"}
@@ -155,7 +151,7 @@ export function SocialDrawer() {
                 "py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer",
                 drawerType === "following"
                   ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm"
-                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50"
+                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50",
               )}
             >
               <UserCheck size={12} />
@@ -165,7 +161,7 @@ export function SocialDrawer() {
                   "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
                   drawerType === "following"
                     ? "bg-black/20 text-black"
-                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]"
+                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]",
                 )}
               >
                 {drawerType === "following" ? studentsList.length : "•"}
@@ -231,8 +227,8 @@ export function SocialDrawer() {
                 {searchQuery
                   ? `No students found matching "${searchQuery}". Try searching by handle or department.`
                   : drawerType === "followers"
-                  ? "This student does not have any campus followers yet."
-                  : "This student is not following any peers yet."}
+                    ? "This student does not have any campus followers yet."
+                    : "This student is not following any peers yet."}
               </p>
             </div>
           ) : (
@@ -257,7 +253,10 @@ export function SocialDrawer() {
                   className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))] hover:bg-[var(--surface)] transition-all rounded-[1px]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    {student.avatar_url && (student.avatar_url.startsWith("http") || student.avatar_url.startsWith("/media/") || student.avatar_url.startsWith("/")) ? (
+                    {student.avatar_url &&
+                    (student.avatar_url.startsWith("http") ||
+                      student.avatar_url.startsWith("/media/") ||
+                      student.avatar_url.startsWith("/")) ? (
                       <div className="w-9 h-9 rounded-[1px] bg-zinc-900 border border-[var(--line)] overflow-hidden flex-shrink-0 shadow-inner">
                         <img
                           src={student.avatar_url}
@@ -313,7 +312,7 @@ export function SocialDrawer() {
                           toggleFollowThunk({
                             targetId: student.id,
                             targetHandle: student.handle,
-                          })
+                          }),
                         )
                       }
                       className={cn(
@@ -322,7 +321,7 @@ export function SocialDrawer() {
                           ? isHovered
                             ? "bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20"
                             : "bg-[var(--surface)] border-[var(--line)] text-[var(--muted)] hover:text-white"
-                          : "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] shadow-[0_0_10px_rgba(200,255,54,0.06)]"
+                          : "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] shadow-[0_0_10px_rgba(200,255,54,0.06)]",
                       )}
                     >
                       {isPending ? (
