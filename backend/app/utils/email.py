@@ -22,7 +22,6 @@ def _otp_email_plaintext(otp_code: str) -> str:
     Required by spam filters and text-only email clients.
     """
     return f"""CHAOS COMPUTER CLUB // AUTH // OTP
-IDENTITY CHALLENGE // MEDI-CAPS
 
 AUTHENTICATE SESSION
 Enter the one-time authentication token below to complete verification.
@@ -221,17 +220,6 @@ def _otp_email_template(otp_code: str) -> str:
           <!-- Minimal Content Body -->
           <tr>
             <td style="padding:28px 28px 24px 28px;">
-
-              <!-- Kicker badge -->
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
-                <tr>
-                  <td bgcolor="#121808" style="background-color:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.28);padding:3px 8px;">
-                    <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:1.8px;color:#ccff00;text-transform:uppercase;display:block;">
-                      IDENTITY CHALLENGE // MEDI-CAPS
-                    </span>
-                  </td>
-                </tr>
-              </table>
 
               <!-- Headline -->
               <h1 style="margin:0 0 8px 0;padding:0;font-family:'Inter Tight','Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#ffffff;line-height:1.2;">
