@@ -1,3 +1,4 @@
+import { EditProfileModal } from './EditProfileModal';
 import { SocialDrawer } from './SocialDrawer';
 import { fetchMyFollowingIdsThunk } from '@/store/slices/socialSlice';
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
@@ -144,6 +145,7 @@ export function PortalShell() {
         <Outlet />
       </main>
       <SocialDrawer />
+      <EditProfileModal />
     </div>
   );
 }

@@ -70,6 +70,23 @@ export interface Member {
   is_core_member: boolean;
   is_onboarded: boolean;
   avatar_url: string | null;
+  bio?: string | null;
+  github_username?: string | null;
+  linkedin_url?: string | null;
+  followers_count?: number;
+  following_count?: number;
+  tier?: string | null;
+  university_rank?: number;
+}
+
+export interface UpdateProfilePayload {
+  full_name?: string;
+  department?: string;
+  batch?: string;
+  bio?: string;
+  github_username?: string;
+  linkedin_url?: string;
+  avatar_url?: string;
 }
 
 export interface AuthResult {
@@ -215,4 +232,13 @@ export async function finishAssessmentTest(contestSlug: string): Promise<any> {
 
 export async function fetchAssessmentLeaderboard(contestSlug: string): Promise<any> {
   return apiFetch(`/assessment/${contestSlug}/leaderboard`);
+}
+
+export async function updateProfile(
+  data: UpdateProfilePayload
+): Promise<{ success: boolean; message: string; member: Member }> {
+  return apiFetch<{ success: boolean; message: string; member: Member }>("/auth/profile", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
 }

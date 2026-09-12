@@ -53,6 +53,12 @@ export const defaultMemberProfile: MemberProfile = {
   tier: "1★ Explorer",
   podiums: 0,
   streak: 0,
+  followers_count: 0,
+  following_count: 0,
+  bio: null,
+  github_username: null,
+  linkedin_url: null,
+  avatar_url: null,
 };
 
 export const defaultCampusPass: CampusPass = {
@@ -360,3 +366,7 @@ export const portalQueries = {
       gcTime: 30 * 60 * 1000,
     }),
 };
+
+export function invalidateFullProfileCache(): void {
+  fullProfileCache = null;
+}

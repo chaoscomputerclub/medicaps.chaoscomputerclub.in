@@ -22,6 +22,7 @@ from app.schemas.auth import (
     SendOTPRequest,
     VerifyOTPRequest,
     CompleteOnboardingRequest,
+    UpdateProfileRequest,
 )
 from app.controllers.auth_controller import AuthController
 
@@ -55,6 +56,17 @@ async def complete_onboarding(
     db: AsyncSession = Depends(get_db),
 ):
     return await AuthController.complete_onboarding(payload, current_member, db)
+
+
+
+@router.put("/profile", summary="Update current member's profile details")
+@router.patch("/profile", summary="Update current member's profile details")
+async def update_profile(
+    payload: UpdateProfileRequest,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.update_profile(payload, current_member, db)
 
 
 @router.get("/me", summary="Get own authenticated profile")

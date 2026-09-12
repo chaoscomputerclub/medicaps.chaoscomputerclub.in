@@ -7,8 +7,10 @@ import {
   verifyOTP,
   getMe,
   completeOnboarding,
+  updateProfile,
   type Member,
   type AuthResult,
+  type UpdateProfilePayload,
 } from "@/lib/auth";
 
 export interface AuthState {
@@ -100,6 +102,20 @@ export const completeOnboardingThunk = createAsyncThunk<
     return res.member;
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to complete onboarding.");
+  }
+});
+
+
+export const updateProfileThunk = createAsyncThunk<
+  Member,
+  UpdateProfilePayload,
+  { rejectValue: string }
+>("auth/updateProfile", async (data, { rejectWithValue }) => {
+  try {
+    const res = await updateProfile(data);
+    return res.member;
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to update profile.");
   }
 });
 
@@ -230,6 +246,25 @@ export const authSlice = createSlice({
       state.pending = false;
       state.message = action.payload || "Onboarding failed.";
     });
+
+    // updateProfileThunk
+    builder.addCase(updateProfileThunk.pending, (state) => {
+      state.pending = true;
+      state.message = null;
+    });
+    builder.addCase(updateProfileThunk.fulfilled, (state, action) => {
+      state.pending = false;
+      state.member = { ...(state.member || {}), ...action.payload } as Member;
+      if (action.payload.full_name) state.name = action.payload.full_name;
+      if (action.payload.department) state.department = action.payload.department;
+      if (action.payload.batch) state.batch = action.payload.batch;
+      state.message = null;
+    });
+    builder.addCase(updateProfileThunk.rejected, (state, action) => {
+      state.pending = false;
+      state.message = action.payload || "Failed to update profile.";
+    });
+
   },
 });
 

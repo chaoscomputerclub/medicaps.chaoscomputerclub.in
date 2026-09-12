@@ -55,13 +55,21 @@ class VerifyOTPRequest(BaseModel):
 
 
 class MemberPublic(BaseModel):
+    id: Optional[str] = None
     handle: Optional[str] = None
     full_name: Optional[str] = None
     email: str
+    prn: Optional[str] = None
     department: Optional[str] = None
     batch: Optional[str] = None
     rating: int = 1200
+    peak_rating: int = 1200
+    is_core_member: bool = False
     is_onboarded: bool = False
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    github_username: Optional[str] = None
+    linkedin_url: Optional[str] = None
 
 
 class AuthTokenResponse(BaseModel):
@@ -90,3 +98,45 @@ class CompleteOnboardingRequest(BaseModel):
     @classmethod
     def prn_upper(cls, v: str) -> str:
         return v.strip().upper()
+
+
+class UpdateProfileRequest(BaseModel):
+    full_name: Optional[str] = None
+    department: Optional[str] = None
+    batch: Optional[str] = None
+    bio: Optional[str] = None
+    github_username: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) < 2:
+                raise ValueError("Full name must have at least 2 characters.")
+        return v
+
+    @field_validator("bio")
+    @classmethod
+    def validate_bio(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) > 500:
+                raise ValueError("Bio cannot exceed 500 characters.")
+        return v
+
+    @field_validator("github_username")
+    @classmethod
+    def validate_github(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip().lstrip("@")
+        return v
+
+    @field_validator("linkedin_url")
+    @classmethod
+    def validate_linkedin(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+        return v

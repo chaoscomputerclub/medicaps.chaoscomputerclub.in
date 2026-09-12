@@ -4,12 +4,14 @@ export interface UiState {
   sidebarOpen: boolean;
   activeModal: string | null;
   theme: "dark" | "light" | "system";
+  isEditProfileOpen: boolean;
 }
 
 const initialState: UiState = {
   sidebarOpen: false,
   activeModal: null,
   theme: "dark",
+  isEditProfileOpen: false,
 };
 
 export const uiSlice = createSlice({
@@ -31,9 +33,15 @@ export const uiSlice = createSlice({
     setTheme(state, action: PayloadAction<"dark" | "light" | "system">) {
       state.theme = action.payload;
     },
+    openEditProfileModal(state) {
+      state.isEditProfileOpen = true;
+    },
+    closeEditProfileModal(state) {
+      state.isEditProfileOpen = false;
+    },
   },
 });
 
-export const { toggleSidebar, setSidebarOpen, openModal, closeModal, setTheme } = uiSlice.actions;
+export const { toggleSidebar, setSidebarOpen, openModal, closeModal, setTheme, openEditProfileModal, closeEditProfileModal } = uiSlice.actions;
 
 export default uiSlice.reducer;

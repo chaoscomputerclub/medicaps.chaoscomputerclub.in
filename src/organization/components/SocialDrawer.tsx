@@ -1,10 +1,22 @@
 /**
  * Chaos Computer Club India — Cyber Social Drawer
- * Displays student followers and following with live interactive follow actions.
+ * Manages student followers and following with live interactive follow actions.
+ * Built strictly with CCC brutalist dark design tokens and Redux Toolkit.
  */
 
-import { useEffect } from "react";
-import { Check, Loader2, Search, UserCheck, UserMinus, UserPlus, Users, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Check,
+  Globe,
+  Loader2,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  UserMinus,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   closeSocialDrawer,
@@ -32,6 +44,20 @@ export function SocialDrawer() {
     searchQuery,
   } = useAppSelector((state) => state.social);
 
+  const [hoveredStudentId, setHoveredStudentId] = useState<string | null>(null);
+
+  // Keyboard shortcut: ESC to close
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        dispatch(closeSocialDrawer());
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [dispatch, drawerOpen]);
+
   // Load data whenever drawer opens or active tab switches
   useEffect(() => {
     if (!drawerOpen || !drawerTargetHandle) return;
@@ -55,102 +81,166 @@ export function SocialDrawer() {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-      {/* Click outside to close */}
-      <div className="absolute inset-0" onClick={() => dispatch(closeSocialDrawer())} />
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Student Connections"
+      className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    >
+      {/* Click outside backdrop */}
+      <div
+        className="absolute inset-0"
+        onClick={() => dispatch(closeSocialDrawer())}
+      />
 
-      {/* Drawer Container */}
-      <aside className="relative z-10 w-full max-w-md h-full bg-[#0a0a0a] border-l border-[#222] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-        {/* Header */}
-        <header className="p-5 border-b border-[#222] bg-[#0e0e0e] flex items-center justify-between">
-          <div>
-            <p className="font-mono text-[10px] text-accent font-bold uppercase tracking-wider mb-0.5">
-              [ PEER INTEL // NETWORK ]
-            </p>
-            <h2 className="text-base font-bold text-white uppercase tracking-tight">
-              @{drawerTargetHandle}
-            </h2>
+      {/* Slide-over Drawer Panel */}
+      <aside className="relative z-10 w-full max-w-md h-full bg-[var(--surface)] border-l border-[var(--line)] shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300">
+        
+        {/* Header Section */}
+        <header className="p-4 border-b border-[var(--line)] bg-[var(--bg)]/70 backdrop-blur-md">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+              <div>
+                <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--accent)]">
+                  PEER NETWORK
+                </p>
+                <h2 className="font-mono text-sm font-bold text-white uppercase tracking-tight">
+                  {drawerTargetName || `@${drawerTargetHandle}`}
+                </h2>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => dispatch(closeSocialDrawer())}
+              className="p-1.5 text-[var(--muted)] hover:text-white border border-transparent hover:border-[var(--line)] rounded-[1px] hover:bg-[var(--surface-2)] transition-all cursor-pointer"
+              title="Close drawer (Esc)"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => dispatch(closeSocialDrawer())}
-            className="p-1.5 text-muted hover:text-white hover:bg-[#1a1a1a] rounded-[1px] transition-colors"
-            aria-label="Close drawer"
-          >
-            <X size={18} />
-          </button>
-        </header>
 
-        {/* Tab Switcher */}
-        <div className="grid grid-cols-2 border-b border-[#222] bg-[#0c0c0c] text-xs font-mono font-bold uppercase">
-          <button
-            type="button"
-            onClick={() => dispatch(setDrawerType("followers"))}
-            className={cn(
-              "py-3 text-center border-b-2 transition-all",
-              drawerType === "followers"
-                ? "border-accent text-accent bg-[#141414]"
-                : "border-transparent text-muted hover:text-white"
-            )}
-          >
-            Followers
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch(setDrawerType("following"))}
-            className={cn(
-              "py-3 text-center border-b-2 transition-all",
-              drawerType === "following"
-                ? "border-accent text-accent bg-[#141414]"
-                : "border-transparent text-muted hover:text-white"
-            )}
-          >
-            Following
-          </button>
-        </div>
+          {/* Segmented Tab Switcher */}
+          <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px]">
+            <button
+              type="button"
+              onClick={() => dispatch(setDrawerType("followers"))}
+              className={cn(
+                "py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer",
+                drawerType === "followers"
+                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm"
+                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50"
+              )}
+            >
+              <Users size={12} />
+              <span>Followers</span>
+              <span
+                className={cn(
+                  "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
+                  drawerType === "followers"
+                    ? "bg-black/20 text-black"
+                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]"
+                )}
+              >
+                {drawerType === "followers" ? studentsList.length : "•"}
+              </span>
+            </button>
 
-        {/* Search Box */}
-        <div className="p-3 border-b border-[#222] bg-[#0c0c0c]">
-          <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <button
+              type="button"
+              onClick={() => dispatch(setDrawerType("following"))}
+              className={cn(
+                "py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer",
+                drawerType === "following"
+                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm"
+                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50"
+              )}
+            >
+              <UserCheck size={12} />
+              <span>Following</span>
+              <span
+                className={cn(
+                  "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
+                  drawerType === "following"
+                    ? "bg-black/20 text-black"
+                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]"
+                )}
+              >
+                {drawerType === "following" ? studentsList.length : "•"}
+              </span>
+            </button>
+          </div>
+
+          {/* Monospace Filter Input */}
+          <div className="relative mt-3">
+            <Search
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
+            />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => dispatch(setSocialSearchQuery(e.target.value))}
-              placeholder={`Search in ${drawerType}…`}
-              className="w-full bg-[#141414] border border-[#262626] rounded-[1px] pl-9 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted font-mono focus:outline-none focus:border-accent"
+              placeholder="Search handle, name, or department..."
+              className="w-full h-8 pl-8 pr-8 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/60 focus:outline-none focus:border-[var(--accent)]/70 transition-colors"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => dispatch(setSocialSearchQuery(""))}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-white p-0.5"
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
-        </div>
+        </header>
 
-        {/* Student List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        {/* Student Cards Stream */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
           {loadingList ? (
-            <div className="space-y-3 py-2">
+            <div className="space-y-2.5">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center gap-3 p-3 border border-[#1a1a1a] bg-[#111]">
-                  <Skeleton className="w-10 h-10 rounded-[1px]" />
-                  <div className="flex-1 space-y-1.5">
-                    <Skeleton className="h-3.5 w-28" />
-                    <Skeleton className="h-2.5 w-36" />
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] rounded-[1px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-9 h-9 bg-[var(--surface-3)] rounded-[1px]" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-3 w-24 bg-[var(--surface-3)]" />
+                      <Skeleton className="h-2.5 w-32 bg-[var(--surface-3)]" />
+                      <Skeleton className="h-2 w-16 bg-[var(--surface-3)]" />
+                    </div>
                   </div>
-                  <Skeleton className="h-7 w-20" />
+                  <Skeleton className="h-7 w-20 bg-[var(--surface-3)] rounded-[1px]" />
                 </div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-muted font-mono text-xs">
-              <Users size={28} className="mx-auto text-[#333] mb-3" />
-              {searchQuery ? (
-                <p>No students match "{searchQuery}".</p>
-              ) : (
-                <p>No {drawerType} recorded yet.</p>
-              )}
+            <div className="text-center py-16 px-4">
+              <div className="w-12 h-12 rounded-[1px] border border-[var(--line)] bg-[var(--surface-2)] text-[var(--muted)] flex items-center justify-center mx-auto mb-3">
+                <Users size={20} />
+              </div>
+              <h3 className="font-mono text-xs font-bold text-white uppercase tracking-wider">
+                {searchQuery ? "No matching peers" : "No connections recorded"}
+              </h3>
+              <p className="text-[11px] text-[var(--muted)] font-mono mt-1 max-w-[240px] mx-auto leading-relaxed">
+                {searchQuery
+                  ? `No students found matching "${searchQuery}". Try searching by handle or department.`
+                  : drawerType === "followers"
+                  ? "This student does not have any campus followers yet."
+                  : "This student is not following any peers yet."}
+              </p>
             </div>
           ) : (
             filtered.map((student) => {
-              const isFollowing = followingIds.includes(student.id) || student.is_following;
+              const isFollowing = followingIds.includes(student.id);
               const isPending = actionPendingId === student.id;
+              const isHovered = hoveredStudentId === student.id;
+
               const initials = student.full_name
                 ? student.full_name
                     .split(" ")
@@ -164,60 +254,80 @@ export function SocialDrawer() {
               return (
                 <article
                   key={student.id}
-                  className="flex items-center justify-between p-3 border border-[#202020] bg-[#121212] hover:border-[#333] transition-colors rounded-[1px]"
+                  className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))] hover:bg-[var(--surface)] transition-all rounded-[1px]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-[1px] bg-[#181818] border border-[#2a2a2a] text-accent flex items-center justify-center font-mono text-xs font-bold flex-shrink-0">
+                    <div className="w-9 h-9 rounded-[1px] bg-[var(--surface)] border border-[var(--line)] text-[var(--accent)] flex items-center justify-center font-mono text-xs font-bold flex-shrink-0 shadow-inner">
                       {initials}
                     </div>
+
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <strong className="text-xs font-mono text-white truncate">
+                        <strong className="text-xs font-mono text-white truncate tracking-tight">
                           @{student.handle}
                         </strong>
-                        <span className="text-[10px] text-muted font-mono">
+                        <span className="text-[10px] text-[var(--accent)] font-mono font-bold">
                           {student.rating}
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted truncate">
-                        {student.full_name || student.handle}
+
+                      <p className="text-[11px] text-[var(--muted)] truncate font-sans mt-0.5">
+                        {student.full_name || `@${student.handle}`}
                       </p>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[9px] font-mono text-muted uppercase">
+
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[9px] font-mono uppercase bg-[var(--surface)] border border-[var(--line)] text-[var(--muted)] px-1.5 py-0.2 rounded-[1px]">
                           {student.department} · {student.batch}
                         </span>
+                        <TierBadge>{student.tier}</TierBadge>
                       </div>
                     </div>
                   </div>
 
                   {student.is_self ? (
-                    <span className="px-2 py-1 text-[10px] font-mono uppercase bg-[#1a1a1a] text-muted border border-[#2a2a2a] rounded-[1px]">
+                    <span className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)] rounded-[1px]">
                       You
                     </span>
                   ) : (
                     <button
                       type="button"
                       disabled={isPending}
+                      onMouseEnter={() => setHoveredStudentId(student.id)}
+                      onMouseLeave={() => setHoveredStudentId(null)}
                       onClick={() =>
-                        dispatch(toggleFollowThunk({ targetId: student.id, targetHandle: student.handle }))
+                        dispatch(
+                          toggleFollowThunk({
+                            targetId: student.id,
+                            targetHandle: student.handle,
+                          })
+                        )
                       }
                       className={cn(
-                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-[1px] flex items-center gap-1.5 transition-all flex-shrink-0",
+                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-[1px] flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer",
                         isFollowing
-                          ? "bg-transparent border-[#333] text-muted hover:border-danger hover:text-danger hover:bg-danger/10"
-                          : "bg-accent/10 border-accent/40 text-accent hover:bg-accent hover:text-black"
+                          ? isHovered
+                            ? "bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20"
+                            : "bg-[var(--surface)] border-[var(--line)] text-[var(--muted)] hover:text-white"
+                          : "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] shadow-[0_0_10px_rgba(200,255,54,0.06)]"
                       )}
                     >
                       {isPending ? (
-                        <Loader2 size={12} className="animate-spin" />
+                        <Loader2 size={11} className="animate-spin" />
                       ) : isFollowing ? (
-                        <>
-                          <Check size={12} />
-                          <span>Following</span>
-                        </>
+                        isHovered ? (
+                          <>
+                            <UserMinus size={11} />
+                            <span>Unfollow</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check size={11} />
+                            <span>Following</span>
+                          </>
+                        )
                       ) : (
                         <>
-                          <UserPlus size={12} />
+                          <UserPlus size={11} />
                           <span>Follow</span>
                         </>
                       )}
@@ -230,9 +340,9 @@ export function SocialDrawer() {
         </div>
 
         {/* Footer */}
-        <footer className="p-3 border-t border-[#222] bg-[#0c0c0c] text-center">
-          <p className="text-[10px] text-muted font-mono">
-            PEER CONNECTIONS • CHAOS COMPUTER CLUB
+        <footer className="p-3 border-t border-[var(--line)] bg-[var(--bg)]/90 backdrop-blur-md text-center">
+          <p className="text-[9px] text-[var(--muted)] font-mono uppercase tracking-widest">
+            AUTHENTICATED CAMPUS SOCIAL GRAPH • MEDI-CAPS CHAPTER
           </p>
         </footer>
       </aside>

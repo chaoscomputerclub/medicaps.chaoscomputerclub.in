@@ -48,6 +48,9 @@ class MemberProfile(Base):
     hashed_password = Column(String(255), nullable=True)                        # null for Google-only users
     google_id = Column(String(120), unique=True, nullable=True, index=True)     # Google sub ID
     avatar_url = Column(String(500), nullable=True)                             # Google profile picture
+    bio = Column(String(500), nullable=True)                                    # Student bio / tagline
+    github_username = Column(String(100), nullable=True)                       # GitHub handle
+    linkedin_url = Column(String(200), nullable=True)                          # LinkedIn profile / handle
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
     # Relationships

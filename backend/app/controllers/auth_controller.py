@@ -27,6 +27,7 @@ from app.schemas.auth import (
     AuthTokenResponse,
     MemberPublic,
     CompleteOnboardingRequest,
+    UpdateProfileRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,13 +35,21 @@ logger = logging.getLogger(__name__)
 
 def _to_member_public(member: MemberProfile) -> MemberPublic:
     return MemberPublic(
+        id=member.id,
         handle=member.handle,
         full_name=member.full_name,
         email=member.email,
+        prn=member.prn,
         department=member.department,
         batch=member.batch,
         rating=member.rating,
+        peak_rating=getattr(member, "peak_rating", member.rating),
+        is_core_member=getattr(member, "is_core_member", False),
         is_onboarded=member.is_onboarded,
+        avatar_url=getattr(member, "avatar_url", None),
+        bio=getattr(member, "bio", None),
+        github_username=getattr(member, "github_username", None),
+        linkedin_url=getattr(member, "linkedin_url", None),
     )
 
 
@@ -229,6 +238,55 @@ class AuthController:
         }
 
     @staticmethod
+    async def update_profile(
+        payload: UpdateProfileRequest,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> dict:
+        """
+        Update editable student profile fields.
+        Institutional identifiers (PRN, @medicaps.ac.in email) are strictly immutable.
+        """
+        if payload.full_name is not None:
+            clean_name = payload.full_name.strip()
+            if len(clean_name) >= 2:
+                current_member.full_name = clean_name
+            else:
+                raise HTTPException(status_code=400, detail="Full name must have at least 2 characters.")
+
+        if payload.department is not None:
+            dept = payload.department.strip()
+            if dept:
+                current_member.department = dept
+
+        if payload.batch is not None:
+            batch = payload.batch.strip()
+            if batch:
+                current_member.batch = batch
+
+        if payload.bio is not None:
+            current_member.bio = payload.bio.strip()
+
+        if payload.github_username is not None:
+            current_member.github_username = payload.github_username.strip().lstrip("@")
+
+        if payload.linkedin_url is not None:
+            current_member.linkedin_url = payload.linkedin_url.strip()
+
+        if payload.avatar_url is not None:
+            current_member.avatar_url = payload.avatar_url.strip()
+
+        current_member.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(current_member)
+
+        return {
+            "success": True,
+            "message": "Competitive profile updated successfully.",
+            "member": _to_member_public(current_member).model_dump(),
+        }
+
+    @staticmethod
     async def get_full_profile(current_member: MemberProfile, db: AsyncSession) -> dict:
         """Return full member profile with computed stats."""
         from sqlalchemy import func
@@ -329,6 +387,12 @@ class AuthController:
                 "tier": tier,
                 "podiums": 0,
                 "streak": 0,
+                "followers_count": followers_count,
+                "following_count": following_count,
+                "bio": getattr(current_member, "bio", None),
+                "github_username": getattr(current_member, "github_username", None),
+                "linkedin_url": getattr(current_member, "linkedin_url", None),
+                "avatar_url": getattr(current_member, "avatar_url", None),
             },
             "campusPass": pass_data,
             "ratingHistory": rating_history,
