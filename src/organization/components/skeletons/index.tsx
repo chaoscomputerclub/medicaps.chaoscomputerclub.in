@@ -590,54 +590,39 @@ export function LeaderboardSkeleton() {
           <Skeleton className="h-3 w-24" />
         </div>
       </header>
-      <div className="leader-tools">
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-      </div>
       <div className="table-scroll leaderboard-table">
         <table>
           <thead>
             <tr>
-              <th>Rank</th>
-              <th>Member</th>
-              <th>Department</th>
-              <th>Tier</th>
-              <th>Trend</th>
-              <th>Rating</th>
-              <th>Peak</th>
-              <th>Attendance</th>
+              <th style={{ width: "110px" }}>Rank</th>
+              <th>Name</th>
+              <th style={{ width: "200px" }}>Attended</th>
+              <th style={{ width: "120px", textAlign: "right" }}>Score</th>
             </tr>
           </thead>
           <tbody>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <tr key={i}>
                 <td>
-                  <Skeleton className="h-5 w-10" />
+                  <Skeleton className="h-5 w-12" />
                 </td>
                 <td>
-                  <div className="flex flex-col gap-1.5">
-                    <Skeleton className="h-3.5 w-28" />
-                    <Skeleton className="h-2.5 w-36" />
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-8 h-8 rounded-[1px] flex-shrink-0" />
+                    <div className="flex flex-col gap-1.5">
+                      <Skeleton className="h-3.5 w-28" />
+                      <Skeleton className="h-2.5 w-16" />
+                    </div>
                   </div>
                 </td>
                 <td>
-                  <Skeleton className="h-3 w-24" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-2 w-14" />
+                    <Skeleton className="h-3 w-8" />
+                  </div>
                 </td>
-                <td>
-                  <Skeleton className="h-4 w-20" />
-                </td>
-                <td>
-                  <Skeleton className="h-4 w-16" />
-                </td>
-                <td>
-                  <Skeleton className="h-4 w-12" />
-                </td>
-                <td>
-                  <Skeleton className="h-4 w-12" />
-                </td>
-                <td>
-                  <Skeleton className="h-3 w-28" />
+                <td className="text-right">
+                  <Skeleton className="h-5 w-12 ml-auto" />
                 </td>
               </tr>
             ))}

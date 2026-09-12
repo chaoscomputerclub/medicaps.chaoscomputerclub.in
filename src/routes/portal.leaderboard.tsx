@@ -1,12 +1,15 @@
 /**
- * Chaos Computer Club India — Global Ranking
- * Strictly formatted as: Rank | Name with profile pic | Region | Attended | Score
- * Built with CCC brutalist dark theme, top-pinned "(You)" card, and zero filters.
+ * Chaos Computer Club India — University Leaderboard
+ * Strictly formatted with original UI layout:
+ * Header: Verified Elo index | University leaderboard. | Rating Cycle Monsoon '26
+ * Columns: RANK | NAME (with profile pic) | ATTENDED | SCORE
+ * Clean brutalist styling, zero filters.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAppSelector } from "@/store/hooks";
+import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { LeaderboardSkeleton } from "@/organization/components/skeletons";
 import { portalQueries } from "@/organization/data/queries";
 import type { LeaderboardEntry } from "@/organization/data/types";
@@ -17,57 +20,42 @@ const q = portalQueries.leaderboard();
 export const Route = createFileRoute("/portal/leaderboard")({
   head: () => ({
     meta: [
-      { title: "Global Ranking — CCC Medi-Caps" },
+      { title: "University Leaderboard — CCC Medi-Caps" },
       {
         name: "description",
-        content:
-          "Official university-wide global ranking standings based on proctored offline battles.",
+        content: "University-wide CCC rating standings from verified offline contests across CSE, IT, AIDS, and Cyber Security.",
       },
-      { property: "og:title", content: "Global Ranking — CCC Medi-Caps" },
+      { property: "og:title", content: "CCC Medi-Caps University Leaderboard" },
       {
         property: "og:description",
-        content: "Verified university contest rankings across CSE, IT, AIDS and Cyber Security.",
+        content: "Verified offline contest ratings across CSE, IT, AIDS and Cyber Security.",
       },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(q),
   pendingComponent: LeaderboardSkeleton,
-  component: GlobalRankingPage,
+  component: Leaderboard,
 });
 
 const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
-  volt: { icon: "⚡", bg: "bg-lime-950/60", border: "border-lime-500/50", text: "text-lime-400" },
-  binary: { icon: "👾", bg: "bg-cyan-950/60", border: "border-cyan-500/50", text: "text-cyan-400" },
-  quantum: {
-    icon: "⚛️",
-    bg: "bg-purple-950/60",
-    border: "border-purple-500/50",
-    text: "text-purple-400",
-  },
-  matrix: {
-    icon: "💻",
-    bg: "bg-emerald-950/60",
-    border: "border-emerald-500/50",
-    text: "text-emerald-400",
-  },
-  grandmaster: {
-    icon: "🏆",
-    bg: "bg-amber-950/60",
-    border: "border-amber-500/50",
-    text: "text-amber-400",
-  },
-  cipher: { icon: "🛡️", bg: "bg-rose-950/60", border: "border-rose-500/50", text: "text-rose-400" },
+  volt: { icon: "⚡", bg: "bg-lime-500/10", border: "border-lime-500/40", text: "text-lime-400" },
+  binary: { icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
+  quantum: { icon: "⚛️", bg: "bg-purple-500/10", border: "border-purple-500/40", text: "text-purple-400" },
+  matrix: { icon: "💻", bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-400" },
+  grandmaster: { icon: "🏆", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
+  cipher: { icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
 };
 
-function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean }) {
+function AvatarBubble({ item }: { item: LeaderboardEntry }) {
   const emblem = item.avatar_url && EMBLEM_MAP[item.avatar_url];
 
   if (emblem) {
     return (
       <div
         className={cn(
-          "w-8 h-8 rounded-full border flex items-center justify-center text-sm flex-shrink-0 shadow-sm",
+          "w-8 h-8 rounded-[1px] border flex items-center justify-center text-sm flex-shrink-0 shadow-sm",
           emblem.bg,
           emblem.border,
           emblem.text,
@@ -78,16 +66,28 @@ function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean
     );
   }
 
-  if (
+  const hasImg = Boolean(
     item.avatar_url &&
-    (item.avatar_url.startsWith("http") ||
-      item.avatar_url.startsWith("/media/") ||
-      item.avatar_url.startsWith("/"))
-  ) {
+      (item.avatar_url.startsWith("http") ||
+        item.avatar_url.startsWith("/media/") ||
+        item.avatar_url.startsWith("/"))
+  );
+
+  const initials = item.full_name
+    ? item.full_name
+        .split(" ")
+        .map((w) => w[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : item.handle?.slice(0, 2).toUpperCase() || "CC";
+
+  if (hasImg) {
     return (
-      <div className="w-8 h-8 rounded-full border border-zinc-700 overflow-hidden flex-shrink-0 bg-zinc-800">
+      <div className="w-8 h-8 rounded-[1px] border border-[var(--line)] overflow-hidden flex-shrink-0 bg-zinc-900 shadow-sm">
         <img
-          src={item.avatar_url}
+          src={item.avatar_url!}
           alt={item.full_name || item.handle}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -99,183 +99,125 @@ function AvatarBubble({ item, isYou }: { item: LeaderboardEntry; isYou?: boolean
     );
   }
 
-  const initials = item.full_name
-    ? item.full_name
-        .split(" ")
-        .map((w) => w[0])
-        .filter(Boolean)
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
-    : item.handle.slice(0, 2).toUpperCase();
-
   return (
-    <div
-      className={cn(
-        "w-8 h-8 rounded-full border flex items-center justify-center font-mono text-[11px] font-bold flex-shrink-0 shadow-sm",
-        isYou
-          ? "bg-[var(--accent)]/15 border-[var(--accent)]/50 text-[var(--accent)]"
-          : "bg-zinc-800/80 border-zinc-700 text-zinc-300",
-      )}
-    >
+    <div className="w-8 h-8 rounded-[1px] border border-[var(--line)] bg-[var(--surface)] text-[var(--accent)] font-mono text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-sm">
       {initials}
     </div>
   );
 }
 
-function GlobalRankingPage() {
+function Leaderboard() {
   const { data } = useSuspenseQuery(q);
-  const currentMember = useAppSelector((s) => s.auth.member);
-  const currentMemberId = currentMember?.id;
-
-  // Find current user in the global standings
-  const currentUserRow = data.find(
-    (x) =>
-      (currentMemberId && x.id === currentMemberId) ||
-      (currentMember?.handle && x.handle === currentMember.handle),
-  );
+  const currentMemberId = useAppSelector((s) => s.auth.member?.id);
 
   return (
-    <div className="page-wrap max-w-5xl mx-auto px-4 py-8">
-      {/* Page Title & Subtitle */}
-      <header className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Global Ranking
-        </h1>
-        <p className="text-xs sm:text-sm text-[var(--muted)] font-mono mt-1.5">
-          Total Participants: {data.length.toLocaleString()}
-        </p>
+    <div className="page-wrap">
+      {/* Original University Leaderboard Page Header */}
+      <header className="page-header">
+        <div>
+          <p className="kicker">Verified Elo index</p>
+          <h1>University leaderboard.</h1>
+          <p>
+            One standing across CSE, IT, AIDS, and Cyber Security. Browser activity never affects rank.
+          </p>
+        </div>
+        <div className="ranking-meta">
+          <span>RATING CYCLE</span>
+          <strong>MONSOON '26</strong>
+          <small>{data.length} active members</small>
+        </div>
       </header>
 
-      {/* Pinned "You" Row Card (Matching LeetCode Highlight) */}
-      {currentUserRow && (
-        <section aria-label="Your Position" className="mb-5">
-          <div className="grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-3.5 bg-[var(--surface-2)] border border-[var(--accent)]/50 rounded-xl shadow-[0_0_20px_rgba(200,255,54,0.08)] transition-all">
-            {/* Rank */}
-            <div className="font-mono font-bold text-sm sm:text-base text-white">
-              {currentUserRow.university_rank.toLocaleString()}
-            </div>
+      {/* Table: RANK | NAME (with profile pic) | ATTENDED | SCORE */}
+      <div className="table-scroll leaderboard-table">
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: "110px" }}>Rank</th>
+              <th>Name</th>
+              <th style={{ width: "200px" }}>Attended</th>
+              <th style={{ width: "120px", textAlign: "right" }}>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center py-12 text-[#777] font-mono text-sm">
+                  No ranked members found in university standings.
+                </td>
+              </tr>
+            ) : (
+              data.map((x) => {
+                const change = (x.previous_rank ?? x.university_rank) - x.university_rank;
+                const isYou = x.id === currentMemberId;
 
-            {/* Name with Profile Pic */}
-            <div className="flex items-center gap-3 min-w-0 pr-2">
-              <AvatarBubble item={currentUserRow} isYou={true} />
-              <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                <span className="font-semibold text-sm sm:text-base text-white truncate font-sans">
-                  {currentUserRow.full_name || currentUserRow.handle}
-                </span>
-                <span className="text-xs">⚡</span>
-                <span className="text-xs font-mono font-bold text-[var(--accent)]">(You)</span>
-              </div>
-            </div>
-
-            {/* Region */}
-            <div className="flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm text-zinc-300">
-              <span className="text-sm">🇮🇳</span>
-              <span className="truncate">{currentUserRow.department}</span>
-            </div>
-
-            {/* Attended */}
-            <div className="text-right font-mono text-xs sm:text-sm text-zinc-200 pr-1">
-              {currentUserRow.attendance_count}
-            </div>
-
-            {/* Score */}
-            <div className="text-right font-mono text-sm sm:text-base font-bold text-white">
-              {currentUserRow.rating.toLocaleString()}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Global Ranking Table Headers */}
-      <div className="grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-2.5 text-xs text-[var(--muted)] font-medium select-none uppercase tracking-wider">
-        <span>Rank</span>
-        <span>Name</span>
-        <span className="text-center">Region</span>
-        <span className="text-right pr-1">Attended</span>
-        <span className="text-right">Score</span>
-      </div>
-
-      {/* Global Ranking Rows Stream */}
-      <div className="space-y-2">
-        {data.length === 0 ? (
-          <div className="text-center py-16 px-4 bg-[var(--surface)] border border-[var(--line)] rounded-xl">
-            <p className="font-mono text-sm text-[var(--muted)]">
-              No ranked participants in university standings yet.
-            </p>
-          </div>
-        ) : (
-          data.map((x) => {
-            const isYou =
-              (currentMemberId && x.id === currentMemberId) ||
-              (currentMember?.handle && x.handle === currentMember.handle);
-
-            return (
-              <div
-                key={x.handle}
-                className={cn(
-                  "grid grid-cols-[55px_1fr_90px_80px_85px] sm:grid-cols-[70px_1fr_130px_100px_105px] items-center px-4 sm:px-5 py-3 rounded-xl border transition-all duration-150",
-                  isYou
-                    ? "bg-[var(--surface-2)] border-[var(--accent)]/40 shadow-sm"
-                    : "bg-[var(--surface)] hover:bg-[var(--surface-2)] border-[var(--line)] hover:border-zinc-700",
-                )}
-              >
-                {/* Rank Badge / Number */}
-                <div className="flex items-center">
-                  {x.university_rank === 1 ? (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#facc15] text-black font-bold font-mono text-xs sm:text-sm flex items-center justify-center shadow-md shadow-amber-500/20">
-                      1
-                    </div>
-                  ) : x.university_rank === 2 ? (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#cbd5e1] text-black font-bold font-mono text-xs sm:text-sm flex items-center justify-center shadow-md shadow-slate-400/20">
-                      2
-                    </div>
-                  ) : x.university_rank === 3 ? (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#ea580c] text-white font-bold font-mono text-xs sm:text-sm flex items-center justify-center shadow-md shadow-orange-600/20">
-                      3
-                    </div>
-                  ) : (
-                    <span className="font-mono text-xs sm:text-sm font-semibold text-zinc-400 pl-1">
-                      {x.university_rank.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-
-                {/* Name with Profile Pic */}
-                <div className="flex items-center gap-3 min-w-0 pr-2">
-                  <AvatarBubble item={x} isYou={Boolean(isYou)} />
-                  <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                    <span className="font-medium text-xs sm:text-sm text-white truncate font-sans">
-                      {x.full_name || x.handle}
-                    </span>
-                    {x.university_rank <= 3 && <span className="text-xs">⚡</span>}
-                    {isYou && (
-                      <span className="text-[11px] font-mono font-bold text-[var(--accent)] ml-0.5">
-                        (You)
-                      </span>
+                return (
+                  <tr
+                    key={x.handle}
+                    className={cn(
+                      "transition-colors",
+                      isYou && "bg-[var(--accent)]/5 border-l-2 border-l-[var(--accent)]"
                     )}
-                  </div>
-                </div>
+                  >
+                    {/* 1. RANK */}
+                    <td>
+                      <div className="rank-cell">
+                        <strong>{String(x.university_rank).padStart(2, "0")}</strong>
+                        <span className={change > 0 ? "up" : change < 0 ? "down" : "flat"}>
+                          {change > 0 ? <ChevronUp /> : change < 0 ? <ChevronDown /> : <Minus />}
+                          {Math.abs(change) || "—"}
+                        </span>
+                      </div>
+                    </td>
 
-                {/* Region */}
-                <div className="flex items-center justify-center gap-1.5 font-mono text-xs text-zinc-400">
-                  <span className="text-sm">🇮🇳</span>
-                  <span className="truncate">{x.department}</span>
-                </div>
+                    {/* 2. NAME with Profile Pic / Avatar */}
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <AvatarBubble item={x} />
+                        <div className="competitor">
+                          <div className="flex items-center gap-2">
+                            <strong className="text-white hover:text-[var(--accent)] transition-colors">
+                              {x.full_name || x.handle}
+                            </strong>
+                            {isYou && (
+                              <span className="proof-seal text-[8px] py-0.5 px-1 font-mono">
+                                YOU
+                              </span>
+                            )}
+                          </div>
+                          <span>@{x.handle}</span>
+                        </div>
+                      </div>
+                    </td>
 
-                {/* Attended */}
-                <div className="text-right font-mono text-xs sm:text-sm text-zinc-300 pr-1">
-                  {x.attendance_count}
-                </div>
+                    {/* 3. ATTENDED */}
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <span className="attendance-meter">
+                          <i
+                            style={{
+                              width: `${
+                                (x.attendance_count / (x.attendance_total || 6)) * 100
+                              }%`,
+                            }}
+                          />
+                        </span>
+                        <small>
+                          {x.attendance_count}/{x.attendance_total || 6}
+                        </small>
+                      </div>
+                    </td>
 
-                {/* Score */}
-                <div className="text-right font-mono text-xs sm:text-sm font-bold text-white">
-                  {x.rating.toLocaleString()}
-                </div>
-              </div>
-            );
-          })
-        )}
+                    {/* 4. SCORE */}
+                    <td className="score-value text-right font-mono font-bold text-[var(--accent)]">
+                      {x.rating}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
