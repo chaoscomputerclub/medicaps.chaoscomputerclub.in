@@ -62,12 +62,21 @@ function PortalSidebar() {
       <SidebarHeader className="border-b border-border">
         <Link
           to="/portal"
-          className="flex items-center gap-2 px-1 py-1.5 font-mono text-[0.625rem] tracking-[0.2em] uppercase"
+          className="group flex items-center gap-2.5 px-2 py-2 font-mono text-[0.625rem] tracking-[0.2em] uppercase"
         >
-          <span className="grid size-6 shrink-0 place-items-center border border-border-strong text-accent">
-            C
-          </span>
-          <span className="truncate group-data-[collapsible=icon]:hidden">CCC / Portal</span>
+          <img
+            src="/logo.png"
+            alt="Chaos Computer Club Logo"
+            className="size-7 shrink-0 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.18)] transition-transform duration-200 group-hover:scale-105"
+          />
+          <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden leading-tight">
+            <span className="font-bold text-foreground group-hover:text-accent transition-colors tracking-widest text-[0.6875rem]">
+              CCC
+            </span>
+            <span className="text-[0.5rem] text-muted-foreground tracking-wider">
+              Medi-Caps Chapter
+            </span>
+          </div>
         </Link>
       </SidebarHeader>
 
@@ -146,11 +155,21 @@ export function PortalShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen w-full bg-background">
         <PortalSidebar />
         <SidebarInset className="min-w-0 bg-background">
-          <header className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-border bg-background/90 px-3 backdrop-blur-md">
-            <SidebarTrigger className="rounded-none" />
-            <span className="font-mono text-[0.5625rem] tracking-[0.2em] text-subtle-foreground uppercase">
-              Member portal
-            </span>
+          <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border bg-background/90 px-3 backdrop-blur-md">
+            <div className="flex items-center gap-2.5">
+              <SidebarTrigger className="rounded-none" />
+              <div className="h-4 w-px bg-border" />
+              <Link to="/portal" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <img
+                  src="/logo.png"
+                  alt="CCC Logo"
+                  className="size-5 shrink-0 object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]"
+                />
+                <span className="font-mono text-[0.5625rem] tracking-[0.2em] text-subtle-foreground uppercase">
+                  Member Portal <span className="text-muted-foreground/40">/</span> Medi-Caps
+                </span>
+              </Link>
+            </div>
           </header>
           <main className="min-w-0 px-4 py-6 md:px-8 md:py-10">
             <div className="mx-auto w-full max-w-6xl">{children}</div>
