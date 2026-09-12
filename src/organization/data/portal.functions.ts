@@ -3,6 +3,44 @@ import { createServerFn } from "@tanstack/react-start";
 import type { Database } from "@/integrations/supabase/types";
 
 export const getPublicPortalData = createServerFn({ method: "GET" }).handler(async () => {
+  const backendUrl = process.env["BACKEND_URL"] || "http://127.0.0.1:8000/api";
+
+  // 1. Prioritize CCC FastAPI Local/LAN Backend
+  try {
+    const healthRes = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(1200) });
+    if (healthRes.ok) {
+      const [contests, standings, announcements] = await Promise.all([
+        fetch(`${backendUrl}/contests`).then((r) => (r.ok ? r.json() : [])),
+        fetch(`${backendUrl}/scoreboards/chaos-arena-2026`).then((r) => (r.ok ? r.json() : [])),
+        fetch(`${backendUrl}/feed/announcements`).then((r) => (r.ok ? r.json() : [])),
+      ]);
+
+      const problems = contests.flatMap((c: any) =>
+        (c.problems || []).map((p: any) => ({
+          contest_id: c.id,
+          problem_index: p.problem_index,
+          title: p.title,
+          topic: p.topic,
+          points: p.points,
+          solved_count: p.solved_count,
+          first_ac_seconds: p.first_ac_seconds,
+          editorial_summary: p.editorial_summary,
+        }))
+      );
+
+      return {
+        contests: contests || [],
+        problems: problems || [],
+        standings: standings || [],
+        announcements: announcements || [],
+        proofs: [],
+      };
+    }
+  } catch {
+    // FastAPI not reachable, fallback to Supabase or fixtures
+  }
+
+  // 2. Fallback to Supabase cloud records
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
   const url = process.env["SUPABASE_URL"];
   if (!key || !url) throw new Error("Portal data service is unavailable.");
