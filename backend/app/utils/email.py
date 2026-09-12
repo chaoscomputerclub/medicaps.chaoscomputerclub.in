@@ -15,13 +15,10 @@ logger = logging.getLogger(__name__)
 
 def _otp_email_template(otp_code: str) -> str:
     """
-    Chaos Computer Club India — Branded OTP Verification Email Template
-    Editorial / industrial architectural dark aesthetic:
-    - Void black (#080808) base canvas
-    - Charcoal surface (#101012), surface-raised (#151518)
-    - Signature acid-lime accent (#ccff00)
-    - Zero border-radius (pure flat architectural geometry)
-    - Monospace terminal kickers & cryptographic token display card
+    Chaos Computer Club India — Minimal OTP Verification Email Template
+    - Void black only — never adapts to OS light mode
+    - tag-cut (chamfered polygon) acid-lime OTP block
+    - Black OTP digits on acid-lime background
     """
     return f"""<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -29,171 +26,130 @@ def _otp_email_template(otp_code: str) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Chaos Computer Club — Verification Code</title>
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td, p, a, span {{ font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif !important; }}
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>Chaos Computer Club — Verify</title>
+  <style>
+    :root {{ color-scheme: dark; }}
+    @media (prefers-color-scheme: light) {{
+      body, table, td {{ background-color: #080808 !important; color: #eaeaea !important; }}
+    }}
   </style>
-  <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; background-color: #080808; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color: #eaeaea; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #080808; table-layout: fixed; margin: 0; padding: 0;">
+<body style="margin:0;padding:0;background-color:#080808;color:#eaeaea;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;" bgcolor="#080808">
+
+  <!-- Outer wrapper: forces #080808 everywhere -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#080808" style="background-color:#080808;">
     <tr>
-      <td align="center" style="padding: 44px 16px 60px 16px;">
-        
-        <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellspacing="0" cellpadding="0" width="560">
-        <tr>
-        <td align="center" valign="top" width="560">
-        <![endif]-->
-        
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 560px; background-color: #101012; border: 1px solid #1f1f24; border-top: 3px solid #ccff00; border-collapse: separate; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);">
-          
-          <!-- System Status Bar -->
+      <td align="center" style="padding:48px 16px 64px;">
+
+        <!-- Card: 520px max -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background-color:#0e0e10;border:1px solid #222228;">
+
+          <!-- Acid-lime top bar -->
           <tr>
-            <td style="background-color: #151518; border-bottom: 1px solid #1f1f24; padding: 12px 24px;">
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+            <td height="3" bgcolor="#ccff00" style="background-color:#ccff00;font-size:3px;line-height:3px;">&nbsp;</td>
+          </tr>
+
+          <!-- Header row -->
+          <tr>
+            <td style="padding:20px 28px 20px;border-bottom:1px solid #1c1c22;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="left" style="vertical-align: middle;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="vertical-align: middle; padding-right: 10px;">
-                          <img src="https://chaoscomputerclub.in/logo.png" width="22" height="22" alt="CCC" style="display: block; border: 0; width: 22px; height: 22px; object-fit: contain;" />
-                        </td>
-                        <td style="vertical-align: middle; font-family: 'JetBrains Mono', 'SF Mono', Consolas, 'Courier New', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase;">
-                          CHAOS COMPUTER CLUB
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:11px;font-weight:700;letter-spacing:1.6px;color:#ccff00;text-transform:uppercase;vertical-align:middle;">
+                    CHAOS COMPUTER CLUB
                   </td>
-                  <td align="right" style="vertical-align: middle; font-family: 'JetBrains Mono', 'SF Mono', Consolas, 'Courier New', monospace; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: #ccff00; text-transform: uppercase;">
-                    [ AUTH // 2026 ]
+                  <td align="right" style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;letter-spacing:1.2px;color:#44444c;text-transform:uppercase;vertical-align:middle;">
+                    AUTH // OTP
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Main Body -->
+          <!-- Body -->
           <tr>
-            <td style="padding: 38px 36px 32px 36px;">
-              
-              <!-- Section Kicker -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
-                <tr>
-                  <td style="background-color: rgba(204, 255, 0, 0.08); border: 1px solid rgba(204, 255, 0, 0.25); padding: 4px 10px;">
-                    <span style="font-family: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.8px; color: #ccff00; text-transform: uppercase;">
-                      (01 // IDENTITY_CHALLENGE) &middot; MEDI-CAPS
-                    </span>
-                  </td>
-                </tr>
-              </table>
+            <td style="padding:32px 28px 28px;">
 
-              <!-- Main Title -->
-              <h1 style="margin: 0 0 12px 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -0.4px; color: #ffffff; line-height: 1.25;">
-                Verify Your Identity
-              </h1>
-
-              <!-- Description -->
-              <p style="margin: 0 0 28px 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #94949a;">
-                A terminal session access request was initiated for your account. Provide the cryptographic verification code below to authorize your session in the arena.
-              </p>
-
-              <!-- Industrial OTP Passcode Box -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 26px 0;">
-                <tr>
-                  <td style="background-color: #08080a; border: 1px solid #28282e; border-left: 4px solid #ccff00; padding: 24px 20px; text-align: center;">
-                    <div style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; font-size: 10px; font-weight: 700; letter-spacing: 2.5px; color: #6e6e76; text-transform: uppercase; margin-bottom: 10px;">
-                      // ONE-TIME VERIFICATION PASSCODE //
-                    </div>
-                    <div style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, 'Courier New', monospace; font-size: 42px; font-weight: 800; letter-spacing: 14px; color: #ccff00; line-height: 1.15; padding: 6px 0 8px 14px; text-shadow: 0 0 24px rgba(204, 255, 0, 0.2);">
-                      {otp_code}
-                    </div>
-                    <div style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; font-size: 11px; color: #8e8e96; letter-spacing: 1.2px; margin-top: 10px;">
-                      EXPIRES IN <strong style="color: #ffffff;">5 MINUTES</strong> &bull; SINGLE-USE ONLY
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Session Telemetry Grid -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #141417; border: 1px solid #1f1f24; margin-bottom: 26px;">
-                <tr>
-                  <td style="padding: 14px 18px; font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; font-size: 11px; line-height: 1.7; color: #6a6a72;">
-                    <span style="color: #9a9aa2; font-weight: 600;">REALM:</span> Medi-Caps University Chapter<br>
-                    <span style="color: #9a9aa2; font-weight: 600;">GATEWAY:</span> Redis HMAC-SHA256
-                  </td>
-                  <td align="right" style="padding: 14px 18px; font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; font-size: 11px; line-height: 1.7; color: #6a6a72; vertical-align: top;">
-                    <span style="color: #9a9aa2; font-weight: 600;">TTL:</span> 300s Remaining<br>
-                    <span style="color: #9a9aa2; font-weight: 600;">MAX ATTEMPTS:</span> 5
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Security Disclaimer -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr>
-                  <td style="border-left: 2px solid #28282e; padding-left: 12px;">
-                    <p style="margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; line-height: 1.6; color: #6e6e76;">
-                      Never share this code. Chaos Computer Club administrators will never solicit your verification token. If you did not trigger this authentication request, no action is necessary.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-
-          <!-- Footer Divider -->
-          <tr>
-            <td style="border-top: 1px solid #1b1b1f; padding: 0; font-size: 0; line-height: 0;">&nbsp;</td>
-          </tr>
-
-          <!-- Industrial CCC Footer -->
-          <tr>
-            <td style="background-color: #0c0c0e; padding: 26px 36px; text-align: center;">
-              
-              <!-- Orbital Tagline -->
-              <div style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, 'Courier New', monospace; font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #ccff00; text-transform: uppercase; margin-bottom: 12px;">
-                EXPLORE &middot; BUILD &middot; COMPETE &middot; FAIL &middot; LEARN &middot; SHARE
+              <!-- Kicker pill — tag-cut simulated via thick border-left -->
+              <div style="display:inline-block;background-color:#ccff001a;border:1px solid #ccff0040;padding:3px 10px;margin-bottom:20px;">
+                <span style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:2px;color:#ccff00;text-transform:uppercase;">
+                  IDENTITY CHALLENGE // MEDI-CAPS
+                </span>
               </div>
 
-              <!-- Community Subtitle -->
-              <p style="margin: 0 0 12px 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; line-height: 1.6; color: #52525a;">
-                Chaos Computer Club India &middot; Medi-Caps University Chapter<br>
-                India's offline competitive tech community for college students.
-              </p>
+              <!-- Title -->
+              <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;margin:0 0 10px;">
+                Verify your identity
+              </div>
 
-              <!-- Navigation Links -->
-              <p style="margin: 0; font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; font-size: 11px; color: #6a6a72;">
-                <a href="https://chaoscomputerclub.in" style="color: #94949a; text-decoration: none; border-bottom: 1px dotted #404048;">chaoscomputerclub.in</a>
-                &nbsp;&bull;&nbsp;
-                <a href="https://medicaps.chaoscomputerclub.in" style="color: #94949a; text-decoration: none; border-bottom: 1px dotted #404048;">medicaps.chaoscomputerclub.in</a>
-              </p>
+              <!-- Subtitle -->
+              <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:#6c6c72;line-height:1.6;margin:0 0 28px;">
+                Use the passcode below to complete authentication.
+              </div>
+
+              <!-- OTP Block: acid-lime fill + chamfered top-right corner (inline SVG trick via border) -->
+              <!--
+                clip-path polygon not supported in email clients, so we simulate
+                the tag-cut chamfer by nesting a rotated border element in the top-right corner.
+                The block itself is solid #ccff00 with #080808 text (black on lime).
+              -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr>
+                  <td>
+                    <!-- Outer shell: relative container with overflow hidden for chamfer effect -->
+                    <div style="position:relative;background-color:#ccff00;overflow:hidden;">
+                      <!-- Chamfer notch: a rotated dark square in top-right simulates the polygon cut -->
+                      <div style="position:absolute;top:-14px;right:-14px;width:28px;height:28px;background-color:#0e0e10;transform:rotate(45deg);"></div>
+                      <!-- Inner content -->
+                      <div style="padding:28px 28px 28px 28px;text-align:center;">
+                        <!-- OTP code: black text on acid-lime -->
+                        <div style="font-family:'JetBrains Mono','SF Mono',Consolas,'Courier New',monospace;font-size:48px;font-weight:900;letter-spacing:16px;color:#080808;line-height:1;padding-left:16px;">
+                          {otp_code}
+                        </div>
+                        <!-- Meta line -->
+                        <div style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:2px;color:#1c1c00;text-transform:uppercase;margin-top:12px;">
+                          EXPIRES IN 5 MIN &bull; SINGLE USE
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Disclaimer -->
+              <div style="border-left:2px solid #222228;padding-left:12px;">
+                <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;color:#44444c;line-height:1.6;">
+                  If you didn&rsquo;t request this, ignore it. Never share this code.
+                </div>
+              </div>
 
             </td>
           </tr>
 
-        </table>
-        
-        <!-- Outer Micro Tag -->
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 560px; margin-top: 16px;">
+          <!-- Footer -->
           <tr>
-            <td align="center" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; font-size: 10px; letter-spacing: 1px; color: #3a3a42; text-transform: uppercase;">
-              ESTABLISHED 2026 &bull; OPEN BY DEFAULT &bull; PEER DRIVEN
+            <td style="padding:18px 28px;border-top:1px solid #1c1c22;background-color:#0a0a0c;">
+              <div style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:2px;color:#ccff00;text-transform:uppercase;margin-bottom:8px;">
+                EXPLORE &middot; BUILD &middot; COMPETE &middot; FAIL &middot; LEARN
+              </div>
+              <div style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;letter-spacing:1px;color:#3a3a44;text-transform:uppercase;">
+                chaoscomputerclub.in &bull; medicaps.chaoscomputerclub.in
+              </div>
             </td>
           </tr>
+
         </table>
 
-        <!--[if (gte mso 9)|(IE)]>
-        </td>
-        </tr>
-        </table>
-        <![endif]-->
+        <!-- Below-card muted tag -->
+        <div style="font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:10px;letter-spacing:1.2px;color:#2e2e36;text-transform:uppercase;margin-top:14px;text-align:center;">
+          ESTABLISHED 2026 &bull; OPEN BY DEFAULT &bull; PEER DRIVEN
+        </div>
 
       </td>
     </tr>
   </table>
+
 </body>
 </html>"""
 
