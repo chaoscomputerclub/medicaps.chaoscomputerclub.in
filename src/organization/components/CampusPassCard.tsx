@@ -1,0 +1,5 @@
+import { QRCodeSVG } from "qrcode.react";
+import { MapPin, ScanLine } from "lucide-react";
+import type { CampusPass } from "../data/types";
+import { formatContestDate } from "./ui";
+export function CampusPassCard({pass}:{pass:CampusPass}){return <article className="campus-pass"><div className="pass-cut pass-cut-left"/><div className="pass-cut pass-cut-right"/><header><span>CCC / MEDI-CAPS</span><strong>CAMPUS ACCESS PASS</strong></header><div className="pass-body"><div><p className="kicker">Registered delegate</p><h3>{pass.member_name}</h3><code>@{pass.handle} · {pass.prn_hash}</code><dl><div><dt>Contest</dt><dd>{pass.contest_title}</dd></div><div><dt>Seat</dt><dd>{pass.seat}</dd></div><div><dt><MapPin size={12}/> Venue</dt><dd>{pass.venue}</dd></div><div><dt>Check-in opens</dt><dd>{formatContestDate(pass.check_in_opens_at)}</dd></div></dl></div><div className="pass-qr"><QRCodeSVG value={pass.pass_code} size={116} bgColor="transparent" fgColor="currentColor" level="H"/><span><ScanLine size={13}/>{pass.status}</span></div></div><footer><code>{pass.pass_code}</code><span>OFFLINE • SINGLE ENTRY</span></footer></article>}

@@ -1,10 +1,3 @@
-/**
- * Chaos Computer Club India — chaoscomputerclub.in
- *
- * Copyright (c) 2026 Chaos Computer Club India
- * Licensed under the MIT License. See LICENSE in the project root for license information.
- */
-
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDown } from "lucide-react";

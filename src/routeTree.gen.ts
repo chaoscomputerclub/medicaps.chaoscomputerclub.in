@@ -10,23 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as PortalRouteRouteImport } from './routes/portal/route'
+import { Route as PortalRouteImport } from './routes/portal'
 import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as PortalIndexRouteImport } from './routes/portal/index'
-import { Route as PortalLeaderboardRouteImport } from './routes/portal/leaderboard'
-import { Route as PortalProfileRouteImport } from './routes/portal/profile'
-import { Route as PortalContestsIndexRouteImport } from './routes/portal/contests/index'
-import { Route as PortalContestsContestSlugRouteImport } from './routes/portal/contests/$contestSlug'
-import { Route as PortalEventsIndexRouteImport } from './routes/portal/events/index'
-import { Route as PortalEventsEventSlugRouteImport } from './routes/portal/events/$eventSlug'
-import { Route as PortalProblemsIndexRouteImport } from './routes/portal/problems/index'
-import { Route as PortalProblemsProblemSlugRouteImport } from './routes/portal/problems/$problemSlug'
+import { Route as PortalIndexRouteImport } from './routes/portal.index'
+import { Route as PortalLeaderboardRouteImport } from './routes/portal.leaderboard'
+import { Route as PortalProfileRouteImport } from './routes/portal.profile'
+import { Route as PortalVerifyRouteImport } from './routes/portal.verify'
+import { Route as PortalContestsIndexRouteImport } from './routes/portal.contests.index'
+import { Route as PortalContestsContestSlugRouteImport } from './routes/portal.contests.$contestSlug'
+import { Route as PortalProblemsIndexRouteImport } from './routes/portal.problems.index'
+import { Route as PortalProblemsProblemSlugRouteImport } from './routes/portal.problems.$problemSlug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -34,7 +39,7 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PortalRouteRoute = PortalRouteRouteImport.update({
+const PortalRoute = PortalRouteImport.update({
   id: '/portal',
   path: '/portal',
   getParentRoute: () => rootRouteImport,
@@ -52,153 +57,149 @@ const SignupRoute = SignupRouteImport.update({
 const PortalIndexRoute = PortalIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PortalRoute,
 } as any)
 const PortalLeaderboardRoute = PortalLeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PortalRoute,
 } as any)
 const PortalProfileRoute = PortalProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalVerifyRoute = PortalVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => PortalRoute,
 } as any)
 const PortalContestsIndexRoute = PortalContestsIndexRouteImport.update({
   id: '/contests/',
   path: '/contests/',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PortalRoute,
 } as any)
 const PortalContestsContestSlugRoute =
   PortalContestsContestSlugRouteImport.update({
     id: '/contests/$contestSlug',
     path: '/contests/$contestSlug',
-    getParentRoute: () => PortalRouteRoute,
+    getParentRoute: () => PortalRoute,
   } as any)
-const PortalEventsIndexRoute = PortalEventsIndexRouteImport.update({
-  id: '/events/',
-  path: '/events/',
-  getParentRoute: () => PortalRouteRoute,
-} as any)
-const PortalEventsEventSlugRoute = PortalEventsEventSlugRouteImport.update({
-  id: '/events/$eventSlug',
-  path: '/events/$eventSlug',
-  getParentRoute: () => PortalRouteRoute,
-} as any)
 const PortalProblemsIndexRoute = PortalProblemsIndexRouteImport.update({
   id: '/problems/',
   path: '/problems/',
-  getParentRoute: () => PortalRouteRoute,
+  getParentRoute: () => PortalRoute,
 } as any)
 const PortalProblemsProblemSlugRoute =
   PortalProblemsProblemSlugRouteImport.update({
     id: '/problems/$problemSlug',
     path: '/problems/$problemSlug',
-    getParentRoute: () => PortalRouteRoute,
+    getParentRoute: () => PortalRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/portal': typeof PortalRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
+  '/portal': typeof PortalRouteWithChildren
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
+  '/portal/verify': typeof PortalVerifyRoute
   '/portal/': typeof PortalIndexRoute
   '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRoute
-  '/portal/events/$eventSlug': typeof PortalEventsEventSlugRoute
   '/portal/problems/$problemSlug': typeof PortalProblemsProblemSlugRoute
   '/portal/contests/': typeof PortalContestsIndexRoute
-  '/portal/events/': typeof PortalEventsIndexRoute
   '/portal/problems/': typeof PortalProblemsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
+  '/portal/verify': typeof PortalVerifyRoute
   '/portal': typeof PortalIndexRoute
   '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRoute
-  '/portal/events/$eventSlug': typeof PortalEventsEventSlugRoute
   '/portal/problems/$problemSlug': typeof PortalProblemsProblemSlugRoute
   '/portal/contests': typeof PortalContestsIndexRoute
-  '/portal/events': typeof PortalEventsIndexRoute
   '/portal/problems': typeof PortalProblemsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/portal': typeof PortalRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
+  '/portal': typeof PortalRouteWithChildren
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
+  '/portal/verify': typeof PortalVerifyRoute
   '/portal/': typeof PortalIndexRoute
   '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRoute
-  '/portal/events/$eventSlug': typeof PortalEventsEventSlugRoute
   '/portal/problems/$problemSlug': typeof PortalProblemsProblemSlugRoute
   '/portal/contests/': typeof PortalContestsIndexRoute
-  '/portal/events/': typeof PortalEventsIndexRoute
   '/portal/problems/': typeof PortalProblemsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/portal'
+    | '/auth'
     | '/login'
+    | '/portal'
     | '/recover'
     | '/signup'
     | '/portal/leaderboard'
     | '/portal/profile'
+    | '/portal/verify'
     | '/portal/'
     | '/portal/contests/$contestSlug'
-    | '/portal/events/$eventSlug'
     | '/portal/problems/$problemSlug'
     | '/portal/contests/'
-    | '/portal/events/'
     | '/portal/problems/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/login'
     | '/recover'
     | '/signup'
     | '/portal/leaderboard'
     | '/portal/profile'
+    | '/portal/verify'
     | '/portal'
     | '/portal/contests/$contestSlug'
-    | '/portal/events/$eventSlug'
     | '/portal/problems/$problemSlug'
     | '/portal/contests'
-    | '/portal/events'
     | '/portal/problems'
   id:
     | '__root__'
     | '/'
-    | '/portal'
+    | '/auth'
     | '/login'
+    | '/portal'
     | '/recover'
     | '/signup'
     | '/portal/leaderboard'
     | '/portal/profile'
+    | '/portal/verify'
     | '/portal/'
     | '/portal/contests/$contestSlug'
-    | '/portal/events/$eventSlug'
     | '/portal/problems/$problemSlug'
     | '/portal/contests/'
-    | '/portal/events/'
     | '/portal/problems/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PortalRouteRoute: typeof PortalRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   LoginRoute: typeof LoginRoute
+  PortalRoute: typeof PortalRouteWithChildren
   RecoverRoute: typeof RecoverRoute
   SignupRoute: typeof SignupRoute
 }
@@ -212,6 +213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -223,7 +231,7 @@ declare module '@tanstack/react-router' {
       id: '/portal'
       path: '/portal'
       fullPath: '/portal'
-      preLoaderRoute: typeof PortalRouteRouteImport
+      preLoaderRoute: typeof PortalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recover': {
@@ -245,102 +253,103 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/portal/'
       preLoaderRoute: typeof PortalIndexRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
     }
     '/portal/leaderboard': {
       id: '/portal/leaderboard'
       path: '/leaderboard'
       fullPath: '/portal/leaderboard'
       preLoaderRoute: typeof PortalLeaderboardRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
     }
     '/portal/profile': {
       id: '/portal/profile'
       path: '/profile'
       fullPath: '/portal/profile'
       preLoaderRoute: typeof PortalProfileRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/verify': {
+      id: '/portal/verify'
+      path: '/verify'
+      fullPath: '/portal/verify'
+      preLoaderRoute: typeof PortalVerifyRouteImport
+      parentRoute: typeof PortalRoute
     }
     '/portal/contests/': {
       id: '/portal/contests/'
       path: '/contests'
       fullPath: '/portal/contests/'
       preLoaderRoute: typeof PortalContestsIndexRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
     }
     '/portal/contests/$contestSlug': {
       id: '/portal/contests/$contestSlug'
       path: '/contests/$contestSlug'
       fullPath: '/portal/contests/$contestSlug'
       preLoaderRoute: typeof PortalContestsContestSlugRouteImport
-      parentRoute: typeof PortalRouteRoute
-    }
-    '/portal/events/': {
-      id: '/portal/events/'
-      path: '/events'
-      fullPath: '/portal/events/'
-      preLoaderRoute: typeof PortalEventsIndexRouteImport
-      parentRoute: typeof PortalRouteRoute
-    }
-    '/portal/events/$eventSlug': {
-      id: '/portal/events/$eventSlug'
-      path: '/events/$eventSlug'
-      fullPath: '/portal/events/$eventSlug'
-      preLoaderRoute: typeof PortalEventsEventSlugRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
     }
     '/portal/problems/': {
       id: '/portal/problems/'
       path: '/problems'
       fullPath: '/portal/problems/'
       preLoaderRoute: typeof PortalProblemsIndexRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
     }
     '/portal/problems/$problemSlug': {
       id: '/portal/problems/$problemSlug'
       path: '/problems/$problemSlug'
       fullPath: '/portal/problems/$problemSlug'
       preLoaderRoute: typeof PortalProblemsProblemSlugRouteImport
-      parentRoute: typeof PortalRouteRoute
+      parentRoute: typeof PortalRoute
     }
   }
 }
 
-interface PortalRouteRouteChildren {
+interface PortalRouteChildren {
   PortalLeaderboardRoute: typeof PortalLeaderboardRoute
   PortalProfileRoute: typeof PortalProfileRoute
+  PortalVerifyRoute: typeof PortalVerifyRoute
   PortalIndexRoute: typeof PortalIndexRoute
   PortalContestsContestSlugRoute: typeof PortalContestsContestSlugRoute
-  PortalEventsEventSlugRoute: typeof PortalEventsEventSlugRoute
   PortalProblemsProblemSlugRoute: typeof PortalProblemsProblemSlugRoute
   PortalContestsIndexRoute: typeof PortalContestsIndexRoute
-  PortalEventsIndexRoute: typeof PortalEventsIndexRoute
   PortalProblemsIndexRoute: typeof PortalProblemsIndexRoute
 }
 
-const PortalRouteRouteChildren: PortalRouteRouteChildren = {
+const PortalRouteChildren: PortalRouteChildren = {
   PortalLeaderboardRoute: PortalLeaderboardRoute,
   PortalProfileRoute: PortalProfileRoute,
+  PortalVerifyRoute: PortalVerifyRoute,
   PortalIndexRoute: PortalIndexRoute,
   PortalContestsContestSlugRoute: PortalContestsContestSlugRoute,
-  PortalEventsEventSlugRoute: PortalEventsEventSlugRoute,
   PortalProblemsProblemSlugRoute: PortalProblemsProblemSlugRoute,
   PortalContestsIndexRoute: PortalContestsIndexRoute,
-  PortalEventsIndexRoute: PortalEventsIndexRoute,
   PortalProblemsIndexRoute: PortalProblemsIndexRoute,
 }
 
-const PortalRouteRouteWithChildren = PortalRouteRoute._addFileChildren(
-  PortalRouteRouteChildren,
-)
+const PortalRouteWithChildren =
+  PortalRoute._addFileChildren(PortalRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PortalRouteRoute: PortalRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   LoginRoute: LoginRoute,
+  PortalRoute: PortalRouteWithChildren,
   RecoverRoute: RecoverRoute,
   SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

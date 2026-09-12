@@ -1,10 +1,3 @@
-/**
- * Chaos Computer Club India — chaoscomputerclub.in
- *
- * Copyright (c) 2026 Chaos Computer Club India
- * Licensed under the MIT License. See LICENSE in the project root for license information.
- */
-
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -23,17 +16,11 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        accent:
-          "bg-accent text-accent-foreground shadow-[0_10px_30px_-14px_color-mix(in_oklab,var(--accent)_60%,transparent)] hover:bg-accent/90",
-        outlineStrong:
-          "border border-border-strong bg-transparent text-foreground hover:bg-surface-raised hover:border-accent/50",
-        nav: "text-muted-foreground hover:text-foreground hover:bg-surface-raised/60",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
-        xl: "h-12 rounded-md px-6 text-sm",
         icon: "h-9 w-9",
       },
     },
