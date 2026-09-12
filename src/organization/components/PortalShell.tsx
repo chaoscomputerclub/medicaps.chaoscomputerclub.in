@@ -19,12 +19,12 @@ import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { getToken } from "@/lib/auth";
 
 const links = [
-  { to: "/portal", label: "Operations", icon: LayoutDashboard },
-  { to: "/portal/contests", label: "Contests", icon: Trophy },
-  { to: "/portal/leaderboard", label: "Leaderboard", icon: Award },
-  { to: "/portal/problems", label: "Archive", icon: Archive },
-  { to: "/portal/verify", label: "Verify proof", icon: ShieldCheck },
-  { to: "/portal/profile", label: "Profile", icon: UserRound },
+  { to: "/portal", label: "Operations", icon: LayoutDashboard, exact: true },
+  { to: "/portal/contests", label: "Contests", icon: Trophy, exact: false },
+  { to: "/portal/leaderboard", label: "Leaderboard", icon: Award, exact: true },
+  { to: "/portal/problems", label: "Archive", icon: Archive, exact: false },
+  { to: "/portal/verify", label: "Verify proof", icon: ShieldCheck, exact: true },
+  { to: "/portal/profile", label: "Profile", icon: UserRound, exact: true },
 ] as const;
 
 export function PortalShell() {
@@ -54,6 +54,8 @@ export function PortalShell() {
         .slice(0, 2)
         .toUpperCase()
     : "??";
+
+  const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
 
   return (
     <div className="portal-frame">
@@ -87,15 +89,16 @@ export function PortalShell() {
 
         <nav aria-label="Portal navigation">
           {links.map((item) => {
-            const active =
-              item.to === "/portal"
-                ? pathname === item.to
-                : pathname.startsWith(item.to);
+            const active = item.exact
+              ? cleanPath === item.to
+              : cleanPath === item.to || cleanPath.startsWith(item.to + "/");
             return (
               <Link
                 key={item.to}
                 to={item.to}
                 preload="intent"
+                activeOptions={{ exact: item.exact }}
+                activeProps={{ className: "active" }}
                 className={active ? "nav-item active" : "nav-item"}
                 onClick={() => dispatch(setSidebarOpen(false))}
               >
