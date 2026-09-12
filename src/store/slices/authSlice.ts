@@ -163,6 +163,9 @@ export const authSlice = createSlice({
     builder.addCase(sendOtpThunk.fulfilled, (state, action) => {
       state.pending = false;
       state.step = "otp";
+      if (action.payload.transaction_id) {
+        state.transactionId = action.payload.transaction_id;
+      }
       if (action.payload.dev_otp) {
         state.devOtp = action.payload.dev_otp;
       }
