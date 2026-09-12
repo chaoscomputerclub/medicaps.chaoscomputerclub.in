@@ -1,6 +1,6 @@
 /**
  * Chaos Computer Club India — Real-Time Database Query Definitions
- * Strictly Zero Static Data — All Records Queried From Database
+ * Memoized Profile Data Layer + Single Unified Query Instance
  */
 
 import { queryOptions } from "@tanstack/react-query";
@@ -24,18 +24,27 @@ import type {
   Achievement,
 } from "./types";
 
+export type FullProfilePayload = {
+  member: MemberProfile;
+  ratingHistory: RatingHistoryPoint[];
+  recentBattles: OfflineBattleResult[];
+  campusPass: CampusPass;
+  proofs: TrustProof[];
+  achievements: Achievement[];
+};
+
 export const defaultMemberProfile: MemberProfile = {
   id: "",
-  handle: "cadet",
-  full_name: "Cadet",
+  handle: "",
+  full_name: "",
   email: "",
-  prn: "N/A",
+  prn: "—",
   department: "CSE",
   batch: "2023-27",
   rating: 1200,
   peak_rating: 1200,
   peak_contest: "Campus Standby",
-  university_rank: 1,
+  university_rank: 0,
   active_members: 0,
   attendance_count: 0,
   attendance_total: 0,
@@ -48,7 +57,7 @@ export const defaultMemberProfile: MemberProfile = {
 
 export const defaultCampusPass: CampusPass = {
   pass_code: "NONE",
-  member_name: "Cadet",
+  member_name: "",
   handle: "—",
   prn_hash: "N/A",
   contest_title: "Campus Session",
@@ -58,192 +67,296 @@ export const defaultCampusPass: CampusPass = {
   status: "expired",
 };
 
-async function fetchFullProfileData() {
+// In-memory memoization caches
+let fullProfilePromise: Promise<FullProfilePayload> | null = null;
+let fullProfileCache: { data: FullProfilePayload; timestamp: number } | null = null;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+let publicRecordsPromise: Promise<any> | null = null;
+let publicRecordsCache: { data: any; timestamp: number } | null = null;
+
+export async function fetchFullProfileData(force = false): Promise<FullProfilePayload> {
   if (typeof window !== "undefined") {
+    // 1. Check in-memory memoized cache
+    if (!force && fullProfileCache && Date.now() - fullProfileCache.timestamp < CACHE_TTL) {
+      return fullProfileCache.data;
+    }
+
+    // 2. Reuse in-flight promise to eliminate duplicate parallel fetches
+    if (!force && fullProfilePromise) {
+      return fullProfilePromise;
+    }
+
     const token = getToken();
     if (!token) {
       return {
         member: defaultMemberProfile,
-        ratingHistory: [] as RatingHistoryPoint[],
-        recentBattles: [] as OfflineBattleResult[],
+        ratingHistory: [],
+        recentBattles: [],
         campusPass: defaultCampusPass,
-        proofs: [] as TrustProof[],
-        achievements: [] as Achievement[],
+        proofs: [],
+        achievements: [],
       };
     }
+
     const apiBase = getApiBase();
-    try {
-      const res = await fetch(`${apiBase}/auth/profile/full`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return {
-          member: { ...defaultMemberProfile, ...(data.member || {}) },
-          ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
-          recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
-          campusPass: data.campusPass || defaultCampusPass,
-          proofs: Array.isArray(data.proofs) ? data.proofs : [],
-          achievements: Array.isArray(data.achievements) ? data.achievements : [],
-        };
+    fullProfilePromise = (async () => {
+      try {
+        const res = await fetch(`${apiBase}/auth/profile/full`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const payload: FullProfilePayload = {
+            member: { ...defaultMemberProfile, ...(data.member || {}) },
+            ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
+            recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
+            campusPass: data.campusPass || defaultCampusPass,
+            proofs: Array.isArray(data.proofs) ? data.proofs : [],
+            achievements: Array.isArray(data.achievements) ? data.achievements : [],
+          };
+          fullProfileCache = { data: payload, timestamp: Date.now() };
+          return payload;
+        }
+        if (res.status === 401 || res.status === 403) {
+          clearToken();
+          fullProfileCache = null;
+          window.location.href = "/auth";
+        }
+      } catch {
+        // Fallback on network failure
+      } finally {
+        fullProfilePromise = null;
       }
-      if (res.status === 401 || res.status === 403) {
-        clearToken();
-        window.location.href = "/auth";
-      }
-    } catch {
-      // Network failure, return safe defaults
-    }
+
+      return {
+        member: defaultMemberProfile,
+        ratingHistory: [],
+        recentBattles: [],
+        campusPass: defaultCampusPass,
+        proofs: [],
+        achievements: [],
+      };
+    })();
+
+    return fullProfilePromise;
   }
 
-  // During SSR or fallback, return safe defaults without throwing UNAUTHORIZED
+  // During SSR, return safe defaults without throwing
   return {
     member: defaultMemberProfile,
-    ratingHistory: [] as RatingHistoryPoint[],
-    recentBattles: [] as OfflineBattleResult[],
+    ratingHistory: [],
+    recentBattles: [],
     campusPass: defaultCampusPass,
-    proofs: [] as TrustProof[],
-    achievements: [] as Achievement[],
+    proofs: [],
+    achievements: [],
   };
+}
+
+/**
+ * Eagerly preloads and memoizes full profile details before route transition
+ */
+export async function preloadFullProfile(tokenOverride?: string): Promise<FullProfilePayload> {
+  if (tokenOverride && typeof window !== "undefined") {
+    localStorage.setItem("ccc_medicaps_token", tokenOverride);
+  }
+  return await fetchFullProfileData(true);
 }
 
 async function publicRecords() {
-  const data = await getPublicPortalData();
-  const mappedContests: OfflineContest[] = (data.contests || []).map((record: any) => {
-    const contestProblems: ContestProblem[] = (data.problems || [])
-      .filter((problem: any) => problem.contest_id === record.id)
-      .map((problem: any) => ({
-        index: problem.problem_index ?? problem.index,
-        title: problem.title,
-        topic: problem.topic,
-        points: problem.points,
-        solved_count: problem.solved_count ?? 0,
-        first_ac_seconds: problem.first_ac_seconds,
-        editorial: problem.editorial_summary ?? "Editorial verified and sealed.",
-      }));
-    const contestStandings: ScoreboardEntry[] = (data.standings || [])
-      .filter((entry: any) => entry.contest_id === record.id)
-      .map((entry: any) => ({
-        rank: entry.rank,
-        handle: entry.handle,
-        full_name: entry.full_name,
-        department: entry.department as ScoreboardEntry["department"],
-        batch: entry.batch as ScoreboardEntry["batch"],
-        division: entry.division as ScoreboardEntry["division"],
-        score: entry.score,
-        solved: entry.solved,
-        penalty_seconds: entry.penalty_seconds,
-        rating_delta: entry.rating_delta ?? 0,
-        is_you: false,
-        problems: Array.isArray(entry.telemetry) ? (entry.telemetry as ProblemTelemetry[]) : [],
-      }));
-    return {
-      id: record.id,
-      slug: record.slug,
-      title: record.title,
-      season: record.season,
-      status: record.status as OfflineContest["status"],
-      division: record.division === "open" ? "overall" : (record.division as OfflineContest["division"]),
-      starts_at: record.starts_at,
-      ends_at: record.ends_at,
-      check_in_opens_at: record.check_in_opens_at,
-      venue: record.venue,
-      seat_capacity: record.seat_capacity,
-      registered_count: record.registered_count,
-      problem_count: record.problem_count,
-      environment: record.environment,
-      chief_proctors: record.chief_proctors || [],
-      prize_pool: record.prize_pool,
-      sponsor: record.sponsor,
-      summary: record.summary,
-      rules: record.rules || [],
-      problems: contestProblems,
-      standings: contestStandings,
-      registered: false,
-    };
-  });
+  if (publicRecordsCache && Date.now() - publicRecordsCache.timestamp < CACHE_TTL) {
+    return publicRecordsCache.data;
+  }
+  if (publicRecordsPromise) {
+    return publicRecordsPromise;
+  }
 
-  const proofs: TrustProof[] = (data.proofs || []).map((proof: any) => {
-    const contest = (data.contests || []).find((item: any) => item.id === proof.contest_id);
-    return {
-      certificate_id: proof.certificate_id,
-      contest_slug: contest?.slug ?? "chaos-arena-2026",
-      contest_title: proof.contest_title,
-      member_handle: proof.member_handle,
-      session_uuid: proof.session_uuid,
-      prn_hash: proof.prn_hash,
-      sha256_digest: proof.sha256_digest,
-      proctor_stamp: proof.proctor_stamp,
-      attendance_stamp: proof.attendance_stamp,
-      score: proof.score,
-      rank: proof.rank,
-      issued_at: proof.issued_at,
-      status: proof.status === "revoked" ? "revoked" : "valid",
-    };
-  });
+  publicRecordsPromise = (async () => {
+    try {
+      const data = await getPublicPortalData();
+      const mappedContests: OfflineContest[] = (data.contests || []).map((record: any) => {
+        const contestProblems: ContestProblem[] = (data.problems || [])
+          .filter((problem: any) => problem.contest_id === record.id)
+          .map((problem: any) => ({
+            index: problem.problem_index ?? problem.index,
+            title: problem.title,
+            topic: problem.topic,
+            points: problem.points,
+            solved_count: problem.solved_count ?? 0,
+            first_ac_seconds: problem.first_ac_seconds,
+            editorial: problem.editorial_summary ?? "Editorial verified and sealed.",
+          }));
+        const contestStandings: ScoreboardEntry[] = (data.standings || [])
+          .filter((entry: any) => entry.contest_id === record.id)
+          .map((entry: any) => ({
+            rank: entry.rank,
+            handle: entry.handle,
+            full_name: entry.full_name,
+            department: entry.department as ScoreboardEntry["department"],
+            batch: entry.batch as ScoreboardEntry["batch"],
+            division: entry.division as ScoreboardEntry["division"],
+            score: entry.score,
+            solved: entry.solved,
+            penalty_seconds: entry.penalty_seconds,
+            rating_delta: entry.rating_delta ?? 0,
+            is_you: false,
+            problems: Array.isArray(entry.telemetry) ? (entry.telemetry as ProblemTelemetry[]) : [],
+          }));
+        return {
+          id: record.id,
+          slug: record.slug,
+          title: record.title,
+          season: record.season,
+          status: record.status as OfflineContest["status"],
+          division: record.division === "open" ? "overall" : (record.division as OfflineContest["division"]),
+          starts_at: record.starts_at,
+          ends_at: record.ends_at,
+          check_in_opens_at: record.check_in_opens_at,
+          venue: record.venue,
+          seat_capacity: record.seat_capacity,
+          registered_count: record.registered_count,
+          problem_count: record.problem_count,
+          environment: record.environment,
+          chief_proctors: record.chief_proctors || [],
+          prize_pool: record.prize_pool,
+          sponsor: record.sponsor,
+          summary: record.summary,
+          rules: record.rules || [],
+          problems: contestProblems,
+          standings: contestStandings,
+          registered: false,
+        };
+      });
 
-  return {
-    contests: mappedContests,
-    announcements: (data.announcements || []) as AnnouncementFeedItem[],
-    proofs,
-  };
+      const proofs: TrustProof[] = (data.proofs || []).map((proof: any) => {
+        const contest = (data.contests || []).find((item: any) => item.id === proof.contest_id);
+        return {
+          certificate_id: proof.certificate_id,
+          contest_slug: contest?.slug ?? "chaos-arena-2026",
+          contest_title: proof.contest_title,
+          member_handle: proof.member_handle,
+          session_uuid: proof.session_uuid,
+          prn_hash: proof.prn_hash,
+          sha256_digest: proof.sha256_digest,
+          proctor_stamp: proof.proctor_stamp,
+          attendance_stamp: proof.attendance_stamp,
+          score: proof.score,
+          rank: proof.rank,
+          issued_at: proof.issued_at,
+          status: proof.status === "revoked" ? "revoked" : "valid",
+        };
+      });
+
+      const result = {
+        contests: mappedContests,
+        announcements: (data.announcements || []) as AnnouncementFeedItem[],
+        proofs,
+      };
+      publicRecordsCache = { data: result, timestamp: Date.now() };
+      return result;
+    } finally {
+      publicRecordsPromise = null;
+    }
+  })();
+
+  return publicRecordsPromise;
 }
 
-const publicQuery = queryOptions({ queryKey: ["portal", "public-records"], queryFn: publicRecords });
-
 export const portalQueries = {
+  fullProfile: () =>
+    queryOptions({
+      queryKey: ["portal", "full-profile"],
+      queryFn: () => fetchFullProfileData(),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
   member: () =>
     queryOptions({
-      queryKey: ["portal", "member"],
-      queryFn: async () => (await fetchFullProfileData()).member,
+      queryKey: ["portal", "full-profile"],
+      queryFn: () => fetchFullProfileData(),
+      select: (data: FullProfilePayload) => data.member,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
+  ratingHistory: () =>
+    queryOptions({
+      queryKey: ["portal", "full-profile"],
+      queryFn: () => fetchFullProfileData(),
+      select: (data: FullProfilePayload) => data.ratingHistory,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
+  recentBattles: () =>
+    queryOptions({
+      queryKey: ["portal", "full-profile"],
+      queryFn: () => fetchFullProfileData(),
+      select: (data: FullProfilePayload) => data.recentBattles,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
+  campusPass: () =>
+    queryOptions({
+      queryKey: ["portal", "full-profile"],
+      queryFn: () => fetchFullProfileData(),
+      select: (data: FullProfilePayload) => data.campusPass,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
+  achievements: () =>
+    queryOptions({
+      queryKey: ["portal", "full-profile"],
+      queryFn: () => fetchFullProfileData(),
+      select: (data: FullProfilePayload) => data.achievements,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     }),
   contests: () =>
     queryOptions({
-      queryKey: ["portal", "contests"],
-      queryFn: async () => (await publicRecords()).contests,
+      queryKey: ["portal", "public-records"],
+      queryFn: () => publicRecords(),
+      select: (data: any) => data.contests as OfflineContest[],
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     }),
   contest: (slug: string) =>
     queryOptions({
-      queryKey: ["portal", "contest", slug],
-      queryFn: async () => (await publicRecords()).contests.find((c) => c.slug === slug) ?? null,
+      queryKey: ["portal", "public-records"],
+      queryFn: () => publicRecords(),
+      select: (data: any) => (data.contests as OfflineContest[]).find((c) => c.slug === slug) ?? null,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
+  announcements: () =>
+    queryOptions({
+      queryKey: ["portal", "public-records"],
+      queryFn: () => publicRecords(),
+      select: (data: any) => data.announcements as AnnouncementFeedItem[],
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }),
+  proofs: () =>
+    queryOptions({
+      queryKey: ["portal", "public-records"],
+      queryFn: () => publicRecords(),
+      select: (data: any) => data.proofs as TrustProof[],
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     }),
   leaderboard: () =>
     queryOptions({
       queryKey: ["portal", "leaderboard"],
-      queryFn: async () => await getUniversityLeaderboardData(),
+      queryFn: () => getUniversityLeaderboardData(),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     }),
-  announcements: () =>
+  publicRecords: () =>
     queryOptions({
-      queryKey: ["portal", "announcements"],
-      queryFn: async () => (await publicRecords()).announcements,
-    }),
-  proofs: () =>
-    queryOptions({
-      queryKey: ["portal", "proofs"],
-      queryFn: async () => (await publicRecords()).proofs,
-    }),
-  publicRecords: () => publicQuery,
-  ratingHistory: () =>
-    queryOptions({
-      queryKey: ["portal", "rating-history"],
-      queryFn: async () => (await fetchFullProfileData()).ratingHistory,
-    }),
-  recentBattles: () =>
-    queryOptions({
-      queryKey: ["portal", "recent-battles"],
-      queryFn: async () => (await fetchFullProfileData()).recentBattles,
-    }),
-  campusPass: () =>
-    queryOptions({
-      queryKey: ["portal", "campus-pass"],
-      queryFn: async () => (await fetchFullProfileData()).campusPass,
-    }),
-  achievements: () =>
-    queryOptions({
-      queryKey: ["portal", "achievements"],
-      queryFn: async () => (await fetchFullProfileData()).achievements,
+      queryKey: ["portal", "public-records"],
+      queryFn: () => publicRecords(),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
     }),
 };

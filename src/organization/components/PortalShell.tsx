@@ -95,6 +95,7 @@ export function PortalShell() {
               <Link
                 key={item.to}
                 to={item.to}
+                preload="intent"
                 className={active ? "nav-item active" : "nav-item"}
                 onClick={() => dispatch(setSidebarOpen(false))}
               >

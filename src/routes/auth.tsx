@@ -7,6 +7,7 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
+import { preloadFullProfile } from "@/organization/data/queries";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Chrome, Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle, Lock } from "lucide-react";
@@ -137,7 +138,10 @@ function Auth() {
       window.history.replaceState({}, document.title, window.location.pathname);
 
       if (onboardedParam === "true" || onboardedParam === "0") {
-        void navigate({ to: "/portal" });
+        void (async () => {
+          await preloadFullProfile(tokenParam);
+          void navigate({ to: "/portal" });
+        })();
         return;
       } else {
         dispatch(setStep("onboarding"));
@@ -194,6 +198,7 @@ function Auth() {
     if (verifyOtpThunk.fulfilled.match(resultAction)) {
       const res = resultAction.payload;
       if (!res.is_new_user && res.member?.is_onboarded) {
+        await preloadFullProfile(res.access_token);
         void navigate({ to: "/portal" });
       }
     }
@@ -239,6 +244,7 @@ function Auth() {
     );
 
     if (completeOnboardingThunk.fulfilled.match(resultAction)) {
+      await preloadFullProfile();
       void navigate({ to: "/portal" });
     }
   }

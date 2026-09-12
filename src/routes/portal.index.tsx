@@ -61,14 +61,14 @@ function Dashboard() {
 
   const live = contests.find((c) => c.status === "live") ?? contests[0];
   const next = contests.find((c) => c.status === "upcoming");
-  const greetingName = member?.full_name ? member.full_name.split(" ")[0] : member?.handle || "Cadet";
+  const greetingName = member?.full_name ? member.full_name.split(" ")[0] : member?.handle && member.handle.toLowerCase() !== "cadet" ? member.handle : "";
 
   return (
     <div className="page-wrap">
       <header className="page-header">
         <div>
           <p className="kicker">Member operations console</p>
-          <h1>Good morning, {greetingName}.</h1>
+          <h1>Good morning{greetingName ? `, ${greetingName}.` : "."}</h1>
           <p>Your competitive record is only written inside a verified Medi-Caps contest room.</p>
         </div>
         <div className="member-rating">
