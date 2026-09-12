@@ -1,3 +1,11 @@
+/**
+ * Chaos Computer Club India — Medi-Caps Chapter
+ * medicaps.chaoscomputerclub.in
+ *
+ * Copyright (c) 2026 Chaos Computer Club India
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ */
+
 import { queryOptions } from "@tanstack/react-query";
 import * as api from "./api";
 import type { DataMode, LeaderboardScope } from "./types";

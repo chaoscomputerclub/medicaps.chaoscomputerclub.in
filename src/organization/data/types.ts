@@ -1,4 +1,12 @@
 /**
+ * Chaos Computer Club India — Medi-Caps Chapter
+ * medicaps.chaoscomputerclub.in
+ *
+ * Copyright (c) 2026 Chaos Computer Club India
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ */
+
+/**
  * Portal data contracts.
  *
  * These types are the shape the eventual API is expected to return: snake_case
