@@ -77,25 +77,33 @@ export const getPublicPortalData = createServerFn({ method: "GET" }).handler(asy
  */
 export const getMemberProfileData = createServerFn({ method: "GET" }).handler(async () => {
   const backendUrl = getBackendUrl();
-
-  const res = await fetch(`${backendUrl}/auth/profile/full`, {
-    headers: { "Content-Type": "application/json" },
-  }).catch(() => null);
-
-  if (res && res.ok) {
-    const data = await res.json();
-    return data as {
-      member: MemberProfile;
-      ratingHistory: RatingHistoryPoint[];
-      recentBattles: OfflineBattleResult[];
-      campusPass: CampusPass;
-      proofs: TrustProof[];
-      achievements: Achievement[];
-    };
+  try {
+    const res = await fetch(`${backendUrl}/auth/profile/full`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        member: data.member || null,
+        ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
+        recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
+        campusPass: data.campusPass || null,
+        proofs: Array.isArray(data.proofs) ? data.proofs : [],
+        achievements: Array.isArray(data.achievements) ? data.achievements : [],
+      };
+    }
+  } catch {
+    // Unreachable or unauthenticated
   }
 
-  // Guest members strictly not allowed
-  throw new Error("UNAUTHORIZED");
+  return {
+    member: null,
+    ratingHistory: [],
+    recentBattles: [],
+    campusPass: null,
+    proofs: [],
+    achievements: [],
+  };
 });
 
 /**

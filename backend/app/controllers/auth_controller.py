@@ -253,40 +253,81 @@ class AuthController:
             select(func.count(MemberProfile.id)).where(
                 MemberProfile.rating > current_member.rating
             )
+        )        # Campus pass formatting
+        pass_data = {
+            "pass_code": getattr(campus_pass, "pass_code", None) or "NONE",
+            "member_name": current_member.full_name or current_member.email,
+            "handle": current_member.handle or "—",
+            "prn_hash": f"PRN-{current_member.prn[-4:]}" if current_member.prn else "N/A",
+            "contest_title": "Offline Contest Session",
+            "seat": getattr(campus_pass, "seat", None) or "Assigned Physical Lab",
+            "venue": "Campus Computer Center",
+            "check_in_opens_at": datetime.now(timezone.utc).isoformat(),
+            "status": "issued" if campus_pass else "expired",
+        }
+
+        # Query attended scoreboards / battles
+        sb_rows = await db.execute(
+            select(ScoreboardEntry, OfflineContest)
+            .join(OfflineContest, ScoreboardEntry.contest_id == OfflineContest.id)
+            .where(ScoreboardEntry.member_id == current_member.id)
+            .order_by(OfflineContest.starts_at.desc())
+        )
+        recent_battles = []
+        rating_history = []
+        for sb, contest in sb_rows.all():
+            recent_battles.append({
+                "contest": contest.title,
+                "date": contest.starts_at.isoformat() if contest.starts_at else datetime.now(timezone.utc).isoformat(),
+                "rank": sb.rank,
+                "solved": f"{sb.solved}/{contest.problem_count or 6}",
+                "penalty": f"{sb.penalty_seconds // 60}m",
+                "delta": sb.rating_delta or 0,
+                "certificate_id": f"PROOF-{contest.slug[:8].upper()}-{sb.rank:03d}",
+            })
+            rating_history.append({
+                "contest": contest.title,
+                "date": contest.starts_at.isoformat() if contest.starts_at else datetime.now(timezone.utc).isoformat(),
+                "rank": sb.rank,
+                "old_rating": current_member.rating - (sb.rating_delta or 0),
+                "new_rating": current_member.rating,
+            })
+
+        tier = "5★ Grandmaster" if current_member.rating >= 2200 else (
+            "4★ Master" if current_member.rating >= 1900 else (
+                "3★ Specialist" if current_member.rating >= 1600 else (
+                    "2★ Candidate" if current_member.rating >= 1400 else "1★ Explorer"
+                )
+            )
         )
 
         return {
             "member": {
                 "id": current_member.id,
-                "handle": current_member.handle,
-                "full_name": current_member.full_name,
+                "handle": current_member.handle or "cadet",
+                "full_name": current_member.full_name or "Cadet",
                 "email": current_member.email,
-                "prn": current_member.prn,
-                "department": current_member.department,
-                "batch": current_member.batch,
+                "prn": current_member.prn or "N/A",
+                "department": current_member.department or "CSE",
+                "batch": current_member.batch or "2023-27",
                 "rating": current_member.rating,
                 "peak_rating": current_member.peak_rating,
+                "peak_contest": "Chaos Arena 2026",
                 "university_rank": (ranked or 0) + 1,
                 "active_members": all_members_count or 0,
                 "attendance_count": attended or 0,
                 "attendance_total": total_contests or 0,
                 "is_onboarded": current_member.is_onboarded,
+                "is_core_member": getattr(current_member, "is_core_member", False),
+                "tier": tier,
+                "podiums": 0,
+                "streak": 0,
             },
-            "campusPass": {
-                "member_name": current_member.full_name or current_member.email,
-                "handle": current_member.handle or "—",
-                "prn_hash": f"PRN-{current_member.prn[-4:]}" if current_member.prn else "N/A",
-                "is_active": campus_pass is not None,
-                "pass_id": campus_pass.id if campus_pass else None,
-                "contest_id": campus_pass.contest_id if campus_pass else None,
-            } if campus_pass else {
-                "is_active": False,
-                "pass_id": None,
-                "member_name": current_member.full_name or current_member.email,
-                "handle": current_member.handle or "—",
-                "prn_hash": "N/A",
-                "contest_id": None,
-            },
+            "campusPass": pass_data,
+            "ratingHistory": rating_history,
+            "recentBattles": recent_battles,
+            "achievements": [],
+            "proofs": [],
         }
 
     @staticmethod

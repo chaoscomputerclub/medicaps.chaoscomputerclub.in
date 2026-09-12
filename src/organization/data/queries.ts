@@ -4,37 +4,12 @@
  */
 
 import { queryOptions } from "@tanstack/react-query";
-import { getToken, getApiBase } from "@/lib/auth";
+import { getToken, getApiBase, clearToken } from "@/lib/auth";
 import {
   getPublicPortalData,
   getMemberProfileData,
   getUniversityLeaderboardData,
 } from "./portal.functions";
-
-async function fetchFullProfileData() {
-  if (typeof window !== "undefined") {
-    const token = getToken();
-    if (!token) {
-      window.location.href = "/auth";
-      throw new Error("Authentication required. Guest members strictly not allowed.");
-    }
-    const apiBase = getApiBase();
-    const res = await fetch(`${apiBase}/auth/profile/full`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }).catch(() => null);
-    if (res && res.ok) {
-      return await res.json();
-    }
-    if (res && (res.status === 401 || res.status === 403)) {
-      window.location.href = "/auth";
-      throw new Error("Session expired. Please sign in again.");
-    }
-  }
-  return await getMemberProfileData();
-}
 import type {
   AnnouncementFeedItem,
   ContestProblem,
@@ -42,7 +17,98 @@ import type {
   ProblemTelemetry,
   ScoreboardEntry,
   TrustProof,
+  MemberProfile,
+  RatingHistoryPoint,
+  CampusPass,
+  OfflineBattleResult,
+  Achievement,
 } from "./types";
+
+export const defaultMemberProfile: MemberProfile = {
+  id: "",
+  handle: "cadet",
+  full_name: "Cadet",
+  email: "",
+  prn: "N/A",
+  department: "CSE",
+  batch: "2023-27",
+  rating: 1200,
+  peak_rating: 1200,
+  peak_contest: "Campus Standby",
+  university_rank: 1,
+  active_members: 0,
+  attendance_count: 0,
+  attendance_total: 0,
+  is_core_member: false,
+  is_onboarded: false,
+  tier: "1★ Explorer",
+  podiums: 0,
+  streak: 0,
+};
+
+export const defaultCampusPass: CampusPass = {
+  pass_code: "NONE",
+  member_name: "Cadet",
+  handle: "—",
+  prn_hash: "N/A",
+  contest_title: "Campus Session",
+  seat: "Unassigned",
+  venue: "Campus Center",
+  check_in_opens_at: new Date().toISOString(),
+  status: "expired",
+};
+
+async function fetchFullProfileData() {
+  if (typeof window !== "undefined") {
+    const token = getToken();
+    if (!token) {
+      return {
+        member: defaultMemberProfile,
+        ratingHistory: [] as RatingHistoryPoint[],
+        recentBattles: [] as OfflineBattleResult[],
+        campusPass: defaultCampusPass,
+        proofs: [] as TrustProof[],
+        achievements: [] as Achievement[],
+      };
+    }
+    const apiBase = getApiBase();
+    try {
+      const res = await fetch(`${apiBase}/auth/profile/full`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          member: { ...defaultMemberProfile, ...(data.member || {}) },
+          ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
+          recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
+          campusPass: data.campusPass || defaultCampusPass,
+          proofs: Array.isArray(data.proofs) ? data.proofs : [],
+          achievements: Array.isArray(data.achievements) ? data.achievements : [],
+        };
+      }
+      if (res.status === 401 || res.status === 403) {
+        clearToken();
+        window.location.href = "/auth";
+      }
+    } catch {
+      // Network failure, return safe defaults
+    }
+  }
+
+  // During SSR or fallback, return safe defaults without throwing UNAUTHORIZED
+  return {
+    member: defaultMemberProfile,
+    ratingHistory: [] as RatingHistoryPoint[],
+    recentBattles: [] as OfflineBattleResult[],
+    campusPass: defaultCampusPass,
+    proofs: [] as TrustProof[],
+    achievements: [] as Achievement[],
+  };
+}
 
 async function publicRecords() {
   const data = await getPublicPortalData();

@@ -3,7 +3,7 @@ import { MapPin, ScanLine } from "lucide-react";
 import type { CampusPass } from "../data/types";
 import { formatContestDate } from "./ui";
 export function CampusPassCard({pass}:{pass:CampusPass}){
-  if(!pass || pass.pass_code === "NONE") {
+  if(!pass || !pass.pass_code || pass.pass_code === "NONE") {
     return (
       <article className="campus-pass flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#222]">
         <header className="w-full flex justify-between font-mono text-xs text-[#555]">
