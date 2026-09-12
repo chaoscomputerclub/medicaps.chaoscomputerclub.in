@@ -12,7 +12,7 @@ from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.routers.auth import get_current_member
+from app.middleware.auth import get_current_member
 from app.engine.enums import Language, Verdict, ComparisonMode
 from app.engine.executors.factory import get_executor
 from app.engine.schemas import TestCaseSchema

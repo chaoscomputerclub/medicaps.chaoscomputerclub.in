@@ -56,6 +56,11 @@ class Settings(BaseSettings):
     # OTP expiry (minutes)
     OTP_EXPIRE_MINUTES: int = 10
 
+    # Redis (OTP session store)
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "127.0.0.1")
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
+    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+
     @property
     def cors_origins_list(self) -> List[str]:
         env_origins = os.getenv("CORS_ORIGINS", "")

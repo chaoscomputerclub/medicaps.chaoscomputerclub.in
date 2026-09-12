@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
 from app.models.db_models import CampusPass, MemberProfile
 from app.models.schemas import CampusPassResponse
-from app.routers.auth import get_current_member
+from app.middleware.auth import get_current_member
 
 router = APIRouter(prefix="/passes", tags=["Campus Gate Passes"])
 

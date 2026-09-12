@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 from app.core.db import get_db
 from app.models.db_models import ContestProblem, MemberProfile, OfflineContest
 from app.models.schemas import ContestProblemResponse, OfflineContestResponse
-from app.routers.auth import get_current_member
+from app.middleware.auth import get_current_member
 
 router = APIRouter(prefix="/contests", tags=["Offline Contests"])
 
