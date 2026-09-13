@@ -1,15 +1,15 @@
 /**
  * Chaos Computer Club India — University Leaderboard
- * Strictly formatted with original UI layout:
- * Header: Verified Elo index | University leaderboard. | Rating Cycle Monsoon '26
- * Columns: RANK | NAME (with profile pic) | ATTENDED | SCORE
- * Clean brutalist styling, zero filters.
+ * Premium redesign: clean brutalist aesthetic, consistent scores,
+ * initials-based avatars with deterministic per-user colors,
+ * sparkline rating graphs, perfect right-aligned score gapping.
+ * Columns: RANK | NAME | ATTENDED | TREND | SCORE
  */
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAppSelector } from "@/store/hooks";
-import { ChevronDown, ChevronUp, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { LeaderboardSkeleton } from "@/organization/components/skeletons";
 import { portalQueries } from "@/organization/data/queries";
 import type { LeaderboardEntry } from "@/organization/data/types";
@@ -23,12 +23,14 @@ export const Route = createFileRoute("/portal/leaderboard")({
       { title: "University Leaderboard — CCC Medi-Caps" },
       {
         name: "description",
-        content: "University-wide CCC rating standings from verified offline contests across CSE, IT, AIDS, and Cyber Security.",
+        content:
+          "University-wide CCC rating standings from verified offline contests across CSE, IT, AIDS, and Cyber Security.",
       },
       { property: "og:title", content: "CCC Medi-Caps University Leaderboard" },
       {
         property: "og:description",
-        content: "Verified offline contest ratings across CSE, IT, AIDS and Cyber Security.",
+        content:
+          "Verified offline contest ratings across CSE, IT, AIDS and Cyber Security.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -39,33 +41,67 @@ export const Route = createFileRoute("/portal/leaderboard")({
   component: Leaderboard,
 });
 
-const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
-  volt: { icon: "⚡", bg: "bg-lime-500/10", border: "border-lime-500/40", text: "text-lime-400" },
-  binary: { icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
-  quantum: { icon: "⚛️", bg: "bg-purple-500/10", border: "border-purple-500/40", text: "text-purple-400" },
-  matrix: { icon: "💻", bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-400" },
-  grandmaster: { icon: "🏆", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
-  cipher: { icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
-};
+/** Deterministic hue from a string — stable unique avatar color per user */
+function stringToHue(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+}
 
-function AvatarBubble({ item }: { item: LeaderboardEntry }) {
-  const emblem = item.avatar_url && EMBLEM_MAP[item.avatar_url];
-
-  if (emblem) {
+/** Inline SVG sparkline — renders rating history as an elegant polyline */
+function Sparkline({ values }: { values: number[] }) {
+  if (!values || values.length < 2) {
     return (
-      <div
-        className={cn(
-          "w-8 h-8 rounded-[1px] border flex items-center justify-center text-sm flex-shrink-0 shadow-sm",
-          emblem.bg,
-          emblem.border,
-          emblem.text,
-        )}
-      >
-        <span>{emblem.icon}</span>
+      <div className="lb-trend-wrap">
+        <svg className="spark" viewBox="0 0 84 22" aria-hidden="true">
+          <line
+            x1="0"
+            y1="11"
+            x2="84"
+            y2="11"
+            stroke="var(--line-strong)"
+            strokeWidth="1.5"
+            strokeDasharray="3 3"
+          />
+        </svg>
       </div>
     );
   }
 
+  const W = 84;
+  const H = 22;
+  const pad = 3;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const pts = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  const last = values[values.length - 1] ?? values[0] ?? 0;
+  const first = values[0] ?? 0;
+  const isUp = last >= first;
+  const strokeColor = isUp ? "var(--accent)" : "var(--danger)";
+
+  const lastX = W - pad;
+  const lastY = H - pad - ((last - min) / range) * (H - pad * 2);
+
+  return (
+    <div className="lb-trend-wrap">
+      <svg className="spark" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <polyline points={pts.join(" ")} stroke={strokeColor} fill="none" strokeWidth="1.75" />
+        <circle cx={lastX} cy={lastY} r="2.5" fill={strokeColor} />
+      </svg>
+    </div>
+  );
+}
+
+function AvatarBubble({ item }: { item: LeaderboardEntry }) {
   const hasImg = Boolean(
     item.avatar_url &&
       (item.avatar_url.startsWith("http") ||
@@ -83,16 +119,36 @@ function AvatarBubble({ item }: { item: LeaderboardEntry }) {
         .toUpperCase()
     : item.handle?.slice(0, 2).toUpperCase() || "CC";
 
+  const seed = item.full_name || item.handle || "cc";
+  const hue = stringToHue(seed);
+  const avatarStyle = {
+    background: `hsl(${hue}, 45%, 15%)`,
+    color: `hsl(${hue}, 80%, 75%)`,
+    border: `1px solid hsl(${hue}, 45%, 28%)`,
+  };
+
   if (hasImg) {
     return (
-      <div className="w-8 h-8 rounded-[1px] border border-[var(--line)] overflow-hidden flex-shrink-0 bg-zinc-900 shadow-sm">
+      <div className="lb-avatar" style={{ border: avatarStyle.border }}>
         <img
           src={item.avatar_url!}
           alt={item.full_name || item.handle}
           className="w-full h-full object-cover"
           onError={(e) => {
-            (e.currentTarget as HTMLElement).style.display = "none";
-            e.currentTarget.parentElement!.innerText = initials;
+            const el = e.currentTarget as HTMLImageElement;
+            el.style.display = "none";
+            const p = el.parentElement!;
+            Object.assign(p.style, {
+              background: avatarStyle.background,
+              color: avatarStyle.color,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "var(--font-mono)",
+              fontWeight: "700",
+              fontSize: "11px",
+            });
+            p.textContent = initials;
           }}
         />
       </div>
@@ -100,9 +156,30 @@ function AvatarBubble({ item }: { item: LeaderboardEntry }) {
   }
 
   return (
-    <div className="w-8 h-8 rounded-[1px] border border-[var(--line)] bg-[var(--surface)] text-[var(--accent)] font-mono text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-sm">
+    <div className="lb-avatar" style={avatarStyle}>
       {initials}
     </div>
+  );
+}
+
+/** Rank delta indicator with micro icons */
+function RankDelta({ change }: { change: number }) {
+  if (change > 0)
+    return (
+      <span className="lb-delta lb-delta--up">
+        <TrendingUp size={11} /> {change}
+      </span>
+    );
+  if (change < 0)
+    return (
+      <span className="lb-delta lb-delta--down">
+        <TrendingDown size={11} /> {Math.abs(change)}
+      </span>
+    );
+  return (
+    <span className="lb-delta lb-delta--flat">
+      <Minus size={11} />
+    </span>
   );
 }
 
@@ -112,13 +189,14 @@ function Leaderboard() {
 
   return (
     <div className="page-wrap">
-      {/* Original University Leaderboard Page Header */}
+      {/* Header */}
       <header className="page-header">
         <div>
           <p className="kicker">Verified Elo index</p>
           <h1>University leaderboard.</h1>
           <p>
-            One standing across CSE, IT, AIDS, and Cyber Security. Browser activity never affects rank.
+            One standing across CSE, IT, AIDS, and Cyber Security. Browser
+            activity never affects rank.
           </p>
         </div>
         <div className="ranking-meta">
@@ -128,59 +206,74 @@ function Leaderboard() {
         </div>
       </header>
 
-      {/* Table: RANK | NAME (with profile pic) | ATTENDED | SCORE */}
+      {/* Table: RANK | NAME | ATTENDED | TREND | SCORE */}
       <div className="table-scroll leaderboard-table">
         <table>
           <thead>
             <tr>
-              <th style={{ width: "110px" }}>Rank</th>
-              <th>Name</th>
-              <th style={{ width: "200px" }}>Attended</th>
-              <th style={{ width: "120px", textAlign: "right" }}>Score</th>
+              <th className="lb-th-rank">Rank</th>
+              <th className="lb-th-name">Name</th>
+              <th className="lb-th-attended">Attended</th>
+              <th className="lb-th-trend">Trend</th>
+              <th className="lb-th-score">Score</th>
             </tr>
           </thead>
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center py-12 text-[#777] font-mono text-sm">
+                <td
+                  colSpan={5}
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 0",
+                    color: "var(--muted)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                  }}
+                >
                   No ranked members found in university standings.
                 </td>
               </tr>
             ) : (
               data.map((x) => {
-                const change = (x.previous_rank ?? x.university_rank) - x.university_rank;
+                const change =
+                  (x.previous_rank ?? x.university_rank) - x.university_rank;
                 const isYou = x.id === currentMemberId;
+                const attended = x.attendance_count ?? 0;
+                const total = x.attendance_total || 6;
+                const pct = Math.min((attended / total) * 100, 100);
+                const rating =
+                  typeof x.rating === "number"
+                    ? x.rating
+                    : Number(x.rating) || 0;
+                const sparkData: number[] = Array.isArray(x.ratings)
+                  ? x.ratings.map(Number).filter(isFinite)
+                  : [rating];
 
                 return (
                   <tr
                     key={x.handle}
-                    className={cn(
-                      "transition-colors",
-                      isYou && "bg-[var(--accent)]/5 border-l-2 border-l-[var(--accent)]"
-                    )}
+                    className={cn("lb-row", isYou && "lb-row--you")}
                   >
                     {/* 1. RANK */}
-                    <td>
+                    <td className="lb-td-rank">
                       <div className="rank-cell">
-                        <strong>{String(x.university_rank).padStart(2, "0")}</strong>
-                        <span className={change > 0 ? "up" : change < 0 ? "down" : "flat"}>
-                          {change > 0 ? <ChevronUp /> : change < 0 ? <ChevronDown /> : <Minus />}
-                          {Math.abs(change) || "—"}
-                        </span>
+                        <strong>
+                          {String(x.university_rank).padStart(2, "0")}
+                        </strong>
+                        <RankDelta change={change} />
                       </div>
                     </td>
 
-                    {/* 2. NAME with Profile Pic / Avatar */}
-                    <td>
-                      <div className="flex items-center gap-3">
+                    {/* 2. NAME (no question marks, clean presentation) */}
+                    <td className="lb-td-name">
+                      <div className="lb-name-cell">
                         <AvatarBubble item={x} />
                         <div className="competitor">
-                          <div className="flex items-center gap-2">
-                            <strong className="text-white hover:text-[var(--accent)] transition-colors">
-                              {x.full_name || x.handle}
-                            </strong>
+                          <div className="lb-name-row">
+                            <strong>{x.full_name || x.handle}</strong>
                             {isYou && (
-                              <span className="proof-seal text-[8px] py-0.5 px-1 font-mono">
+                              <span className="proof-seal text-[8px] py-0.5 px-1.5 font-mono">
                                 YOU
                               </span>
                             )}
@@ -191,26 +284,25 @@ function Leaderboard() {
                     </td>
 
                     {/* 3. ATTENDED */}
-                    <td>
-                      <div className="flex items-center gap-2">
+                    <td className="lb-td-attended">
+                      <div className="lb-attendance">
                         <span className="attendance-meter">
-                          <i
-                            style={{
-                              width: `${
-                                (x.attendance_count / (x.attendance_total || 6)) * 100
-                              }%`,
-                            }}
-                          />
+                          <i style={{ width: `${pct}%` }} />
                         </span>
                         <small>
-                          {x.attendance_count}/{x.attendance_total || 6}
+                          {attended}/{total}
                         </small>
                       </div>
                     </td>
 
-                    {/* 4. SCORE */}
-                    <td className="score-value text-right font-mono font-bold text-[var(--accent)]">
-                      {x.rating}
+                    {/* 4. TREND (sparkline rating graph) */}
+                    <td className="lb-td-trend">
+                      <Sparkline values={sparkData} />
+                    </td>
+
+                    {/* 5. SCORE (perfectly aligned with header) */}
+                    <td className="lb-td-score">
+                      <span>{rating.toLocaleString()}</span>
                     </td>
                   </tr>
                 );
