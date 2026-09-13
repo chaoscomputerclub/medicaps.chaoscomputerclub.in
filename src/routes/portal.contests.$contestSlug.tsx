@@ -77,13 +77,21 @@ function ContestDetail() {
     };
   }, [contestSlug]);
 
+  function handleLaunchAssessmentWindow() {
+    const w = Math.min(window.screen.availWidth || 1440, 1920);
+    const h = Math.min(window.screen.availHeight || 900, 1080);
+    const url = `/assessments/${contestSlug}`;
+    window.open(url, "_blank", `width=${w},height=${h},menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
+  }
+
   async function handleRegister() {
     setIsRegistering(true);
     try {
       const res = await registerForContest(contestSlug);
       setIsRegistered(true);
-      toast.success(res.message || "Registration confirmed! Workstation reserved.");
+      toast.success(res.message || "Registration confirmed! Launching assessment window...");
       queryClient.invalidateQueries({ queryKey: ["portal", "public-records"] });
+      handleLaunchAssessmentWindow();
     } catch (err: any) {
       toast.error(err?.message || "Failed to register for contest. Please ensure you are logged in.");
     } finally {
@@ -162,12 +170,11 @@ function ContestDetail() {
         <div className="flex items-center gap-2 flex-wrap">
           {isRegistered ? (
             <Button
-              asChild
-              className="bg-accent text-accent-foreground hover:bg-accent/90 font-mono text-xs shadow-[0_0_15px_rgba(200,255,54,0.3)]"
+              type="button"
+              onClick={handleLaunchAssessmentWindow}
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-mono text-xs shadow-[0_0_15px_rgba(200,255,54,0.3)] cursor-pointer"
             >
-              <Link to="/portal/assessments/$contestSlug" params={{ contestSlug: c.slug }}>
-                <Terminal size={14} className="mr-1.5" /> ENTER ASSESSMENT STUDIO →
-              </Link>
+              <Terminal size={14} className="mr-1.5" /> LAUNCH ASSESSMENT (NEW WINDOW) ↗
             </Button>
           ) : (
             <Button

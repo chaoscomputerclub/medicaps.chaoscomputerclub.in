@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AssessmentsContestSlugRouteImport } from './routes/assessments.$contestSlug'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalLeaderboardRouteImport } from './routes/portal.leaderboard'
 import { Route as PortalProfileRouteImport } from './routes/portal.profile'
@@ -55,6 +56,11 @@ const RecoverRoute = RecoverRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssessmentsContestSlugRoute = AssessmentsContestSlugRouteImport.update({
+  id: '/assessments/$contestSlug',
+  path: '/assessments/$contestSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalIndexRoute = PortalIndexRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRouteWithChildren
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
+  '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
   '/portal/settings': typeof PortalSettingsRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
+  '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
   '/portal/settings': typeof PortalSettingsRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRouteWithChildren
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
+  '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
   '/portal/settings': typeof PortalSettingsRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/recover'
     | '/signup'
+    | '/assessments/$contestSlug'
     | '/portal/leaderboard'
     | '/portal/profile'
     | '/portal/settings'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover'
     | '/signup'
+    | '/assessments/$contestSlug'
     | '/portal/leaderboard'
     | '/portal/profile'
     | '/portal/settings'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/recover'
     | '/signup'
+    | '/assessments/$contestSlug'
     | '/portal/leaderboard'
     | '/portal/profile'
     | '/portal/settings'
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRouteWithChildren
   RecoverRoute: typeof RecoverRoute
   SignupRoute: typeof SignupRoute
+  AssessmentsContestSlugRoute: typeof AssessmentsContestSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assessments/$contestSlug': {
+      id: '/assessments/$contestSlug'
+      path: '/assessments/$contestSlug'
+      fullPath: '/assessments/$contestSlug'
+      preLoaderRoute: typeof AssessmentsContestSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal/': {
@@ -418,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRouteWithChildren,
   RecoverRoute: RecoverRoute,
   SignupRoute: SignupRoute,
+  AssessmentsContestSlugRoute: AssessmentsContestSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

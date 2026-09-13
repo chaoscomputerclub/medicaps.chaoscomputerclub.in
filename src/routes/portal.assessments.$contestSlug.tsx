@@ -266,6 +266,18 @@ function AssessmentStudio() {
             <span className="text-sm font-semibold text-[#f0f0f0] hidden md:inline">
               {assessment?.title ?? "Online Assessment"}
             </span>
+            <button
+              type="button"
+              onClick={() => {
+                const w = Math.min(window.screen.availWidth || 1440, 1920);
+                const h = Math.min(window.screen.availHeight || 900, 1080);
+                window.open(`/assessments/${contestSlug}`, "_blank", `width=${w},height=${h},menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
+              }}
+              className="flex items-center gap-1 font-mono text-[10px] text-accent hover:text-white px-2 py-0.5 rounded border border-accent/30 bg-accent/10 transition-all cursor-pointer ml-2"
+              title="Open clean fullscreen window without portal sidebar"
+            >
+              <span>Full Screen Window ↗</span>
+            </button>
           </div>
         </div>
 
