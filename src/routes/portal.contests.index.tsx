@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { portalQueries } from "@/organization/data/queries";
-import { SectionHeader, StatusDot, formatContestDate } from "@/organization/components/ui";
+import { SectionHeader, StatusDot, EmptyState, formatContestDate } from "@/organization/components/ui";
 const q = portalQueries.contests();
 export const Route = createFileRoute("/portal/contests/")({
   validateSearch: (search: Record<string, unknown>): { status?: string } => ({
@@ -60,9 +60,10 @@ function Contests() {
       <section className="contest-directory">
         <SectionHeader kicker={`${shown.length} operations`} title="Contest directory" />
         {shown.length === 0 ? (
-          <div className="panel text-center py-12 text-sm text-[#777] font-mono">
-            No offline contests scheduled yet. Announcements will appear here.
-          </div>
+          <EmptyState
+            title="No Contests Scheduled"
+            body={`No ${filter !== "all" ? filter : ""} offline battles are scheduled on the campus node right now. Check back soon for announcements.`}
+          />
         ) : (
           shown.map((c) => (
             <article className="contest-row" key={c.slug}>

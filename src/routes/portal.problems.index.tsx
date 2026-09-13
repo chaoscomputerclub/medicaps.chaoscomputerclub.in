@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { portalQueries } from "@/organization/data/queries";
-import { SectionHeader } from "@/organization/components/ui";
+import { SectionHeader, EmptyState } from "@/organization/components/ui";
 const q = portalQueries.contests();
 export const Route = createFileRoute("/portal/problems/")({
   head: () => ({
@@ -47,10 +47,10 @@ function Archive() {
         <SectionHeader kicker="Released sets" title="Completed contest problems" />
         <div className="archive-list">
           {complete.length === 0 ? (
-            <div className="text-center py-12 text-[#777] font-mono text-sm">
-              No archived problem sets released yet. Completed offline contest problems will be
-              archived here.
-            </div>
+            <EmptyState
+              title="Archive Empty"
+              body="No archived problem sets released yet. Completed offline contest problems and official editorials will appear here."
+            />
           ) : (
             complete.flatMap((c) =>
               c.problems.map((p) => (

@@ -85,6 +85,17 @@ function Verify() {
         </div>
         <small>Enter an official certificate ID or complete SHA-256 digest.</small>
       </form>
+      {!submitted && (
+        <div className="border border-dashed border-[var(--line)] bg-[var(--surface-2)]/40 p-8 text-center my-6">
+          <ShieldCheck className="size-10 text-muted-foreground/30 mx-auto mb-3" />
+          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Awaiting Verification Query
+          </h3>
+          <p className="font-mono text-[0.6875rem] text-muted-foreground/70 max-w-md mx-auto mt-1 leading-relaxed">
+            Enter an official certificate ID or a 64-character SHA-256 digest above to validate authentic contest attendance, seat, and proctored records.
+          </p>
+        </div>
+      )}
       {submitted &&
         (result ? (
           <div className="verification-result valid">
