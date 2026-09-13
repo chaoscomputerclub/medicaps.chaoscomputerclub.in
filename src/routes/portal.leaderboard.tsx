@@ -32,11 +32,11 @@ export const Route = createFileRoute("/portal/leaderboard")({
 });
 
 function Spark({ data }: { data: number[] }) {
-  const safeData = data && data.length > 0 ? data : [1200, 1200];
-  const min = Math.min(...safeData);
-  const max = Math.max(...safeData);
+  if (!data || data.length < 2) return <span className="spark-empty" aria-hidden="true" />;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
   const range = max - min || 1;
-  const pts = safeData
+  const pts = data
     .map((v, i) => `${i * 18},${24 - ((v - min) / range) * 20}`)
     .join(" ");
   return (
@@ -133,7 +133,7 @@ function Leaderboard() {
                       </div>
                     </td>
                     <td>
-                      <Spark data={x.ratings || [x.rating, x.rating]} />
+                      <Spark data={x.ratings ?? []} />
                     </td>
                     <td className="score-value">{x.rating}</td>
                     <td className="mono-value">{x.peak_rating}</td>

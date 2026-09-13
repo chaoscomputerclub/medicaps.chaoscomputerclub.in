@@ -76,8 +76,8 @@ async def get_university_leaderboard(
         recent_deltas = history_by_member.get(m.id, [])[:4]
 
         # Mask student PRN for privacy in public leaderboards
-        prn_str = m.prn or "0827CS231000"
-        masked_prn = f"{prn_str[:6]}****{prn_str[-2:]}" if len(prn_str) >= 10 else prn_str
+        prn_str = m.prn or ""
+        masked_prn = f"{prn_str[:6]}****{prn_str[-2:]}" if len(prn_str) >= 10 else (prn_str or "—")
 
         # Generate historical rating sparkline points from recent deltas
         m_rating = m.rating if m.rating is not None else 1200
@@ -87,8 +87,7 @@ async def get_university_leaderboard(
             running_rating -= delta
             sparkline.append(running_rating)
         sparkline.reverse()
-        if len(sparkline) == 1:
-            sparkline = [m_rating, m_rating]
+        # Single-point sparkline is valid — frontend handles flat render
 
         handle = m.handle or (m.email.split("@")[0] if m.email else f"cadet_{current_rank}")
         full_name = m.full_name or handle
@@ -101,7 +100,7 @@ async def get_university_leaderboard(
                 avatar_url=m.avatar_url,
                 rank=current_rank,
                 university_rank=current_rank,
-                previous_rank=current_rank + (1 if current_rank % 2 == 0 else -1 if current_rank > 1 else 0),
+                previous_rank=None,  # No fake rank movement — only set after a contest
                 handle=handle,
                 full_name=full_name,
                 prn=masked_prn,
