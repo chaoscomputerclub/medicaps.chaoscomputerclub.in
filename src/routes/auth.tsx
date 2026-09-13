@@ -285,25 +285,20 @@ function Auth() {
     <AuthLayout title={title} description={description}>
       {step === "email" && (
         <>
-          {/* Institutional Perimeter Status Banner */}
-          <div className="border border-border/80 bg-[#0a0a0c] p-3 mb-4 rounded-none">
-            <div className="flex items-center justify-between font-mono text-[0.6875rem] text-[#ccff00] uppercase tracking-wider mb-1.5">
-              <span className="flex items-center gap-1.5 font-bold">
-                <ShieldAlert className="size-3.5 text-[#ccff00]" />[ GATEWAY // INSTITUTIONAL ACCESS
-                ]
+          {/* Institutional Access Notice */}
+          <div className="mb-4 flex items-center justify-between gap-3 border border-border/80 bg-[#0d0d10] px-3.5 py-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="relative flex size-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ccff00] opacity-60" />
+                <span className="relative inline-flex size-2 rounded-full bg-[#ccff00]" />
               </span>
-              <span className="text-[0.625rem] text-[#ccff00] border border-[#ccff00]/40 px-1.5 py-0.5 font-semibold">
-                ENFORCED
-              </span>
+              <p className="font-sans text-xs text-muted-foreground leading-relaxed">
+                Sign in with your official <strong className="font-medium text-foreground">@medicaps.ac.in</strong> email address.
+              </p>
             </div>
-            <p className="font-mono text-[0.6875rem] text-zinc-400 leading-relaxed">
-              Access is restricted strictly to official{" "}
-              <strong className="text-zinc-200">@medicaps.ac.in</strong> credentials. Commercial
-              providers (<span className="text-zinc-500 line-through">Gmail</span>,{" "}
-              <span className="text-zinc-500 line-through">Yahoo</span>,{" "}
-              <span className="text-zinc-500 line-through">Outlook</span>) are blocked by the
-              firewall.
-            </p>
+            <span className="shrink-0 font-mono text-[0.6rem] tracking-wider text-[#ccff00] uppercase font-semibold border border-[#ccff00]/30 bg-[#ccff00]/5 px-2 py-0.5">
+              Campus ID
+            </span>
           </div>
 
           <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
@@ -343,15 +338,16 @@ function Auth() {
 
             {/* Realtime Live Domain Warning */}
             {isInvalidDomain && (
-              <div className="p-3 border border-amber-500/40 bg-amber-950/20 text-amber-300 font-mono text-xs leading-relaxed space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-400 font-bold tracking-wider uppercase text-[0.6875rem]">
-                  <AlertTriangle className="size-3.5 text-amber-400 shrink-0" />
-                  <span>[ 403 // FORBIDDEN DOMAIN: @{typedDomain} ]</span>
+              <div className="p-3 border border-amber-500/40 bg-amber-950/20 text-xs leading-relaxed flex items-start gap-2.5">
+                <AlertTriangle className="size-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="font-mono text-[0.6875rem] text-amber-400 font-semibold uppercase tracking-wider">
+                    Institutional Email Required
+                  </div>
+                  <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
+                    Please use your registered <strong className="text-white">@medicaps.ac.in</strong> address instead of personal accounts (@{typedDomain}).
+                  </p>
                 </div>
-                <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
-                  Personal accounts are blocked by policy. Please switch to your registered{" "}
-                  <strong className="text-white">@medicaps.ac.in</strong> email address.
-                </p>
               </div>
             )}
 
