@@ -273,14 +273,32 @@ function Auth() {
     window.location.href = getGoogleLoginURL();
   }
 
-  let title: React.ReactNode = "Login";
+  let title: React.ReactNode = (
+    <>
+      <span className="block whitespace-nowrap">ENTER</span>
+      <span className="block whitespace-nowrap">MEMBER</span>
+      <span className="block whitespace-nowrap">OPERATIONS</span>
+    </>
+  );
   let description: React.ReactNode = null;
 
   if (step === "otp") {
-    title = "Verify Code";
+    title = (
+      <>
+        <span className="block whitespace-nowrap">VERIFY</span>
+        <span className="block whitespace-nowrap">AUTHENTICATION</span>
+        <span className="block whitespace-nowrap">CODE</span>
+      </>
+    );
     description = `Enter the six-digit code sent to ${email}.`;
   } else if (step === "onboarding") {
-    title = "Complete Registration";
+    title = (
+      <>
+        <span className="block whitespace-nowrap">COMPLETE</span>
+        <span className="block whitespace-nowrap">MEMBER</span>
+        <span className="block whitespace-nowrap">REGISTRATION</span>
+      </>
+    );
     description =
       "Set your academic parameters to initialize your portal credential.";
   }
@@ -341,7 +359,7 @@ function Auth() {
             )}
 
             <Button
-              className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold disabled:opacity-50"
+              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer disabled:opacity-50"
               disabled={pending || isInvalidDomain}
               type="submit"
             >
@@ -353,20 +371,24 @@ function Auth() {
             </Button>
           </form>
 
-          <div className="auth-divider my-4">
-            <span>or</span>
+          {/* Divider: ---- or ---- */}
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border/80" />
+            <span className="font-mono text-[0.6875rem] uppercase tracking-widest text-muted-foreground/70 select-none">
+              or
+            </span>
+            <div className="h-px flex-1 bg-border/80" />
           </div>
 
-          <Button
+          <button
             type="button"
-            className="w-full font-sans text-xs sm:text-sm font-medium h-10 border border-border/80 bg-surface/50 hover:bg-surface/90 hover:border-accent/40 transition-colors flex items-center justify-center gap-2.5"
-            variant="outline"
+            className="w-full h-11 px-4 font-sans text-xs sm:text-sm font-medium border border-border/80 bg-zinc-900/50 hover:bg-zinc-800/80 hover:border-zinc-500 text-zinc-200 hover:text-white transition-all flex items-center justify-center gap-2.5 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             onClick={handleGoogle}
             disabled={pending}
           >
             <GoogleIcon className="size-4 shrink-0" />
-            <span>Continue with Google</span>
-          </Button>
+            <span className="tracking-wide">Continue with Google</span>
+          </button>
         </>
       )}
 

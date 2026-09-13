@@ -45,12 +45,12 @@ export function AuthLayout({
 
         {/* Main Box Card */}
         <div className="relative z-10 w-full border border-border bg-surface shadow-2xl">
-          <div className="border-b border-border px-6 py-5 text-center sm:text-left">
-            <h1 className="font-display font-bold uppercase tracking-tight text-foreground text-2xl sm:text-3xl">
+          <div className="border-b border-border px-5 py-6 sm:px-6 text-center sm:text-left">
+            <h1 className="font-display font-[850] uppercase tracking-tight text-foreground text-[3.15rem] leading-[0.95] sm:text-[3.4rem] sm:leading-[1]">
               {title}
             </h1>
             {description ? (
-              <p className="mt-2 font-sans text-xs sm:text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2.5 font-sans text-xs sm:text-sm leading-relaxed text-muted-foreground">
                 {description}
               </p>
             ) : null}
