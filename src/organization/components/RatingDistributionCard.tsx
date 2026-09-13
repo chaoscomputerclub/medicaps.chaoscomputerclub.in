@@ -21,12 +21,13 @@ export function RatingDistributionCard({
   const hasAttended = attendanceCount > 0;
 
   // --- Percentile & rank display ---
-  let percentileDisplay = "0%";
+  // New users with zero attendance have no competitive standing yet
+  let percentileDisplay = "—";
   if (hasAttended) {
     const cohortTotal = Math.max(distribution?.total || 1, 1);
     const rank = Math.max(1, member.university_rank || 1);
     const pct = (rank / cohortTotal) * 100;
-    percentileDisplay = pct < 1 ? `${pct.toFixed(2)}%` : `${pct.toFixed(1)}%`;
+    percentileDisplay = pct < 1 ? `Top ${pct.toFixed(2)}%` : `Top ${pct.toFixed(1)}%`;
   }
   const rankDisplay = hasAttended ? `#${member.university_rank}` : "#—";
 
@@ -68,7 +69,7 @@ export function RatingDistributionCard({
       {/* Top Percentile Display */}
       <div>
         <span className="text-xs font-medium text-[var(--muted)] font-sans tracking-wide block">
-          Top
+          {hasAttended ? "Percentile" : "Standing"}
         </span>
         <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-0.5 font-sans">
           {percentileDisplay}

@@ -259,8 +259,8 @@ function Profile() {
         <Metric label="Rating" value={m.rating} detail={`Peak ${m.peak_rating}`} />
         <Metric
           label="University rank"
-          value={`#${m.university_rank}`}
-          detail={`of ${m.active_members}`}
+          value={(m.attendance_count ?? 0) > 0 ? `#${m.university_rank}` : "#—"}
+          detail={(m.attendance_count ?? 0) > 0 ? `of ${m.active_members}` : "No contests yet"}
         />
         <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />
         <Metric
