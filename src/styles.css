@@ -167,6 +167,8 @@ p {
   color: var(--muted);
   line-height: 1.55;
 }
+
+@layer components {
 .portal-frame {
   min-height: 100vh;
 }
@@ -2792,4 +2794,5 @@ a[class~="hover:bg-primary"]:hover svg {
 
 .notice-concluded {
   color: var(--muted);
+}
 }
