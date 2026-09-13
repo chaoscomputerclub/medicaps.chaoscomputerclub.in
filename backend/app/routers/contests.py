@@ -257,7 +257,7 @@ async def get_registration_status(
     if not assessment and contest.status == "live":
         assess_season_res = await db.execute(
             select(Assessment).where(
-                (Assessment.season == contest.season) | (Assessment.slug == "medicaps-offline-open-2026")
+                (Assessment.slug == "medicaps-offline-open-2026") | (Assessment.is_active == True)
             )
         )
         assessment = assess_season_res.scalars().first()

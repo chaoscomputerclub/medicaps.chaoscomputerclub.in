@@ -63,24 +63,23 @@ async def is_member_eligible_for_live_contest(
         select(CampusPass).where(
             CampusPass.member_id == member.id,
             CampusPass.contest_id == contest.id,
-            CampusPass.status == "active",
+            CampusPass.check_in_status != "revoked",
         )
     )
     if pass_res.scalars().first():
         return True, "Valid Digital Campus QR Pass holder."
 
     # 6. Check Phase 1 Screening Assessment qualification
-    # Look for assessments linked to this contest or in the same season
+    # Look for assessments linked to this contest
     assess_res = await db.execute(
-        select(Assessment).where(
-            (Assessment.contest_id == contest.id) |
-            (Assessment.season == contest.season)
-        )
+        select(Assessment).where(Assessment.contest_id == contest.id)
     )
     assessments = assess_res.scalars().all()
     if not assessments:
-        # Fallback: check any active assessments
-        all_assess_res = await db.execute(select(Assessment))
+        # Companion screening assessment
+        all_assess_res = await db.execute(
+            select(Assessment).where(Assessment.is_active == True)
+        )
         assessments = all_assess_res.scalars().all()
 
     for assess in assessments:
