@@ -1830,6 +1830,7 @@ dd {
 }
 
 .leaderboard-table table {
+  table-layout: fixed !important;
   border-collapse: collapse;
   width: 100%;
   min-width: 760px;
@@ -1841,14 +1842,15 @@ dd {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 12px 14px;
+  padding: 13px 12px;
   border-bottom: 1px solid var(--line-strong);
   background: var(--surface-2);
+  line-height: 1;
 }
 
 /* Body Rows */
 .leaderboard-table td {
-  padding: 14px 14px;
+  padding: 14px 12px;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
 }
@@ -1866,14 +1868,13 @@ dd {
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
-/* Column Sizing & Alignment */
+/* Column Sizing & Exact Spatial Balancing */
 
 /* 1. RANK */
 .lb-th-rank,
 .lb-td-rank {
-  width: 105px;
   padding-left: 24px !important;
-  text-align: left;
+  text-align: left !important;
 }
 
 .rank-cell {
@@ -1903,7 +1904,9 @@ dd {
 /* 2. NAME */
 .lb-th-name,
 .lb-td-name {
-  text-align: left;
+  text-align: left !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
 }
 
 .lb-name-cell {
@@ -1953,8 +1956,9 @@ dd {
 /* 3. ATTENDED */
 .lb-th-attended,
 .lb-td-attended {
-  width: 170px;
-  text-align: left;
+  text-align: left !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
 }
 
 .lb-attendance {
@@ -1984,37 +1988,45 @@ dd {
   color: var(--muted);
 }
 
-/* 4. TREND (Sparkline) */
+/* 4. TREND (Sparkline) — Clean Left Alignment Directly Under Header */
 .lb-th-trend,
 .lb-td-trend {
-  width: 140px;
-  text-align: center;
+  text-align: left !important;
+  padding-left: 20px !important;
+  padding-right: 12px !important;
 }
 
 .lb-trend-wrap {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  width: 72px;
+  height: 18px;
 }
 
 .spark {
-  width: 84px;
-  height: 22px;
+  width: 72px;
+  height: 18px;
   display: block;
 }
 
-/* 5. SCORE — Perfect Right Alignment & Gapping */
+/* 5. SCORE — Perfect Right Alignment & Matching Gapping */
 .lb-th-score,
 .lb-td-score {
-  width: 130px;
   text-align: right !important;
   padding-right: 28px !important;
+  padding-left: 8px !important;
+}
+
+.lb-th-score {
+  letter-spacing: 0.1em;
 }
 
 .lb-td-score span {
   display: inline-block;
-  font: 800 15px var(--font-mono);
+  font: 800 15px/1 var(--font-mono);
   color: var(--accent);
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+  vertical-align: middle;
 }

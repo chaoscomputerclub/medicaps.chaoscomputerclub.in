@@ -1,8 +1,8 @@
 /**
  * Chaos Computer Club India — University Leaderboard
- * Premium redesign: clean brutalist aesthetic, consistent scores,
- * initials-based avatars with deterministic per-user colors,
- * sparkline rating graphs, perfect right-aligned score gapping.
+ * Premium brutalist aesthetic with mathematical column alignment,
+ * calm baseline telemetry for flat ratings, balanced symmetrical gapping,
+ * and deterministic initials avatars.
  * Columns: RANK | NAME | ATTENDED | TREND | SCORE
  */
 
@@ -50,17 +50,24 @@ function stringToHue(str: string): number {
   return Math.abs(hash) % 360;
 }
 
-/** Inline SVG sparkline — renders rating history as an elegant polyline */
+/** Precision inline SVG sparkline — balanced baseline for flat ratings, clean deltas */
 function Sparkline({ values }: { values: number[] }) {
-  if (!values || values.length < 2) {
+  const W = 72;
+  const H = 18;
+  const midY = H / 2;
+
+  // If no rating history or flat/unchanged ratings: render subtle, quiet baseline
+  const isFlat = !values || values.length < 2 || values.every((v) => v === values[0]);
+
+  if (isFlat) {
     return (
       <div className="lb-trend-wrap">
-        <svg className="spark" viewBox="0 0 84 22" aria-hidden="true">
+        <svg className="spark" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
           <line
             x1="0"
-            y1="11"
-            x2="84"
-            y2="11"
+            y1={midY}
+            x2={W}
+            y2={midY}
             stroke="var(--line-strong)"
             strokeWidth="1.5"
             strokeDasharray="3 3"
@@ -70,9 +77,7 @@ function Sparkline({ values }: { values: number[] }) {
     );
   }
 
-  const W = 84;
-  const H = 22;
-  const pad = 3;
+  const pad = 2;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
@@ -83,9 +88,9 @@ function Sparkline({ values }: { values: number[] }) {
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
 
-  const last = values[values.length - 1] ?? values[0] ?? 0;
   const first = values[0] ?? 0;
-  const isUp = last >= first;
+  const last = values[values.length - 1] ?? first;
+  const isUp = last > first;
   const strokeColor = isUp ? "var(--accent)" : "var(--danger)";
 
   const lastX = W - pad;
@@ -95,7 +100,7 @@ function Sparkline({ values }: { values: number[] }) {
     <div className="lb-trend-wrap">
       <svg className="spark" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
         <polyline points={pts.join(" ")} stroke={strokeColor} fill="none" strokeWidth="1.75" />
-        <circle cx={lastX} cy={lastY} r="2.5" fill={strokeColor} />
+        <circle cx={lastX} cy={lastY} r="2" fill={strokeColor} />
       </svg>
     </div>
   );
@@ -206,9 +211,16 @@ function Leaderboard() {
         </div>
       </header>
 
-      {/* Table: RANK | NAME | ATTENDED | TREND | SCORE */}
+      {/* Table: Strictly defined fixed columns with symmetrical rhythm */}
       <div className="table-scroll leaderboard-table">
         <table>
+          <colgroup>
+            <col style={{ width: "90px" }} />
+            <col />
+            <col style={{ width: "170px" }} />
+            <col style={{ width: "135px" }} />
+            <col style={{ width: "120px" }} />
+          </colgroup>
           <thead>
             <tr>
               <th className="lb-th-rank">Rank</th>
@@ -265,7 +277,7 @@ function Leaderboard() {
                       </div>
                     </td>
 
-                    {/* 2. NAME (no question marks, clean presentation) */}
+                    {/* 2. NAME */}
                     <td className="lb-td-name">
                       <div className="lb-name-cell">
                         <AvatarBubble item={x} />
@@ -295,12 +307,12 @@ function Leaderboard() {
                       </div>
                     </td>
 
-                    {/* 4. TREND (sparkline rating graph) */}
+                    {/* 4. TREND — Left-aligned directly beneath header */}
                     <td className="lb-td-trend">
                       <Sparkline values={sparkData} />
                     </td>
 
-                    {/* 5. SCORE (perfectly aligned with header) */}
+                    {/* 5. SCORE — Perfect Right Alignment */}
                     <td className="lb-td-score">
                       <span>{rating.toLocaleString()}</span>
                     </td>
