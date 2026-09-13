@@ -139,7 +139,7 @@ function ContestDetail() {
             </Button>
             <Button
               asChild
-              className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-mono text-xs font-bold uppercase tracking-wider"
+              className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider"
             >
               <Link to="/portal/leaderboard">
                 View Screening Leaderboard
@@ -174,7 +174,7 @@ function ContestDetail() {
             {!isRegistered ? (
               <Button
                 onClick={() => setShowRegisterModal(true)}
-                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
+                className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold text-xs uppercase tracking-wider px-5"
               >
                 <Users className="w-4 h-4 mr-2" />
                 Register for contest
@@ -183,7 +183,7 @@ function ContestDetail() {
             ) : isUnlocked ? (
               <Button
                 asChild
-                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
+                className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold text-xs uppercase tracking-wider px-5"
               >
                 <Link
                   to="/portal/contests/$contestSlug/assessment"
