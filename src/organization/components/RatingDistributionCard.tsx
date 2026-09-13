@@ -36,31 +36,35 @@ export function RatingDistributionCard({
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const rank = member.university_rank || 1;
-  const activeTotal = member.active_members || 480;
-  const percentileVal = (rank / activeTotal) * 100;
-  const percentileDisplay =
-    percentileVal < 1 ? `${percentileVal.toFixed(2)}%` : `${percentileVal.toFixed(1)}%`;
+  const attendanceCount = member.attendance_count ?? 0;
+  const hasAttended = attendanceCount > 0;
 
-  // Determine user's active bucket:
-  // If user is top 5% (e.g. rank <= 24), highlight the top tier bucket (22)
-  // Otherwise map by rating
-  let activeBucket = 22;
-  if (percentileVal > 5) {
+  // If cadet has 0 offline contests attended, set percentile to 0% and initial ranking at minimum
+  let percentileDisplay = "0%";
+  let activeBucket = 0; // Minimum baseline position
+
+  if (hasAttended) {
+    const cohortTotal = Math.max(member.active_members || 480, 480);
+    const rank = Math.max(1, member.university_rank || 1);
+    const pct = (rank / cohortTotal) * 100;
+    percentileDisplay = pct < 1 ? `${pct.toFixed(2)}%` : `${pct.toFixed(1)}%`;
+
     const rating = member.rating || 1200;
     activeBucket = BUCKET_DISTRIBUTION.findIndex(
       (b) => rating >= b.min && rating < b.max
     );
     if (activeBucket === -1) {
-      activeBucket = rating >= 2100 ? 22 : 4;
+      activeBucket = rating >= 2100 ? 22 : 0;
     }
   }
+
+  const rankDisplay = hasAttended ? `#${member.university_rank}` : "#—";
 
   return (
     <div className="panel flex flex-col justify-between h-full bg-[var(--surface)] border border-[var(--line)] p-6">
       {/* Top Percentile Display */}
       <div>
-        <span className="text-xs font-medium text-zinc-400 font-sans tracking-wide block">
+        <span className="text-xs font-medium text-[var(--muted)] font-sans tracking-wide block">
           Top
         </span>
         <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-0.5 font-sans">
@@ -90,16 +94,16 @@ export function RatingDistributionCard({
                     {bucket.min} - {bucket.max}
                   </div>
                 )}
-                {/* The Bar */}
+                {/* The Bar: themed with var(--accent) (#c8ff36 lime) */}
                 <div
                   style={{ height: `${barHeightPx}px` }}
                   className={cn(
                     "w-full rounded-t-[2px] transition-all duration-150",
                     isUserBucket
-                      ? "bg-[#ffa116] shadow-sm shadow-[#ffa116]/30"
+                      ? "bg-[var(--accent)] shadow-md shadow-[var(--accent)]/40 brightness-110"
                       : isHovered
                       ? "bg-zinc-500"
-                      : "bg-[#383838]"
+                      : "bg-[#333333]"
                   )}
                 />
               </div>
@@ -108,7 +112,7 @@ export function RatingDistributionCard({
         </div>
       </div>
 
-      {/* Stats Summary Footer matching LeetCode contest metrics */}
+      {/* Stats Summary Footer */}
       <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[var(--line)] text-left">
         <div>
           <span className="text-[10px] font-mono text-[var(--muted)] uppercase block">
@@ -123,10 +127,7 @@ export function RatingDistributionCard({
             Global Rank
           </span>
           <strong className="text-sm font-mono font-bold text-white block mt-0.5">
-            #{rank}{" "}
-            <span className="text-xs text-[var(--muted)] font-normal">
-              / {activeTotal}
-            </span>
+            {rankDisplay}
           </strong>
         </div>
         <div>
@@ -134,7 +135,7 @@ export function RatingDistributionCard({
             Attended
           </span>
           <strong className="text-sm font-mono font-bold text-white block mt-0.5">
-            {member.attendance_count ?? 0}
+            {attendanceCount}
           </strong>
         </div>
       </div>
