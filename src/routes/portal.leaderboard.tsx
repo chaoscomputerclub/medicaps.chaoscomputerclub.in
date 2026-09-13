@@ -1,23 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  setLeaderboardSearch,
-  setLeaderboardDept,
-  setLeaderboardBatch,
-} from "@/store/slices/portalSlice";
-import { ChevronDown, ChevronUp, Minus, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useAppSelector } from "@/store/hooks";
+import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { LeaderboardSkeleton } from "@/organization/components/skeletons";
 import { portalQueries } from "@/organization/data/queries";
-import { TierBadge } from "@/organization/components/ui";
 
 const q = portalQueries.leaderboard();
 
@@ -45,17 +31,6 @@ export const Route = createFileRoute("/portal/leaderboard")({
   component: Leaderboard,
 });
 
-function formatTier(tier: string): string {
-  const map: Record<string, string> = {
-    "5_star": "5★ Grandmaster",
-    "4_star": "4★ Master",
-    "3_star": "3★ Specialist",
-    "2_star": "2★ Candidate",
-    "1_star": "1★ Explorer",
-  };
-  return map[tier] || tier || "1★ Explorer";
-}
-
 function Spark({ data }: { data: number[] }) {
   const safeData = data && data.length > 0 ? data : [1200, 1200];
   const min = Math.min(...safeData);
@@ -73,19 +48,8 @@ function Spark({ data }: { data: number[] }) {
 
 function Leaderboard() {
   const { data } = useSuspenseQuery(q);
-  const dispatch = useAppDispatch();
-  const search = useAppSelector((s) => s.portal.leaderboardSearch);
-  const dept = useAppSelector((s) => s.portal.leaderboardDept);
-  const batch = useAppSelector((s) => s.portal.leaderboardBatch);
   const currentMemberId = useAppSelector((s) => s.auth.member?.id);
-
-  const rows = data.filter(
-    (x) =>
-      (dept === "all" || x.department === dept) &&
-      (batch === "all" || x.batch === batch) &&
-      (x.handle.toLowerCase().includes(search.toLowerCase()) ||
-        x.full_name.toLowerCase().includes(search.toLowerCase()))
-  );
+  const rows = data;
 
   return (
     <div className="page-wrap">
@@ -105,65 +69,23 @@ function Leaderboard() {
         </div>
       </header>
 
-      <div className="leader-tools">
-        <label>
-          <Search />
-          <Input
-            value={search}
-            onChange={(e) => dispatch(setLeaderboardSearch(e.target.value))}
-            placeholder="Search handle or member"
-          />
-        </label>
-        <Select
-          value={dept}
-          onValueChange={(v) => dispatch(setLeaderboardDept(v))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Department" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All departments</SelectItem>
-            <SelectItem value="CSE">CSE</SelectItem>
-            <SelectItem value="IT">IT</SelectItem>
-            <SelectItem value="AIDS">AIDS</SelectItem>
-            <SelectItem value="Cyber Security">Cyber Security</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={batch}
-          onValueChange={(v) => dispatch(setLeaderboardBatch(v))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Batch" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All batches</SelectItem>
-            <SelectItem value="2022-26">2022–26</SelectItem>
-            <SelectItem value="2023-27">2023–27</SelectItem>
-            <SelectItem value="2024-28">2024–28</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="table-scroll leaderboard-table">
         <table>
           <thead>
             <tr>
               <th>Rank</th>
               <th>Member</th>
-              <th>Department</th>
-              <th>Tier</th>
               <th>Trend</th>
               <th>Rating</th>
               <th>Peak</th>
-              <th>Attendance</th>
+              <th>Attended</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={6}
                   className="text-center py-12 text-[#777] font-mono text-sm"
                 >
                   No ranked members found in university standings.
@@ -209,14 +131,6 @@ function Leaderboard() {
                         <strong>{x.handle}</strong>
                         <span>{x.full_name}</span>
                       </div>
-                    </td>
-                    <td>
-                      <span className="mono-tag">
-                        {x.department} · {x.batch}
-                      </span>
-                    </td>
-                    <td>
-                      <TierBadge>{formatTier(x.tier)}</TierBadge>
                     </td>
                     <td>
                       <Spark data={x.ratings || [x.rating, x.rating]} />
