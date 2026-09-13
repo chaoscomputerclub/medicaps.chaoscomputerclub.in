@@ -95,13 +95,16 @@ button {
   color: #000000 !important;
 }
 
-.bg-accent *,
-.bg-primary *,
-.bg-emerald-400 *,
-.bg-emerald-500 *,
-.bg-lime-400 *,
-.bg-lime-500 *,
-.bg-\[var\(--accent\)\] * {
+.bg-accent span,
+.bg-accent strong,
+.bg-accent p,
+.bg-primary span,
+.bg-primary strong,
+.bg-primary p,
+.bg-emerald-400 span,
+.bg-emerald-500 span,
+.bg-lime-400 span,
+.bg-lime-500 span {
   color: #000000;
 }
 
@@ -116,27 +119,19 @@ button {
   stroke: #000000 !important;
 }
 
-[class*="hover:bg-accent"]:hover,
-[class*="hover:bg-primary"]:hover,
-[class*="hover:bg-[var(--accent)]"]:hover,
-[class*="hover:bg-emerald"]:hover,
-[class*="hover:bg-lime"]:hover {
+.hover\:bg-accent:hover,
+.hover\:bg-primary:hover,
+.hover\:bg-\[var\(--accent\)\]:hover,
+.hover\:bg-emerald-400:hover,
+.hover\:bg-lime-400:hover {
   color: #000000 !important;
 }
 
-[class*="hover:bg-accent"]:hover *,
-[class*="hover:bg-primary"]:hover *,
-[class*="hover:bg-[var(--accent)]"]:hover *,
-[class*="hover:bg-emerald"]:hover *,
-[class*="hover:bg-lime"]:hover * {
-  color: #000000 !important;
-}
-
-[class*="hover:bg-accent"]:hover svg,
-[class*="hover:bg-primary"]:hover svg,
-[class*="hover:bg-[var(--accent)]"]:hover svg,
-[class*="hover:bg-emerald"]:hover svg,
-[class*="hover:bg-lime"]:hover svg {
+.hover\:bg-accent:hover svg,
+.hover\:bg-primary:hover svg,
+.hover\:bg-\[var\(--accent\)\]:hover svg,
+.hover\:bg-emerald-400:hover svg,
+.hover\:bg-lime-400:hover svg {
   color: #000000 !important;
   stroke: #000000 !important;
 }
@@ -187,14 +182,32 @@ p {
   margin-left: 244px;
   min-height: 100vh;
   background-color: var(--bg);
+  position: relative;
+}
+
+.portal-main::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 244px;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg);
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
     linear-gradient(var(--line) 1px, transparent 1px),
     linear-gradient(90deg, var(--line) 1px, transparent 1px);
   background-size: auto, 64px 64px, 64px 64px;
   background-position: 0 0, -1px -1px, -1px -1px;
-  background-repeat: repeat, repeat, repeat;
-  background-attachment: fixed;
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 0;
+  transform: translateZ(0);
+}
+
+.portal-main > * {
+  position: relative;
+  z-index: 1;
 }
 .brand-lockup {
   display: flex;
@@ -1440,6 +1453,9 @@ dd {
   }
   .portal-main {
     margin-left: 0;
+  }
+  .portal-main::before {
+    left: 0;
   }
   .page-wrap {
     padding: 25px 14px 55px;
