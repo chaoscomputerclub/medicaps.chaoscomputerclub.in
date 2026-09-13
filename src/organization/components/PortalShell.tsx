@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
@@ -129,7 +130,14 @@ export function PortalShell() {
         </div>
 
         <div className="sidebar-user">
-          <div className="avatar-code">{initials}</div>
+          <Avatar className="w-8 h-8 rounded-[1px] border border-[var(--line)] bg-[var(--accent)] text-[var(--accent-ink)] flex-shrink-0">
+            {member?.avatar_url && (member.avatar_url.startsWith("http") || member.avatar_url.startsWith("/media/")) ? (
+              <AvatarImage src={member.avatar_url || undefined} alt={member.handle || "avatar"} className="object-cover" />
+            ) : null}
+            <AvatarFallback className="rounded-[1px] bg-[var(--accent)] text-[var(--accent-ink)] font-mono font-bold text-xs">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
           <div>
             <strong>
               {member?.handle ??

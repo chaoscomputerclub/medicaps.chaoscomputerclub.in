@@ -34,6 +34,9 @@ import { Award, ExternalLink, LockKeyhole, ShieldCheck, Zap } from "lucide-react
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { ProofBadge } from "@/organization/components/ProofBadge";
 import { RatingChart } from "@/organization/components/RatingChart";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
 import { portalQueries } from "@/organization/data/queries";
 const qs = [
@@ -116,48 +119,33 @@ function Profile() {
   return (
     <div className="page-wrap">
       <header className="profile-header">
-        {m.avatar_url &&
-        (m.avatar_url.startsWith("http") ||
-          m.avatar_url.startsWith("/media/") ||
-          m.avatar_url.startsWith("/")) ? (
-          <div className="profile-mark overflow-hidden bg-zinc-900 border border-[var(--line)]">
-            <img
-              src={m.avatar_url}
-              alt={m.full_name || m.handle}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLElement).style.display = "none";
-                e.currentTarget.parentElement!.innerText = initials;
-              }}
-            />
-          </div>
-        ) : activeEmblem ? (
-          <div
-            className={cn(
-              "profile-mark flex items-center justify-center font-mono text-2xl border",
-              activeEmblem.bg,
-              activeEmblem.border,
-              activeEmblem.text,
-            )}
-          >
-            <span>{activeEmblem.icon}</span>
-          </div>
-        ) : (
-          <div className="profile-mark">{initials}</div>
-        )}
+        <Avatar className="w-16 h-16 rounded-[1px] border border-[var(--line)] bg-zinc-900 flex-shrink-0">
+          {m.avatar_url &&
+          (m.avatar_url.startsWith("http") ||
+            m.avatar_url.startsWith("/media/") ||
+            m.avatar_url.startsWith("/")) ? (
+            <AvatarImage src={m.avatar_url || undefined} alt={m.full_name || m.handle} className="object-cover" />
+          ) : null}
+          <AvatarFallback className={cn(
+            "rounded-[1px] font-mono text-xl font-bold flex items-center justify-center w-full h-full",
+            activeEmblem ? cn(activeEmblem.bg, activeEmblem.border, activeEmblem.text) : "bg-[var(--accent)] text-[var(--accent-ink)]"
+          )}>
+            {activeEmblem ? activeEmblem.icon : initials}
+          </AvatarFallback>
+        </Avatar>
         <div className="min-w-0 flex-1">
           <p className="kicker">Competitive identity</p>
           <div className="flex items-center gap-3 flex-wrap">
             <h1>{m.full_name}</h1>
-            <button
+            <Button
               type="button"
               id="profile-edit-btn"
               onClick={() => dispatch(openEditProfileModal())}
-              className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/40 hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] rounded-[1px] transition-all cursor-pointer shadow-[0_0_10px_rgba(200,255,54,0.1)]"
+              className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/40 hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] rounded-[1px] transition-all cursor-pointer shadow-[0_0_10px_rgba(200,255,54,0.1)]"
             >
               <Edit3 size={12} />
               <span>Edit Profile</span>
-            </button>
+            </Button>
           </div>
           <p className="profile-sub text-xs text-[var(--muted)] font-mono mt-0.5">
             @{m.handle} · {m.department} · {m.batch}
