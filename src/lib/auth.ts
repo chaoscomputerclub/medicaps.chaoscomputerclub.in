@@ -5,13 +5,18 @@
  */
 
 export function getApiBase(): string {
+  const envUrl =
+    typeof import.meta !== "undefined" && import.meta.env
+      ? (import.meta.env as Record<string, string>)["VITE_API_URL"]
+      : undefined;
+
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, "");
+  }
+
   if (typeof window !== "undefined") {
-    // 1. Localhost development
+    // 1. Localhost development fallback
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      const envUrl = (import.meta.env as Record<string, string>)["VITE_API_URL"];
-      if (envUrl && envUrl.trim() && !envUrl.includes("chaoscomputerclub.in")) {
-        return envUrl.trim().replace(/\/+$/, "");
-      }
       return "http://localhost:8000/api";
     }
 
@@ -21,9 +26,9 @@ export function getApiBase(): string {
   }
 
   // SSR fallback
-  const ssrUrl = process.env["BACKEND_URL"];
+  const ssrUrl = process.env["BACKEND_URL"] || process.env["VITE_API_URL"];
   if (ssrUrl && ssrUrl.trim()) return ssrUrl.trim().replace(/\/+$/, "");
-  return "http://127.0.0.1:8002/api";
+  return "https://medicaps.chaoscomputerclub.in/api";
 }
 
 const TOKEN_KEY = "ccc_medicaps_token";
