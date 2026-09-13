@@ -98,14 +98,20 @@ export type ContestRecord = {
 };
 
 export type ContestHistoryItem = {
+  contest_id?: string;
   contest_slug: string;
   contest_title: string;
   season: string;
+  status: "upcoming" | "live" | "finished";
+  lifecycle: ContestLifecycle;
   participated_at: string;
-  score: number;
-  rank: number;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  venue?: string | null;
+  score: number | null;
+  rank: number | null;
   participants: number;
-  outcome: "qualified" | "not_qualified" | "pending";
+  outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending";
   offline_result: string | null;
 };
 
@@ -273,17 +279,56 @@ export const contestSystemService = {
       const token = getToken();
       if (!token) return [];
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/auth/profile/full`, {
+
+      // 1. Fetch comprehensive participated & registered contests
+      const res = await fetch(`${apiBase}/contests/my/participated`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
+        if (Array.isArray(data)) {
+          return data.map((item: any) => ({
+            contest_id: item.contest_id,
+            contest_slug: item.contest_slug,
+            contest_title: item.contest_title,
+            season: item.season || "Season 1 — 2026",
+            status: item.status || "upcoming",
+            lifecycle:
+              item.status === "finished"
+                ? "offline_complete"
+                : item.status === "live"
+                ? "assessment_live"
+                : "registration_open",
+            participated_at: item.participated_at || new Date().toISOString(),
+            starts_at: item.starts_at,
+            ends_at: item.ends_at,
+            venue: item.venue || "Computing Complex · Lab Block 04",
+            score: item.score ?? null,
+            rank: item.rank ?? null,
+            participants: item.participants ?? 30,
+            outcome: item.outcome || "registered",
+            offline_result: item.offline_result || null,
+          }));
+        }
+      }
+
+      // 2. Fallback to /auth/profile/full
+      const profileRes = await fetch(`${apiBase}/auth/profile/full`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (profileRes.ok) {
+        const data = await profileRes.json();
         const battles = data.recentBattles || [];
         return battles.map((b: any) => ({
           contest_slug: b.contest_slug || b.contest.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
           contest_title: b.contest,
           season: "Season 1 — 2026",
+          status: "finished",
+          lifecycle: "offline_complete",
           participated_at: b.date,
+          starts_at: null,
+          ends_at: null,
+          venue: "Computing Complex",
           score: b.score ?? 0,
           rank: b.rank,
           participants: b.participants ?? 30,

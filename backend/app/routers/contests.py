@@ -35,6 +35,112 @@ async def list_contests(
     return result.scalars().all()
 
 
+
+@router.get("/my/participated", summary="List all contests the current member has registered for or participated in")
+async def get_my_participated_contests(
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Return all contests the current member has registered for or participated in,
+    including upcoming registered contests, active online screening attempts,
+    and verified on-campus scoreboard finishes.
+    """
+    from app.models.db_models import ContestRegistration, OfflineContest, AssessmentSession, Assessment, ScoreboardEntry
+
+    # 1. Fetch all contest registrations for this cadet
+    reg_query = (
+        select(ContestRegistration, OfflineContest)
+        .join(OfflineContest, ContestRegistration.contest_id == OfflineContest.id)
+        .where(ContestRegistration.member_id == current_member.id)
+        .order_by(ContestRegistration.registered_at.desc())
+    )
+    reg_res = await db.execute(reg_query)
+    registrations = reg_res.all()
+
+    # 2. Fetch all scoreboard entries (on-campus finishes)
+    sb_query = (
+        select(ScoreboardEntry, OfflineContest)
+        .join(OfflineContest, ScoreboardEntry.contest_id == OfflineContest.id)
+        .where(ScoreboardEntry.member_id == current_member.id)
+    )
+    sb_res = await db.execute(sb_query)
+    scoreboards = {row[1].id: row[0] for row in sb_res.all()}
+
+    # 3. Fetch all assessment sessions (online screening attempts)
+    sess_query = (
+        select(AssessmentSession, Assessment.slug)
+        .join(Assessment, AssessmentSession.assessment_id == Assessment.id)
+        .where(AssessmentSession.member_id == current_member.id)
+    )
+    sess_res = await db.execute(sess_query)
+    sessions = {row[1]: row[0] for row in sess_res.all()}
+
+    results = []
+    seen_contest_ids = set()
+
+    for reg, contest in registrations:
+        seen_contest_ids.add(contest.id)
+        sb = scoreboards.get(contest.id)
+        sess = sessions.get(contest.slug)
+
+        # Determine outcome and status
+        if contest.status == "upcoming":
+            outcome = "registered"
+        elif contest.status == "live":
+            outcome = "live"
+        elif sb:
+            outcome = "qualified" if sb.rank <= 30 else "not_qualified"
+        elif sess and sess.status == "submitted":
+            outcome = "pending"
+        else:
+            outcome = "registered"
+
+        score = sb.score if sb else (sess.score if sess else None)
+        rank = sb.rank if sb else None
+
+        results.append({
+            "contest_id": contest.id,
+            "contest_slug": contest.slug,
+            "contest_title": contest.title,
+            "season": contest.season,
+            "status": contest.status,
+            "venue": contest.venue,
+            "participated_at": reg.registered_at.isoformat(),
+            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+            "score": score,
+            "rank": rank,
+            "participants": contest.registered_count,
+            "outcome": outcome,
+            "offline_result": f"Certificate CCC-{contest.slug.upper()}" if (sb and sb.rank <= 30) else None,
+        })
+
+    # Also add any scoreboard entries if not already in registrations
+    for contest_id, sb in scoreboards.items():
+        if contest_id not in seen_contest_ids:
+            contest_row = await db.get(OfflineContest, contest_id)
+            if contest_row:
+                results.append({
+                    "contest_id": contest_row.id,
+                    "contest_slug": contest_row.slug,
+                    "contest_title": contest_row.title,
+                    "season": contest_row.season,
+                    "status": contest_row.status,
+                    "venue": contest_row.venue,
+                    "participated_at": contest_row.starts_at.isoformat() if contest_row.starts_at else None,
+                    "starts_at": contest_row.starts_at.isoformat() if contest_row.starts_at else None,
+                    "ends_at": contest_row.ends_at.isoformat() if contest_row.ends_at else None,
+                    "score": sb.score,
+                    "rank": sb.rank,
+                    "participants": contest_row.registered_count,
+                    "outcome": "qualified" if sb.rank <= 30 else "not_qualified",
+                    "offline_result": f"Certificate CCC-{contest_row.slug.upper()}",
+                })
+
+    return results
+
+
 @router.get("/{slug}", response_model=OfflineContestResponse)
 async def get_contest_detail(slug: str, db: AsyncSession = Depends(get_db)):
     """Fetch complete specifications, venue, rules, and proctor details for an offline contest."""
