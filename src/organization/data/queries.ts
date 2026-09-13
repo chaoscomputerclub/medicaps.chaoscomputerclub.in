@@ -9,6 +9,7 @@ import {
   getPublicPortalData,
   getMemberProfileData,
   getUniversityLeaderboardData,
+  getRatingDistribution,
 } from "./portal.functions";
 import type {
   AnnouncementFeedItem,
@@ -361,6 +362,13 @@ export const portalQueries = {
       queryFn: () => getUniversityLeaderboardData(),
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
+    }),
+  ratingDistribution: () =>
+    queryOptions({
+      queryKey: ["portal", "rating-distribution"],
+      queryFn: () => getRatingDistribution(),
+      staleTime: 2 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
     }),
   publicRecords: () =>
     queryOptions({

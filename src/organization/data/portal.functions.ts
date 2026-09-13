@@ -128,3 +128,20 @@ export const getUniversityLeaderboardData = createServerFn({ method: "GET" }).ha
   }
   return [] as LeaderboardEntry[];
 });
+
+export type RatingBucket = { min: number; max: number; count: number };
+export type RatingDistribution = { total: number; buckets: RatingBucket[] };
+
+/**
+ * Real rating distribution from the DB — no static fake curve.
+ * Buckets are 50-point ranges; counts reflect real registered members.
+ */
+export const getRatingDistribution = createServerFn({ method: "GET" }).handler(async () => {
+  const backendUrl = getBackendUrl();
+  const res = await fetch(`${backendUrl}/leaderboard/distribution`).catch(() => null);
+  if (res && res.ok) {
+    return (await res.json()) as RatingDistribution;
+  }
+  return { total: 0, buckets: [] } as RatingDistribution;
+});
+

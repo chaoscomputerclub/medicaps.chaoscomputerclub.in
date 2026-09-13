@@ -126,6 +126,34 @@ async def get_university_leaderboard(
     return rows
 
 
+
+@router.get("/distribution")
+async def get_rating_distribution(db: AsyncSession = Depends(get_db)):
+    """
+    Return the real rating distribution histogram from the DB.
+    Each bucket spans 50 rating points (1000-1050, ..., 2350-2400+).
+    Count is the actual number of members whose rating falls in that range.
+    """
+    result = await db.execute(select(MemberProfile.rating))
+    ratings = [r for (r,) in result.all() if r is not None]
+
+    # Define 28 buckets covering 1000 to 2400
+    buckets = []
+    for lo in range(1000, 2400, 50):
+        hi = lo + 50
+        count = sum(1 for r in ratings if lo <= r < hi)
+        buckets.append({"min": lo, "max": hi, "count": count})
+
+    # Final overflow bucket: >= 2400
+    buckets.append({
+        "min": 2400,
+        "max": 9999,
+        "count": sum(1 for r in ratings if r >= 2400),
+    })
+
+    total = len(ratings)
+    return {"total": total, "buckets": buckets}
+
 @router.get("/departments")
 async def get_department_performance(db: AsyncSession = Depends(get_db)):
     """Aggregate rating and participation statistics by university department."""

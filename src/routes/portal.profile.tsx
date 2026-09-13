@@ -43,6 +43,7 @@ const qs = [
   portalQueries.campusPass(),
   portalQueries.proofs(),
   portalQueries.achievements(),
+  portalQueries.ratingDistribution(),
 ] as const;
 import { redirect } from "@tanstack/react-router";
 import { isAuthenticated } from "@/lib/auth";
@@ -81,6 +82,7 @@ export const Route = createFileRoute("/portal/profile")({
       context.queryClient.ensureQueryData(qs[3]),
       context.queryClient.ensureQueryData(qs[4]),
       context.queryClient.ensureQueryData(qs[5]),
+      context.queryClient.ensureQueryData(qs[6]),
     ]);
   },
   pendingComponent: ProfileSkeleton,
@@ -98,6 +100,7 @@ function Profile() {
   const { data: pass } = useSuspenseQuery(qs[3]);
   const { data: proofs } = useSuspenseQuery(qs[4]);
   const { data: achievements } = useSuspenseQuery(qs[5]);
+  const { data: distribution } = useSuspenseQuery(qs[6]);
   const activeEmblem = m.avatar_url ? EMBLEM_MAP[m.avatar_url] : null;
   const initials = m.full_name
     ? m.full_name
@@ -272,7 +275,7 @@ function Profile() {
           <RatingChart data={history} />
         </div>
         <div>
-          <RatingDistributionCard member={m} />
+          <RatingDistributionCard member={m} distribution={distribution} />
         </div>
       </section>
       <section className="panel">

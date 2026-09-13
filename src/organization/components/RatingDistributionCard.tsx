@@ -1,64 +1,67 @@
 import { useState } from "react";
 import type { MemberProfile } from "../data/types";
+import type { RatingDistribution } from "../data/portal.functions";
 import { cn } from "@/lib/utils";
 
-// 23 histogram distribution buckets matching contest rating distribution curve
-const BUCKET_DISTRIBUTION = [
-  { min: 1000, max: 1050, height: 6 },
-  { min: 1050, max: 1100, height: 7 },
-  { min: 1100, max: 1150, height: 7 },
-  { min: 1150, max: 1200, height: 14 },
-  { min: 1200, max: 1250, height: 35 },
-  { min: 1250, max: 1300, height: 100 }, // Peak distribution
-  { min: 1300, max: 1350, height: 80 },
-  { min: 1350, max: 1400, height: 56 },
-  { min: 1400, max: 1450, height: 38 },
-  { min: 1450, max: 1500, height: 26 },
-  { min: 1500, max: 1550, height: 18 },
-  { min: 1550, max: 1600, height: 12 },
-  { min: 1600, max: 1650, height: 8 },
-  { min: 1650, max: 1700, height: 7 },
-  { min: 1700, max: 1750, height: 7 },
-  { min: 1750, max: 1800, height: 7 },
-  { min: 1800, max: 1850, height: 7 },
-  { min: 1850, max: 1900, height: 7 },
-  { min: 1900, max: 1950, height: 7 },
-  { min: 1950, max: 2000, height: 7 },
-  { min: 2000, max: 2050, height: 7 },
-  { min: 2050, max: 2100, height: 7 },
-  { min: 2100, max: 2400, height: 7 },
-];
-
+/**
+ * RatingDistributionCard
+ * Renders a real histogram sourced from the backend's /leaderboard/distribution endpoint.
+ * Falls back to an all-zero chart when the app has no members yet — no fake data.
+ */
 export function RatingDistributionCard({
   member,
+  distribution,
 }: {
   member: MemberProfile;
+  distribution?: RatingDistribution | null;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const attendanceCount = member.attendance_count ?? 0;
   const hasAttended = attendanceCount > 0;
 
-  // If cadet has 0 offline contests attended, set percentile to 0% and initial ranking at minimum
+  // --- Percentile & rank display ---
   let percentileDisplay = "0%";
-  let activeBucket = 0; // Minimum baseline position
-
   if (hasAttended) {
-    const cohortTotal = Math.max(member.active_members || 480, 480);
+    const cohortTotal = Math.max(distribution?.total || 1, 1);
     const rank = Math.max(1, member.university_rank || 1);
     const pct = (rank / cohortTotal) * 100;
     percentileDisplay = pct < 1 ? `${pct.toFixed(2)}%` : `${pct.toFixed(1)}%`;
+  }
+  const rankDisplay = hasAttended ? `#${member.university_rank}` : "#—";
 
-    const rating = member.rating || 1200;
-    activeBucket = BUCKET_DISTRIBUTION.findIndex(
-      (b) => rating >= b.min && rating < b.max
+  // --- Build buckets from live backend data ---
+  const buckets = distribution?.buckets ?? [];
+  const total = distribution?.total ?? 0;
+
+  // If no members yet, show ghost bars at equal low height (not a fake peak)
+  const isEmpty = total === 0 || buckets.length === 0;
+
+  // Normalise: find real max count so bars scale relative to each other
+  const maxCount = isEmpty ? 1 : Math.max(...buckets.map((b) => b.count), 1);
+
+  // Find bucket that contains the member's rating
+  const memberRating = member.rating ?? 1200;
+  let activeBucketIndex = -1;
+  if (!isEmpty) {
+    activeBucketIndex = buckets.findIndex(
+      (b) => memberRating >= b.min && memberRating < b.max
     );
-    if (activeBucket === -1) {
-      activeBucket = rating >= 2100 ? 22 : 0;
+    if (activeBucketIndex === -1) {
+      // If rating is at/above last bucket's min, use last bucket
+      activeBucketIndex = buckets.length - 1;
     }
   }
 
-  const rankDisplay = hasAttended ? `#${member.university_rank}` : "#—";
+  // Ghost placeholder buckets (for empty state / loading)
+  const PLACEHOLDER_BUCKETS = Array.from({ length: 28 }, (_, i) => ({
+    min: 1000 + i * 50,
+    max: 1050 + i * 50,
+    count: 0,
+  }));
+
+  const displayBuckets = isEmpty ? PLACEHOLDER_BUCKETS : buckets;
+  const MAX_BAR_PX = 72;
 
   return (
     <div className="panel flex flex-col justify-between h-full bg-[var(--surface)] border border-[var(--line)] p-6">
@@ -73,36 +76,54 @@ export function RatingDistributionCard({
       </div>
 
       {/* Histogram Bar Chart */}
-      <div className="my-6">
-        <div className="flex items-end justify-between gap-[3px] sm:gap-[4px] h-[90px] w-full">
-          {BUCKET_DISTRIBUTION.map((bucket, index) => {
-            const isUserBucket = index === activeBucket;
+      <div className="my-6 relative">
+        {isEmpty && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <span className="text-[10px] font-mono text-[var(--muted)] tracking-widest opacity-70">
+              NO CONTEST DATA YET
+            </span>
+          </div>
+        )}
+        <div
+          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[90px] w-full"
+          aria-label="Rating distribution histogram"
+        >
+          {displayBuckets.map((bucket, index) => {
+            const count = isEmpty ? 0 : (bucket.count ?? 0);
+            // Min height: 3px for ghost bars, otherwise 3px + scaled
+            const barHeightPx = isEmpty
+              ? 3
+              : Math.max(3, Math.round((count / maxCount) * MAX_BAR_PX));
+
+            const isUserBucket = !isEmpty && index === activeBucketIndex;
             const isHovered = hoveredIndex === index;
-            // Scale bar height to max ~75px
-            const barHeightPx = Math.max(5, Math.round((bucket.height / 100) * 75));
 
             return (
               <div
-                key={index}
-                className="flex-1 flex flex-col items-center justify-end h-full relative group cursor-pointer"
+                key={`${bucket.min}-${index}`}
+                className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                {/* Tooltip on hover */}
-                {isHovered && (
-                  <div className="absolute -top-8 px-2 py-1 bg-zinc-900 border border-zinc-700 text-[10px] font-mono text-zinc-200 rounded whitespace-nowrap z-10 pointer-events-none shadow-lg">
-                    {bucket.min} - {bucket.max}
+                {/* Tooltip */}
+                {isHovered && !isEmpty && (
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-zinc-700 text-[10px] font-mono text-zinc-200 rounded whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                    {bucket.min}–{bucket.min + 50}: {count}
                   </div>
                 )}
-                {/* The Bar: themed with var(--accent) (#c8ff36 lime) */}
+                {/* Bar */}
                 <div
                   style={{ height: `${barHeightPx}px` }}
                   className={cn(
                     "w-full rounded-t-[2px] transition-all duration-150",
-                    isUserBucket
+                    isEmpty
+                      ? "bg-[#222222] opacity-40"
+                      : isUserBucket
                       ? "bg-[var(--accent)] shadow-md shadow-[var(--accent)]/40 brightness-110"
                       : isHovered
                       ? "bg-zinc-500"
+                      : count === 0
+                      ? "bg-[#1e1e1e]"
                       : "bg-[#333333]"
                   )}
                 />
@@ -119,7 +140,7 @@ export function RatingDistributionCard({
             Contest Rating
           </span>
           <strong className="text-sm font-mono font-bold text-white block mt-0.5">
-            {member.rating?.toLocaleString() || 1200}
+            {member.rating?.toLocaleString() ?? 1200}
           </strong>
         </div>
         <div>
