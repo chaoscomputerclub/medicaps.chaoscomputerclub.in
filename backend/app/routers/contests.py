@@ -413,3 +413,37 @@ async def check_in_contest(
         "contest": contest.title,
         "pass_code": pass_code,
     }
+
+
+@router.post("/{slug}/reset-timer")
+async def reset_contest_timer(
+    slug: str,
+    seconds: int = Query(10, description="Countdown duration in seconds"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Reset contest and assessment starts_at to N seconds in the future for demo countdown."""
+    from datetime import datetime, timezone, timedelta
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    now = datetime.now(timezone.utc)
+    new_starts = now + timedelta(seconds=seconds)
+    contest.starts_at = new_starts
+    contest.status = "upcoming"
+
+    # Also update Assessment starts_at
+    a_res = await db.execute(select(Assessment).where((Assessment.contest_id == contest.id) | (Assessment.slug == slug)))
+    assessment = a_res.scalars().first()
+    if assessment:
+        assessment.starts_at = new_starts
+        assessment.is_active = True
+
+    await db.commit()
+    return {
+        "status": "timer_reset",
+        "slug": slug,
+        "countdown_seconds": seconds,
+        "starts_at": new_starts.isoformat(),
+    }

@@ -60,9 +60,15 @@ function Assessment() {
   const [now, setNow] = useState<number>(() => Date.now());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
+    const timer = setInterval(() => {
+      const current = Date.now();
+      setNow(current);
+      if (startsAtMs && current >= startsAtMs && (state === "waiting" || state === "default")) {
+        navigate({ search: { state: "live" } });
+      }
+    }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [startsAtMs, state, navigate]);
 
   if (!c) return null;
 
@@ -87,6 +93,20 @@ function Assessment() {
               ? "The Phase 1 Online Screening Assessment unlocks strictly 24 hours prior to the contest live start window. Questions and coding challenges remain cryptographically sealed until then."
               : "Your registration is confirmed. Keep this window open; you may begin as soon as the live screening window opens."}
           </p>
+
+          {now < startsAtMs && Math.ceil((startsAtMs - now) / 1000) <= 60 && (
+            <div className="my-6 p-6 rounded-lg bg-[var(--surface-2)] border border-amber-500/40 text-center shadow-[0_0_25px_rgba(251,191,36,0.15)]">
+              <p className="font-mono text-xs uppercase tracking-widest text-amber-400 font-bold mb-1">
+                ⚡ ONLINE ASSESSMENT COMMENCES IN
+              </p>
+              <div className="font-mono text-6xl font-black text-amber-300 tracking-wider animate-pulse">
+                00:00:{String(Math.max(0, Math.ceil((startsAtMs - now) / 1000))).padStart(2, "0")}
+              </div>
+              <p className="font-mono text-[11px] text-[var(--muted)] mt-2">
+                Workstation telemetry ready. Terminal will unlock automatically.
+              </p>
+            </div>
+          )}
 
           <div style={{ maxWidth: "480px", margin: "24px auto 16px" }}>
             <AssessmentTimeWatch

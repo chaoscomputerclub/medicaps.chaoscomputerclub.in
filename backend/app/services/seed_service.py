@@ -20,7 +20,7 @@ from app.models.db_models import (
 logger = logging.getLogger(__name__)
 
 CONTEST_SLUG = "medicaps-offline-open-2026"
-AUTO_SEED_DEMO_CONTESTS = False
+AUTO_SEED_DEMO_CONTESTS = True
 
 # ─── Starter Codes ────────────────────────────────────────────────────────────
 
@@ -459,9 +459,9 @@ async def seed_database(db: AsyncSession):
         contest_obj.status = "upcoming"
         contest_obj.title = "CCC Medi-Caps Campus Clash 2026 (Phase 1 Screening Active)"
         now_t = datetime.now(timezone.utc)
-        contest_obj.starts_at = now_t + timedelta(days=3)
+        contest_obj.starts_at = now_t + timedelta(seconds=10)
         contest_obj.ends_at = contest_obj.starts_at + timedelta(days=7)
-        contest_obj.check_in_opens_at = contest_obj.starts_at - timedelta(hours=24)
+        contest_obj.check_in_opens_at = now_t - timedelta(hours=1)
         p_res = await db.execute(
             select(AssessmentProblem).join(Assessment).where(Assessment.slug == CONTEST_SLUG)
         )
@@ -501,7 +501,7 @@ async def seed_database(db: AsyncSession):
             existing_probs["C"].starter_codes = PROB_C_STARTER
     else:
         now = datetime.now(timezone.utc)
-        starts = now - timedelta(hours=1)
+        starts = now + timedelta(seconds=10)
         ends = now + timedelta(days=7)
 
         # Create Demo OfflineContest (status: upcoming)
@@ -513,7 +513,7 @@ async def seed_database(db: AsyncSession):
             division="open",
             starts_at=starts,
             ends_at=ends,
-            check_in_opens_at=starts - timedelta(minutes=30),
+            check_in_opens_at=now - timedelta(hours=1),
             venue="Computing Complex · Lab Block 04",
             seat_capacity=60,
             registered_count=0,
@@ -682,84 +682,6 @@ async def seed_database(db: AsyncSession):
 
         db.add_all([prob_a, prob_b, prob_c])
 
-    # 2. Companion Live Final Contest (status: live, strictly Top 30 qualified only)
-    FINAL_SLUG = "medicaps-campus-final-2026"
-    existing_final = await db.execute(
-        select(OfflineContest).where(OfflineContest.slug == FINAL_SLUG)
-    )
-    final_obj = existing_final.scalars().first()
-    now = datetime.now(timezone.utc)
-    if not final_obj:
-        logger.info("Seeding companion live final contest '%s'...", FINAL_SLUG)
-        final_contest = OfflineContest(
-            slug=FINAL_SLUG,
-            title="CCC Medi-Caps On-Premise Live Final 2026",
-            season="Season 1 — 2026",
-            status="live",
-            division="open",
-            starts_at=now - timedelta(hours=1),
-            ends_at=now + timedelta(hours=3),
-            check_in_opens_at=now - timedelta(hours=2),
-            venue="Computing Complex · Air-Gapped Superlab 01",
-            seat_capacity=30,
-            registered_count=30,
-            problem_count=4,
-            environment="Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20",
-            chief_proctors=["Dr. Ratnesh Litoriya", "Prof. Amit Shrivastava", "Lead Proctor @ CCC MCU"],
-            prize_pool="₹50,000 + Physical Gold & Silver Medals",
-            sponsor="Chaos Computer Club India",
-            summary="The on-premise physical air-gapped lab final. STRICTLY RESTRICTED TO TOP 30 CADETS qualified through Phase 1 Screening Assessment.",
-            rules=[
-                "Top 30 qualified cadets only. Workstation allocation tied to screening rank.",
-                "Physical attendance at Computing Complex Lab 01 mandatory.",
-                "Zero external internet access. Direct physical network telemetry.",
-                "Real-time scoreboard frozen in the final 30 minutes."
-            ],
-            created_at=now,
-        )
-        db.add(final_contest)
-        await db.flush()
-
-        fp1 = ContestProblem(
-            contest_id=final_contest.id,
-            problem_index="A",
-            title="Kernel Ring Buffer Overflow",
-            topic="Low-Level Data Structures & Bit Manipulation",
-            points=100,
-            solved_count=0,
-            editorial_summary="Simulate fixed-size circular buffer with lock-free atomic pointer wraps."
-        )
-        fp2 = ContestProblem(
-            contest_id=final_contest.id,
-            problem_index="B",
-            title="Quantum Entropy Decryption",
-            topic="Number Theory & Modular Exponentiation",
-            points=200,
-            solved_count=0,
-            editorial_summary="Use Chinese Remainder Theorem with Pollard's Rho factor decomposition."
-        )
-        fp3 = ContestProblem(
-            contest_id=final_contest.id,
-            problem_index="C",
-            title="Air-Gapped Mesh Routing Matrix",
-            topic="Min-Cost Max-Flow & Capacity Scaling",
-            points=300,
-            solved_count=0,
-            editorial_summary="Model network as directed capacity flow with node latency costs."
-        )
-        fp4 = ContestProblem(
-            contest_id=final_contest.id,
-            problem_index="D",
-            title="Neural Packet Filter Pipeline",
-            topic="Dynamic Programming & Tree Decomposition",
-            points=400,
-            solved_count=0,
-            editorial_summary="Optimize tree treewidth routing for hierarchical firewall rule clusters."
-        )
-        db.add_all([fp1, fp2, fp3, fp4])
-    else:
-        final_obj.status = "live"
-
     await db.commit()
-    logger.info("Successfully ensured demo upcoming contest and companion live final contest in database.")
+    logger.info("Successfully seeded example upcoming contest with 10s assessment countdown in database.")
     return

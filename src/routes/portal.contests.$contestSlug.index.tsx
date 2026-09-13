@@ -23,7 +23,9 @@ import { AssessmentTimeWatch } from "@/organization/components/AssessmentTimeWat
 import { RegisterConfirmModal } from "@/organization/components/RegisterConfirmModal";
 import { contestSystemQueries } from "@/organization/data/contest-queries";
 import { reviewState } from "@/organization/data/contest-system";
-import { getContestRegistrationStatus } from "@/lib/auth";
+import { getContestRegistrationStatus, getApiBase, getToken } from "@/lib/auth";
+import { toast } from "sonner";
+import { Clock, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/portal/contests/$contestSlug/")({
   validateSearch: (s: Record<string, unknown>): { state?: ReturnType<typeof reviewState> | undefined } => ({
@@ -72,6 +74,32 @@ function ContestDetail() {
       clearInterval(timer);
     };
   }, [contestSlug]);
+
+  const [isResettingTimer, setIsResettingTimer] = useState(false);
+  const handleResetTimer = async () => {
+    try {
+      setIsResettingTimer(true);
+      const apiBase = getApiBase();
+      const token = getToken();
+      const res = await fetch(`${apiBase}/contests/${contestSlug}/reset-timer?seconds=10`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        toast.success("10-second assessment countdown timer started!");
+        const data = await res.json();
+        if (c.stages && c.stages[0]) {
+          c.stages[0].starts_at = data.starts_at;
+        }
+        c.registration_closes_at = data.starts_at;
+        setNow(Date.now());
+      }
+    } catch {
+      toast.error("Failed to reset timer.");
+    } finally {
+      setIsResettingTimer(false);
+    }
+  };
 
   const isRegistered = Boolean(registrationStatus?.registered || c.registered);
 
@@ -181,22 +209,65 @@ function ContestDetail() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : isUnlocked ? (
-              <Button
-                asChild
-                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
-              >
-                <Link
-                  to="/portal/contests/$contestSlug/assessment"
-                  params={{ contestSlug }}
-                  search={{ state: "live" }}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Enter Online Assessment
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
+              now < startsAtMs ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    asChild
+                    className="bg-amber-400 text-black hover:bg-amber-300 font-bold text-xs uppercase tracking-wider px-5 shadow-[0_0_15px_rgba(251,191,36,0.3)] animate-pulse"
+                  >
+                    <Link
+                      to="/portal/contests/$contestSlug/assessment"
+                      params={{ contestSlug }}
+                      search={{ state: "waiting" }}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Clock className="w-4 h-4 mr-2 animate-spin" />
+                      Assessment Starts in {Math.max(0, Math.ceil((startsAtMs - now) / 1000))}s
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetTimer}
+                    disabled={isResettingTimer}
+                    className="font-mono text-xs border-[var(--line)] hover:border-amber-400 text-amber-300"
+                  >
+                    <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isResettingTimer ? "animate-spin" : ""}`} />
+                    Restart 10s Timer
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    asChild
+                    className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
+                  >
+                    <Link
+                      to="/portal/contests/$contestSlug/assessment"
+                      params={{ contestSlug }}
+                      search={{ state: "live" }}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Play className="w-4 h-4 mr-2 fill-current" />
+                      Enter Online Assessment
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetTimer}
+                    disabled={isResettingTimer}
+                    className="font-mono text-xs border-[var(--line)] hover:border-amber-400 text-amber-300"
+                  >
+                    <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isResettingTimer ? "animate-spin" : ""}`} />
+                    Restart 10s Timer
+                  </Button>
+                </div>
+              )
             ) : isConcluded ? (
               <Button disabled variant="outline" className="text-[var(--muted)] border-[var(--line)]">
                 Assessment Concluded
