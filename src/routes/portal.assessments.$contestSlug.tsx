@@ -431,14 +431,14 @@ function AssessmentStudio() {
                     <div className="text-[#888] font-bold">Example {idx + 1}</div>
                     <div className="space-y-1">
                       <div className="text-[#666]">Input:</div>
-                      <pre className="p-2 rounded bg-[#070707] text-[#ddd] overflow-x-auto">
-                        {s.stdin}
+                      <pre className="p-2 rounded bg-[#070707] text-[#ddd] overflow-x-auto whitespace-pre-wrap">
+                        {s.stdin || (s as any).input}
                       </pre>
                     </div>
                     <div className="space-y-1">
                       <div className="text-[#666]">Expected Output:</div>
-                      <pre className="p-2 rounded bg-[#070707] text-[#ddd] overflow-x-auto">
-                        {s.expected_output}
+                      <pre className="p-2 rounded bg-[#070707] text-[#ddd] overflow-x-auto whitespace-pre-wrap">
+                        {s.expected_output || (s as any).output}
                       </pre>
                     </div>
                     {s.explanation && (
@@ -544,7 +544,7 @@ function AssessmentStudio() {
                   {activeProblem?.sample_testcases?.map((st, i) => (
                     <div key={i} className="p-2.5 rounded bg-[#141414] border border-[#202020]">
                       <span className="text-subtle-foreground text-[0.625rem]">CASE {i + 1}</span>
-                      <pre className="text-[#ccc] mt-1">{st.stdin}</pre>
+                      <pre className="text-[#ccc] mt-1 whitespace-pre-wrap">{st.stdin || (st as any).input}</pre>
                     </div>
                   ))}
                   <div className="space-y-1.5 pt-2">

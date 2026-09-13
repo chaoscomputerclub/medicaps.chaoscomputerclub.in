@@ -449,8 +449,47 @@ async def seed_database(db: AsyncSession):
     existing_contest = await db.execute(
         select(OfflineContest).where(OfflineContest.slug == CONTEST_SLUG)
     )
-    if existing_contest.scalars().first():
-        logger.info("Demo contest '%s' already exists in database.", CONTEST_SLUG)
+    contest_obj = existing_contest.scalars().first()
+    if contest_obj:
+        logger.info("Demo contest '%s' exists, refreshing problem schemas and testcases...", CONTEST_SLUG)
+        p_res = await db.execute(
+            select(AssessmentProblem).join(Assessment).where(Assessment.slug == CONTEST_SLUG)
+        )
+        existing_probs = {p.problem_index: p for p in p_res.scalars().all()}
+        if "A" in existing_probs:
+            existing_probs["A"].sample_testcases = [
+                {"stdin": "4\nAB\nBA\nCD\nDC", "input": "4\nAB\nBA\nCD\nDC", "expected_output": "2", "output": "2", "explanation": "(AB, BA) and (CD, DC) form 2 mirror pairs."},
+                {"stdin": "3\nXYZ\nZYX\nABC", "input": "3\nXYZ\nZYX\nABC", "expected_output": "1", "output": "1", "explanation": "(XYZ, ZYX) forms 1 mirror pair."}
+            ]
+            existing_probs["A"].hidden_testcases = [
+                {"stdin": "2\nRACECAR\nRACECAR", "input": "2\nRACECAR\nRACECAR", "expected_output": "1", "output": "1"},
+                {"stdin": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "input": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "expected_output": "3", "output": "3"},
+                {"stdin": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "input": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "expected_output": "3", "output": "3"},
+                {"stdin": "1\nSOLO", "input": "1\nSOLO", "expected_output": "0", "output": "0"}
+            ]
+            existing_probs["A"].starter_codes = PROB_A_STARTER
+        if "B" in existing_probs:
+            existing_probs["B"].sample_testcases = [
+                {"stdin": "2 10\n2 5 10\n3 6 20", "input": "2 10\n2 5 10\n3 6 20", "expected_output": "160", "output": "160", "explanation": "Allocate 2 to p1 and 6 to p2 = 8, leftover 2 to p1 = 4 total, utility 4*10 + 6*20 = 160."},
+                {"stdin": "2 4\n3 5 10\n2 4 20", "input": "2 4\n3 5 10\n2 4 20", "expected_output": "-1", "output": "-1", "explanation": "Minimum requirements sum to 3 + 2 = 5, which exceeds total bandwidth 4."}
+            ]
+            existing_probs["B"].hidden_testcases = [
+                {"stdin": "3 15\n1 4 5\n2 6 15\n3 7 10", "input": "3 15\n1 4 5\n2 6 15\n3 7 10", "expected_output": "170", "output": "170"},
+                {"stdin": "1 10\n5 12 8", "input": "1 10\n5 12 8", "expected_output": "80", "output": "80"},
+                {"stdin": "2 10\n6 8 5\n5 9 10", "input": "2 10\n6 8 5\n5 9 10", "expected_output": "-1", "output": "-1"}
+            ]
+            existing_probs["B"].starter_codes = PROB_B_STARTER
+        if "C" in existing_probs:
+            existing_probs["C"].sample_testcases = [
+                {"stdin": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15", "input": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15", "expected_output": "20", "output": "20", "explanation": "Path 1 -> 2 -> 4 has latency 10 + 20 = 30. Applying 1 repeater to edge (2,4) reduces 20 to 10. Total latency = 10 + 10 = 20."},
+                {"stdin": "3 1 1\n1 2 10", "input": "3 1 1\n1 2 10", "expected_output": "-1", "output": "-1", "explanation": "Workstation 3 is unreachable."}
+            ]
+            existing_probs["C"].hidden_testcases = [
+                {"stdin": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "input": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "expected_output": "10", "output": "10"},
+                {"stdin": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "input": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "expected_output": "70", "output": "70"}
+            ]
+            existing_probs["C"].starter_codes = PROB_C_STARTER
+        await db.commit()
         return
 
     now = datetime.now(timezone.utc)
@@ -549,21 +588,21 @@ async def seed_database(db: AsyncSession):
         starter_codes=PROB_A_STARTER,
         sample_testcases=[
             {
-                "input": "4\nAB\nBA\nCD\nDC",
-                "expected_output": "2",
+                "stdin": "4\nAB\nBA\nCD\nDC", "input": "4\nAB\nBA\nCD\nDC",
+                "expected_output": "2", "output": "2",
                 "explanation": "(AB, BA) and (CD, DC) form 2 mirror pairs."
             },
             {
-                "input": "3\nXYZ\nZYX\nABC",
-                "expected_output": "1",
+                "stdin": "3\nXYZ\nZYX\nABC", "input": "3\nXYZ\nZYX\nABC",
+                "expected_output": "1", "output": "1",
                 "explanation": "(XYZ, ZYX) forms 1 mirror pair."
             }
         ],
         hidden_testcases=[
-            {"input": "2\nRACECAR\nRACECAR", "expected_output": "1"},
-            {"input": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "expected_output": "3"},
-            {"input": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "expected_output": "3"},
-            {"input": "1\nSOLO", "expected_output": "0"}
+            {"stdin": "2\nRACECAR\nRACECAR", "input": "2\nRACECAR\nRACECAR", "expected_output": "1", "output": "1"},
+            {"stdin": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "input": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "expected_output": "3", "output": "3"},
+            {"stdin": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "input": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "expected_output": "3", "output": "3"},
+            {"stdin": "1\nSOLO", "input": "1\nSOLO", "expected_output": "0", "output": "0"}
         ],
         created_at=now,
     )
@@ -583,20 +622,20 @@ async def seed_database(db: AsyncSession):
         starter_codes=PROB_B_STARTER,
         sample_testcases=[
             {
-                "input": "2 10\n2 5 10\n3 6 20",
-                "expected_output": "160",
+                "stdin": "2 10\n2 5 10\n3 6 20", "input": "2 10\n2 5 10\n3 6 20",
+                "expected_output": "160", "output": "160",
                 "explanation": "Allocate 2 to p1 and 6 to p2 = 8, leftover 2 to p1 = 4 total, utility 4*10 + 6*20 = 160."
             },
             {
-                "input": "2 4\n3 5 10\n2 4 20",
-                "expected_output": "-1",
+                "stdin": "2 4\n3 5 10\n2 4 20", "input": "2 4\n3 5 10\n2 4 20",
+                "expected_output": "-1", "output": "-1",
                 "explanation": "Minimum requirements sum to 3 + 2 = 5, which exceeds total bandwidth 4."
             }
         ],
         hidden_testcases=[
-            {"input": "3 15\n1 4 5\n2 6 15\n3 7 10", "expected_output": "170"},
-            {"input": "1 10\n5 12 8", "expected_output": "80"},
-            {"input": "2 10\n6 8 5\n5 9 10", "expected_output": "-1"}
+            {"stdin": "3 15\n1 4 5\n2 6 15\n3 7 10", "input": "3 15\n1 4 5\n2 6 15\n3 7 10", "expected_output": "170", "output": "170"},
+            {"stdin": "1 10\n5 12 8", "input": "1 10\n5 12 8", "expected_output": "80", "output": "80"},
+            {"stdin": "2 10\n6 8 5\n5 9 10", "input": "2 10\n6 8 5\n5 9 10", "expected_output": "-1", "output": "-1"}
         ],
         created_at=now,
     )
@@ -616,19 +655,19 @@ async def seed_database(db: AsyncSession):
         starter_codes=PROB_C_STARTER,
         sample_testcases=[
             {
-                "input": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15",
-                "expected_output": "20",
+                "stdin": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15", "input": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15",
+                "expected_output": "20", "output": "20",
                 "explanation": "Path 1 -> 2 -> 4 has latency 10 + 20 = 30. Applying 1 repeater to edge (2,4) reduces 20 to 10. Total latency = 10 + 10 = 20."
             },
             {
-                "input": "3 1 1\n1 2 10",
-                "expected_output": "-1",
+                "stdin": "3 1 1\n1 2 10", "input": "3 1 1\n1 2 10",
+                "expected_output": "-1", "output": "-1",
                 "explanation": "Workstation 3 is unreachable."
             }
         ],
         hidden_testcases=[
-            {"input": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "expected_output": "10"},
-            {"input": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "expected_output": "70"}
+            {"stdin": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "input": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "expected_output": "10", "output": "10"},
+            {"stdin": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "input": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "expected_output": "70", "output": "70"}
         ],
         created_at=now,
     )

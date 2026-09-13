@@ -52,6 +52,18 @@ class TelemetryRequest(BaseModel):
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
+def _normalize_testcase(tc: dict) -> dict:
+    stdin_val = tc.get("stdin") if tc.get("stdin") is not None else tc.get("input", "")
+    expected_out = tc.get("expected_output") if tc.get("expected_output") is not None else tc.get("output", "")
+    return {
+        "stdin": stdin_val,
+        "input": stdin_val,
+        "expected_output": expected_out,
+        "output": expected_out,
+        "explanation": tc.get("explanation"),
+    }
+
+
 def _public_problem_data(problem: AssessmentProblem) -> dict:
     """Return problem details without leaking hidden testcases."""
     return {
@@ -67,7 +79,7 @@ def _public_problem_data(problem: AssessmentProblem) -> dict:
         "time_limit": problem.time_limit,
         "memory_limit": problem.memory_limit,
         "starter_codes": problem.starter_codes or {},
-        "sample_testcases": problem.sample_testcases or [],
+        "sample_testcases": [_normalize_testcase(s) for s in (problem.sample_testcases or [])],
     }
 
 
@@ -216,8 +228,8 @@ async def run_sample_code(
             TestCaseSchema(
                 id=f"sample_{i+1}",
                 name=f"Sample Test {i+1}",
-                stdin=s.get("stdin", ""),
-                expected_output=s.get("expected_output", ""),
+                stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
+                expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
             )
             for i, s in enumerate(sample_list)
         ]
@@ -289,8 +301,8 @@ async def submit_assessment_code(
             TestCaseSchema(
                 id=f"sample_{i+1}",
                 name=f"Sample {i+1}",
-                stdin=s.get("stdin", ""),
-                expected_output=s.get("expected_output", ""),
+                stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
+                expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
                 hidden=False,
                 weight=1.0,
             )
@@ -302,8 +314,8 @@ async def submit_assessment_code(
             TestCaseSchema(
                 id=f"hidden_{i+1}",
                 name=f"Testcase {len(samples) + i + 1}",
-                stdin=h.get("stdin", ""),
-                expected_output=h.get("expected_output", ""),
+                stdin=h.get("stdin") if h.get("stdin") is not None else h.get("input", ""),
+                expected_output=h.get("expected_output") if h.get("expected_output") is not None else h.get("output", ""),
                 hidden=True,
                 weight=h.get("weight", 2.0),
             )
