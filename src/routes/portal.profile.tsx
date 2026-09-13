@@ -31,7 +31,7 @@ import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Award, ExternalLink, LockKeyhole, ShieldCheck, Zap } from "lucide-react";
-import { CampusPassCard } from "@/organization/components/CampusPassCard";
+import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { ProofBadge } from "@/organization/components/ProofBadge";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
@@ -272,7 +272,7 @@ function Profile() {
           <RatingChart data={history} />
         </div>
         <div>
-          <CampusPassCard pass={pass} />
+          <RatingDistributionCard member={m} />
         </div>
       </section>
       <section className="panel">
