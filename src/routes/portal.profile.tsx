@@ -124,7 +124,7 @@ function Profile() {
           (m.avatar_url.startsWith("http") ||
             m.avatar_url.startsWith("/media/") ||
             m.avatar_url.startsWith("/")) ? (
-            <AvatarImage src={m.avatar_url} alt={m.full_name || m.handle} className="object-cover" />
+            <AvatarImage src={m.avatar_url || undefined} alt={m.full_name || m.handle} className="object-cover" />
           ) : null}
           <AvatarFallback className={cn(
             "rounded-[1px] font-mono text-xl font-bold flex items-center justify-center w-full h-full",

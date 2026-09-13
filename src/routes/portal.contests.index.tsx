@@ -87,7 +87,7 @@ function Contests() {
         </div>
       </header>
 
-      <Tabs value={filter} onValueChange={(val) => void navigate({ search: { filter: val, state } })} className="mb-6">
+      <Tabs value={filter || "all"} onValueChange={(val) => void navigate({ search: { filter: val, state } })} className="mb-6">
         <TabsList className="bg-[var(--surface-2)] border border-[var(--line)] p-1 rounded-[1px] h-auto flex-wrap">
           {filterTabs.map((tab) => (
             <TabsTrigger
