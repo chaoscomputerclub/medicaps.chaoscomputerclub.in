@@ -284,7 +284,7 @@ function Assessment() {
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold">
+            <Button className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold">
               <Send className="w-4 h-4 mr-1.5" />
               Finish assessment
             </Button>
@@ -310,7 +310,7 @@ function Assessment() {
               <Button variant="outline">Keep reviewing</Button>
               <Button
                 onClick={() => void navigate({ search: { state: "submitted" } })}
-                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold"
+                className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold"
               >
                 Submit assessment
               </Button>
@@ -389,7 +389,7 @@ function Assessment() {
             </Button>
             <Button
               onClick={() => setActive(Math.min(active + 1, c.assessment.problems.length - 1))}
-              className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold"
+              className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold"
             >
               Save and continue
             </Button>

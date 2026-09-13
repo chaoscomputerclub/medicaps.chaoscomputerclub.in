@@ -169,7 +169,7 @@ function ContestDetail() {
             </Button>
             <Button
               asChild
-              className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-mono text-xs font-bold uppercase tracking-wider"
+              className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider"
             >
               <Link to="/portal/leaderboard">
                 View Screening Leaderboard
@@ -205,7 +205,7 @@ function ContestDetail() {
               <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   onClick={() => setShowRegisterModal(true)}
-                  className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
+                  className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold text-xs uppercase tracking-wider px-5"
                 >
                   <Users className="w-4 h-4 mr-2" />
                   Register for contest
@@ -256,7 +256,7 @@ function ContestDetail() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     asChild
-                    className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
+                    className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold text-xs uppercase tracking-wider px-5 shadow-[0_0_20px_rgba(34,197,94,0.3)]"
                   >
                     <Link
                       to="/portal/contests/$contestSlug/assessment"

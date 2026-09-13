@@ -146,7 +146,7 @@ function MyContestsPage() {
                 ? "You haven’t registered for upcoming contests yet. Explore the contest calendar and claim your workstation seat."
                 : "Enter two-round campus contests to build your verified competitive record."}
             </p>
-            <Button asChild className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs font-mono uppercase tracking-wider">
+            <Button asChild className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold text-xs font-mono uppercase tracking-wider">
               <Link to="/portal/contests">Explore Active Contests</Link>
             </Button>
           </div>
@@ -290,7 +290,7 @@ function MyContestsPage() {
                       {isLive ? (
                         <Button
                           asChild
-                          className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-mono text-xs font-bold uppercase tracking-wider"
+                          className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider"
                         >
                           <Link
                             to="/portal/contests/$contestSlug/assessment"

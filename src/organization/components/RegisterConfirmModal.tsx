@@ -170,7 +170,7 @@ export function RegisterConfirmModal({
           <Button
             onClick={handleConfirmRegistration}
             disabled={isSubmitting || !agreed}
-            className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-mono text-xs font-bold uppercase tracking-wider px-5"
+            className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-5"
           >
             {isSubmitting ? (
               <>
