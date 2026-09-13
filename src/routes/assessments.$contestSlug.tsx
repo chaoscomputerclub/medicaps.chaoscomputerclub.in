@@ -263,7 +263,7 @@ function StandaloneAssessmentPage() {
           <div className="pt-2 flex flex-col gap-2">
             {isLifecycleErr && (
               <a href={`/portal/assessments/${contestSlug}/leaderboard`} className="w-full">
-                <Button className="w-full bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90">
+                <Button className="w-full bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90">
                   <Trophy size={14} className="mr-1.5" /> View Screening Standings & Cutoff 🏆
                 </Button>
               </a>
@@ -272,7 +272,7 @@ function StandaloneAssessmentPage() {
               <Button
                 onClick={handleDirectRegister}
                 disabled={isRegistering}
-                className="w-full bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90"
+                className="w-full bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90"
               >
                 <Users size={14} className="mr-1.5" />
                 {isRegistering ? "Registering..." : "Register Now & Enter Workspace"}
@@ -280,7 +280,7 @@ function StandaloneAssessmentPage() {
             )}
             {isAuthErr && (
               <a href={`/auth?redirect=/assessments/${contestSlug}`} className="w-full">
-                <Button className="w-full bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90">
+                <Button className="w-full bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90">
                   Sign In to Continue
                 </Button>
               </a>
@@ -397,7 +397,7 @@ function StandaloneAssessmentPage() {
             size="sm"
             disabled={isRunning || isSubmitting}
             onClick={handleSubmit}
-            className="h-7 px-2.5 gap-1 text-xs font-mono bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer"
+            className="h-7 px-2.5 gap-1 text-xs font-mono bg-accent text-black font-bold hover:bg-accent/90 cursor-pointer"
           >
             <Send size={12} />
             <span>{isSubmitting ? "Judging..." : "Submit"}</span>

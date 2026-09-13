@@ -4,6 +4,7 @@ import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import {
   Archive,
+  History,
   Award,
   ChevronRight,
   LayoutDashboard,
@@ -25,6 +26,7 @@ import { getToken } from "@/lib/auth";
 const links = [
   { to: "/portal", label: "Operations", icon: LayoutDashboard, exact: true },
   { to: "/portal/contests", label: "Contests", icon: Trophy, exact: false },
+  { to: "/portal/my-contests", label: "My contests", icon: History, exact: false },
   { to: "/portal/leaderboard", label: "Leaderboard", icon: Award, exact: true },
   { to: "/portal/problems", label: "Archive", icon: Archive, exact: false },
   { to: "/portal/verify", label: "Verify proof", icon: ShieldCheck, exact: true },
@@ -62,6 +64,15 @@ export function PortalShell() {
       : "??";
 
   const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
+  const isAssessment = cleanPath.includes("/assessment");
+
+  if (isAssessment) {
+    return (
+      <main className="portal-main-assessment">
+        <Outlet />
+      </main>
+    );
+  }
 
   return (
     <div className="portal-frame">

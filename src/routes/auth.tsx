@@ -378,7 +378,7 @@ function Auth() {
             )}
 
             <Button
-              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer disabled:opacity-50"
+              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-black font-bold hover:bg-accent/90 cursor-pointer disabled:opacity-50"
               disabled={pending || isInvalidDomain}
               type="submit"
             >
@@ -591,7 +591,7 @@ function Auth() {
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer disabled:opacity-50"
+            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-black font-bold hover:bg-accent/90 cursor-pointer disabled:opacity-50"
             disabled={
               pending ||
               !name.trim() ||

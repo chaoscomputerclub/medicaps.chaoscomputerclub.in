@@ -18,15 +18,19 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AssessmentsContestSlugRouteImport } from './routes/assessments.$contestSlug'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalLeaderboardRouteImport } from './routes/portal.leaderboard'
+import { Route as PortalMyContestsRouteImport } from './routes/portal.my-contests'
 import { Route as PortalProfileRouteImport } from './routes/portal.profile'
 import { Route as PortalSettingsRouteImport } from './routes/portal.settings'
 import { Route as PortalVerifyRouteImport } from './routes/portal.verify'
-import { Route as PortalAssessmentsContestSlugRouteImport } from './routes/portal.assessments.$contestSlug'
 import { Route as PortalContestsIndexRouteImport } from './routes/portal.contests.index'
 import { Route as PortalContestsContestSlugRouteImport } from './routes/portal.contests.$contestSlug'
 import { Route as PortalProblemsIndexRouteImport } from './routes/portal.problems.index'
 import { Route as PortalProblemsProblemSlugRouteImport } from './routes/portal.problems.$problemSlug'
-import { Route as PortalAssessmentsContestSlugLeaderboardRouteImport } from './routes/portal.assessments.$contestSlug.leaderboard'
+import { Route as PortalContestsContestSlugIndexRouteImport } from './routes/portal.contests.$contestSlug.index'
+import { Route as PortalContestsContestSlugAssessmentRouteImport } from './routes/portal.contests.$contestSlug.assessment'
+import { Route as PortalContestsContestSlugOfflineRouteImport } from './routes/portal.contests.$contestSlug.offline'
+import { Route as PortalContestsContestSlugQualifiedRouteImport } from './routes/portal.contests.$contestSlug.qualified'
+import { Route as PortalContestsContestSlugResultsRouteImport } from './routes/portal.contests.$contestSlug.results'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -73,6 +77,11 @@ const PortalLeaderboardRoute = PortalLeaderboardRouteImport.update({
   path: '/leaderboard',
   getParentRoute: () => PortalRoute,
 } as any)
+const PortalMyContestsRoute = PortalMyContestsRouteImport.update({
+  id: '/my-contests',
+  path: '/my-contests',
+  getParentRoute: () => PortalRoute,
+} as any)
 const PortalProfileRoute = PortalProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -88,12 +97,6 @@ const PortalVerifyRoute = PortalVerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => PortalRoute,
 } as any)
-const PortalAssessmentsContestSlugRoute =
-  PortalAssessmentsContestSlugRouteImport.update({
-    id: '/assessments/$contestSlug',
-    path: '/assessments/$contestSlug',
-    getParentRoute: () => PortalRoute,
-  } as any)
 const PortalContestsIndexRoute = PortalContestsIndexRouteImport.update({
   id: '/contests/',
   path: '/contests/',
@@ -116,11 +119,35 @@ const PortalProblemsProblemSlugRoute =
     path: '/problems/$problemSlug',
     getParentRoute: () => PortalRoute,
   } as any)
-const PortalAssessmentsContestSlugLeaderboardRoute =
-  PortalAssessmentsContestSlugLeaderboardRouteImport.update({
-    id: '/leaderboard',
-    path: '/leaderboard',
-    getParentRoute: () => PortalAssessmentsContestSlugRoute,
+const PortalContestsContestSlugIndexRoute =
+  PortalContestsContestSlugIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => PortalContestsContestSlugRoute,
+  } as any)
+const PortalContestsContestSlugAssessmentRoute =
+  PortalContestsContestSlugAssessmentRouteImport.update({
+    id: '/assessment',
+    path: '/assessment',
+    getParentRoute: () => PortalContestsContestSlugRoute,
+  } as any)
+const PortalContestsContestSlugOfflineRoute =
+  PortalContestsContestSlugOfflineRouteImport.update({
+    id: '/offline',
+    path: '/offline',
+    getParentRoute: () => PortalContestsContestSlugRoute,
+  } as any)
+const PortalContestsContestSlugQualifiedRoute =
+  PortalContestsContestSlugQualifiedRouteImport.update({
+    id: '/qualified',
+    path: '/qualified',
+    getParentRoute: () => PortalContestsContestSlugRoute,
+  } as any)
+const PortalContestsContestSlugResultsRoute =
+  PortalContestsContestSlugResultsRouteImport.update({
+    id: '/results',
+    path: '/results',
+    getParentRoute: () => PortalContestsContestSlugRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -132,16 +159,20 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
+  '/portal/my-contests': typeof PortalMyContestsRoute
   '/portal/profile': typeof PortalProfileRoute
   '/portal/settings': typeof PortalSettingsRoute
   '/portal/verify': typeof PortalVerifyRoute
   '/portal/': typeof PortalIndexRoute
-  '/portal/assessments/$contestSlug': typeof PortalAssessmentsContestSlugRouteWithChildren
-  '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRoute
+  '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRouteWithChildren
   '/portal/problems/$problemSlug': typeof PortalProblemsProblemSlugRoute
   '/portal/contests/': typeof PortalContestsIndexRoute
   '/portal/problems/': typeof PortalProblemsIndexRoute
-  '/portal/assessments/$contestSlug/leaderboard': typeof PortalAssessmentsContestSlugLeaderboardRoute
+  '/portal/contests/$contestSlug/assessment': typeof PortalContestsContestSlugAssessmentRoute
+  '/portal/contests/$contestSlug/offline': typeof PortalContestsContestSlugOfflineRoute
+  '/portal/contests/$contestSlug/qualified': typeof PortalContestsContestSlugQualifiedRoute
+  '/portal/contests/$contestSlug/results': typeof PortalContestsContestSlugResultsRoute
+  '/portal/contests/$contestSlug/': typeof PortalContestsContestSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -151,16 +182,19 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
+  '/portal/my-contests': typeof PortalMyContestsRoute
   '/portal/profile': typeof PortalProfileRoute
   '/portal/settings': typeof PortalSettingsRoute
   '/portal/verify': typeof PortalVerifyRoute
   '/portal': typeof PortalIndexRoute
-  '/portal/assessments/$contestSlug': typeof PortalAssessmentsContestSlugRouteWithChildren
-  '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRoute
   '/portal/problems/$problemSlug': typeof PortalProblemsProblemSlugRoute
   '/portal/contests': typeof PortalContestsIndexRoute
   '/portal/problems': typeof PortalProblemsIndexRoute
-  '/portal/assessments/$contestSlug/leaderboard': typeof PortalAssessmentsContestSlugLeaderboardRoute
+  '/portal/contests/$contestSlug/assessment': typeof PortalContestsContestSlugAssessmentRoute
+  '/portal/contests/$contestSlug/offline': typeof PortalContestsContestSlugOfflineRoute
+  '/portal/contests/$contestSlug/qualified': typeof PortalContestsContestSlugQualifiedRoute
+  '/portal/contests/$contestSlug/results': typeof PortalContestsContestSlugResultsRoute
+  '/portal/contests/$contestSlug': typeof PortalContestsContestSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -172,16 +206,20 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
+  '/portal/my-contests': typeof PortalMyContestsRoute
   '/portal/profile': typeof PortalProfileRoute
   '/portal/settings': typeof PortalSettingsRoute
   '/portal/verify': typeof PortalVerifyRoute
   '/portal/': typeof PortalIndexRoute
-  '/portal/assessments/$contestSlug': typeof PortalAssessmentsContestSlugRouteWithChildren
-  '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRoute
+  '/portal/contests/$contestSlug': typeof PortalContestsContestSlugRouteWithChildren
   '/portal/problems/$problemSlug': typeof PortalProblemsProblemSlugRoute
   '/portal/contests/': typeof PortalContestsIndexRoute
   '/portal/problems/': typeof PortalProblemsIndexRoute
-  '/portal/assessments/$contestSlug/leaderboard': typeof PortalAssessmentsContestSlugLeaderboardRoute
+  '/portal/contests/$contestSlug/assessment': typeof PortalContestsContestSlugAssessmentRoute
+  '/portal/contests/$contestSlug/offline': typeof PortalContestsContestSlugOfflineRoute
+  '/portal/contests/$contestSlug/qualified': typeof PortalContestsContestSlugQualifiedRoute
+  '/portal/contests/$contestSlug/results': typeof PortalContestsContestSlugResultsRoute
+  '/portal/contests/$contestSlug/': typeof PortalContestsContestSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -194,16 +232,20 @@ export interface FileRouteTypes {
     | '/signup'
     | '/assessments/$contestSlug'
     | '/portal/leaderboard'
+    | '/portal/my-contests'
     | '/portal/profile'
     | '/portal/settings'
     | '/portal/verify'
     | '/portal/'
-    | '/portal/assessments/$contestSlug'
     | '/portal/contests/$contestSlug'
     | '/portal/problems/$problemSlug'
     | '/portal/contests/'
     | '/portal/problems/'
-    | '/portal/assessments/$contestSlug/leaderboard'
+    | '/portal/contests/$contestSlug/assessment'
+    | '/portal/contests/$contestSlug/offline'
+    | '/portal/contests/$contestSlug/qualified'
+    | '/portal/contests/$contestSlug/results'
+    | '/portal/contests/$contestSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -213,16 +255,19 @@ export interface FileRouteTypes {
     | '/signup'
     | '/assessments/$contestSlug'
     | '/portal/leaderboard'
+    | '/portal/my-contests'
     | '/portal/profile'
     | '/portal/settings'
     | '/portal/verify'
     | '/portal'
-    | '/portal/assessments/$contestSlug'
-    | '/portal/contests/$contestSlug'
     | '/portal/problems/$problemSlug'
     | '/portal/contests'
     | '/portal/problems'
-    | '/portal/assessments/$contestSlug/leaderboard'
+    | '/portal/contests/$contestSlug/assessment'
+    | '/portal/contests/$contestSlug/offline'
+    | '/portal/contests/$contestSlug/qualified'
+    | '/portal/contests/$contestSlug/results'
+    | '/portal/contests/$contestSlug'
   id:
     | '__root__'
     | '/'
@@ -233,16 +278,20 @@ export interface FileRouteTypes {
     | '/signup'
     | '/assessments/$contestSlug'
     | '/portal/leaderboard'
+    | '/portal/my-contests'
     | '/portal/profile'
     | '/portal/settings'
     | '/portal/verify'
     | '/portal/'
-    | '/portal/assessments/$contestSlug'
     | '/portal/contests/$contestSlug'
     | '/portal/problems/$problemSlug'
     | '/portal/contests/'
     | '/portal/problems/'
-    | '/portal/assessments/$contestSlug/leaderboard'
+    | '/portal/contests/$contestSlug/assessment'
+    | '/portal/contests/$contestSlug/offline'
+    | '/portal/contests/$contestSlug/qualified'
+    | '/portal/contests/$contestSlug/results'
+    | '/portal/contests/$contestSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -320,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalLeaderboardRouteImport
       parentRoute: typeof PortalRoute
     }
+    '/portal/my-contests': {
+      id: '/portal/my-contests'
+      path: '/my-contests'
+      fullPath: '/portal/my-contests'
+      preLoaderRoute: typeof PortalMyContestsRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/portal/profile': {
       id: '/portal/profile'
       path: '/profile'
@@ -339,13 +395,6 @@ declare module '@tanstack/react-router' {
       path: '/verify'
       fullPath: '/portal/verify'
       preLoaderRoute: typeof PortalVerifyRouteImport
-      parentRoute: typeof PortalRoute
-    }
-    '/portal/assessments/$contestSlug': {
-      id: '/portal/assessments/$contestSlug'
-      path: '/assessments/$contestSlug'
-      fullPath: '/portal/assessments/$contestSlug'
-      preLoaderRoute: typeof PortalAssessmentsContestSlugRouteImport
       parentRoute: typeof PortalRoute
     }
     '/portal/contests/': {
@@ -376,39 +425,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalProblemsProblemSlugRouteImport
       parentRoute: typeof PortalRoute
     }
-    '/portal/assessments/$contestSlug/leaderboard': {
-      id: '/portal/assessments/$contestSlug/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/portal/assessments/$contestSlug/leaderboard'
-      preLoaderRoute: typeof PortalAssessmentsContestSlugLeaderboardRouteImport
-      parentRoute: typeof PortalAssessmentsContestSlugRoute
+    '/portal/contests/$contestSlug/': {
+      id: '/portal/contests/$contestSlug/'
+      path: '/'
+      fullPath: '/portal/contests/$contestSlug/'
+      preLoaderRoute: typeof PortalContestsContestSlugIndexRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
+    }
+    '/portal/contests/$contestSlug/assessment': {
+      id: '/portal/contests/$contestSlug/assessment'
+      path: '/assessment'
+      fullPath: '/portal/contests/$contestSlug/assessment'
+      preLoaderRoute: typeof PortalContestsContestSlugAssessmentRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
+    }
+    '/portal/contests/$contestSlug/offline': {
+      id: '/portal/contests/$contestSlug/offline'
+      path: '/offline'
+      fullPath: '/portal/contests/$contestSlug/offline'
+      preLoaderRoute: typeof PortalContestsContestSlugOfflineRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
+    }
+    '/portal/contests/$contestSlug/qualified': {
+      id: '/portal/contests/$contestSlug/qualified'
+      path: '/qualified'
+      fullPath: '/portal/contests/$contestSlug/qualified'
+      preLoaderRoute: typeof PortalContestsContestSlugQualifiedRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
+    }
+    '/portal/contests/$contestSlug/results': {
+      id: '/portal/contests/$contestSlug/results'
+      path: '/results'
+      fullPath: '/portal/contests/$contestSlug/results'
+      preLoaderRoute: typeof PortalContestsContestSlugResultsRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
     }
   }
 }
 
-interface PortalAssessmentsContestSlugRouteChildren {
-  PortalAssessmentsContestSlugLeaderboardRoute: typeof PortalAssessmentsContestSlugLeaderboardRoute
+interface PortalContestsContestSlugRouteChildren {
+  PortalContestsContestSlugAssessmentRoute: typeof PortalContestsContestSlugAssessmentRoute
+  PortalContestsContestSlugOfflineRoute: typeof PortalContestsContestSlugOfflineRoute
+  PortalContestsContestSlugQualifiedRoute: typeof PortalContestsContestSlugQualifiedRoute
+  PortalContestsContestSlugResultsRoute: typeof PortalContestsContestSlugResultsRoute
+  PortalContestsContestSlugIndexRoute: typeof PortalContestsContestSlugIndexRoute
 }
 
-const PortalAssessmentsContestSlugRouteChildren: PortalAssessmentsContestSlugRouteChildren =
+const PortalContestsContestSlugRouteChildren: PortalContestsContestSlugRouteChildren =
   {
-    PortalAssessmentsContestSlugLeaderboardRoute:
-      PortalAssessmentsContestSlugLeaderboardRoute,
+    PortalContestsContestSlugAssessmentRoute:
+      PortalContestsContestSlugAssessmentRoute,
+    PortalContestsContestSlugOfflineRoute:
+      PortalContestsContestSlugOfflineRoute,
+    PortalContestsContestSlugQualifiedRoute:
+      PortalContestsContestSlugQualifiedRoute,
+    PortalContestsContestSlugResultsRoute:
+      PortalContestsContestSlugResultsRoute,
+    PortalContestsContestSlugIndexRoute: PortalContestsContestSlugIndexRoute,
   }
 
-const PortalAssessmentsContestSlugRouteWithChildren =
-  PortalAssessmentsContestSlugRoute._addFileChildren(
-    PortalAssessmentsContestSlugRouteChildren,
+const PortalContestsContestSlugRouteWithChildren =
+  PortalContestsContestSlugRoute._addFileChildren(
+    PortalContestsContestSlugRouteChildren,
   )
 
 interface PortalRouteChildren {
   PortalLeaderboardRoute: typeof PortalLeaderboardRoute
+  PortalMyContestsRoute: typeof PortalMyContestsRoute
   PortalProfileRoute: typeof PortalProfileRoute
   PortalSettingsRoute: typeof PortalSettingsRoute
   PortalVerifyRoute: typeof PortalVerifyRoute
   PortalIndexRoute: typeof PortalIndexRoute
-  PortalAssessmentsContestSlugRoute: typeof PortalAssessmentsContestSlugRouteWithChildren
-  PortalContestsContestSlugRoute: typeof PortalContestsContestSlugRoute
+  PortalContestsContestSlugRoute: typeof PortalContestsContestSlugRouteWithChildren
   PortalProblemsProblemSlugRoute: typeof PortalProblemsProblemSlugRoute
   PortalContestsIndexRoute: typeof PortalContestsIndexRoute
   PortalProblemsIndexRoute: typeof PortalProblemsIndexRoute
@@ -416,13 +504,12 @@ interface PortalRouteChildren {
 
 const PortalRouteChildren: PortalRouteChildren = {
   PortalLeaderboardRoute: PortalLeaderboardRoute,
+  PortalMyContestsRoute: PortalMyContestsRoute,
   PortalProfileRoute: PortalProfileRoute,
   PortalSettingsRoute: PortalSettingsRoute,
   PortalVerifyRoute: PortalVerifyRoute,
   PortalIndexRoute: PortalIndexRoute,
-  PortalAssessmentsContestSlugRoute:
-    PortalAssessmentsContestSlugRouteWithChildren,
-  PortalContestsContestSlugRoute: PortalContestsContestSlugRoute,
+  PortalContestsContestSlugRoute: PortalContestsContestSlugRouteWithChildren,
   PortalProblemsProblemSlugRoute: PortalProblemsProblemSlugRoute,
   PortalContestsIndexRoute: PortalContestsIndexRoute,
   PortalProblemsIndexRoute: PortalProblemsIndexRoute,

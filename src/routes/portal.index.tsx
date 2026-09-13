@@ -149,7 +149,7 @@ function Dashboard() {
             </p>
             <div className="button-row">
               <Button asChild variant="outline">
-                <Link to="/portal/contests" search={{ status: "all" }}>
+                <Link to="/portal/contests" search={{ filter: "all", state: "default" }}>
                   Browse Contests <ArrowRight />
                 </Link>
               </Button>
