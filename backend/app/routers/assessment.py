@@ -104,8 +104,16 @@ async def get_or_start_assessment(
     # 1. Fetch or auto-provision assessment
     assessment = await get_or_create_assessment(contest_slug, db)
 
-    # 1.1 Verify Candidate Contest Registration
+    # 1.1 Verify Contest Lifecycle & Candidate Contest Registration
     if assessment.contest_id:
+        c_check = await db.execute(select(OfflineContest).where(OfflineContest.id == assessment.contest_id))
+        contest = c_check.scalars().first()
+        if contest and contest.status != "upcoming":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="The Phase 1 Online Screening Assessment is only available for UPCOMING contests. This contest is now LIVE for Top 30 qualified finalists only.",
+            )
+
         reg_check = await db.execute(
             select(ContestRegistration).where(
                 ContestRegistration.contest_id == assessment.contest_id,

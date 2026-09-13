@@ -20,6 +20,8 @@ import {
   AlertCircle,
   XCircle,
   ShieldAlert,
+  Lock,
+  Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { registerForContest } from "@/lib/auth";
@@ -239,24 +241,34 @@ function StandaloneAssessmentPage() {
     );
   }
 
-  // Error / Registration Gate
+  // Error / Registration / Lifecycle Gate
   if (error && !assessment) {
     const isRegistrationErr = error.toLowerCase().includes("registration");
     const isAuthErr = error.toLowerCase().includes("credential") || error.toLowerCase().includes("token") || error.toLowerCase().includes("login");
+    const isLifecycleErr = error.toLowerCase().includes("upcoming") || error.toLowerCase().includes("live") || error.toLowerCase().includes("top 30");
 
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070707] text-[#e0e0e0] font-sans p-6">
         <div className="max-w-md w-full p-6 rounded-lg bg-[#0e0e0e] border border-[#222] text-center space-y-4">
           <div className="w-12 h-12 rounded-full bg-[#161616] border border-[#282828] flex items-center justify-center mx-auto text-accent">
-            <ShieldAlert size={24} />
+            {isLifecycleErr ? <Lock size={24} className="text-amber-400" /> : <ShieldAlert size={24} />}
           </div>
-          <h2 className="text-base font-semibold font-mono text-white">Assessment Access Gate</h2>
+          <h2 className="text-base font-semibold font-mono text-white">
+            {isLifecycleErr ? "Screening Assessment Closed" : "Assessment Access Gate"}
+          </h2>
           <p className="text-xs text-[#888] font-mono leading-relaxed">
             {error}
           </p>
 
           <div className="pt-2 flex flex-col gap-2">
-            {isRegistrationErr && (
+            {isLifecycleErr && (
+              <a href={`/portal/assessments/${contestSlug}/leaderboard`} className="w-full">
+                <Button className="w-full bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90">
+                  <Trophy size={14} className="mr-1.5" /> View Screening Standings & Cutoff 🏆
+                </Button>
+              </a>
+            )}
+            {isRegistrationErr && !isLifecycleErr && (
               <Button
                 onClick={handleDirectRegister}
                 disabled={isRegistering}

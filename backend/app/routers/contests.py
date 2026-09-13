@@ -5,11 +5,11 @@ Offline Contests & On-Premise Event Management Router
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from app.core.db import get_db
-from app.models.db_models import ContestProblem, MemberProfile, OfflineContest, ContestRegistration
+from app.models.db_models import ContestProblem, MemberProfile, OfflineContest, ContestRegistration, Assessment, AssessmentSession
 from app.models.schemas import ContestProblemResponse, OfflineContestResponse
 from app.middleware.auth import get_current_member, get_current_member_optional
 
@@ -72,14 +72,30 @@ async def get_registration_status(
     db: AsyncSession = Depends(get_db),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
-    """Check if the current member is registered for this contest & assessment round."""
+    """Check candidate registration, screening assessment ranking, and Top 30 live final eligibility."""
     c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
     contest = c_res.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
+    contest_status = contest.status  # "upcoming", "live", "finished"
+
     if not current_member:
-        return {"registered": False, "contest_slug": slug}
+        return {
+            "registered": False,
+            "contest_slug": slug,
+            "contest_status": contest_status,
+            "status": None,
+            "registered_at": None,
+            "assessment_taken": False,
+            "assessment_score": 0.0,
+            "assessment_rank": None,
+            "assessment_status": None,
+            "is_top_30_qualified": False,
+            "can_take_assessment": False,
+            "can_enter_live_contest": False,
+            "eligibility_message": "Sign in to register or check your contest standing.",
+        }
 
     reg_res = await db.execute(
         select(ContestRegistration).where(
@@ -88,11 +104,84 @@ async def get_registration_status(
         )
     )
     reg = reg_res.scalars().first()
+    is_registered = reg is not None
+
+    # Check candidate screening assessment session & rank
+    assessment_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
+    assessment = assessment_res.scalars().first()
+
+    assessment_taken = False
+    assessment_score = 0.0
+    assessment_rank = None
+    assessment_session_status = None
+    is_top_30_qualified = False
+
+    if assessment:
+        s_res = await db.execute(
+            select(AssessmentSession).where(
+                AssessmentSession.assessment_id == assessment.id,
+                AssessmentSession.member_id == current_member.id,
+            )
+        )
+        my_session = s_res.scalars().first()
+        if my_session:
+            assessment_taken = True
+            assessment_score = my_session.total_score
+            assessment_session_status = my_session.status
+
+            # Calculate candidate rank in screening leaderboard
+            all_sessions_res = await db.execute(
+                select(AssessmentSession)
+                .where(
+                    AssessmentSession.assessment_id == assessment.id,
+                    AssessmentSession.status.in_(["in_progress", "submitted"]),
+                )
+                .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
+            )
+            all_sessions = all_sessions_res.scalars().all()
+            for rank_num, s in enumerate(all_sessions, start=1):
+                if s.member_id == current_member.id:
+                    assessment_rank = rank_num
+                    break
+
+            is_top_30_qualified = (
+                my_session.is_top_30_qualified or
+                (assessment_rank is not None and assessment_rank <= 30)
+            )
+
+    can_take_assessment = (contest_status == "upcoming" and is_registered)
+    can_enter_live_contest = (contest_status == "live" and is_top_30_qualified)
+
+    # Contextual eligibility explanation
+    if contest_status == "upcoming":
+        if not is_registered:
+            eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
+        elif not assessment_taken:
+            eligibility_message = "Registration confirmed. Take the Phase 1 Screening Assessment to qualify for the Top 30 Live Final."
+        else:
+            eligibility_message = f"Screening submitted. Score: {assessment_score} pts (Current Rank: #{assessment_rank or '—'}). Top 30 cadets will advance when the contest goes LIVE."
+    elif contest_status == "live":
+        if is_top_30_qualified:
+            eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Workstation reserved. Enter the Live Contest Lab."
+        else:
+            eligibility_message = "🔒 Live Final is restricted strictly to Top 30 assessment qualifiers. You are currently not eligible."
+    else:
+        eligibility_message = "This contest has officially concluded."
+
     return {
-        "registered": reg is not None,
+        "registered": is_registered,
         "contest_slug": slug,
+        "contest_status": contest_status,
         "status": reg.status if reg else None,
         "registered_at": reg.registered_at.isoformat() if reg else None,
+        "assessment_taken": assessment_taken,
+        "assessment_score": assessment_score,
+        "assessment_rank": assessment_rank,
+        "assessment_status": assessment_session_status,
+        "is_top_30_qualified": is_top_30_qualified,
+        "can_take_assessment": can_take_assessment,
+        "can_enter_live_contest": can_enter_live_contest,
+        "eligibility_message": eligibility_message,
     }
 
 
@@ -107,6 +196,12 @@ async def register_for_contest(
     contest = c_res.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if contest.status != "upcoming":
+        raise HTTPException(
+            status_code=400,
+            detail="Registration and Phase 1 screening are only open for UPCOMING contests. Live contests are restricted strictly to pre-qualified Top 30 finalists.",
+        )
 
     # Check if candidate is already registered
     existing_reg = await db.execute(

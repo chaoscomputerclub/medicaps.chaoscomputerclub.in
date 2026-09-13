@@ -282,8 +282,17 @@ export async function updateProfile(
 export interface ContestRegistrationResponse {
   registered: boolean;
   contest_slug: string;
+  contest_status?: "upcoming" | "live" | "finished";
   status?: string;
   registered_at?: string;
+  assessment_taken?: boolean;
+  assessment_score?: number;
+  assessment_rank?: number | null;
+  assessment_status?: string | null;
+  is_top_30_qualified?: boolean;
+  can_take_assessment?: boolean;
+  can_enter_live_contest?: boolean;
+  eligibility_message?: string;
 }
 
 export async function getContestRegistrationStatus(
