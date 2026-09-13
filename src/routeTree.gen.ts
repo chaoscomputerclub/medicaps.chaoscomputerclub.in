@@ -18,6 +18,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalLeaderboardRouteImport } from './routes/portal.leaderboard'
 import { Route as PortalProfileRouteImport } from './routes/portal.profile'
+import { Route as PortalSettingsRouteImport } from './routes/portal.settings'
 import { Route as PortalVerifyRouteImport } from './routes/portal.verify'
 import { Route as PortalAssessmentsContestSlugRouteImport } from './routes/portal.assessments.$contestSlug'
 import { Route as PortalContestsIndexRouteImport } from './routes/portal.contests.index'
@@ -71,6 +72,11 @@ const PortalProfileRoute = PortalProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => PortalRoute,
 } as any)
+const PortalSettingsRoute = PortalSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => PortalRoute,
+} as any)
 const PortalVerifyRoute = PortalVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
+  '/portal/settings': typeof PortalSettingsRoute
   '/portal/verify': typeof PortalVerifyRoute
   '/portal/': typeof PortalIndexRoute
   '/portal/assessments/$contestSlug': typeof PortalAssessmentsContestSlugRouteWithChildren
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
+  '/portal/settings': typeof PortalSettingsRoute
   '/portal/verify': typeof PortalVerifyRoute
   '/portal': typeof PortalIndexRoute
   '/portal/assessments/$contestSlug': typeof PortalAssessmentsContestSlugRouteWithChildren
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/profile': typeof PortalProfileRoute
+  '/portal/settings': typeof PortalSettingsRoute
   '/portal/verify': typeof PortalVerifyRoute
   '/portal/': typeof PortalIndexRoute
   '/portal/assessments/$contestSlug': typeof PortalAssessmentsContestSlugRouteWithChildren
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/portal/leaderboard'
     | '/portal/profile'
+    | '/portal/settings'
     | '/portal/verify'
     | '/portal/'
     | '/portal/assessments/$contestSlug'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/portal/leaderboard'
     | '/portal/profile'
+    | '/portal/settings'
     | '/portal/verify'
     | '/portal'
     | '/portal/assessments/$contestSlug'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/portal/leaderboard'
     | '/portal/profile'
+    | '/portal/settings'
     | '/portal/verify'
     | '/portal/'
     | '/portal/assessments/$contestSlug'
@@ -295,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalProfileRouteImport
       parentRoute: typeof PortalRoute
     }
+    '/portal/settings': {
+      id: '/portal/settings'
+      path: '/settings'
+      fullPath: '/portal/settings'
+      preLoaderRoute: typeof PortalSettingsRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/portal/verify': {
       id: '/portal/verify'
       path: '/verify'
@@ -365,6 +384,7 @@ const PortalAssessmentsContestSlugRouteWithChildren =
 interface PortalRouteChildren {
   PortalLeaderboardRoute: typeof PortalLeaderboardRoute
   PortalProfileRoute: typeof PortalProfileRoute
+  PortalSettingsRoute: typeof PortalSettingsRoute
   PortalVerifyRoute: typeof PortalVerifyRoute
   PortalIndexRoute: typeof PortalIndexRoute
   PortalAssessmentsContestSlugRoute: typeof PortalAssessmentsContestSlugRouteWithChildren
@@ -377,6 +397,7 @@ interface PortalRouteChildren {
 const PortalRouteChildren: PortalRouteChildren = {
   PortalLeaderboardRoute: PortalLeaderboardRoute,
   PortalProfileRoute: PortalProfileRoute,
+  PortalSettingsRoute: PortalSettingsRoute,
   PortalVerifyRoute: PortalVerifyRoute,
   PortalIndexRoute: PortalIndexRoute,
   PortalAssessmentsContestSlugRoute:

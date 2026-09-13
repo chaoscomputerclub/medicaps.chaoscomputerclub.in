@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Settings,
   ShieldCheck,
   Trophy,
   UserRound,
@@ -28,6 +29,7 @@ const links = [
   { to: "/portal/problems", label: "Archive", icon: Archive, exact: false },
   { to: "/portal/verify", label: "Verify proof", icon: ShieldCheck, exact: true },
   { to: "/portal/profile", label: "Profile", icon: UserRound, exact: true },
+  { to: "/portal/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
 
 export function PortalShell() {
