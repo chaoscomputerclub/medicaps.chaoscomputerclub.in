@@ -2563,3 +2563,165 @@ a[class~="hover:bg-primary"]:hover svg {
 .submission-check strong {
   color: var(--accent) !important;
 }
+
+/* ─── Assessment Time Watch ─────────────────────────────────────────────── */
+.time-watch-card {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.time-watch-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.time-watch-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 800 10px var(--font-mono);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.time-watch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font: 700 9px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+}
+
+.time-watch-pill.badge-locked {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  border-color: var(--warning);
+  color: #fbbf24;
+}
+
+.time-watch-pill.badge-unlocked {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.time-watch-pill.badge-live {
+  background: color-mix(in srgb, #ef4444 20%, transparent);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.time-watch-pill.badge-concluded {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.time-watch-pill .pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.time-watch-digits {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 14px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.time-digit-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.digit-val {
+  font: 900 2rem var(--font-mono);
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.digit-seconds .digit-val {
+  color: var(--accent);
+}
+
+.digit-sub {
+  font: 700 9px var(--font-mono);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+.digit-colon {
+  font: 900 1.5rem var(--font-mono);
+  color: var(--line-strong);
+  margin-top: -12px;
+}
+
+.time-watch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font: 600 11px var(--font-mono);
+}
+
+.time-watch-info .info-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.time-watch-info .info-row strong {
+  color: #ffffff;
+}
+
+.time-watch-notice {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--surface-3);
+  border-left: 3px solid var(--accent);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.notice-locked {
+  color: #e5e5e5;
+}
+
+.notice-unlocked {
+  color: var(--accent);
+}
+
+.notice-live {
+  color: #ffffff;
+}
+
+.notice-concluded {
+  color: var(--muted);
+}

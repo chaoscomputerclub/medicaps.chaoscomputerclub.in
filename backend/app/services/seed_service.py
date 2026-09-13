@@ -453,6 +453,10 @@ async def seed_database(db: AsyncSession):
         logger.info("Demo contest '%s' exists, ensuring status is 'upcoming' and refreshing problem schemas...", CONTEST_SLUG)
         contest_obj.status = "upcoming"
         contest_obj.title = "CCC Medi-Caps Campus Clash 2026 (Phase 1 Screening Active)"
+        now_t = datetime.now(timezone.utc)
+        contest_obj.starts_at = now_t + timedelta(days=3)
+        contest_obj.ends_at = contest_obj.starts_at + timedelta(days=7)
+        contest_obj.check_in_opens_at = contest_obj.starts_at - timedelta(hours=24)
         p_res = await db.execute(
             select(AssessmentProblem).join(Assessment).where(Assessment.slug == CONTEST_SLUG)
         )

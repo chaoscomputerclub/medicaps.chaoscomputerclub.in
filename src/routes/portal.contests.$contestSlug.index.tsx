@@ -1,10 +1,264 @@
-import {createFileRoute,Link,notFound} from "@tanstack/react-router";
-import {useSuspenseQuery} from "@tanstack/react-query";
-import {ArrowLeft,ArrowRight,CalendarCheck,Gift,ShieldCheck,Users} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {SectionHeader} from "@/organization/components/ui";
-import {LifecycleBadge,Timeline,TwoStageIndicator} from "@/organization/components/ContestSystemUI";
-import {contestSystemQueries} from "@/organization/data/contest-queries";
-import {reviewState} from "@/organization/data/contest-system";
-export const Route=createFileRoute("/portal/contests/$contestSlug/")({validateSearch:(s:Record<string,unknown>):{state?:ReturnType<typeof reviewState>|undefined}=>({state:s["state"]?reviewState(s["state"]):"default"}),loader:async({context,params})=>{const c=await context.queryClient.ensureQueryData(contestSystemQueries.contest(params.contestSlug));if(!c)throw notFound();return c},head:({loaderData})=>({meta:[{title:loaderData?`${loaderData.title} — CCC Medi-Caps`:"Contest unavailable"},{name:"description",content:loaderData?.summary??"Contest unavailable."},{property:"og:title",content:loaderData?.title??"Contest unavailable"},{property:"og:description",content:loaderData?.summary??"Contest unavailable."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:ContestDetail});
-function ContestDetail(){const {contestSlug}=Route.useParams();const {state}=Route.useSearch();const {data:c}=useSuspenseQuery(contestSystemQueries.contest(contestSlug));if(!c)return null;const registered=state==="waiting"||state==="default"?c.registered:false;return <div className="page-wrap"><Link to="/portal/contests" search={{filter:"all",state:"default"}} className="back-link"><ArrowLeft/>All contests</Link><header className="contest-overview"><div><LifecycleBadge lifecycle={c.lifecycle}/><p className="kicker">{c.season}</p><h1>{c.title}</h1><p>{c.summary}</p><div className="button-row"><Button asChild><Link to="/portal/contests/$contestSlug/assessment" params={{contestSlug}} search={{state:registered?"waiting":"live"}} target="_blank" rel="noopener noreferrer">{registered?"View assessment status":"Register for contest"}<ArrowRight/></Link></Button><Button variant="outline" asChild><Link to="/portal/contests/$contestSlug/results" params={{contestSlug}} search={{state:"qualified",query:"",filter:"all",sort:"rank"}}>View Round 1 results</Link></Button></div></div><div className="format-emphasis"><p className="kicker">How this contest works</p><TwoStageIndicator stages={c.stages}/><p>Everyone begins online. Only the thirty highest verified Round 1 scores receive access to the on-campus final.</p></div></header>{registered&&<section className="registration-confirmed"><CalendarCheck/><div><strong>You’re registered for Round 1</strong><p>Your place is confirmed. Return when the assessment opens; we’ll notify you before the live window.</p></div><span>Opens 19 Sep · 18:00 IST</span></section>}<div className="content-grid contest-information"><section className="panel"><SectionHeader kicker="Four fixed moments" title="Contest timeline"/><Timeline contest={c}/></section><section className="panel"><SectionHeader kicker="Who can enter" title="Eligibility"/><ul className="check-list">{c.eligibility.map(x=><li key={x}><ShieldCheck/>{x}</li>)}</ul></section></div><section className="contest-lower"><div className="panel"><SectionHeader kicker="Both rounds" title="Rules and qualification"/><ol className="rule-list">{c.rules.map((x,i)=><li key={x}><span>{String(i+1).padStart(2,"0")}</span>{x}</li>)}</ol></div><div className="panel"><SectionHeader kicker="What is at stake" title="Prizes and recognition"/><ul className="prize-list">{c.prizes.map(x=><li key={x}><Gift/>{x}</li>)}</ul><div className="capacity-note"><Users/><span><strong>{c.registered_count}</strong> registered for Round 1</span></div></div></section></div>}
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarCheck,
+  CheckCircle2,
+  Gift,
+  Lock,
+  Play,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/organization/components/ui";
+import {
+  LifecycleBadge,
+  Timeline,
+  TwoStageIndicator,
+} from "@/organization/components/ContestSystemUI";
+import { AssessmentTimeWatch } from "@/organization/components/AssessmentTimeWatch";
+import { RegisterConfirmModal } from "@/organization/components/RegisterConfirmModal";
+import { contestSystemQueries } from "@/organization/data/contest-queries";
+import { reviewState } from "@/organization/data/contest-system";
+import { getContestRegistrationStatus } from "@/lib/auth";
+
+export const Route = createFileRoute("/portal/contests/$contestSlug/")({
+  validateSearch: (s: Record<string, unknown>): { state?: ReturnType<typeof reviewState> | undefined } => ({
+    state: s["state"] ? reviewState(s["state"]) : "default",
+  }),
+  loader: async ({ context, params }) => {
+    const c = await context.queryClient.ensureQueryData(
+      contestSystemQueries.contest(params.contestSlug)
+    );
+    if (!c) throw notFound();
+    return c;
+  },
+  head: ({ loaderData }) => ({
+    meta: [
+      { title: loaderData ? `${loaderData.title} — CCC Medi-Caps` : "Contest unavailable" },
+      { name: "description", content: loaderData?.summary ?? "Contest unavailable." },
+      { property: "og:title", content: loaderData?.title ?? "Contest unavailable" },
+      { property: "og:description", content: loaderData?.summary ?? "Contest unavailable." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: ContestDetail,
+});
+
+function ContestDetail() {
+  const { contestSlug } = Route.useParams();
+  const { data: c } = useSuspenseQuery(contestSystemQueries.contest(contestSlug));
+  if (!c) return null;
+
+  const [registrationStatus, setRegistrationStatus] = useState<any>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [now, setNow] = useState<number>(() => Date.now());
+
+  useEffect(() => {
+    let mounted = true;
+    getContestRegistrationStatus(contestSlug)
+      .then((res) => {
+        if (mounted) setRegistrationStatus(res);
+      })
+      .catch(() => {});
+
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, [contestSlug]);
+
+  const isRegistered = Boolean(registrationStatus?.registered || c.registered);
+
+  const startsAtMs = new Date(c.stages[0]?.starts_at || c.registration_closes_at).getTime();
+  const endsAtMs = new Date(c.stages[0]?.ends_at || c.results_at).getTime();
+  const unlockAtMs = startsAtMs - 24 * 60 * 60 * 1000;
+
+  const isLocked = now < unlockAtMs;
+  const isUnlocked = now >= unlockAtMs && now <= endsAtMs;
+  const isConcluded = now > endsAtMs;
+
+  const isUpcoming = c.lifecycle === "registration_open";
+  const hasResults =
+    !isUpcoming &&
+    (c.lifecycle === "results_pending" ||
+      c.lifecycle === "qualification_announced" ||
+      c.lifecycle === "offline_complete" ||
+      (Boolean(c.results_at) && new Date(c.results_at).getTime() <= now));
+
+  const handleRegisteredSuccess = () => {
+    setRegistrationStatus({ registered: true, contest_slug: contestSlug });
+    c.registered = true;
+    c.registered_count += 1;
+  };
+
+  return (
+    <div className="page-wrap">
+      <Link
+        to="/portal/contests"
+        search={{ filter: "all", state: "default" }}
+        className="back-link"
+      >
+        <ArrowLeft />
+        All contests
+      </Link>
+
+      <header className="contest-overview">
+        <div>
+          <LifecycleBadge lifecycle={c.lifecycle} />
+          <p className="kicker">{c.season}</p>
+          <h1>{c.title}</h1>
+          <p>{c.summary}</p>
+
+          <div className="button-row">
+            {!isRegistered ? (
+              <Button
+                onClick={() => setShowRegisterModal(true)}
+                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Register for contest
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            ) : isUnlocked ? (
+              <Button
+                asChild
+                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
+              >
+                <Link
+                  to="/portal/contests/$contestSlug/assessment"
+                  params={{ contestSlug }}
+                  search={{ state: "live" }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Enter Online Assessment
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            ) : isConcluded ? (
+              <Button disabled variant="outline" className="text-[var(--muted)] border-[var(--line)]">
+                Assessment Concluded
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                disabled
+                className="border-[var(--line)] text-white opacity-95 cursor-not-allowed bg-[var(--surface-2)]"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2 text-[var(--accent)]" />
+                Registered · Assessment Locked (Opens 24h prior)
+              </Button>
+            )}
+
+            {/* View Round 1 results strictly hidden for upcoming contests */}
+            {hasResults && (
+              <Button variant="outline" asChild>
+                <Link
+                  to="/portal/contests/$contestSlug/results"
+                  params={{ contestSlug }}
+                  search={{ state: "qualified", query: "", filter: "all", sort: "rank" }}
+                >
+                  View Round 1 results
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="format-emphasis">
+          {/* Real-time Assessment Time Watch on the side */}
+          <AssessmentTimeWatch
+            startsAt={c.stages[0]?.starts_at || c.registration_closes_at}
+            endsAt={c.stages[0]?.ends_at || c.results_at}
+            isRegistered={isRegistered}
+          />
+
+          <p className="kicker">How this contest works</p>
+          <TwoStageIndicator stages={c.stages} />
+          <p>
+            Everyone begins online. Only the thirty highest verified Round 1 scores receive access to
+            the on-campus final.
+          </p>
+        </div>
+      </header>
+
+      {isRegistered && (
+        <section className="registration-confirmed">
+          <CalendarCheck />
+          <div>
+            <strong>You’re registered for Round 1</strong>
+            <p>
+              Your seat is reserved. The assessment unlocks exactly 24 hours prior to live launch.
+              We will verify your presence through automated telemetry.
+            </p>
+          </div>
+          <span>Status: Verified Entry</span>
+        </section>
+      )}
+
+      <div className="content-grid contest-information">
+        <section className="panel">
+          <SectionHeader kicker="Four fixed moments" title="Contest timeline" />
+          <Timeline contest={c} />
+        </section>
+        <section className="panel">
+          <SectionHeader kicker="Who can enter" title="Eligibility" />
+          <ul className="check-list">
+            {c.eligibility.map((x) => (
+              <li key={x}>
+                <ShieldCheck />
+                {x}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <section className="contest-lower">
+        <div className="panel">
+          <SectionHeader kicker="Both rounds" title="Rules and qualification" />
+          <ol className="rule-list">
+            {c.rules.map((x, i) => (
+              <li key={x}>
+                <span>{String(i + 1).padStart(2, "0")}</span>
+                {x}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="panel">
+          <SectionHeader kicker="What is at stake" title="Prizes and recognition" />
+          <ul className="prize-list">
+            {c.prizes.map((x) => (
+              <li key={x}>
+                <Gift />
+                {x}
+              </li>
+            ))}
+          </ul>
+          <div className="capacity-note">
+            <Users />
+            <span>
+              <strong>{c.registered_count}</strong> registered for Round 1
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Confirmation Modal */}
+      <RegisterConfirmModal
+        open={showRegisterModal}
+        onOpenChange={setShowRegisterModal}
+        contest={c}
+        onSuccess={handleRegisteredSuccess}
+      />
+    </div>
+  );
+}
