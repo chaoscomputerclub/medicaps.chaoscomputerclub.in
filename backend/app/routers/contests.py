@@ -92,11 +92,11 @@ async def get_my_participated_contests(
         elif sb:
             outcome = "qualified" if sb.rank <= 30 else "not_qualified"
         elif sess and sess.status == "submitted":
-            outcome = "pending"
+            outcome = "qualified" if sess.is_top_30_qualified else "pending"
         else:
             outcome = "registered"
 
-        score = sb.score if sb else (sess.score if sess else None)
+        score = sb.score if sb else (round(sess.total_score) if (sess and sess.total_score is not None) else None)
         rank = sb.rank if sb else None
 
         results.append({
