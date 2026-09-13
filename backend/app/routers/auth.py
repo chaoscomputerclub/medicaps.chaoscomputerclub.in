@@ -12,7 +12,7 @@ Flow:
   GET  /auth/me               → return own profile (requires JWT)
   POST /auth/logout           → client-side token drop (stateless JWT)
 """
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -83,6 +83,22 @@ async def get_profile_full(
     db: AsyncSession = Depends(get_db),
 ):
     return await AuthController.get_full_profile(current_member, db)
+
+
+@router.get("/check-handle", summary="Check handle availability (unauthenticated)")
+async def check_handle(
+    handle: str = Query(..., min_length=3, max_length=40, description="Handle to check"),
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.check_handle(handle, db)
+
+
+@router.delete("/me", summary="Permanently delete authenticated member account")
+async def delete_account(
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.delete_account(current_member, db)
 
 
 @router.post("/logout", summary="Invalidate current session (client-side)")

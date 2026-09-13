@@ -8,9 +8,12 @@ import {
   getMe,
   completeOnboarding,
   updateProfile,
+  checkHandle,
+  deleteAccount,
   type Member,
   type AuthResult,
   type UpdateProfilePayload,
+  type CompleteOnboardingPayload,
 } from "@/lib/auth";
 
 export interface AuthState {
@@ -29,6 +32,7 @@ export interface AuthState {
   pending: boolean;
   message: string | null;
   devOtp: string | null;
+  handleStatus: "idle" | "checking" | "available" | "taken";
 }
 
 const initialToken = typeof window !== "undefined" ? getToken() : null;
@@ -49,6 +53,7 @@ const initialState: AuthState = {
   pending: false,
   message: null,
   devOtp: null,
+  handleStatus: "idle",
 };
 
 // Async Thunks
@@ -93,7 +98,7 @@ export const fetchCurrentUserThunk = createAsyncThunk<Member, void, { rejectValu
 
 export const completeOnboardingThunk = createAsyncThunk<
   Member,
-  { handle: string; full_name: string; prn: string; department: string; batch: string },
+  CompleteOnboardingPayload,
   { rejectValue: string }
 >("auth/completeOnboarding", async (data, { rejectWithValue }) => {
   try {
@@ -101,6 +106,32 @@ export const completeOnboardingThunk = createAsyncThunk<
     return res.member;
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to complete onboarding.");
+  }
+});
+
+export const checkHandleThunk = createAsyncThunk<
+  { available: boolean; handle: string; reason?: string },
+  string,
+  { rejectValue: string }
+>("auth/checkHandle", async (handle, { rejectWithValue }) => {
+  try {
+    return await checkHandle(handle);
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to check handle availability.");
+  }
+});
+
+export const deleteAccountThunk = createAsyncThunk<
+  void,
+  void,
+  { rejectValue: string }
+>("auth/deleteAccount", async (_, { rejectWithValue }) => {
+  try {
+    await deleteAccount();
+    removePersistedToken();
+    return;
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to delete account.");
   }
 });
 
@@ -132,6 +163,9 @@ export const authSlice = createSlice({
     },
     setHandle(state, action: PayloadAction<string>) {
       state.handle = action.payload;
+    },
+    setHandleStatus(state, action: PayloadAction<"idle" | "checking" | "available" | "taken">) {
+      state.handleStatus = action.payload;
     },
     setPrn(state, action: PayloadAction<string>) {
       state.prn = action.payload;
@@ -262,6 +296,25 @@ export const authSlice = createSlice({
       state.pending = false;
       state.message = action.payload || "Failed to update profile.";
     });
+
+    // checkHandleThunk
+    builder.addCase(checkHandleThunk.pending, (state) => {
+      state.handleStatus = "checking";
+    });
+    builder.addCase(checkHandleThunk.fulfilled, (state, action) => {
+      state.handleStatus = action.payload.available ? "available" : "taken";
+    });
+    builder.addCase(checkHandleThunk.rejected, (state) => {
+      state.handleStatus = "idle";
+    });
+
+    // deleteAccountThunk
+    builder.addCase(deleteAccountThunk.fulfilled, (state) => {
+      state.member = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.step = "email";
+    });
   },
 });
 
@@ -270,6 +323,7 @@ export const {
   setOtp,
   setName,
   setHandle,
+  setHandleStatus,
   setPrn,
   setDepartment,
   setBatch,

@@ -224,9 +224,12 @@ class AuthController:
 
         current_member.handle = payload.handle
         current_member.full_name = payload.full_name
-        current_member.prn = payload.prn
-        current_member.department = payload.department
-        current_member.batch = payload.batch
+        if payload.prn:
+            current_member.prn = payload.prn
+        if payload.department:
+            current_member.department = payload.department
+        if payload.batch:
+            current_member.batch = payload.batch
         current_member.is_onboarded = True
         current_member.updated_at = datetime.now(timezone.utc)
         await db.commit()
@@ -256,6 +259,21 @@ class AuthController:
         Update editable student profile fields.
         Institutional identifiers (PRN, @medicaps.ac.in email) are strictly immutable.
         """
+        if payload.handle is not None:
+            clean_handle = payload.handle.strip().lower()
+            if len(clean_handle) < 3:
+                raise HTTPException(status_code=400, detail="Handle must have at least 3 characters.")
+            if clean_handle != current_member.handle:
+                existing = await db.execute(
+                    select(MemberProfile).where(
+                        MemberProfile.handle == clean_handle,
+                        MemberProfile.id != current_member.id,
+                    )
+                )
+                if existing.scalars().first():
+                    raise HTTPException(status_code=409, detail="Handle already taken. Choose another.")
+                current_member.handle = clean_handle
+
         if payload.full_name is not None:
             clean_name = payload.full_name.strip()
             if len(clean_name) >= 2:
@@ -416,6 +434,50 @@ class AuthController:
         }
         await set_cache(cache_key, payload, ttl_seconds=120)
         return payload
+
+    @staticmethod
+    async def check_handle(handle: str, db: AsyncSession) -> dict:
+        """
+        Unauthenticated handle availability check.
+        Used during onboarding before the member has completed registration.
+        """
+        if not handle or len(handle) < 3:
+            return {"available": False, "handle": handle, "reason": "Handle must be at least 3 characters."}
+        clean = handle.strip().lower()
+        existing = await db.execute(
+            select(MemberProfile).where(MemberProfile.handle == clean)
+        )
+        taken = existing.scalars().first() is not None
+        return {"available": not taken, "handle": clean}
+
+    @staticmethod
+    async def delete_account(current_member: MemberProfile, db: AsyncSession) -> dict:
+        """
+        Permanently delete the authenticated member's account and all associated data.
+        This action is irreversible.
+        """
+        from app.models.db_models import StudentFollow, CampusPass
+        from sqlalchemy import delete as sql_delete
+
+        member_id = current_member.id
+
+        # Remove follow relationships
+        await db.execute(sql_delete(StudentFollow).where(
+            (StudentFollow.follower_id == member_id) | (StudentFollow.following_id == member_id)
+        ))
+        # Remove campus passes
+        await db.execute(sql_delete(CampusPass).where(CampusPass.member_id == member_id))
+
+        # Remove profile caches
+        await delete_cache(f"cache:profile:{member_id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+
+        # Delete the member record
+        await db.delete(current_member)
+        await db.commit()
+
+        logger.info("Account permanently deleted: %s (%s)", current_member.email, member_id)
+        return {"success": True, "message": "Account permanently deleted."}
 
     @staticmethod
     async def google_login(request: Request):

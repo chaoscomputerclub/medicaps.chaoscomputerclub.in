@@ -85,6 +85,7 @@ export interface Member {
 }
 
 export interface UpdateProfilePayload {
+  handle?: string;
   full_name?: string;
   department?: string;
   batch?: string;
@@ -179,23 +180,41 @@ export function getGoogleLoginURL(): string {
 
 // ── Onboarding ─────────────────────────────────────────────────────────────
 
-export async function completeOnboarding(data: {
+export interface CompleteOnboardingPayload {
   handle: string;
   full_name: string;
-  prn: string;
-  department: string;
-  batch: string;
-}): Promise<{ success: boolean; member: Member }> {
+  prn?: string;
+  department?: string;
+  batch?: string;
+}
+
+export async function completeOnboarding(
+  data: CompleteOnboardingPayload,
+): Promise<{ success: boolean; member: Member }> {
   return apiFetch("/auth/complete-onboarding", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
+export async function checkHandle(
+  handle: string,
+): Promise<{ available: boolean; handle: string; reason?: string }> {
+  return apiFetch<{ available: boolean; handle: string; reason?: string }>(
+    `/auth/check-handle?handle=${encodeURIComponent(handle)}`,
+  );
+}
+
 // ── Me ─────────────────────────────────────────────────────────────────────
 
 export async function getMe(): Promise<{ success: boolean; member: Member }> {
   return apiFetch("/auth/me");
+}
+
+export async function deleteAccount(): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>("/auth/me", {
+    method: "DELETE",
+  });
 }
 
 export function logout(): void {

@@ -82,9 +82,9 @@ class AuthTokenResponse(BaseModel):
 class CompleteOnboardingRequest(BaseModel):
     handle: str
     full_name: str
-    prn: str
-    department: str
-    batch: str
+    prn: Optional[str] = None
+    department: Optional[str] = None
+    batch: Optional[str] = None
 
     @field_validator("handle")
     @classmethod
@@ -96,11 +96,14 @@ class CompleteOnboardingRequest(BaseModel):
 
     @field_validator("prn")
     @classmethod
-    def prn_upper(cls, v: str) -> str:
-        return v.strip().upper()
+    def prn_upper(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v.strip():
+            return v.strip().upper()
+        return None
 
 
 class UpdateProfileRequest(BaseModel):
+    handle: Optional[str] = None
     full_name: Optional[str] = None
     department: Optional[str] = None
     batch: Optional[str] = None

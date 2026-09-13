@@ -10,7 +10,7 @@
 import { preloadFullProfile } from "@/organization/data/queries";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle } from "lucide-react";
+import { Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AuthLayout } from "@/organization/components/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,8 @@ import {
   verifyOtpThunk,
   completeOnboardingThunk,
   fetchCurrentUserThunk,
+  checkHandleThunk,
+  setHandleStatus,
 } from "@/store/slices/authSlice";
 import { getGoogleLoginURL, isMedicapsEmail } from "@/lib/auth";
 
@@ -111,6 +113,7 @@ function Auth() {
     message,
     devOtp,
     isAuthenticated: authed,
+    handleStatus,
   } = useAppSelector((state) => state.auth);
 
   // Live real-time domain inspection
@@ -186,6 +189,21 @@ function Auth() {
     }
   }, [dispatch, navigate, authed]);
 
+  // Real-time debounced handle availability check (450ms)
+  useEffect(() => {
+    if (step !== "onboarding") return;
+    const clean = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (!clean || clean.length < 3) {
+      dispatch(setHandleStatus("idle"));
+      return;
+    }
+    dispatch(setHandleStatus("checking"));
+    const timer = setTimeout(() => {
+      dispatch(checkHandleThunk(clean));
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [handle, step, dispatch]);
+
   // Step 1: Send OTP via Redux Thunk (Restricted strictly to @medicaps.ac.in)
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -238,7 +256,7 @@ function Auth() {
     await dispatch(sendOtpThunk(clean));
   }
 
-  // Step 3: Complete Onboarding via Redux Thunk
+  // Step 3: Complete Onboarding via Redux Thunk (minimal 2-field registration)
   async function handleOnboardingSubmit(e: React.FormEvent) {
     e.preventDefault();
     const fallbackHandle = email.split("@")[0] || "user";
@@ -248,8 +266,12 @@ function Auth() {
       dispatch(setMessage("Full name is required."));
       return;
     }
-    if (!prn.trim()) {
-      dispatch(setMessage("University PRN is required."));
+    if (h.length < 3) {
+      dispatch(setMessage("Handle must be at least 3 characters."));
+      return;
+    }
+    if (handleStatus === "taken") {
+      dispatch(setMessage("This handle is already taken. Choose another."));
       return;
     }
 
@@ -257,9 +279,6 @@ function Auth() {
       completeOnboardingThunk({
         handle: h,
         full_name: name.trim(),
-        prn: prn.trim().toUpperCase(),
-        department,
-        batch,
       }),
     );
 
@@ -300,7 +319,7 @@ function Auth() {
       </>
     );
     description =
-      "Set your academic parameters to initialize your portal credential.";
+      "Choose your display name and handle to initialize your portal credential.";
   }
 
   return (
@@ -479,111 +498,110 @@ function Auth() {
       )}
 
       {step === "onboarding" && (
-        <form className="auth-form space-y-4" onSubmit={handleOnboardingSubmit}>
+        <form
+          className="auth-form space-y-4 animate-in fade-in-50 slide-in-from-bottom-2 duration-300 ease-out"
+          onSubmit={handleOnboardingSubmit}
+        >
           <div>
             <Label
               htmlFor="ob-name"
-              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+              className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground block mb-1.5"
             >
               Full name
             </Label>
             <Input
               id="ob-name"
               value={name}
-              onChange={(e) => dispatch(setName(e.target.value))}
+              onChange={(e) => {
+                dispatch(setName(e.target.value));
+                if (message) dispatch(setMessage(null));
+              }}
               placeholder="Ada Lovelace"
               required
               autoFocus
-              className="mt-1 font-mono text-sm"
+              className="font-mono text-sm h-10"
             />
           </div>
+
           <div>
-            <Label
-              htmlFor="ob-handle"
-              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
-            >
-              Member handle / alias
-            </Label>
-            <Input
-              id="ob-handle"
-              value={handle}
-              onChange={(e) =>
-                dispatch(setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")))
-              }
-              placeholder="ada_core"
-              required
-              className="mt-1 font-mono text-sm"
-            />
-          </div>
-          <div>
-            <Label
-              htmlFor="ob-prn"
-              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
-            >
-              University PRN
-            </Label>
-            <Input
-              id="ob-prn"
-              value={prn}
-              onChange={(e) => dispatch(setPrn(e.target.value.toUpperCase()))}
-              placeholder="0827CS221184"
-              required
-              pattern="[A-Z0-9]{8,16}"
-              className="mt-1 font-mono text-sm"
-            />
-          </div>
-          <div className="auth-selects">
-            <div>
-              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
-                Department
+            <div className="flex items-center justify-between mb-1.5">
+              <Label
+                htmlFor="ob-handle"
+                className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground"
+              >
+                Member handle / alias
               </Label>
-              <Select value={department} onValueChange={(val) => dispatch(setDepartment(val))}>
-                <SelectTrigger className="mt-1 font-mono text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CSE">CSE</SelectItem>
-                  <SelectItem value="IT">IT</SelectItem>
-                  <SelectItem value="AIDS">AIDS</SelectItem>
-                  <SelectItem value="Cyber Security">Cyber Security</SelectItem>
-                  <SelectItem value="ECE">ECE</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center h-4">
+                {handleStatus === "checking" && (
+                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-accent/90 font-mono transition-opacity animate-pulse">
+                    <Loader2 className="spin size-3" /> checking...
+                  </span>
+                )}
+                {handleStatus === "available" && (
+                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-emerald-400 font-mono font-medium transition-all">
+                    <Check size={12} className="text-emerald-400" /> handle available
+                  </span>
+                )}
+                {handleStatus === "taken" && (
+                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-rose-400 font-mono font-medium transition-all">
+                    <X size={12} className="text-rose-400" /> handle taken
+                  </span>
+                )}
+                {handleStatus === "idle" && handle.length > 0 && handle.length < 3 && (
+                  <span className="text-[0.6875rem] text-muted-foreground font-mono">
+                    min 3 characters
+                  </span>
+                )}
+              </div>
             </div>
-            <div>
-              <Label className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground">
-                Batch
-              </Label>
-              <Select value={batch} onValueChange={(val) => dispatch(setBatch(val))}>
-                <SelectTrigger className="mt-1 font-mono text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2022-26">2022–26</SelectItem>
-                  <SelectItem value="2023-27">2023–27</SelectItem>
-                  <SelectItem value="2024-28">2024–28</SelectItem>
-                  <SelectItem value="2025-29">2025–29</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-muted-foreground select-none">
+                @
+              </span>
+              <Input
+                id="ob-handle"
+                value={handle}
+                onChange={(e) => {
+                  dispatch(setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")));
+                  if (message) dispatch(setMessage(null));
+                }}
+                placeholder="ada_core"
+                required
+                className={cn(
+                  "font-mono text-sm h-10 pl-8 transition-colors",
+                  handleStatus === "available" && "border-emerald-500/70 focus-visible:ring-emerald-500",
+                  handleStatus === "taken" && "border-rose-500/70 focus-visible:ring-rose-500 text-rose-200",
+                )}
+              />
             </div>
+            <p className="mt-1.5 font-mono text-[0.6875rem] text-muted-foreground">
+              Letters, numbers, and underscores only. This will be your permanent campus alias.
+            </p>
           </div>
 
           {message && (
             <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
               <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                <span>[ AUTHENTICATION ERROR ]</span>
+                <span>[ REGISTRATION ERROR ]</span>
               </div>
               <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
             </div>
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold"
-            disabled={pending}
+            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer disabled:opacity-50"
+            disabled={
+              pending ||
+              !name.trim() ||
+              handle.trim().length < 3 ||
+              handleStatus === "taken" ||
+              handleStatus === "checking"
+            }
             type="submit"
           >
-            {pending ? <Loader2 className="spin size-4" /> : "Continue"}
+            {pending ? <Loader2 className="spin size-4" /> : "Complete Registration →"}
           </Button>
         </form>
       )}
