@@ -4,6 +4,14 @@ import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { LeaderboardSkeleton } from "@/organization/components/skeletons";
 import { portalQueries } from "@/organization/data/queries";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 const q = portalQueries.leaderboard();
 
@@ -69,28 +77,28 @@ function Leaderboard() {
         </div>
       </header>
 
-      <div className="table-scroll leaderboard-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Member</th>
-              <th>Trend</th>
-              <th>Rating</th>
-              <th>Peak</th>
-              <th>Attended</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="table-scroll leaderboard-table border border-[var(--line)] bg-[var(--surface-2)]">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-[var(--line)] hover:bg-transparent">
+              <TableHead className="text-left font-mono text-xs uppercase font-bold text-[var(--muted)]">Rank</TableHead>
+              <TableHead className="text-left font-mono text-xs uppercase font-bold text-[var(--muted)]">Member</TableHead>
+              <TableHead className="text-left font-mono text-xs uppercase font-bold text-[var(--muted)]">Trend</TableHead>
+              <TableHead className="text-left font-mono text-xs uppercase font-bold text-[var(--muted)]">Rating</TableHead>
+              <TableHead className="text-left font-mono text-xs uppercase font-bold text-[var(--muted)]">Peak</TableHead>
+              <TableHead className="text-left font-mono text-xs uppercase font-bold text-[var(--muted)]">Attended</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {rows.length === 0 ? (
-              <tr>
-                <td
+              <TableRow>
+                <TableCell
                   colSpan={6}
                   className="text-center py-12 text-[#777] font-mono text-sm"
                 >
                   No ranked members found in university standings.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               rows.map((x) => {
                 const change =
@@ -104,8 +112,8 @@ function Leaderboard() {
                 );
 
                 return (
-                  <tr key={x.handle} className={isYou ? "is-you" : ""}>
-                    <td>
+                  <TableRow key={x.handle} className={isYou ? "is-you bg-[var(--accent)]/10 hover:bg-[var(--accent)]/15 border-l-2 border-l-[var(--accent)]" : "border-b border-[var(--line)] hover:bg-[var(--surface-3)]"}>
+                    <TableCell>
                       <div className="rank-cell">
                         <strong>
                           {String(x.university_rank).padStart(2, "0")}
@@ -125,32 +133,32 @@ function Leaderboard() {
                           {Math.abs(change) || "—"}
                         </span>
                       </div>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <div className="competitor">
                         <strong>{x.handle}</strong>
                         <span>{x.full_name}</span>
                       </div>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <Spark data={x.ratings ?? []} />
-                    </td>
-                    <td className="score-value">{x.rating}</td>
-                    <td className="mono-value">{x.peak_rating}</td>
-                    <td>
+                    </TableCell>
+                    <TableCell className="score-value font-mono font-bold">{x.rating}</TableCell>
+                    <TableCell className="mono-value font-mono">{x.peak_rating}</TableCell>
+                    <TableCell>
                       <span className="attendance-meter">
                         <i style={{ width: `${attendancePct}%` }} />
                       </span>
                       <small>
                         {attendanceCount}/{attendanceTotal}
                       </small>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

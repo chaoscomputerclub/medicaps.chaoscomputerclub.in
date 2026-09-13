@@ -1,16 +1,14 @@
 /**
  * Chaos Computer Club India — Cyber Social Drawer
  * Manages student followers and following with live interactive follow actions.
- * Built strictly with CCC brutalist dark design tokens and Redux Toolkit.
+ * Built strictly with CCC brutalist dark design tokens, shadcn UI Sheet, and Redux Toolkit.
  */
 
 import { useEffect, useState } from "react";
 import {
   Check,
-  Globe,
   Loader2,
   Search,
-  ShieldCheck,
   UserCheck,
   UserMinus,
   UserPlus,
@@ -28,6 +26,15 @@ import {
 } from "@/store/slices/socialSlice";
 import { TierBadge } from "./ui";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 export function SocialDrawer() {
@@ -46,18 +53,6 @@ export function SocialDrawer() {
 
   const [hoveredStudentId, setHoveredStudentId] = useState<string | null>(null);
 
-  // Keyboard shortcut: ESC to close
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        dispatch(closeSocialDrawer());
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [dispatch, drawerOpen]);
-
   // Load data whenever drawer opens or active tab switches
   useEffect(() => {
     if (!drawerOpen || !drawerTargetHandle) return;
@@ -67,8 +62,6 @@ export function SocialDrawer() {
       dispatch(fetchFollowingThunk(drawerTargetHandle));
     }
   }, [dispatch, drawerOpen, drawerType, drawerTargetHandle]);
-
-  if (!drawerOpen) return null;
 
   const filtered = studentsList.filter((s) => {
     const q = searchQuery.toLowerCase().trim();
@@ -81,19 +74,15 @@ export function SocialDrawer() {
   });
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Student Connections"
-      className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    <Sheet
+      open={drawerOpen}
+      onOpenChange={(open) => {
+        if (!open) dispatch(closeSocialDrawer());
+      }}
     >
-      {/* Click outside backdrop */}
-      <div className="absolute inset-0" onClick={() => dispatch(closeSocialDrawer())} />
-
-      {/* Slide-over Drawer Panel */}
-      <aside className="relative z-10 w-full max-w-md h-full bg-[var(--surface)] border-l border-[var(--line)] shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300">
+      <SheetContent side="right" className="w-full max-w-md bg-[var(--surface)] border-l border-[var(--line)] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md">
         {/* Header Section */}
-        <header className="p-4 border-b border-[var(--line)] bg-[var(--bg)]/70 backdrop-blur-md">
+        <SheetHeader className="p-4 border-b border-[var(--line)] bg-[var(--bg)]/70 backdrop-blur-md text-left space-y-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
@@ -101,32 +90,23 @@ export function SocialDrawer() {
                 <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--accent)]">
                   PEER NETWORK
                 </p>
-                <h2 className="font-mono text-sm font-bold text-white uppercase tracking-tight">
+                <SheetTitle className="font-mono text-sm font-bold text-white uppercase tracking-tight">
                   {drawerTargetName || `@${drawerTargetHandle}`}
-                </h2>
+                </SheetTitle>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => dispatch(closeSocialDrawer())}
-              className="p-1.5 text-[var(--muted)] hover:text-white border border-transparent hover:border-[var(--line)] rounded-[1px] hover:bg-[var(--surface-2)] transition-all cursor-pointer"
-              title="Close drawer (Esc)"
-              aria-label="Close"
-            >
-              <X size={16} />
-            </button>
           </div>
 
           {/* Segmented Tab Switcher */}
           <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px]">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => dispatch(setDrawerType("followers"))}
               className={cn(
-                "py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer",
+                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-transparent",
                 drawerType === "followers"
-                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm"
+                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm hover:bg-[var(--accent)] hover:text-black"
                   : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50",
               )}
             >
@@ -142,15 +122,16 @@ export function SocialDrawer() {
               >
                 {drawerType === "followers" ? studentsList.length : "•"}
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => dispatch(setDrawerType("following"))}
               className={cn(
-                "py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer",
+                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-transparent",
                 drawerType === "following"
-                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm"
+                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm hover:bg-[var(--accent)] hover:text-black"
                   : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50",
               )}
             >
@@ -166,7 +147,7 @@ export function SocialDrawer() {
               >
                 {drawerType === "following" ? studentsList.length : "•"}
               </span>
-            </button>
+            </Button>
           </div>
 
           {/* Monospace Filter Input */}
@@ -175,24 +156,26 @@ export function SocialDrawer() {
               size={13}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
             />
-            <input
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => dispatch(setSocialSearchQuery(e.target.value))}
               placeholder="Search handle, name, or department..."
-              className="w-full h-8 pl-8 pr-8 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/60 focus:outline-none focus:border-[var(--accent)]/70 transition-colors"
+              className="h-8 pl-8 pr-8 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/60 focus:border-[var(--accent)]/70 transition-colors"
             />
             {searchQuery && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => dispatch(setSocialSearchQuery(""))}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-white p-0.5"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-[var(--muted)] hover:text-white"
               >
                 <X size={12} />
-              </button>
+              </Button>
             )}
           </div>
-        </header>
+        </SheetHeader>
 
         {/* Student Cards Stream */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
@@ -253,26 +236,18 @@ export function SocialDrawer() {
                   className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))] hover:bg-[var(--surface)] transition-all rounded-[1px]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    {student.avatar_url &&
-                    (student.avatar_url.startsWith("http") ||
-                      student.avatar_url.startsWith("/media/") ||
-                      student.avatar_url.startsWith("/")) ? (
-                      <div className="w-9 h-9 rounded-[1px] bg-zinc-900 border border-[var(--line)] overflow-hidden flex-shrink-0 shadow-inner">
-                        <img
+                    <Avatar className="w-9 h-9 rounded-[1px] border border-[var(--line)] bg-zinc-900">
+                      {student.avatar_url ? (
+                        <AvatarImage
                           src={student.avatar_url}
                           alt={student.full_name || student.handle}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLElement).style.display = "none";
-                            e.currentTarget.parentElement!.innerText = initials;
-                          }}
+                          className="object-cover"
                         />
-                      </div>
-                    ) : (
-                      <div className="w-9 h-9 rounded-[1px] bg-[var(--surface)] border border-[var(--line)] text-[var(--accent)] flex items-center justify-center font-mono text-xs font-bold flex-shrink-0 shadow-inner">
+                      ) : null}
+                      <AvatarFallback className="rounded-[1px] bg-[var(--surface)] text-[var(--accent)] font-mono text-xs font-bold">
                         {initials}
-                      </div>
-                    )}
+                      </AvatarFallback>
+                    </Avatar>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -302,7 +277,7 @@ export function SocialDrawer() {
                       You
                     </span>
                   ) : (
-                    <button
+                    <Button
                       type="button"
                       disabled={isPending}
                       onMouseEnter={() => setHoveredStudentId(student.id)}
@@ -316,7 +291,7 @@ export function SocialDrawer() {
                         )
                       }
                       className={cn(
-                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-[1px] flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer",
+                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-[1px] flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer h-auto",
                         isFollowing
                           ? isHovered
                             ? "bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20"
@@ -344,7 +319,7 @@ export function SocialDrawer() {
                           <span>Follow</span>
                         </>
                       )}
-                    </button>
+                    </Button>
                   )}
                 </article>
               );
@@ -358,7 +333,7 @@ export function SocialDrawer() {
             AUTHENTICATED CAMPUS SOCIAL GRAPH • MEDI-CAPS CHAPTER
           </p>
         </footer>
-      </aside>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

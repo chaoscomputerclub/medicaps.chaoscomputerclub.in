@@ -2,6 +2,7 @@
  * Chaos Computer Club India — Contest Registration Confirmation Modal
  * Interactive confirmation modal requiring acknowledgment of two-phase
  * contest rules, air-gapped lab integrity guidelines, and proctoring.
+ * Refactored to use shadcn UI Dialog, Button, and Checkbox primitives.
  */
 
 import { useState } from "react";
@@ -9,16 +10,21 @@ import {
   ShieldCheck,
   Users,
   MapPin,
-  Calendar,
-  AlertTriangle,
   Loader2,
   CheckCircle2,
-  X,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { registerForContest, isAuthenticated } from "@/lib/auth";
 import type { ContestRecord } from "../data/contest-system";
 
@@ -38,8 +44,6 @@ export function RegisterConfirmModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreed, setAgreed] = useState(true);
   const navigate = useNavigate();
-
-  if (!open) return null;
 
   const handleConfirmRegistration = async () => {
     if (!isAuthenticated()) {
@@ -68,28 +72,17 @@ export function RegisterConfirmModal({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
-    >
-      <div className="relative w-full max-w-lg bg-[var(--surface)] border border-[var(--line-strong)] shadow-2xl overflow-hidden flex flex-col">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg bg-[var(--surface)] border border-[var(--line-strong)] text-white p-0 gap-0 overflow-hidden">
         {/* Modal Header */}
-        <div className="p-4 border-b border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-between">
+        <DialogHeader className="p-4 border-b border-[var(--line)] bg-[var(--surface-2)] flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-[var(--accent)]" />
-            <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-white">
+            <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
               Confirm Contest Registration
-            </h2>
+            </DialogTitle>
           </div>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="text-[var(--muted)] hover:text-white p-1 transition-colors cursor-pointer"
-            aria-label="Close modal"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* Modal Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
@@ -144,11 +137,10 @@ export function RegisterConfirmModal({
 
           {/* Agreement Checkbox */}
           <label className="flex items-start gap-3 p-3 bg-[var(--surface-3)] border border-[var(--line)] cursor-pointer text-left">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5 accent-[var(--accent)] w-4 h-4 rounded"
+              onCheckedChange={(checked) => setAgreed(checked === true)}
+              className="mt-0.5 border-[var(--line-strong)] data-[state=checked]:bg-[var(--accent)] data-[state=checked]:text-black"
             />
             <span className="text-xs text-[#c0c0c0] leading-relaxed">
               I certify that I am an enrolled Medi-Caps University student. I acknowledge that automated proctoring, browser telemetry, and air-gapped lab integrity guidelines are strictly enforced.
@@ -157,12 +149,12 @@ export function RegisterConfirmModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-end gap-3">
+        <DialogFooter className="p-4 border-t border-[var(--line)] bg-[var(--surface-2)] flex flex-row justify-end gap-3 space-x-0">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
-            className="text-white border-[var(--line)] font-mono text-xs font-semibold uppercase"
+            className="text-white border-[var(--line)] font-mono text-xs font-semibold uppercase hover:bg-[var(--surface-3)] hover:text-white"
           >
             Cancel
           </Button>
@@ -170,7 +162,7 @@ export function RegisterConfirmModal({
           <Button
             onClick={handleConfirmRegistration}
             disabled={isSubmitting || !agreed}
-            className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-5"
+            className="bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-5"
           >
             {isSubmitting ? (
               <>
@@ -184,8 +176,8 @@ export function RegisterConfirmModal({
               </>
             )}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

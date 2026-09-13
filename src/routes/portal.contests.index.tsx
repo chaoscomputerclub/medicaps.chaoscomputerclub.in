@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarDays, Users, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, SectionHeader } from "@/organization/components/ui";
 import { LifecycleBadge, TwoStageIndicator } from "@/organization/components/ContestSystemUI";
 import { contestSystemQueries } from "@/organization/data/contest-queries";
@@ -85,22 +87,19 @@ function Contests() {
         </div>
       </header>
 
-      <div className="segmented flex-wrap gap-2 mb-6">
-        {filterTabs.map((tab) => (
-          <Button
-            key={tab.key}
-            variant={filter === tab.key ? "default" : "ghost"}
-            className={
-              filter === tab.key
-                ? "bg-primary text-black font-mono text-xs font-semibold"
-                : "font-mono text-xs font-semibold text-[var(--muted)] hover:text-white"
-            }
-            onClick={() => void navigate({ search: { filter: tab.key, state } })}
-          >
-            {tab.label} ({tab.count})
-          </Button>
-        ))}
-      </div>
+      <Tabs value={filter} onValueChange={(val) => void navigate({ search: { filter: val, state } })} className="mb-6">
+        <TabsList className="bg-[var(--surface-2)] border border-[var(--line)] p-1 rounded-[1px] h-auto flex-wrap">
+          {filterTabs.map((tab) => (
+            <TabsTrigger
+              key={tab.key}
+              value={tab.key}
+              className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-[var(--muted)]"
+            >
+              {tab.label} ({tab.count})
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       <section>
         <SectionHeader kicker={`${shown.length} contests`} title="Contest calendar" />

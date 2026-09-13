@@ -38,6 +38,17 @@ import { invalidateFullProfileCache } from "@/organization/data/queries";
 import { uploadMedia } from "@/lib/storage";
 import { TierBadge } from "./ui";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 // Preset Cyber Emblems available to CCC members
 interface EmblemDef {
@@ -240,33 +251,26 @@ export function EditProfileModal() {
     PRESET_EMBLEMS.find((e) => e.id === avatarEmblem) || PRESET_EMBLEMS[0]!;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+    <Dialog
+      open={isEditProfileOpen}
+      onOpenChange={(open) => {
+        if (!open) dispatch(closeEditProfileModal());
+      }}
     >
-      <div className="relative w-full max-w-3xl bg-[var(--surface)] border border-[var(--line)] shadow-2xl rounded-[1px] overflow-hidden flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-3xl bg-[var(--surface)] border border-[var(--line)] text-white p-0 gap-0 overflow-hidden max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-4 border-b border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-between">
+        <DialogHeader className="p-4 border-b border-[var(--line)] bg-[var(--surface-2)] flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
             <User size={16} className="text-[var(--accent)]" />
-            <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-white">
+            <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
               Edit Competitive Profile
-            </h2>
+            </DialogTitle>
             <span className="proof-seal text-[9px] py-0.5">
               <Sparkles size={10} />
               INTERLEET V4
             </span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => dispatch(closeEditProfileModal())}
-            className="p-1 text-[var(--muted)] hover:text-white border border-[var(--line)] hover:bg-[var(--surface-3)] rounded-[1px] transition-colors cursor-pointer"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* Modal Body: 2 Columns (Form on left, Real-Time Preview on right) */}
         <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -673,21 +677,23 @@ export function EditProfileModal() {
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="p-4 border-t border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-end gap-3">
-          <button
+        {/* Modal Footer */}
+        <DialogFooter className="p-4 border-t border-[var(--line)] bg-[var(--surface-2)] flex flex-row items-center justify-end gap-3 space-x-0">
+          <Button
             type="button"
+            variant="outline"
             disabled={saving || uploadingAvatar}
             onClick={() => dispatch(closeEditProfileModal())}
-            className="px-4 py-2 font-mono text-xs uppercase font-bold text-[var(--muted)] hover:text-white border border-[var(--line)] hover:bg-[var(--surface-3)] rounded-[1px] transition-all cursor-pointer"
+            className="px-4 py-2 font-mono text-xs uppercase font-bold text-white border-[var(--line)] hover:bg-[var(--surface-3)] rounded-[1px] transition-all cursor-pointer"
           >
             Cancel
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="submit"
             form="edit-profile-form"
             disabled={saving || uploadingAvatar}
-            className="px-5 py-2 font-mono text-xs uppercase font-bold bg-[var(--accent)] text-[var(--accent-ink)] hover:brightness-110 rounded-[1px] flex items-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(200,255,54,0.2)] disabled:opacity-50"
+            className="px-5 py-2 font-mono text-xs uppercase font-bold bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent)]/90 hover:text-black rounded-[1px] flex items-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(200,255,54,0.2)] disabled:opacity-50"
           >
             {saving ? (
               <>
@@ -700,9 +706,9 @@ export function EditProfileModal() {
                 <span>Save Profile Changes</span>
               </>
             )}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -19,6 +19,8 @@ import {
 import { contestSystemQueries } from "@/organization/data/contest-queries";
 import { SectionHeader } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const query = contestSystemQueries.history();
 
@@ -88,37 +90,23 @@ function MyContestsPage() {
         </div>
       </header>
 
-      {/* Segmented Filter Controls */}
-      <div className="segmented mb-6 flex-wrap">
-        <Button
-          variant={filter === "all" ? "default" : "ghost"}
-          onClick={() => setFilter("all")}
-          className="font-mono text-xs font-semibold"
-        >
-          All ({data.length})
-        </Button>
-        <Button
-          variant={filter === "registered" ? "default" : "ghost"}
-          onClick={() => setFilter("registered")}
-          className="font-mono text-xs font-semibold"
-        >
-          Registered ({registeredCount})
-        </Button>
-        <Button
-          variant={filter === "live" ? "default" : "ghost"}
-          onClick={() => setFilter("live")}
-          className="font-mono text-xs font-semibold"
-        >
-          Live Screening ({liveCount})
-        </Button>
-        <Button
-          variant={filter === "completed" ? "default" : "ghost"}
-          onClick={() => setFilter("completed")}
-          className="font-mono text-xs font-semibold"
-        >
-          Completed ({completedCount})
-        </Button>
-      </div>
+      {/* Segmented Filter Controls using shadcn Tabs */}
+      <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="mb-6">
+        <TabsList className="bg-[var(--surface-2)] border border-[var(--line)] p-1 rounded-[1px] h-auto flex-wrap">
+          <TabsTrigger value="all" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-[var(--muted)]">
+            All ({data.length})
+          </TabsTrigger>
+          <TabsTrigger value="registered" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-[var(--muted)]">
+            Registered ({registeredCount})
+          </TabsTrigger>
+          <TabsTrigger value="live" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-[var(--muted)]">
+            Live Screening ({liveCount})
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-[var(--muted)]">
+            Completed ({completedCount})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Main Participation List */}
       <section className="panel p-0 overflow-hidden border border-[var(--line-strong)]">
