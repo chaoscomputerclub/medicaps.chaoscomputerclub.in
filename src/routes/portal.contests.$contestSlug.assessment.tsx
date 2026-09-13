@@ -1,5 +1,8 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getApiBase, getToken } from "@/lib/auth";
+import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle,
@@ -53,22 +56,13 @@ function Assessment() {
   const { contestSlug } = Route.useParams();
   const { state } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const queryClient = useQueryClient();
   const { data: c } = useSuspenseQuery(contestSystemQueries.contest(contestSlug));
 
   const [active, setActive] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [now, setNow] = useState<number>(() => Date.now());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const current = Date.now();
-      setNow(current);
-      if (startsAtMs && current >= startsAtMs && (state === "waiting" || state === "default")) {
-        navigate({ search: { state: "live" } });
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [startsAtMs, state, navigate]);
+  const [isResettingTimer, setIsResettingTimer] = useState(false);
 
   if (!c) return null;
 
@@ -78,33 +72,115 @@ function Assessment() {
 
   const isLocked = now < unlockAtMs;
   const isConcluded = now > endsAtMs;
+  const isCountdownActive = now < startsAtMs;
 
-  // Strict 24h Unlock Gate
-  if (isLocked || state === "waiting" || state === "default") {
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const current = Date.now();
+      setNow(current);
+      if (startsAtMs && current >= startsAtMs && (state === "waiting" || state === "default")) {
+        navigate({ to: "/assessments/$contestSlug", params: { contestSlug } });
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [startsAtMs, state, contestSlug, navigate]);
+
+  const handleResetTimer = async () => {
+    try {
+      setIsResettingTimer(true);
+      const apiBase = getApiBase();
+      const token = getToken();
+      const res = await fetch(`${apiBase}/contests/${contestSlug}/reset-timer?seconds=10`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        toast.success("10-second assessment countdown timer started!");
+        const data = await res.json();
+        if (c.stages && c.stages[0]) {
+          c.stages[0].starts_at = data.starts_at;
+        }
+        c.registration_closes_at = data.starts_at;
+        await queryClient.invalidateQueries({ queryKey: ["contest-system"] });
+        setNow(Date.now());
+      }
+    } catch {
+      toast.error("Failed to reset timer.");
+    } finally {
+      setIsResettingTimer(false);
+    }
+  };
+
+  // Strict 24h Unlock Gate or Waiting Room
+  if (isLocked || isCountdownActive || state === "waiting") {
+    const remainingSeconds = Math.max(0, Math.ceil((startsAtMs - now) / 1000));
     return (
       <div className="page-wrap narrow">
         <StatePanel
           icon={<Lock className="w-8 h-8 text-[var(--accent)]" />}
           kicker="Phase 1 · Online Screening Assessment"
-          title={isLocked ? "Assessment is Locked" : "Waiting Room"}
+          title={isLocked ? "Assessment is Locked" : isCountdownActive ? "Assessment Waiting Room" : "Assessment is Live"}
         >
           <p>
             {isLocked
               ? "The Phase 1 Online Screening Assessment unlocks strictly 24 hours prior to the contest live start window. Questions and coding challenges remain cryptographically sealed until then."
-              : "Your registration is confirmed. Keep this window open; you may begin as soon as the live screening window opens."}
+              : isCountdownActive
+              ? "Your workstation telemetry is synchronized. The online screening test will unlock automatically when the countdown expires."
+              : "The assessment window is currently open and active. Proceed to your proctored coding workspace."}
           </p>
 
-          {now < startsAtMs && Math.ceil((startsAtMs - now) / 1000) <= 60 && (
+          {isCountdownActive ? (
             <div className="my-6 p-6 rounded-lg bg-[var(--surface-2)] border border-amber-500/40 text-center shadow-[0_0_25px_rgba(251,191,36,0.15)]">
               <p className="font-mono text-xs uppercase tracking-widest text-amber-400 font-bold mb-1">
                 ⚡ ONLINE ASSESSMENT COMMENCES IN
               </p>
               <div className="font-mono text-6xl font-black text-amber-300 tracking-wider animate-pulse">
-                00:00:{String(Math.max(0, Math.ceil((startsAtMs - now) / 1000))).padStart(2, "0")}
+                00:00:{String(remainingSeconds).padStart(2, "0")}
               </div>
               <p className="font-mono text-[11px] text-[var(--muted)] mt-2">
                 Workstation telemetry ready. Terminal will unlock automatically.
               </p>
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetTimer}
+                  disabled={isResettingTimer}
+                  className="font-mono text-xs border-[var(--line)] hover:border-amber-400 text-amber-300"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isResettingTimer ? "animate-spin" : ""}`} />
+                  Restart 10s Timer
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="my-6 p-6 rounded-lg bg-emerald-950/40 border border-emerald-500/50 text-center shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+              <p className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-bold mb-1">
+                ⚡ ASSESSMENT TERMINAL UNLOCKED
+              </p>
+              <div className="font-mono text-xl font-black text-white tracking-wider my-2">
+                TERMINAL ACCESS GRANTED
+              </div>
+              <p className="font-mono text-xs text-[var(--muted)] mb-4">
+                The 10-second countdown has completed. You can now launch into the proctored IDE.
+              </p>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                <Button asChild className="bg-emerald-400 text-black hover:bg-emerald-300 font-mono font-bold text-xs uppercase tracking-wider px-6 py-2 shadow-lg">
+                  <Link to="/assessments/$contestSlug" params={{ contestSlug }}>
+                    Launch Proctored Workspace →
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetTimer}
+                  disabled={isResettingTimer}
+                  className="font-mono text-xs border-[var(--line)] hover:border-amber-400 text-amber-300"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isResettingTimer ? "animate-spin" : ""}`} />
+                  Restart 10s Timer
+                </Button>
+              </div>
             </div>
           )}
 

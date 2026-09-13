@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
@@ -54,6 +54,7 @@ export const Route = createFileRoute("/portal/contests/$contestSlug/")({
 function ContestDetail() {
   const { contestSlug } = Route.useParams();
   const { data: c } = useSuspenseQuery(contestSystemQueries.contest(contestSlug));
+  const queryClient = useQueryClient();
   if (!c) return null;
 
   const [registrationStatus, setRegistrationStatus] = useState<any>(null);
@@ -92,6 +93,7 @@ function ContestDetail() {
           c.stages[0].starts_at = data.starts_at;
         }
         c.registration_closes_at = data.starts_at;
+        await queryClient.invalidateQueries({ queryKey: ["contest-system"] });
         setNow(Date.now());
       }
     } catch {
@@ -200,14 +202,26 @@ function ContestDetail() {
 
           <div className="button-row">
             {!isRegistered ? (
-              <Button
-                onClick={() => setShowRegisterModal(true)}
-                className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Register for contest
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-bold text-xs uppercase tracking-wider px-5"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Register for contest
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetTimer}
+                  disabled={isResettingTimer}
+                  className="font-mono text-xs border-[var(--line)] hover:border-amber-400 text-amber-300"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isResettingTimer ? "animate-spin" : ""}`} />
+                  Restart 10s Timer
+                </Button>
+              </div>
             ) : isUnlocked ? (
               now < startsAtMs ? (
                 <div className="flex items-center gap-2 flex-wrap">
