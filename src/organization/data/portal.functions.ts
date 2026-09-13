@@ -23,13 +23,7 @@ function getBackendUrl(): string {
   if (typeof process !== "undefined" && process.env && process.env["BACKEND_URL"]) {
     return process.env["BACKEND_URL"];
   }
-  if (typeof window !== "undefined") {
-    return window.location.hostname.includes("localhost") ||
-      window.location.hostname.includes("127.0.0.1")
-      ? "http://localhost:8002/api"
-      : "https://ccc-medicaps-api.sharexpress.in/api";
-  }
-  return "http://127.0.0.1:8002/api";
+  return "https://medicaps-api.chaoscomputerclub.in/api";
 }
 
 /**

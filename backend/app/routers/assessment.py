@@ -19,6 +19,7 @@ from app.engine.schemas import TestCaseSchema
 from app.models.db_models import (
     OfflineContest,
     Assessment,
+    ContestRegistration,
     AssessmentProblem,
     AssessmentSession,
     AssessmentSubmission,
@@ -90,6 +91,20 @@ async def get_or_start_assessment(
     """Retrieve or initialize candidate assessment session."""
     # 1. Fetch or auto-provision assessment
     assessment = await get_or_create_assessment(contest_slug, db)
+
+    # 1.1 Verify Candidate Contest Registration
+    if assessment.contest_id:
+        reg_check = await db.execute(
+            select(ContestRegistration).where(
+                ContestRegistration.contest_id == assessment.contest_id,
+                ContestRegistration.member_id == current_member.id,
+            )
+        )
+        if not reg_check.scalars().first():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Contest registration required before entering the Phase 1 online screening assessment.",
+            )
 
     # 2. Fetch or create session
     s_result = await db.execute(

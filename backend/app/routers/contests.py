@@ -9,9 +9,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from app.core.db import get_db
-from app.models.db_models import ContestProblem, MemberProfile, OfflineContest
+from app.models.db_models import ContestProblem, MemberProfile, OfflineContest, ContestRegistration
 from app.models.schemas import ContestProblemResponse, OfflineContestResponse
-from app.middleware.auth import get_current_member
+from app.middleware.auth import get_current_member, get_current_member_optional
 
 router = APIRouter(prefix="/contests", tags=["Offline Contests"])
 
@@ -66,26 +66,82 @@ async def get_contest_problems(slug: str, db: AsyncSession = Depends(get_db)):
     return res.scalars().all()
 
 
+@router.get("/{slug}/registration-status")
+async def get_registration_status(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
+    """Check if the current member is registered for this contest & assessment round."""
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if not current_member:
+        return {"registered": False, "contest_slug": slug}
+
+    reg_res = await db.execute(
+        select(ContestRegistration).where(
+            ContestRegistration.contest_id == contest.id,
+            ContestRegistration.member_id == current_member.id,
+        )
+    )
+    reg = reg_res.scalars().first()
+    return {
+        "registered": reg is not None,
+        "contest_slug": slug,
+        "status": reg.status if reg else None,
+        "registered_at": reg.registered_at.isoformat() if reg else None,
+    }
+
+
 @router.post("/{slug}/register")
 async def register_for_contest(
     slug: str,
     db: AsyncSession = Depends(get_db),
     current_member: MemberProfile = Depends(get_current_member),
 ):
-    """Reserve physical workstation seat for the offline campus contest."""
+    """Reserve physical workstation seat and unlock Phase 1 Online Assessment for the contest."""
     c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
     contest = c_res.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
+    # Check if candidate is already registered
+    existing_reg = await db.execute(
+        select(ContestRegistration).where(
+            ContestRegistration.contest_id == contest.id,
+            ContestRegistration.member_id == current_member.id,
+        )
+    )
+    if existing_reg.scalars().first():
+        return {
+            "status": "already_registered",
+            "registered": True,
+            "message": f"You are already registered for {contest.title}. Proceed to the assessment studio.",
+            "venue": contest.venue,
+            "registered_count": contest.registered_count,
+            "capacity": contest.seat_capacity,
+        }
+
     if contest.registered_count >= contest.seat_capacity:
         raise HTTPException(status_code=400, detail="All lab workstation seats are filled for this contest.")
 
+    # Create ContestRegistration record in DB
+    new_reg = ContestRegistration(
+        contest_id=contest.id,
+        member_id=current_member.id,
+        status="confirmed",
+    )
+    db.add(new_reg)
     contest.registered_count += 1
     await db.commit()
+
     return {
         "status": "confirmed",
-        "message": f"Workstation seat reserved for {contest.title}.",
+        "registered": True,
+        "message": f"Registration confirmed for {contest.title}. Workstation seat reserved and assessment round unlocked.",
         "venue": contest.venue,
         "registered_count": contest.registered_count,
         "capacity": contest.seat_capacity,

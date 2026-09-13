@@ -55,6 +55,7 @@ class MemberProfile(Base):
 
     # Relationships
     rating_history = relationship("RatingHistory", back_populates="member", cascade="all, delete-orphan")
+    contest_registrations = relationship("ContestRegistration", back_populates="member", cascade="all, delete-orphan")
 
 
 class OTPStore(Base):
@@ -95,6 +96,7 @@ class OfflineContest(Base):
     # Relationships
     problems = relationship("ContestProblem", back_populates="contest", cascade="all, delete-orphan")
     scoreboard_entries = relationship("ScoreboardEntry", back_populates="contest", cascade="all, delete-orphan")
+    registrations = relationship("ContestRegistration", back_populates="contest", cascade="all, delete-orphan")
 
 
 class ContestProblem(Base):
@@ -307,3 +309,21 @@ class StudentFollow(Base):
 
     follower = relationship("MemberProfile", foreign_keys=[follower_id], backref="following_relations")
     following = relationship("MemberProfile", foreign_keys=[following_id], backref="follower_relations")
+
+class ContestRegistration(Base):
+    """Candidate workstation registration for an offline contest & screening assessment."""
+    __tablename__ = "contest_registrations"
+
+    id = Column(String(36), primary_key=True, default=get_uuid)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False, index=True)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    registered_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+    status = Column(String(20), default="confirmed", nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("contest_id", "member_id", name="uq_contest_member_reg"),
+    )
+
+    # Relationships
+    contest = relationship("OfflineContest", back_populates="registrations")
+    member = relationship("MemberProfile", back_populates="contest_registrations")

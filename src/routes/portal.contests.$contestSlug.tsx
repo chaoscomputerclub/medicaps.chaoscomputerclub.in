@@ -1,9 +1,13 @@
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   ArrowLeft,
+  CheckCircle2,
   Clock3,
+  Loader2,
   MapPin,
   MonitorCog,
   ShieldCheck,
@@ -11,6 +15,7 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import { getContestRegistrationStatus, registerForContest, getToken } from "@/lib/auth";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";
 import { Button } from "@/components/ui/button";
 import { SectionHeader, StatusDot, formatContestDate } from "@/organization/components/ui";
@@ -43,7 +48,49 @@ export const Route = createFileRoute("/portal/contests/$contestSlug")({
 });
 function ContestDetail() {
   const { contestSlug } = Route.useParams();
+  const queryClient = useQueryClient();
   const { data: c } = useSuspenseQuery(portalQueries.contest(contestSlug));
+
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isCheckingReg, setIsCheckingReg] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setIsCheckingReg(false);
+      return;
+    }
+    let cancelled = false;
+    getContestRegistrationStatus(contestSlug)
+      .then((res) => {
+        if (!cancelled) {
+          setIsRegistered(res.registered);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsCheckingReg(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [contestSlug]);
+
+  async function handleRegister() {
+    setIsRegistering(true);
+    try {
+      const res = await registerForContest(contestSlug);
+      setIsRegistered(true);
+      toast.success(res.message || "Registration confirmed! Workstation reserved.");
+      queryClient.invalidateQueries({ queryKey: ["portal", "public-records"] });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to register for contest. Please ensure you are logged in.");
+    } finally {
+      setIsRegistering(false);
+    }
+  }
+
   if (!c) return null;
   return (
     <div className="page-wrap">
@@ -94,27 +141,55 @@ function ContestDetail() {
       </header>
       <div className="registration-band">
         <div>
-          <strong>Phase 1 Online Screening Assessment Active</strong>
-          <span>
-            Appear in the online assessment round to qualify among the Top 30 for the in-person
-            physical lab final.
-          </span>
+          {isRegistered ? (
+            <>
+              <strong className="text-accent flex items-center gap-1.5">
+                <CheckCircle2 size={16} /> Registration Confirmed · Assessment Unlocked
+              </strong>
+              <span>
+                Your workstation seat is reserved. Enter the online screening studio to qualify among the Top 30.
+              </span>
+            </>
+          ) : (
+            <>
+              <strong>Phase 1 Online Screening Assessment Active</strong>
+              <span>
+                Register for this offline campus challenge to unlock your screening round and workstation allocation.
+              </span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            asChild
-            className="bg-accent text-accent-foreground hover:bg-accent/90 font-mono text-xs"
-          >
-            <Link to="/portal/assessments/$contestSlug" params={{ contestSlug: c.slug }}>
-              <Terminal size={14} className="mr-1.5" /> ASSESSMENT STUDIO
-            </Link>
-          </Button>
+          {isRegistered ? (
+            <Button
+              asChild
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-mono text-xs shadow-[0_0_15px_rgba(200,255,54,0.3)]"
+            >
+              <Link to="/portal/assessments/$contestSlug" params={{ contestSlug: c.slug }}>
+                <Terminal size={14} className="mr-1.5" /> ENTER ASSESSMENT STUDIO →
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={handleRegister}
+              disabled={isRegistering || isCheckingReg}
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-mono text-xs cursor-pointer"
+            >
+              {isRegistering ? (
+                <Loader2 className="spin size-3.5 mr-1.5" />
+              ) : (
+                <Users size={14} className="mr-1.5" />
+              )}
+              REGISTER FOR CONTEST & ASSESSMENT
+            </Button>
+          )}
           <Button variant="outline" asChild className="font-mono text-xs border-[#333]">
             <Link
               to="/portal/assessments/$contestSlug/leaderboard"
               params={{ contestSlug: c.slug }}
             >
-              <Trophy size={14} className="mr-1.5" /> LEADERBOARD
+              <Trophy size={14} className="mr-1.5" /> SCREENING STANDINGS
             </Link>
           </Button>
         </div>

@@ -19,8 +19,11 @@ import {
   Send,
   ShieldAlert,
   Terminal,
+  Users,
   XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
+import { registerForContest } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -176,37 +179,67 @@ function AssessmentStudio() {
   }
 
   if (error) {
+    const isRegErr = error.toLowerCase().includes("registration required");
     const isAuthErr =
-      error.toLowerCase().includes("authenticated") ||
-      error.toLowerCase().includes("credential") ||
-      error.toLowerCase().includes("token") ||
-      error.toLowerCase().includes("unauthorized") ||
-      error.toLowerCase().includes("session");
+      !isRegErr &&
+      (error.toLowerCase().includes("authenticated") ||
+        error.toLowerCase().includes("credential") ||
+        error.toLowerCase().includes("token") ||
+        error.toLowerCase().includes("unauthorized") ||
+        error.toLowerCase().includes("session"));
+
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#070707] text-[#eee] font-mono p-6 text-center">
-        <ShieldAlert size={44} className="text-destructive" />
+        {isRegErr ? (
+          <Terminal size={48} className="text-accent" />
+        ) : (
+          <ShieldAlert size={44} className="text-destructive" />
+        )}
         <h2 className="text-lg font-bold text-white">
-          {isAuthErr ? "Candidate Authentication Required" : "Assessment Round Unavailable"}
+          {isRegErr
+            ? "Contest Registration Required"
+            : isAuthErr
+              ? "Candidate Authentication Required"
+              : "Assessment Round Unavailable"}
         </h2>
         <p className="text-sm text-[#888] max-w-md">
-          {isAuthErr
-            ? "Sign in with your Medi-Caps account to enter the proctored assessment."
-            : error}
+          {isRegErr
+            ? "You must reserve your workstation seat and register for this offline contest before entering the Phase 1 online screening round."
+            : isAuthErr
+              ? "Sign in with your Medi-Caps account to enter the proctored assessment."
+              : error}
         </p>
         <div className="flex items-center gap-3 mt-2 flex-wrap justify-center">
-          {isAuthErr ? (
+          {isRegErr && (
+            <Button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await registerForContest(contestSlug);
+                  toast.success(res.message || "Registration confirmed! Unlocking assessment studio...");
+                  dispatch(fetchAssessmentThunk(contestSlug));
+                } catch (err: any) {
+                  toast.error(err?.message || "Failed to register. Please sign in first.");
+                }
+              }}
+              className="bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90 cursor-pointer shadow-[0_0_15px_rgba(200,255,54,0.3)]"
+            >
+              <Users size={14} className="mr-1.5" /> Register Now & Enter Studio →
+            </Button>
+          )}
+          {isAuthErr && (
             <a href={`/auth?redirect=/portal/assessments/${contestSlug}`}>
-              <Button className="bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90">
+              <Button className="bg-accent text-accent-foreground font-mono text-xs hover:bg-accent/90 cursor-pointer">
                 Sign In to Start Assessment
               </Button>
             </a>
-          ) : null}
-          <Link to="/portal/contests" search={{ status: "all" }}>
+          )}
+          <Link to="/portal/contests/$contestSlug" params={{ contestSlug }}>
             <Button
               variant="outline"
-              className="font-mono text-xs border-[#333] hover:bg-[#181818]"
+              className="font-mono text-xs border-[#333] hover:bg-[#181818] cursor-pointer"
             >
-              Return to Contests
+              Return to Contest Details
             </Button>
           </Link>
         </div>

@@ -61,3 +61,22 @@ async def require_onboarded(
             detail="Please complete your profile setup first.",
         )
     return member
+
+async def get_current_member_optional(
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[MemberProfile]:
+    """Optional auth dependency — returns None if token missing or invalid."""
+    if not token:
+        return None
+    try:
+        payload = decode_access_token(token)
+        if not payload:
+            return None
+        member_id: Optional[str] = payload.get("sub")
+        if not member_id:
+            return None
+        result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
+        return result.scalars().first()
+    except Exception:
+        return None

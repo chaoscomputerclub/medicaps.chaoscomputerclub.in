@@ -15,9 +15,9 @@ export function getApiBase(): string {
   }
 
   if (typeof window !== "undefined") {
-    // 1. Localhost development fallback
+    // 1. Localhost development fallback (connect to live server backend)
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      return "http://localhost:8000/api";
+      return "https://medicaps-api.chaoscomputerclub.in/api";
     }
 
     // 2. Production: Always use relative /api on current origin
@@ -274,5 +274,35 @@ export async function updateProfile(
   return apiFetch<{ success: boolean; message: string; member: Member }>("/auth/profile", {
     method: "PUT",
     body: JSON.stringify(data),
+  });
+}
+
+// ── Contest Registration ───────────────────────────────────────────────────
+
+export interface ContestRegistrationResponse {
+  registered: boolean;
+  contest_slug: string;
+  status?: string;
+  registered_at?: string;
+}
+
+export async function getContestRegistrationStatus(
+  slug: string,
+): Promise<ContestRegistrationResponse> {
+  return apiFetch<ContestRegistrationResponse>(`/contests/${encodeURIComponent(slug)}/registration-status`);
+}
+
+export async function registerForContest(
+  slug: string,
+): Promise<{
+  status: string;
+  registered: boolean;
+  message: string;
+  venue: string;
+  registered_count: number;
+  capacity: number;
+}> {
+  return apiFetch(`/contests/${encodeURIComponent(slug)}/register`, {
+    method: "POST",
   });
 }
