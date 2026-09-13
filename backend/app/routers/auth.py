@@ -104,3 +104,13 @@ async def delete_account(
 @router.post("/logout", summary="Invalidate current session (client-side)")
 async def logout(current_member: MemberProfile = Depends(get_current_member)):
     return {"success": True, "message": "Logged out. Delete your local token."}
+
+
+@router.get("/jwt-public-key", summary="Get RSA 256 public key for asymmetric token verification")
+async def get_jwt_public_key():
+    """Return the public RSA 256 key used to verify signatures issued by this server."""
+    from app.core.config import settings
+    return {
+        "algorithm": "RS256",
+        "public_key": settings.JWT_PUBLIC_KEY,
+    }

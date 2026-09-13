@@ -1,7 +1,7 @@
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 Authentication, Security, and Password Hashing
-Native bcrypt implementation (safe against passlib 72-byte bug)
+Native bcrypt + JWT RSA 256 (RS256) Asymmetric Signature
 """
 
 from datetime import datetime, timedelta, timezone
@@ -33,21 +33,45 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Encode JWT access token with expiration."""
+    """
+    Encode JWT access token with RSA 256 (RS256) asymmetric private key.
+    Falls back gracefully to HS256 if RSA key is unavailable.
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+
+    # RS256 Asymmetric Signature
+    if settings.ALGORITHM == "RS256" and settings.JWT_PRIVATE_KEY:
+        return jwt.encode(to_encode, settings.JWT_PRIVATE_KEY, algorithm="RS256")
+
+    # Symmetric HS256 Fallback
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
 
 
 def decode_access_token(token: str) -> Optional[dict]:
-    """Decode and validate a JWT access token."""
+    """
+    Decode and validate a JWT access token using RSA 256 (RS256) public key.
+    Provides backward compatibility for existing HS256 sessions during key rotation.
+    """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        return payload
+        # RS256 Verification with Public Key
+        if settings.JWT_PUBLIC_KEY:
+            try:
+                return jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=["RS256"])
+            except JWTError:
+                # Fallback check for existing HS256 tokens during transition
+                if settings.SECRET_KEY:
+                    try:
+                        return jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+                    except JWTError:
+                        pass
+                raise
+
+        # Symmetric fallback
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM, "HS256"])
     except JWTError:
         return None

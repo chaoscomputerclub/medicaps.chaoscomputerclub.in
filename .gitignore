@@ -49,3 +49,7 @@ backend/*/*/__pycache__/
 backend/.env
 backend/.env.*
 !backend/.env.example
+
+# RSA Private Keys
+backend/keys/jwt_private_key.pem
+*.pem

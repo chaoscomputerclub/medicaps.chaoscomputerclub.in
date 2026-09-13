@@ -28,12 +28,14 @@ class Settings(BaseSettings):
         f"sqlite+aiosqlite:///{BASE_DIR}/ccc_medicaps.db"
     )
 
-    # JWT Authentication
+    # JWT Authentication (RSA 256 / RS256 Asymmetric Cryptography)
+    ALGORITHM: str = os.getenv("ALGORITHM", "RS256")
     SECRET_KEY: str = os.getenv(
         "SECRET_KEY",
         "ccc-medicaps-in-person-contest-security-key-2026-sha256-verified"
     )
-    ALGORITHM: str = "HS256"
+    JWT_PRIVATE_KEY: str = os.getenv("JWT_PRIVATE_KEY", "")
+    JWT_PUBLIC_KEY: str = os.getenv("JWT_PUBLIC_KEY", "")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
     # Google OAuth
@@ -112,3 +114,14 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Automatically load RSA keys from backend/keys/ if not supplied via env
+if not settings.JWT_PRIVATE_KEY or not settings.JWT_PUBLIC_KEY:
+    keys_dir = BASE_DIR / "keys"
+    priv_file = keys_dir / "jwt_private_key.pem"
+    pub_file = keys_dir / "jwt_public_key.pem"
+    if priv_file.exists():
+        settings.JWT_PRIVATE_KEY = priv_file.read_text().strip()
+    if pub_file.exists():
+        settings.JWT_PUBLIC_KEY = pub_file.read_text().strip()
+
