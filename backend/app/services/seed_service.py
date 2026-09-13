@@ -20,6 +20,7 @@ from app.models.db_models import (
 logger = logging.getLogger(__name__)
 
 CONTEST_SLUG = "medicaps-offline-open-2026"
+AUTO_SEED_DEMO_CONTESTS = False
 
 # ─── Starter Codes ────────────────────────────────────────────────────────────
 
@@ -444,6 +445,10 @@ main();
 
 
 async def seed_database(db: AsyncSession):
+    if not AUTO_SEED_DEMO_CONTESTS:
+        logger.info("Auto-seeding demo contests is disabled (database kept clean).")
+        return
+
     # 1. Update or create Demo Screening Contest (status: upcoming)
     existing_contest = await db.execute(
         select(OfflineContest).where(OfflineContest.slug == CONTEST_SLUG)
