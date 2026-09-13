@@ -82,6 +82,7 @@ export type ContestRecord = {
   prizes: string[];
   registered_count: number;
   registered: boolean;
+  is_eligible?: boolean;
   stages: [Stage, Stage];
   assessment: AssessmentSession;
   rankings: RankingEntry[];
@@ -245,7 +246,11 @@ export const contestSystemService = {
   async listContests(): Promise<ContestRecord[]> {
     try {
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/contests`);
+      const token = getToken();
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/contests`, { headers });
       if (res.ok) {
         const apiContests = await res.json();
         if (Array.isArray(apiContests)) {
@@ -261,10 +266,14 @@ export const contestSystemService = {
   async getContest(slug: string): Promise<ContestRecord | null> {
     try {
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/contests/${slug}`);
+      const token = getToken();
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/contests/${slug}`, { headers });
       if (res.ok) {
         const c = await res.json();
-        const sbRes = await fetch(`${apiBase}/scoreboards/${slug}`).catch(() => null);
+        const sbRes = await fetch(`${apiBase}/scoreboards/${slug}`, { headers }).catch(() => null);
         const standings = sbRes && sbRes.ok ? await sbRes.json() : [];
         return mapBackendContestToRecord(c, standings);
       }

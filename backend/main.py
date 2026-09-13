@@ -1,3 +1,4 @@
+from app.middleware.contest_eligibility import ContestEligibilityMiddleware
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 FastAPI Main Application Entrypoint
@@ -41,6 +42,9 @@ app = FastAPI(
 )
 
 # CORS Middleware
+# Live Contest Eligibility Middleware (Enforces Top 30 restriction on live finals)
+app.add_middleware(ContestEligibilityMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

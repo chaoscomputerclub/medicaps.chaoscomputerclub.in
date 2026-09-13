@@ -71,7 +71,7 @@ function Dashboard() {
   const { data: history } = useSuspenseQuery(queries[3]);
   const { data: pass } = useSuspenseQuery(queries[4]);
 
-  const live = contests.find((c) => c.status === "live") ?? contests[0];
+  const live = contests.find((c) => c.status === "live");
   const next = contests.find((c) => c.status === "upcoming");
   const greetingName = member?.full_name
     ? member.full_name.split(" ")[0]

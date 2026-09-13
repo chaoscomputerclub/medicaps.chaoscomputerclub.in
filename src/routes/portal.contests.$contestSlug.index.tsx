@@ -97,6 +97,61 @@ function ContestDetail() {
     c.registered_count += 1;
   };
 
+  const isLive = c.lifecycle === "assessment_live" || (c as any).status === "live";
+  const isEligibleForLive = Boolean(
+    registrationStatus?.can_enter_live_contest ||
+    registrationStatus?.is_top_30_qualified ||
+    (registrationStatus?.assessment_rank && registrationStatus.assessment_rank <= 30)
+  );
+
+  if (isLive && registrationStatus && !isEligibleForLive) {
+    return (
+      <div className="page-wrap">
+        <Link
+          to="/portal/contests"
+          search={{ filter: "all", state: "default" }}
+          className="back-link"
+        >
+          <ArrowLeft />
+          All contests
+        </Link>
+        <div className="panel border border-amber-500/30 bg-amber-950/20 p-8 sm:p-12 text-center rounded-lg mt-6">
+          <Lock className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+          <span className="mono-tag text-amber-300 border-amber-500/40 bg-amber-950/60 uppercase">
+            Top 30 Qualifiers Only
+          </span>
+          <h1 className="text-xl sm:text-2xl font-black text-white mt-3 uppercase tracking-wider">
+            Live Final Access Restricted
+          </h1>
+          <p className="text-sm text-[var(--muted)] max-w-lg mx-auto mt-2 leading-relaxed">
+            {registrationStatus.eligibility_message ||
+              "This live on-premise final is strictly restricted to cadets who qualified within the Top 30 cutoff of the Phase 1 Online Screening Assessment."}
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
+            <Button
+              asChild
+              variant="outline"
+              className="border-[var(--line)] text-white hover:border-[var(--accent)] font-mono text-xs uppercase"
+            >
+              <Link to="/portal/contests" search={{ filter: "all", state: "default" }}>
+                Explore Available Contests
+              </Link>
+            </Button>
+            <Button
+              asChild
+              className="bg-[var(--accent)] text-black hover:bg-[var(--accent-ink)] font-mono text-xs font-bold uppercase tracking-wider"
+            >
+              <Link to="/portal/leaderboard">
+                View Screening Leaderboard
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-wrap">
       <Link

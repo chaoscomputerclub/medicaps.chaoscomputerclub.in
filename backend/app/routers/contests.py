@@ -1,3 +1,4 @@
+from app.services.contest_eligibility_service import is_member_eligible_for_live_contest
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 Offline Contests & On-Premise Event Management Router
@@ -21,8 +22,14 @@ async def list_contests(
     status: Optional[str] = Query(None, description="Filter by: live, upcoming, finished"),
     division: Optional[str] = Query(None, description="Filter by: division_1, division_2, division_3, open"),
     db: AsyncSession = Depends(get_db),
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
-    """List all offline campus contests with optional status and division filtering."""
+    """
+    List offline campus contests.
+    STRICT SECURITY RULE: Contests in LIVE status are strictly filtered out
+    unless the requesting member is authenticated and eligible (Top 30 qualifier,
+    registered finalist, or core team proctor).
+    """
     stmt = select(OfflineContest).options(selectinload(OfflineContest.problems))
 
     if status:
@@ -32,7 +39,17 @@ async def list_contests(
 
     stmt = stmt.order_by(OfflineContest.starts_at.desc())
     result = await db.execute(stmt)
-    return result.scalars().all()
+    all_contests = result.scalars().all()
+
+    filtered_contests = []
+    for c in all_contests:
+        if c.status == "live":
+            is_eligible, _ = await is_member_eligible_for_live_contest(current_member, c, db)
+            if not is_eligible:
+                continue
+        filtered_contests.append(c)
+
+    return filtered_contests
 
 
 
@@ -142,7 +159,11 @@ async def get_my_participated_contests(
 
 
 @router.get("/{slug}", response_model=OfflineContestResponse)
-async def get_contest_detail(slug: str, db: AsyncSession = Depends(get_db)):
+async def get_contest_detail(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
     """Fetch complete specifications, venue, rules, and proctor details for an offline contest."""
     stmt = (
         select(OfflineContest)
@@ -153,16 +174,34 @@ async def get_contest_detail(slug: str, db: AsyncSession = Depends(get_db)):
     contest = result.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if contest.status == "live":
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db)
+        if not is_eligible:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access restricted: {reason}",
+            )
+
     return contest
 
 
 @router.get("/{slug}/problems", response_model=List[ContestProblemResponse])
-async def get_contest_problems(slug: str, db: AsyncSession = Depends(get_db)):
+async def get_contest_problems(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
     """Fetch problem set papers (A-F), first-solve times, and editorial summaries."""
     c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
     contest = c_res.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if contest.status == "live":
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db)
+        if not is_eligible:
+            raise HTTPException(status_code=403, detail=f"Access restricted: {reason}")
 
     res = await db.execute(
         select(ContestProblem)
@@ -215,6 +254,13 @@ async def get_registration_status(
     # Check candidate screening assessment session & rank
     assessment_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
     assessment = assessment_res.scalars().first()
+    if not assessment and contest.status == "live":
+        assess_season_res = await db.execute(
+            select(Assessment).where(
+                (Assessment.season == contest.season) | (Assessment.slug == "medicaps-offline-open-2026")
+            )
+        )
+        assessment = assess_season_res.scalars().first()
 
     assessment_taken = False
     assessment_score = 0.0
