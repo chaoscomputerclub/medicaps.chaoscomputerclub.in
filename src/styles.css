@@ -116,11 +116,15 @@ p {
 .portal-main {
   margin-left: 244px;
   min-height: 100vh;
+  background-color: var(--bg);
   background-image:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
     linear-gradient(var(--line) 1px, transparent 1px),
     linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 64px 64px;
-  background-position: -1px -1px;
+  background-size: auto, 64px 64px, 64px 64px;
+  background-position: 0 0, -1px -1px, -1px -1px;
+  background-repeat: repeat, repeat, repeat;
+  background-attachment: fixed;
 }
 .brand-lockup {
   display: flex;
