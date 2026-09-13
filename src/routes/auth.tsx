@@ -10,7 +10,7 @@
 import { preloadFullProfile } from "@/organization/data/queries";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Chrome, Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle, Lock } from "lucide-react";
+import { Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AuthLayout } from "@/organization/components/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,29 @@ import {
   fetchCurrentUserThunk,
 } from "@/store/slices/authSlice";
 import { getGoogleLoginURL, isMedicapsEmail } from "@/lib/auth";
+
+function GoogleIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+      />
+    </svg>
+  );
+}
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -250,70 +273,30 @@ function Auth() {
     window.location.href = getGoogleLoginURL();
   }
 
-  let title: React.ReactNode = (
-    <>
-      <span className="block whitespace-nowrap">ENTER</span>
-      <span className="block whitespace-nowrap">MEMBER</span>
-      <span className="block whitespace-nowrap">OPERATIONS</span>
-    </>
-  );
-  let description =
-    "Campus credentials unlock registrations, issued passes, private rating history, and attendance-backed proofs.";
+  let title: React.ReactNode = "Login";
+  let description: React.ReactNode = null;
 
   if (step === "otp") {
-    title = (
-      <>
-        <span className="block whitespace-nowrap">VERIFY</span>
-        <span className="block whitespace-nowrap">AUTHENTICATION</span>
-        <span className="block whitespace-nowrap">CODE</span>
-      </>
-    );
+    title = "Verify Code";
     description = `Enter the six-digit code sent to ${email}.`;
   } else if (step === "onboarding") {
-    title = (
-      <>
-        <span className="block whitespace-nowrap">COMPLETE</span>
-        <span className="block whitespace-nowrap">MEMBER</span>
-        <span className="block whitespace-nowrap">REGISTRATION</span>
-      </>
-    );
+    title = "Complete Registration";
     description =
-      "First-time registration detected. Set your academic parameters to initialize your portal credential.";
+      "Set your academic parameters to initialize your portal credential.";
   }
 
   return (
     <AuthLayout title={title} description={description}>
       {step === "email" && (
         <>
-          {/* Institutional Access Notice */}
-          <div className="mb-4 flex items-center justify-between gap-3 border border-border/80 bg-[#0d0d10] px-3.5 py-2.5">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="relative flex size-2 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ccff00] opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-[#ccff00]" />
-              </span>
-              <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                Sign in with your official <strong className="font-medium text-foreground">@medicaps.ac.in</strong> email address.
-              </p>
-            </div>
-            <span className="shrink-0 font-mono text-[0.6rem] tracking-wider text-[#ccff00] uppercase font-semibold border border-[#ccff00]/30 bg-[#ccff00]/5 px-2 py-0.5">
-              Campus ID
-            </span>
-          </div>
-
           <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <Label
-                  htmlFor="email"
-                  className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
-                >
-                  Institutional email address
-                </Label>
-                <span className="font-mono text-[0.625rem] text-[#ccff00] font-semibold tracking-wider uppercase">
-                  @medicaps.ac.in only
-                </span>
-              </div>
+              <Label
+                htmlFor="email"
+                className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground block mb-1.5"
+              >
+                Email address
+              </Label>
               <div className="input-icon">
                 <Mail className="size-4 text-muted-foreground" />
                 <Input
@@ -328,7 +311,7 @@ function Auth() {
                   required
                   autoFocus
                   className={cn(
-                    "font-mono text-sm",
+                    "font-mono text-sm h-10",
                     isInvalidDomain &&
                       "border-amber-500/80 focus-visible:ring-amber-500 text-amber-200 bg-amber-950/10",
                   )}
@@ -340,14 +323,9 @@ function Auth() {
             {isInvalidDomain && (
               <div className="p-3 border border-amber-500/40 bg-amber-950/20 text-xs leading-relaxed flex items-start gap-2.5">
                 <AlertTriangle className="size-4 text-amber-400 shrink-0 mt-0.5" />
-                <div className="space-y-0.5">
-                  <div className="font-mono text-[0.6875rem] text-amber-400 font-semibold uppercase tracking-wider">
-                    Institutional Email Required
-                  </div>
-                  <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
-                    Please use your registered <strong className="text-white">@medicaps.ac.in</strong> address instead of personal accounts (@{typedDomain}).
-                  </p>
-                </div>
+                <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
+                  Please use your registered <strong className="text-white">@medicaps.ac.in</strong> email address.
+                </p>
               </div>
             )}
 
@@ -369,8 +347,6 @@ function Auth() {
             >
               {pending ? (
                 <Loader2 className="spin size-4" />
-              ) : isInvalidDomain ? (
-                "Enter @medicaps.ac.in Address"
               ) : (
                 "Continue with Email OTP"
               )}
@@ -383,19 +359,14 @@ function Auth() {
 
           <Button
             type="button"
-            className="w-full font-mono text-xs tracking-wider h-10 border-border/80 hover:border-[#ccff00]/40 transition-colors"
+            className="w-full font-sans text-xs sm:text-sm font-medium h-10 border border-border/80 bg-surface/50 hover:bg-surface/90 hover:border-accent/40 transition-colors flex items-center justify-center gap-2.5"
             variant="outline"
             onClick={handleGoogle}
             disabled={pending}
           >
-            <Chrome className="size-4 mr-2 text-[#ccff00]" /> Continue with Medi-Caps Google
-            Workspace
+            <GoogleIcon className="size-4 shrink-0" />
+            <span>Continue with Google</span>
           </Button>
-
-          <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-center gap-2 font-mono text-[0.625rem] text-muted-foreground uppercase tracking-wider">
-            <Lock className="size-3 text-[#ccff00]" />
-            <span>Medi-Caps University Realm &bull; Open By Default &bull; Peer Driven</span>
-          </div>
         </>
       )}
 

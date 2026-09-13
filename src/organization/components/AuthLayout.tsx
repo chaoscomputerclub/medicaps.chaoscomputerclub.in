@@ -17,7 +17,7 @@ export function AuthLayout({
   footer,
 }: {
   title: ReactNode;
-  description: string;
+  description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
 }) {
@@ -45,19 +45,21 @@ export function AuthLayout({
 
         {/* Main Box Card */}
         <div className="relative z-10 w-full border border-border bg-surface shadow-2xl">
-          <div className="border-b border-border px-5 py-6 sm:px-6 text-center sm:text-left">
-            <h1 className="font-display font-[850] uppercase tracking-tight text-foreground text-[3.15rem] leading-[0.95] sm:text-[3.4rem] sm:leading-[1]">
+          <div className="border-b border-border px-6 py-5 text-center sm:text-left">
+            <h1 className="font-display font-bold uppercase tracking-tight text-foreground text-2xl sm:text-3xl">
               {title}
             </h1>
-            <p className="mt-2.5 font-sans text-xs sm:text-sm leading-relaxed text-muted-foreground">
-              {description}
-            </p>
+            {description ? (
+              <p className="mt-2 font-sans text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                {description}
+              </p>
+            ) : null}
           </div>
 
-          <div className="p-5 sm:p-6">{children}</div>
+          <div className="p-6">{children}</div>
 
           {footer ? (
-            <div className="border-t border-border px-5 py-3 sm:px-6 sm:py-4 font-mono text-xs text-muted-foreground text-center">
+            <div className="border-t border-border px-6 py-4 font-mono text-xs text-muted-foreground text-center">
               {footer}
             </div>
           ) : null}
