@@ -121,7 +121,7 @@ class ScoreboardEntry(Base):
 
     id = Column(String(36), primary_key=True, default=get_uuid)
     contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False)
-    member_id = Column(String(36), nullable=True)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="SET NULL"), nullable=True)
     rank = Column(Integer, nullable=False)
     handle = Column(String(50), nullable=False)
     full_name = Column(String(100), nullable=False)
@@ -159,8 +159,8 @@ class TrustProof(Base):
 
     id = Column(String(36), primary_key=True, default=get_uuid)
     certificate_id = Column(String(50), unique=True, nullable=False, index=True)
-    contest_id = Column(String(36), nullable=False)
-    member_id = Column(String(36), nullable=True)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="SET NULL"), nullable=True)
     member_handle = Column(String(50), nullable=False, index=True)
     contest_title = Column(String(120), nullable=False)
     session_uuid = Column(String(36), nullable=False)
@@ -178,8 +178,8 @@ class CampusPass(Base):
     __tablename__ = "campus_passes"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    member_id = Column(String(36), nullable=False, index=True)
-    contest_id = Column(String(36), nullable=False)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False)
     pass_code = Column(String(30), unique=True, nullable=False, index=True)
     seat_number = Column(String(20), nullable=False)
     qr_data = Column(Text, nullable=False)
@@ -280,7 +280,7 @@ class AssessmentSubmission(Base):
     id = Column(String(36), primary_key=True, default=get_uuid)
     session_id = Column(String(36), ForeignKey("assessment_sessions.id", ondelete="CASCADE"), nullable=False)
     problem_id = Column(String(36), ForeignKey("assessment_problems.id", ondelete="CASCADE"), nullable=False)
-    member_id = Column(String(36), nullable=False)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False)
     language = Column(String(20), nullable=False)
     code = Column(Text, nullable=False)
     verdict = Column(String(30), nullable=False)
