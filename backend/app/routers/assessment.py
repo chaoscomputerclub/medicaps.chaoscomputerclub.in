@@ -16,6 +16,13 @@ from app.middleware.auth import get_current_member
 from app.engine.enums import Language, Verdict, ComparisonMode
 from app.engine.executors.factory import get_executor
 from app.engine.schemas import TestCaseSchema
+from app.services.contest_lifecycle_service import (
+    ASSESSMENT_DURATION_MINUTES,
+    assessment_available,
+    assessment_window,
+    remaining_seconds as session_remaining_seconds,
+    session_deadline,
+)
 from app.models.db_models import (
     OfflineContest,
     Assessment,
@@ -108,11 +115,18 @@ async def get_or_start_assessment(
     if assessment.contest_id:
         c_check = await db.execute(select(OfflineContest).where(OfflineContest.id == assessment.contest_id))
         contest = c_check.scalars().first()
-        if contest and contest.status != "upcoming":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="The Phase 1 Online Screening Assessment is only available for UPCOMING contests. This contest is now LIVE for Top 30 qualified finalists only.",
+        if contest:
+            allowed, reason = assessment_available(contest.status, contest.starts_at)
+            # An already-started session stays reachable so a candidate never
+            # loses an in-flight attempt when the window edge is crossed.
+            has_open_session = await db.execute(
+                select(AssessmentSession).where(
+                    AssessmentSession.assessment_id == assessment.id,
+                    AssessmentSession.member_id == current_member.id,
+                )
             )
+            if not allowed and not has_open_session.scalars().first():
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=reason)
 
         reg_check = await db.execute(
             select(ContestRegistration).where(
@@ -151,11 +165,11 @@ async def get_or_start_assessment(
         await db.refresh(session)
 
     # 3. Calculate remaining seconds
-    duration_delta = timedelta(minutes=assessment.duration_minutes)
-    started_at = session.started_at.replace(tzinfo=timezone.utc) if session.started_at.tzinfo is None else session.started_at
-    now = now_utc()
-    expires_at = started_at + duration_delta
-    remaining_seconds = max(0, int((expires_at - now).total_seconds()))
+    # The 2-hour session clock is anchored to the server-recorded start and can
+    # never be paused, extended, or restarted.
+    started_at = session.started_at
+    expires_at = session_deadline(started_at)
+    remaining_seconds = session_remaining_seconds(started_at)
 
     if remaining_seconds <= 0 and session.status == "in_progress":
         session.status = "submitted"
@@ -194,8 +208,11 @@ async def get_or_start_assessment(
             "slug": assessment.slug,
             "title": assessment.title,
             "summary": assessment.summary,
-            "duration_minutes": assessment.duration_minutes,
+            "duration_minutes": ASSESSMENT_DURATION_MINUTES,
             "max_violations": assessment.max_violations,
+            "window": assessment_window(
+                contest.starts_at
+            ).as_dict() if assessment.contest_id and contest else None,
         },
         "session": {
             "id": session.id,

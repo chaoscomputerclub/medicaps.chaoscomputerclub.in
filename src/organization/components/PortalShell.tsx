@@ -16,7 +16,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -36,6 +36,8 @@ const links = [
 ] as const;
 
 export function PortalShell() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.ui.sidebarOpen);
   const member = useAppSelector((state) => state.auth.member);
@@ -139,10 +141,7 @@ export function PortalShell() {
             </AvatarFallback>
           </Avatar>
           <div>
-            <strong>
-              {member?.handle ??
-                (typeof window !== "undefined" && !getToken() ? "Sign in required" : "Loading…")}
-            </strong>
+            <strong>{member?.handle ?? (hydrated && !getToken() ? "Sign in required" : "Loading…")}</strong>
             <span>{member ? `${member.rating} · ${member.department ?? "Member"}` : ""}</span>
           </div>
           <button

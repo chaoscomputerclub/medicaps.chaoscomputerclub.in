@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AssessmentsContestSlugRouteImport } from './routes/assessments.$contestSlug'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalLeaderboardRouteImport } from './routes/portal.leaderboard'
@@ -60,6 +61,11 @@ const RecoverRoute = RecoverRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssessmentsContestSlugRoute = AssessmentsContestSlugRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRouteWithChildren
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
+  '/api/$': typeof ApiSplatRoute
   '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/my-contests': typeof PortalMyContestsRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
+  '/api/$': typeof ApiSplatRoute
   '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/my-contests': typeof PortalMyContestsRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRouteWithChildren
   '/recover': typeof RecoverRoute
   '/signup': typeof SignupRoute
+  '/api/$': typeof ApiSplatRoute
   '/assessments/$contestSlug': typeof AssessmentsContestSlugRoute
   '/portal/leaderboard': typeof PortalLeaderboardRoute
   '/portal/my-contests': typeof PortalMyContestsRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/recover'
     | '/signup'
+    | '/api/$'
     | '/assessments/$contestSlug'
     | '/portal/leaderboard'
     | '/portal/my-contests'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover'
     | '/signup'
+    | '/api/$'
     | '/assessments/$contestSlug'
     | '/portal/leaderboard'
     | '/portal/my-contests'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/recover'
     | '/signup'
+    | '/api/$'
     | '/assessments/$contestSlug'
     | '/portal/leaderboard'
     | '/portal/my-contests'
@@ -301,6 +313,7 @@ export interface RootRouteChildren {
   PortalRoute: typeof PortalRouteWithChildren
   RecoverRoute: typeof RecoverRoute
   SignupRoute: typeof SignupRoute
+  ApiSplatRoute: typeof ApiSplatRoute
   AssessmentsContestSlugRoute: typeof AssessmentsContestSlugRoute
 }
 
@@ -346,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assessments/$contestSlug': {
@@ -525,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalRoute: PortalRouteWithChildren,
   RecoverRoute: RecoverRoute,
   SignupRoute: SignupRoute,
+  ApiSplatRoute: ApiSplatRoute,
   AssessmentsContestSlugRoute: AssessmentsContestSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,12 +1,288 @@
-import {Fragment} from "react";
-import {createFileRoute,Link,notFound,useNavigate} from "@tanstack/react-router";
-import {useSuspenseQuery} from "@tanstack/react-query";
-import {ArrowLeft,ArrowRight,Search,SlidersHorizontal} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from "@/components/ui/select";
-import {ResultSummary} from "@/organization/components/ContestSystemUI";
-import {contestSystemQueries} from "@/organization/data/contest-queries";
-import {reviewState} from "@/organization/data/contest-system";
-export const Route=createFileRoute("/portal/contests/$contestSlug/results")({validateSearch:(s:Record<string,unknown>)=>({state:reviewState(s["state"]),query:String(s["query"]??""),filter:["all","qualified","others"].includes(String(s["filter"]))?String(s["filter"]):"all",sort:["rank","score","time"].includes(String(s["sort"]))?String(s["sort"]):"rank"}),loader:async({context,params})=>{const c=await context.queryClient.ensureQueryData(contestSystemQueries.contest(params.contestSlug));if(!c)throw notFound();return c},head:()=>({meta:[{title:"Round 1 Results — CCC Medi-Caps"},{name:"description",content:"Assessment rankings and the visible Top 30 qualification cutoff."},{property:"og:title",content:"Round 1 Results — CCC Medi-Caps"},{property:"og:description",content:"Verified assessment standings and Top 30 finalists."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Results});
-function Results(){const {contestSlug}=Route.useParams();const s=Route.useSearch();const navigate=useNavigate({from:Route.fullPath});const {data:c}=useSuspenseQuery(contestSystemQueries.contest(contestSlug));if(!c)return null;const outcome=s.state==="pending"?"pending":s.state==="qualified"?"qualified":"not-qualified";let rows=c.rankings.filter(r=>(s.filter==="all"||s.filter==="qualified"&&r.qualified||s.filter==="others"&&!r.qualified)&&(`${r.full_name} ${r.username}`.toLowerCase().includes(s.query.toLowerCase())));rows=[...rows].sort((a,b)=>s.sort==="score"?b.score-a.score:s.sort==="time"?a.time_seconds-b.time_seconds:a.rank-b.rank);const result={...c.current_user_result,rank:outcome==="qualified"?18:34,score:outcome==="qualified"?82:59,qualified:outcome==="qualified"};return <div className="page-wrap"><Link to="/portal/contests/$contestSlug" params={{contestSlug}} search={{state:"default"}} className="back-link"><ArrowLeft/>Contest overview</Link><header className="page-header"><div><p className="kicker">Round 1 · Verified standings</p><h1>Assessment results.</h1><p>The Top 30 continue to the live campus final. The line below marks the round boundary, not the value of anyone’s effort.</p></div><div className="cutoff-stat"><strong>TOP 30</strong><span>QUALIFY FOR ROUND 2</span></div></header><ResultSummary result={result} state={outcome}/>{outcome==="qualified"&&<div className="qualification-link"><span>Your Round 2 place is ready.</span><Button asChild><Link to="/portal/contests/$contestSlug/qualified" params={{contestSlug}}>Continue to qualification <ArrowRight/></Link></Button></div>}<div className="leader-tools"><label><Search/><Input aria-label="Search participants" placeholder="Search name or username" value={s.query} onChange={e=>void navigate({search:{...s,query:e.target.value}})}/></label><Select value={s.filter} onValueChange={filter=>void navigate({search:{...s,filter}})}><SelectTrigger><SlidersHorizontal/><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">All participants</SelectItem><SelectItem value="qualified">Top 30</SelectItem><SelectItem value="others">Outside cutoff</SelectItem></SelectContent></Select><Select value={s.sort} onValueChange={sort=>void navigate({search:{...s,sort}})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="rank">Sort by rank</SelectItem><SelectItem value="score">Sort by score</SelectItem><SelectItem value="time">Sort by time</SelectItem></SelectContent></Select></div>{outcome==="pending"?<div className="results-pending"><span/><span/><span/><p>Standings will appear after verification is complete.</p></div>:<div className="table-scroll assessment-ranking"><table><thead><tr><th>Rank</th><th>Participant</th><th>Department</th><th>Score</th><th>Answered</th><th>Time</th><th>Outcome</th></tr></thead><tbody>{rows.map(r=><Fragment key={r.username}>{r.rank===31&&<tr className="cutoff-row"><td colSpan={7}><span>TOP 30 QUALIFICATION CUTOFF</span></td></tr>}<tr className={r.is_current_user?"current-user":""}><td><strong>#{r.rank}</strong></td><td><div className="competitor"><strong>@{r.username}</strong><span>{r.full_name}</span></div></td><td><span className="mono-tag">{r.department} · {r.batch}</span></td><td className="score-value">{r.score}</td><td>{r.answered}/5</td><td>{Math.floor(r.time_seconds/60)}m {r.time_seconds%60}s</td><td><span className={r.qualified?"outcome qualified":"outcome complete"}>{r.qualified?"Qualified":"Round complete"}</span></td></tr></Fragment>)}</tbody></table></div>}</div>}
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { ArrowLeft, Crown, Search, Timer, Trophy, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { contestQueries } from "@/features/contest/queries";
+import { FINALIST_SEATS } from "@/features/contest/lifecycle";
+import { cn } from "@/lib/utils";
+import type { RankingRow } from "@/features/contest/types";
+
+const FILTERS = ["all", "qualified", "eliminated"] as const;
+type FilterKey = (typeof FILTERS)[number];
+
+export const Route = createFileRoute("/portal/contests/$contestSlug/results")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { state?: string; query?: string; filter?: FilterKey; sort?: string } => ({
+    state: search["state"] ? String(search["state"]) : "default",
+    query: search["query"] ? String(search["query"]) : "",
+    filter: FILTERS.includes(String(search["filter"]) as FilterKey)
+      ? (String(search["filter"]) as FilterKey)
+      : "all",
+    sort: search["sort"] ? String(search["sort"]) : "rank",
+  }),
+  head: () => ({
+    meta: [
+      { title: "Round 1 Ranking — CCC Medi-Caps Contests" },
+      {
+        name: "description",
+        content: "Live Round 1 assessment ranking with the Top 30 qualification cut-off for the campus final.",
+      },
+      { property: "og:title", content: "Round 1 Ranking — CCC Medi-Caps" },
+      { property: "og:description", content: "Scores, penalty time, and the Top 30 qualification line." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  loader: ({ context, params }) =>
+    context.queryClient.ensureQueryData(contestQueries.ranking(params.contestSlug)),
+  component: RankingPage,
+});
+
+function RankingPage() {
+  const { contestSlug } = Route.useParams();
+  const { query = "", filter = "all" } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { data: ranking } = useSuspenseQuery(contestQueries.ranking(contestSlug));
+  const { data: contest } = useQuery(contestQueries.detail(contestSlug));
+  const { data: registration } = useQuery(contestQueries.registration(contestSlug));
+
+  const myHandle = registration?.assessment_rank
+    ? ranking.rows.find((row) => row.rank === registration.assessment_rank)?.handle
+    : undefined;
+
+  const rows = ranking.rows.filter((row) => {
+    const matchesQuery =
+      !query ||
+      row.handle.toLowerCase().includes(query.toLowerCase()) ||
+      row.full_name.toLowerCase().includes(query.toLowerCase());
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "qualified" && row.rank <= ranking.cutoff) ||
+      (filter === "eliminated" && row.rank > ranking.cutoff);
+    return matchesQuery && matchesFilter;
+  });
+
+  const myRow = myHandle ? ranking.rows.find((row) => row.handle === myHandle) : undefined;
+
+  return (
+    <div className="page-wrap space-y-6">
+      <Link to="/portal/contests/$contestSlug" params={{ contestSlug }} search={{ state: "default" }} className="back-link">
+        <ArrowLeft />
+        Back to contest
+      </Link>
+
+      <header className="space-y-2">
+        <p className="kicker">Round 1 · Online assessment</p>
+        <h1 className="text-2xl font-black uppercase tracking-tight text-white">
+          {contest?.title ?? "Assessment ranking"}
+        </h1>
+        <p className="max-w-2xl text-sm text-[var(--muted)]">
+          Ranked by total score, then by penalty time. The line after rank {ranking.cutoff} is the
+          qualification cut for the offline campus final.
+        </p>
+      </header>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard icon={<Users className="size-4" />} label="Participants" value={String(ranking.total_participants)} />
+        <StatCard icon={<Trophy className="size-4" />} label="Finalist seats" value={String(ranking.cutoff || FINALIST_SEATS)} />
+        <StatCard
+          icon={<Timer className="size-4" />}
+          label="Your result"
+          value={
+            myRow
+              ? `#${myRow.rank} · ${myRow.total_score} pts`
+              : registration?.assessment_taken
+                ? "Being verified"
+                : "Not attempted"
+          }
+        />
+      </div>
+
+      {myRow && (
+        <Card className="rounded-none border-[var(--accent)]/50 bg-[var(--surface-1)]">
+          <CardHeader className="flex-row items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
+                Your standing
+              </CardTitle>
+              <p className="font-mono text-xs text-[var(--muted)]">
+                {myRow.full_name} · {myRow.department} · {myRow.batch}
+              </p>
+            </div>
+            <Badge
+              variant="outline"
+              className={cn(
+                "rounded-none font-mono text-[10px] uppercase tracking-widest",
+                myRow.rank <= ranking.cutoff
+                  ? "border-[var(--accent)] text-[var(--accent)]"
+                  : "border-amber-500/40 text-amber-300",
+              )}
+            >
+              {myRow.rank <= ranking.cutoff ? "Qualified for the final" : "Below the cut"}
+            </Badge>
+          </CardHeader>
+        </Card>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Tabs
+          value={filter}
+          onValueChange={(value) => void navigate({ search: (prev) => ({ ...prev, filter: value as FilterKey }) })}
+        >
+          <TabsList className="h-auto rounded-none border border-[var(--line)] bg-[var(--surface-2)] p-1">
+            {FILTERS.map((key) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="rounded-none font-mono text-xs font-bold uppercase data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black"
+              >
+                {key}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+          <Input
+            value={query}
+            onChange={(event) =>
+              void navigate({ search: (prev) => ({ ...prev, query: event.target.value }) })
+            }
+            placeholder="Search handle or name"
+            className="rounded-none border-[var(--line)] bg-[var(--surface-2)] pl-9 font-mono text-xs"
+          />
+        </div>
+      </div>
+
+      <div className="border border-[var(--line)] bg-[var(--surface-1)]">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-[var(--line)]">
+              <TableHead className="w-16 font-mono text-[10px] uppercase tracking-widest">Rank</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest">Cadet</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest">Department</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">Score</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">Penalty</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.length === 0 ? (
+              <TableRow className="border-[var(--line)]">
+                <TableCell colSpan={6} className="py-12 text-center text-xs text-[var(--muted)]">
+                  No ranked submissions match this view yet.
+                </TableCell>
+              </TableRow>
+            ) : (
+              rows.map((row, index) => (
+                <RankRow
+                  key={`${row.handle}-${row.rank}`}
+                  row={row}
+                  cutoff={ranking.cutoff}
+                  isMe={row.handle === myHandle}
+                  showCutLine={
+                    filter === "all" && row.rank === ranking.cutoff + 1 && index > 0
+                  }
+                />
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase">
+          <Link to="/portal/contests/$contestSlug/qualified" params={{ contestSlug }} search={{ state: "default" }}>
+            Qualification & campus pass
+          </Link>
+        </Button>
+        <Button asChild variant="ghost" className="rounded-none font-mono text-xs uppercase">
+          <Link to="/portal/leaderboard">Chapter leaderboard</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function RankRow({
+  row,
+  cutoff,
+  isMe,
+  showCutLine,
+}: {
+  row: RankingRow;
+  cutoff: number;
+  isMe: boolean;
+  showCutLine: boolean;
+}) {
+  return (
+    <>
+      {showCutLine && (
+        <TableRow className="border-[var(--accent)]/50 bg-[var(--surface-2)]">
+          <TableCell colSpan={6} className="py-2 text-center font-mono text-[10px] uppercase tracking-widest text-[var(--accent)]">
+            Top {cutoff} qualification cut-off
+          </TableCell>
+        </TableRow>
+      )}
+      <TableRow
+        className={cn(
+          "border-[var(--line)]",
+          isMe && "bg-[var(--accent)]/10",
+        )}
+      >
+        <TableCell className="font-mono text-xs font-bold text-white">
+          <span className="inline-flex items-center gap-1">
+            {row.rank <= 3 && <Crown className="size-3 text-[var(--accent)]" />}
+            {row.rank}
+          </span>
+        </TableCell>
+        <TableCell>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-white">{row.full_name}</span>
+            <span className="font-mono text-[10px] text-[var(--muted)]">@{row.handle}</span>
+          </div>
+        </TableCell>
+        <TableCell className="font-mono text-xs text-[var(--muted)]">
+          {row.department} · {row.batch}
+        </TableCell>
+        <TableCell className="text-right font-mono text-xs font-bold text-[var(--accent)]">
+          {row.total_score}
+        </TableCell>
+        <TableCell className="text-right font-mono text-xs text-[var(--muted)]">
+          {row.penalty_minutes}m
+        </TableCell>
+        <TableCell className="text-right">
+          <Badge
+            variant="outline"
+            className={cn(
+              "rounded-none font-mono text-[10px] uppercase",
+              row.rank <= cutoff ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)]",
+            )}
+          >
+            {row.rank <= cutoff ? "Qualified" : row.status === "in_progress" ? "In progress" : "Ranked"}
+          </Badge>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
+      <CardContent className="flex items-center gap-3 py-5">
+        <span className="text-[var(--accent)]">{icon}</span>
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">{label}</p>
+          <strong className="font-mono text-lg text-white">{value}</strong>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

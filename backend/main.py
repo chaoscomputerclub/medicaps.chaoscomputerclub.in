@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.routers import assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, storage, verify
+from app.api.v1.router import api_router_v1
 
 
 @asynccontextmanager
@@ -76,6 +77,9 @@ app.include_router(feed.router, prefix=settings.API_PREFIX)
 app.include_router(assessment.router, prefix=settings.API_PREFIX)
 app.include_router(social.router, prefix=settings.API_PREFIX)
 app.include_router(storage.router, prefix=settings.API_PREFIX)
+
+# Versioned surface — preferred for all new clients (/api/v1/...).
+app.include_router(api_router_v1, prefix=f"{settings.API_PREFIX}/v1")
 
 
 if __name__ == "__main__":
