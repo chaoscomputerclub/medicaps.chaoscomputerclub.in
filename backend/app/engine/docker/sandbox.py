@@ -193,7 +193,7 @@ class CoreDockerSandbox:
             stderr = _decode(stderr_b)
             exit_code = res.exit_code
 
-            timed_out = (exit_code == 124)
+            timed_out = (exit_code in [124, 15, 143])
             oom_killed = (exit_code == 137)
 
             # Parse /usr/bin/time output from stderr
