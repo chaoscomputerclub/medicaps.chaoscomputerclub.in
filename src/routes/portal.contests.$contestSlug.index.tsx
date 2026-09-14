@@ -14,6 +14,7 @@ import {
   MapPin,
   Play,
   QrCode,
+  RotateCcw,
   ShieldCheck,
   Trophy,
   Users,
@@ -95,6 +96,15 @@ function ContestOverview() {
   const qualified = Boolean(
     registration?.is_top_30_qualified || registration?.can_enter_live_contest,
   );
+
+  const resetAttempt = useMutation({
+    mutationFn: () => contestApi.resetDevSession(contestSlug),
+    onSuccess: (result) => {
+      toast.success(result.message || "Attempt reset successfully. You can begin again!");
+      void queryClient.invalidateQueries({ queryKey: ["contest"] });
+    },
+    onError: (error: Error) => toast.error(error.message || "Reset failed"),
+  });
 
   const register = useMutation({
     mutationFn: () => contestApi.register(contestSlug),
@@ -246,6 +256,40 @@ function ContestOverview() {
                 </Button>
               )}
             </div>
+
+            {contestSlug.startsWith("dev-") && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-amber-500/50 font-mono text-[10px] uppercase text-amber-400">
+                      Dev Sandbox Active
+                    </Badge>
+                    <span className="text-xs font-medium text-amber-200/90">
+                      {phase === "assessment_submitted"
+                        ? "Assessment completed & submitted."
+                        : phase === "final_live"
+                          ? "Live Final Arena mode active."
+                          : "Phase 1 Screening mode active."}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Reset your candidate attempt anytime to test the flow repeatedly from scratch.
+                  </p>
+                </div>
+                {phase === "assessment_submitted" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={resetAttempt.isPending}
+                    className="border-amber-500/40 text-amber-300 hover:bg-amber-500/20"
+                    onClick={() => resetAttempt.mutate()}
+                  >
+                    <RotateCcw className="mr-1.5 size-3.5" />
+                    {resetAttempt.isPending ? "Resetting…" : "Reset Attempt"}
+                  </Button>
+                )}
+              </div>
+            )}
 
             {isRegistered && (
               <div className="flex flex-wrap items-center gap-3 rounded-md border border-primary/25 bg-primary/5 px-4 py-3">

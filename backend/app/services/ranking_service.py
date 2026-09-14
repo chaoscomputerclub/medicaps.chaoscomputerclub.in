@@ -63,8 +63,10 @@ def build_ranking(sessions: Iterable, contest_slug: str) -> dict:
     }
 
 
-def ranking_released(contest_starts_at: Optional[datetime], at: Optional[datetime] = None) -> bool:
-    """True once the Round 1 entry window has closed."""
+def ranking_released(contest_starts_at: Optional[datetime], at: Optional[datetime] = None, contest_slug: Optional[str] = None) -> bool:
+    """True once the Round 1 entry window has closed, or immediately for dev contests."""
+    if contest_slug and contest_slug.startswith("dev-"):
+        return True
     if contest_starts_at is None:
         return True
     window = assessment_window(contest_starts_at)

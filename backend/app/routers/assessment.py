@@ -8,7 +8,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -518,7 +518,7 @@ async def get_assessment_leaderboard(
     )
     contest = contest_result.scalars().first()
 
-    if contest is not None and not ranking_released(contest.starts_at):
+    if contest is not None and not ranking_released(contest.starts_at, contest_slug=contest_slug):
         payload = withheld_payload(contest_slug, contest.starts_at)
         payload["assessment_title"] = assessment.title
         return payload
@@ -536,6 +536,46 @@ async def get_assessment_leaderboard(
         return payload
 
     return await cached_ranking(contest_slug, compute)
+
+
+@router.post("/{contest_slug}/reset-dev-session")
+async def reset_dev_assessment_session(
+    contest_slug: str,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Development endpoint: Reset the candidate's assessment attempt, deleting their
+    AssessmentSession and AssessmentSubmission records so the flow can be tested from scratch.
+    """
+    if not (contest_slug.startswith("dev-") or getattr(current_member, "is_core_member", False)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Session reset is only permitted on development contests or by chapter core team.",
+        )
+
+    assessment = await get_or_create_assessment(contest_slug, db)
+
+    s_result = await db.execute(
+        select(AssessmentSession).where(
+            AssessmentSession.assessment_id == assessment.id,
+            AssessmentSession.member_id == current_member.id,
+        )
+    )
+    session = s_result.scalars().first()
+    if session:
+        await db.execute(
+            delete(AssessmentSubmission).where(AssessmentSubmission.session_id == session.id)
+        )
+        await db.delete(session)
+        await db.commit()
+        await invalidate_ranking(contest_slug)
+
+    return {
+        "success": True,
+        "contest_slug": contest_slug,
+        "message": "Candidate assessment session and submissions reset successfully. You may now start a new attempt.",
+    }
 
 
 @router.post("/{contest_slug}/qualify-top30")

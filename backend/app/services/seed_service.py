@@ -14,12 +14,16 @@ from app.models.db_models import (
     ContestProblem,
     Assessment,
     AssessmentProblem,
+    AssessmentSession,
+    ScoreboardEntry,
     now_utc,
 )
 
 logger = logging.getLogger(__name__)
 
 CONTEST_SLUG = "medicaps-offline-open-2026"
+DEV_ASSESSMENT_SLUG = "dev-assessment-round"
+DEV_CONTEST_SLUG = "dev-offline-final"
 AUTO_SEED_DEMO_CONTESTS = True
 
 # ─── Starter Codes ────────────────────────────────────────────────────────────
@@ -444,6 +448,328 @@ main();
 }
 
 
+
+async def seed_dev_assessment_contest(db: AsyncSession):
+    now = datetime.now(timezone.utc)
+    # Starts in 12 hours so the 24-hour assessment window (now - 12h to now + 12h) is ACTIVELY OPEN right now
+    starts = now + timedelta(hours=12)
+    ends = starts + timedelta(days=7)
+
+    existing = await db.execute(select(OfflineContest).where(OfflineContest.slug == DEV_ASSESSMENT_SLUG))
+    contest = existing.scalars().first()
+
+    if contest:
+        logger.info("Dev assessment contest '%s' exists, refreshing problem schemas...", DEV_ASSESSMENT_SLUG)
+        contest.title = "[DEV] Round 1 Screening Assessment Arena"
+        contest.status = "upcoming"
+        contest.starts_at = starts
+        contest.ends_at = ends
+        contest.check_in_opens_at = now - timedelta(hours=12)
+
+        # Ensure active assessment
+        a_res = await db.execute(select(Assessment).where(Assessment.slug == DEV_ASSESSMENT_SLUG))
+        assess = a_res.scalars().first()
+        if assess:
+            assess.is_active = True
+            assess.starts_at = now - timedelta(hours=12)
+            assess.ends_at = starts
+    else:
+        logger.info("Creating dev assessment contest '%s'...", DEV_ASSESSMENT_SLUG)
+        contest = OfflineContest(
+            slug=DEV_ASSESSMENT_SLUG,
+            title="[DEV] Round 1 Screening Assessment Arena",
+            season="Development 2026",
+            status="upcoming",
+            division="open",
+            starts_at=starts,
+            ends_at=ends,
+            check_in_opens_at=now - timedelta(hours=12),
+            venue="Online Proctored Code Workspace",
+            seat_capacity=100,
+            registered_count=0,
+            problem_count=3,
+            environment="Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20",
+            chief_proctors=["CCC Dev Operations", "Auto Proctor Bot"],
+            prize_pool="₹10,000 + Digital Badges",
+            sponsor="Chaos Computer Club DevLab",
+            summary="Dedicated development sandbox to test Phase 1 online screening assessment: candidate registration, countdown timer, fullscreen Monaco editor, multi-language execution (Python, C++, JS), anti-cheat telemetry, and live scoring.",
+            rules=[
+                "Single workstation, full-screen proctored environment.",
+                "Points awarded per testcase passed.",
+                "Auto-submits when 2-hour timer expires.",
+                "Reset anytime using the Dev Toolbar."
+            ],
+            created_at=now,
+        )
+        db.add(contest)
+        await db.flush()
+
+        p1 = ContestProblem(
+            contest_id=contest.id,
+            problem_index="A",
+            title="Campus Pass Hash Collision",
+            topic="Hash Tables & String Processing",
+            points=100,
+            solved_count=0,
+            editorial_summary="Maintain frequency counts of encountered strings and pair with reversed keys."
+        )
+        p2 = ContestProblem(
+            contest_id=contest.id,
+            problem_index="B",
+            title="Subnet Bandwidth Allocation",
+            topic="Greedy & Resource Scheduling",
+            points=150,
+            solved_count=0,
+            editorial_summary="Satisfy minimum bounds first, then greedily distribute surplus bandwidth by priority."
+        )
+        p3 = ContestProblem(
+            contest_id=contest.id,
+            problem_index="C",
+            title="Air-Gapped Relay Optimization",
+            topic="Modified Dijkstra & State Graphs",
+            points=250,
+            solved_count=0,
+            editorial_summary="Run multi-layer shortest path algorithm tracking state (node, repeaters_used)."
+        )
+        db.add_all([p1, p2, p3])
+
+        assessment = Assessment(
+            contest_id=contest.id,
+            slug=DEV_ASSESSMENT_SLUG,
+            title="Phase 1 Screening Assessment — Dev Arena",
+            summary="120-minute competitive screening sandbox. Test sample and hidden testcases across Python, C++, and JavaScript.",
+            duration_minutes=120,
+            starts_at=now - timedelta(hours=12),
+            ends_at=starts,
+            is_active=True,
+            max_violations=3,
+            created_at=now,
+        )
+        db.add(assessment)
+        await db.flush()
+
+        prob_a = AssessmentProblem(
+            assessment_id=assessment.id,
+            problem_index="A",
+            title="Campus Pass Hash Collision",
+            difficulty="EASY",
+            description="At Medi-Caps University, campus pass numbers are issued as alphanumeric strings. Two passes are considered a 'mirror pair' if one string is the exact reverse of the other (e.g. 'AB' and 'BA'). Given a list of N pass strings, determine the total count of valid unordered mirror pairs (i < j where passes[i] is the reverse of passes[j]).",
+            input_format="The first line contains an integer N (1 ≤ N ≤ 10^5), representing the number of passes.\nThe next N lines each contain a single uppercase alphanumeric string.",
+            output_format="Print a single integer representing the number of valid mirror pairs.",
+            constraints="1 ≤ N ≤ 10^5\n1 ≤ length(string) ≤ 20\nAll characters are uppercase ASCII letters and digits.",
+            points=100,
+            time_limit=2.0,
+            memory_limit=256,
+            starter_codes=PROB_A_STARTER,
+            sample_testcases=[
+                {
+                    "stdin": "4\nAB\nBA\nCD\nDC", "input": "4\nAB\nBA\nCD\nDC",
+                    "expected_output": "2", "output": "2",
+                    "explanation": "(AB, BA) and (CD, DC) form 2 mirror pairs."
+                },
+                {
+                    "stdin": "3\nXYZ\nZYX\nABC", "input": "3\nXYZ\nZYX\nABC",
+                    "expected_output": "1", "output": "1",
+                    "explanation": "(XYZ, ZYX) forms 1 mirror pair."
+                }
+            ],
+            hidden_testcases=[
+                {"stdin": "2\nRACECAR\nRACECAR", "input": "2\nRACECAR\nRACECAR", "expected_output": "1", "output": "1"},
+                {"stdin": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "input": "5\nAAA\nAAA\nAAA\nBBB\nCCC", "expected_output": "3", "output": "3"},
+                {"stdin": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "input": "6\nHELLO\nOLLEH\nWORLD\nDLROW\nTEST\nTSET", "expected_output": "3", "output": "3"},
+                {"stdin": "1\nSOLO", "input": "1\nSOLO", "expected_output": "0", "output": "0"}
+            ],
+            created_at=now,
+        )
+
+        prob_b = AssessmentProblem(
+            assessment_id=assessment.id,
+            problem_index="B",
+            title="Subnet Bandwidth Allocation",
+            difficulty="MEDIUM",
+            description="The Medi-Caps lab router has M megabits of total bandwidth to distribute among K competing lab processes. Process i requires at least min_i bandwidth and can consume at most max_i bandwidth, yielding utility = allocated_bandwidth * priority_i. Find the maximum total utility achievable such that the sum of allocated bandwidth does not exceed M and every process receives at least its minimum requirement. If the total minimum requirements exceed M, output -1.",
+            input_format="The first line contains two integers K and M (1 ≤ K ≤ 10^4, 1 ≤ M ≤ 10^6).\nThe next K lines each contain three integers: min_i, max_i, and priority_i (1 ≤ min_i ≤ max_i ≤ 10^4, 1 ≤ priority_i ≤ 1000).",
+            output_format="Print the maximum total utility as an integer, or -1 if the minimum requirements cannot be satisfied.",
+            constraints="1 ≤ K ≤ 10^4\n1 ≤ M ≤ 10^6\n1 ≤ min_i ≤ max_i ≤ 10^4\n1 ≤ priority_i ≤ 1000",
+            points=150,
+            time_limit=2.0,
+            memory_limit=256,
+            starter_codes=PROB_B_STARTER,
+            sample_testcases=[
+                {
+                    "stdin": "2 10\n2 5 10\n3 6 20", "input": "2 10\n2 5 10\n3 6 20",
+                    "expected_output": "160", "output": "160",
+                    "explanation": "Allocate 2 to p1 and 6 to p2 = 8, leftover 2 to p1 = 4 total, utility 4*10 + 6*20 = 160."
+                },
+                {
+                    "stdin": "2 4\n3 5 10\n2 4 20", "input": "2 4\n3 5 10\n2 4 20",
+                    "expected_output": "-1", "output": "-1",
+                    "explanation": "Minimum requirements sum to 3 + 2 = 5, which exceeds total bandwidth 4."
+                }
+            ],
+            hidden_testcases=[
+                {"stdin": "3 15\n1 4 5\n2 6 15\n3 7 10", "input": "3 15\n1 4 5\n2 6 15\n3 7 10", "expected_output": "170", "output": "170"},
+                {"stdin": "1 10\n5 12 8", "input": "1 10\n5 12 8", "expected_output": "80", "output": "80"},
+                {"stdin": "2 10\n6 8 5\n5 9 10", "input": "2 10\n6 8 5\n5 9 10", "expected_output": "-1", "output": "-1"}
+            ],
+            created_at=now,
+        )
+
+        prob_c = AssessmentProblem(
+            assessment_id=assessment.id,
+            problem_index="C",
+            title="Air-Gapped Relay Optimization",
+            difficulty="HARD",
+            description="An air-gapped lab network consists of N workstations numbered 1 to N and M bidirectional communication channels. Each channel connects workstation u and v with latency L (in milliseconds). Workstation 1 needs to transmit an encrypted cryptographic key to workstation N. To avoid packet interception, you may deploy at most K quantum booster repeaters at chosen intermediate workstations along the path. A repeater reduces the latency of its adjacent outgoing channel by half (floor division). Find the minimum total transmission latency from workstation 1 to workstation N.",
+            input_format="The first line contains three integers N, M, K (2 ≤ N ≤ 1000, 1 ≤ M ≤ 5000, 0 ≤ K ≤ 10).\nThe next M lines each contain three integers u, v, L (1 ≤ u, v ≤ N, u ≠ v, 1 ≤ L ≤ 10^5).",
+            output_format="Print a single integer representing the minimum latency from 1 to N, or -1 if workstation N is unreachable.",
+            constraints="2 ≤ N ≤ 1000\n1 ≤ M ≤ 5000\n0 ≤ K ≤ 10\n1 ≤ L ≤ 10^5",
+            points=250,
+            time_limit=2.0,
+            memory_limit=256,
+            starter_codes=PROB_C_STARTER,
+            sample_testcases=[
+                {
+                    "stdin": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15", "input": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15",
+                    "expected_output": "20", "output": "20",
+                    "explanation": "Path 1 -> 2 -> 4 has latency 10 + 20 = 30. Applying 1 repeater to edge (2,4) reduces 20 to 10. Total latency = 10 + 10 = 20."
+                },
+                {
+                    "stdin": "3 1 1\n1 2 10", "input": "3 1 1\n1 2 10",
+                    "expected_output": "-1", "output": "-1",
+                    "explanation": "Workstation 3 is unreachable."
+                }
+            ],
+            hidden_testcases=[
+                {"stdin": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "input": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "expected_output": "10", "output": "10"},
+                {"stdin": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "input": "5 6 2\n1 2 100\n2 3 100\n3 5 100\n1 4 40\n4 5 100\n2 5 200", "expected_output": "70", "output": "70"}
+            ],
+            created_at=now,
+        )
+
+        db.add_all([prob_a, prob_b, prob_c])
+
+
+async def seed_dev_offline_contest(db: AsyncSession):
+    now = datetime.now(timezone.utc)
+    # Starts 1 hour ago and ends 5 hours from now -> status: 'live', actively running
+    starts = now - timedelta(hours=1)
+    ends = now + timedelta(hours=5)
+
+    existing = await db.execute(select(OfflineContest).where(OfflineContest.slug == DEV_CONTEST_SLUG))
+    contest = existing.scalars().first()
+
+    if contest:
+        logger.info("Dev offline live contest '%s' exists, updating state to live...", DEV_CONTEST_SLUG)
+        contest.status = "live"
+        contest.starts_at = starts
+        contest.ends_at = ends
+        contest.check_in_opens_at = now - timedelta(hours=2)
+    else:
+        logger.info("Creating dev offline live contest '%s'...", DEV_CONTEST_SLUG)
+        contest = OfflineContest(
+            slug=DEV_CONTEST_SLUG,
+            title="[DEV] Round 2 On-Premise Final Arena (Live)",
+            season="Development 2026",
+            status="live",
+            division="open",
+            starts_at=starts,
+            ends_at=ends,
+            check_in_opens_at=now - timedelta(hours=2),
+            venue="Computing Complex · Lab Block 04 · Air-Gapped Workstations",
+            seat_capacity=30,
+            registered_count=12,
+            problem_count=3,
+            environment="Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20",
+            chief_proctors=["Dr. Ratnesh Litoriya", "Prof. Amit Shrivastava", "CCC Dev Proctor"],
+            prize_pool="₹25,000 + Champion Trophy",
+            sponsor="Chaos Computer Club India",
+            summary="Dedicated development sandbox to test Phase 2 live on-premise final arena: finalist pass verification, workstation check-in, contest problems, live leaderboard, and final podium standings.",
+            rules=[
+                "Physical air-gapped workstations.",
+                "Points awarded per accepted submission.",
+                "Live scoreboard frozen in final 15 minutes."
+            ],
+            created_at=now,
+        )
+        db.add(contest)
+        await db.flush()
+
+        p1 = ContestProblem(
+            contest_id=contest.id,
+            problem_index="A",
+            title="Campus Pass Hash Collision",
+            topic="Hash Tables & String Processing",
+            points=100,
+            solved_count=9,
+            editorial_summary="Maintain frequency counts of encountered strings and pair with reversed keys."
+        )
+        p2 = ContestProblem(
+            contest_id=contest.id,
+            problem_index="B",
+            title="Subnet Bandwidth Allocation",
+            topic="Greedy & Resource Scheduling",
+            points=150,
+            solved_count=4,
+            editorial_summary="Satisfy minimum bounds first, then greedily distribute surplus bandwidth by priority."
+        )
+        p3 = ContestProblem(
+            contest_id=contest.id,
+            problem_index="C",
+            title="Air-Gapped Relay Optimization",
+            topic="Modified Dijkstra & State Graphs",
+            points=250,
+            solved_count=1,
+            editorial_summary="Run multi-layer shortest path algorithm tracking state (node, repeaters_used)."
+        )
+        db.add_all([p1, p2, p3])
+
+        # Seed sample live scoreboard entries
+        sb1 = ScoreboardEntry(
+            contest_id=contest.id,
+            rank=1,
+            handle="zenith_dev",
+            full_name="Zenith Coder",
+            department="CSE",
+            batch="2023-27",
+            division="open",
+            score=500,
+            solved=3,
+            penalty_seconds=2520,
+            rating_delta=45,
+            telemetry=[]
+        )
+        sb2 = ScoreboardEntry(
+            contest_id=contest.id,
+            rank=2,
+            handle="byte_ninja",
+            full_name="Aarav Sharma",
+            department="IT",
+            batch="2023-27",
+            division="open",
+            score=250,
+            solved=2,
+            penalty_seconds=2100,
+            rating_delta=28,
+            telemetry=[]
+        )
+        sb3 = ScoreboardEntry(
+            contest_id=contest.id,
+            rank=3,
+            handle="algo_rhythm",
+            full_name="Priya Patel",
+            department="CSE",
+            batch="2024-28",
+            division="open",
+            score=100,
+            solved=1,
+            penalty_seconds=1080,
+            rating_delta=12,
+            telemetry=[]
+        )
+        db.add_all([sb1, sb2, sb3])
+
+
 async def seed_database(db: AsyncSession):
     if not AUTO_SEED_DEMO_CONTESTS:
         logger.info("Auto-seeding demo contests is disabled (database kept clean).")
@@ -462,7 +788,6 @@ async def seed_database(db: AsyncSession):
         # Only reset starts_at when there are no active in-progress sessions.
         # Resetting the clock while candidates are mid-assessment would corrupt
         # their session_deadline() and invalidate the server-anchored timer.
-        from app.models.db_models import Assessment, AssessmentSession
         active_check = await db.execute(
             select(AssessmentSession)
             .join(Assessment, Assessment.id == AssessmentSession.assessment_id)
@@ -703,6 +1028,10 @@ async def seed_database(db: AsyncSession):
 
         db.add_all([prob_a, prob_b, prob_c])
 
+    # Seed Development Contests for flow testing
+    await seed_dev_assessment_contest(db)
+    await seed_dev_offline_contest(db)
+
     await db.commit()
-    logger.info("Successfully seeded example upcoming contest with 10s assessment countdown in database.")
+    logger.info("Successfully seeded demo and development contests in database.")
     return

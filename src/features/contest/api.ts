@@ -220,6 +220,13 @@ export const contestApi = {
     }
   },
 
+  resetDevSession(slug: string) {
+    return request<{ success: boolean; message: string }>(
+      `/assessment/${encodeURIComponent(slug)}/reset-dev-session`,
+      { method: "POST" },
+    );
+  },
+
   async participated(): Promise<ParticipationRecord[]> {
     if (!getToken()) return [];
     const raw = await request<Record<string, any>[]>("/contests/my/participated");

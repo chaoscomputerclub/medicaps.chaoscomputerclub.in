@@ -40,6 +40,10 @@ async def is_member_eligible_for_live_contest(
     if contest.status != "live":
         return True, "Contest is public"
 
+    # 1.5 Dev test arena contests are open to allow easy development testing
+    if contest.slug.startswith("dev-"):
+        return True, "Development test arena access."
+
     # 2. If unauthenticated, live contest access is strictly denied
     if not member:
         return False, "Authentication required to view or enter live contests."

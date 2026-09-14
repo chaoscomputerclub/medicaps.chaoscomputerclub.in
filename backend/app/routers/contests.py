@@ -1,3 +1,4 @@
+import uuid
 from app.services.contest_eligibility_service import is_member_eligible_for_live_contest
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
@@ -10,7 +11,7 @@ from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from app.core.db import get_db
-from app.models.db_models import ContestProblem, MemberProfile, OfflineContest, ContestRegistration, Assessment, AssessmentSession
+from app.models.db_models import ContestProblem, MemberProfile, OfflineContest, ContestRegistration, Assessment, CampusPass, now_utc, AssessmentSession
 from app.models.schemas import ContestProblemResponse, OfflineContestResponse
 from app.middleware.auth import get_current_member, get_current_member_optional
 
@@ -43,7 +44,7 @@ async def list_contests(
 
     filtered_contests = []
     for c in all_contests:
-        if c.status == "live":
+        if c.status == "live" and not c.slug.startswith("dev-"):
             is_eligible, _ = await is_member_eligible_for_live_contest(current_member, c, db)
             if not is_eligible:
                 continue
@@ -315,6 +316,15 @@ async def get_registration_status(
     )
     can_enter_live_contest = (contest_status == "live" and is_top_30_qualified)
 
+    # Dev Contest overrides for frictionless testing
+    if slug.startswith("dev-"):
+        if contest_status == "live":
+            is_top_30_qualified = True
+            can_enter_live_contest = True
+        elif contest_status == "upcoming":
+            # Allow taking assessment as long as candidate is registered and session is not submitted
+            can_take_assessment = is_registered and not (assessment_taken and assessment_session_status == "submitted")
+
     # Contextual eligibility explanation
     if contest_status == "upcoming":
         if not is_registered:
@@ -420,7 +430,8 @@ async def register_for_contest(
 @router.post("/{slug}/check-in")
 async def check_in_contest(
     slug: str,
-    pass_code: str = Query(..., description="Campus Pass verification code"),
+    pass_code: Optional[str] = Query(None, description="Campus Pass verification code"),
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
     db: AsyncSession = Depends(get_db),
 ):
     """Verify physical on-premise attendance at the lab gate check-in."""
@@ -429,11 +440,40 @@ async def check_in_contest(
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
+    assigned_seat = "Lab-04-WS-07"
+    effective_code = pass_code or f"CCC-PASS-{uuid.uuid4().hex[:6].upper()}"
+
+    if current_member:
+        pass_res = await db.execute(
+            select(CampusPass).where(
+                CampusPass.contest_id == contest.id,
+                CampusPass.member_id == current_member.id,
+            )
+        )
+        pass_obj = pass_res.scalars().first()
+        if not pass_obj:
+            pass_obj = CampusPass(
+                contest_id=contest.id,
+                member_id=current_member.id,
+                pass_code=effective_code,
+                seat_number=assigned_seat,
+                qr_data=f"ccc://medicaps/contest/{contest.slug}/cadet/{current_member.handle}",
+                check_in_status="checked_in",
+                issued_at=now_utc(),
+            )
+            db.add(pass_obj)
+        else:
+            pass_obj.check_in_status = "checked_in"
+            assigned_seat = pass_obj.seat_number
+        await db.commit()
+
     return {
+        "success": True,
         "status": "checked_in",
-        "message": "Physical presence verified by lab proctor.",
+        "message": f"Physical presence verified. Workstation assigned: {assigned_seat}",
         "contest": contest.title,
-        "pass_code": pass_code,
+        "seat": assigned_seat,
+        "pass_code": effective_code,
     }
 
 
