@@ -59,7 +59,7 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
                     c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
                     contest = c_res.scalars().first()
 
-                    if contest and contest.status == "live":
+                    if contest and contest.status == "live" and not contest.slug.startswith("dev-"):
                         # Extract Authorization header
                         auth_header = request.headers.get("Authorization")
                         token: Optional[str] = None
