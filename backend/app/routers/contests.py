@@ -429,7 +429,7 @@ async def reset_contest_timer(
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
     now = datetime.now(timezone.utc)
-    new_starts = now + timedelta(seconds=seconds)
+    new_starts = now + timedelta(hours=24, seconds=seconds)
     contest.starts_at = new_starts
     contest.status = "upcoming"
 
@@ -437,7 +437,8 @@ async def reset_contest_timer(
     a_res = await db.execute(select(Assessment).where((Assessment.contest_id == contest.id) | (Assessment.slug == slug)))
     assessment = a_res.scalars().first()
     if assessment:
-        assessment.starts_at = new_starts
+        assessment.starts_at = now + timedelta(seconds=seconds)
+        assessment.ends_at = new_starts
         assessment.is_active = True
 
     await db.commit()

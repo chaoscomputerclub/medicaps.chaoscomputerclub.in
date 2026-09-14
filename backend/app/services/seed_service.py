@@ -459,7 +459,7 @@ async def seed_database(db: AsyncSession):
         contest_obj.status = "upcoming"
         contest_obj.title = "CCC Medi-Caps Campus Clash 2026 (Phase 1 Screening Active)"
         now_t = datetime.now(timezone.utc)
-        contest_obj.starts_at = now_t + timedelta(seconds=10)
+        contest_obj.starts_at = now_t + timedelta(hours=24, seconds=10)
         contest_obj.ends_at = contest_obj.starts_at + timedelta(days=7)
         contest_obj.check_in_opens_at = now_t - timedelta(hours=1)
         p_res = await db.execute(
@@ -501,8 +501,8 @@ async def seed_database(db: AsyncSession):
             existing_probs["C"].starter_codes = PROB_C_STARTER
     else:
         now = datetime.now(timezone.utc)
-        starts = now + timedelta(seconds=10)
-        ends = now + timedelta(days=7)
+        starts = now + timedelta(hours=24, seconds=10)
+        ends = starts + timedelta(days=7)
 
         # Create Demo OfflineContest (status: upcoming)
         contest = OfflineContest(
@@ -570,9 +570,9 @@ async def seed_database(db: AsyncSession):
             slug=CONTEST_SLUG,
             title="Phase 1 Screening Assessment: Medi-Caps Campus Clash 2026",
             summary="90-minute competitive screening round. Pass all sample and hidden testcases across Python, C++, and JavaScript.",
-            duration_minutes=90,
-            starts_at=starts,
-            ends_at=ends,
+            duration_minutes=120,
+            starts_at=now + timedelta(seconds=10),
+            ends_at=starts,
             is_active=True,
             max_violations=3,
             created_at=now,
