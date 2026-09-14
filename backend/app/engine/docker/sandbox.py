@@ -91,7 +91,12 @@ class CoreDockerSandbox:
         except Exception:
             container_ws = "/workspace"
 
-        cmd_wrapped = ["sh", "-c", f"timeout {time_limit} {' '.join(command)}"]
+        # Wrap command in timeout
+        if len(command) >= 3 and command[0] == "sh" and command[1] == "-c":
+            cmd_wrapped = ["sh", "-c", f"timeout {time_limit} {command[2]}"]
+        else:
+            cmd_str = " ".join(command)
+            cmd_wrapped = ["sh", "-c", f"timeout {time_limit} {cmd_str}"]
         try:
             res = container.exec_run(
                 cmd=cmd_wrapped,

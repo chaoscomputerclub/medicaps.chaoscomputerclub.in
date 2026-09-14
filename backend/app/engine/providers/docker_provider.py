@@ -154,23 +154,18 @@ class DockerSandboxProvider(JudgeProvider):
             total_count = len(testcase_results)
             score = round((passed_count / total_count * 100.0), 2) if total_count > 0 else 0.0
 
-            # Determine dominant verdict
-            if passed_count == total_count and total_count > 0:
-                top_verdict = Verdict.ACCEPTED
-            else:
-                top_verdict = Verdict.ACCEPTED
-                for tr in testcase_results:
-                    if not tr.passed:
-                        top_verdict = tr.verdict
-                        break
+            # Determine dominant verdict and representative output
+            first_fail = next((tr for tr in testcase_results if not tr.passed), None)
+            rep_case = first_fail if first_fail else (testcase_results[0] if testcase_results else None)
+            top_verdict = rep_case.verdict if first_fail else Verdict.ACCEPTED
 
             return ExecutionResult(
-                success=(passed_count == total_count),
+                success=(passed_count == total_count and total_count > 0),
                 submission_id=submission_id,
                 status=ExecutionStatus.COMPLETED,
                 verdict=top_verdict,
-                stdout=testcase_results[0].stdout if testcase_results else "",
-                stderr=testcase_results[0].stderr if testcase_results else "",
+                stdout=rep_case.stdout if rep_case else "",
+                stderr=rep_case.stderr if rep_case else "",
                 compile_output=compile_output,
                 memory=0.0,
                 time=round(total_time_ms / 1000.0, 4),
