@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Crown, Search, Timer, Trophy, Users } from "lucide-react";
+import { ArrowLeft, Crown, Lock, Search, Timer, Trophy, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,7 +71,7 @@ function RankingPage() {
   const myRow = myHandle ? ranking.rows.find((row) => row.handle === myHandle) : undefined;
 
   return (
-    <div className="page-wrap space-y-6">
+    <div className="page-wrap max-w-6xl space-y-6">
       <Link to="/portal/contests/$contestSlug" params={{ contestSlug }} search={{ state: "default" }} className="back-link">
         <ArrowLeft />
         Back to contest
@@ -79,7 +79,7 @@ function RankingPage() {
 
       <header className="space-y-2">
         <p className="kicker">Round 1 · Online assessment</p>
-        <h1 className="text-2xl font-black uppercase tracking-tight text-white">
+        <h1 className="text-3xl font-bold normal-case text-foreground">
           {contest?.title ?? "Assessment ranking"}
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
@@ -87,6 +87,34 @@ function RankingPage() {
           qualification cut for the offline campus final.
         </p>
       </header>
+
+      {!ranking.released && (
+        <Card className="rounded-lg border-border bg-card/80 backdrop-blur-xl">
+          <CardHeader>
+             <CardTitle className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <Lock className="size-4 text-[var(--accent)]" />
+              Ranking sealed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-[var(--muted)]">
+            <p>
+              {ranking.message ??
+                "Round 1 ranking stays sealed while the 24-hour entry window is open, so no candidate can pace themselves against live rivals."}
+            </p>
+            <p className="font-mono text-xs uppercase">
+              {ranking.releases_at
+                ? `Publishes ${new Date(ranking.releases_at).toLocaleString()}`
+                : "Publishes when the entry window closes"}
+            </p>
+             <Button asChild variant="outline" className="rounded-md text-xs">
+              <Link to="/portal/contests/$contestSlug" params={{ contestSlug }} search={{ state: "default" }}>
+                Back to contest
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard icon={<Users className="size-4" />} label="Participants" value={String(ranking.total_participants)} />
@@ -105,10 +133,10 @@ function RankingPage() {
       </div>
 
       {myRow && (
-        <Card className="rounded-none border-[var(--accent)]/50 bg-[var(--surface-1)]">
+         <Card className="rounded-lg border-primary/50 bg-card/80 backdrop-blur-xl">
           <CardHeader className="flex-row items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
+               <CardTitle className="text-sm font-bold text-foreground">
                 Your standing
               </CardTitle>
               <p className="font-mono text-xs text-[var(--muted)]">
@@ -135,12 +163,12 @@ function RankingPage() {
           value={filter}
           onValueChange={(value) => void navigate({ search: (prev) => ({ ...prev, filter: value as FilterKey }) })}
         >
-          <TabsList className="h-auto rounded-none border border-[var(--line)] bg-[var(--surface-2)] p-1">
+           <TabsList className="h-auto rounded-lg border border-border bg-card/80 p-1 backdrop-blur-xl">
             {FILTERS.map((key) => (
               <TabsTrigger
                 key={key}
                 value={key}
-                className="rounded-none font-mono text-xs font-bold uppercase data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black"
+                 className="rounded-md text-xs font-bold capitalize data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 {key}
               </TabsTrigger>
@@ -155,12 +183,12 @@ function RankingPage() {
               void navigate({ search: (prev) => ({ ...prev, query: event.target.value }) })
             }
             placeholder="Search handle or name"
-            className="rounded-none border-[var(--line)] bg-[var(--surface-2)] pl-9 font-mono text-xs"
+             className="rounded-lg border-border bg-card/80 pl-9 text-xs backdrop-blur-xl"
           />
         </div>
       </div>
 
-      <div className="border border-[var(--line)] bg-[var(--surface-1)]">
+       <div className="overflow-hidden rounded-lg border border-border bg-card/80 backdrop-blur-xl">
         <Table>
           <TableHeader>
             <TableRow className="border-[var(--line)]">

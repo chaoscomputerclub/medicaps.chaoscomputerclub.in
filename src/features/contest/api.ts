@@ -13,6 +13,7 @@ import type {
   ContestSummary,
   ParticipationRecord,
   RegistrationStatus,
+  FinalStandingRow,
 } from "./types";
 
 export class ContestApiError extends Error {
@@ -160,8 +161,11 @@ export const contestApi = {
     const rows = Array.isArray(raw["leaderboard"]) ? raw["leaderboard"] : [];
     return {
       contest_slug: slug,
-      cutoff: Number(raw["cutoff"] ?? 30),
+      cutoff: Number(raw["cutoff_rank"] ?? raw["cutoff"] ?? 30),
       total_participants: Number(raw["total_participants"] ?? rows.length),
+      released: raw["released"] === undefined ? true : Boolean(raw["released"]),
+      releases_at: raw["releases_at"] ?? null,
+      message: typeof raw["message"] === "string" ? raw["message"] : null,
       rows: rows.map((r: Record<string, any>, index: number) => ({
         rank: Number(r["rank"] ?? index + 1),
         handle: String(r["handle"] ?? "cadet"),
@@ -175,6 +179,25 @@ export const contestApi = {
       })),
     };
   },
+
+  async finalStandings(slug: string): Promise<FinalStandingRow[]> {
+    const raw = await request<Record<string, any>[]>(`/scoreboards/${encodeURIComponent(slug)}`);
+    return raw
+      .map((r) => ({
+        rank: Number(r["rank"] ?? 0),
+        handle: String(r["handle"] ?? "cadet"),
+        full_name: String(r["full_name"] ?? r["handle"] ?? "Cadet"),
+        department: String(r["department"] ?? "—"),
+        batch: String(r["batch"] ?? "—"),
+        division: String(r["division"] ?? "—"),
+        score: Number(r["score"] ?? 0),
+        solved: Number(r["solved"] ?? 0),
+        penalty_minutes: Math.round(Number(r["penalty_seconds"] ?? 0) / 60),
+        rating_delta: r["rating_delta"] == null ? null : Number(r["rating_delta"]),
+      }))
+      .sort((a, b) => a.rank - b.rank);
+  },
+
 
   async myPass(): Promise<CampusPass | null> {
     if (!getToken()) return null;

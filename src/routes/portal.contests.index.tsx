@@ -1,23 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQueries, useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowUpRight, CalendarRange, Trophy } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useQueries, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { ArrowRight, CalendarRange, Clock3, Code2, Crown, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { contestQueries } from "@/features/contest/queries";
-import { ContestCard, Countdown, PhaseBadge } from "@/features/contest/components";
-import {
-  FINALIST_SEATS,
-  assessmentOpensAt,
-  cadenceLabel,
-  contestPhase,
-  formatWhen,
-} from "@/features/contest/lifecycle";
+import { Countdown, PhaseBadge, useTick } from "@/features/contest/components";
+import { FINALIST_SEATS, assessmentOpensAt, assessmentClosesAt, cadenceLabel, contestPhase, formatWhen } from "@/features/contest/lifecycle";
 import type { ContestSummary } from "@/features/contest/types";
-
+import { portalQueries } from "@/organization/data/queries";
 const TABS = ["all", "weekly", "biweekly", "upcoming", "past"] as const;
 type TabKey = (typeof TABS)[number];
 
@@ -51,197 +41,54 @@ function ContestHub() {
   const { data: contests } = useSuspenseQuery(contestQueries.list());
   const { filter = "all" } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-
-  const registrations = useQueries({
-    queries: contests.map((contest) => contestQueries.registration(contest.slug)),
-  });
-  const phaseFor = (contest: ContestSummary, index: number) =>
-    contestPhase(contest, registrations[index]?.data ?? null);
-
-  const upcoming = contests.filter((c) => c.status !== "finished");
-  const past = contests.filter((c) => c.status === "finished");
-  const featured =
-    upcoming.slice().sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())[0] ?? null;
-
-  const visible = contests.filter((contest) => {
-    if (filter === "all") return true;
-    if (filter === "weekly") return contest.cadence === "weekly";
-    if (filter === "biweekly") return contest.cadence === "biweekly";
-    if (filter === "upcoming") return contest.status !== "finished";
-    return contest.status === "finished";
-  });
-
-  return (
-    <div className="page-wrap space-y-8">
-      <header className="page-header">
-        <div>
-          <p className="kicker">Online qualifier → campus final</p>
-          <h1>Contests</h1>
-          <p>
-            Every edition runs in two rounds. Round 1 is a timed online assessment that opens 24 hours
-            before contest day. The Top {FINALIST_SEATS} verified scores receive a QR pass for the
-            offline final.
-          </p>
+  const now = useTick();
+  const registrations = useQueries({ queries: contests.map(c => contestQueries.registration(c.slug)) });
+  const { data: leaders = [] } = useQuery(portalQueries.leaderboard());
+  const phaseFor = (c: ContestSummary) => contestPhase(c, registrations[contests.indexOf(c)]?.data ?? null, now);
+  const featured = contests.filter(c => c.status !== "finished").sort((a,b) => +new Date(a.starts_at) - +new Date(b.starts_at))[0];
+  const visible = contests.filter(c => filter === "all" || (filter === "past" ? c.status === "finished" : filter === "upcoming" ? c.status !== "finished" : c.cadence === filter));
+  const phase = featured ? phaseFor(featured) : null;
+  return <div className="page-wrap space-y-8">
+    <header className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+      <div className="space-y-2"><p className="kicker">Compete. Qualify. Meet on campus.</p><h1 className="text-4xl font-bold normal-case text-foreground">Contest hub</h1><p className="max-w-lg text-sm text-muted-foreground">Weekly and biweekly challenges with one simple path to the campus final.</p></div>
+      <div className="flex w-fit items-center gap-1 rounded-lg border border-border bg-card/80 p-1 backdrop-blur-xl">
+        <Button size="sm" className="rounded-md">Contests</Button>
+        <Button asChild size="sm" variant="ghost" className="rounded-md text-muted-foreground"><Link to="/portal/leaderboard">Ranking</Link></Button>
+        <Button asChild size="sm" variant="ghost" className="rounded-md text-muted-foreground"><Link to="/portal/my-contests">My contests</Link></Button>
+      </div>
+    </header>
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-7">
+      {featured && <section className="group relative overflow-hidden rounded-lg border border-primary/30 bg-card/90 shadow-xl backdrop-blur-xl">
+        <div className="absolute inset-y-0 right-0 hidden w-52 place-items-center border-l border-border bg-secondary/50 md:grid" aria-hidden="true"><div className="grid size-32 place-items-center rounded-lg border border-primary/20 bg-primary/5"><Code2 className="size-16 text-primary/70" /></div></div>
+        <div className="space-y-5 p-6 md:max-w-[calc(100%-13rem)] md:p-8">
+          <div className="flex flex-wrap items-center gap-3"><PhaseBadge phase={phaseFor(featured)} /><span className="text-xs font-medium text-muted-foreground">{cadenceLabel(featured)} {featured.edition ?? ""}</span></div>
+          <div><h2 className="text-3xl font-bold normal-case text-foreground">{featured.title}</h2><p className="mt-2 max-w-xl text-sm text-muted-foreground">{phase === "assessment_submitted" ? "Your assessment is in. Results unlock when the entry window closes." : "Take the 2-hour online assessment. The Top 30 move to the campus final."}</p></div>
+          <div className="flex flex-wrap items-end gap-8">
+            {phase === "registration_open" ? <Countdown target={assessmentOpensAt(featured)} label="Round 1 opens in" /> : phase === "assessment_open" ? <Countdown target={assessmentClosesAt(featured)} label="Round 1 closes in" /> : <div><p className="text-xs text-muted-foreground">Campus final</p><span className="font-mono text-sm">{formatWhen(featured.starts_at)}</span></div>}
+            <div><p className="text-xs text-muted-foreground">Registered</p><strong className="font-mono text-xl text-foreground">{featured.registered_count}</strong></div>
+          </div>
+          <Button asChild className="rounded-md"><Link to="/portal/contests/$contestSlug" params={{contestSlug: featured.slug}} search={{state:"default"}}>View contest <ArrowRight /></Link></Button>
         </div>
-        <div className="hub-stat">
-          <strong>{FINALIST_SEATS}</strong>
-          <span>FINALIST SEATS</span>
-        </div>
-      </header>
-
-      {featured && (
-        <Card className="rounded-none border-[var(--accent)]/50 bg-[var(--surface-1)]">
-          <CardHeader className="gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <PhaseBadge phase={phaseFor(featured, contests.indexOf(featured))} />
-              <Badge variant="outline" className="rounded-none font-mono text-[10px] uppercase tracking-widest">
-                Next up
-              </Badge>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
-                {cadenceLabel(featured)}
-                {featured.edition ? ` ${featured.edition}` : ""}
-              </span>
-            </div>
-            <CardTitle className="text-2xl font-black uppercase tracking-tight text-white">
-              {featured.title}
-            </CardTitle>
-            <p className="max-w-2xl text-sm leading-relaxed text-[var(--muted)]">{featured.summary}</p>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex flex-wrap gap-8">
-              <Countdown target={assessmentOpensAt(featured)} label="Round 1 opens in" />
-              <div className="flex flex-col gap-1">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
-                  Offline final
-                </span>
-                <span className="font-mono text-sm text-white">{formatWhen(featured.starts_at)}</span>
-                <span className="font-mono text-xs text-[var(--muted)]">{featured.venue}</span>
-              </div>
-            </div>
-            <Button asChild className="rounded-none font-mono text-xs font-bold uppercase tracking-wider">
-              <Link
-                to="/portal/contests/$contestSlug"
-                params={{ contestSlug: featured.slug }}
-                search={{ state: "default" }}
-              >
-                Open contest
-                <ArrowUpRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      <Tabs value={filter} onValueChange={(value) => void navigate({ search: { filter: value as TabKey } })}>
-        <TabsList className="h-auto flex-wrap rounded-none border border-[var(--line)] bg-[var(--surface-2)] p-1">
-          {TABS.map((tab) => (
-            <TabsTrigger
-              key={tab}
-              value={tab}
-              className="rounded-none font-mono text-xs font-bold uppercase data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black"
-            >
-              {tab}
-            </TabsTrigger>
-          ))}
+      </section>}
+      <section className="space-y-5">
+      <Tabs value={filter} onValueChange={value => void navigate({search:{filter:value as TabKey}})}>
+        <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-lg border border-border bg-card/70 p-1 backdrop-blur-xl">
+          {TABS.map(tab => <TabsTrigger key={tab} value={tab} className="shrink-0 rounded-md px-4 py-2 capitalize text-muted-foreground data-[state=active]:bg-secondary data-[state=active]:text-foreground">{tab === "all" ? "All contests" : tab}</TabsTrigger>)}
         </TabsList>
       </Tabs>
-
-      {filter === "past" ? (
-        <PastTable contests={past} />
-      ) : (
-        <section className="grid gap-4 lg:grid-cols-2">
-          {visible.length === 0 ? (
-            <Card className="rounded-none border-dashed border-[var(--line)] bg-transparent lg:col-span-2">
-              <CardContent className="flex flex-col items-center gap-2 py-14 text-center">
-                <CalendarRange className="size-6 text-[var(--muted)]" />
-                <strong className="text-sm text-white">No contests in this view</strong>
-                <p className="max-w-sm text-xs text-[var(--muted)]">
-                  New weekly and biweekly editions are published here as soon as the chapter announces them.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            visible.map((contest) => (
-              <ContestCard
-                key={contest.slug}
-                contest={contest}
-                phase={phaseFor(contest, contests.indexOf(contest))}
-                featured={contest.slug === featured?.slug}
-              />
-            ))
-          )}
-        </section>
-      )}
-
-      <Separator className="bg-[var(--line)]" />
-
-      <section className="grid gap-4 sm:grid-cols-3">
-        {[
-          { title: "Round 1 · Online", body: "2-hour timed coding assessment. The window is open for 24 hours before contest day." },
-          { title: "Cut · Top 30", body: "Ranking by score, then by penalty time. Verified results only." },
-          { title: "Round 2 · Offline", body: "Proctored campus final. Entry with the QR pass issued to finalists." },
-        ].map((item) => (
-          <Card key={item.title} className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
-            <CardHeader className="gap-2">
-              <Trophy className="size-4 text-[var(--accent)]" />
-              <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
-                {item.title}
-              </CardTitle>
-              <p className="text-xs leading-relaxed text-[var(--muted)]">{item.body}</p>
-            </CardHeader>
-          </Card>
-        ))}
+      <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card/80 backdrop-blur-xl">
+        {visible.length === 0 ? <div className="space-y-2 p-12 text-center"><CalendarRange className="mx-auto size-6 text-muted-foreground"/><h3>No contests here yet</h3><p className="text-sm">New contests will appear when announced.</p></div> : visible.map(c => <article key={c.slug} className="flex flex-col justify-between gap-4 p-5 transition-colors hover:bg-secondary/70 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 items-center gap-4"><div className="grid size-11 shrink-0 place-items-center rounded-md border border-border bg-secondary text-primary"><Code2 className="size-5" /></div><div className="min-w-0 space-y-1"><h3 className="truncate text-sm font-semibold text-foreground">{c.title}</h3><p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"><span>{formatWhen(assessmentOpensAt(c).toISOString())}</span><span>2 hours</span><span>{c.registered_count} registered</span></p></div></div>
+          <div className="flex shrink-0 items-center gap-3"><PhaseBadge phase={phaseFor(c)}/><Button asChild size="icon" variant="ghost" className="rounded-md" title="Open contest"><Link to="/portal/contests/$contestSlug" params={{contestSlug:c.slug}} search={{state:"default"}} aria-label={`Open ${c.title}`}><ArrowRight /></Link></Button></div>
+        </article>)}
+      </div>
       </section>
+      </div>
+      <aside className="space-y-5">
+        <section className="overflow-hidden rounded-lg border border-border bg-card/80 backdrop-blur-xl"><div className="flex items-center justify-between border-b border-border p-5"><h2 className="flex items-center gap-2 text-base font-semibold normal-case"><Crown className="size-4 text-primary"/>Top contestants</h2><Button asChild size="icon" variant="ghost" className="rounded-md"><Link to="/portal/leaderboard" aria-label="Open leaderboard"><ArrowRight /></Link></Button></div><div className="divide-y divide-border">{leaders.slice(0,5).map((leader,index)=><div key={leader.handle} className="flex items-center gap-3 px-5 py-3"><span className="w-5 font-mono text-xs text-primary">{String(index+1).padStart(2,"0")}</span><div className="grid size-8 place-items-center rounded-full bg-secondary text-xs font-bold text-foreground">{leader.handle.slice(0,2).toUpperCase()}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-foreground">{leader.handle}</p><p className="text-[11px] text-muted-foreground">{leader.department}</p></div><strong className="font-mono text-xs">{leader.rating}</strong></div>)}</div></section>
+        <section className="rounded-lg border border-border bg-card/60 p-5 backdrop-blur-xl"><h2 className="text-base font-semibold normal-case">How it works</h2><div className="mt-5 space-y-5">{[{icon:Clock3,title:"Round 1 online",text:"One 2-hour attempt."},{icon:Users,title:`Top ${FINALIST_SEATS} qualify`,text:"Results unlock after the window."},{icon:Trophy,title:"Campus final",text:"Enter with your QR pass."}].map((step,index)=><div key={step.title} className="flex gap-3"><div className="grid size-8 shrink-0 place-items-center rounded-md border border-primary/25 bg-primary/5 text-primary"><step.icon className="size-4"/></div><div><p className="text-sm font-medium text-foreground">{index+1}. {step.title}</p><p className="text-xs text-muted-foreground">{step.text}</p></div></div>)}</div></section>
+      </aside>
     </div>
-  );
-}
-
-function PastTable({ contests }: { contests: ContestSummary[] }) {
-  if (contests.length === 0) {
-    return (
-      <Card className="rounded-none border-dashed border-[var(--line)] bg-transparent">
-        <CardContent className="py-14 text-center text-xs text-[var(--muted)]">
-          No completed editions yet.
-        </CardContent>
-      </Card>
-    );
-  }
-  return (
-    <div className="border border-[var(--line)] bg-[var(--surface-1)]">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-[var(--line)]">
-            <TableHead className="font-mono text-[10px] uppercase tracking-widest">Contest</TableHead>
-            <TableHead className="font-mono text-[10px] uppercase tracking-widest">Format</TableHead>
-            <TableHead className="font-mono text-[10px] uppercase tracking-widest">Final held</TableHead>
-            <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">
-              Participants
-            </TableHead>
-            <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">Ranking</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {contests.map((contest) => (
-            <TableRow key={contest.slug} className="border-[var(--line)]">
-              <TableCell className="font-semibold text-white">{contest.title}</TableCell>
-              <TableCell className="font-mono text-xs text-[var(--muted)]">{cadenceLabel(contest)}</TableCell>
-              <TableCell className="font-mono text-xs text-[var(--muted)]">{formatWhen(contest.starts_at)}</TableCell>
-              <TableCell className="text-right font-mono text-xs text-white">{contest.registered_count}</TableCell>
-              <TableCell className="text-right">
-                <Button asChild variant="ghost" size="sm" className="rounded-none font-mono text-xs uppercase">
-                  <Link
-                    to="/portal/contests/$contestSlug/results"
-                    params={{ contestSlug: contest.slug }}
-                    search={{ state: "default", query: "", filter: "all", sort: "rank" }}
-                  >
-                    View
-                  </Link>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+  </div>;
 }

@@ -29,6 +29,8 @@ import { Route as PortalProblemsIndexRouteImport } from './routes/portal.problem
 import { Route as PortalProblemsProblemSlugRouteImport } from './routes/portal.problems.$problemSlug'
 import { Route as PortalContestsContestSlugIndexRouteImport } from './routes/portal.contests.$contestSlug.index'
 import { Route as PortalContestsContestSlugAssessmentRouteImport } from './routes/portal.contests.$contestSlug.assessment'
+import { Route as PortalContestsContestSlugFinalResultsRouteImport } from './routes/portal.contests.$contestSlug.final-results'
+import { Route as PortalContestsContestSlugLobbyRouteImport } from './routes/portal.contests.$contestSlug.lobby'
 import { Route as PortalContestsContestSlugOfflineRouteImport } from './routes/portal.contests.$contestSlug.offline'
 import { Route as PortalContestsContestSlugQualifiedRouteImport } from './routes/portal.contests.$contestSlug.qualified'
 import { Route as PortalContestsContestSlugResultsRouteImport } from './routes/portal.contests.$contestSlug.results'
@@ -137,6 +139,18 @@ const PortalContestsContestSlugAssessmentRoute =
     path: '/assessment',
     getParentRoute: () => PortalContestsContestSlugRoute,
   } as any)
+const PortalContestsContestSlugFinalResultsRoute =
+  PortalContestsContestSlugFinalResultsRouteImport.update({
+    id: '/final-results',
+    path: '/final-results',
+    getParentRoute: () => PortalContestsContestSlugRoute,
+  } as any)
+const PortalContestsContestSlugLobbyRoute =
+  PortalContestsContestSlugLobbyRouteImport.update({
+    id: '/lobby',
+    path: '/lobby',
+    getParentRoute: () => PortalContestsContestSlugRoute,
+  } as any)
 const PortalContestsContestSlugOfflineRoute =
   PortalContestsContestSlugOfflineRouteImport.update({
     id: '/offline',
@@ -176,6 +190,8 @@ export interface FileRoutesByFullPath {
   '/portal/contests/': typeof PortalContestsIndexRoute
   '/portal/problems/': typeof PortalProblemsIndexRoute
   '/portal/contests/$contestSlug/assessment': typeof PortalContestsContestSlugAssessmentRoute
+  '/portal/contests/$contestSlug/final-results': typeof PortalContestsContestSlugFinalResultsRoute
+  '/portal/contests/$contestSlug/lobby': typeof PortalContestsContestSlugLobbyRoute
   '/portal/contests/$contestSlug/offline': typeof PortalContestsContestSlugOfflineRoute
   '/portal/contests/$contestSlug/qualified': typeof PortalContestsContestSlugQualifiedRoute
   '/portal/contests/$contestSlug/results': typeof PortalContestsContestSlugResultsRoute
@@ -199,6 +215,8 @@ export interface FileRoutesByTo {
   '/portal/contests': typeof PortalContestsIndexRoute
   '/portal/problems': typeof PortalProblemsIndexRoute
   '/portal/contests/$contestSlug/assessment': typeof PortalContestsContestSlugAssessmentRoute
+  '/portal/contests/$contestSlug/final-results': typeof PortalContestsContestSlugFinalResultsRoute
+  '/portal/contests/$contestSlug/lobby': typeof PortalContestsContestSlugLobbyRoute
   '/portal/contests/$contestSlug/offline': typeof PortalContestsContestSlugOfflineRoute
   '/portal/contests/$contestSlug/qualified': typeof PortalContestsContestSlugQualifiedRoute
   '/portal/contests/$contestSlug/results': typeof PortalContestsContestSlugResultsRoute
@@ -225,6 +243,8 @@ export interface FileRoutesById {
   '/portal/contests/': typeof PortalContestsIndexRoute
   '/portal/problems/': typeof PortalProblemsIndexRoute
   '/portal/contests/$contestSlug/assessment': typeof PortalContestsContestSlugAssessmentRoute
+  '/portal/contests/$contestSlug/final-results': typeof PortalContestsContestSlugFinalResultsRoute
+  '/portal/contests/$contestSlug/lobby': typeof PortalContestsContestSlugLobbyRoute
   '/portal/contests/$contestSlug/offline': typeof PortalContestsContestSlugOfflineRoute
   '/portal/contests/$contestSlug/qualified': typeof PortalContestsContestSlugQualifiedRoute
   '/portal/contests/$contestSlug/results': typeof PortalContestsContestSlugResultsRoute
@@ -252,6 +272,8 @@ export interface FileRouteTypes {
     | '/portal/contests/'
     | '/portal/problems/'
     | '/portal/contests/$contestSlug/assessment'
+    | '/portal/contests/$contestSlug/final-results'
+    | '/portal/contests/$contestSlug/lobby'
     | '/portal/contests/$contestSlug/offline'
     | '/portal/contests/$contestSlug/qualified'
     | '/portal/contests/$contestSlug/results'
@@ -275,6 +297,8 @@ export interface FileRouteTypes {
     | '/portal/contests'
     | '/portal/problems'
     | '/portal/contests/$contestSlug/assessment'
+    | '/portal/contests/$contestSlug/final-results'
+    | '/portal/contests/$contestSlug/lobby'
     | '/portal/contests/$contestSlug/offline'
     | '/portal/contests/$contestSlug/qualified'
     | '/portal/contests/$contestSlug/results'
@@ -300,6 +324,8 @@ export interface FileRouteTypes {
     | '/portal/contests/'
     | '/portal/problems/'
     | '/portal/contests/$contestSlug/assessment'
+    | '/portal/contests/$contestSlug/final-results'
+    | '/portal/contests/$contestSlug/lobby'
     | '/portal/contests/$contestSlug/offline'
     | '/portal/contests/$contestSlug/qualified'
     | '/portal/contests/$contestSlug/results'
@@ -459,6 +485,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalContestsContestSlugAssessmentRouteImport
       parentRoute: typeof PortalContestsContestSlugRoute
     }
+    '/portal/contests/$contestSlug/final-results': {
+      id: '/portal/contests/$contestSlug/final-results'
+      path: '/final-results'
+      fullPath: '/portal/contests/$contestSlug/final-results'
+      preLoaderRoute: typeof PortalContestsContestSlugFinalResultsRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
+    }
+    '/portal/contests/$contestSlug/lobby': {
+      id: '/portal/contests/$contestSlug/lobby'
+      path: '/lobby'
+      fullPath: '/portal/contests/$contestSlug/lobby'
+      preLoaderRoute: typeof PortalContestsContestSlugLobbyRouteImport
+      parentRoute: typeof PortalContestsContestSlugRoute
+    }
     '/portal/contests/$contestSlug/offline': {
       id: '/portal/contests/$contestSlug/offline'
       path: '/offline'
@@ -485,6 +525,8 @@ declare module '@tanstack/react-router' {
 
 interface PortalContestsContestSlugRouteChildren {
   PortalContestsContestSlugAssessmentRoute: typeof PortalContestsContestSlugAssessmentRoute
+  PortalContestsContestSlugFinalResultsRoute: typeof PortalContestsContestSlugFinalResultsRoute
+  PortalContestsContestSlugLobbyRoute: typeof PortalContestsContestSlugLobbyRoute
   PortalContestsContestSlugOfflineRoute: typeof PortalContestsContestSlugOfflineRoute
   PortalContestsContestSlugQualifiedRoute: typeof PortalContestsContestSlugQualifiedRoute
   PortalContestsContestSlugResultsRoute: typeof PortalContestsContestSlugResultsRoute
@@ -495,6 +537,9 @@ const PortalContestsContestSlugRouteChildren: PortalContestsContestSlugRouteChil
   {
     PortalContestsContestSlugAssessmentRoute:
       PortalContestsContestSlugAssessmentRoute,
+    PortalContestsContestSlugFinalResultsRoute:
+      PortalContestsContestSlugFinalResultsRoute,
+    PortalContestsContestSlugLobbyRoute: PortalContestsContestSlugLobbyRoute,
     PortalContestsContestSlugOfflineRoute:
       PortalContestsContestSlugOfflineRoute,
     PortalContestsContestSlugQualifiedRoute:

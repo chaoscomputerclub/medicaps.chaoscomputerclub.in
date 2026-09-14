@@ -16,20 +16,26 @@ import {
 } from "./lifecycle";
 import type { ContestPhase, ContestSummary } from "./types";
 
-const PHASE_COPY: Record<ContestPhase, { label: string; tone: string }> = {
-  registration_open: { label: "Registration open", tone: "border-sky-500/40 text-sky-300" },
-  assessment_open: { label: "Round 1 live", tone: "border-[var(--accent)] text-[var(--accent)]" },
-  assessment_submitted: { label: "Round 1 submitted", tone: "border-violet-500/40 text-violet-300" },
-  assessment_closed: { label: "Round 1 closed", tone: "border-amber-500/40 text-amber-300" },
-  final_live: { label: "Final live on campus", tone: "border-rose-500/40 text-rose-300" },
-  complete: { label: "Completed", tone: "border-[var(--line)] text-[var(--muted)]" },
+const PHASE_COPY: Record<ContestPhase, string> = {
+  registration_open: "Registration open",
+  assessment_open: "Round 1 open",
+  assessment_submitted: "Submitted",
+  assessment_closed: "Round 1 closed",
+  final_live: "Campus final live",
+  complete: "Completed",
 };
-
 export function PhaseBadge({ phase }: { phase: ContestPhase }) {
-  const { label, tone } = PHASE_COPY[phase];
   return (
-    <Badge variant="outline" className={cn("rounded-none font-mono text-[10px] uppercase tracking-widest", tone)}>
-      {label}
+    <Badge
+      variant="outline"
+      className={cn(
+        "rounded-sm text-xs font-medium",
+        phase === "assessment_open" || phase === "final_live"
+          ? "border-primary text-primary"
+          : "border-border text-muted-foreground",
+      )}
+    >
+      {PHASE_COPY[phase]}
     </Badge>
   );
 }
@@ -48,7 +54,9 @@ export function Countdown({ target, label }: { target: string | Date; label: str
   const ms = new Date(target).getTime() - now;
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">{label}</span>
+      <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
+        {label}
+      </span>
       <span className="font-mono text-2xl font-bold tabular-nums text-[var(--accent)]">
         {ms <= 0 ? "00:00:00" : formatCountdown(ms)}
       </span>
@@ -69,7 +77,7 @@ export function RoundsTimeline({
       body: `${formatWhen(assessmentOpensAt(contest).toISOString())} → ${formatWhen(
         assessmentClosesAt(contest).toISOString(),
       )}`,
-      note: "2-hour immutable session · code judged on hidden tests",
+      note: "One 2-hour attempt · automatic submission when time ends",
       done: phase !== "registration_open",
       active: phase === "assessment_open",
     },
@@ -83,26 +91,38 @@ export function RoundsTimeline({
   ];
 
   return (
-    <ol className="space-y-3">
-      {rounds.map((round) => (
+    <ol className="relative space-y-2 before:absolute before:bottom-8 before:left-5 before:top-8 before:w-px before:bg-border">
+      {rounds.map((round, index) => (
         <li
           key={round.title}
           className={cn(
-            "border border-[var(--line)] bg-[var(--surface-2)] p-4",
-            round.active && "border-[var(--accent)]/60",
+            "relative grid grid-cols-[40px_minmax(0,1fr)] gap-4 rounded-md border border-transparent p-3",
+            round.active && "border-primary/30 bg-primary/5",
           )}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <strong className="text-sm font-semibold text-white">{round.title}</strong>
-            <Badge
-              variant="outline"
-              className="rounded-none font-mono text-[10px] uppercase tracking-widest"
-            >
-              {round.active ? "In progress" : round.done ? "Done" : "Scheduled"}
-            </Badge>
+          <div
+            className={cn(
+              "relative z-10 grid size-10 place-items-center rounded-full border bg-card font-display text-sm font-bold",
+              round.active || round.done
+                ? "border-primary text-primary"
+                : "border-border text-muted-foreground",
+            )}
+          >
+            {round.done ? "✓" : index + 1}
           </div>
-          <p className="mt-1 font-mono text-xs text-[var(--muted)]">{round.body}</p>
-          <p className="mt-1 text-xs text-[var(--muted)]">{round.note}</p>
+          <div className="min-w-0 py-0.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <strong className="text-sm font-semibold text-foreground">{round.title}</strong>
+              <Badge
+                variant="outline"
+                className="rounded-sm font-mono text-[10px] uppercase tracking-widest"
+              >
+                {round.active ? "Live now" : round.done ? "Complete" : "Upcoming"}
+              </Badge>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{round.body}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{round.note}</p>
+          </div>
         </li>
       ))}
     </ol>
@@ -137,7 +157,9 @@ export function ContestCard({
             {contest.edition ? ` ${contest.edition}` : ""}
           </span>
         </div>
-        <CardTitle className="text-lg font-bold leading-snug text-white">{contest.title}</CardTitle>
+        <CardTitle className="text-lg font-bold leading-snug text-foreground">
+          {contest.title}
+        </CardTitle>
         <p className="text-sm leading-relaxed text-[var(--muted)]">{contest.summary}</p>
       </CardHeader>
 
@@ -170,7 +192,11 @@ export function ContestCard({
 
       <CardFooter className="justify-between gap-3">
         <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase">
-          <Link to="/portal/contests/$contestSlug" params={{ contestSlug: contest.slug }} search={{ state: "default" }}>
+          <Link
+            to="/portal/contests/$contestSlug"
+            params={{ contestSlug: contest.slug }}
+            search={{ state: "default" }}
+          >
             Contest details
           </Link>
         </Button>

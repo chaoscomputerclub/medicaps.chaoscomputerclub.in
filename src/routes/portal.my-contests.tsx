@@ -64,13 +64,12 @@ function MyContestsPage() {
   return (
     <div className="page-wrap">
       {/* Header with quick stats */}
-      <header className="page-header">
+      <header className="flex flex-col justify-between gap-5 border-b border-border pb-6 md:flex-row md:items-end">
         <div>
-          <p className="kicker">Personal competition record</p>
-          <h1>My contests.</h1>
+          <p className="kicker">Your competition record</p>
+          <h1 className="text-4xl font-bold normal-case">My contests</h1>
           <p>
-            Track your registered qualifiers, live screening windows, and verified campus final results
-            in one synchronized ledger.
+            Everything you entered, qualified for, or completed — in one place.
           </p>
         </div>
 
@@ -91,8 +90,8 @@ function MyContestsPage() {
       </header>
 
       {/* Segmented Filter Controls using shadcn Tabs */}
-      <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="mb-6">
-        <TabsList className="bg-[var(--surface-2)] border border-[var(--line)] p-1 rounded-[1px] h-auto flex-wrap">
+      <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-6">
+        <TabsList className="h-auto flex-wrap rounded-lg border border-border bg-card/80 p-1 backdrop-blur-xl">
           <TabsTrigger value="all" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-[var(--muted)]">
             All ({data.length})
           </TabsTrigger>
@@ -109,8 +108,8 @@ function MyContestsPage() {
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="panel p-0 overflow-hidden border border-[var(--line-strong)]">
-        <div className="p-4 sm:p-6 border-b border-[var(--line)] bg-[var(--surface-2)] flex items-center justify-between">
+      <section className="overflow-hidden rounded-lg border border-border bg-card/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between border-b border-border bg-secondary/50 p-4 sm:p-6">
           <SectionHeader
             kicker="Contest Ledger"
             title={`Showing ${filteredContests.length} ${filter === "all" ? "participations" : filter + " contests"}`}
@@ -149,7 +148,7 @@ function MyContestsPage() {
               return (
                 <article
                   key={c.contest_slug}
-                  className="p-5 sm:p-6 hover:bg-[var(--surface-2)] transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-5"
+                  className="flex flex-col justify-between gap-5 p-5 transition-colors hover:bg-secondary/60 sm:p-6 lg:flex-row lg:items-center"
                 >
                   {/* Left: Status Icon & Details */}
                   <div className="flex items-start gap-4">

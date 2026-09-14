@@ -23,6 +23,13 @@ from app.services.contest_lifecycle_service import (
     remaining_seconds as session_remaining_seconds,
     session_deadline,
 )
+from app.services.ranking_service import (
+    build_ranking,
+    cached_ranking,
+    invalidate_ranking,
+    ranking_released,
+    withheld_payload,
+)
 from app.models.db_models import (
     OfflineContest,
     Assessment,
@@ -401,6 +408,7 @@ async def submit_assessment_code(
     session.total_penalty_seconds = int((now_utc() - started_at).total_seconds())
 
     await db.commit()
+    await invalidate_ranking(contest_slug)
 
     return {
         "verdict": exec_result.verdict,
@@ -478,6 +486,7 @@ async def finish_assessment(
         session.status = "submitted"
         session.submitted_at = now_utc()
         await db.commit()
+        await invalidate_ranking(contest_slug)
 
     return {"success": True, "total_score": session.total_score if session else 0}
 
@@ -487,39 +496,37 @@ async def get_assessment_leaderboard(
     contest_slug: str,
     db: AsyncSession = Depends(get_db),
 ):
-    """Live assessment screening leaderboard with Top 30 cut-off demarcation."""
+    """
+    Round 1 ranking, served from cache.
+
+    Sealed until the 24-hour entry window closes, then published in full with
+    the exact Top 30 cutoff.
+    """
     assessment = await get_or_create_assessment(contest_slug, db)
 
-    s_result = await db.execute(
-        select(AssessmentSession)
-        .where(
-            AssessmentSession.assessment_id == assessment.id,
-            AssessmentSession.status.in_(["in_progress", "submitted"]),
-        )
-        .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
+    contest_result = await db.execute(
+        select(OfflineContest).where(OfflineContest.slug == contest_slug)
     )
-    sessions = s_result.scalars().all()
+    contest = contest_result.scalars().first()
 
-    leaderboard = []
-    for rank, s in enumerate(sessions, start=1):
-        leaderboard.append({
-            "rank": rank,
-            "handle": s.handle,
-            "full_name": s.full_name,
-            "department": s.department,
-            "batch": s.batch,
-            "total_score": s.total_score,
-            "penalty_minutes": round(s.total_penalty_seconds / 60.0, 1),
-            "status": s.status,
-            "is_top_30_qualified": (rank <= 30 or s.is_top_30_qualified),
-        })
+    if contest is not None and not ranking_released(contest.starts_at):
+        payload = withheld_payload(contest_slug, contest.starts_at)
+        payload["assessment_title"] = assessment.title
+        return payload
 
-    return {
-        "assessment_title": assessment.title,
-        "total_participants": len(sessions),
-        "cutoff_rank": 30,
-        "leaderboard": leaderboard,
-    }
+    async def compute() -> dict:
+        s_result = await db.execute(
+            select(AssessmentSession).where(
+                AssessmentSession.assessment_id == assessment.id,
+                AssessmentSession.status.in_(["in_progress", "submitted"]),
+            )
+        )
+        payload = build_ranking(s_result.scalars().all(), contest_slug)
+        payload["assessment_title"] = assessment.title
+        payload["released"] = True
+        return payload
+
+    return await cached_ranking(contest_slug, compute)
 
 
 @router.post("/{contest_slug}/qualify-top30")

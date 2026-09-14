@@ -35,6 +35,12 @@ export const contestQueries = {
       refetchInterval: 30 * 1000,
       staleTime: 15 * 1000,
     }),
+  finalStandings: (slug: string) =>
+    queryOptions({
+      queryKey: ["contest", "final-standings", slug],
+      queryFn: () => contestApi.finalStandings(slug),
+      staleTime: MINUTE,
+    }),
   pass: () =>
     queryOptions({
       queryKey: ["contest", "pass"],

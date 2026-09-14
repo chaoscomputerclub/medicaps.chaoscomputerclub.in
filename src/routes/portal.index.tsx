@@ -13,6 +13,8 @@ import {
   formatContestDate,
 } from "@/organization/components/ui";
 import { portalQueries } from "@/organization/data/queries";
+import { ContestActivityFeed } from "@/features/contest/feed";
+import { contestQueries } from "@/features/contest/queries";
 
 const queries = [
   portalQueries.member(),
@@ -55,6 +57,7 @@ export const Route = createFileRoute("/portal/")({
       context.queryClient.ensureQueryData(queries[2]),
       context.queryClient.ensureQueryData(queries[3]),
       context.queryClient.ensureQueryData(queries[4]),
+      context.queryClient.ensureQueryData(contestQueries.list()),
     ]),
   pendingComponent: DashboardSkeleton,
   component: Dashboard,
@@ -193,23 +196,8 @@ function Dashboard() {
           <RatingChart data={history} />
         </div>
         <div className="panel">
-          <SectionHeader kicker="Operations feed" title="Chapter signals" />
-          <div className="feed-list">
-            {feed.length === 0 ? (
-              <p className="text-xs text-[#777] font-mono py-8 text-center">
-                No announcements published yet.
-              </p>
-            ) : (
-              feed.map((item) => (
-                <article key={item.id}>
-                  <span>{item.kind.replace("_", " ")}</span>
-                  <h3>{item.title}</h3>
-                  <p>{item.summary}</p>
-                  <time>{formatContestDate(item.published_at)}</time>
-                </article>
-              ))
-            )}
-          </div>
+          <SectionHeader kicker="Contest feed" title="What's happening" />
+          <ContestActivityFeed />
         </div>
       </section>
 

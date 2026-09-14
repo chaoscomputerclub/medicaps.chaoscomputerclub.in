@@ -69,7 +69,25 @@ export type AssessmentRanking = {
   contest_slug: string;
   cutoff: number;
   total_participants: number;
+  /** False while the 24-hour entry window is still open — ranking stays sealed. */
+  released: boolean;
+  releases_at: string | null;
+  message: string | null;
   rows: RankingRow[];
+};
+
+/** Round 2 (offline final) verified standings. */
+export type FinalStandingRow = {
+  rank: number;
+  handle: string;
+  full_name: string;
+  department: string;
+  batch: string;
+  division: string;
+  score: number;
+  solved: number;
+  penalty_minutes: number;
+  rating_delta: number | null;
 };
 
 export type CampusPass = {
