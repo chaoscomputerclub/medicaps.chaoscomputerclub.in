@@ -33,6 +33,14 @@ async def lifespan(app: FastAPI):
     bg_tasks = start_background_tasks(AsyncSessionLocal)
     print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
 
+    # ── Prewarm Core Docker Engine sandboxes ──────────────────────────────────
+    try:
+        from app.engine.docker.pool import prewarm_containers
+        prewarm_containers()
+        print("✓ Core Docker sandboxes verified & prewarmed.")
+    except Exception as exc:
+        print(f"Notice during Docker prewarm: {exc}")
+
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────

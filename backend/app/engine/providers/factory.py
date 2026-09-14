@@ -13,16 +13,16 @@ logger = logging.getLogger("ccc.judge")
 
 @lru_cache(maxsize=1)
 def get_judge_provider() -> JudgeProvider:
-    choice = os.getenv("JUDGE_PROVIDER", "interleet").strip().lower()
+    choice = os.getenv("JUDGE_PROVIDER", "docker").strip().lower()
 
-    if choice in {"interleet", "docker", "server", "interleet-docker"}:
+    if choice in {"docker", "core", "native", "interleet", "server", "interleet-docker"}:
         try:
-            from .interleet_provider import InterleetProvider
+            from .docker_provider import DockerSandboxProvider
 
-            logger.info("judge provider: interleet docker containers")
-            return InterleetProvider()
+            logger.info("judge provider: core in-process docker execution engine")
+            return DockerSandboxProvider()
         except Exception as exc:
-            logger.warning("interleet provider unavailable (%s); falling back to local", exc)
+            logger.warning("docker provider unavailable (%s); falling back to local", exc)
 
     if choice in {"judge0", "external", "remote"}:
         try:
@@ -30,7 +30,7 @@ def get_judge_provider() -> JudgeProvider:
 
             logger.info("judge provider: judge0")
             return Judge0Provider()
-        except Exception as exc:  # httpx missing, misconfiguration, etc.
+        except Exception as exc:
             logger.warning("judge0 provider unavailable (%s); falling back to local", exc)
 
     from .local_provider import LocalSandboxProvider
