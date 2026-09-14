@@ -6,13 +6,14 @@ Inspired by Interleet Judge Engine
 
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.middleware.auth import get_current_member
+from app.middleware.rate_limit import rate_limit
 from app.engine.enums import Language, Verdict, ComparisonMode
 from app.engine.executors.factory import get_executor
 from app.engine.schemas import TestCaseSchema
@@ -237,10 +238,12 @@ async def get_or_start_assessment(
 
 @router.post("/{contest_slug}/run")
 async def run_sample_code(
+    request: Request,
     contest_slug: str,
     payload: RunCodeRequest,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
+    _rl: None = Depends(rate_limit("assessment:run", max_calls=30, window_seconds=60)),
 ):
     """Run code against sample testcases or custom stdin."""
     p_result = await db.execute(select(AssessmentProblem).where(AssessmentProblem.id == payload.problem_id))
@@ -303,10 +306,12 @@ async def run_sample_code(
 
 @router.post("/{contest_slug}/submit")
 async def submit_assessment_code(
+    request: Request,
     contest_slug: str,
     payload: SubmitCodeRequest,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
+    _rl: None = Depends(rate_limit("assessment:submit", max_calls=5, window_seconds=60)),
 ):
     """Submit code for official assessment evaluation against all testcases."""
     # 1. Fetch problem & session

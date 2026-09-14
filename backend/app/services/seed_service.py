@@ -455,13 +455,34 @@ async def seed_database(db: AsyncSession):
     )
     contest_obj = existing_contest.scalars().first()
     if contest_obj:
-        logger.info("Demo contest '%s' exists, ensuring status is 'upcoming' and refreshing problem schemas...", CONTEST_SLUG)
-        contest_obj.status = "upcoming"
+        logger.info("Demo contest '%s' exists, refreshing problem schemas...", CONTEST_SLUG)
         contest_obj.title = "CCC Medi-Caps Campus Clash 2026 (Phase 1 Screening Active)"
-        now_t = datetime.now(timezone.utc)
-        contest_obj.starts_at = now_t + timedelta(hours=24, seconds=10)
-        contest_obj.ends_at = contest_obj.starts_at + timedelta(days=7)
-        contest_obj.check_in_opens_at = now_t - timedelta(hours=1)
+
+        # ── Timing reset guard ────────────────────────────────────────────────
+        # Only reset starts_at when there are no active in-progress sessions.
+        # Resetting the clock while candidates are mid-assessment would corrupt
+        # their session_deadline() and invalidate the server-anchored timer.
+        from app.models.db_models import Assessment, AssessmentSession
+        active_check = await db.execute(
+            select(AssessmentSession)
+            .join(Assessment, Assessment.id == AssessmentSession.assessment_id)
+            .where(
+                Assessment.slug == CONTEST_SLUG,
+                AssessmentSession.status == "in_progress",
+            )
+            .limit(1)
+        )
+        has_active_sessions = active_check.scalars().first() is not None
+
+        if not has_active_sessions:
+            contest_obj.status = "upcoming"
+            now_t = datetime.now(timezone.utc)
+            contest_obj.starts_at = now_t + timedelta(hours=24, seconds=10)
+            contest_obj.ends_at = contest_obj.starts_at + timedelta(days=7)
+            contest_obj.check_in_opens_at = now_t - timedelta(hours=1)
+            logger.info("Demo contest timing reset (no active sessions).")
+        else:
+            logger.info("Active sessions found — skipping timing reset to preserve session deadlines.")
         p_res = await db.execute(
             select(AssessmentProblem).join(Assessment).where(Assessment.slug == CONTEST_SLUG)
         )
