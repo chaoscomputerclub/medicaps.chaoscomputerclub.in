@@ -93,10 +93,10 @@ def _create_persistent_container(client, image: str) -> Optional[Container]:
                 str(workspace_base): {"bind": "/workspace", "mode": "rw"}
             },
             network_disabled=True,
-            mem_limit="512m",
-            memswap_limit="512m",
+            mem_limit="1024m",
+            memswap_limit="1024m",
             nano_cpus=2_000_000_000,
-            pids_limit=256,
+            pids_limit=1024,
             security_opt=["no-new-privileges"],
             cap_drop=["ALL"],
             detach=True,
