@@ -301,17 +301,39 @@ async def get_registration_status(
                 (assessment_rank is not None and assessment_rank <= 30)
             )
 
-    can_take_assessment = (contest_status == "upcoming" and is_registered)
+    # Assessment can only be started if not yet taken AND the lifecycle window is open
+    from app.services.contest_lifecycle_service import assessment_available
+    assessment_window_open = False
+    if contest and contest.starts_at:
+        assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
+
+    can_take_assessment = (
+        contest_status == "upcoming"
+        and is_registered
+        and not assessment_taken
+        and assessment_window_open
+    )
     can_enter_live_contest = (contest_status == "live" and is_top_30_qualified)
 
     # Contextual eligibility explanation
     if contest_status == "upcoming":
         if not is_registered:
             eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
-        elif not assessment_taken:
-            eligibility_message = "Registration confirmed. Take the Phase 1 Screening Assessment to qualify for the Top 30 Live Final."
+        elif assessment_taken:
+            eligibility_message = f"Screening submitted. Score: {assessment_score} pts (Current Rank: #{assessment_rank or chr(0x2014)}). Top 30 cadets will advance when the contest goes LIVE."
+        elif not assessment_window_open:
+            from app.services.contest_lifecycle_service import assessment_window
+            if contest and contest.starts_at:
+                window = assessment_window(contest.starts_at)
+                from app.services.contest_lifecycle_service import utcnow
+                if utcnow() < window.opens_at:
+                    eligibility_message = f"Assessment window opens at {window.opens_at.strftime('%d %b %Y, %H:%M UTC')}. You can enter once it unlocks."
+                else:
+                    eligibility_message = "The Round 1 assessment window has closed."
+            else:
+                eligibility_message = "Assessment window is not yet open."
         else:
-            eligibility_message = f"Screening submitted. Score: {assessment_score} pts (Current Rank: #{assessment_rank or '—'}). Top 30 cadets will advance when the contest goes LIVE."
+            eligibility_message = "Registration confirmed. Round 1 window is open — start your assessment now."
     elif contest_status == "live":
         if is_top_30_qualified:
             eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Workstation reserved. Enter the Live Contest Lab."

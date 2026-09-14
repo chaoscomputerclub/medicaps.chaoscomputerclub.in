@@ -241,6 +241,77 @@ function StandaloneAssessmentPage() {
     );
   }
 
+  // ── Submitted / Completed gate ───────────────────────────────────────────
+  // When the session is already done show a clean completion screen instead of
+  // the live editor. This prevents any re-entry path from reaching the workspace.
+  if (session && (session.status === "submitted" || session.status === "disqualified")) {
+    const isDisqualified = session.status === "disqualified";
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#080808] text-[#e0e0e0] font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-xl bg-[#0e0e0e] border border-[#1e1e1e] text-center space-y-6">
+          <div
+            className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto border ${
+              isDisqualified
+                ? "bg-red-950/30 border-red-500/30 text-red-400"
+                : "bg-emerald-950/30 border-emerald-500/30 text-emerald-400"
+            }`}
+          >
+            {isDisqualified ? <ShieldAlert size={28} /> : <CheckCircle2 size={28} />}
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-lg font-bold font-mono text-white">
+              {isDisqualified ? "Assessment Disqualified" : "Assessment Submitted"}
+            </h2>
+            <p className="text-sm text-[#888] font-mono leading-relaxed">
+              {isDisqualified
+                ? "Your session was disqualified due to anti-cheat policy violations. Your answers were not recorded."
+                : "Your answers have been recorded. Results will be published after the 24-hour entry window closes."}
+            </p>
+          </div>
+
+          {!isDisqualified && (
+            <div className="rounded-lg bg-[#141414] border border-[#1e1e1e] p-4 space-y-1">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666]">Score recorded</span>
+                <span className="text-emerald-400 font-bold">{session.total_score ?? 0} pts</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666]">Status</span>
+                <span className="text-[#ccc] font-bold uppercase tracking-wider">Submitted</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => navigate({
+                to: "/portal/contests/$contestSlug/results",
+                params: { contestSlug },
+                search: { state: "default", query: "", filter: "all", sort: "rank" },
+              })}
+              className="w-full py-2 px-4 rounded-lg bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90 transition-colors"
+            >
+              View Round 1 Ranking
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate({
+                to: "/portal/contests/$contestSlug",
+                params: { contestSlug },
+                search: { state: "default" },
+              })}
+              className="w-full py-2 px-4 rounded-lg border border-[#2a2a2a] text-[#aaa] font-mono text-xs hover:bg-[#161616] transition-colors"
+            >
+              Return to Contest
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Error / Registration / Lifecycle Gate
   if (error && !assessment) {
     const isRegistrationErr = error.toLowerCase().includes("registration");
