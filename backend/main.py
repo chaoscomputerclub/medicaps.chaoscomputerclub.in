@@ -82,9 +82,15 @@ async def health_check():
 
     redis_ok = await ping_redis()
     judge_provider = "unknown"
+    judge_healthy = False
+    judge_meta = {}
     try:
         from app.engine.providers.factory import get_judge_provider
-        judge_provider = get_judge_provider().name
+        provider = get_judge_provider()
+        judge_provider = provider.name
+        judge_healthy = await provider.healthy()
+        if hasattr(provider, "get_engine_status"):
+            judge_meta = await provider.get_engine_status()
     except Exception:
         pass
 
@@ -96,6 +102,8 @@ async def health_check():
         "services": {
             "redis": "ok" if redis_ok else "degraded",
             "judge_provider": judge_provider,
+            "judge_healthy": judge_healthy,
+            "judge_meta": judge_meta,
         },
     }
 

@@ -16,6 +16,7 @@ from app.middleware.auth import get_current_member
 from app.middleware.rate_limit import rate_limit
 from app.engine.enums import Language, Verdict, ComparisonMode
 from app.engine.executors.factory import get_executor
+from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
 from app.services.contest_lifecycle_service import (
     ASSESSMENT_DURATION_MINUTES,
@@ -269,7 +270,9 @@ async def run_sample_code(
             for i, s in enumerate(sample_list)
         ]
 
-    exec_result = await executor.execute_batch(
+    provider = get_judge_provider()
+    exec_result = await provider.execute_batch(
+        language=payload.language,
         code=payload.code,
         testcases=tcs,
         time_limit=problem.time_limit,
@@ -358,9 +361,10 @@ async def submit_assessment_code(
             )
         )
 
-    # 3. Execute via Interleet engine
-    executor = get_executor(payload.language)
-    exec_result = await executor.execute_batch(
+    # 3. Execute via Interleet Docker engine (with automatic local fallback)
+    provider = get_judge_provider()
+    exec_result = await provider.execute_batch(
+        language=payload.language,
         code=payload.code,
         testcases=all_tcs,
         time_limit=problem.time_limit,

@@ -13,7 +13,16 @@ logger = logging.getLogger("ccc.judge")
 
 @lru_cache(maxsize=1)
 def get_judge_provider() -> JudgeProvider:
-    choice = os.getenv("JUDGE_PROVIDER", "local").strip().lower()
+    choice = os.getenv("JUDGE_PROVIDER", "interleet").strip().lower()
+
+    if choice in {"interleet", "docker", "server", "interleet-docker"}:
+        try:
+            from .interleet_provider import InterleetProvider
+
+            logger.info("judge provider: interleet docker containers")
+            return InterleetProvider()
+        except Exception as exc:
+            logger.warning("interleet provider unavailable (%s); falling back to local", exc)
 
     if choice in {"judge0", "external", "remote"}:
         try:
