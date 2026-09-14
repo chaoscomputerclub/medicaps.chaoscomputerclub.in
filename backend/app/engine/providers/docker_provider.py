@@ -150,30 +150,27 @@ class DockerSandboxProvider(JudgeProvider):
                 testcase_results.append(tc_res)
 
             # 4. Aggregation
-            passed_count = sum(1 for tr in testcase_results if tr.passed)
-            total_count = len(testcase_results)
-            score = round((passed_count / total_count * 100.0), 2) if total_count > 0 else 0.0
+            scoring_res = JudgeEngine.score(testcase_results)
 
-            # Determine dominant verdict and representative output
+            # Determine representative output
             first_fail = next((tr for tr in testcase_results if not tr.passed), None)
             rep_case = first_fail if first_fail else (testcase_results[0] if testcase_results else None)
-            top_verdict = rep_case.verdict if first_fail else Verdict.ACCEPTED
 
             return ExecutionResult(
-                success=(passed_count == total_count and total_count > 0),
+                success=(scoring_res.passed == scoring_res.total and scoring_res.total > 0),
                 submission_id=submission_id,
                 status=ExecutionStatus.COMPLETED,
-                verdict=top_verdict,
+                verdict=scoring_res.verdict,
                 stdout=rep_case.stdout if rep_case else "",
                 stderr=rep_case.stderr if rep_case else "",
                 compile_output=compile_output,
-                memory=0.0,
-                time=round(total_time_ms / 1000.0, 4),
+                memory=scoring_res.max_memory_mb,
+                time=round(scoring_res.max_time_ms / 1000.0, 4),
                 exit_code=testcase_results[0].exit_code if testcase_results else 0,
                 testcase_results=testcase_results,
-                passed_testcases=passed_count,
-                total_testcases=total_count,
-                score=score,
+                passed_testcases=scoring_res.passed,
+                total_testcases=scoring_res.total,
+                score=scoring_res.score,
                 completed_at=datetime.now(timezone.utc),
             )
 

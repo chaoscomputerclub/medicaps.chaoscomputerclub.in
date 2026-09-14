@@ -175,8 +175,10 @@ class CoreDockerSandbox:
         except Exception:
             pass
 
-        # Execution command wrapped in timeout
-        cmd_wrapped = ["sh", "-c", f"timeout {time_limit} {run_cmd}"]
+        # Execution command wrapped in timeout, ulimit, and time profiling
+        # Memory limit in kb
+        mem_kb = int(memory_limit_mb * 1024)
+        cmd_wrapped = ["sh", "-c", f"ulimit -v {mem_kb}; /usr/bin/time -v timeout {time_limit} {run_cmd}"]
 
         try:
             res = container.exec_run(
@@ -194,6 +196,27 @@ class CoreDockerSandbox:
             timed_out = (exit_code == 124)
             oom_killed = (exit_code == 137)
 
+            # Parse /usr/bin/time output from stderr
+            peak_memory_mb = 0.0
+            clean_stderr = []
+            for line in stderr.splitlines():
+                if "Maximum resident set size (kbytes):" in line:
+                    try:
+                        peak_memory_mb = int(line.split(":")[1].strip()) / 1024.0
+                    except Exception:
+                        pass
+                elif "Command being timed:" in line or "User time (seconds):" in line or "System time (seconds):" in line or "Percent of CPU this job got:" in line or "Elapsed (wall clock) time" in line or "Average " in line or "Major (requiring I/O)" in line or "Minor (reclaiming a frame)" in line or "Voluntary context switches:" in line or "Involuntary context switches:" in line or "Swaps:" in line or "File system inputs:" in line or "File system outputs:" in line or "Socket messages" in line or "Signals delivered:" in line or "Page size (bytes):" in line or "Exit status:" in line or "Command terminated by signal" in line:
+                    continue # filter out time verbose output
+                else:
+                    clean_stderr.append(line)
+            
+            stderr = "\n".join(clean_stderr)
+
+            # Check for ulimit-induced memory errors (exit code 1 or 134 often)
+            if not oom_killed and exit_code != 0:
+                if "MemoryError" in stderr or "std::bad_alloc" in stderr or peak_memory_mb >= memory_limit_mb:
+                    oom_killed = True
+
             if len(stdout) > MAX_OUTPUT_BYTES:
                 stdout = stdout[:MAX_OUTPUT_BYTES] + "\n[Output truncated: exceeded 5MB limit]"
 
@@ -204,7 +227,7 @@ class CoreDockerSandbox:
                 stderr=stderr,
                 exit_code=exit_code,
                 wall_time_ms=round(wall_time_ms, 2),
-                peak_memory_mb=0.0,
+                peak_memory_mb=round(peak_memory_mb, 2),
                 timed_out=timed_out,
                 oom_killed=oom_killed,
             )
