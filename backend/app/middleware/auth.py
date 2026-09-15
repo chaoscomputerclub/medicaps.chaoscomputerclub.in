@@ -80,3 +80,30 @@ async def get_current_member_optional(
         return result.scalars().first()
     except Exception:
         return None
+
+
+async def require_admin_or_core(
+    member: Optional[MemberProfile] = Depends(get_current_member_optional),
+) -> Optional[MemberProfile]:
+    """
+    Guards organizer/admin endpoints.
+    Permits execution if:
+    - User is authenticated with `is_core_member` set to True
+    - Or development bypass / dev mode is active
+    """
+    from app.core.config import settings
+
+    if settings.is_dev_bypass_enabled:
+        return member
+
+    if not member:
+        raise _UNAUTHORIZED
+
+    if not getattr(member, "is_core_member", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrator or Core Team access required for this operation.",
+        )
+
+    return member
+
