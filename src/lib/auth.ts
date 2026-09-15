@@ -10,14 +10,14 @@ export function getApiBase(): string {
       ? (import.meta.env as Record<string, string>)["VITE_API_URL"]
       : undefined;
 
-  if (envUrl && envUrl.trim()) {
+  if (envUrl && envUrl.trim() && !envUrl.includes("medicaps-api.chaoscomputerclub.in")) {
     return envUrl.trim().replace(/\/+$/, "");
   }
 
   if (typeof window !== "undefined") {
     // 1. Localhost development fallback (connect to live server backend)
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      return "https://medicaps-api.chaoscomputerclub.in/api";
+      return "https://ccc-medicaps-api.sharexpress.in/api";
     }
 
     // 2. Production: Always use relative /api on current origin
@@ -25,10 +25,7 @@ export function getApiBase(): string {
     return `${window.location.origin}/api`;
   }
 
-  // Fallback API URL
-  const ssrUrl = (import.meta.env["VITE_API_URL"] as string | undefined);
-  if (ssrUrl && ssrUrl.trim()) return ssrUrl.trim().replace(/\/+$/, "");
-  return "https://medicaps.chaoscomputerclub.in/api";
+  return "https://ccc-medicaps-api.sharexpress.in/api";
 }
 
 export class ApiError extends Error {
