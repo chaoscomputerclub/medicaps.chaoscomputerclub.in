@@ -59,12 +59,58 @@ class DynamicContestService:
     @staticmethod
     def _default_starter_codes(problem_title: str) -> Dict[str, str]:
         """Generate default starter code templates for common languages."""
+        py_template = (
+            f"# {problem_title}\n"
+            "import sys\n\n"
+            "def main():\n"
+            "    input_data = sys.stdin.read().split()\n"
+            "    if not input_data:\n"
+            "        return\n"
+            "    # Write your solution here\n"
+            "    pass\n\n"
+            "if __name__ == '__main__':\n"
+            "    main()\n"
+        )
+        cpp_template = (
+            f"// {problem_title}\n"
+            "#include <iostream>\n"
+            "#include <vector>\n"
+            "#include <string>\n"
+            "#include <algorithm>\n\n"
+            "using namespace std;\n\n"
+            "int main() {\n"
+            "    ios_base::sync_with_stdio(false);\n"
+            "    cin.tie(NULL);\n"
+            "    // Write your solution here\n"
+            "    return 0;\n"
+            "}\n"
+        )
+        js_template = (
+            f"// {problem_title}\n"
+            "const fs = require('fs');\n\n"
+            "function main() {\n"
+            "    const input = fs.readFileSync(0, 'utf-8').trim().split(/\\s+/);\n"
+            "    // Write your solution here\n"
+            "}\n\n"
+            "main();\n"
+        )
+        java_template = (
+            f"// {problem_title}\n"
+            "import java.util.*;\n\n"
+            "public class Main {\n"
+            "    public static void main(String[] args) {\n"
+            "        Scanner sc = new Scanner(System.in);\n"
+            "        // Write your solution here\n"
+            "    }\n"
+            "}\n"
+        )
         return {
-            "python": f"# {problem_title}\nimport sys\n\ndef main():\n    input_data = sys.stdin.read().split()\n    if not input_data:\n        return\n    # Write your solution here\n    pass\n\nif __name__ == '__main__':\n    main()\n",
-            "cpp": f"// {problem_title}\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    // Write your solution here\n    return 0;\n}\n",
-            "javascript": f"// {problem_title}\nconst fs = require('fs');\n\nfunction main() {\n    const input = fs.readFileSync(0, 'utf-8').trim().split(/\\s+/);\n    // Write your solution here\n}\n\nmain();\n",
-            "java": f"// {problem_title}\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Write your solution here\n    }\n}\n",
+            "python": py_template,
+            "cpp": cpp_template,
+            "javascript": js_template,
+            "java": java_template,
         }
+
 
     @staticmethod
     async def create_contest(
