@@ -445,6 +445,8 @@ class DynamicContestService:
                 )
                 db.add(ap)
 
+        await db.flush()
+
         # Recount total problems
         count_res = await db.execute(select(ContestProblem).where(ContestProblem.contest_id == contest.id))
         contest.problem_count = len(count_res.scalars().all())
@@ -494,6 +496,8 @@ class DynamicContestService:
                     AssessmentProblem.problem_index == idx,
                 )
             )
+
+        await db.flush()
 
         # Recount problems
         count_res = await db.execute(select(ContestProblem).where(ContestProblem.contest_id == contest.id))
