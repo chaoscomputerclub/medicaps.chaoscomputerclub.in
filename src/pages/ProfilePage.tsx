@@ -16,7 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { openSocialDrawer } from "@/store/slices/socialSlice";
+import { openSocialDrawer, fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { openEditProfileModal } from "@/store/slices/uiSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
@@ -162,11 +162,20 @@ export function ProfilePage() {
       ? m.handle.slice(0, 2).toUpperCase()
       : "CC";
 
+  const followingIds = useAppSelector((s) => s.social.followingIds);
+
+  useEffect(() => {
+    dispatch(fetchMyFollowingIdsThunk());
+  }, [dispatch]);
+
   const isFollowing =
     isFollowingOptimistic !== null
       ? isFollowingOptimistic
       : Boolean(m.is_following);
   const displayedFollowers = Math.max(0, (m.followers_count || 0) + followersCountDelta);
+  const displayedFollowing = isViewingSelf
+    ? (followingIds.length > 0 ? followingIds.length : (m.following_count ?? 0))
+    : (m.following_count ?? 0);
 
   // Copy Profile Link Handler
   const handleCopyLink = () => {
@@ -361,7 +370,7 @@ export function ProfilePage() {
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-[#292929] hover:border-[var(--accent)]/50 rounded-none cursor-pointer"
               >
                 <UserCheck size={12} className="text-[var(--accent)]" />
-                <strong className="text-white font-mono">{m.following_count ?? 0}</strong> Following
+                <strong className="text-white font-mono">{displayedFollowing}</strong> Following
               </button>
               {m.github_username && (
                 <a

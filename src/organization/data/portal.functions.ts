@@ -76,7 +76,7 @@ export async function getPublicPortalData(force = false) {
  */
 export async function getMemberProfileData(force = false) {
   const token = getToken();
-  const cacheKey = `profile:full:${token ? token.slice(-16) : "anon"}`;
+  const cacheKey = "member:profile:full";
 
   return swrFetch(
     cacheKey,

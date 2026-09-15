@@ -49,9 +49,9 @@ export function PortalShell() {
       navigate("/auth");
       return;
     }
+    dispatch(fetchMyFollowingIdsThunk());
     if (!member && !pending) {
       dispatch(fetchCurrentUserThunk());
-      dispatch(fetchMyFollowingIdsThunk());
     }
   }, [dispatch, member, pending, navigate]);
 
