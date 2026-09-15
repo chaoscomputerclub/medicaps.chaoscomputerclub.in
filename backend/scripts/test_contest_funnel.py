@@ -207,7 +207,11 @@ if __name__ == '__main__':
         )
         print(f"  Second Scan Result: status={dup_res.status} | message={dup_res.message}")
         assert dup_res.status == "already_checked_in", f"Expected already_checked_in, got {dup_res.status}"
-        print("  ✓ Duplicate Scan Protection Verified!")
+        # 9. Cleanup Test Records
+        print("\n🔹 Step 8: Cleaning up test member and records...")
+        await db.execute(delete(MemberProfile).where(MemberProfile.handle == test_handle))
+        await db.commit()
+        print("  ✓ Test Cadet and Funnel Records Cleaned.")
 
         print("\n" + "=" * 60)
         print("🎉 COMPLETE CONTEST & ASSESSMENT FUNNEL PASSED WITH 100% SUCCESS!")

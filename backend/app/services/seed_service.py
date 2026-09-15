@@ -63,6 +63,15 @@ async def purge_all_contest_data(db: AsyncSession) -> dict:
     # 4. Purge All Contests
     await db.execute(delete(OfflineContest))
 
+    # 5. Purge Any Mock / Funnel Test Member Accounts
+    await db.execute(
+        delete(MemberProfile).where(
+            (MemberProfile.handle.like("cadet_funnel%"))
+            | (MemberProfile.email.like("%test%@medicaps.ac.in"))
+            | (MemberProfile.handle.like("test_%"))
+        )
+    )
+
     await db.commit()
 
     # Invalidate Redis Caches
