@@ -11,25 +11,30 @@ import { cn } from "@/lib/utils";
 export function RatingDistributionCard({
   member,
   distribution,
+  userRating,
+  loading,
 }: {
-  member: MemberProfile;
+  member?: Partial<MemberProfile> | null;
   distribution?: RatingDistribution | null;
+  userRating?: number;
+  loading?: boolean;
 }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const attendanceCount = member.attendance_count ?? 0;
+  const attendanceCount = member?.attendance_count ?? 0;
   const hasAttended = attendanceCount > 0;
 
   // --- Percentile & rank display ---
-  // New users with zero attendance have no competitive standing yet
   let percentileDisplay = "—";
-  if (hasAttended) {
+  if (hasAttended && member?.university_rank) {
     const cohortTotal = Math.max(distribution?.total || 1, 1);
     const rank = Math.max(1, member.university_rank || 1);
     const pct = (rank / cohortTotal) * 100;
     percentileDisplay = pct < 1 ? `Top ${pct.toFixed(2)}%` : `Top ${pct.toFixed(1)}%`;
+  } else if (member?.percentile) {
+    percentileDisplay = `Top ${(100 - member.percentile).toFixed(1)}%`;
   }
-  const rankDisplay = hasAttended ? `#${member.university_rank}` : "#—";
+  const rankDisplay = member?.university_rank ? `#${member.university_rank}` : "—";
 
   // --- Build buckets from live backend data ---
   const buckets = distribution?.buckets ?? [];
@@ -42,7 +47,7 @@ export function RatingDistributionCard({
   const maxCount = isEmpty ? 1 : Math.max(...buckets.map((b) => b.count), 1);
 
   // Find bucket that contains the member's rating
-  const memberRating = member.rating ?? 1200;
+  const memberRating = userRating ?? member?.rating ?? 1200;
   let activeBucketIndex = -1;
   if (!isEmpty) {
     activeBucketIndex = buckets.findIndex(
@@ -141,7 +146,7 @@ export function RatingDistributionCard({
             Contest Rating
           </span>
           <strong className="text-sm font-mono font-bold text-white block mt-0.5">
-            {member.rating?.toLocaleString() ?? 1200}
+            {(userRating ?? member?.rating)?.toLocaleString() ?? 1200}
           </strong>
         </div>
         <div>

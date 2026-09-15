@@ -495,6 +495,7 @@ export function ProfilePage() {
 
         <div className="lg:col-span-4">
           <RatingDistributionCard
+            member={m}
             distribution={distribution || { total: 0, buckets: [] }}
             loading={distLoading}
             userRating={m.rating}
