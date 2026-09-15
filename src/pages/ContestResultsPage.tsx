@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FINALIST_SEATS } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
 import type { RankingRow, AssessmentRanking } from "@/features/contest/types";
+import { ContestResultsSkeleton } from "@/organization/components/skeletons";
 
 const FILTERS = ["all", "qualified", "eliminated"] as const;
 type FilterKey = (typeof FILTERS)[number];
@@ -74,6 +75,10 @@ export function ContestResultsPage() {
   });
 
   const myRow = myHandle ? ranking.rows.find((row) => row.handle === myHandle) : undefined;
+
+  if (loading) {
+    return <ContestResultsSkeleton />;
+  }
 
   return (
     <div className="page-wrap max-w-6xl space-y-6">

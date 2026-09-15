@@ -17,6 +17,7 @@ import { contestSystemService } from "@/organization/data/contest-system";
 import { SectionHeader } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MyContestsSkeleton } from "@/organization/components/skeletons";
 
 export function MyContestsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -38,6 +39,10 @@ export function MyContestsPage() {
       });
     return () => { active = false; };
   }, []);
+
+  if (loading) {
+    return <MyContestsSkeleton />;
+  }
 
   const qualifiedCount = data.filter((x) => x.outcome === "qualified").length;
   const registeredCount = data.filter((x) => x.status === "upcoming" || x.outcome === "registered").length;
@@ -112,11 +117,7 @@ export function MyContestsPage() {
           </Button>
         </div>
 
-        {loading ? (
-          <div className="p-12 text-center text-neutral-500 font-mono text-xs animate-pulse">
-            LOADING CONTEST LEDGER...
-          </div>
-        ) : filteredContests.length === 0 ? (
+        {filteredContests.length === 0 ? (
           <div className="py-16 px-6 text-center">
             <Trophy className="w-10 h-10 text-neutral-600 mx-auto mb-3 opacity-60" />
             <h3 className="font-mono text-base font-bold text-white uppercase tracking-wider">

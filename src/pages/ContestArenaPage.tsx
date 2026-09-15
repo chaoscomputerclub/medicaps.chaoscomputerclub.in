@@ -42,6 +42,7 @@ import {
   submitArenaCodeThunk,
   clearArenaResults,
 } from "@/store/slices/contestSlice";
+import { AssessmentStudioSkeleton, Skeleton } from "@/organization/components/skeletons";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -200,11 +201,7 @@ export function ContestArenaPage() {
   };
 
   if (isLoadingArena && !arenaData) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[var(--bg)] font-mono text-xs text-[var(--muted)]">
-        Loading faculty-proctored contest arena…
-      </div>
-    );
+    return <AssessmentStudioSkeleton />;
   }
 
   const title = arenaData?.title || "Live Contest Arena";
@@ -477,8 +474,21 @@ export function ContestArenaPage() {
               </div>
             </div>
           ) : (
-            <div className="p-12 text-center text-[var(--muted)] font-mono text-xs">
-              Loading problem details...
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <Skeleton className="h-7 w-64" />
+              <div className="space-y-2 pt-2">
+                <Skeleton className="h-3.5 w-full" />
+                <Skeleton className="h-3.5 w-11/12" />
+                <Skeleton className="h-3.5 w-4/5" />
+              </div>
+              <div className="pt-4 space-y-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-16 w-full" />
+              </div>
             </div>
           )}
         </div>

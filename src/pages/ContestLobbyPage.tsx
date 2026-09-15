@@ -19,6 +19,7 @@ import {
 } from "@/features/contest/lifecycle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
+import { ContestLobbySkeleton } from "@/organization/components/skeletons";
 
 export function ContestLobbyPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -37,11 +38,7 @@ export function ContestLobbyPage() {
   }, [contestSlug, dispatch]);
 
   if (isLoadingDetail && !contest) {
-    return (
-      <div className="page-wrap space-y-6">
-        <div className="py-12 text-center font-mono text-xs text-[var(--muted)]">Loading assessment lobby…</div>
-      </div>
-    );
+    return <ContestLobbySkeleton />;
   }
 
   if (!contest) {

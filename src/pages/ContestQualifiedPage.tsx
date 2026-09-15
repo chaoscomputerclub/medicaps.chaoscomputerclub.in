@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FINALIST_SEATS, formatWhen } from "@/features/contest/lifecycle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, fetchCampusPassThunk } from "@/store/slices/contestSlice";
+import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
 
 export function ContestQualifiedPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -30,11 +31,7 @@ export function ContestQualifiedPage() {
   const rank = registration?.assessment_rank ?? null;
 
   if (isLoadingDetail && !contest) {
-    return (
-      <div className="page-wrap space-y-6">
-        <Skeleton className="h-28 w-full rounded-none bg-[var(--surface-2)]" />
-      </div>
-    );
+    return <ContestOfflineSkeleton />;
   }
 
   if (!contest) {

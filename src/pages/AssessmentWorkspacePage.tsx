@@ -50,6 +50,7 @@ import {
   decrementTimer,
   dismissAntiCheatWarning,
 } from "@/store/slices/assessmentSlice";
+import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 
 
 function formatTimer(seconds: number): string {
@@ -219,14 +220,7 @@ export function AssessmentWorkspacePage() {
 
   // Loading skeleton
   if (isLoading && !assessment) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#070707] text-[#999] font-mono text-xs">
-        <div className="flex items-center gap-2">
-          <Terminal size={16} className="animate-spin text-accent" />
-          <span>INITIALIZING ASSESSMENT WORKSPACE...</span>
-        </div>
-      </div>
-    );
+    return <AssessmentStudioSkeleton />;
   }
 
   // ── Submitted / Completed gate ───────────────────────────────────────────

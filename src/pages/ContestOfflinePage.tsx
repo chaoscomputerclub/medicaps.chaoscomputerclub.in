@@ -26,6 +26,7 @@ import {
   fetchCampusPassThunk,
   checkInContestThunk,
 } from "@/store/slices/contestSlice";
+import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
 
 export function ContestOfflinePage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -59,11 +60,7 @@ export function ContestOfflinePage() {
   };
 
   if (isLoadingDetail && !contest) {
-    return (
-      <div className="page-wrap space-y-6">
-        <div className="py-12 text-center font-mono text-xs text-[var(--muted)]">Loading contest details…</div>
-      </div>
-    );
+    return <ContestOfflineSkeleton />;
   }
 
   if (!contest) {

@@ -22,6 +22,7 @@ import {
 import { formatWhen } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
 import type { FinalStandingRow } from "@/features/contest/types";
+import { ContestFinalResultsSkeleton } from "@/organization/components/skeletons";
 
 
 
@@ -29,6 +30,7 @@ export function ContestFinalResultsPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const [rows, setRows] = useState<FinalStandingRow[]>([]);
   const [contest, setContest] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!contestSlug) return;
@@ -38,8 +40,13 @@ export function ContestFinalResultsPage() {
     ]).then(([r, c]) => {
       setRows(r);
       setContest(c);
+      setLoading(false);
     });
   }, [contestSlug]);
+
+  if (loading) {
+    return <ContestFinalResultsSkeleton />;
+  }
 
   const podium = rows.slice(0, 3);
 

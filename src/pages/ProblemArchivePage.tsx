@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { SectionHeader, EmptyState } from "@/organization/components/ui";
+import { ProblemArchiveSkeleton } from "@/organization/components/skeletons";
 
 export function ProblemArchivePage() {
   const [contests, setContests] = useState<any[]>([]);
@@ -24,6 +25,10 @@ export function ProblemArchivePage() {
     return () => { active = false; };
   }, []);
 
+  if (loading) {
+    return <ProblemArchiveSkeleton />;
+  }
+
   const complete = contests.filter((c) => c.status === "finished");
 
   return (
@@ -42,11 +47,7 @@ export function ProblemArchivePage() {
       <section className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-6">
         <SectionHeader kicker="Released sets" title="Completed contest problems" />
 
-        {loading ? (
-          <div className="py-12 text-center text-neutral-500 font-mono text-xs animate-pulse">
-            LOADING ARCHIVE PROBLEMS...
-          </div>
-        ) : complete.length === 0 ? (
+        {complete.length === 0 ? (
           <EmptyState
             title="Archive Empty"
             body="No archived problem sets released yet. Completed offline contest problems and official editorials will appear here."

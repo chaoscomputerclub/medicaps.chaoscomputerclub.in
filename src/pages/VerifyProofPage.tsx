@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProofBadge } from "@/organization/components/ProofBadge";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { contestApi } from "@/features/contest/api";
+import { VerifyProofSkeleton } from "@/organization/components/skeletons";
 
 export function VerifyProofPage() {
   const [searchParams] = useSearchParams();
@@ -111,6 +112,10 @@ export function VerifyProofPage() {
           p.sha256_digest?.toLowerCase() === submitted.toLowerCase()
       )
     : undefined;
+
+  if (loading) {
+    return <VerifyProofSkeleton />;
+  }
 
   return (
     <div className="page-wrap verify-wrap p-6 max-w-5xl mx-auto space-y-6">

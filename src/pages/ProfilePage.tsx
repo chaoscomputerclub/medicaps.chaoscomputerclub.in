@@ -26,6 +26,7 @@ import {
   getMemberProfileData,
   getRatingDistribution,
 } from "@/organization/data/portal.functions";
+import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
 
 const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
@@ -84,11 +85,7 @@ export function ProfilePage() {
   }, [navigate]);
 
   if (loading) {
-    return (
-      <div className="page-wrap p-6 max-w-7xl mx-auto py-24 text-center font-mono text-neutral-500 text-xs animate-pulse">
-        LOADING MEMBER PROFILE...
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   const m = profileData?.member;

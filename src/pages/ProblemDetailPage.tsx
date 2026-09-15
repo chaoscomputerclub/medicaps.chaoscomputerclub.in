@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Ban, CheckCircle2 } from "lucide-react";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
+import { ProblemDetailSkeleton } from "@/organization/components/skeletons";
 
 export function ProblemDetailPage() {
   const { problemSlug } = useParams<{ problemSlug: string }>();
@@ -39,11 +40,7 @@ export function ProblemDetailPage() {
   }, [problemSlug]);
 
   if (loading) {
-    return (
-      <div className="page-wrap p-6 max-w-4xl mx-auto py-24 text-center font-mono text-neutral-500 text-xs animate-pulse">
-        LOADING ARCHIVED PROBLEM...
-      </div>
-    );
+    return <ProblemDetailSkeleton />;
   }
 
   if (!data) {

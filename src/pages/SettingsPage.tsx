@@ -55,6 +55,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { SettingsSkeleton } from "@/organization/components/skeletons";
 
 const PRESET_EMBLEMS = [
   { id: "volt", label: "Volt", icon: "⚡", bg: "bg-lime-500/10", border: "border-lime-500/40", text: "text-lime-400" },
@@ -190,6 +191,10 @@ export function SettingsPage() {
   };
 
   const isHandleChanged = Boolean(member && handleInput.trim().toLowerCase() !== member.handle?.toLowerCase());
+
+  if (!member) {
+    return <SettingsSkeleton />;
+  }
 
   return (
     <div className="page-wrap space-y-6">

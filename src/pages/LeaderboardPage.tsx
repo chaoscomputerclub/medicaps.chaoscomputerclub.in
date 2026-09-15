@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
+import { LeaderboardRowSkeleton } from "@/organization/components/skeletons";
 import {
   Table,
   TableHeader,
@@ -78,11 +79,7 @@ export function LeaderboardPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-neutral-500 font-mono text-xs animate-pulse">
-                  LOADING UNIVERSITY STANDINGS...
-                </TableCell>
-              </TableRow>
+              <LeaderboardRowSkeleton count={8} />
             ) : data.length === 0 ? (
               <TableRow>
                 <TableCell

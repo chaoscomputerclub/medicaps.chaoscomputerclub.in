@@ -31,6 +31,7 @@ import type { ContestSummary, ParticipationRecord } from "@/features/contest/typ
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
+import { ContestsHubSkeleton, Skeleton } from "@/organization/components/skeletons";
 import { toast } from "sonner";
 
 // High-precision ticking countdown hook
@@ -232,6 +233,10 @@ export function ContestsHubPage() {
       setRegisteringSlug(null);
     }
   };
+
+  if (isLoading && contests.length === 0) {
+    return <ContestsHubSkeleton />;
+  }
 
   return (
     <div className="page-wrap space-y-8">
@@ -847,8 +852,28 @@ export function ContestsHubPage() {
               {/* Past Contests List */}
               <div className="divide-y divide-border border border-border bg-card">
                 {isLoading && pastContests.length === 0 ? (
-                  <div className="p-12 text-center font-mono text-xs text-muted-foreground">
-                    Loading past contest history…
+                  <div className="divide-y divide-border">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="p-5 flex flex-col sm:flex-row justify-between gap-4">
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-16" />
+                            <Skeleton className="h-3 w-8" />
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                          <Skeleton className="h-5 w-3/4" />
+                          <div className="flex items-center gap-4 pt-1">
+                            <Skeleton className="h-3 w-16" />
+                            <Skeleton className="h-3 w-24" />
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Skeleton className="h-8 w-28" />
+                          <Skeleton className="h-8 w-24" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : filteredPastContests.length === 0 ? (
                   <div className="p-12 text-center space-y-2">
@@ -926,8 +951,29 @@ export function ContestsHubPage() {
             <div className="space-y-4">
               <div className="divide-y divide-border border border-border bg-card">
                 {isLoadingParticipations ? (
-                  <div className="p-12 text-center font-mono text-xs text-muted-foreground">
-                    Loading your participation history…
+                  <div className="divide-y divide-border">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="p-5 flex flex-col lg:flex-row justify-between gap-4 lg:items-center">
+                        <div className="flex items-start gap-4">
+                          <Skeleton className="w-10 h-10 rounded-none shrink-0" />
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Skeleton className="h-4 w-16" />
+                              <Skeleton className="h-4 w-28" />
+                            </div>
+                            <Skeleton className="h-5 w-56" />
+                            <div className="flex items-center gap-4 pt-1">
+                              <Skeleton className="h-3 w-24" />
+                              <Skeleton className="h-3 w-20" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="h-5 w-16" />
+                          <Skeleton className="h-8 w-28" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : myParticipations.length === 0 ? (
                   <div className="p-12 text-center space-y-3">

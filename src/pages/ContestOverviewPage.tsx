@@ -38,6 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { contestApi } from "@/features/contest/api";
 import { Countdown, PhaseBadge, RoundsTimeline, useTick } from "@/features/contest/components";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
+import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import {
   ASSESSMENT_DURATION_MINUTES,
   FINALIST_SEATS,
@@ -63,7 +64,7 @@ export function ContestOverviewPage() {
   const [assessmentConfirmOpen, setAssessmentConfirmOpen] = useState(false);
 
   if (isLoadingDetail && !contest) {
-    return <div className="page-wrap"><div className="py-12 text-center font-mono text-xs text-[var(--muted)]">Loading contest details…</div></div>;
+    return <ContestDetailSkeleton />;
   }
   if (!contest) {
     return <div className="page-wrap"><div className="py-12 text-center font-mono text-xs text-[var(--muted)]">Contest not found.</div></div>;
