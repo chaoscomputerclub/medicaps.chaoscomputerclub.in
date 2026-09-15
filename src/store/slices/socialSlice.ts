@@ -61,9 +61,11 @@ export const fetchFollowersThunk = createAsyncThunk<StudentFollowItem[], string>
   "social/fetchFollowers",
   async (target, { rejectWithValue }) => {
     try {
+      const cleanTarget = target.replace(/^@+/, "").trim();
+      if (!cleanTarget) return [];
       const token = getToken();
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/social/${encodeURIComponent(target)}/followers`, {
+      const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/followers`, {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -83,9 +85,11 @@ export const fetchFollowingThunk = createAsyncThunk<StudentFollowItem[], string>
   "social/fetchFollowing",
   async (target, { rejectWithValue }) => {
     try {
+      const cleanTarget = target.replace(/^@+/, "").trim();
+      if (!cleanTarget) return [];
       const token = getToken();
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/social/${encodeURIComponent(target)}/following`, {
+      const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/following`, {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -109,21 +113,21 @@ export const toggleFollowThunk = createAsyncThunk<
     followersCount: number;
     followingCount: number;
   },
-  { targetId: string; targetHandle: string }
->("social/toggleFollow", async ({ targetId, targetHandle }, { getState, rejectWithValue }) => {
+  { targetId?: string; targetHandle?: string } | string
+>("social/toggleFollow", async (arg, { getState, rejectWithValue }) => {
   try {
     const token = getToken();
     if (!token) {
       window.location.href = "/auth";
       return rejectWithValue("Authentication required");
     }
-    const apiBase = getApiBase();
-    const state = getState() as { social: SocialState };
-    const currentlyFollowing = state.social.followingIds.includes(targetId);
+    const target = typeof arg === "string" ? arg : (arg.targetHandle || arg.targetId || "");
+    const cleanTarget = target.replace(/^@+/, "").trim();
+    if (!cleanTarget) return rejectWithValue("Target student handle is required.");
 
-    const method = currentlyFollowing ? "DELETE" : "POST";
-    const res = await fetch(`${apiBase}/social/follow/${encodeURIComponent(targetId)}`, {
-      method,
+    const apiBase = getApiBase();
+    const res = await fetch(`${apiBase}/social/follow/${encodeURIComponent(cleanTarget)}`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -131,17 +135,35 @@ export const toggleFollowThunk = createAsyncThunk<
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: "Action failed" }));
-      return rejectWithValue(err.detail || "Action failed");
+      // If already following, try DELETE to unfollow
+      const delRes = await fetch(`${apiBase}/social/follow/${encodeURIComponent(cleanTarget)}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!delRes.ok) {
+        const err = await delRes.json().catch(() => ({ detail: "Action failed" }));
+        return rejectWithValue(err.detail || "Action failed");
+      }
+      const data = await delRes.json();
+      return {
+        targetId: (typeof arg === "object" && arg.targetId) || cleanTarget,
+        targetHandle: data.target_handle || cleanTarget,
+        isFollowing: false,
+        followersCount: data.followers_count ?? 0,
+        followingCount: data.following_count ?? 0,
+      };
     }
 
     const data = await res.json();
     return {
-      targetId,
-      targetHandle,
-      isFollowing: data.is_following,
-      followersCount: data.followers_count,
-      followingCount: data.following_count,
+      targetId: (typeof arg === "object" && arg.targetId) || cleanTarget,
+      targetHandle: data.target_handle || cleanTarget,
+      isFollowing: Boolean(data.is_following),
+      followersCount: data.followers_count ?? 0,
+      followingCount: data.following_count ?? 0,
     };
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to toggle follow status");
@@ -155,15 +177,25 @@ export const socialSlice = createSlice({
     openSocialDrawer: (
       state,
       action: PayloadAction<{
-        targetHandle: string;
+        targetHandle?: string;
+        handle?: string;
+        target?: string;
         targetName?: string | null;
-        type: "followers" | "following";
-      }>,
+        name?: string | null;
+        type?: "followers" | "following";
+        mode?: "followers" | "following";
+      } | string>,
     ) => {
+      const payload = typeof action.payload === "string" ? { handle: action.payload } : action.payload;
+      const rawHandle = payload.targetHandle || payload.handle || payload.target || "";
+      const cleanHandle = rawHandle.replace(/^@+/, "").trim();
+      const rawName = payload.targetName || payload.name || cleanHandle;
+      const drawerType = payload.type || payload.mode || "followers";
+
       state.drawerOpen = true;
-      state.drawerType = action.payload.type;
-      state.drawerTargetHandle = action.payload.targetHandle;
-      state.drawerTargetName = action.payload.targetName || action.payload.targetHandle;
+      state.drawerType = drawerType;
+      state.drawerTargetHandle = cleanHandle;
+      state.drawerTargetName = rawName || cleanHandle;
       state.searchQuery = "";
       state.studentsList = [];
     },
@@ -214,28 +246,30 @@ export const socialSlice = createSlice({
 
     // Toggle Follow: Optimistic
     builder.addCase(toggleFollowThunk.pending, (state, action) => {
-      const { targetId } = action.meta.arg;
-      state.actionPendingId = targetId;
-      if (state.followingIds.includes(targetId)) {
-        state.followingIds = state.followingIds.filter((id) => id !== targetId);
+      const arg = action.meta.arg;
+      const targetKey = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
+      state.actionPendingId = targetKey;
+      if (state.followingIds.includes(targetKey)) {
+        state.followingIds = state.followingIds.filter((id) => id !== targetKey);
       } else {
-        state.followingIds.push(targetId);
+        state.followingIds.push(targetKey);
       }
       // Also update in current modal list if visible
-      const item = state.studentsList.find((s) => s.id === targetId);
+      const item = state.studentsList.find((s) => s.id === targetKey || s.handle === targetKey);
       if (item) {
         item.is_following = !item.is_following;
       }
     });
     builder.addCase(toggleFollowThunk.fulfilled, (state, action) => {
       state.actionPendingId = null;
-      const { targetId, isFollowing } = action.payload;
-      if (isFollowing && !state.followingIds.includes(targetId)) {
-        state.followingIds.push(targetId);
-      } else if (!isFollowing && state.followingIds.includes(targetId)) {
-        state.followingIds = state.followingIds.filter((id) => id !== targetId);
+      const { targetId, targetHandle, isFollowing } = action.payload;
+      if (isFollowing) {
+        if (targetId && !state.followingIds.includes(targetId)) state.followingIds.push(targetId);
+        if (targetHandle && !state.followingIds.includes(targetHandle)) state.followingIds.push(targetHandle);
+      } else {
+        state.followingIds = state.followingIds.filter((id) => id !== targetId && id !== targetHandle);
       }
-      const item = state.studentsList.find((s) => s.id === targetId);
+      const item = state.studentsList.find((s) => s.id === targetId || s.handle === targetHandle);
       if (item) {
         item.is_following = isFollowing;
       }
@@ -243,13 +277,14 @@ export const socialSlice = createSlice({
     builder.addCase(toggleFollowThunk.rejected, (state, action) => {
       state.actionPendingId = null;
       // Rollback on rejection
-      const { targetId } = action.meta.arg;
-      if (state.followingIds.includes(targetId)) {
-        state.followingIds = state.followingIds.filter((id) => id !== targetId);
+      const arg = action.meta.arg;
+      const targetKey = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
+      if (state.followingIds.includes(targetKey)) {
+        state.followingIds = state.followingIds.filter((id) => id !== targetKey);
       } else {
-        state.followingIds.push(targetId);
+        state.followingIds.push(targetKey);
       }
-      const item = state.studentsList.find((s) => s.id === targetId);
+      const item = state.studentsList.find((s) => s.id === targetKey || s.handle === targetKey);
       if (item) {
         item.is_following = !item.is_following;
       }

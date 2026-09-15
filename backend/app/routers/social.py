@@ -25,15 +25,16 @@ router = APIRouter(prefix="/social", tags=["Social Network & Following"])
 
 async def resolve_member(target: str, db: AsyncSession) -> MemberProfile:
     """Resolve a member by handle (case-insensitive) or UUID."""
+    clean_target = target.lstrip("@").strip()
     stmt = select(MemberProfile).where(
-        (func.lower(MemberProfile.handle) == target.lower()) | (MemberProfile.id == target)
+        (func.lower(MemberProfile.handle) == clean_target.lower()) | (MemberProfile.id == clean_target)
     )
     res = await db.execute(stmt)
     member = res.scalars().first()
     if not member:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student '{target}' not found.",
+            detail=f"Student '{clean_target}' not found.",
         )
     return member
 

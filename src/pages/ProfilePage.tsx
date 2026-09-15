@@ -336,8 +336,8 @@ export function ProfilePage() {
                 onClick={() =>
                   dispatch(
                     openSocialDrawer({
-                      handle: m.handle,
-                      name: m.full_name,
+                      targetHandle: m.handle,
+                      targetName: m.full_name || m.handle,
                       type: "followers",
                     })
                   )
@@ -352,8 +352,8 @@ export function ProfilePage() {
                 onClick={() =>
                   dispatch(
                     openSocialDrawer({
-                      handle: m.handle,
-                      name: m.full_name,
+                      targetHandle: m.handle,
+                      targetName: m.full_name || m.handle,
                       type: "following",
                     })
                   )
