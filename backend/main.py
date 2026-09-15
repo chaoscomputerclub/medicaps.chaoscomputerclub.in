@@ -5,6 +5,7 @@ FastAPI Main Application Entrypoint
 Inspired by Desktop/sharexpress/interleet and Desktop/sharexpress/cloud.sharexpress
 """
 
+import os
 from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
@@ -33,13 +34,17 @@ async def lifespan(app: FastAPI):
     bg_tasks = start_background_tasks(AsyncSessionLocal)
     print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
 
-    # ── Prewarm Core Docker Engine sandboxes ──────────────────────────────────
-    try:
-        from app.engine.docker.pool import prewarm_containers
-        prewarm_containers()
-        print("✓ Core Docker sandboxes verified & prewarmed.")
-    except Exception as exc:
-        print(f"Notice during Docker prewarm: {exc}")
+    # ── Prewarm Core Docker Engine sandboxes (only when docker is active) ──────
+    judge_choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
+    if judge_choice in {"docker", "core", "native"}:
+        try:
+            from app.engine.docker.pool import prewarm_containers
+            prewarm_containers()
+            print("✓ Core Docker sandboxes verified & prewarmed.")
+        except Exception as exc:
+            print(f"Notice during Docker prewarm: {exc}")
+    else:
+        print(f"✓ Judge engine provider '{judge_choice}' active.")
 
     yield
 

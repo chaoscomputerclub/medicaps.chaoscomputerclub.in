@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { CalendarClock, MapPin, Trophy, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -192,20 +192,12 @@ export function ContestCard({
 
       <CardFooter className="justify-between gap-3">
         <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase">
-          <Link
-            to="/portal/contests/$contestSlug"
-            params={{ contestSlug: contest.slug }}
-            search={{ state: "default" }}
-          >
+          <Link to={`/portal/contests/${contest.slug}`}>
             Contest details
           </Link>
         </Button>
         <Button asChild variant="ghost" className="rounded-none font-mono text-xs uppercase">
-          <Link
-            to="/portal/contests/$contestSlug/results"
-            params={{ contestSlug: contest.slug }}
-            search={{ state: "default", query: "", filter: "all", sort: "rank" }}
-          >
+          <Link to={`/portal/contests/${contest.slug}/results`}>
             Ranking
           </Link>
         </Button>

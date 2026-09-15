@@ -5,15 +5,41 @@ Chaos Computer Club India — Medi-Caps Chapter Backend
 Offline Contests & On-Premise Event Management Router
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from app.core.db import get_db
-from app.models.db_models import ContestProblem, MemberProfile, OfflineContest, ContestRegistration, Assessment, CampusPass, now_utc, AssessmentSession
-from app.models.schemas import ContestProblemResponse, OfflineContestResponse
+from app.models.db_models import (
+    ContestProblem,
+    MemberProfile,
+    OfflineContest,
+    ContestRegistration,
+    Assessment,
+    CampusPass,
+    now_utc,
+    AssessmentSession,
+    ContestSubmission,
+    ScoreboardEntry,
+)
+from app.models.schemas import ContestProblemResponse, OfflineContestResponse, ContestArenaResponse, ContestArenaProblemResponse
 from app.middleware.auth import get_current_member, get_current_member_optional
+from app.engine.enums import Language, Verdict, ComparisonMode
+from app.engine.providers.factory import get_judge_provider
+from app.engine.schemas import TestCaseSchema
+
+class ArenaRunRequest(BaseModel):
+    problem_id: str
+    language: Language
+    code: str
+    custom_stdin: Optional[str] = None
+
+class ArenaSubmitRequest(BaseModel):
+    problem_id: str
+    language: Language
+    code: str
 
 router = APIRouter(prefix="/contests", tags=["Offline Contests"])
 
@@ -31,7 +57,10 @@ async def list_contests(
     unless the requesting member is authenticated and eligible (Top 30 qualifier,
     registered finalist, or core team proctor).
     """
-    stmt = select(OfflineContest).options(selectinload(OfflineContest.problems))
+    stmt = select(OfflineContest).options(
+        selectinload(OfflineContest.problems),
+        selectinload(OfflineContest.assessment),
+    )
 
     if status:
         stmt = stmt.where(OfflineContest.status == status)
@@ -44,6 +73,9 @@ async def list_contests(
 
     filtered_contests = []
     for c in all_contests:
+        # Exclude legacy dev screening rounds from being listed as standalone contests
+        if c.slug in ("dev-assessment-round", "dev-offline-final"):
+            continue
         if c.status == "live" and not c.slug.startswith("dev-"):
             is_eligible, _ = await is_member_eligible_for_live_contest(current_member, c, db)
             if not is_eligible:
@@ -168,7 +200,10 @@ async def get_contest_detail(
     """Fetch complete specifications, venue, rules, and proctor details for an offline contest."""
     stmt = (
         select(OfflineContest)
-        .options(selectinload(OfflineContest.problems))
+        .options(
+            selectinload(OfflineContest.problems),
+            selectinload(OfflineContest.assessment),
+        )
         .where(OfflineContest.slug == slug)
     )
     result = await db.execute(stmt)
@@ -509,4 +544,275 @@ async def reset_contest_timer(
         "slug": slug,
         "countdown_seconds": seconds,
         "starts_at": new_starts.isoformat(),
+    }
+
+
+@router.get("/{slug}/arena", response_model=ContestArenaResponse)
+async def get_contest_arena_data(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
+    """Retrieve full arena workspace data, assigned workstation seat, faculty proctors, and problem statements."""
+    c_res = await db.execute(
+        select(OfflineContest)
+        .options(selectinload(OfflineContest.problems))
+        .where(OfflineContest.slug == slug)
+    )
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if contest.status == "live" and not slug.startswith("dev-"):
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db)
+        if not is_eligible:
+            raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
+
+    # Check candidate CampusPass for assigned workstation seat
+    assigned_seat = "Lab-04-WS-07"
+    pass_code = None
+    check_in_status = "issued"
+
+    if current_member:
+        pass_res = await db.execute(
+            select(CampusPass).where(
+                CampusPass.contest_id == contest.id,
+                CampusPass.member_id == current_member.id,
+            )
+        )
+        pass_obj = pass_res.scalars().first()
+        if pass_obj:
+            assigned_seat = pass_obj.seat_number
+            pass_code = pass_obj.pass_code
+            check_in_status = pass_obj.check_in_status
+
+    # Sort problems by problem_index
+    problems = sorted(contest.problems, key=lambda p: p.problem_index)
+
+    fallback_descriptions = {
+        "A": "At Medi-Caps University, campus pass numbers are issued as alphanumeric strings. Two passes are considered a 'mirror pair' if one string is the exact reverse of the other (e.g. 'AB' and 'BA'). Given a list of N pass strings, determine the total count of valid unordered mirror pairs (i < j where passes[i] is the reverse of passes[j]).",
+        "B": "The Medi-Caps lab router has M megabits of total bandwidth to distribute among K competing lab processes. Process i requires at least min_i bandwidth and can consume at most max_i bandwidth, yielding utility = allocated_bandwidth * priority_i. Find the maximum total utility achievable such that the sum of allocated bandwidth does not exceed M and every process receives at least its minimum requirement. If the total minimum requirements exceed M, output -1.",
+        "C": "An air-gapped lab network consists of N workstations numbered 1 to N and M bidirectional communication channels. Each channel connects workstation u and v with latency L (in milliseconds). Workstation 1 needs to transmit an encrypted cryptographic key to workstation N. To avoid packet interception, you may deploy at most K quantum booster repeaters at chosen intermediate workstations along the path. A repeater reduces the latency of its adjacent outgoing channel by half (floor division). Find the minimum total transmission latency from workstation 1 to workstation N."
+    }
+
+    arena_problems = []
+    for p in problems:
+        desc = getattr(p, "description", None) or fallback_descriptions.get(p.problem_index, f"Problem {p.problem_index}: {p.title}")
+        arena_problems.append({
+            "id": p.id,
+            "contest_id": p.contest_id,
+            "problem_index": p.problem_index,
+            "title": p.title,
+            "topic": p.topic,
+            "points": p.points,
+            "difficulty": getattr(p, "difficulty", None) or "MEDIUM",
+            "description": desc,
+            "input_format": getattr(p, "input_format", None) or "Standard competitive programming input format.",
+            "output_format": getattr(p, "output_format", None) or "Standard output format.",
+            "constraints": getattr(p, "constraints", None) or "Time Limit: 2.0s · Memory: 256MB",
+            "time_limit": getattr(p, "time_limit", 2.0) or 2.0,
+            "memory_limit": getattr(p, "memory_limit", 256) or 256,
+            "starter_codes": getattr(p, "starter_codes", None) or {},
+            "sample_testcases": getattr(p, "sample_testcases", None) or [],
+        })
+
+    return {
+        "contest_id": contest.id,
+        "slug": contest.slug,
+        "title": contest.title,
+        "season": contest.season,
+        "status": contest.status,
+        "starts_at": contest.starts_at.isoformat() if contest.starts_at else "",
+        "ends_at": contest.ends_at.isoformat() if contest.ends_at else "",
+        "venue": contest.venue,
+        "environment": contest.environment,
+        "chief_proctors": contest.chief_proctors if contest.chief_proctors else ["Dr. Ratnesh Litoriya", "Prof. Amit Shrivastava"],
+        "assigned_seat": assigned_seat,
+        "pass_code": pass_code,
+        "check_in_status": check_in_status,
+        "is_faculty_proctored": True,
+        "problems": arena_problems,
+    }
+
+
+@router.post("/{slug}/arena/run")
+async def run_contest_arena_code(
+    slug: str,
+    payload: ArenaRunRequest,
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    """Run code against sample test cases or custom stdin in the live contest arena."""
+    p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
+    problem = p_res.scalars().first()
+    if not problem:
+        raise HTTPException(status_code=404, detail="Contest problem not found.")
+
+    if payload.custom_stdin is not None:
+        tcs = [TestCaseSchema(id="custom", stdin=payload.custom_stdin, expected_output="")]
+    else:
+        sample_list = getattr(problem, "sample_testcases", None) or []
+        tcs = [
+            TestCaseSchema(
+                id=f"sample_{i+1}",
+                name=f"Sample Test {i+1}",
+                stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
+                expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
+            )
+            for i, s in enumerate(sample_list)
+        ]
+        if not tcs:
+            tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
+
+    provider = get_judge_provider()
+    exec_result = await provider.execute_batch(
+        language=payload.language,
+        code=payload.code,
+        testcases=tcs,
+        time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
+        memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
+        comparison_mode=ComparisonMode.TRIMMED,
+    )
+
+    return {
+        "success": exec_result.success,
+        "verdict": exec_result.verdict,
+        "stdout": exec_result.stdout,
+        "stderr": exec_result.stderr,
+        "compile_output": exec_result.compile_output,
+        "time": exec_result.time,
+        "memory": exec_result.memory,
+        "passed_testcases": exec_result.passed_testcases,
+        "total_testcases": exec_result.total_testcases,
+        "score": exec_result.score,
+        "testcase_results": [
+            {
+                "testcase_id": tr.testcase_id,
+                "name": tr.name,
+                "passed": tr.passed,
+                "verdict": tr.verdict,
+                "stdout": tr.stdout,
+                "expected_output": tr.expected_output,
+                "stderr": tr.stderr,
+                "wall_time_ms": tr.wall_time_ms,
+            }
+            for tr in exec_result.testcase_results
+        ],
+    }
+
+
+@router.post("/{slug}/arena/submit")
+async def submit_contest_arena_code(
+    slug: str,
+    payload: ArenaSubmitRequest,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Submit solution in live contest arena against full judge test suite & update live scoreboard."""
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
+    problem = p_res.scalars().first()
+    if not problem:
+        raise HTTPException(status_code=404, detail="Contest problem not found.")
+
+    samples = getattr(problem, "sample_testcases", None) or []
+    hidden = getattr(problem, "hidden_testcases", None) or []
+    all_raw = samples + hidden
+
+    all_tcs: list[TestCaseSchema] = []
+    for i, s in enumerate(all_raw):
+        all_tcs.append(
+            TestCaseSchema(
+                id=f"tc_{i+1}",
+                name=f"Test {i+1}",
+                stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
+                expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
+                hidden=(i >= len(samples)),
+                weight=1.0,
+            )
+        )
+    if not all_tcs:
+        all_tcs = [TestCaseSchema(id="tc_1", name="Test 1", stdin="", expected_output="")]
+
+    provider = get_judge_provider()
+    exec_result = await provider.execute_batch(
+        language=payload.language,
+        code=payload.code,
+        testcases=all_tcs,
+        time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
+        memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
+        comparison_mode=ComparisonMode.TRIMMED,
+    )
+
+    is_accepted = exec_result.passed_testcases == exec_result.total_testcases
+    verdict_str = "ACCEPTED" if is_accepted else (exec_result.verdict or "WRONG_ANSWER")
+    points_awarded = problem.points if is_accepted else int(problem.points * (exec_result.passed_testcases / max(1, exec_result.total_testcases)))
+
+    # Record contest submission
+    sub = ContestSubmission(
+        contest_id=contest.id,
+        problem_id=problem.id,
+        member_id=current_member.id,
+        handle=current_member.handle or f"cadet_{current_member.id[:6]}",
+        language=str(payload.language),
+        code=payload.code,
+        verdict=verdict_str,
+        passed_testcases=exec_result.passed_testcases,
+        total_testcases=exec_result.total_testcases,
+        execution_time=exec_result.time or 0.0,
+        memory_used=exec_result.memory or 0,
+        points_awarded=points_awarded,
+        submitted_at=now_utc(),
+    )
+    db.add(sub)
+
+    # If accepted, update problem solved_count
+    if is_accepted:
+        problem.solved_count += 1
+
+    # Update or create ScoreboardEntry
+    sb_res = await db.execute(
+        select(ScoreboardEntry).where(
+            ScoreboardEntry.contest_id == contest.id,
+            ScoreboardEntry.member_id == current_member.id,
+        )
+    )
+    sb_entry = sb_res.scalars().first()
+    if not sb_entry:
+        sb_entry = ScoreboardEntry(
+            contest_id=contest.id,
+            member_id=current_member.id,
+            rank=999,
+            handle=current_member.handle or f"cadet_{current_member.id[:6]}",
+            full_name=current_member.full_name or "Cadet",
+            department=current_member.department or "CSE",
+            batch=current_member.batch or "2023-27",
+            division="open",
+            score=points_awarded,
+            solved=1 if is_accepted else 0,
+            penalty_seconds=120,
+            telemetry=[{"problem_index": problem.problem_index, "status": "solved" if is_accepted else "failed", "attempts": 1, "is_first_ac": False}],
+        )
+        db.add(sb_entry)
+    else:
+        if is_accepted:
+            sb_entry.score += points_awarded
+            sb_entry.solved += 1
+
+    await db.commit()
+
+    return {
+        "submission_id": sub.id,
+        "success": exec_result.success,
+        "verdict": verdict_str,
+        "passed_testcases": exec_result.passed_testcases,
+        "total_testcases": exec_result.total_testcases,
+        "points_awarded": points_awarded,
+        "execution_time": exec_result.time,
+        "memory": exec_result.memory,
+        "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({exec_result.passed_testcases}/{exec_result.total_testcases} testcases passed)",
     }

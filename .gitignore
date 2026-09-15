@@ -41,6 +41,7 @@ backend/*.db
 backend/__pycache__/
 backend/*/__pycache__/
 backend/*/*/__pycache__/
+codebox-engine/
 
 # Environment files
 .env

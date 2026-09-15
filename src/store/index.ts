@@ -4,6 +4,7 @@ import portalReducer from "./slices/portalSlice";
 import uiReducer from "./slices/uiSlice";
 import assessmentReducer from "./slices/assessmentSlice";
 import socialReducer from "./slices/socialSlice";
+import contestReducer from "./slices/contestSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,8 +13,9 @@ export const store = configureStore({
     ui: uiReducer,
     assessment: assessmentReducer,
     social: socialReducer,
+    contest: contestReducer,
   },
-  devTools: process.env["NODE_ENV"] !== "production",
+  devTools: import.meta.env.DEV,
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -90,12 +90,40 @@ export const MonacoEditor = memo(function MonacoEditor({
     loadMonaco().then((monaco) => {
       if (!alive || !containerRef.current || editorRef.current) return;
 
+      // Register authentic Chaos Computer Club dark theme
+      monaco.editor.defineTheme("ccc-dark", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [
+          { token: "comment", foreground: "8f918d", fontStyle: "italic" },
+          { token: "keyword", foreground: "c8ff36", fontStyle: "bold" },
+          { token: "identifier", foreground: "eeede5" },
+          { token: "string", foreground: "64d8db" },
+          { token: "number", foreground: "ffb84d" },
+          { token: "type", foreground: "ffffff" },
+          { token: "delimiter", foreground: "8f918d" },
+        ],
+        colors: {
+          "editor.background": "#080808",
+          "editor.foreground": "#eeede5",
+          "editorCursor.foreground": "#c8ff36",
+          "editor.lineHighlightBackground": "#141414",
+          "editorLineNumber.foreground": "#414141",
+          "editorLineNumber.activeForeground": "#c8ff36",
+          "editor.selectionBackground": "#292929",
+          "editor.inactiveSelectionBackground": "#1d1d1d",
+          "editorGutter.background": "#080808",
+          "editorIndentGuide.background1": "#1d1d1d",
+          "editorIndentGuide.activeBackground1": "#414141",
+        },
+      });
+
       const editor = monaco.editor.create(containerRef.current, {
         value: valueRef.current,
         language: LANG_TO_MONACO[languageRef.current] ?? "python",
-        theme: "vs-dark",
+        theme: "ccc-dark",
         fontSize: 13,
-        fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
+        fontFamily: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',
         fontLigatures: true,
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
@@ -148,10 +176,10 @@ export const MonacoEditor = memo(function MonacoEditor({
   }, [language, value]);
 
   return (
-    <div style={{ position: "relative", height, width: "100%", background: "#0d0d0d" }}>
+    <div style={{ position: "relative", height, width: "100%", background: "#080808" }}>
       {!loaded && (
         <div
-          style={{ padding: "1rem", color: "#888", fontFamily: "monospace", fontSize: "0.8125rem" }}
+          style={{ padding: "1rem", color: "#8f918d", fontFamily: "var(--font-mono, monospace)", fontSize: "0.8125rem" }}
         >
           Initializing terminal code editor…
         </div>

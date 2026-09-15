@@ -3,10 +3,10 @@
  * coming off the contest service — no static announcements.
  */
 
-import { Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { CalendarClock, Flag, ListOrdered, Play, Trophy } from "lucide-react";
-import { contestQueries } from "./queries";
+import { contestApi } from "./api";
 import {
   FINALIST_SEATS,
   assessmentClosesAt,
@@ -47,7 +47,7 @@ function eventsFor(contest: ContestSummary): FeedEvent[] {
       at: opens.getTime(),
       title: `${label} — Round 1 opens`,
       body: `Online assessment window ${formatWhen(opens.toISOString())} → ${formatWhen(
-        closes.toISOString(),
+        closes.toISOString()
       )}. One 2-hour attempt.`,
       slug: contest.slug,
       icon: Play,
@@ -85,7 +85,25 @@ function eventsFor(contest: ContestSummary): FeedEvent[] {
 }
 
 export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
-  const { data: contests } = useSuspenseQuery(contestQueries.list());
+  const [contests, setContests] = useState<ContestSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    contestApi.list()
+      .then((data) => {
+        if (active) {
+          setContests(data || []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load contest feed:", err);
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
+
   const now = Date.now();
 
   const events = contests
@@ -93,6 +111,14 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
     .filter((event) => event.at <= now + 14 * 86400000)
     .sort((a, b) => b.at - a.at)
     .slice(0, limit);
+
+  if (loading) {
+    return (
+      <p className="py-8 text-center font-mono text-xs text-[var(--muted)] animate-pulse">
+        Loading contest activity…
+      </p>
+    );
+  }
 
   if (events.length === 0) {
     return (
@@ -103,23 +129,21 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
   }
 
   return (
-    <div className="feed-list">
+    <div className="feed-list space-y-4">
       {events.map((event) => {
         const Icon = event.icon;
         return (
-          <article key={event.key}>
-            <span>{event.kind}</span>
-            <h3>
-              <Link
-                to="/portal/contests/$contestSlug"
-                params={{ contestSlug: event.slug }}
-                search={{ state: "default" }}
-              >
+          <article key={event.key} className="border-b border-[#292929] pb-3 last:border-b-0">
+            <span className="font-mono text-[10px] uppercase text-[var(--accent)] block tracking-wider mb-1">
+              {event.kind}
+            </span>
+            <h3 className="font-bold text-sm text-white hover:text-[var(--accent)] transition-colors">
+              <Link to={`/portal/contests/${event.slug}`}>
                 {event.title}
               </Link>
             </h3>
-            <p>{event.body}</p>
-            <time className="inline-flex items-center gap-1">
+            <p className="text-xs text-neutral-400 mt-0.5">{event.body}</p>
+            <time className="inline-flex items-center gap-1 font-mono text-[10px] text-neutral-500 mt-1">
               <Icon className="size-3" />
               {formatWhen(new Date(event.at).toISOString())}
             </time>

@@ -28,6 +28,16 @@ export type ContestSummary = {
   rules: string[];
   chief_proctors: string[];
   registered: boolean;
+  banner_url?: string | null;
+  assessment?: {
+    id: string;
+    slug: string;
+    title: string;
+    starts_at: string;
+    ends_at: string;
+    duration_minutes: number;
+    is_active: boolean;
+  } | null;
 };
 
 export type ContestProblemPreview = {
@@ -125,3 +135,78 @@ export type ContestPhase =
   | "assessment_closed"
   | "final_live"
   | "complete";
+
+export type ContestArenaProblem = {
+  id: string;
+  contest_id: string;
+  problem_index: string;
+  title: string;
+  topic: string;
+  points: number;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  description: string;
+  input_format: string;
+  output_format: string;
+  constraints: string;
+  time_limit: number;
+  memory_limit: number;
+  starter_codes: Record<string, string>;
+  sample_testcases: Array<{
+    stdin: string;
+    expected_output: string;
+    explanation?: string;
+  }>;
+};
+
+export type ContestArenaData = {
+  contest_id: string;
+  slug: string;
+  title: string;
+  season: string;
+  status: ContestStatus;
+  starts_at: string;
+  ends_at: string;
+  venue: string;
+  environment: string;
+  chief_proctors: string[];
+  assigned_seat: string;
+  pass_code: string | null;
+  check_in_status: string;
+  is_faculty_proctored: boolean;
+  problems: ContestArenaProblem[];
+};
+
+export type ArenaRunResult = {
+  success: boolean;
+  verdict: string;
+  stdout?: string;
+  stderr?: string;
+  compile_output?: string;
+  time?: number;
+  memory?: number;
+  passed_testcases?: number;
+  total_testcases?: number;
+  score?: number;
+  testcase_results?: Array<{
+    testcase_id: string;
+    name: string;
+    passed: boolean;
+    verdict: string;
+    stdout: string;
+    expected_output: string;
+    stderr: string;
+    wall_time_ms: number;
+  }>;
+};
+
+export type ArenaSubmitResult = {
+  submission_id: string;
+  success: boolean;
+  verdict: string;
+  passed_testcases: number;
+  total_testcases: number;
+  points_awarded: number;
+  execution_time?: number;
+  memory?: number;
+  message: string;
+};

@@ -13,7 +13,16 @@ logger = logging.getLogger("ccc.judge")
 
 @lru_cache(maxsize=1)
 def get_judge_provider() -> JudgeProvider:
-    choice = os.getenv("JUDGE_PROVIDER", "docker").strip().lower()
+    choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
+
+    if choice in {"codebox", "code_box", "codebox-engine"}:
+        try:
+            from .codebox_provider import CodeboxProvider
+
+            logger.info("judge provider: codebox execution engine")
+            return CodeboxProvider()
+        except Exception as exc:
+            logger.warning("codebox provider unavailable (%s); falling back to local", exc)
 
     if choice in {"docker", "core", "native", "interleet", "server", "interleet-docker"}:
         try:

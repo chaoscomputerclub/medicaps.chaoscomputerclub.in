@@ -3,7 +3,9 @@
  * Memoized Profile Data Layer + Single Unified Query Instance
  */
 
-import { queryOptions } from "@tanstack/react-query";
+export function queryOptions<T extends Record<string, any>>(opts: T): T {
+  return opts;
+}
 import { getToken, getApiBase, clearToken } from "@/lib/auth";
 import {
   getPublicPortalData,

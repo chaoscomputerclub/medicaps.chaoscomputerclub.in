@@ -9,11 +9,13 @@ Judge providers.
 from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
 from .factory import get_judge_provider
 from .docker_provider import DockerSandboxProvider
+from .codebox_provider import CodeboxProvider
 
 __all__ = [
     "JudgeProvider",
     "ProviderRunRequest",
     "ProviderRunResult",
     "DockerSandboxProvider",
+    "CodeboxProvider",
     "get_judge_provider",
 ]

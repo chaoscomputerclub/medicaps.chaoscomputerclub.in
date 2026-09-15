@@ -30,7 +30,6 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { closeEditProfileModal } from "@/store/slices/uiSlice";
 import { updateProfileThunk } from "@/store/slices/authSlice";
@@ -117,7 +116,6 @@ const BATCHES = ["2022-26", "2023-27", "2024-28", "2025-29", "Faculty / Alumni"]
 
 export function EditProfileModal() {
   const dispatch = useAppDispatch();
-  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditProfileOpen = useAppSelector((state) => state.ui.isEditProfileOpen);
@@ -235,8 +233,6 @@ export function EditProfileModal() {
 
       // Invalidate memoized caches
       invalidateFullProfileCache();
-      queryClient.invalidateQueries({ queryKey: ["portal", "full-profile"] });
-      queryClient.invalidateQueries({ queryKey: ["portal", "leaderboard"] });
 
       toast.success("Competitive profile updated successfully!");
       dispatch(closeEditProfileModal());

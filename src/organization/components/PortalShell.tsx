@@ -1,7 +1,7 @@
 import { EditProfileModal } from "./EditProfileModal";
 import { SocialDrawer } from "./SocialDrawer";
 import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Archive,
   History,
@@ -27,10 +27,8 @@ import { getToken } from "@/lib/auth";
 const links = [
   { to: "/portal", label: "Operations", icon: LayoutDashboard, exact: true },
   { to: "/portal/contests", label: "Contests", icon: Trophy, exact: false },
-  { to: "/portal/my-contests", label: "My contests", icon: History, exact: false },
   { to: "/portal/leaderboard", label: "Leaderboard", icon: Award, exact: true },
   { to: "/portal/problems", label: "Archive", icon: Archive, exact: false },
-  { to: "/portal/verify", label: "Verify proof", icon: ShieldCheck, exact: true },
   { to: "/portal/profile", label: "Profile", icon: UserRound, exact: true },
   { to: "/portal/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
@@ -39,21 +37,23 @@ export function PortalShell() {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const open = useAppSelector((state) => state.ui.sidebarOpen);
   const member = useAppSelector((state) => state.auth.member);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const location = useLocation();
+  const pathname = location.pathname;
 
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      window.location.href = "/auth";
+      navigate("/auth");
       return;
     }
     if (!member) {
       dispatch(fetchCurrentUserThunk());
       dispatch(fetchMyFollowingIdsThunk());
     }
-  }, [dispatch, member]);
+  }, [dispatch, member, navigate]);
 
   const initials = member?.handle
     ? member.handle.slice(0, 2).toUpperCase()
@@ -67,9 +67,9 @@ export function PortalShell() {
       : "??";
 
   const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
-  const isAssessment = cleanPath.includes("/assessment");
+  const isFullscreenWorkspace = cleanPath.includes("/assessment") || cleanPath.includes("/arena");
 
-  if (isAssessment) {
+  if (isFullscreenWorkspace) {
     return (
       <main className="portal-main-assessment">
         <Outlet />
@@ -112,9 +112,6 @@ export function PortalShell() {
               <Link
                 key={item.to}
                 to={item.to}
-                preload="intent"
-                activeOptions={{ exact: item.exact }}
-                activeProps={{ className: "active" }}
                 className={active ? "nav-item active" : "nav-item"}
                 onClick={() => dispatch(setSidebarOpen(false))}
               >

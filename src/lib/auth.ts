@@ -25,8 +25,8 @@ export function getApiBase(): string {
     return `${window.location.origin}/api`;
   }
 
-  // SSR fallback
-  const ssrUrl = process.env["BACKEND_URL"] || process.env["VITE_API_URL"];
+  // Fallback API URL
+  const ssrUrl = (import.meta.env["VITE_API_URL"] as string | undefined);
   if (ssrUrl && ssrUrl.trim()) return ssrUrl.trim().replace(/\/+$/, "");
   return "https://medicaps.chaoscomputerclub.in/api";
 }

@@ -1,4 +1,6 @@
-import { queryOptions } from "@tanstack/react-query";
+function queryOptions<T extends Record<string, any>>(opts: T): T {
+  return opts;
+}
 import { contestApi } from "./api";
 
 const MINUTE = 60 * 1000;
@@ -52,5 +54,11 @@ export const contestQueries = {
       queryKey: ["contest", "participated"],
       queryFn: () => contestApi.participated(),
       staleTime: MINUTE,
+    }),
+  arena: (slug: string) =>
+    queryOptions({
+      queryKey: ["contest", "arena", slug],
+      queryFn: () => contestApi.arena(slug),
+      staleTime: 30 * 1000,
     }),
 };

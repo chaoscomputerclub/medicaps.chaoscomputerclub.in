@@ -3,35 +3,18 @@
  * Zero Static Fixtures — No Trust Client Policy (100% Real-Time Database Queries)
  */
 
-import { createServerFn } from "@tanstack/react-start";
+import { getApiBase, getToken } from "@/lib/auth";
 import type {
   AnnouncementFeedItem,
-  ContestProblem,
-  OfflineContest,
-  ProblemTelemetry,
-  ScoreboardEntry,
-  TrustProof,
-  MemberProfile,
-  RatingHistoryPoint,
-  CampusPass,
-  OfflineBattleResult,
-  Achievement,
   LeaderboardEntry,
 } from "./types";
-
-function getBackendUrl(): string {
-  if (typeof process !== "undefined" && process.env && process.env["BACKEND_URL"]) {
-    return process.env["BACKEND_URL"];
-  }
-  return "https://medicaps-api.chaoscomputerclub.in/api";
-}
 
 /**
  * Real-time public contest, scoreboard, announcement, and verification proofs.
  * Strictly queried from the PostgreSQL database through FastAPI.
  */
-export const getPublicPortalData = createServerFn({ method: "GET" }).handler(async () => {
-  const backendUrl = getBackendUrl();
+export async function getPublicPortalData() {
+  const backendUrl = getApiBase();
 
   const [apiContests, apiAnnouncements, apiProofs] = await Promise.all([
     fetch(`${backendUrl}/contests`)
@@ -72,17 +55,21 @@ export const getPublicPortalData = createServerFn({ method: "GET" }).handler(asy
     announcements: (apiAnnouncements || []) as AnnouncementFeedItem[],
     proofs: (apiProofs || []) as any[],
   };
-});
+}
 
 /**
  * Real-time full member profile, rating trajectory, active pass, and cryptographic proofs.
  * Strictly queried from the database.
  */
-export const getMemberProfileData = createServerFn({ method: "GET" }).handler(async () => {
-  const backendUrl = getBackendUrl();
+export async function getMemberProfileData() {
+  const backendUrl = getApiBase();
+  const token = getToken();
   try {
     const res = await fetch(`${backendUrl}/auth/profile/full`, {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
     });
     if (res.ok) {
       const data = await res.json();
@@ -107,21 +94,21 @@ export const getMemberProfileData = createServerFn({ method: "GET" }).handler(as
     proofs: [],
     achievements: [],
   };
-});
+}
 
 /**
  * Real-time university leaderboard with star division brackets.
  * Strictly queried from the database.
  */
-export const getUniversityLeaderboardData = createServerFn({ method: "GET" }).handler(async () => {
-  const backendUrl = getBackendUrl();
+export async function getUniversityLeaderboardData() {
+  const backendUrl = getApiBase();
   const res = await fetch(`${backendUrl}/leaderboard`).catch(() => null);
   if (res && res.ok) {
     const data = await res.json();
     return data as LeaderboardEntry[];
   }
   return [] as LeaderboardEntry[];
-});
+}
 
 export type RatingBucket = { min: number; max: number; count: number };
 export type RatingDistribution = { total: number; buckets: RatingBucket[] };
@@ -130,12 +117,11 @@ export type RatingDistribution = { total: number; buckets: RatingBucket[] };
  * Real rating distribution from the DB — no static fake curve.
  * Buckets are 50-point ranges; counts reflect real registered members.
  */
-export const getRatingDistribution = createServerFn({ method: "GET" }).handler(async () => {
-  const backendUrl = getBackendUrl();
+export async function getRatingDistribution() {
+  const backendUrl = getApiBase();
   const res = await fetch(`${backendUrl}/leaderboard/distribution`).catch(() => null);
   if (res && res.ok) {
     return (await res.json()) as RatingDistribution;
   }
   return { total: 0, buckets: [] } as RatingDistribution;
-});
-
+}

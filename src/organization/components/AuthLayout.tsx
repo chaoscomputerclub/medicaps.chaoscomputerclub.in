@@ -6,7 +6,7 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { type ReactNode } from "react";
 
 /** Instrumental auth chrome: single unified box card with high-impact typography. */

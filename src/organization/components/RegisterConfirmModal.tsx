@@ -14,8 +14,8 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -49,7 +49,7 @@ export function RegisterConfirmModal({
     if (!isAuthenticated()) {
       toast.error("Please sign in to your Medi-Caps account to register.");
       onOpenChange(false);
-      navigate({ to: "/auth" });
+      navigate("/auth");
       return;
     }
 
