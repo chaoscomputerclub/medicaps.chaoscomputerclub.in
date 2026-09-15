@@ -118,8 +118,11 @@ export function ContestQualifiedPage() {
           <CardContent className="space-y-4">
             {pass && qualified ? (
               <>
-                <div className="flex justify-center bg-white p-4">
-                  <QRCodeSVG value={pass.pass_code} size={168} level="H" />
+                <div className="flex flex-col items-center justify-center bg-white p-5 rounded-none space-y-2">
+                  <QRCodeSVG value={`CCC-PASS:${pass.pass_code}:${pass.seat}:QUALIFIED`} size={176} level="H" />
+                  <span className="font-mono text-[10px] text-black font-bold uppercase tracking-wider">
+                    {pass.pass_code}
+                  </span>
                 </div>
                 <dl className="space-y-2 font-mono text-xs text-[var(--muted)]">
                   <Row label="Pass code" value={pass.pass_code} />
@@ -128,6 +131,14 @@ export function ContestQualifiedPage() {
                   <Row label="Check-in opens" value={formatWhen(pass.check_in_opens_at)} />
                   <Row label="Status" value={pass.status.replace("_", " ")} />
                 </dl>
+                <div className="pt-2">
+                  <Button asChild variant="outline" className="w-full rounded-none border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-black font-mono text-xs uppercase tracking-wider">
+                    <Link to={`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}>
+                      <QrCode className="size-3.5 mr-2" />
+                      Test Proctor Gate Verification
+                    </Link>
+                  </Button>
+                </div>
               </>
             ) : (
               <div className="flex flex-col items-center gap-2 py-12 text-center">

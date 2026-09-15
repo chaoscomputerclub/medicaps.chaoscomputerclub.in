@@ -551,8 +551,8 @@ async def seed_initial_data(db: AsyncSession):
                 output_format="Print a single integer representing the number of valid mirror pairs.",
                 constraints="1 ≤ N ≤ 10^5, string length ≤ 20.", points=100, time_limit=2.0, memory_limit=256,
                 starter_codes=PROB_A_STARTER,
-                sample_testcases=[{"stdin": "4\\nAB\\nBA\\nCD\\nDC", "expected_output": "2", "explanation": "(AB, BA) and (CD, DC) form 2 mirror pairs."}],
-                hidden_testcases=[{"stdin": "2\\nRACECAR\\nRACECAR", "expected_output": "1"}],
+                sample_testcases=[{"stdin": "4\nAB\nBA\nCD\nDC", "expected_output": "2", "explanation": "(AB, BA) and (CD, DC) form 2 mirror pairs."}],
+                hidden_testcases=[{"stdin": "2\nRACECAR\nRACECAR", "expected_output": "1"}],
                 created_at=now,
             ),
             AssessmentProblem(
@@ -562,8 +562,8 @@ async def seed_initial_data(db: AsyncSession):
                 output_format="Print maximum utility as an integer, or -1 if impossible.",
                 constraints="1 ≤ K ≤ 10^4, 1 ≤ M ≤ 10^6.", points=150, time_limit=2.0, memory_limit=256,
                 starter_codes=PROB_B_STARTER,
-                sample_testcases=[{"stdin": "2 10\\n2 5 10\\n3 6 20", "expected_output": "160", "explanation": "Utility = 160."}],
-                hidden_testcases=[{"stdin": "1 10\\n5 12 8", "expected_output": "80"}],
+                sample_testcases=[{"stdin": "2 10\n2 5 10\n3 6 20", "expected_output": "160", "explanation": "Utility = 160."}],
+                hidden_testcases=[{"stdin": "1 10\n5 12 8", "expected_output": "80"}],
                 created_at=now,
             ),
             AssessmentProblem(
@@ -573,8 +573,8 @@ async def seed_initial_data(db: AsyncSession):
                 output_format="Print minimum latency, or -1 if unreachable.",
                 constraints="2 ≤ N ≤ 1000, 1 ≤ M ≤ 5000, 0 ≤ K ≤ 10.", points=250, time_limit=2.0, memory_limit=256,
                 starter_codes=PROB_C_STARTER,
-                sample_testcases=[{"stdin": "4 4 1\\n1 2 10\\n2 4 20\\n1 3 15\\n3 4 15", "expected_output": "20", "explanation": "Path latency = 20."}],
-                hidden_testcases=[{"stdin": "3 3 0\\n1 2 5\\n2 3 5\\n1 3 12", "expected_output": "10"}],
+                sample_testcases=[{"stdin": "4 4 1\n1 2 10\n2 4 20\n1 3 15\n3 4 15", "expected_output": "20", "explanation": "Path latency = 20."}],
+                hidden_testcases=[{"stdin": "3 3 0\n1 2 5\n2 3 5\n1 3 12", "expected_output": "10"}],
                 created_at=now,
             )
         ])

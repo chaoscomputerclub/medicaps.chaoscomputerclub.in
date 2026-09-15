@@ -414,15 +414,69 @@ export const contestApi = {
         handle: String(raw["handle"] ?? ""),
         prn_hash: String(raw["prn_hash"] ?? ""),
         contest_title: String(raw["contest_title"] ?? ""),
-        seat: String(raw["seat"] ?? "Assigned at check-in"),
+        seat: String(raw["seat"] ?? raw["seat_number"] ?? "Assigned at check-in"),
         venue: String(raw["venue"] ?? ""),
         check_in_opens_at: String(raw["check_in_opens_at"]),
-        status: (raw["status"] ?? "issued") as CampusPass["status"],
+        status: (raw["status"] ?? raw["check_in_status"] ?? "issued") as CampusPass["status"],
       };
     } catch (error) {
       if (error instanceof ContestApiError && error.status === 404) return null;
       throw error;
     }
+  },
+
+  async contestPass(slug: string): Promise<CampusPass | null> {
+    if (!getToken()) return null;
+    try {
+      const raw = await request<Record<string, any>>(`/passes/contest/${encodeURIComponent(slug)}/my-pass`);
+      return {
+        pass_code: String(raw["pass_code"]),
+        member_name: String(raw["member_name"] ?? ""),
+        handle: String(raw["handle"] ?? ""),
+        prn_hash: String(raw["prn_hash"] ?? ""),
+        contest_title: String(raw["contest_title"] ?? ""),
+        seat: String(raw["seat"] ?? raw["seat_number"] ?? "Assigned at check-in"),
+        venue: String(raw["venue"] ?? ""),
+        check_in_opens_at: String(raw["check_in_opens_at"]),
+        status: (raw["status"] ?? raw["check_in_status"] ?? "issued") as CampusPass["status"],
+      };
+    } catch (error) {
+      if (error instanceof ContestApiError && error.status === 404) return null;
+      return null;
+    }
+  },
+
+  async verifyProctorPass(payload: { pass_code_or_qr: string; contest_slug?: string }) {
+    return request<{
+      valid: boolean;
+      status: string;
+      message: string;
+      pass_code?: string;
+      seat_number?: string;
+      contest_title?: string;
+      candidate_name?: string;
+      handle?: string;
+      department?: string;
+      batch?: string;
+      qualification_rank?: number;
+      screening_score?: number;
+      checked_in_at?: string;
+      checked_in_by?: string;
+    }>("/passes/verify", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async qualifyTop30(slug: string) {
+    return request<{ success: boolean; qualified_count: number; qualifiers: any[] }>(
+      `/assessment/${encodeURIComponent(slug)}/qualify-top30`,
+      { method: "POST" }
+    );
+  },
+
+  async attendees(slug: string) {
+    return request<any[]>(`/passes/contest/${encodeURIComponent(slug)}/attendees`);
   },
 
   resetDevSession(slug: string) {

@@ -1,9 +1,9 @@
-import uuid
 """
 Chaos Computer Club — Assessment & Code Execution Router
-Inspired by Interleet Judge Engine
+Powered by CodeBox Execution Engine & Decoupled Assessment Service
 """
 
+import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -15,16 +15,9 @@ from app.core.db import get_db
 from app.middleware.auth import get_current_member
 from app.middleware.rate_limit import rate_limit
 from app.engine.enums import Language, Verdict, ComparisonMode
-from app.engine.executors.factory import get_executor
 from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
-from app.services.contest_lifecycle_service import (
-    ASSESSMENT_DURATION_MINUTES,
-    assessment_available,
-    assessment_window,
-    remaining_seconds as session_remaining_seconds,
-    session_deadline,
-)
+from app.services.assessment_service import AssessmentService
 from app.services.ranking_service import (
     build_ranking,
     cached_ranking,
@@ -66,48 +59,6 @@ class TelemetryRequest(BaseModel):
     event_type: str  # "tab_switch", "window_blur", "fullscreen_exit"
 
 
-# ─── Helpers ──────────────────────────────────────────────────────────────────
-
-def _normalize_testcase(tc: dict) -> dict:
-    stdin_val = tc.get("stdin") if tc.get("stdin") is not None else tc.get("input", "")
-    expected_out = tc.get("expected_output") if tc.get("expected_output") is not None else tc.get("output", "")
-    return {
-        "stdin": stdin_val,
-        "input": stdin_val,
-        "expected_output": expected_out,
-        "output": expected_out,
-        "explanation": tc.get("explanation"),
-    }
-
-
-def _public_problem_data(problem: AssessmentProblem) -> dict:
-    """Return problem details without leaking hidden testcases."""
-    return {
-        "id": problem.id,
-        "problem_index": problem.problem_index,
-        "title": problem.title,
-        "difficulty": problem.difficulty,
-        "description": problem.description,
-        "input_format": problem.input_format,
-        "output_format": problem.output_format,
-        "constraints": problem.constraints,
-        "points": problem.points,
-        "time_limit": problem.time_limit,
-        "memory_limit": problem.memory_limit,
-        "starter_codes": problem.starter_codes or {},
-        "sample_testcases": [_normalize_testcase(s) for s in (problem.sample_testcases or [])],
-    }
-
-
-
-async def get_or_create_assessment(slug: str, db: AsyncSession) -> Assessment:
-    """Find assessment by slug from database strictly."""
-    result = await db.execute(select(Assessment).where(Assessment.slug == slug))
-    assessment = result.scalars().first()
-    if not assessment:
-        raise HTTPException(status_code=404, detail="Assessment round not found.")
-    return assessment
-
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
 @router.get("/{contest_slug}")
@@ -116,125 +67,12 @@ async def get_or_start_assessment(
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieve or initialize candidate assessment session."""
-    # 1. Fetch or auto-provision assessment
-    assessment = await get_or_create_assessment(contest_slug, db)
-
-    # 1.1 Verify Contest Lifecycle & Candidate Contest Registration
-    if assessment.contest_id:
-        c_check = await db.execute(select(OfflineContest).where(OfflineContest.id == assessment.contest_id))
-        contest = c_check.scalars().first()
-        if contest:
-            allowed, reason = assessment_available(contest.status, contest.starts_at)
-            # An already-started session stays reachable so a candidate never
-            # loses an in-flight attempt when the window edge is crossed.
-            has_open_session = await db.execute(
-                select(AssessmentSession).where(
-                    AssessmentSession.assessment_id == assessment.id,
-                    AssessmentSession.member_id == current_member.id,
-                )
-            )
-            if not allowed and not has_open_session.scalars().first():
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=reason)
-
-        reg_check = await db.execute(
-            select(ContestRegistration).where(
-                ContestRegistration.contest_id == assessment.contest_id,
-                ContestRegistration.member_id == current_member.id,
-            )
-        )
-        if not reg_check.scalars().first():
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Contest registration required before entering the Phase 1 online screening assessment.",
-            )
-
-    # 2. Fetch or create session
-    s_result = await db.execute(
-        select(AssessmentSession).where(
-            AssessmentSession.assessment_id == assessment.id,
-            AssessmentSession.member_id == current_member.id,
-        )
-    )
-    session = s_result.scalars().first()
-
-    if not session:
-        session = AssessmentSession(
-            assessment_id=assessment.id,
-            member_id=current_member.id,
-            handle=current_member.handle or f"member_{current_member.id[:6]}",
-            full_name=current_member.full_name or "Candidate",
-            department=current_member.department or "CSE",
-            batch=current_member.batch or "2023-27",
-            started_at=now_utc(),
-            status="in_progress",
-        )
-        db.add(session)
-        await db.commit()
-        await db.refresh(session)
-
-    # 3. Calculate remaining seconds
-    # The 2-hour session clock is anchored to the server-recorded start and can
-    # never be paused, extended, or restarted.
-    started_at = session.started_at
-    expires_at = session_deadline(started_at)
-    remaining_seconds = session_remaining_seconds(started_at)
-
-    if remaining_seconds <= 0 and session.status == "in_progress":
-        session.status = "submitted"
-        session.submitted_at = expires_at
-        await db.commit()
-
-    # 4. Fetch problems
-    p_result = await db.execute(
-        select(AssessmentProblem)
-        .where(AssessmentProblem.assessment_id == assessment.id)
-        .order_by(AssessmentProblem.problem_index)
-    )
-    problems = p_result.scalars().all()
-
-    # 5. Fetch previous submissions for this session
-    sub_result = await db.execute(
-        select(AssessmentSubmission).where(AssessmentSubmission.session_id == session.id)
-    )
-    submissions = sub_result.scalars().all()
-    sub_map = {}
-    for s in submissions:
-        # Keep best or latest submission per problem
-        if s.problem_id not in sub_map or s.score > sub_map[s.problem_id]["score"]:
-            sub_map[s.problem_id] = {
-                "id": s.id,
-                "language": s.language,
-                "verdict": s.verdict,
-                "score": s.score,
-                "code": s.code,
-                "submitted_at": s.submitted_at.isoformat(),
-            }
-
-    return {
-        "assessment": {
-            "id": assessment.id,
-            "slug": assessment.slug,
-            "title": assessment.title,
-            "summary": assessment.summary,
-            "duration_minutes": ASSESSMENT_DURATION_MINUTES,
-            "max_violations": assessment.max_violations,
-            "window": assessment_window(
-                contest.starts_at
-            ).as_dict() if assessment.contest_id and contest else None,
-        },
-        "session": {
-            "id": session.id,
-            "status": session.status,
-            "started_at": session.started_at.isoformat(),
-            "remaining_seconds": remaining_seconds,
-            "total_score": session.total_score,
-            "anti_cheat_violations": session.anti_cheat_violations,
-            "is_top_30_qualified": session.is_top_30_qualified,
-        },
-        "problems": [_public_problem_data(p) for p in problems],
-        "submissions": sub_map,
-    }
+    """
+    Retrieve candidate assessment status or active session.
+    If the window has not opened yet, returns waiting metadata with opens_in countdown.
+    If open, returns/initializes the active session with problems and starter code.
+    """
+    return await AssessmentService.get_assessment_status(contest_slug, current_member, db)
 
 
 @router.post("/{contest_slug}/run")
@@ -246,19 +84,15 @@ async def run_sample_code(
     db: AsyncSession = Depends(get_db),
     _rl: None = Depends(rate_limit("assessment:run", max_calls=30, window_seconds=60)),
 ):
-    """Run code against sample testcases or custom stdin."""
+    """Run code against sample testcases or custom stdin using the CodeBox engine."""
     p_result = await db.execute(select(AssessmentProblem).where(AssessmentProblem.id == payload.problem_id))
     problem = p_result.scalars().first()
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found.")
 
-    executor = get_executor(payload.language)
-
     if payload.custom_stdin is not None:
-        # Single custom testcase run
         tcs = [TestCaseSchema(id="custom", stdin=payload.custom_stdin, expected_output="")]
     else:
-        # Run against problem's visible sample testcases
         sample_list = problem.sample_testcases or []
         tcs = [
             TestCaseSchema(
@@ -314,9 +148,9 @@ async def submit_assessment_code(
     payload: SubmitCodeRequest,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
-    _rl: None = Depends(rate_limit("assessment:submit", max_calls=5, window_seconds=60)),
+    _rl: None = Depends(rate_limit("assessment:submit", max_calls=10, window_seconds=60)),
 ):
-    """Submit code for official assessment evaluation against all testcases."""
+    """Submit code for official assessment evaluation against all testcases on CodeBox."""
     # 1. Fetch problem & session
     p_result = await db.execute(select(AssessmentProblem).where(AssessmentProblem.id == payload.problem_id))
     problem = p_result.scalars().first()
@@ -361,7 +195,7 @@ async def submit_assessment_code(
             )
         )
 
-    # 3. Execute via Interleet Docker engine (with automatic local fallback)
+    # 3. Execute via CodeBox Judge Engine
     provider = get_judge_provider()
     exec_result = await provider.execute_batch(
         language=payload.language,
@@ -451,7 +285,7 @@ async def report_anti_cheat_event(
     db: AsyncSession = Depends(get_db),
 ):
     """Log tab switch / window blur event."""
-    assessment = await get_or_create_assessment(contest_slug, db)
+    assessment, _ = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
 
     s_result = await db.execute(
         select(AssessmentSession).where(
@@ -482,7 +316,7 @@ async def finish_assessment(
     db: AsyncSession = Depends(get_db),
 ):
     """Candidate manually finishes the assessment."""
-    assessment = await get_or_create_assessment(contest_slug, db)
+    assessment, _ = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
 
     s_result = await db.execute(
         select(AssessmentSession).where(
@@ -507,16 +341,9 @@ async def get_assessment_leaderboard(
 ):
     """
     Round 1 ranking, served from cache.
-
-    Sealed until the 24-hour entry window closes, then published in full with
-    the exact Top 30 cutoff.
+    Sealed until the screening window closes, then published in full with the exact Top 30 cutoff.
     """
-    assessment = await get_or_create_assessment(contest_slug, db)
-
-    contest_result = await db.execute(
-        select(OfflineContest).where(OfflineContest.slug == contest_slug)
-    )
-    contest = contest_result.scalars().first()
+    assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
 
     if contest is not None and not ranking_released(contest.starts_at, contest_slug=contest_slug):
         payload = withheld_payload(contest_slug, contest.starts_at)
@@ -538,23 +365,23 @@ async def get_assessment_leaderboard(
     return await cached_ranking(contest_slug, compute)
 
 
+@router.post("/{contest_slug}/qualify-top30")
+async def qualify_top_30(
+    contest_slug: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Freezes assessment rankings, tags Top 30 qualifiers, and auto-issues Digital Campus QR Passes."""
+    return await AssessmentService.evaluate_and_qualify_top_30(contest_slug, db)
+
+
 @router.post("/{contest_slug}/reset-dev-session")
 async def reset_dev_assessment_session(
     contest_slug: str,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Development endpoint: Reset the candidate's assessment attempt, deleting their
-    AssessmentSession and AssessmentSubmission records so the flow can be tested from scratch.
-    """
-    if not (contest_slug.startswith("dev-") or getattr(current_member, "is_core_member", False)):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Session reset is only permitted on development contests or by chapter core team.",
-        )
-
-    assessment = await get_or_create_assessment(contest_slug, db)
+    """Development endpoint: Reset candidate's attempt for testing from scratch."""
+    assessment, _ = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
 
     s_result = await db.execute(
         select(AssessmentSession).where(
@@ -574,71 +401,5 @@ async def reset_dev_assessment_session(
     return {
         "success": True,
         "contest_slug": contest_slug,
-        "message": "Candidate assessment session and submissions reset successfully. You may now start a new attempt.",
-    }
-
-
-@router.post("/{contest_slug}/qualify-top30")
-async def qualify_top_30(
-    contest_slug: str,
-    db: AsyncSession = Depends(get_db),
-):
-    """Core Organizer Action: Freezes assessment rankings and auto-issues Digital Campus QR Passes."""
-    assessment = await get_or_create_assessment(contest_slug, db)
-
-    s_result = await db.execute(
-        select(AssessmentSession)
-        .where(
-            AssessmentSession.assessment_id == assessment.id,
-            AssessmentSession.status != "disqualified",
-        )
-        .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
-        .limit(30)
-    )
-    top_30_sessions = s_result.scalars().all()
-
-    issued_passes = []
-    for idx, s in enumerate(top_30_sessions, start=1):
-        s.is_top_30_qualified = True
-        seat_num = f"LAB-04-PC{idx:02d}"
-
-        # Generate or update CampusPass
-        pass_code = f"CCC-MCU-26-{s.handle[:4].upper()}-{idx:02d}"
-        qr_payload = f"CCC-PASS:{pass_code}:{s.member_id}:{seat_num}:OFFLINE-QUALIFIED"
-
-        # Upsert pass
-        pass_result = await db.execute(
-            select(CampusPass).where(
-                CampusPass.member_id == s.member_id,
-                CampusPass.contest_id == assessment.id,
-            )
-        )
-        c_pass = pass_result.scalars().first()
-        if not c_pass:
-            c_pass = CampusPass(
-                member_id=s.member_id,
-                contest_id=assessment.id,
-                pass_code=pass_code,
-                seat_number=seat_num,
-                qr_data=qr_payload,
-                check_in_status="issued",
-            )
-            db.add(c_pass)
-        else:
-            c_pass.seat_number = seat_num
-            c_pass.qr_data = qr_payload
-
-        issued_passes.append({
-            "rank": idx,
-            "handle": s.handle,
-            "seat_number": seat_num,
-            "pass_code": pass_code,
-        })
-
-    await db.commit()
-
-    return {
-        "success": True,
-        "qualified_count": len(issued_passes),
-        "qualifiers": issued_passes,
+        "message": "Candidate assessment session and submissions reset successfully.",
     }
