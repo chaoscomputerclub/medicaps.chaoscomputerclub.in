@@ -108,6 +108,7 @@ echo -e "${GREEN}✓ Services deployed and restarted successfully.${NC}"
 # STEP 5: Live Production Health Check
 # ------------------------------------------------------------------------------
 echo -e "\n${BLUE}[5/5] Validating live production endpoints...${NC}"
+sleep 3
 
 API_RESP=$(curl -s --max-time 10 https://medicaps-api.chaoscomputerclub.in/api/health || echo "FAILED")
 echo -e "Backend Health: ${CYAN}${API_RESP}${NC}"
