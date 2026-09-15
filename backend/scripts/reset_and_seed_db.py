@@ -1,19 +1,20 @@
 """
-Chaos Computer Club India — Database Reset & Seeding Utility
-Drops all tables, creates fresh schemas with all columns, and seeds official contest & assessment data.
+Chaos Computer Club India — Database Clean Reset Utility
+Drops all tables, creates fresh empty schemas with zero mock or static data.
 """
 
 import asyncio
 import sys
 import os
 
-from app.core.db import engine, AsyncSessionLocal, Base
-from app.services.seed_service import seed_initial_data
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from app.core.db import engine, Base
 
 
-async def reset_and_seed():
+async def reset_db():
     print("=" * 60)
-    print("⚡ [CCC] Database Clean Drop, Schema Recreate & Fresh Seeding")
+    print("⚡ [CCC] Database Clean Drop & Fresh Empty Schema Creation")
     print("=" * 60)
 
     # 1. Drop all tables
@@ -23,21 +24,15 @@ async def reset_and_seed():
     print("  ✓ All tables dropped successfully.")
 
     # 2. Recreate all tables
-    print("\n📦 Step 2: Creating all tables with updated schema...")
+    print("\n📦 Step 2: Creating all tables with clean schema...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print("  ✓ Tables created successfully.")
-
-    # 3. Seed initial data
-    print("\n🌱 Step 3: Seeding official contests, assessments, problems & testcases...")
-    async with AsyncSessionLocal() as session:
-        await seed_initial_data(session)
-    print("  ✓ Official data seeded successfully.")
+    print("  ✓ Tables created successfully (Zero static data).")
 
     print("\n" + "=" * 60)
-    print("🎉 DATABASE HAS BEEN CLEANLY DROPPED, RECREATED & SEEDED!")
+    print("🎉 DATABASE HAS BEEN CLEANLY RECREATED IN PURE STATE!")
     print("=" * 60)
 
 
 if __name__ == "__main__":
-    asyncio.run(reset_and_seed())
+    asyncio.run(reset_db())

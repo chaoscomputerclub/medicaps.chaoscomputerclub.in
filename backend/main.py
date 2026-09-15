@@ -20,15 +20,10 @@ from app.api.v1.router import api_router_v1
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan: initialize database tables and seed realistic data on start."""
+    """Application lifespan: initialize database tables with zero static/mock data."""
     print(f"⚡ Starting {settings.PROJECT_NAME} (v{settings.VERSION})...")
     await init_db()
-    async with AsyncSessionLocal() as session:
-        try:
-            await seed_database(session)
-        except Exception as e:
-            print(f"Notice during seed_database: {e}")
-    print("✓ Database verified & initialized successfully.")
+    print("✓ Database verified & initialized successfully (clean state).")
 
     # ── Production background tasks ──────────────────────────────────────────
     bg_tasks = start_background_tasks(AsyncSessionLocal)

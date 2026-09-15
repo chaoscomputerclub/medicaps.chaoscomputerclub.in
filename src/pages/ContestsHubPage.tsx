@@ -122,54 +122,31 @@ export function ContestsHubPage() {
 
   // Upcoming Weekly Contest (Hero Card 1)
   const upcomingWeekly = useMemo(() => {
-    return (
-      upcomingContests.find((c) => c.cadence === "weekly") || {
-        id: "ccc-weekly-42",
-        slug: "ccc-weekly-42",
-        title: "CCC Medi-Caps Weekly Contest 42",
-        cadence: "weekly" as const,
-        edition: 42,
-        starts_at: new Date(Date.now() + 2 * 86400000).toISOString(),
-        ends_at: new Date(Date.now() + 2 * 86400000 + 7200000).toISOString(),
-        registered_count: 142,
-        problem_count: 4,
-        registered: false,
-        summary: "Weekly Sunday morning algorithmic showdown for Medi-Caps cadets. Top 30 advance to lab finals.",
-        venue: "Computing Complex · Lab Block 04",
-      }
-    );
+    return upcomingContests.find((c) => c.cadence === "weekly") || null;
   }, [upcomingContests]);
 
   // Upcoming Biweekly Contest (Hero Card 2)
   const upcomingBiweekly = useMemo(() => {
-    return (
-      upcomingContests.find((c) => c.cadence === "biweekly") || {
-        id: "ccc-biweekly-18",
-        slug: "ccc-biweekly-18",
-        title: "CCC Medi-Caps Biweekly Contest 18",
-        cadence: "biweekly" as const,
-        edition: 18,
-        starts_at: new Date(Date.now() + 5 * 86400000).toISOString(),
-        ends_at: new Date(Date.now() + 5 * 86400000 + 7200000).toISOString(),
-        registered_count: 98,
-        problem_count: 4,
-        registered: false,
-        summary: "Biweekly Saturday night algorithmic clash. Air-gapped campus final for Top 30 qualifiers.",
-        venue: "Computing Complex · Lab Block 04",
-      }
-    );
+    return upcomingContests.find((c) => c.cadence === "biweekly") || null;
   }, [upcomingContests]);
 
-  // Timers for the 2 hero cards
+  // Other upcoming contests
+  const otherUpcomingContests = useMemo(() => {
+    return upcomingContests.filter((c) => c !== upcomingWeekly && c !== upcomingBiweekly);
+  }, [upcomingContests, upcomingWeekly, upcomingBiweekly]);
+
+  // Timers for the hero cards
   const weeklyCountdown = useCountdown(upcomingWeekly?.starts_at);
   const biweeklyCountdown = useCountdown(upcomingBiweekly?.starts_at);
 
   const isWeeklyRegistered = useMemo(() => {
-    return Boolean(upcomingWeekly?.registered || myParticipations.some((p) => p.contest_slug === upcomingWeekly?.slug));
+    if (!upcomingWeekly) return false;
+    return Boolean(upcomingWeekly.registered || myParticipations.some((p) => p.contest_slug === upcomingWeekly.slug));
   }, [upcomingWeekly, myParticipations]);
 
   const isBiweeklyRegistered = useMemo(() => {
-    return Boolean(upcomingBiweekly?.registered || myParticipations.some((p) => p.contest_slug === upcomingBiweekly?.slug));
+    if (!upcomingBiweekly) return false;
+    return Boolean(upcomingBiweekly.registered || myParticipations.some((p) => p.contest_slug === upcomingBiweekly.slug));
   }, [upcomingBiweekly, myParticipations]);
 
   // Check if user is registered for either upcoming contest or has an active assessment
@@ -179,7 +156,7 @@ export function ContestsHubPage() {
 
   // The active/next assessment for the user
   const assessmentInfo = useMemo(() => {
-    const contest = registeredUpcomingContest || upcomingWeekly;
+    const contest = registeredUpcomingContest || upcomingWeekly || upcomingBiweekly || upcomingContests[0];
     if (!contest) return null;
 
     const contestStart = new Date(contest.starts_at).getTime();
@@ -214,7 +191,7 @@ export function ContestsHubPage() {
         minute: "2-digit",
       }),
     };
-  }, [registeredUpcomingContest, upcomingWeekly, myParticipations]);
+  }, [registeredUpcomingContest, upcomingWeekly, upcomingBiweekly, upcomingContests, myParticipations]);
 
   const assessmentUnlockTimer = useCountdown(
     assessmentInfo && assessmentInfo.isUpcoming ? new Date(assessmentInfo.assessOpen).toISOString() : null
@@ -276,7 +253,7 @@ export function ContestsHubPage() {
         </div>
       </header>
 
-      {/* ─── Section 1: LeetCode-Style Upcoming Contests (2 Hero Cards) ─ */}
+      {/* ─── Section 1: LeetCode-Style Upcoming Contests ───────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider text-foreground">
@@ -285,255 +262,339 @@ export function ContestsHubPage() {
           <span className="font-mono text-xs text-muted-foreground">Real-time Registration & Clocks</span>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Card 1: Weekly Contest */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-primary/50 hover:shadow-primary/5">
-            <div className="absolute right-0 top-0 h-28 w-28 -translate-y-8 translate-x-8 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-colors" />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="rounded-none border-primary/40 bg-primary/10 font-mono text-[11px] font-bold text-primary">
-                    WEEKLY
-                  </Badge>
-                  <span className="font-mono text-xs text-muted-foreground">#{upcomingWeekly.edition ?? 42}</span>
-                </div>
-                <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
-                  <Users className="size-3.5" /> {upcomingWeekly.registered_count} Registered
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                  {upcomingWeekly.title}
-                </h3>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                  {upcomingWeekly.summary || "Sunday morning algorithmic showdown for Medi-Caps cadets."}
-                </p>
-              </div>
-
-              {/* Timing & Clock */}
-              <div className="rounded-none border border-border/80 bg-background/60 p-4">
-                <div className="flex items-center justify-between border-b border-border/60 pb-2 text-xs">
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar className="size-3.5 text-primary" /> Starts At
-                  </span>
-                  <span className="font-mono font-medium text-foreground">
-                    {new Date(upcomingWeekly.starts_at).toLocaleString("en-IN", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-
-                <div className="pt-3">
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Contest Countdown
-                    </span>
-                    <span className="font-mono text-[11px] text-primary">Live Ticking</span>
-                  </div>
-
-                  <div className="mt-2 grid grid-cols-4 gap-2 text-center">
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-foreground">
-                        {String(weeklyCountdown.days).padStart(2, "0")}
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Days</div>
-                    </div>
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-foreground">
-                        {String(weeklyCountdown.hours).padStart(2, "0")}
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Hours</div>
-                    </div>
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-foreground">
-                        {String(weeklyCountdown.minutes).padStart(2, "0")}
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Mins</div>
-                    </div>
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-primary">
-                        {String(weeklyCountdown.seconds).padStart(2, "0")}
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Secs</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Clock className="size-3.5" /> 2 Hours</span>
-                <span>·</span>
-                <span className="flex items-center gap-1"><Code2 className="size-3.5" /> 4 Problems</span>
-                <span>·</span>
-                <span className="flex items-center gap-1"><Award className="size-3.5" /> Rating Change</span>
-              </div>
+        {upcomingContests.length === 0 ? (
+          <div className="relative overflow-hidden border border-border bg-card p-8 text-center space-y-4 shadow-sm">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-none bg-primary/10 border border-primary/30">
+              <Calendar className="size-6 text-primary" />
             </div>
-
-            {/* Registration CTA */}
-            <div className="mt-6 flex items-center gap-3">
-              {isWeeklyRegistered ? (
-                <div className="flex w-full items-center gap-2">
-                  <Button
-                    onClick={() => {
-                      setConfirmContestSlug(upcomingWeekly.slug);
-                      setConfirmContestTitle(upcomingWeekly.title);
-                      setAssessmentConfirmOpen(true);
-                    }}
-                    className="flex-1 rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
-                  >
-                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
-                  </Button>
-                  <Button asChild variant="outline" className="rounded-none font-mono text-xs">
-                    <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex w-full items-center gap-2">
-                  <Button
-                    onClick={() => handleRegister(upcomingWeekly.slug)}
-                    disabled={registeringSlug === upcomingWeekly.slug}
-                    className="flex-1 rounded-none font-mono text-xs font-bold uppercase tracking-wider"
-                  >
-                    {registeringSlug === upcomingWeekly.slug ? "REGISTERING..." : "REGISTER NOW"}
-                  </Button>
-                  <Button asChild variant="outline" className="rounded-none font-mono text-xs">
-                    <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
-                  </Button>
-                </div>
-              )}
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-foreground font-mono uppercase tracking-tight">
+                No Scheduled Contests Currently
+              </h3>
+              <p className="max-w-md mx-auto text-xs text-muted-foreground">
+                Official contests are announced ahead of the live screening rounds. Practice past problem sets or check standings in the university leaderboard.
+              </p>
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                <Link to="/portal/problems">Explore Problem Archive</Link>
+              </Button>
+              <Button asChild variant="ghost" className="rounded-none font-mono text-xs">
+                <Link to="/portal/leaderboard">View Leaderboard</Link>
+              </Button>
             </div>
           </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Card 1: Weekly Contest if present */}
+            {upcomingWeekly && (
+              <div className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-primary/50 hover:shadow-primary/5">
+                <div className="absolute right-0 top-0 h-28 w-28 -translate-y-8 translate-x-8 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-colors" />
 
-          {/* Card 2: Biweekly Contest */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-cyan-500/50 hover:shadow-cyan-500/5">
-            <div className="absolute right-0 top-0 h-28 w-28 -translate-y-8 translate-x-8 rounded-full bg-cyan-500/5 blur-2xl group-hover:bg-cyan-500/10 transition-colors" />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="rounded-none border-cyan-500/40 bg-cyan-500/10 font-mono text-[11px] font-bold text-cyan-400">
-                    BIWEEKLY
-                  </Badge>
-                  <span className="font-mono text-xs text-muted-foreground">#{upcomingBiweekly.edition ?? 18}</span>
-                </div>
-                <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
-                  <Users className="size-3.5" /> {upcomingBiweekly.registered_count} Registered
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-cyan-400">
-                  {upcomingBiweekly.title}
-                </h3>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                  {upcomingBiweekly.summary || "Saturday night algorithmic clash. Air-gapped campus final for Top 30."}
-                </p>
-              </div>
-
-              {/* Timing & Clock */}
-              <div className="rounded-none border border-border/80 bg-background/60 p-4">
-                <div className="flex items-center justify-between border-b border-border/60 pb-2 text-xs">
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar className="size-3.5 text-cyan-400" /> Starts At
-                  </span>
-                  <span className="font-mono font-medium text-foreground">
-                    {new Date(upcomingBiweekly.starts_at).toLocaleString("en-IN", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-
-                <div className="pt-3">
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Contest Countdown
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="rounded-none border-primary/40 bg-primary/10 font-mono text-[11px] font-bold text-primary">
+                        WEEKLY
+                      </Badge>
+                      <span className="font-mono text-xs text-muted-foreground">#{upcomingWeekly.edition ?? "--"}</span>
+                    </div>
+                    <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="size-3.5" /> {upcomingWeekly.registered_count} Registered
                     </span>
-                    <span className="font-mono text-[11px] text-cyan-400">Live Ticking</span>
                   </div>
 
-                  <div className="mt-2 grid grid-cols-4 gap-2 text-center">
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-foreground">
-                        {String(biweeklyCountdown.days).padStart(2, "0")}
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Days</div>
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                      {upcomingWeekly.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {upcomingWeekly.summary || "Sunday morning algorithmic showdown for Medi-Caps cadets."}
+                    </p>
+                  </div>
+
+                  {/* Timing & Clock */}
+                  <div className="rounded-none border border-border/80 bg-background/60 p-4">
+                    <div className="flex items-center justify-between border-b border-border/60 pb-2 text-xs">
+                      <span className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="size-3.5 text-primary" /> Starts At
+                      </span>
+                      <span className="font-mono font-medium text-foreground">
+                        {new Date(upcomingWeekly.starts_at).toLocaleString("en-IN", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-foreground">
-                        {String(biweeklyCountdown.hours).padStart(2, "0")}
+
+                    <div className="pt-3">
+                      <div className="flex items-baseline justify-between">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                          Contest Countdown
+                        </span>
+                        <span className="font-mono text-[11px] text-primary">Live Ticking</span>
                       </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Hours</div>
-                    </div>
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-foreground">
-                        {String(biweeklyCountdown.minutes).padStart(2, "0")}
+
+                      <div className="mt-2 grid grid-cols-4 gap-2 text-center">
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-foreground">
+                            {String(weeklyCountdown.days).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Days</div>
+                        </div>
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-foreground">
+                            {String(weeklyCountdown.hours).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Hours</div>
+                        </div>
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-foreground">
+                            {String(weeklyCountdown.minutes).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Mins</div>
+                        </div>
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-primary">
+                            {String(weeklyCountdown.seconds).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Secs</div>
+                        </div>
                       </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Mins</div>
-                    </div>
-                    <div className="rounded-none border border-border bg-card/90 py-1.5">
-                      <div className="font-mono text-lg font-black text-cyan-400">
-                        {String(biweeklyCountdown.seconds).padStart(2, "0")}
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Secs</div>
                     </div>
                   </div>
+
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock className="size-3.5" /> 2 Hours</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><Code2 className="size-3.5" /> {upcomingWeekly.problem_count || 4} Problems</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><Award className="size-3.5" /> Rating Change</span>
+                  </div>
+                </div>
+
+                {/* Registration CTA */}
+                <div className="mt-6 flex items-center gap-3">
+                  {isWeeklyRegistered ? (
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        onClick={() => {
+                          setConfirmContestSlug(upcomingWeekly.slug);
+                          setConfirmContestTitle(upcomingWeekly.title);
+                          setAssessmentConfirmOpen(true);
+                        }}
+                        className="flex-1 rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
+                      >
+                        <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
+                      </Button>
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                        <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        onClick={() => handleRegister(upcomingWeekly.slug)}
+                        disabled={registeringSlug === upcomingWeekly.slug}
+                        className="flex-1 rounded-none font-mono text-xs font-bold uppercase tracking-wider"
+                      >
+                        {registeringSlug === upcomingWeekly.slug ? "REGISTERING..." : "REGISTER NOW"}
+                      </Button>
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                        <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
+            )}
 
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Clock className="size-3.5" /> 2 Hours</span>
-                <span>·</span>
-                <span className="flex items-center gap-1"><Code2 className="size-3.5" /> 4 Problems</span>
-                <span>·</span>
-                <span className="flex items-center gap-1"><Award className="size-3.5" /> Rating Change</span>
+            {/* Card 2: Biweekly Contest if present */}
+            {upcomingBiweekly && (
+              <div className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-cyan-500/50 hover:shadow-cyan-500/5">
+                <div className="absolute right-0 top-0 h-28 w-28 -translate-y-8 translate-x-8 rounded-full bg-cyan-500/5 blur-2xl group-hover:bg-cyan-500/10 transition-colors" />
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="rounded-none border-cyan-500/40 bg-cyan-500/10 font-mono text-[11px] font-bold text-cyan-400">
+                        BIWEEKLY
+                      </Badge>
+                      <span className="font-mono text-xs text-muted-foreground">#{upcomingBiweekly.edition ?? "--"}</span>
+                    </div>
+                    <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="size-3.5" /> {upcomingBiweekly.registered_count} Registered
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-cyan-400">
+                      {upcomingBiweekly.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {upcomingBiweekly.summary || "Saturday night algorithmic clash. Air-gapped campus final for Top 30."}
+                    </p>
+                  </div>
+
+                  {/* Timing & Clock */}
+                  <div className="rounded-none border border-border/80 bg-background/60 p-4">
+                    <div className="flex items-center justify-between border-b border-border/60 pb-2 text-xs">
+                      <span className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="size-3.5 text-cyan-400" /> Starts At
+                      </span>
+                      <span className="font-mono font-medium text-foreground">
+                        {new Date(upcomingBiweekly.starts_at).toLocaleString("en-IN", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="pt-3">
+                      <div className="flex items-baseline justify-between">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                          Contest Countdown
+                        </span>
+                        <span className="font-mono text-[11px] text-cyan-400">Live Ticking</span>
+                      </div>
+
+                      <div className="mt-2 grid grid-cols-4 gap-2 text-center">
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-foreground">
+                            {String(biweeklyCountdown.days).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Days</div>
+                        </div>
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-foreground">
+                            {String(biweeklyCountdown.hours).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Hours</div>
+                        </div>
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-foreground">
+                            {String(biweeklyCountdown.minutes).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Mins</div>
+                        </div>
+                        <div className="rounded-none border border-border bg-card/90 py-1.5">
+                          <div className="font-mono text-lg font-black text-cyan-400">
+                            {String(biweeklyCountdown.seconds).padStart(2, "0")}
+                          </div>
+                          <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Secs</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock className="size-3.5" /> 2 Hours</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><Code2 className="size-3.5" /> {upcomingBiweekly.problem_count || 4} Problems</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><Award className="size-3.5" /> Rating Change</span>
+                  </div>
+                </div>
+
+                {/* Registration CTA */}
+                <div className="mt-6 flex items-center gap-3">
+                  {isBiweeklyRegistered ? (
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        onClick={() => {
+                          setConfirmContestSlug(upcomingBiweekly.slug);
+                          setConfirmContestTitle(upcomingBiweekly.title);
+                          setAssessmentConfirmOpen(true);
+                        }}
+                        className="flex-1 rounded-none bg-cyan-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-300"
+                      >
+                        <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
+                      </Button>
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                        <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        onClick={() => handleRegister(upcomingBiweekly.slug)}
+                        disabled={registeringSlug === upcomingBiweekly.slug}
+                        className="flex-1 rounded-none bg-cyan-500 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-400"
+                      >
+                        {registeringSlug === upcomingBiweekly.slug ? "REGISTERING..." : "REGISTER NOW"}
+                      </Button>
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                        <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Registration CTA */}
-            <div className="mt-6 flex items-center gap-3">
-              {isBiweeklyRegistered ? (
-                <div className="flex w-full items-center gap-2">
+            {/* Other upcoming contests */}
+            {otherUpcomingContests.map((contest) => (
+              <div
+                key={contest.slug}
+                className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-primary/50"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="rounded-none font-mono text-[11px] font-bold uppercase">
+                      {contest.cadence}
+                    </Badge>
+                    <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="size-3.5" /> {contest.registered_count} Registered
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                      {contest.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {contest.summary}
+                    </p>
+                  </div>
+
+                  <div className="rounded-none border border-border/80 bg-background/60 p-4 text-xs flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="size-3.5 text-primary" /> Starts At
+                    </span>
+                    <span className="font-mono font-medium text-foreground">
+                      {new Date(contest.starts_at).toLocaleString("en-IN", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center gap-3">
                   <Button
-                    onClick={() => {
-                      setConfirmContestSlug(upcomingBiweekly.slug);
-                      setConfirmContestTitle(upcomingBiweekly.title);
-                      setAssessmentConfirmOpen(true);
-                    }}
-                    className="flex-1 rounded-none bg-cyan-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-300"
+                    onClick={() => handleRegister(contest.slug)}
+                    disabled={registeringSlug === contest.slug || contest.registered}
+                    className="flex-1 rounded-none font-mono text-xs font-bold uppercase"
                   >
-                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
+                    {contest.registered ? "REGISTERED" : "REGISTER NOW"}
                   </Button>
                   <Button asChild variant="outline" className="rounded-none font-mono text-xs">
-                    <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
+                    <Link to={`/portal/contests/${contest.slug}`}>DETAILS</Link>
                   </Button>
                 </div>
-              ) : (
-                <div className="flex w-full items-center gap-2">
-                  <Button
-                    onClick={() => handleRegister(upcomingBiweekly.slug)}
-                    disabled={registeringSlug === upcomingBiweekly.slug}
-                    className="flex-1 rounded-none bg-cyan-500 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-400"
-                  >
-                    {registeringSlug === upcomingBiweekly.slug ? "REGISTERING..." : "REGISTER NOW"}
-                  </Button>
-                  <Button asChild variant="outline" className="rounded-none font-mono text-xs">
-                    <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
-                  </Button>
-                </div>
-              )}
-            </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </section>
 
       {/* ─── Section 2: Dedicated Online Assessment Screening Layer ───── */}
@@ -557,7 +618,9 @@ export function ContestsHubPage() {
                   ? "Screening Assessment Attempt Completed"
                   : assessmentInfo?.isOpen
                     ? "Phase 1 Online Screening Assessment is LIVE"
-                    : "Screening Assessment Unlocks 24h Before Contest"}
+                    : assessmentInfo?.isUpcoming
+                      ? "Screening Assessment Unlocks 24h Before Contest"
+                      : "Campus Online Screening Layer"}
               </h3>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
                 All registered cadets take an online 2-hour proctored assessment in our browser sandbox.
@@ -588,15 +651,26 @@ export function ContestsHubPage() {
 
           {/* Dynamic Assessment Action Box */}
           <div className="flex flex-col items-start gap-4 rounded-none border border-border bg-background/80 p-5 lg:min-w-[340px] lg:items-end">
-            {assessmentInfo?.hasTaken ? (
+            {!assessmentInfo ? (
+              <div className="w-full space-y-3 text-center">
+                <p className="text-xs text-muted-foreground">
+                  No active screening window currently open.
+                </p>
+                <Button asChild variant="outline" className="w-full rounded-none font-mono text-xs">
+                  <Link to="/portal/problems">Explore Practice Problems</Link>
+                </Button>
+              </div>
+            ) : assessmentInfo.hasTaken ? (
               <div className="w-full space-y-3">
                 <div className="flex items-center justify-between border-b border-border pb-2">
                   <span className="font-mono text-xs text-muted-foreground">Your Score</span>
-                  <span className="font-mono text-lg font-black text-primary">{assessmentInfo.score ?? 280} / 300</span>
+                  <span className="font-mono text-lg font-black text-primary">{assessmentInfo.score ?? 0} pts</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-muted-foreground">Standing</span>
-                  <span className="font-mono text-sm font-bold text-foreground">Rank #{assessmentInfo.rank ?? 12}</span>
+                  <span className="font-mono text-sm font-bold text-foreground">
+                    {assessmentInfo.rank ? `Rank #${assessmentInfo.rank}` : "Score Recorded"}
+                  </span>
                 </div>
                 {assessmentInfo.isTop30 ? (
                   <div className="mt-2 space-y-2">
@@ -627,9 +701,8 @@ export function ContestsHubPage() {
                 </div>
                 <Button
                   onClick={() => {
-                    const c = registeredUpcomingContest || upcomingWeekly;
-                    setConfirmContestSlug(c.slug);
-                    setConfirmContestTitle(c.title);
+                    setConfirmContestSlug(assessmentInfo.contest.slug);
+                    setConfirmContestTitle(assessmentInfo.contest.title);
                     setAssessmentConfirmOpen(true);
                   }}
                   className="w-full rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90 shadow-md"
@@ -640,7 +713,7 @@ export function ContestsHubPage() {
                   Full-screen distraction-free IDE with live testcase execution.
                 </p>
               </div>
-            ) : assessmentInfo?.isOpen ? (
+            ) : assessmentInfo.isOpen ? (
               <div className="w-full space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-red-400 animate-pulse">
@@ -661,7 +734,7 @@ export function ContestsHubPage() {
                   Full-screen anti-cheat & Monaco editor active upon entry.
                 </p>
               </div>
-            ) : assessmentInfo?.isUpcoming ? (
+            ) : assessmentInfo.isUpcoming ? (
               <div className="w-full space-y-3">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
@@ -680,8 +753,8 @@ export function ContestsHubPage() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => handleRegister(upcomingWeekly.slug)}
-                  disabled={registeringSlug === upcomingWeekly.slug}
+                  onClick={() => handleRegister(assessmentInfo.contest.slug)}
+                  disabled={registeringSlug === assessmentInfo.contest.slug}
                   className="w-full rounded-none font-mono text-xs font-bold uppercase tracking-wider"
                 >
                   <Sparkles className="mr-1.5 size-3.5" /> REGISTER TO UNLOCK
@@ -696,11 +769,11 @@ export function ContestsHubPage() {
                   Register for an upcoming contest to enter the screening pipeline.
                 </p>
                 <Button
-                  onClick={() => handleRegister(upcomingWeekly.slug)}
-                  disabled={registeringSlug === upcomingWeekly.slug}
+                  onClick={() => handleRegister(assessmentInfo.contest.slug)}
+                  disabled={registeringSlug === assessmentInfo.contest.slug}
                   className="w-full rounded-none font-mono text-xs font-bold uppercase tracking-wider"
                 >
-                  {registeringSlug === upcomingWeekly.slug ? "REGISTERING..." : "REGISTER FOR SCREENING"}
+                  {registeringSlug === assessmentInfo.contest.slug ? "REGISTERING..." : "REGISTER FOR SCREENING"}
                 </Button>
               </div>
             )}
@@ -861,14 +934,21 @@ export function ContestsHubPage() {
                     <Trophy className="mx-auto size-8 text-muted-foreground" />
                     <h4 className="text-base font-bold text-foreground">No Participations Recorded Yet</h4>
                     <p className="max-w-md mx-auto text-xs text-muted-foreground">
-                      You haven't attended any contests or screening rounds yet. Register for Weekly Contest 42 above to earn your place on the university leaderboard!
+                      You haven't attended any contests or screening rounds yet. Register for an upcoming contest to earn your place on the university leaderboard!
                     </p>
-                    <Button
-                      onClick={() => handleRegister(upcomingWeekly.slug)}
-                      className="rounded-none font-mono text-xs font-bold uppercase"
-                    >
-                      Register For Weekly 42
-                    </Button>
+                    {upcomingContests.length > 0 ? (
+                      <Button
+                        onClick={() => handleRegister(upcomingContests[0].slug)}
+                        disabled={registeringSlug === upcomingContests[0].slug}
+                        className="rounded-none font-mono text-xs font-bold uppercase"
+                      >
+                        {registeringSlug === upcomingContests[0].slug ? "REGISTERING..." : `Register For ${upcomingContests[0].title}`}
+                      </Button>
+                    ) : (
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs font-bold uppercase">
+                        <Link to="/portal/problems">Explore Problem Archive</Link>
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   myParticipations.map((record) => (
@@ -957,44 +1037,50 @@ export function ContestsHubPage() {
             </div>
 
             <div className="divide-y divide-border">
-              {leaders.slice(0, 7).map((leader, index) => {
-                const isTop3 = index < 3;
-                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : null;
+              {leaders.length === 0 ? (
+                <div className="p-6 text-center text-xs font-mono text-muted-foreground">
+                  No ranked cadets recorded yet.
+                </div>
+              ) : (
+                leaders.slice(0, 7).map((leader, index) => {
+                  const isTop3 = index < 3;
+                  const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : null;
 
-                return (
-                  <div
-                    key={leader.handle}
-                    className={`flex items-center justify-between p-3.5 transition-colors hover:bg-secondary/40 ${
-                      index === 0 ? "bg-primary/5" : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex w-6 items-center justify-center font-mono text-xs font-bold">
-                        {medal || <span className="text-muted-foreground">{index + 1}</span>}
+                  return (
+                    <div
+                      key={leader.handle}
+                      className={`flex items-center justify-between p-3.5 transition-colors hover:bg-secondary/40 ${
+                        index === 0 ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex w-6 items-center justify-center font-mono text-xs font-bold">
+                          {medal || <span className="text-muted-foreground">{index + 1}</span>}
+                        </div>
+
+                        <div className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary font-mono text-[11px] font-bold text-foreground">
+                          {leader.handle.slice(0, 2).toUpperCase()}
+                        </div>
+
+                        <div className="min-w-0 truncate">
+                          <p className="truncate text-xs font-bold text-foreground">
+                            {leader.handle}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground truncate">
+                            {leader.department} · {leader.tier}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="grid size-7 shrink-0 place-items-center rounded-full bg-secondary font-mono text-[11px] font-bold text-foreground">
-                        {leader.handle.slice(0, 2).toUpperCase()}
-                      </div>
-
-                      <div className="min-w-0 truncate">
-                        <p className="truncate text-xs font-bold text-foreground">
-                          {leader.handle}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground truncate">
-                          {leader.department} · {leader.tier}
-                        </p>
+                      <div className="shrink-0 text-right">
+                        <span className="font-mono text-xs font-black text-primary">
+                          {leader.rating}
+                        </span>
                       </div>
                     </div>
-
-                    <div className="shrink-0 text-right">
-                      <span className="font-mono text-xs font-black text-primary">
-                        {leader.rating}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
 
             <div className="border-t border-border p-3 text-center bg-secondary/20">
