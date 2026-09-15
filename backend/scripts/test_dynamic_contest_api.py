@@ -41,9 +41,19 @@ async def test_dynamic_api():
     async with AsyncSessionLocal() as db:
         now = datetime.now(timezone.utc)
         test_slug = "test-dynamic-hackathon-2026"
+        clone_slug = "test-dynamic-hackathon-2026-v2"
+        preset_slug = "weekly-contest-99"
+
+        # Pre-cleanup in case of previous run interruption
+        for s in [test_slug, clone_slug, preset_slug]:
+            try:
+                await DynamicContestService.delete_contest(s, db)
+            except Exception:
+                pass
 
         # ── TEST 1: Atomic Dynamic Contest Creation ────────────────────────
         print("\n🔹 TEST 1: Dynamic Contest & Problem Creation")
+
         create_req = DynamicContestCreateRequest(
             title="CCC Medi-Caps Spring Hackathon 2026",
             slug=test_slug,
