@@ -104,6 +104,11 @@ export function ContestOverviewPage() {
     }
   };
 
+  const isDevBypass = Boolean(
+    registration?.is_dev_bypass ||
+    contestSlug.startsWith("dev-")
+  );
+
   return (
     <div className="page-wrap max-w-6xl space-y-6">
       <Link to="/portal/contests" className="back-link">
@@ -129,6 +134,11 @@ export function ContestOverviewPage() {
               <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 {contest.season}
               </span>
+              {isDevBypass && (
+                <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono text-[10px] uppercase tracking-widest">
+                  ⚡ DEV BYPASS ACTIVE
+                </Badge>
+              )}
             </div>
 
             <div className="max-w-3xl space-y-3">
@@ -163,53 +173,49 @@ export function ContestOverviewPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {!isRegistered && (phase === "registration_open" || phase === "assessment_open") && (
+              {!isRegistered && (phase === "registration_open" || phase === "assessment_open" || isDevBypass) && (
                 <Button onClick={() => setConfirmOpen(true)} size="lg">
                   Register for Round 1
                   <ArrowRight className="size-4" />
                 </Button>
               )}
 
-              {isRegistered && phase === "registration_open" && (
-                <Button asChild size="lg">
-                  <Link
-                    to={`/portal/contests/${contestSlug}/lobby`}>
-                    View assessment lobby
-                    <ArrowRight className="size-4" />
+              {(isRegistered || isDevBypass) && (phase === "registration_open" || isDevBypass) && (
+                <Button asChild size="lg" className="bg-primary text-primary-foreground">
+                  <Link to={`/portal/contests/${contestSlug}/lobby`}>
+                    <Play className="size-4 fill-current mr-2" />
+                    Enter assessment workspace
                   </Link>
                 </Button>
               )}
 
-              {isRegistered && phase === "assessment_open" && (
+              {isRegistered && phase === "assessment_open" && !isDevBypass && (
                 <Button asChild size="lg">
-                  <Link
-                    to={`/portal/contests/${contestSlug}/lobby`}>
-                    <Play className="size-4 fill-current" />
+                  <Link to={`/portal/contests/${contestSlug}/lobby`}>
+                    <Play className="size-4 fill-current mr-2" />
                     Start assessment
                   </Link>
                 </Button>
               )}
 
-              {phase === "assessment_submitted" && (
+              {phase === "assessment_submitted" && !isDevBypass && (
                 <Button variant="outline" disabled size="lg">
                   <BadgeCheck className="size-4 text-primary" />
                   Assessment submitted
                 </Button>
               )}
 
-              {phase === "final_live" &&
-                (qualified ? (
+              {(phase === "final_live" || isDevBypass) &&
+                (qualified || isDevBypass ? (
                   <>
                     <Button asChild size="lg" className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs uppercase font-bold tracking-wider">
-                      <Link
-                        to={`/portal/contests/${contestSlug}/arena`}>
+                      <Link to={`/portal/contests/${contestSlug}/arena`}>
                         <Play className="size-4 fill-current mr-2" />
-                        Attempt contest (Live Arena)
+                        Live Final Arena
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="lg" className="rounded-none border-[var(--line)] font-mono text-xs uppercase tracking-wider text-white hover:bg-[var(--surface-2)]">
-                      <Link
-                        to={`/portal/contests/${contestSlug}/offline`}>
+                      <Link to={`/portal/contests/${contestSlug}/offline`}>
                         <QrCode className="size-4 mr-2 text-[var(--accent)]" />
                         Campus pass & check-in
                       </Link>
@@ -223,53 +229,44 @@ export function ContestOverviewPage() {
                 ))}
 
               <Button asChild variant="ghost" size="lg">
-                <Link
-                  to={`/portal/contests/${contestSlug}/results`}>
+                <Link to={`/portal/contests/${contestSlug}/results`}>
                   View ranking
                 </Link>
               </Button>
 
               {phase === "complete" && (
                 <Button asChild variant="outline" size="lg">
-                  <Link
-                    to={`/portal/contests/${contestSlug}/final-results`}>
+                  <Link to={`/portal/contests/${contestSlug}/final-results`}>
                     Final results
                   </Link>
                 </Button>
               )}
             </div>
 
-            {contestSlug.startsWith("dev-") && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+            {isDevBypass && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-amber-500/50 font-mono text-[10px] uppercase text-amber-400">
-                      Dev Sandbox Active
+                    <Badge variant="outline" className="border-emerald-500/50 font-mono text-[10px] uppercase text-emerald-400">
+                      ⚡ Dynamic Dev Mode Active
                     </Badge>
-                    <span className="text-xs font-medium text-amber-200/90">
-                      {phase === "assessment_submitted"
-                        ? "Assessment completed & submitted."
-                        : phase === "final_live"
-                          ? "Live Final Arena mode active."
-                          : "Phase 1 Screening mode active."}
+                    <span className="text-xs font-medium text-emerald-200/90">
+                      Timing windows & live arena restrictions unlocked via DEV_BYPASS_RESTRICTIONS.
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    Reset your candidate attempt anytime to test the flow repeatedly from scratch.
+                    You can test the screening assessment, live arena, and QR passes anytime. Reset your session below to re-test anytime.
                   </p>
                 </div>
-                {phase === "assessment_submitted" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={false}
-                    className="border-amber-500/40 text-amber-300 hover:bg-amber-500/20"
-                    onClick={() => handleResetAttempt()}
-                  >
-                    <RotateCcw className="mr-1.5 size-3.5" />
-                    {false ? "Resetting…" : "Reset Attempt"}
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
+                  onClick={() => handleResetAttempt()}
+                >
+                  <RotateCcw className="mr-1.5 size-3.5" />
+                  Reset Attempt
+                </Button>
               </div>
             )}
 

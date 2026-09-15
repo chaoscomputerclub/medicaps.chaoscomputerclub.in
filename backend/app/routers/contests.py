@@ -343,6 +343,9 @@ async def get_registration_status(
     if contest and contest.starts_at:
         assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
 
+    from app.core.config import settings
+    is_dev_bypass = settings.is_dev_bypass_enabled or getattr(current_member, "is_core_member", False) or slug.startswith("dev-")
+
     can_take_assessment = (
         contest_status == "upcoming"
         and is_registered
@@ -352,16 +355,17 @@ async def get_registration_status(
     can_enter_live_contest = (contest_status == "live" and is_top_30_qualified)
 
     # Dev Contest overrides for frictionless testing
-    if slug.startswith("dev-"):
-        if contest_status == "live":
-            is_top_30_qualified = True
-            can_enter_live_contest = True
-        elif contest_status == "upcoming":
-            # Allow taking assessment as long as candidate is registered and session is not submitted
-            can_take_assessment = is_registered and not (assessment_taken and assessment_session_status == "submitted")
+    if is_dev_bypass:
+        is_registered = True
+        is_top_30_qualified = True
+        can_enter_live_contest = True
+        can_take_assessment = not (assessment_taken and assessment_session_status == "submitted")
+        assessment_window_open = True
 
     # Contextual eligibility explanation
-    if contest_status == "upcoming":
+    if is_dev_bypass:
+        eligibility_message = "⚡ DEV BYPASS ACTIVE: Unrestricted development testing mode enabled."
+    elif contest_status == "upcoming":
         if not is_registered:
             eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
         elif assessment_taken:
@@ -401,6 +405,7 @@ async def get_registration_status(
         "can_take_assessment": can_take_assessment,
         "can_enter_live_contest": can_enter_live_contest,
         "eligibility_message": eligibility_message,
+        "is_dev_bypass": is_dev_bypass,
     }
 
 

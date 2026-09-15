@@ -36,6 +36,11 @@ export interface AssessmentState {
     summary: string;
     duration_minutes: number;
     max_violations: number;
+    starts_at?: string;
+    ends_at?: string;
+    is_open?: boolean;
+    opens_in_seconds?: number;
+    closes_in_seconds?: number;
   } | null;
   session: {
     id: string;

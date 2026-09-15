@@ -55,6 +55,17 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:8081")
     BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000")
 
+    # Dynamic Development Testing & Restriction Controls
+    DEV_BYPASS_RESTRICTIONS: bool = os.getenv("DEV_BYPASS_RESTRICTIONS", "false").lower() in ("true", "1", "yes")
+    DEV_MODE: bool = os.getenv("DEV_MODE", "false").lower() in ("true", "1", "yes")
+
+    @property
+    def is_dev_bypass_enabled(self) -> bool:
+        """Returns True if any development restriction bypass mode is active."""
+        env_bypass = os.getenv("DEV_BYPASS_RESTRICTIONS", "").lower() in ("true", "1", "yes")
+        env_mode = os.getenv("DEV_MODE", "").lower() in ("true", "1", "yes")
+        return bool(self.DEV_BYPASS_RESTRICTIONS or self.DEV_MODE or env_bypass or env_mode)
+
     # OTP expiry (minutes)
     OTP_EXPIRE_MINUTES: int = 10
 

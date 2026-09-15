@@ -381,7 +381,7 @@ async def reset_dev_assessment_session(
     db: AsyncSession = Depends(get_db),
 ):
     """Development endpoint: Reset candidate's attempt for testing from scratch."""
-    assessment, _ = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
+    assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
 
     s_result = await db.execute(
         select(AssessmentSession).where(
@@ -395,8 +395,23 @@ async def reset_dev_assessment_session(
             delete(AssessmentSubmission).where(AssessmentSubmission.session_id == session.id)
         )
         await db.delete(session)
-        await db.commit()
-        await invalidate_ranking(contest_slug)
+
+    # Also reset registration record if exists
+    if contest:
+        reg_stmt = select(ContestRegistration).where(
+            ContestRegistration.contest_id == contest.id,
+            ContestRegistration.member_id == current_member.id,
+        )
+        reg_res = await db.execute(reg_stmt)
+        reg = reg_res.scalars().first()
+        if reg:
+            reg.assessment_taken = False
+            reg.assessment_score = 0.0
+            reg.assessment_rank = None
+            reg.is_top_30_qualified = False
+
+    await db.commit()
+    await invalidate_ranking(contest_slug)
 
     return {
         "success": True,

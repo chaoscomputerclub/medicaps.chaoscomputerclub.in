@@ -13,6 +13,7 @@ from sqlalchemy import select, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 
+from app.core.config import settings
 from app.models.base import now_utc
 from app.models.contest import OfflineContest, ContestRegistration
 from app.models.assessment import Assessment, AssessmentProblem, AssessmentSession, AssessmentSubmission
@@ -117,9 +118,10 @@ class AssessmentService:
         """
         Check candidate's assessment status.
         If window is in the future, returns waiting metadata with opens_in countdown.
-        If window is open, returns/initializes the active session and problem challenges.
+        If window is open or dev bypass active, returns/initializes the active session and problem challenges.
         """
         assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
+        is_dev_bypass = settings.is_dev_bypass_enabled or getattr(current_member, "is_core_member", False) or contest_slug.startswith("dev-")
 
         # 1. Check if user is registered for the contest
         is_registered = False
@@ -132,11 +134,22 @@ class AssessmentService:
             )
             reg = reg_check.scalars().first()
             is_registered = bool(reg)
-            if not is_registered:
+            if not is_registered and not is_dev_bypass:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Contest registration is required before entering the Phase 1 online screening assessment.",
                 )
+            elif not is_registered and is_dev_bypass:
+                # Auto-confirm registration in dev mode
+                auto_reg = ContestRegistration(
+                    contest_id=contest.id,
+                    member_id=current_member.id,
+                    registered_at=now_utc(),
+                    status="confirmed",
+                )
+                db.add(auto_reg)
+                await db.commit()
+                is_registered = True
 
         # 2. Check Assessment Window
         now = now_utc()
@@ -149,9 +162,9 @@ class AssessmentService:
         if ends_at.tzinfo is None:
             ends_at = ends_at.replace(tzinfo=timezone.utc)
 
-        is_open = starts_at <= now <= ends_at
-        opens_in_seconds = max(0, int((starts_at - now).total_seconds()))
-        closes_in_seconds = max(0, int((ends_at - now).total_seconds()))
+        is_open = (starts_at <= now <= ends_at) or is_dev_bypass
+        opens_in_seconds = 0 if is_dev_bypass else max(0, int((starts_at - now).total_seconds()))
+        closes_in_seconds = max(7200, int((ends_at - now).total_seconds())) if is_dev_bypass else max(0, int((ends_at - now).total_seconds()))
 
         # Check existing session
         s_result = await db.execute(
@@ -163,7 +176,7 @@ class AssessmentService:
         session = s_result.scalars().first()
 
         # If window not open yet and user doesn't have an active session, return waiting state
-        if not is_open and not session and opens_in_seconds > 0:
+        if not is_open and not session and opens_in_seconds > 0 and not is_dev_bypass:
             return {
                 "assessment": {
                     "id": assessment.id,
@@ -184,8 +197,8 @@ class AssessmentService:
                 "message": f"Assessment window opens in {opens_in_seconds // 3600}h {(opens_in_seconds % 3600) // 60}m. Please wait for the window to unlock.",
             }
 
-        # If window ended and user never started
-        if closes_in_seconds <= 0 and not session:
+        # If window ended and user never started (only when not in dev bypass)
+        if closes_in_seconds <= 0 and not session and not is_dev_bypass:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="The Round 1 screening assessment window has concluded.",

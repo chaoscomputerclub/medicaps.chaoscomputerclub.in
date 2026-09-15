@@ -59,8 +59,9 @@ export function ContestLobbyPage() {
   const phase = contestPhase(contest, registration ?? null);
   const opensAt = assessmentOpensAt(contest);
   const closesAt = assessmentClosesAt(contest);
-  const notYetOpen = phase === "registration_open";
-  const canStart = Boolean(registration?.can_take_assessment) && phase === "assessment_open";
+  const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
+  const notYetOpen = phase === "registration_open" && !isDevBypass;
+  const canStart = Boolean(registration?.can_take_assessment) || phase === "assessment_open" || isDevBypass;
 
   return (
     <div className="page-wrap space-y-6">
@@ -90,6 +91,12 @@ export function ContestLobbyPage() {
           submitted automatically and the attempt is locked. There is no second attempt.
         </AlertDescription>
       </Alert>
+
+      {isDevBypass && (
+        <div className="flex items-center gap-2 rounded-none border border-emerald-500/40 bg-emerald-950/20 px-4 py-3 font-mono text-xs text-emerald-400">
+          <span>⚡ <strong>DEV BYPASS ACTIVE:</strong> Scheduled entry window restriction is bypassed. You can check the acknowledgment below and start your assessment session immediately.</span>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">

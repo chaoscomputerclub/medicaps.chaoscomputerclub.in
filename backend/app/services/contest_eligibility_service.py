@@ -27,6 +27,9 @@ from app.models.db_models import (
 logger = logging.getLogger(__name__)
 
 
+from app.core.config import settings
+
+
 async def is_member_eligible_for_live_contest(
     member: Optional[MemberProfile],
     contest: OfflineContest,
@@ -36,6 +39,10 @@ async def is_member_eligible_for_live_contest(
     Check if candidate is eligible to access a live contest.
     Returns (is_eligible, reason).
     """
+    # 0. Global Development Bypass Mode from ENV
+    if settings.is_dev_bypass_enabled:
+        return True, "Development restriction bypass mode active."
+
     # 1. If contest is NOT live, it is open for public view / announcement
     if contest.status != "live":
         return True, "Contest is public"

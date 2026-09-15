@@ -61,6 +61,7 @@ export type RegistrationStatus = {
   can_take_assessment: boolean;
   can_enter_live_contest: boolean;
   eligibility_message: string | null;
+  is_dev_bypass?: boolean;
 };
 
 export type RankingRow = {
