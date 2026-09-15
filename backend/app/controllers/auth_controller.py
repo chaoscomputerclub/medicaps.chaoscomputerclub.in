@@ -10,6 +10,7 @@ Architecture mirrors: Interleet/backend/app/controllers/user.py
 All methods are pure business logic with zero HTTP I/O.
 Routers call these; controllers call utils/lib/models.
 """
+from typing import Optional, Dict, List, Any
 import logging
 from datetime import datetime, timezone
 from fastapi import HTTPException, status
