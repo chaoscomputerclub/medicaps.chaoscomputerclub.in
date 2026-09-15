@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { PortalShell } from "@/organization/components/PortalShell";
+import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 
 // Page imports
 import { AuthPage } from "@/pages/AuthPage";
@@ -27,46 +28,51 @@ export function AppRoutes() {
       {/* Root redirect */}
       <Route path="/" element={<Navigate to="/portal" replace />} />
 
-      {/* Authentication */}
-      <Route path="/auth" element={<AuthPage />} />
+      {/* Guest-only Authentication Route */}
+      <Route element={<GuestGuard />}>
+        <Route path="/auth" element={<AuthPage />} />
+      </Route>
 
-      {/* Standalone Assessment Workspace (FullScreen distraction-free testing) */}
-      <Route path="/assessments/:contestSlug" element={<AssessmentWorkspacePage />} />
+      {/* Strictly Protected Inner Platform Routes */}
+      <Route element={<AuthGuard />}>
+        {/* Standalone Assessment Workspace (FullScreen distraction-free testing) */}
+        <Route path="/assessments/:contestSlug" element={<AssessmentWorkspacePage />} />
 
-      {/* Portal Shell Routes */}
-      <Route path="/portal" element={<PortalShell />}>
-        {/* Dashboard index */}
-        <Route index element={<DashboardPage />} />
+        {/* Portal Shell Routes */}
+        <Route path="/portal" element={<PortalShell />}>
+          {/* Dashboard index */}
+          <Route index element={<DashboardPage />} />
 
-        {/* Contests Hub & Details */}
-        <Route path="contests" element={<ContestsHubPage />} />
-        <Route path="contests/:contestSlug" element={<ContestOverviewPage />} />
-        <Route path="contests/:contestSlug/lobby" element={<ContestLobbyPage />} />
-        <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
-        <Route path="contests/:contestSlug/assessment" element={<AssessmentWorkspacePage />} />
-        <Route path="contests/:contestSlug/offline" element={<ContestOfflinePage />} />
-        <Route path="contests/:contestSlug/qualified" element={<ContestQualifiedPage />} />
-        <Route path="contests/:contestSlug/results" element={<ContestResultsPage />} />
-        <Route path="contests/:contestSlug/final-results" element={<ContestFinalResultsPage />} />
+          {/* Contests Hub & Details */}
+          <Route path="contests" element={<ContestsHubPage />} />
+          <Route path="contests/:contestSlug" element={<ContestOverviewPage />} />
+          <Route path="contests/:contestSlug/lobby" element={<ContestLobbyPage />} />
+          <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
+          <Route path="contests/:contestSlug/assessment" element={<AssessmentWorkspacePage />} />
+          <Route path="contests/:contestSlug/offline" element={<ContestOfflinePage />} />
+          <Route path="contests/:contestSlug/qualified" element={<ContestQualifiedPage />} />
+          <Route path="contests/:contestSlug/results" element={<ContestResultsPage />} />
+          <Route path="contests/:contestSlug/final-results" element={<ContestFinalResultsPage />} />
 
-        {/* My Contests Ledger */}
-        <Route path="my-contests" element={<MyContestsPage />} />
+          {/* My Contests Ledger */}
+          <Route path="my-contests" element={<MyContestsPage />} />
 
-        {/* University Leaderboard */}
-        <Route path="leaderboard" element={<LeaderboardPage />} />
+          {/* University Leaderboard */}
+          <Route path="leaderboard" element={<LeaderboardPage />} />
 
-        {/* Problem Archive & Editorials */}
-        <Route path="problems" element={<ProblemArchivePage />} />
-        <Route path="problems/:problemSlug" element={<ProblemDetailPage />} />
+          {/* Problem Archive & Editorials */}
+          <Route path="problems" element={<ProblemArchivePage />} />
+          <Route path="problems/:problemSlug" element={<ProblemDetailPage />} />
 
-        {/* Cryptographic Result Verification */}
-        <Route path="verify" element={<VerifyProofPage />} />
+          {/* Cryptographic Result Verification */}
+          <Route path="verify" element={<VerifyProofPage />} />
 
-        {/* Member Profile */}
-        <Route path="profile" element={<ProfilePage />} />
+          {/* Member Profile */}
+          <Route path="profile" element={<ProfilePage />} />
 
-        {/* Account & Security Settings */}
-        <Route path="settings" element={<SettingsPage />} />
+          {/* Account & Security Settings */}
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
       </Route>
 
       {/* Catch-all fallback */}

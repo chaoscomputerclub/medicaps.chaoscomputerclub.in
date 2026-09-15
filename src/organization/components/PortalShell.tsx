@@ -22,7 +22,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
-import { getToken } from "@/lib/auth";
+import { getToken, decodeJwtPayload } from "@/lib/auth";
 
 const links = [
   { to: "/portal", label: "Operations", icon: LayoutDashboard, exact: true },
@@ -55,16 +55,18 @@ export function PortalShell() {
     }
   }, [dispatch, member, pending, navigate]);
 
-  const initials = member?.handle
-    ? member.handle.slice(0, 2).toUpperCase()
-    : member?.full_name
-      ? member.full_name
-          .split(" ")
-          .map((w) => w[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase()
-      : "??";
+  const token = getToken();
+  const tokenPayload = token ? decodeJwtPayload(token) : null;
+  const fallbackHandle = tokenPayload?.handle || (tokenPayload?.email ? tokenPayload.email.split("@")[0] : "Cadet");
+  const displayHandle = member?.handle || fallbackHandle;
+  const initials = member?.full_name
+    ? member.full_name
+        .split(" ")
+        .map((w: string) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : (displayHandle.slice(0, 2) || "CC").toUpperCase();
 
   const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
   const isFullscreenWorkspace = cleanPath.includes("/assessment") || cleanPath.includes("/arena");
@@ -138,8 +140,8 @@ export function PortalShell() {
             </AvatarFallback>
           </Avatar>
           <div>
-            <strong>{member?.handle ?? (hydrated && !getToken() ? "Sign in required" : "Loading…")}</strong>
-            <span>{member ? `${member.rating} · ${member.department ?? "Member"}` : ""}</span>
+            <strong>{displayHandle}</strong>
+            <span>{member ? `${member.rating} · ${member.department ?? "Member"}` : "Verified Member"}</span>
           </div>
           <button
             type="button"
