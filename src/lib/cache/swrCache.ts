@@ -15,6 +15,8 @@ export interface SwrCacheOptions {
   forceRefresh?: boolean;
   /** Optional persistence to sessionStorage for persistence across page reloads */
   persistSession?: boolean;
+  /** If false, disables automatic fetching and subscriber attachment */
+  enabled?: boolean;
 }
 
 interface CacheRecord<T> {
@@ -234,14 +236,15 @@ export function useSwrData<T>(
   fetcher: () => Promise<T>,
   options: SwrCacheOptions = {}
 ) {
-  const { staleTime = 30000, ttl = 300000, forceRefresh = false, persistSession = false } = options;
+  const { staleTime = 30000, ttl = 300000, forceRefresh = false, persistSession = false, enabled = true } = options;
 
   // Synchronous cache lookup for instant initial state
-  const initialCache = key ? globalSwrStore.get<T>(key) : undefined;
+  const isQueryActive = Boolean(key && enabled);
+  const initialCache = isQueryActive && key ? globalSwrStore.get<T>(key) : undefined;
   const isFresh = initialCache ? Date.now() - initialCache.timestamp < ttl : false;
 
   const [data, setData] = useState<T | null>(isFresh && initialCache ? initialCache.data : null);
-  const [loading, setLoading] = useState<boolean>(!isFresh || !initialCache);
+  const [loading, setLoading] = useState<boolean>(isQueryActive && (!isFresh || !initialCache));
   const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -250,7 +253,10 @@ export function useSwrData<T>(
 
   const executeFetch = useCallback(
     async (force = false) => {
-      if (!key) return;
+      if (!key || !enabled) {
+        setLoading(false);
+        return;
+      }
 
       const cached = globalSwrStore.get<T>(key);
       const hasValidData = cached && Date.now() - cached.timestamp < ttl;
@@ -276,11 +282,14 @@ export function useSwrData<T>(
         setIsValidating(false);
       }
     },
-    [key, staleTime, ttl, persistSession]
+    [key, enabled, staleTime, ttl, persistSession]
   );
 
   useEffect(() => {
-    if (!key) return;
+    if (!key || !enabled) {
+      setLoading(false);
+      return;
+    }
 
     // Check if store has updated data immediately
     const currentCached = globalSwrStore.get<T>(key);
@@ -300,7 +309,7 @@ export function useSwrData<T>(
     return () => {
       unsubscribe();
     };
-  }, [key, executeFetch, forceRefresh, ttl]);
+  }, [key, enabled, executeFetch, forceRefresh, ttl]);
 
   const mutate = useCallback(
     (newData: T | ((prev: T | null) => T), shouldRevalidate = false) => {

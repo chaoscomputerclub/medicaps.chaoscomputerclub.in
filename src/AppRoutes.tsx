@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 
@@ -21,6 +21,11 @@ import { ProblemDetailPage } from "@/pages/ProblemDetailPage";
 import { VerifyProofPage } from "@/pages/VerifyProofPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { SettingsPage } from "@/pages/SettingsPage";
+
+function ProfileHandleRedirect() {
+  const { handle } = useParams<{ handle: string }>();
+  return <Navigate to={`/portal/profile/${handle ? encodeURIComponent(handle) : ""}`} replace />;
+}
 
 export function AppRoutes() {
   return (
@@ -78,7 +83,7 @@ export function AppRoutes() {
       </Route>
 
       {/* Direct Shortlink for Profiles: /u/:handle */}
-      <Route path="/u/:handle" element={<Navigate to="/portal/profile/:handle" replace />} />
+      <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
 
       {/* Catch-all fallback */}
       <Route path="*" element={<Navigate to="/portal" replace />} />

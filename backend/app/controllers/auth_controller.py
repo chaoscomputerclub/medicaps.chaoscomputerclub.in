@@ -460,7 +460,7 @@ class AuthController:
             ContestProblem,
         )
 
-        clean_target = handle_or_id.strip()
+        clean_target = handle_or_id.lstrip("@").strip()
         # Find target member
         stmt = select(MemberProfile).where(
             or_(
