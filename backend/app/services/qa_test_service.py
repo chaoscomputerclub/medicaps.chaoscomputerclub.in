@@ -549,7 +549,7 @@ class ProductionQAService:
                 "headers": auth_json_headers,
                 "body": {"status": "live"},
                 "expected_status": 200,
-                "required_keys": ["success", "status"],
+                "required_keys": ["success", "current_status"],
                 "notes": "Transitions state machine and activates contest arena.",
             },
             {
