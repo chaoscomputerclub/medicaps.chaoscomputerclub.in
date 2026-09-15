@@ -34,16 +34,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { contestApi } from "@/features/contest/api";
 import { Countdown, PhaseBadge, RoundsTimeline, useTick } from "@/features/contest/components";
+import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import {
   ASSESSMENT_DURATION_MINUTES,
   FINALIST_SEATS,
@@ -53,9 +47,6 @@ import {
   contestPhase,
   formatWhen,
 } from "@/features/contest/lifecycle";
-
-
-
 
 export function ContestOverviewPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -69,6 +60,7 @@ export function ContestOverviewPage() {
     }
   }, [contestSlug, dispatch]);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [assessmentConfirmOpen, setAssessmentConfirmOpen] = useState(false);
 
   if (isLoadingDetail && !contest) {
     return <div className="page-wrap"><div className="py-12 text-center font-mono text-xs text-[var(--muted)]">Loading contest details…</div></div>;
@@ -182,11 +174,13 @@ export function ContestOverviewPage() {
               )}
 
               {(isRegistered || isDevBypass) && phase !== "assessment_submitted" && (
-                <Button asChild size="lg" className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-[var(--accent)]/20">
-                  <Link to={`/assessments/${contestSlug}`}>
-                    <Play className="size-4 fill-black mr-2" />
-                    Take Assessment
-                  </Link>
+                <Button
+                  onClick={() => setAssessmentConfirmOpen(true)}
+                  size="lg"
+                  className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-[var(--accent)]/20"
+                >
+                  <Play className="size-4 fill-black mr-2" />
+                  Take Assessment
                 </Button>
               )}
 
@@ -536,6 +530,15 @@ export function ContestOverviewPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Strict Assessment Launch Confirmation Modal */}
+      <AssessmentConfirmModal
+        open={assessmentConfirmOpen}
+        onOpenChange={setAssessmentConfirmOpen}
+        contestSlug={contestSlug}
+        contestTitle={contest.title}
+        durationMinutes={ASSESSMENT_DURATION_MINUTES}
+      />
     </div>
   );
 }

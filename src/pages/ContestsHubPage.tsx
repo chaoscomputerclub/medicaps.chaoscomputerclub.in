@@ -30,6 +30,7 @@ import { contestApi } from "@/features/contest/api";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
+import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { toast } from "sonner";
 
 // High-precision ticking countdown hook
@@ -88,6 +89,9 @@ export function ContestsHubPage() {
   const [myParticipations, setMyParticipations] = useState<ParticipationRecord[]>([]);
   const [isLoadingParticipations, setIsLoadingParticipations] = useState(false);
   const [registeringSlug, setRegisteringSlug] = useState<string | null>(null);
+  const [assessmentConfirmOpen, setAssessmentConfirmOpen] = useState(false);
+  const [confirmContestSlug, setConfirmContestSlug] = useState("");
+  const [confirmContestTitle, setConfirmContestTitle] = useState("");
 
   useEffect(() => {
     dispatch(fetchContestsThunk());
@@ -375,10 +379,15 @@ export function ContestsHubPage() {
             <div className="mt-6 flex items-center gap-3">
               {isWeeklyRegistered ? (
                 <div className="flex w-full items-center gap-2">
-                  <Button asChild className="flex-1 rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-[var(--accent)]/90">
-                    <Link to={`/assessments/${upcomingWeekly.slug}`}>
-                      <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
-                    </Link>
+                  <Button
+                    onClick={() => {
+                      setConfirmContestSlug(upcomingWeekly.slug);
+                      setConfirmContestTitle(upcomingWeekly.title);
+                      setAssessmentConfirmOpen(true);
+                    }}
+                    className="flex-1 rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
+                  >
+                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
                   </Button>
                   <Button asChild variant="outline" className="rounded-none font-mono text-xs">
                     <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
@@ -494,10 +503,15 @@ export function ContestsHubPage() {
             <div className="mt-6 flex items-center gap-3">
               {isBiweeklyRegistered ? (
                 <div className="flex w-full items-center gap-2">
-                  <Button asChild className="flex-1 rounded-none bg-cyan-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-300">
-                    <Link to={`/assessments/${upcomingBiweekly.slug}`}>
-                      <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
-                    </Link>
+                  <Button
+                    onClick={() => {
+                      setConfirmContestSlug(upcomingBiweekly.slug);
+                      setConfirmContestTitle(upcomingBiweekly.title);
+                      setAssessmentConfirmOpen(true);
+                    }}
+                    className="flex-1 rounded-none bg-cyan-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-300"
+                  >
+                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
                   </Button>
                   <Button asChild variant="outline" className="rounded-none font-mono text-xs">
                     <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
@@ -611,10 +625,16 @@ export function ContestsHubPage() {
                   </span>
                   <span className="font-mono text-xs text-primary font-bold">120 MIN ATTEMPT</span>
                 </div>
-                <Button asChild className="w-full rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90 shadow-md">
-                  <Link to={`/assessments/${(registeredUpcomingContest || upcomingWeekly).slug}`}>
-                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT NOW
-                  </Link>
+                <Button
+                  onClick={() => {
+                    const c = registeredUpcomingContest || upcomingWeekly;
+                    setConfirmContestSlug(c.slug);
+                    setConfirmContestTitle(c.title);
+                    setAssessmentConfirmOpen(true);
+                  }}
+                  className="w-full rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90 shadow-md"
+                >
+                  <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT NOW
                 </Button>
                 <p className="text-[10px] text-muted-foreground text-center">
                   Full-screen distraction-free IDE with live testcase execution.
@@ -1029,6 +1049,14 @@ export function ContestsHubPage() {
           </div>
         </aside>
       </div>
+
+      {/* Strict Assessment Confirmation Modal */}
+      <AssessmentConfirmModal
+        open={assessmentConfirmOpen}
+        onOpenChange={setAssessmentConfirmOpen}
+        contestSlug={confirmContestSlug}
+        contestTitle={confirmContestTitle}
+      />
     </div>
   );
 }
