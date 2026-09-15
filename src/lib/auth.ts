@@ -31,6 +31,18 @@ export function getApiBase(): string {
   return "https://medicaps.chaoscomputerclub.in/api";
 }
 
+export class ApiError extends Error {
+  status: number;
+  data?: any;
+
+  constructor(message: string, status: number, data?: any) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
+  }
+}
+
 const TOKEN_KEY = "ccc_medicaps_token";
 
 export function getToken(): string | null {
@@ -46,18 +58,54 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+/**
+ * Safely decodes a JWT payload supporting standard and URL-safe base64 encoding.
+ */
+export function decodeJwtPayload(token: string): Record<string, any> | null {
+  if (!token || typeof token !== "string") return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2 || !parts[1]) return null;
+    let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4 !== 0) {
+      base64 += "=";
+    }
+    const jsonStr = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+    return JSON.parse(jsonStr);
+  } catch {
+    try {
+      // Fallback simple atob
+      const parts = token.split(".");
+      let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      while (base64.length % 4 !== 0) {
+        base64 += "=";
+      }
+      return JSON.parse(atob(base64));
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
+ * Validates whether the current stored token is structurally valid and unexpired.
+ */
 export function isAuthenticated(): boolean {
   const token = getToken();
   if (!token) return false;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2 || !parts[1]) return false;
-    const payload = JSON.parse(atob(parts[1]));
+  const payload = decodeJwtPayload(token);
+  if (!payload) return false;
+  if (typeof payload.exp === "number") {
     const now = Math.floor(Date.now() / 1000);
-    return typeof payload.exp === "number" && payload.exp > now;
-  } catch {
-    return false;
+    // Allow a 30-second clock skew tolerance
+    return payload.exp > now - 30;
   }
+  return true;
 }
 
 export interface Member {
@@ -126,16 +174,21 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       } else if (err.message) {
         msg = err.message;
       }
-      throw new Error(msg);
+      throw new ApiError(msg, res.status, err);
     }
     return res.json();
   } catch (err: any) {
-    if (err?.message === "Failed to fetch") {
-      throw new Error(
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    if (err?.message === "Failed to fetch" || err?.name === "TypeError") {
+      throw new ApiError(
         `Unable to connect to authentication server (${apiBase}). Please check server status.`,
+        0,
+        err,
       );
     }
-    throw err;
+    throw new ApiError(err?.message || "An unexpected error occurred", 500, err);
   }
 }
 

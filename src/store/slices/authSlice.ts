@@ -90,8 +90,20 @@ export const fetchCurrentUserThunk = createAsyncThunk<Member, void, { rejectValu
       const res = await getMe();
       return res.member;
     } catch (err: any) {
-      removePersistedToken();
-      return rejectWithValue(err?.message || "Session expired.");
+      // ONLY clear the token if the server explicitly rejected authentication with 401
+      const isAuthExpired =
+        err?.status === 401 ||
+        (typeof err?.message === "string" &&
+          (err.message.toLowerCase().includes("authentication required") ||
+            err.message.toLowerCase().includes("invalid token") ||
+            err.message.toLowerCase().includes("jwt expired")));
+
+      if (isAuthExpired) {
+        removePersistedToken();
+        return rejectWithValue(err?.message || "Session expired. Please sign in again.");
+      }
+
+      return rejectWithValue(err?.message || "Unable to refresh user profile.");
     }
   },
 );
@@ -259,9 +271,11 @@ export const authSlice = createSlice({
       }
     });
     builder.addCase(fetchCurrentUserThunk.rejected, (state) => {
-      state.member = null;
-      state.token = null;
-      state.isAuthenticated = false;
+      if (!getToken()) {
+        state.member = null;
+        state.token = null;
+        state.isAuthenticated = false;
+      }
     });
 
     // completeOnboardingThunk

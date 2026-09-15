@@ -130,13 +130,15 @@ export async function fetchFullProfileData(force = false): Promise<FullProfilePa
           fullProfileCache = { data: payload, timestamp: Date.now() };
           return payload;
         }
-        if (res.status === 401 || res.status === 403) {
+        if (res.status === 401) {
           clearToken();
           fullProfileCache = null;
-          window.location.href = "/auth";
+          if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
+            window.location.href = "/auth";
+          }
         }
       } catch {
-        // Fallback on network failure
+        // Fallback on network failure without destroying session
       } finally {
         fullProfilePromise = null;
       }

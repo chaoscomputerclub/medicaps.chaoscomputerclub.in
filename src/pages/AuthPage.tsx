@@ -141,7 +141,12 @@ export function AuthPage() {
       if (emailParam) dispatch(setEmail(emailParam));
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      if (onboardedParam === "true" || onboardedParam === "0") {
+      const isOnboarded =
+        onboardedParam === "true" ||
+        onboardedParam === "0" ||
+        params.get("onboarding") === "0";
+
+      if (isOnboarded) {
         void (async () => {
           await preloadFullProfile(tokenParam);
           navigate("/portal");

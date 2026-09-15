@@ -39,7 +39,7 @@ export function PortalShell() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const open = useAppSelector((state) => state.ui.sidebarOpen);
-  const member = useAppSelector((state) => state.auth.member);
+  const { member, pending } = useAppSelector((state) => state.auth);
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -49,11 +49,11 @@ export function PortalShell() {
       navigate("/auth");
       return;
     }
-    if (!member) {
+    if (!member && !pending) {
       dispatch(fetchCurrentUserThunk());
       dispatch(fetchMyFollowingIdsThunk());
     }
-  }, [dispatch, member, navigate]);
+  }, [dispatch, member, pending, navigate]);
 
   const initials = member?.handle
     ? member.handle.slice(0, 2).toUpperCase()
