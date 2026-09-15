@@ -11,7 +11,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import httpx
@@ -96,7 +96,6 @@ class ProductionQAService:
                 peak_rating=2050,
                 is_onboarded=True,
                 is_core_member=True,
-                is_admin=True,
             )
             db.add(member)
             await db.commit()
