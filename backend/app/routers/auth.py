@@ -12,11 +12,12 @@ Flow:
   GET  /auth/me               → return own profile (requires JWT)
   POST /auth/logout           → client-side token drop (stateless JWT)
 """
+from typing import Optional
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.middleware.auth import get_current_member, require_onboarded
+from app.middleware.auth import get_current_member, get_current_member_optional, require_onboarded
 from app.models.db_models import MemberProfile
 from app.schemas.auth import (
     SendOTPRequest,
@@ -83,6 +84,16 @@ async def get_profile_full(
     db: AsyncSession = Depends(get_db),
 ):
     return await AuthController.get_full_profile(current_member, db)
+
+
+@router.get("/profile/{handle}", summary="Get public competitive profile of another student cadet")
+@router.get("/users/{handle}", summary="Get public competitive profile of another student cadet (alias)")
+async def get_student_profile(
+    handle: str,
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.get_student_public_profile(handle, current_member, db)
 
 
 @router.get("/check-handle", summary="Check handle availability (unauthenticated)")

@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Check,
   Loader2,
@@ -236,24 +237,34 @@ export function SocialDrawer() {
                   className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))] hover:bg-[var(--surface)] transition-all rounded-[1px]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Avatar className="w-9 h-9 rounded-[1px] border border-[var(--line)] bg-zinc-900">
-                      {student.avatar_url ? (
-                        <AvatarImage
-                          src={student.avatar_url}
-                          alt={student.full_name || student.handle}
-                          className="object-cover"
-                        />
-                      ) : null}
-                      <AvatarFallback className="rounded-[1px] bg-[var(--surface)] text-[var(--accent)] font-mono text-xs font-bold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Link
+                      to={`/portal/profile/${student.handle}`}
+                      onClick={() => dispatch(closeSocialDrawer())}
+                      className="cursor-pointer"
+                    >
+                      <Avatar className="w-9 h-9 rounded-[1px] border border-[var(--line)] bg-zinc-900 hover:border-[var(--accent)] transition-colors">
+                        {student.avatar_url ? (
+                          <AvatarImage
+                            src={student.avatar_url}
+                            alt={student.full_name || student.handle}
+                            className="object-cover"
+                          />
+                        ) : null}
+                        <AvatarFallback className="rounded-[1px] bg-[var(--surface)] text-[var(--accent)] font-mono text-xs font-bold">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <strong className="text-xs font-mono text-white truncate tracking-tight">
+                        <Link
+                          to={`/portal/profile/${student.handle}`}
+                          onClick={() => dispatch(closeSocialDrawer())}
+                          className="text-xs font-mono text-white truncate tracking-tight hover:text-[var(--accent)] hover:underline transition-colors"
+                        >
                           @{student.handle}
-                        </strong>
+                        </Link>
                         <span className="text-[10px] text-[var(--accent)] font-mono font-bold">
                           {student.rating}
                         </span>

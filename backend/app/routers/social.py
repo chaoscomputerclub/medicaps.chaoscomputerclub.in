@@ -73,6 +73,8 @@ async def follow_student(
         # Invalidate social & profile caches
         await delete_cache(f"cache:profile:{target_member.id}")
         await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
+        await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
         await delete_cache(f"cache:social:my_following:{current_member.id}")
         await delete_cache_pattern(f"cache:social:*{target_member.id}*")
         await delete_cache_pattern(f"cache:social:*{current_member.id}*")
@@ -124,6 +126,8 @@ async def unfollow_student(
         # Invalidate social & profile caches
         await delete_cache(f"cache:profile:{target_member.id}")
         await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
+        await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
         await delete_cache(f"cache:social:my_following:{current_member.id}")
         await delete_cache_pattern(f"cache:social:*{target_member.id}*")
         await delete_cache_pattern(f"cache:social:*{current_member.id}*")

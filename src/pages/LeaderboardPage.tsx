@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
@@ -121,7 +122,12 @@ export function LeaderboardPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <strong className="font-mono text-sm text-white">{x.handle}</strong>
+                        <Link
+                          to={`/portal/profile/${x.handle}`}
+                          className="font-mono text-sm text-white hover:text-[var(--accent)] hover:underline transition-colors w-fit"
+                        >
+                          @{x.handle}
+                        </Link>
                         <span className="text-xs text-neutral-400">{x.full_name}</span>
                       </div>
                     </TableCell>

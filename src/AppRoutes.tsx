@@ -67,13 +67,18 @@ export function AppRoutes() {
           {/* Cryptographic Result Verification */}
           <Route path="verify" element={<VerifyProofPage />} />
 
-          {/* Member Profile */}
+          {/* Member & Student Profiles */}
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile/:handle" element={<ProfilePage />} />
+          <Route path="u/:handle" element={<ProfilePage />} />
 
           {/* Account & Security Settings */}
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
+
+      {/* Direct Shortlink for Profiles: /u/:handle */}
+      <Route path="/u/:handle" element={<Navigate to="/portal/profile/:handle" replace />} />
 
       {/* Catch-all fallback */}
       <Route path="*" element={<Navigate to="/portal" replace />} />

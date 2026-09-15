@@ -184,4 +184,80 @@ export async function getRatingDistribution(force = false) {
   );
 }
 
+/**
+ * Fetch any student's public competitive profile by handle or ID (LeetCode-style).
+ * Cached with SWR so visiting any profile is instant.
+ */
+export async function getStudentProfileData(handle: string, force = false) {
+  const token = getToken();
+  const cleanHandle = (handle || "").trim().toLowerCase();
+  const cacheKey = `student:profile:${cleanHandle}:${token ? token.slice(-8) : "anon"}`;
+
+  return swrFetch(
+    cacheKey,
+    async () => {
+      const backendUrl = getApiBase();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      try {
+        const res = await fetch(`${backendUrl}/auth/profile/${encodeURIComponent(cleanHandle)}`, {
+          headers,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return {
+            member: data.member || null,
+            ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
+            recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
+            problemStats: data.problemStats || {
+              total_solved: 0,
+              easy_solved: 0,
+              medium_solved: 0,
+              hard_solved: 0,
+              total_submissions: 0,
+              acceptance_rate: 0,
+              topics: [],
+            },
+            submissionCalendar: data.submissionCalendar || {},
+            proofs: Array.isArray(data.proofs) ? data.proofs : [],
+            achievements: Array.isArray(data.achievements) ? data.achievements : [],
+          };
+        }
+      } catch (err) {
+        console.error("Failed to load student profile:", err);
+      }
+
+      return {
+        member: null,
+        ratingHistory: [],
+        recentBattles: [],
+        problemStats: {
+          total_solved: 0,
+          easy_solved: 0,
+          medium_solved: 0,
+          hard_solved: 0,
+          total_submissions: 0,
+          acceptance_rate: 0,
+          topics: [],
+        },
+        submissionCalendar: {},
+        proofs: [],
+        achievements: [],
+      };
+    },
+    {
+      staleTime: 30000, // 30s
+      ttl: 300000, // 5m
+      forceRefresh: force,
+      persistSession: true,
+    }
+  );
+}
+
 export { invalidateSwrCache };
+

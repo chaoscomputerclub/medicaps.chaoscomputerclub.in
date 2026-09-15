@@ -168,10 +168,18 @@ function FinalRow({ row }: { row: FinalStandingRow }) {
       <TableCell className="font-mono text-xs font-bold text-white">{row.rank}</TableCell>
       <TableCell>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-white">{row.full_name}</span>
-          <span className="font-mono text-[10px] text-[var(--muted)]">
+          <Link
+            to={`/portal/profile/${row.handle}`}
+            className="text-sm font-semibold text-white hover:text-[var(--accent)] hover:underline transition-colors w-fit"
+          >
+            {row.full_name}
+          </Link>
+          <Link
+            to={`/portal/profile/${row.handle}`}
+            className="font-mono text-[10px] text-[var(--muted)] hover:text-white transition-colors w-fit"
+          >
             @{row.handle} · {row.department} · {row.batch}
-          </span>
+          </Link>
         </div>
       </TableCell>
       <TableCell className="font-mono text-xs text-[var(--muted)]">{row.division}</TableCell>
