@@ -63,6 +63,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const { handle } = useParams<{ handle?: string }>();
   const currentMember = useAppSelector((s) => s.auth.member);
+  const followingIds = useAppSelector((s) => s.social.followingIds);
 
   const [copied, setCopied] = useState(false);
   const [isFollowingOptimistic, setIsFollowingOptimistic] = useState<boolean | null>(null);
@@ -92,6 +93,10 @@ export function ProfilePage() {
     () => getRatingDistribution(),
     { ttl: 5 * 60 * 1000 }
   );
+
+  useEffect(() => {
+    dispatch(fetchMyFollowingIdsThunk());
+  }, [dispatch]);
 
   useEffect(() => {
     setIsFollowingOptimistic(null);
@@ -161,12 +166,6 @@ export function ProfilePage() {
     : m.handle
       ? m.handle.slice(0, 2).toUpperCase()
       : "CC";
-
-  const followingIds = useAppSelector((s) => s.social.followingIds);
-
-  useEffect(() => {
-    dispatch(fetchMyFollowingIdsThunk());
-  }, [dispatch]);
 
   const isFollowing =
     isFollowingOptimistic !== null
