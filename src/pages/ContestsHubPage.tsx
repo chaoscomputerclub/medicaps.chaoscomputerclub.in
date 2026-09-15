@@ -160,6 +160,14 @@ export function ContestsHubPage() {
   const weeklyCountdown = useCountdown(upcomingWeekly?.starts_at);
   const biweeklyCountdown = useCountdown(upcomingBiweekly?.starts_at);
 
+  const isWeeklyRegistered = useMemo(() => {
+    return Boolean(upcomingWeekly?.registered || myParticipations.some((p) => p.contest_slug === upcomingWeekly?.slug));
+  }, [upcomingWeekly, myParticipations]);
+
+  const isBiweeklyRegistered = useMemo(() => {
+    return Boolean(upcomingBiweekly?.registered || myParticipations.some((p) => p.contest_slug === upcomingBiweekly?.slug));
+  }, [upcomingBiweekly, myParticipations]);
+
   // Check if user is registered for either upcoming contest or has an active assessment
   const registeredUpcomingContest = useMemo(() => {
     return upcomingContests.find((c) => c.registered || myParticipations.some((p) => p.contest_slug === c.slug));
@@ -365,17 +373,16 @@ export function ContestsHubPage() {
 
             {/* Registration CTA */}
             <div className="mt-6 flex items-center gap-3">
-              {upcomingWeekly.registered ? (
-                <div className="flex w-full items-center justify-between rounded-none border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5">
-                  <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-400">
-                    <CheckCircle2 className="size-4" /> REGISTERED FOR CONTEST
-                  </span>
-                  <Link
-                    to={`/portal/contests/${upcomingWeekly.slug}`}
-                    className="font-mono text-xs text-foreground underline hover:text-primary"
-                  >
-                    View Details →
-                  </Link>
+              {isWeeklyRegistered ? (
+                <div className="flex w-full items-center gap-2">
+                  <Button asChild className="flex-1 rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-[var(--accent)]/90">
+                    <Link to={`/assessments/${upcomingWeekly.slug}`}>
+                      <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                    <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
+                  </Button>
                 </div>
               ) : (
                 <div className="flex w-full items-center gap-2">
@@ -485,17 +492,16 @@ export function ContestsHubPage() {
 
             {/* Registration CTA */}
             <div className="mt-6 flex items-center gap-3">
-              {upcomingBiweekly.registered ? (
-                <div className="flex w-full items-center justify-between rounded-none border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5">
-                  <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-400">
-                    <CheckCircle2 className="size-4" /> REGISTERED FOR CONTEST
-                  </span>
-                  <Link
-                    to={`/portal/contests/${upcomingBiweekly.slug}`}
-                    className="font-mono text-xs text-foreground underline hover:text-cyan-400"
-                  >
-                    View Details →
-                  </Link>
+              {isBiweeklyRegistered ? (
+                <div className="flex w-full items-center gap-2">
+                  <Button asChild className="flex-1 rounded-none bg-cyan-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-cyan-300">
+                    <Link to={`/assessments/${upcomingBiweekly.slug}`}>
+                      <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                    <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
+                  </Button>
                 </div>
               ) : (
                 <div className="flex w-full items-center gap-2">
@@ -597,6 +603,23 @@ export function ContestsHubPage() {
                   </Button>
                 )}
               </div>
+            ) : registeredUpcomingContest || isWeeklyRegistered || isBiweeklyRegistered ? (
+              <div className="w-full space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-400">
+                    <CheckCircle2 className="size-4" /> REGISTRATION ACTIVE
+                  </span>
+                  <span className="font-mono text-xs text-primary font-bold">120 MIN ATTEMPT</span>
+                </div>
+                <Button asChild className="w-full rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90 shadow-md">
+                  <Link to={`/assessments/${(registeredUpcomingContest || upcomingWeekly).slug}`}>
+                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT NOW
+                  </Link>
+                </Button>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Full-screen distraction-free IDE with live testcase execution.
+                </p>
+              </div>
             ) : assessmentInfo?.isOpen ? (
               <div className="w-full space-y-3">
                 <div className="flex items-center justify-between">
@@ -611,7 +634,7 @@ export function ContestsHubPage() {
                 </div>
                 <Button asChild className="w-full rounded-none bg-primary font-mono text-xs font-black uppercase text-black hover:bg-primary/90">
                   <Link to={`/assessments/${assessmentInfo.contest.slug}`}>
-                    <Play className="mr-1.5 size-4 fill-black" /> ENTER ASSESSMENT ARENA
+                    <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
                   </Link>
                 </Button>
                 <p className="text-[10px] text-muted-foreground text-center">
@@ -637,14 +660,14 @@ export function ContestsHubPage() {
                   </p>
                 </div>
                 <Button
-                  disabled
-                  variant="secondary"
-                  className="w-full rounded-none font-mono text-xs font-bold cursor-not-allowed opacity-80"
+                  onClick={() => handleRegister(upcomingWeekly.slug)}
+                  disabled={registeringSlug === upcomingWeekly.slug}
+                  className="w-full rounded-none font-mono text-xs font-bold uppercase tracking-wider"
                 >
-                  <Lock className="mr-1.5 size-3.5" /> SCREENING LOCKED
+                  <Sparkles className="mr-1.5 size-3.5" /> REGISTER TO UNLOCK
                 </Button>
                 <p className="text-[10px] text-muted-foreground text-center">
-                  Available automatically for registered cadets 24h prior.
+                  Register now to immediately unlock Phase 1 assessment.
                 </p>
               </div>
             ) : (
@@ -654,9 +677,10 @@ export function ContestsHubPage() {
                 </p>
                 <Button
                   onClick={() => handleRegister(upcomingWeekly.slug)}
-                  className="w-full rounded-none font-mono text-xs font-bold"
+                  disabled={registeringSlug === upcomingWeekly.slug}
+                  className="w-full rounded-none font-mono text-xs font-bold uppercase tracking-wider"
                 >
-                  REGISTER FOR CONTEST
+                  {registeringSlug === upcomingWeekly.slug ? "REGISTERING..." : "REGISTER FOR SCREENING"}
                 </Button>
               </div>
             )}

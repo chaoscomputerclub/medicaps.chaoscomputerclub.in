@@ -18,6 +18,7 @@ import {
   QrCode,
   RotateCcw,
   ShieldCheck,
+  Sparkles,
   Trophy,
   Users,
 } from "lucide-react";
@@ -173,42 +174,43 @@ export function ContestOverviewPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {!isRegistered && (phase === "registration_open" || phase === "assessment_open" || isDevBypass) && (
-                <Button onClick={() => setConfirmOpen(true)} size="lg">
-                  Register for Round 1
-                  <ArrowRight className="size-4" />
+              {!isRegistered && !isDevBypass && (
+                <Button onClick={() => setConfirmOpen(true)} size="lg" className="rounded-none bg-primary text-primary-foreground font-mono text-xs font-bold uppercase tracking-wider">
+                  <Sparkles className="size-4 mr-2" />
+                  Register for Contest
                 </Button>
               )}
 
-              {(isRegistered || isDevBypass) && (phase === "registration_open" || isDevBypass) && (
-                <Button asChild size="lg" className="bg-primary text-primary-foreground">
-                  <Link to={`/portal/contests/${contestSlug}/lobby`}>
-                    <Play className="size-4 fill-current mr-2" />
-                    Enter assessment workspace
+              {(isRegistered || isDevBypass) && phase !== "assessment_submitted" && (
+                <Button asChild size="lg" className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-[var(--accent)]/20">
+                  <Link to={`/assessments/${contestSlug}`}>
+                    <Play className="size-4 fill-black mr-2" />
+                    Take Assessment
                   </Link>
                 </Button>
               )}
 
-              {isRegistered && phase === "assessment_open" && !isDevBypass && (
-                <Button asChild size="lg">
+              {(isRegistered || isDevBypass) && phase !== "assessment_submitted" && (
+                <Button asChild variant="outline" size="lg" className="rounded-none font-mono text-xs uppercase tracking-wider">
                   <Link to={`/portal/contests/${contestSlug}/lobby`}>
-                    <Play className="size-4 fill-current mr-2" />
-                    Start assessment
+                    Assessment Lobby
                   </Link>
                 </Button>
               )}
 
-              {phase === "assessment_submitted" && !isDevBypass && (
-                <Button variant="outline" disabled size="lg">
-                  <BadgeCheck className="size-4 text-primary" />
-                  Assessment submitted
+              {phase === "assessment_submitted" && (
+                <Button asChild variant="outline" size="lg" className="rounded-none border-emerald-500/40 text-emerald-400 font-mono text-xs uppercase">
+                  <Link to={`/portal/contests/${contestSlug}/results`}>
+                    <BadgeCheck className="size-4 text-emerald-400 mr-2" />
+                    Assessment Submitted · View Standings
+                  </Link>
                 </Button>
               )}
 
               {(phase === "final_live" || isDevBypass) &&
                 (qualified || isDevBypass ? (
                   <>
-                    <Button asChild size="lg" className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs uppercase font-bold tracking-wider">
+                    <Button asChild size="lg" className="rounded-none bg-cyan-500 text-black hover:bg-cyan-400 font-mono text-xs uppercase font-bold tracking-wider">
                       <Link to={`/portal/contests/${contestSlug}/arena`}>
                         <Play className="size-4 fill-current mr-2" />
                         Live Final Arena

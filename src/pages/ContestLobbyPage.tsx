@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowLeft, Clock, Lock, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Clock, Lock, Play, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -179,9 +179,10 @@ export function ContestLobbyPage() {
                 <Button
                   disabled={!ack || !canStart}
                   onClick={() => navigate(`/assessments/${contestSlug}`)}
-                  className="rounded-none font-mono text-xs font-bold uppercase tracking-wider"
+                  className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs font-bold uppercase tracking-wider disabled:opacity-50"
                 >
-                  Start assessment
+                  <Play className="mr-1.5 size-4 fill-black" />
+                  Take Assessment Now
                 </Button>
                 <Button asChild variant="ghost" className="rounded-none font-mono text-xs uppercase">
                   <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>
