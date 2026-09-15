@@ -36,8 +36,10 @@ from app.schemas.dynamic_contest import (
     DynamicContestCreateRequest,
     DynamicContestUpdateRequest,
     ProblemCreateSchema,
+    AssessmentConfigSchema,
     ContestCloneRequest,
     PresetContestLaunchRequest,
+    ContestStatusChangeRequest,
 )
 from app.core.cache import delete_cache_pattern
 from app.services.assessment_service import AssessmentService
