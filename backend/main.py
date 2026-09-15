@@ -14,7 +14,7 @@ from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
-from app.routers import admin, admin_contests, assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, storage, verify
+from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, storage, verify
 from app.api.v1.router import api_router_v1
 
 
@@ -131,6 +131,7 @@ app.include_router(storage.router, prefix=settings.API_PREFIX)
 # Admin maintenance routes (not exposed publicly in prod; protect via network policy)
 app.include_router(admin.router, prefix=settings.API_PREFIX)
 app.include_router(admin_contests.router, prefix=settings.API_PREFIX)
+app.include_router(admin_qa.router, prefix=settings.API_PREFIX)
 
 # Versioned surface — preferred for all new clients (/api/v1/).
 app.include_router(api_router_v1, prefix=f"{settings.API_PREFIX}/v1")
