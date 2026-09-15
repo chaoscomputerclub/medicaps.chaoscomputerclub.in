@@ -14,6 +14,9 @@
   "overrides": {
     "rolldown": "1.2.1"
   },
+  "workspaces": [
+    "codebox-engine"
+  ],
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@monaco-editor/react": "^4.7.0",
