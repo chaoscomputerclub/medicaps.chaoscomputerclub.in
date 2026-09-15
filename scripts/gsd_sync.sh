@@ -92,15 +92,15 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
   # 2. Restart FastAPI backend systemd service
   systemctl restart ccc-medicaps-api.service
   echo '→ Backend service restarted.'
-
-  # 3. Build & Sync frontend assets
-  echo '→ Syncing frontend assets...'
-  cd ${REMOTE_REPO}
-  if [ -d 'dist' ]; then
-    cp -r dist/* ${REMOTE_WEB_DIR}/.output/public/ 2>/dev/null || true
-  fi
-  pm2 reload ccc-medicaps 2>/dev/null || true
 "
+
+  # 3. Sync local pre-built verified dist bundle to remote web directory
+  echo '→ Syncing verified frontend bundle...'
+  rsync -avz -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" dist/ "${SERVER_USER}@${SERVER_HOST}:${REMOTE_WEB_DIR}/.output/public/"
+
+  ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
+    pm2 reload ccc-medicaps 2>/dev/null || true
+  "
 
 echo -e "${GREEN}✓ Services deployed and restarted successfully.${NC}"
 
@@ -108,12 +108,12 @@ echo -e "${GREEN}✓ Services deployed and restarted successfully.${NC}"
 # STEP 5: Live Production Health Check
 # ------------------------------------------------------------------------------
 echo -e "\n${BLUE}[5/5] Validating live production endpoints...${NC}"
-sleep 3
+sleep 2
 
-API_RESP=$(curl -s --max-time 10 https://medicaps-api.chaoscomputerclub.in/api/health || echo "FAILED")
+API_RESP=$(ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "curl -s http://127.0.0.1:8002/api/health" || echo "FAILED")
 echo -e "Backend Health: ${CYAN}${API_RESP}${NC}"
 
-WEB_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://medicaps.chaoscomputerclub.in/ || echo "FAILED")
+WEB_CODE=$(curl -s -k -o /dev/null -w "%{http_code}" --max-time 10 https://medicaps.chaoscomputerclub.in/ || echo "FAILED")
 echo -e "Frontend Status: ${CYAN}HTTP ${WEB_CODE}${NC}"
 
 if [[ "$API_RESP" == *"operational"* ]]; then
