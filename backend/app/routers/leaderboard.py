@@ -127,12 +127,20 @@ async def get_university_leaderboard(
 
 
 @router.get("/distribution")
-async def get_rating_distribution(db: AsyncSession = Depends(get_db)):
+async def get_rating_distribution(response: Response, db: AsyncSession = Depends(get_db)):
     """
     Return the real rating distribution histogram from the DB.
     Each bucket spans 50 rating points (1000-1050, ..., 2350-2400+).
     Count is the actual number of members whose rating falls in that range.
+    Protected by 120s Redis Cache-Aside.
     """
+    cache_key = "cache:leaderboard:distribution"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+        return cached
+
     result = await db.execute(select(MemberProfile.rating))
     ratings = [r for (r,) in result.all() if r is not None]
 
@@ -151,11 +159,23 @@ async def get_rating_distribution(db: AsyncSession = Depends(get_db)):
     })
 
     total = len(ratings)
-    return {"total": total, "buckets": buckets}
+    payload = {"total": total, "buckets": buckets}
+    await set_cache(cache_key, payload, ttl_seconds=120)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+    return payload
+
 
 @router.get("/departments")
-async def get_department_performance(db: AsyncSession = Depends(get_db)):
-    """Aggregate rating and participation statistics by university department."""
+async def get_department_performance(response: Response, db: AsyncSession = Depends(get_db)):
+    """Aggregate rating and participation statistics by university department. Protected by 120s Redis Cache."""
+    cache_key = "cache:leaderboard:departments"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+        return cached
+
     stmt = select(
         MemberProfile.department,
         func.count(MemberProfile.id).label("total_members"),
@@ -165,7 +185,7 @@ async def get_department_performance(db: AsyncSession = Depends(get_db)):
 
     result = await db.execute(stmt)
     rows = result.all()
-    return [
+    payload = [
         {
             "department": r.department,
             "total_members": r.total_members,
@@ -174,3 +194,7 @@ async def get_department_performance(db: AsyncSession = Depends(get_db)):
         }
         for r in rows
     ]
+    await set_cache(cache_key, payload, ttl_seconds=120)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+    return payload

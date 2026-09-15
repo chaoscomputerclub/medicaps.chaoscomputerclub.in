@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import { LeaderboardRowSkeleton } from "@/organization/components/skeletons";
+import { useSwrData } from "@/lib/cache/swrCache";
 import {
   Table,
   TableHeader,
@@ -28,25 +28,13 @@ function Spark({ data }: { data: number[] }) {
 }
 
 export function LeaderboardPage() {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: rawData, loading } = useSwrData(
+    "leaderboard:university",
+    getUniversityLeaderboardData,
+    { staleTime: 30000, persistSession: true }
+  );
+  const data = rawData || [];
   const currentMemberId = useAppSelector((s) => s.auth.member?.id);
-
-  useEffect(() => {
-    let active = true;
-    getUniversityLeaderboardData()
-      .then((res) => {
-        if (active) {
-          setData(res || []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load leaderboard:", err);
-        if (active) setLoading(false);
-      });
-    return () => { active = false; };
-  }, []);
 
   return (
     <div className="page-wrap space-y-6">

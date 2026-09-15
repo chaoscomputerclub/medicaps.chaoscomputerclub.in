@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -18,29 +18,18 @@ import { SectionHeader } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyContestsSkeleton } from "@/organization/components/skeletons";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 export function MyContestsPage() {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: rawData, loading } = useSwrData(
+    "system:contests:history",
+    () => contestSystemService.getHistory(),
+    { ttl: 2 * 60 * 1000 }
+  );
+  const data = rawData || [];
   const [filter, setFilter] = useState<"all" | "registered" | "live" | "completed">("all");
 
-  useEffect(() => {
-    let active = true;
-    contestSystemService.getHistory()
-      .then((history) => {
-        if (active) {
-          setData(history || []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load contest history:", err);
-        if (active) setLoading(false);
-      });
-    return () => { active = false; };
-  }, []);
-
-  if (loading) {
+  if (loading && !rawData) {
     return <MyContestsSkeleton />;
   }
 

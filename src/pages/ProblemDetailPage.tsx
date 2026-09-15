@@ -1,45 +1,35 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Ban, CheckCircle2 } from "lucide-react";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ProblemDetailSkeleton } from "@/organization/components/skeletons";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 export function ProblemDetailPage() {
   const { problemSlug } = useParams<{ problemSlug: string }>();
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<{ contest: any; problem: any } | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    if (!problemSlug) {
-      setLoading(false);
-      return;
-    }
+  const { data: portalData, loading } = useSwrData(
+    "public:portal:data",
+    () => getPublicPortalData(),
+    { ttl: 5 * 60 * 1000 }
+  );
 
+  const data = useMemo(() => {
+    if (!problemSlug || !portalData) return null;
     const [slug, index] = problemSlug.split("--");
-    getPublicPortalData()
-      .then((portalData) => {
-        if (!active) return;
-        const contest = portalData.contests?.find((c: any) => c.slug === slug);
-        const problem =
-          contest?.status === "finished"
-            ? contest.problems?.find((p: any) => p.index.toLowerCase() === index?.toLowerCase())
-            : undefined;
+    const contest = portalData.contests?.find((c: any) => c.slug === slug);
+    const problem =
+      contest?.status === "finished"
+        ? contest.problems?.find((p: any) => p.index.toLowerCase() === index?.toLowerCase())
+        : undefined;
 
-        if (contest && problem) {
-          setData({ contest, problem });
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load problem detail:", err);
-        if (active) setLoading(false);
-      });
+    if (contest && problem) {
+      return { contest, problem };
+    }
+    return null;
+  }, [problemSlug, portalData]);
 
-    return () => { active = false; };
-  }, [problemSlug]);
-
-  if (loading) {
+  if (loading && !data) {
     return <ProblemDetailSkeleton />;
   }
 

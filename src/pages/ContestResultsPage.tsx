@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { contestApi } from "@/features/contest/api";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 import { ArrowLeft, Crown, Lock, Search, Timer, Trophy, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,26 @@ export function ContestResultsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("query") || "";
   const filter = (searchParams.get("filter") as FilterKey) || "all";
-  const [ranking, setRanking] = useState<AssessmentRanking>({
+
+  const { data: rankingData, loading: rankLoading } = useSwrData<AssessmentRanking>(
+    `contest:ranking:${contestSlug}`,
+    () => contestApi.ranking(contestSlug),
+    { ttl: 30 * 1000 }
+  );
+
+  const { data: contest, loading: contestLoading } = useSwrData(
+    `contest:detail:${contestSlug}`,
+    () => contestApi.detail(contestSlug),
+    { ttl: 2 * 60 * 1000 }
+  );
+
+  const { data: registration } = useSwrData(
+    `contest:registration:${contestSlug}`,
+    () => contestApi.registrationStatus(contestSlug),
+    { ttl: 2 * 60 * 1000 }
+  );
+
+  const ranking = rankingData || {
     contest_slug: contestSlug,
     cutoff: 30,
     total_participants: 0,
@@ -31,32 +50,7 @@ export function ContestResultsPage() {
     releases_at: null,
     message: null,
     rows: [],
-  });
-  const [contest, setContest] = useState<any>(null);
-  const [registration, setRegistration] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!contestSlug) return;
-    Promise.all([
-      contestApi.ranking(contestSlug).catch(() => ({
-        contest_slug: contestSlug,
-        cutoff: 30,
-        total_participants: 0,
-        released: true,
-        releases_at: null,
-        message: null,
-        rows: [],
-      })),
-      contestApi.detail(contestSlug).catch(() => null),
-      contestApi.registrationStatus(contestSlug).catch(() => null),
-    ]).then(([r, c, reg]) => {
-      setRanking(r);
-      setContest(c);
-      setRegistration(reg);
-      setLoading(false);
-    });
-  }, [contestSlug]);
+  };
 
   const myHandle = registration?.assessment_rank
     ? ranking.rows.find((row) => row.rank === registration.assessment_rank)?.handle
@@ -76,7 +70,7 @@ export function ContestResultsPage() {
 
   const myRow = myHandle ? ranking.rows.find((row) => row.handle === myHandle) : undefined;
 
-  if (loading) {
+  if ((rankLoading || contestLoading) && !rankingData && !contest) {
     return <ContestResultsSkeleton />;
   }
 

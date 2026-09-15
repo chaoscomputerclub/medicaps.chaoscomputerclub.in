@@ -3,8 +3,8 @@
  */
 
 import { Link, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { contestApi } from "@/features/contest/api";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 import { ArrowLeft, Award, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -24,27 +24,24 @@ import { cn } from "@/lib/utils";
 import type { FinalStandingRow } from "@/features/contest/types";
 import { ContestFinalResultsSkeleton } from "@/organization/components/skeletons";
 
-
-
 export function ContestFinalResultsPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
-  const [rows, setRows] = useState<FinalStandingRow[]>([]);
-  const [contest, setContest] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!contestSlug) return;
-    Promise.all([
-      contestApi.finalStandings(contestSlug).catch(() => []),
-      contestApi.detail(contestSlug).catch(() => null),
-    ]).then(([r, c]) => {
-      setRows(r);
-      setContest(c);
-      setLoading(false);
-    });
-  }, [contestSlug]);
+  const { data: finalRows, loading: rowsLoading } = useSwrData<FinalStandingRow[]>(
+    `contest:final_standings:${contestSlug}`,
+    () => contestApi.finalStandings(contestSlug),
+    { ttl: 30 * 1000 }
+  );
 
-  if (loading) {
+  const { data: contest, loading: contestLoading } = useSwrData(
+    `contest:detail:${contestSlug}`,
+    () => contestApi.detail(contestSlug),
+    { ttl: 2 * 60 * 1000 }
+  );
+
+  const rows = finalRows || [];
+
+  if ((rowsLoading || contestLoading) && !finalRows && !contest) {
     return <ContestFinalResultsSkeleton />;
   }
 

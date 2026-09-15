@@ -167,7 +167,9 @@ export const contestSlice = createSlice({
   extraReducers: (builder) => {
     // List
     builder.addCase(fetchContestsThunk.pending, (state) => {
-      state.isLoading = true;
+      if (state.contests.length === 0) {
+        state.isLoading = true;
+      }
       state.error = null;
     });
     builder.addCase(fetchContestsThunk.fulfilled, (state, action: PayloadAction<ContestSummary[]>) => {
@@ -181,7 +183,9 @@ export const contestSlice = createSlice({
 
     // Detail
     builder.addCase(fetchContestDetailThunk.pending, (state) => {
-      state.isLoadingDetail = true;
+      if (!state.currentContest) {
+        state.isLoadingDetail = true;
+      }
     });
     builder.addCase(fetchContestDetailThunk.fulfilled, (state, action) => {
       state.isLoadingDetail = false;

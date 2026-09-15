@@ -4,10 +4,11 @@ Trust-of-Proof Cryptographic Verification Router
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
+from app.core.cache import get_cache, set_cache
 from app.models.db_models import TrustProof
 from app.models.schemas import TrustProofResponse, VerifyRequest, VerifyResponse
 
@@ -15,13 +16,27 @@ router = APIRouter(prefix="/verify", tags=["Trust of Proof Verification"])
 
 @router.get("/proofs", response_model=List[TrustProofResponse])
 async def list_proofs(
+    response: Response,
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
 ):
-    """Fetch live cryptographic trust proofs from database."""
+    """Fetch live cryptographic trust proofs from database. Protected by 120s Redis Cache."""
+    cache_key = f"cache:verify:proofs:{limit}"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+        return cached
+
     stmt = select(TrustProof).order_by(TrustProof.issued_at.desc()).limit(limit)
     res = await db.execute(stmt)
-    return res.scalars().all()
+    records = res.scalars().all()
+
+    payload = [TrustProofResponse.model_validate(r).model_dump() for r in records]
+    await set_cache(cache_key, payload, ttl_seconds=120)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+    return records
 
 
 @router.get("/cert/{certificate_id}", response_model=TrustProofResponse)

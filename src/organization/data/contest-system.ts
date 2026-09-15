@@ -4,6 +4,7 @@
  */
 
 import { getApiBase, getToken } from "@/lib/auth";
+import { swrFetch } from "@/lib/cache/swrCache";
 
 export type ContestLifecycle =
   | "registration_open"
@@ -243,112 +244,130 @@ function mapBackendContestToRecord(c: any, standings: any[] = []): ContestRecord
 }
 
 export const contestSystemService = {
-  async listContests(): Promise<ContestRecord[]> {
-    try {
-      const apiBase = getApiBase();
-      const token = getToken();
-      const headers: Record<string, string> = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+  async listContests(force = false): Promise<ContestRecord[]> {
+    return swrFetch(
+      "system:contests:list",
+      async () => {
+        try {
+          const apiBase = getApiBase();
+          const token = getToken();
+          const headers: Record<string, string> = {};
+          if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await fetch(`${apiBase}/contests`, { headers });
-      if (res.ok) {
-        const apiContests = await res.json();
-        if (Array.isArray(apiContests)) {
-          return apiContests.map((c) => mapBackendContestToRecord(c));
+          const res = await fetch(`${apiBase}/contests`, { headers });
+          if (res.ok) {
+            const apiContests = await res.json();
+            if (Array.isArray(apiContests)) {
+              return apiContests.map((c) => mapBackendContestToRecord(c));
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch contests from API:", e);
         }
-      }
-    } catch (e) {
-      console.error("Failed to fetch contests from API:", e);
-    }
-    return [];
+        return [];
+      },
+      { ttl: 2 * 60 * 1000, force }
+    );
   },
 
-  async getContest(slug: string): Promise<ContestRecord | null> {
-    try {
-      const apiBase = getApiBase();
-      const token = getToken();
-      const headers: Record<string, string> = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+  async getContest(slug: string, force = false): Promise<ContestRecord | null> {
+    return swrFetch(
+      `system:contest:${slug}`,
+      async () => {
+        try {
+          const apiBase = getApiBase();
+          const token = getToken();
+          const headers: Record<string, string> = {};
+          if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await fetch(`${apiBase}/contests/${slug}`, { headers });
-      if (res.ok) {
-        const c = await res.json();
-        const sbRes = await fetch(`${apiBase}/scoreboards/${slug}`, { headers }).catch(() => null);
-        const standings = sbRes && sbRes.ok ? await sbRes.json() : [];
-        return mapBackendContestToRecord(c, standings);
-      }
-    } catch (e) {
-      console.error("Failed to fetch contest from API:", e);
-    }
-    return null;
+          const res = await fetch(`${apiBase}/contests/${slug}`, { headers });
+          if (res.ok) {
+            const c = await res.json();
+            const sbRes = await fetch(`${apiBase}/scoreboards/${slug}`, { headers }).catch(() => null);
+            const standings = sbRes && sbRes.ok ? await sbRes.json() : [];
+            return mapBackendContestToRecord(c, standings);
+          }
+        } catch (e) {
+          console.error("Failed to fetch contest from API:", e);
+        }
+        return null;
+      },
+      { ttl: 2 * 60 * 1000, force }
+    );
   },
 
-  async getHistory(): Promise<ContestHistoryItem[]> {
-    try {
-      const token = getToken();
-      if (!token) return [];
-      const apiBase = getApiBase();
+  async getHistory(force = false): Promise<ContestHistoryItem[]> {
+    return swrFetch(
+      "system:contests:history",
+      async () => {
+        try {
+          const token = getToken();
+          if (!token) return [];
+          const apiBase = getApiBase();
 
-      // 1. Fetch comprehensive participated & registered contests
-      const res = await fetch(`${apiBase}/contests/my/participated`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          return data.map((item: any) => ({
-            contest_id: item.contest_id,
-            contest_slug: item.contest_slug,
-            contest_title: item.contest_title,
-            season: item.season || "Season 1 — 2026",
-            status: item.status || "upcoming",
-            lifecycle:
-              item.status === "finished"
-                ? "offline_complete"
-                : item.status === "live"
-                ? "assessment_live"
-                : "registration_open",
-            participated_at: item.participated_at || new Date().toISOString(),
-            starts_at: item.starts_at,
-            ends_at: item.ends_at,
-            venue: item.venue || "Computing Complex · Lab Block 04",
-            score: item.score ?? null,
-            rank: item.rank ?? null,
-            participants: item.participants ?? 30,
-            outcome: item.outcome || "registered",
-            offline_result: item.offline_result || null,
-          }));
+          // 1. Fetch comprehensive participated & registered contests
+          const res = await fetch(`${apiBase}/contests/my/participated`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              return data.map((item: any) => ({
+                contest_id: item.contest_id,
+                contest_slug: item.contest_slug,
+                contest_title: item.contest_title,
+                season: item.season || "Season 1 — 2026",
+                status: item.status || "upcoming",
+                lifecycle:
+                  item.status === "finished"
+                    ? "offline_complete"
+                    : item.status === "live"
+                    ? "assessment_live"
+                    : "registration_open",
+                participated_at: item.participated_at || new Date().toISOString(),
+                starts_at: item.starts_at,
+                ends_at: item.ends_at,
+                venue: item.venue || "Computing Complex · Lab Block 04",
+                score: item.score ?? null,
+                rank: item.rank ?? null,
+                participants: item.participants ?? 30,
+                outcome: item.outcome || "registered",
+                offline_result: item.offline_result || null,
+              }));
+            }
+          }
+
+          // 2. Fallback to /auth/profile/full
+          const profileRes = await fetch(`${apiBase}/auth/profile/full`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (profileRes.ok) {
+            const data = await profileRes.json();
+            const battles = data.recentBattles || [];
+            return battles.map((b: any) => ({
+              contest_slug: b.contest_slug || b.contest.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+              contest_title: b.contest,
+              season: "Season 1 — 2026",
+              status: "finished",
+              lifecycle: "offline_complete",
+              participated_at: b.date,
+              starts_at: null,
+              ends_at: null,
+              venue: "Computing Complex",
+              score: b.score ?? 0,
+              rank: b.rank,
+              participants: b.participants ?? 30,
+              outcome: b.rank <= 30 ? "qualified" : "not_qualified",
+              offline_result: b.certificate_id ? `Certificate ${b.certificate_id}` : null,
+            }));
+          }
+        } catch (e) {
+          console.error("Failed to fetch history from API:", e);
         }
-      }
-
-      // 2. Fallback to /auth/profile/full
-      const profileRes = await fetch(`${apiBase}/auth/profile/full`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (profileRes.ok) {
-        const data = await profileRes.json();
-        const battles = data.recentBattles || [];
-        return battles.map((b: any) => ({
-          contest_slug: b.contest_slug || b.contest.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-          contest_title: b.contest,
-          season: "Season 1 — 2026",
-          status: "finished",
-          lifecycle: "offline_complete",
-          participated_at: b.date,
-          starts_at: null,
-          ends_at: null,
-          venue: "Computing Complex",
-          score: b.score ?? 0,
-          rank: b.rank,
-          participants: b.participants ?? 30,
-          outcome: b.rank <= 30 ? "qualified" : "not_qualified",
-          offline_result: b.certificate_id ? `Certificate ${b.certificate_id}` : null,
-        }));
-      }
-    } catch (e) {
-      console.error("Failed to fetch history from API:", e);
-    }
-    return [];
+        return [];
+      },
+      { ttl: 2 * 60 * 1000, force }
+    );
   },
 
   async getSettings(): Promise<AccountSettings> {

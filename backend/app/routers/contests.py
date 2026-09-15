@@ -6,12 +6,13 @@ Offline Contests & On-Premise Event Management Router
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from app.core.db import get_db
+from app.core.cache import get_cache, set_cache, delete_cache_pattern
 from app.models.db_models import (
     ContestProblem,
     MemberProfile,
@@ -46,6 +47,7 @@ router = APIRouter(prefix="/contests", tags=["Offline Contests"])
 
 @router.get("", response_model=List[OfflineContestResponse])
 async def list_contests(
+    response: Response,
     status: Optional[str] = Query(None, description="Filter by: live, upcoming, finished"),
     division: Optional[str] = Query(None, description="Filter by: division_1, division_2, division_3, open"),
     db: AsyncSession = Depends(get_db),
@@ -56,7 +58,17 @@ async def list_contests(
     STRICT SECURITY RULE: Contests in LIVE status are strictly filtered out
     unless the requesting member is authenticated and eligible (Top 30 qualifier,
     registered finalist, or core team proctor).
+    Protected by 30s Redis Cache-Aside.
     """
+    # Only cache unauthenticated / general public view
+    member_key = current_member.id if current_member else "anon"
+    cache_key = f"cache:contests:list:{status or 'all'}:{division or 'all'}:{member_key}"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=15"
+        return cached
+
     stmt = select(OfflineContest).options(
         selectinload(OfflineContest.problems),
         selectinload(OfflineContest.assessment),
@@ -82,6 +94,10 @@ async def list_contests(
                 continue
         filtered_contests.append(c)
 
+    payload = [OfflineContestResponse.model_validate(c).model_dump() for c in filtered_contests]
+    await set_cache(cache_key, payload, ttl_seconds=30)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=15"
     return filtered_contests
 
 
@@ -194,10 +210,19 @@ async def get_my_participated_contests(
 @router.get("/{slug}", response_model=OfflineContestResponse)
 async def get_contest_detail(
     slug: str,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
-    """Fetch complete specifications, venue, rules, and proctor details for an offline contest."""
+    """Fetch complete specifications, venue, rules, and proctor details for an offline contest. Protected by 60s Redis Cache."""
+    member_key = current_member.id if current_member else "anon"
+    cache_key = f"cache:contest:detail:{slug}:{member_key}"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+        return cached
+
     stmt = (
         select(OfflineContest)
         .options(
@@ -219,16 +244,28 @@ async def get_contest_detail(
                 detail=f"Access restricted: {reason}",
             )
 
+    payload = OfflineContestResponse.model_validate(contest).model_dump()
+    await set_cache(cache_key, payload, ttl_seconds=60)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
     return contest
 
 
 @router.get("/{slug}/problems", response_model=List[ContestProblemResponse])
 async def get_contest_problems(
     slug: str,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
-    """Fetch problem set papers (A-F), first-solve times, and editorial summaries."""
+    """Fetch problem set papers (A-F), first-solve times, and editorial summaries. Protected by 60s Redis Cache."""
+    cache_key = f"cache:contest:problems:{slug}"
+    cached = await get_cache(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+        return cached
+
     c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
     contest = c_res.scalars().first()
     if not contest:
@@ -244,7 +281,12 @@ async def get_contest_problems(
         .where(ContestProblem.contest_id == contest.id)
         .order_by(ContestProblem.problem_index.asc())
     )
-    return res.scalars().all()
+    records = res.scalars().all()
+    payload = [ContestProblemResponse.model_validate(p).model_dump() for p in records]
+    await set_cache(cache_key, payload, ttl_seconds=60)
+    response.headers["X-Cache"] = "MISS"
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+    return records
 
 
 @router.get("/{slug}/registration-status")
@@ -456,6 +498,7 @@ async def register_for_contest(
     db.add(new_reg)
     contest.registered_count += 1
     await db.commit()
+    await delete_cache_pattern("cache:contest*")
 
     return {
         "status": "confirmed",
@@ -506,6 +549,7 @@ async def check_in_contest(
             pass_obj.check_in_status = "checked_in"
             assigned_seat = pass_obj.seat_number
         await db.commit()
+        await delete_cache_pattern("cache:contest*")
 
     return {
         "success": True,
@@ -544,6 +588,7 @@ async def reset_contest_timer(
         assessment.is_active = True
 
     await db.commit()
+    await delete_cache_pattern("cache:contest*")
     return {
         "status": "timer_reset",
         "slug": slug,
@@ -809,6 +854,8 @@ async def submit_contest_arena_code(
             sb_entry.solved += 1
 
     await db.commit()
+    await delete_cache_pattern("cache:scoreboard*")
+    await delete_cache_pattern("cache:contest*")
 
     return {
         "submission_id": sub.id,

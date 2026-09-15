@@ -1,6 +1,6 @@
 import { DashboardSkeleton } from "@/organization/components/skeletons";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ArrowRight, CalendarClock, MapPin, Radio, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingChart } from "@/organization/components/RatingChart";
@@ -16,36 +16,38 @@ import { fetchFullProfileData, type FullProfilePayload } from "@/organization/da
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
+import { useSwrData } from "@/lib/cache/swrCache";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<FullProfilePayload | null>(null);
-  const [publicData, setPublicData] = useState<{
+
+  const { data: profile, loading: profileLoading } = useSwrData<FullProfilePayload | null>(
+    "member:profile:full",
+    () => fetchFullProfileData(),
+    { ttl: 5 * 60 * 1000 }
+  );
+
+  const { data: publicDataRaw, loading: publicLoading } = useSwrData<{
     contests: OfflineContest[];
     announcements: AnnouncementFeedItem[];
     standings: any[];
     problems: any[];
-  }>({ contests: [], announcements: [], standings: [], problems: [] });
-  const [loading, setLoading] = useState(true);
+  }>(
+    "public:portal:data",
+    () => getPublicPortalData(),
+    { ttl: 5 * 60 * 1000 }
+  );
+
+  const publicData = publicDataRaw || { contests: [], announcements: [], standings: [], problems: [] };
 
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/auth");
-      return;
     }
-
-    Promise.all([
-      fetchFullProfileData().catch(() => null),
-      getPublicPortalData().catch(() => ({ contests: [], announcements: [], standings: [], problems: [] })),
-    ]).then(([prof, pub]) => {
-      if (prof) setProfile(prof);
-      if (pub) setPublicData(pub);
-      setLoading(false);
-    });
   }, [navigate]);
 
-  if (loading && !profile) {
+  if ((profileLoading || publicLoading) && !profile && !publicDataRaw) {
     return <DashboardSkeleton />;
   }
 

@@ -28,6 +28,7 @@ import {
 } from "@/organization/data/portal.functions";
 import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
   volt: { icon: "⚡", bg: "bg-lime-500/10", border: "border-lime-500/40", text: "text-lime-400" },
@@ -57,34 +58,25 @@ export function ProfilePage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
-  const [profileData, setProfileData] = useState<any>(null);
-  const [distribution, setDistribution] = useState<any>(null);
+  const { data: profileData, loading: profileLoading } = useSwrData(
+    "member:profile:full",
+    () => getMemberProfileData(),
+    { ttl: 5 * 60 * 1000 }
+  );
+
+  const { data: distribution, loading: distLoading } = useSwrData(
+    "leaderboard:rating:distribution",
+    () => getRatingDistribution(),
+    { ttl: 5 * 60 * 1000 }
+  );
 
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/auth", { replace: true });
-      return;
     }
-
-    let active = true;
-    Promise.all([getMemberProfileData(), getRatingDistribution()])
-      .then(([pData, dist]) => {
-        if (active) {
-          setProfileData(pData);
-          setDistribution(dist);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load profile:", err);
-        if (active) setLoading(false);
-      });
-
-    return () => { active = false; };
   }, [navigate]);
 
-  if (loading) {
+  if ((profileLoading || distLoading) && !profileData) {
     return <ProfileSkeleton />;
   }
 

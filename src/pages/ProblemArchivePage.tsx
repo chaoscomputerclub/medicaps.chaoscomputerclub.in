@@ -1,35 +1,23 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { SectionHeader, EmptyState } from "@/organization/components/ui";
 import { ProblemArchiveSkeleton } from "@/organization/components/skeletons";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 export function ProblemArchivePage() {
-  const [contests, setContests] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: publicData, loading } = useSwrData(
+    "public:portal:data",
+    () => getPublicPortalData(),
+    { ttl: 5 * 60 * 1000 }
+  );
 
-  useEffect(() => {
-    let active = true;
-    getPublicPortalData()
-      .then((data) => {
-        if (active) {
-          setContests(data.contests || []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load archive:", err);
-        if (active) setLoading(false);
-      });
-    return () => { active = false; };
-  }, []);
-
-  if (loading) {
+  if (loading && !publicData) {
     return <ProblemArchiveSkeleton />;
   }
 
-  const complete = contests.filter((c) => c.status === "finished");
+  const contests = publicData?.contests || [];
+  const complete = contests.filter((c: any) => c.status === "finished");
 
   return (
     <div className="page-wrap space-y-6">

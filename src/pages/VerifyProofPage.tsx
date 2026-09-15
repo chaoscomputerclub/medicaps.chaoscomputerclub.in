@@ -25,6 +25,7 @@ import { ProofBadge } from "@/organization/components/ProofBadge";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { contestApi } from "@/features/contest/api";
 import { VerifyProofSkeleton } from "@/organization/components/skeletons";
+import { useSwrData } from "@/lib/cache/swrCache";
 
 export function VerifyProofPage() {
   const [searchParams] = useSearchParams();
@@ -33,31 +34,17 @@ export function VerifyProofPage() {
   const submitted = useAppSelector((s) => s.portal.verifySubmitted);
 
   const [activeTab, setActiveTab] = useState<"gate_scanner" | "cert_proof">("gate_scanner");
-  const [proofs, setProofs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: publicData, loading } = useSwrData(
+    "public:portal:data",
+    () => getPublicPortalData(),
+    { ttl: 5 * 60 * 1000 }
+  );
+  const proofs = publicData?.proofs || [];
 
   // Proctor QR Scanner States
   const [qrInput, setQrInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [scanResult, setScanResult] = useState<any>(null);
-
-  useEffect(() => {
-    let active = true;
-    getPublicPortalData()
-      .then((res) => {
-        if (active) {
-          setProofs(res.proofs || []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load verification proofs:", err);
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   useEffect(() => {
     const proofQuery = searchParams.get("proof");
@@ -113,7 +100,7 @@ export function VerifyProofPage() {
       )
     : undefined;
 
-  if (loading) {
+  if (loading && !publicData) {
     return <VerifyProofSkeleton />;
   }
 
