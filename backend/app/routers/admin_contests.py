@@ -118,6 +118,10 @@ async def clone_contest(
     "/{slug}/status",
     summary="Transition contest lifecycle status",
 )
+@router.post(
+    "/{slug}/status",
+    summary="Transition contest lifecycle status",
+)
 async def change_contest_status(
     slug: str,
     payload: ContestStatusChangeRequest,

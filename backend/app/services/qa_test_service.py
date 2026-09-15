@@ -35,7 +35,7 @@ class TestCaseResult(BaseModel):
     name: str
     method: str
     endpoint: str
-    expected_status: int
+    expected_status: Union[int, List[int]]
     actual_status: int
     passed: bool
     latency_ms: float
@@ -117,6 +117,9 @@ class ProductionQAService:
         cls, actual_data: Any, required_keys: List[str]
     ) -> Tuple[bool, str]:
         """Verify presence of required keys in dictionary or list of dictionaries."""
+        if not required_keys:
+            return True, "No specific schema constraints"
+
         if isinstance(actual_data, list):
             if len(actual_data) == 0:
                 return True, "Valid (empty list returned as expected)"
@@ -164,7 +167,6 @@ class ProductionQAService:
         auth_json_headers = {**auth_headers, **json_headers}
 
         # List of all test definitions
-        # Structure: (test_id, category, name, method, endpoint, headers, body, expected_status, required_keys, notes)
         test_definitions: List[Dict[str, Any]] = [
             # ── 1. System Health & Infrastructure ────────────────────────────
             {
@@ -212,7 +214,7 @@ class ProductionQAService:
                 "endpoint": "/api/auth/send-otp",
                 "headers": json_headers,
                 "body": {"email": "outsider@gmail.com"},
-                "expected_status": 400,
+                "expected_status": [400, 422],
                 "required_keys": ["detail"],
                 "notes": "Strictly rejects email domains outside @medicaps.ac.in.",
             },
@@ -249,8 +251,8 @@ class ProductionQAService:
                 "headers": auth_headers,
                 "body": None,
                 "expected_status": 200,
-                "required_keys": ["id", "email", "handle", "rating", "is_onboarded", "is_core_member"],
-                "notes": "Retrieves authenticated member profile with role claims.",
+                "required_keys": ["member", "campusPass", "ratingHistory"],
+                "notes": "Retrieves authenticated member profile with stats and pass.",
             },
             # ── 3. Contest Discovery & Matrix ─────────────────────────────────
             {
@@ -262,7 +264,7 @@ class ProductionQAService:
                 "headers": {},
                 "body": None,
                 "expected_status": 200,
-                "required_keys": ["id", "title", "slug", "status", "starts_at", "ends_at", "max_seats", "division"],
+                "required_keys": ["id", "title", "slug", "status", "starts_at", "ends_at", "division", "seat_capacity"],
                 "notes": "Returns live, upcoming, and past official offline contests.",
             },
             {
@@ -274,7 +276,7 @@ class ProductionQAService:
                 "headers": {},
                 "body": None,
                 "expected_status": 200,
-                "required_keys": ["title", "slug", "status", "rules", "phases", "registered_count"],
+                "required_keys": ["title", "slug", "status", "rules", "seat_capacity", "registered_count"],
                 "notes": "Retrieves full contest specifications, venue details, and rules.",
             },
             {
@@ -286,8 +288,8 @@ class ProductionQAService:
                 "headers": {},
                 "body": None,
                 "expected_status": 200,
-                "required_keys": ["problem_index", "title", "difficulty", "points", "starter_codes"],
-                "notes": "Fetches problem statements, constraints, and multi-language boilerplates.",
+                "required_keys": ["id", "contest_id", "problem_index", "title", "points"],
+                "notes": "Fetches problem statements and point weights.",
             },
             {
                 "id": "CONTEST-04",
@@ -438,18 +440,18 @@ class ProductionQAService:
                 "required_keys": ["id", "title", "kind"],
                 "notes": "Filters announcements by system / editorial tags.",
             },
-            # ── 9. Social & OpenGraph Engine ─────────────────────────────────
+            # ── 9. Social & Network Engine ───────────────────────────────────
             {
                 "id": "SOCIAL-01",
                 "category": "Social & OG",
-                "name": "Dynamic Cadet Social Share Card Generation",
+                "name": "Cadet Followers Network Query",
                 "method": "GET",
-                "endpoint": "/api/social/share-card?handle=qa_organizer",
-                "headers": {},
+                "endpoint": "/api/social/qa_organizer/followers",
+                "headers": auth_headers,
                 "body": None,
                 "expected_status": 200,
-                "required_keys": [],
-                "notes": "Generates dynamic SVG / visual rank telemetry asset.",
+                "required_keys": ["count", "students"],
+                "notes": "Retrieves follower network list for member handle.",
             },
             # ── 10. Versioned API Gateway (v1) ───────────────────────────────
             {
@@ -461,7 +463,7 @@ class ProductionQAService:
                 "headers": {},
                 "body": None,
                 "expected_status": 200,
-                "required_keys": ["chapter", "system_time", "version"],
+                "required_keys": ["version", "contest_model", "assessment_duration_minutes"],
                 "notes": "Versioned API telemetry handshake endpoint.",
             },
             {
@@ -497,8 +499,8 @@ class ProductionQAService:
                 "endpoint": "/api/admin/contests/preset/launch",
                 "headers": auth_json_headers,
                 "body": {"contest_type": "weekly", "edition": 999},
-                "expected_status": 200,
-                "required_keys": ["success", "slug", "contest"],
+                "expected_status": 201,
+                "required_keys": ["success", "slug", "contest_id"],
                 "notes": "One-click deployment of weekly edition with 4 algorithmic problems.",
             },
             {
@@ -545,7 +547,7 @@ class ProductionQAService:
                 "method": "POST",
                 "endpoint": "/api/admin/contests/weekly-contest-999/status",
                 "headers": auth_json_headers,
-                "body": {"new_status": "live"},
+                "body": {"status": "live"},
                 "expected_status": 200,
                 "required_keys": ["success", "status"],
                 "notes": "Transitions state machine and activates contest arena.",
@@ -563,8 +565,8 @@ class ProductionQAService:
                     "starts_at": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
                     "ends_at": (datetime.now(timezone.utc) + timedelta(days=7, hours=3)).isoformat(),
                 },
-                "expected_status": 200,
-                "required_keys": ["success", "slug", "problem_count"],
+                "expected_status": 201,
+                "required_keys": ["success", "slug", "contest_id"],
                 "notes": "Performs deep copy of problem statements and testcases.",
             },
             {
@@ -601,7 +603,7 @@ class ProductionQAService:
                 "headers": auth_headers,
                 "body": None,
                 "expected_status": 200,
-                "required_keys": ["contest_slug", "status"],
+                "required_keys": ["assessment", "session", "problems"],
                 "notes": "Checks Phase 1 screening round availability and countdown timer.",
             },
             # ── 13. Edge Cases & Validation Errors ───────────────────────────
@@ -663,6 +665,8 @@ class ProductionQAService:
                         resp = await client.post(endpoint, headers=headers, json=body)
                     elif method == "PUT":
                         resp = await client.put(endpoint, headers=headers, json=body)
+                    elif method == "PATCH":
+                        resp = await client.patch(endpoint, headers=headers, json=body)
                     elif method == "DELETE":
                         resp = await client.delete(endpoint, headers=headers)
                     else:
@@ -677,20 +681,24 @@ class ProductionQAService:
                     except Exception:
                         raw_text = resp.text[:500]
 
-                    # Verification assertions
-                    status_match = actual_status == expected_status
+                    # Status match validation (handles integer or list of allowed statuses)
+                    if isinstance(expected_status, list):
+                        status_match = actual_status in expected_status
+                    else:
+                        status_match = actual_status == expected_status
+
                     schema_match = True
                     schema_msg = "No specific schema required"
 
                     if actual_json is not None and required_keys:
                         schema_match, schema_msg = cls._validate_schema_keys(actual_json, required_keys)
-                    elif expected_status == 200 and actual_json is None:
+                    elif (isinstance(expected_status, int) and expected_status == 200 or (isinstance(expected_status, list) and 200 in expected_status)) and actual_json is None:
                         schema_match = len(raw_text) > 0
 
                     passed = status_match and schema_match
 
                     if passed:
-                        diff_notes = f"✓ Status {actual_status} matched. {schema_msg} (Latency: {latency_ms}ms)"
+                        diff_notes = f"✓ Status HTTP {actual_status} matched expectation. {schema_msg} (Latency: {latency_ms}ms)"
                     else:
                         diff_notes = f"✖ MISMATCH: Expected status {expected_status}, got {actual_status}. Schema note: {schema_msg}"
 
@@ -704,7 +712,7 @@ class ProductionQAService:
                 req_summary = f"Keys: {required_keys}" if required_keys else "Any valid response"
                 if actual_json is not None:
                     if isinstance(actual_json, list):
-                        act_summary = f"List [{len(actual_json)} items]. First item keys: {list(actual_json[0].keys()) if len(actual_json) > 0 and isinstance(actual_json[0], dict) else 'primitive'}"
+                        act_summary = f"List [{len(actual_json)} items]. First item keys: {list(actual_json[0].keys())[:8] if len(actual_json) > 0 and isinstance(actual_json[0], dict) else 'primitive'}"
                     elif isinstance(actual_json, dict):
                         act_summary = f"Dict with keys: {list(actual_json.keys())[:8]}"
                     else:

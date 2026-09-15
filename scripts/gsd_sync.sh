@@ -99,7 +99,7 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
   rsync -avz -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" dist/ "${SERVER_USER}@${SERVER_HOST}:${REMOTE_WEB_DIR}/.output/public/"
 
   ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
-    pm2 reload ccc-medicaps 2>/dev/null || true
+    systemctl reload nginx
   "
 
 echo -e "${GREEN}✓ Services deployed and restarted successfully.${NC}"
