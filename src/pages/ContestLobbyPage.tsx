@@ -1,13 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowLeft, Clock, Lock, Play, ShieldCheck, CheckCircle2 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, CheckCircle2, Clock, Lock, Play, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Countdown } from "@/features/contest/components";
 import {
   ASSESSMENT_DURATION_MINUTES,
   ASSESSMENT_WINDOW_HOURS,
@@ -32,14 +26,10 @@ export function ContestLobbyPage() {
   );
 
   useEffect(() => {
-    if (contestSlug) {
-      dispatch(fetchContestDetailThunk(contestSlug));
-    }
+    if (contestSlug) dispatch(fetchContestDetailThunk(contestSlug));
   }, [contestSlug, dispatch]);
 
-  if (isLoadingDetail && !contest) {
-    return <ContestLobbySkeleton />;
-  }
+  if (isLoadingDetail && !contest) return <ContestLobbySkeleton />;
 
   if (!contest) {
     return (
@@ -62,166 +52,178 @@ export function ContestLobbyPage() {
   const closesAt = assessmentClosesAt(contest);
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const notYetOpen = phase === "registration_open" && !isDevBypass;
-  const canStart = !isAssessmentSubmitted && (Boolean(registration?.can_take_assessment) || phase === "assessment_open" || isDevBypass);
+  const canStart =
+    !isAssessmentSubmitted &&
+    (Boolean(registration?.can_take_assessment) || phase === "assessment_open" || isDevBypass);
 
   return (
-    <div className="page-wrap space-y-6">
-      <Link to={`/portal/contests/${contestSlug}`} className="back-link">
-        <ArrowLeft />
-        Back to contest
+    <div className="page-wrap flex min-h-[calc(100vh-120px)] max-w-2xl flex-col justify-center space-y-10 py-12">
+      {/* Back */}
+      <Link to={`/portal/contests/${contestSlug}`} className="back-link self-start">
+        <ArrowLeft /> {contest.title}
       </Link>
 
-      <header className="space-y-2">
-        <p className="kicker">Round 1 · Online assessment</p>
-        <h1 className="text-2xl font-black uppercase tracking-tight text-white">{contest.title}</h1>
-        <p className="max-w-2xl text-sm text-[var(--muted)]">
-          You are one click away from your single attempt. Read the three rules below — they are the
-          only things you need to know.
-        </p>
-      </header>
+      {/* ─── SUBMITTED STATE ──────────────────────────────── */}
+      {isAssessmentSubmitted ? (
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="size-6 text-emerald-400" />
+              <h1 className="text-2xl font-black text-foreground">Assessment Submitted</h1>
+            </div>
+            <p className="text-sm leading-relaxed text-[var(--muted)]">
+              Your attempt is locked and recorded. Results are published once the screening window closes.
+              Reattempts are not permitted under the single-attempt protocol.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              asChild
+              className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90"
+            >
+              <Link to={`/portal/contests/${contestSlug}/results`}>View Standings</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+              <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
+            </Button>
+          </div>
+        </div>
+      ) : !registration?.registered ? (
+        /* ─── NOT REGISTERED ─────────────────────────────── */
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Lock className="size-6 text-[var(--muted)]" />
+            <h1 className="text-2xl font-black text-foreground">Not Registered</h1>
+            <p className="text-sm text-[var(--muted)]">
+              Register for this contest first, then return here when the assessment window opens.
+            </p>
+          </div>
+          <Button asChild className="rounded-none font-mono text-xs font-black uppercase">
+            <Link to={`/portal/contests/${contestSlug}`}>Register for Contest</Link>
+          </Button>
+        </div>
+      ) : (
+        /* ─── READY TO ATTEMPT ───────────────────────────── */
+        <div className="space-y-10">
+          {/* Title */}
+          <div className="space-y-2">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--accent)]">
+              Round 1 · Online Assessment
+            </p>
+            <h1 className="text-3xl font-black leading-tight text-foreground">{contest.title}</h1>
+          </div>
 
-      <Alert className="rounded-none border-[var(--accent)]/50 bg-[var(--surface-1)]">
-        <AlertTriangle className="size-4 text-[var(--accent)]" />
-        <AlertTitle className="font-mono text-xs font-bold uppercase tracking-widest text-white">
-          The {ASSESSMENT_DURATION_MINUTES / 60}-hour clock cannot be paused
-        </AlertTitle>
-        <AlertDescription className="text-sm leading-relaxed text-[var(--muted)]">
-          Once you press Start, the clock runs continuously for {ASSESSMENT_DURATION_MINUTES} minutes.
-          Closing the tab, refreshing, changing your system time, or losing your connection does not
-          stop it — the countdown is kept by the contest server. When it reaches zero your work is
-          submitted automatically and the attempt is locked. There is no second attempt.
-        </AlertDescription>
-      </Alert>
+          {/* The one warning that matters */}
+          <div className="space-y-4 border-l-2 border-[var(--accent)] pl-5">
+            <p className="text-sm font-semibold text-foreground">
+              The {ASSESSMENT_DURATION_MINUTES}-minute clock cannot be paused.
+            </p>
+            <p className="text-sm leading-relaxed text-[var(--muted)]">
+              Once you press Start, the server clock runs continuously. Closing the tab, refreshing,
+              or losing connection does not stop it. When the timer reaches zero, your work is
+              submitted automatically. There is no second attempt.
+            </p>
+          </div>
 
-      {isDevBypass && (
-        <div className="flex items-center gap-2 rounded-none border border-emerald-500/40 bg-emerald-950/20 px-4 py-3 font-mono text-xs text-emerald-400">
-          <span>⚡ <strong>DEV BYPASS ACTIVE:</strong> Scheduled entry window restriction is bypassed. You can check the acknowledgment below and start your assessment session immediately.</span>
+          {/* Key facts — inline, not cards */}
+          <div className="grid grid-cols-3 divide-x divide-[var(--line)] border border-[var(--line)] bg-[var(--surface-2)]">
+            {[
+              {
+                label: "Window",
+                value: `${ASSESSMENT_WINDOW_HOURS}h entry`,
+                sub: `${formatWhen(opensAt.toISOString())}`,
+              },
+              { label: "Attempt", value: "One only", sub: "No pause, no restart" },
+              { label: "Advance", value: `Top ${FINALIST_SEATS}`, sub: "Score then time" },
+            ].map(({ label, value, sub }) => (
+              <div key={label} className="flex flex-col gap-1 p-4">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--muted)]">
+                  {label}
+                </span>
+                <span className="text-sm font-bold text-foreground">{value}</span>
+                <span className="font-mono text-[10px] text-[var(--muted)]">{sub}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Dev bypass notice */}
+          {isDevBypass && (
+            <div className="border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 font-mono text-xs text-emerald-400">
+              ⚡ <strong>Dev Bypass Active</strong> — timing restrictions are lifted. You can start immediately.
+            </div>
+          )}
+
+          {/* Waiting state */}
+          {notYetOpen && (
+            <div className="flex items-center gap-3 border border-[var(--line)] bg-[var(--surface-2)] px-5 py-4">
+              <Clock className="size-4 shrink-0 text-[var(--muted)]" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Opens {formatWhen(opensAt.toISOString())}
+                </p>
+                <p className="text-xs text-[var(--muted)]">
+                  Come back when the window opens to start your attempt.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Acknowledgment + Start */}
+          <div className="space-y-5">
+            <label className="flex cursor-pointer items-start gap-3">
+              <div
+                role="checkbox"
+                aria-checked={ack}
+                tabIndex={0}
+                onClick={() => setAck((v) => !v)}
+                onKeyDown={(e) => e.key === " " && setAck((v) => !v)}
+                className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center border transition-colors focus:outline-none ${
+                  ack
+                    ? "border-[var(--accent)] bg-[var(--accent)]"
+                    : "border-[var(--line)] bg-transparent hover:border-[var(--accent)]/60"
+                }`}
+              >
+                {ack && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <span className="text-sm text-[var(--muted)]">
+                I understand this is my only attempt, the {ASSESSMENT_DURATION_MINUTES}-minute clock
+                starts immediately and cannot be paused, and my work is submitted automatically when
+                time runs out.
+              </span>
+            </label>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                disabled={!ack || !canStart}
+                onClick={() => navigate(`/assessments/${contestSlug}`)}
+                size="lg"
+                className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90 disabled:opacity-40"
+              >
+                <Play className="mr-1.5 size-4 fill-black" /> Start Assessment
+              </Button>
+              <Button asChild variant="ghost" className="rounded-none font-mono text-xs">
+                <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>
+              </Button>
+            </div>
+
+            {!canStart && !notYetOpen && (
+              <p className="font-mono text-xs text-amber-300">
+                {registration?.eligibility_message ?? "Assessment is not accepting attempts right now."}
+              </p>
+            )}
+          </div>
+
+          {/* Security footer */}
+          <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+            <Shield className="size-3.5 shrink-0" />
+            Full-screen anti-cheat · Monaco editor · Server-side timer · Auto-submit on timeout
+          </div>
         </div>
       )}
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
-          <CardHeader className="gap-2">
-            <Clock className="size-4 text-[var(--accent)]" />
-            <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
-              Entry window · {ASSESSMENT_WINDOW_HOURS}h
-            </CardTitle>
-            <p className="font-mono text-xs text-[var(--muted)]">
-              {formatWhen(opensAt.toISOString())} → {formatWhen(closesAt.toISOString())}
-            </p>
-          </CardHeader>
-        </Card>
-        <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
-          <CardHeader className="gap-2">
-            <Lock className="size-4 text-[var(--accent)]" />
-            <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
-              One attempt
-            </CardTitle>
-            <p className="font-mono text-xs text-[var(--muted)]">
-              No resume, no restart, no extension
-            </p>
-          </CardHeader>
-        </Card>
-        <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
-          <CardHeader className="gap-2">
-            <ShieldCheck className="size-4 text-[var(--accent)]" />
-            <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
-              Top {FINALIST_SEATS} advance
-            </CardTitle>
-            <p className="font-mono text-xs text-[var(--muted)]">Score first, then time taken</p>
-          </CardHeader>
-        </Card>
-      </div>
-
-      <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
-        <CardContent className="space-y-5 py-6">
-          {notYetOpen ? (
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <Countdown target={opensAt} label="Round 1 opens in" />
-              <Badge
-                variant="outline"
-                className="rounded-none border-sky-500/40 font-mono text-[10px] uppercase tracking-widest text-sky-300"
-              >
-                Waiting for the window
-              </Badge>
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <Countdown target={closesAt} label="Window closes in" />
-              <span className="font-mono text-xs text-[var(--muted)]">
-                {contest.problem_count} problems · judged on hidden tests
-              </span>
-            </div>
-          )}
-
-          <Separator className="bg-[var(--line)]" />
-
-          {isAssessmentSubmitted ? (
-            <div className="space-y-4 rounded-none border border-emerald-500/40 bg-emerald-950/20 p-5">
-              <div className="flex items-center gap-2 font-mono text-sm font-bold text-emerald-400">
-                <CheckCircle2 className="size-5 text-emerald-400" />
-                <span>Assessment Attempt Already Completed</span>
-              </div>
-              <p className="font-mono text-xs text-neutral-300 leading-relaxed">
-                You have finalized and submitted your assessment attempt for this contest. Reattempts are not permitted under the single-attempt competitive protocol.
-              </p>
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Button asChild className="rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase text-black hover:bg-[var(--accent)]/90">
-                  <Link to={`/portal/contests/${contestSlug}/results`}>
-                    View Standings & Results
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase">
-                  <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
-                </Button>
-              </div>
-            </div>
-          ) : registration && !registration.registered ? (
-            <p className="text-sm text-[var(--muted)]">
-              You are not registered for this edition yet. Register on the contest page first, then
-              come back here when the window opens.
-            </p>
-          ) : (
-            <>
-              <label className="flex cursor-pointer items-start gap-3 text-sm text-[var(--muted)]">
-                <Checkbox
-                  checked={ack}
-                  onCheckedChange={(value) => setAck(value === true)}
-                  className="mt-0.5 rounded-none border-[var(--line)]"
-                />
-                <span>
-                  I understand this is my only attempt, that the {ASSESSMENT_DURATION_MINUTES}-minute
-                  clock starts immediately and cannot be paused, and that my work is submitted
-                  automatically when it ends.
-                </span>
-              </label>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  disabled={!ack || !canStart}
-                  onClick={() => navigate(`/assessments/${contestSlug}`)}
-                  className="rounded-none bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs font-bold uppercase tracking-wider disabled:opacity-50"
-                >
-                  <Play className="mr-1.5 size-4 fill-black" />
-                  Take Assessment Now
-                </Button>
-                <Button asChild variant="ghost" className="rounded-none font-mono text-xs uppercase">
-                  <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>
-                </Button>
-              </div>
-
-              {!canStart && (
-                <p className="font-mono text-xs text-amber-300">
-                  {registration?.eligibility_message ??
-                    (notYetOpen
-                      ? "Start unlocks the moment the window opens."
-                      : "The contest server is not accepting new attempts right now.")}
-                </p>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
