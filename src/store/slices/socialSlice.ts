@@ -139,7 +139,7 @@ export const toggleFollowThunk = createAsyncThunk<
       window.location.href = "/auth";
       return rejectWithValue("Authentication required");
     }
-    const target = typeof arg === "string" ? arg : (arg.targetHandle || arg.targetId || "");
+    const target = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
     const cleanTarget = target.replace(/^@+/, "").trim();
     if (!cleanTarget) return rejectWithValue("Target student handle is required.");
 
@@ -270,6 +270,7 @@ export const socialSlice = createSlice({
 
     // Toggle Follow: Optimistic
     builder.addCase(toggleFollowThunk.pending, (state, action) => {
+      state.hasFetchedFollowing = true;
       const arg = action.meta.arg;
       const targetId = typeof arg === "object" ? arg.targetId?.trim() : undefined;
       const targetHandle =
@@ -309,6 +310,7 @@ export const socialSlice = createSlice({
       }
     });
     builder.addCase(toggleFollowThunk.fulfilled, (state, action) => {
+      state.hasFetchedFollowing = true;
       state.actionPendingId = null;
       const { targetId, targetHandle, isFollowing, followersCount } = action.payload;
 
@@ -343,6 +345,7 @@ export const socialSlice = createSlice({
       }
     });
     builder.addCase(toggleFollowThunk.rejected, (state, action) => {
+      state.hasFetchedFollowing = true;
       state.actionPendingId = null;
       const arg = action.meta.arg;
       const targetId = typeof arg === "object" ? arg.targetId?.trim() : undefined;

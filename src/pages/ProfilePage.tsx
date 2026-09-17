@@ -162,12 +162,18 @@ export function ProfilePage() {
       ? m.handle.slice(0, 2).toUpperCase()
       : "CC";
 
+  const isSelfUser =
+    Boolean(m.is_self) ||
+    isViewingSelf ||
+    Boolean(currentMember?.id && m.id && currentMember.id === m.id) ||
+    Boolean(currentMember?.handle && m.handle && currentMember.handle.toLowerCase() === m.handle.toLowerCase());
+
   const isFollowedInStore =
-    !m.is_self &&
+    !isSelfUser &&
     (followingIds.includes(m.id) || (m.handle ? followingIds.includes(m.handle) : false));
 
   const isFollowing =
-    m.is_self
+    isSelfUser
       ? false
       : hasFetchedFollowing
         ? isFollowedInStore
@@ -175,11 +181,11 @@ export function ProfilePage() {
 
   const initialFollowed = Boolean(m.is_following);
   const delta =
-    !m.is_self
+    !isSelfUser
       ? (isFollowing ? 1 : 0) - (initialFollowed ? 1 : 0)
       : 0;
   const displayedFollowers = Math.max(0, (m.followers_count || 0) + delta);
-  const displayedFollowing = isViewingSelf
+  const displayedFollowing = isSelfUser
     ? (hasFetchedFollowing ? followingIds.length : (m.following_count ?? 0))
     : (m.following_count ?? 0);
 
@@ -202,7 +208,7 @@ export function ProfilePage() {
       navigate("/auth");
       return;
     }
-    if (m.is_self || isViewingSelf || followLoading) return;
+    if (isSelfUser || followLoading) return;
 
     setFollowLoading(true);
     try {
@@ -251,7 +257,7 @@ export function ProfilePage() {
               </h1>
 
               {/* If viewing own profile: Edit button */}
-              {(isViewingSelf || m.is_self) ? (
+              {isSelfUser ? (
                 <Button
                   type="button"
                   id="profile-edit-btn"

@@ -417,6 +417,8 @@ class AuthController:
                 "attendance_total": total_contests or 0,
                 "is_onboarded": current_member.is_onboarded,
                 "is_core_member": getattr(current_member, "is_core_member", False),
+                "is_self": True,
+                "is_following": False,
                 "tier": tier,
                 "podiums": 0,
                 "streak": 0,

@@ -47,9 +47,16 @@ echo -e "${GREEN}✓ Backend API QA suite passed with 100% compliance.${NC}"
 # ------------------------------------------------------------------------------
 # STEP 3: Full Application Frontend-to-Backend User Action Simulation
 # ------------------------------------------------------------------------------
-echo -e "\n${BLUE}[3/3] Running Full Application Frontend-to-Backend QA Simulation...${NC}"
+echo -e "\n${BLUE}[3/4] Running Full Application Frontend-to-Backend QA Simulation...${NC}"
 node scripts/qa_full_application.mjs
 echo -e "${GREEN}✓ Full application user action simulation passed.${NC}"
+
+# ------------------------------------------------------------------------------
+# STEP 4: Full Application UI Elements & Button Backend Connectivity Audit
+# ------------------------------------------------------------------------------
+echo -e "\n${BLUE}[4/4] Running UI Elements & Button Backend Connectivity Audit...${NC}"
+node scripts/audit_ui_elements_backend_connectivity.mjs
+echo -e "${GREEN}✓ All interactive UI elements audited for backend connectivity.${NC}"
 
 echo -e "\n${GREEN}================================================================${NC}"
 echo -e "${GREEN}   ✨ ALL GSD QA GATES PASSED — CODE QUALIFIED FOR PRODUCTION    ${NC}"
