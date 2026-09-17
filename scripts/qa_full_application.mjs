@@ -191,7 +191,7 @@ class QASimulator {
       `Loaded ${contests.body?.length || 0} official sessions`
     );
 
-    const firstSlug = contests.body?.[0]?.slug || "weekly-contest-42";
+    const firstSlug = contests.body?.[0]?.slug || "weekly-contest-1";
     const contestDetail = await request(`/contests/${firstSlug}`);
     this.record(
       "UI-CONT-02",

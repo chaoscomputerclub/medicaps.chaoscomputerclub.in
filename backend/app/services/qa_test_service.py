@@ -157,7 +157,7 @@ class ProductionQAService:
 
         # Setup QA Auth Token & Dynamic Fixtures
         qa_token = custom_token
-        target_slug = "weekly-contest-42"
+        target_slug = "weekly-contest-1"
         async with AsyncSessionLocal() as db:
             qa_member = await cls.get_or_create_qa_member(db)
             if not qa_token:
@@ -827,7 +827,7 @@ class ProductionQAService:
                 "category": "Validation & Edge Cases",
                 "name": "Contest Registration Without Auth (401 Rejection)",
                 "method": "POST",
-                "endpoint": "/api/contests/weekly-contest-42/register",
+                "endpoint": f"/api/contests/{target_slug}/register",
                 "headers": json_headers,
                 "body": {},
                 "expected_status": 401,

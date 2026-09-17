@@ -55,17 +55,17 @@ async def launch_contests():
         print("  ✓ Old contest data purged cleanly.")
 
         # =====================================================================
-        # 1. WEEKLY CONTEST 42
+        # 1. WEEKLY CONTEST 1
         # =====================================================================
-        print("\n🔹 [1/2] Creating Weekly Contest 42...")
+        print("\n🔹 [1/1] Creating Weekly Contest 1...")
         weekly_contest = OfflineContest(
-            slug="weekly-contest-42",
-            title="CCC Weekly Contest 42",
+            slug="weekly-contest-1",
+            title="CCC Weekly Contest 1",
             season="Season 2026",
             status="upcoming",
             division="open",
             cadence="weekly",
-            edition=42,
+            edition=1,
             starts_at=weekly_starts,
             ends_at=weekly_ends,
             check_in_opens_at=weekly_checkin,
@@ -89,12 +89,12 @@ async def launch_contests():
         db.add(weekly_contest)
         await db.flush()
 
-        # Linked Assessment for Weekly 42
+        # Linked Assessment for Weekly 1
         weekly_assessment = Assessment(
             contest_id=weekly_contest.id,
-            slug="weekly-contest-42",
-            title="Weekly Contest 42 — Online Screening Round",
-            summary="Phase 1 online qualification round for CCC Weekly Contest 42. Solve all 4 challenges within 120 minutes.",
+            slug="weekly-contest-1",
+            title="Weekly Contest 1 — Online Screening Round",
+            summary="Phase 1 online qualification round for CCC Weekly Contest 1. Solve all 4 challenges within 120 minutes.",
             duration_minutes=120,
             starts_at=now - timedelta(minutes=10), # Opened right now for instant testing
             ends_at=weekly_starts,
@@ -105,7 +105,7 @@ async def launch_contests():
         db.add(weekly_assessment)
         await db.flush()
 
-        # Weekly 42 Assessment Problems (4 problems)
+        # Weekly 1 Assessment Problems (4 problems)
         weekly_assessment_problems_data = [
             {
                 "index": "A",
@@ -281,9 +281,7 @@ async def launch_contests():
             )
             db.add(cp)
 
-        print("  ✓ Weekly Contest 42 and 4 problem challenges created.")
-
-        print("  ✓ Weekly Contest 42 and 4 problem challenges created.")
+        print("  ✓ Weekly Contest 1 and 4 problem challenges created.")
 
         await db.commit()
 
@@ -295,7 +293,7 @@ async def launch_contests():
             print("Notice on cache delete:", e)
 
     print("\n" + "=" * 70)
-    print("✨ WEEKLY CONTEST 42 SUCCESSFULLY LAUNCHED!")
+    print("✨ WEEKLY CONTEST 1 SUCCESSFULLY LAUNCHED!")
     print("=" * 70)
 
 
