@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   Trophy,
   UserRound,
@@ -123,6 +124,23 @@ export function PortalShell() {
               </Link>
             );
           })}
+
+          {/* Dedicated Faculty Proctor & Organizer Admin Console (Protected & Visible only to Core Team) */}
+          {(member?.is_core_member || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && (
+            <Link
+              to="/portal/admin"
+              className={cleanPath.startsWith("/portal/admin") ? "nav-item active" : "nav-item"}
+              onClick={() => dispatch(setSidebarOpen(false))}
+            >
+              <ShieldAlert size={17} className="text-red-400" />
+              <div className="flex items-center justify-between w-full">
+                <span>Proctor Console</span>
+                <span className="font-mono text-[9px] uppercase font-black bg-red-500/20 text-red-400 border border-red-500/30 px-1 py-0.5 rounded-none">
+                  CORE
+                </span>
+              </div>
+            </Link>
+          )}
         </nav>
 
         <div className="offline-manifest">

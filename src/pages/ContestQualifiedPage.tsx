@@ -302,11 +302,13 @@ export function ContestQualifiedPage() {
                       <Lock className="size-4 shrink-0" />
                       <span>Physical Gate Lock: Present this QR code to the proctor at the lab entrance to check in.</span>
                     </div>
-                    <Button asChild size="lg" variant="outline" className="w-full rounded-none border-amber-500/40 font-mono text-xs font-black uppercase tracking-wider text-amber-400 hover:bg-amber-500/10">
-                      <Link to={`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}>
-                        <QrCode className="mr-1.5 size-4" /> Proctor Gate Scanner
-                      </Link>
-                    </Button>
+                    {isDevBypass && (
+                      <Button asChild size="lg" variant="outline" className="w-full rounded-none border-amber-500/40 font-mono text-xs font-black uppercase tracking-wider text-amber-400 hover:bg-amber-500/10">
+                        <Link to={`/portal/admin?pass=${encodeURIComponent(pass.pass_code)}`}>
+                          <QrCode className="mr-1.5 size-4" /> Proctor Gate Scanner (Admin View)
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 )}
                 <Button asChild variant="ghost" size="sm" className="rounded-none font-mono text-xs text-[var(--muted)]">

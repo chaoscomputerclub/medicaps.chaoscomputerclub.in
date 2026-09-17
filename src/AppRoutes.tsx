@@ -19,6 +19,7 @@ import { LeaderboardPage } from "@/pages/LeaderboardPage";
 import { ProblemArchivePage } from "@/pages/ProblemArchivePage";
 import { ProblemDetailPage } from "@/pages/ProblemDetailPage";
 import { VerifyProofPage } from "@/pages/VerifyProofPage";
+import { AdminConsolePage } from "@/pages/AdminConsolePage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
@@ -72,6 +73,10 @@ export function AppRoutes() {
           {/* Cryptographic Result Verification */}
           <Route path="verify" element={<VerifyProofPage />} />
 
+          {/* Faculty Proctor & Chapter Organizer Admin Command Center */}
+          <Route path="admin" element={<AdminConsolePage />} />
+          <Route path="proctor" element={<Navigate to="/portal/admin" replace />} />
+
           {/* Member & Student Profiles */}
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/:handle" element={<ProfilePage />} />
@@ -84,6 +89,8 @@ export function AppRoutes() {
 
       {/* Direct Shortlink for Profiles: /u/:handle */}
       <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
+      <Route path="/admin" element={<Navigate to="/portal/admin" replace />} />
+      <Route path="/proctor" element={<Navigate to="/portal/admin" replace />} />
 
       {/* Catch-all fallback */}
       <Route path="*" element={<Navigate to="/portal" replace />} />
