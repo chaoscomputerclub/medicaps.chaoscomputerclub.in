@@ -175,7 +175,8 @@ export type ContestArenaData = {
   assigned_seat: string;
   pass_code: string | null;
   check_in_status: string;
-  is_faculty_proctored: boolean;
+  is_proctored: boolean;
+  is_faculty_proctored?: boolean;
   problems: ContestArenaProblem[];
 };
 

@@ -74,7 +74,7 @@ async def launch_contests():
             registered_count=0,
             problem_count=4,
             environment="Air-Gapped Workstation LAN · Clang 18 / GCC 14 / Python 3.12",
-            chief_proctors=["Dr. Ratnesh Litoriya (Chief Proctor)", "Prof. Amit Shrivastava", "Prof. Prashant Panse"],
+            chief_proctors=["Chief Proctor (CCC Core)", "CCC Operations Desk"],
             prize_pool="₹15,000 Cash Prize + Merit Certificates",
             sponsor="Chaos Computer Club Medi-Caps Chapter",
             summary="Sunday algorithmic showdown for Medi-Caps cadets. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Top 30 online screening qualifiers advance to the air-gapped lab final.",

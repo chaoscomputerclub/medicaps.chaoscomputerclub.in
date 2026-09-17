@@ -112,7 +112,7 @@ const PRESET_EMBLEMS: EmblemDef[] = [
 
 const DEPARTMENTS = ["CSE", "IT", "AIDS", "Cyber Security", "CSBS", "ECE", "Other"];
 
-const BATCHES = ["2022-26", "2023-27", "2024-28", "2025-29", "Faculty / Alumni"];
+const BATCHES = ["2022-26", "2023-27", "2024-28", "2025-29", "Alumni / Special"];
 
 export function EditProfileModal() {
   const dispatch = useAppDispatch();

@@ -110,7 +110,7 @@ async def run_tests():
         # TEST 3: Candidate scans QR badge at lab gate -> status = 'checked_in'
         test_pass.check_in_status = "checked_in"
         test_pass.checked_in_at = datetime.now(timezone.utc)
-        test_pass.checked_in_by = "Dr. Ratnesh Litoriya (Chief Proctor)"
+        test_pass.checked_in_by = "Chief Proctor (CCC Core)"
         await db.commit()
 
         is_eligible_checked_in, reason_checked_in = await is_member_eligible_for_live_contest(

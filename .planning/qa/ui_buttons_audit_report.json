@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-17T10:44:18.198Z",
-  "totalElements": 269,
-  "functionalCount": 269,
+  "timestamp": "2026-09-17T10:56:41.760Z",
+  "totalElements": 267,
+  "functionalCount": 267,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 41,
     "backendQueries": 6,
-    "routingNavigation": 165,
+    "routingNavigation": 163,
     "clientUiState": 41,
     "conditionalLocked": 10,
     "uiPrimitiveWrappers": 6,
@@ -1411,25 +1411,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 303,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestQualifiedPage.tsx",
       "line": 304,
-      "tag": "<Link>",
-      "label": "Proctor Gate Scanner (Admin View)",
-      "handler": "{`/portal/admin?pass=${encodeURIComponent(pass.pass_code)}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 311,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1438,7 +1420,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 312,
+      "line": 305,
       "tag": "<Link>",
       "label": "Contest Overview",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1447,7 +1429,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 329,
+      "line": 322,
       "tag": "<Button>",
       "label": "Refresh Pass",
       "handler": "{() => refreshData(true)}",
@@ -1456,7 +1438,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 359,
+      "line": 352,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1465,7 +1447,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 360,
+      "line": 353,
       "tag": "<Link>",
       "label": "Take Assessment Now",
       "handler": "{`/assessments/${contestSlug}`}",
@@ -1474,7 +1456,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 364,
+      "line": 357,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1483,7 +1465,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 365,
+      "line": 358,
       "tag": "<Link>",
       "label": "Contest Lobby",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1492,7 +1474,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 397,
+      "line": 390,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1501,7 +1483,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 398,
+      "line": 391,
       "tag": "<Link>",
       "label": "View Standings & Cutoff",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
@@ -1510,7 +1492,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 402,
+      "line": 395,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1519,7 +1501,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 403,
+      "line": 396,
       "tag": "<Link>",
       "label": "Practice in Archive",
       "handler": "\"/portal/problems\"",

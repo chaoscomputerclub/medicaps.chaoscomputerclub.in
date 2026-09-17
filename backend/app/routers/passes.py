@@ -60,11 +60,11 @@ async def verify_proctor_gate_pass(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Proctor / Faculty Entrance Scanner:
+    Proctor Gate Entrance Scanner:
     Scans candidate QR Pass, verifies Top 30 qualification status, marks timestamp,
     and returns workstation seat allocation.
     """
-    proctor_name = current_member.full_name if current_member else "Dr. Ratnesh Litoriya (Chief Proctor)"
+    proctor_name = current_member.full_name if current_member else "Chief Proctor (CCC Core)"
     return await PassService.verify_and_check_in(
         raw_input=payload.pass_code_or_qr,
         proctor_name=proctor_name,

@@ -122,7 +122,7 @@ export function ContestOfflinePage() {
         </div>
         <h1 className="text-2xl font-black uppercase tracking-tight text-white">{contest.title}</h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
-          The live final is attended directly in the campus computing lab under faculty proctoring. Present your QR pass at the entrance desk, verify check-in at your assigned seat, and enter the live arena to solve problems.
+          The live final is attended directly in the campus computing lab under air-gapped lab proctoring. Present your QR pass at the entrance desk, verify check-in at your assigned seat, and enter the live arena to solve problems.
         </p>
       </header>
 
@@ -131,10 +131,10 @@ export function ContestOfflinePage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="flex size-2 rounded-full bg-[var(--accent)] animate-pulse" />
-            <h3 className="font-bold text-white text-sm uppercase tracking-wide font-mono">Faculty-Proctored Live Arena Ready</h3>
+            <h3 className="font-bold text-white text-sm uppercase tracking-wide font-mono">Air-Gapped Live Arena Ready</h3>
           </div>
           <p className="text-xs text-[var(--muted)] font-mono">
-            Seat: <strong className="text-white">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-white">Dr. Ratnesh Litoriya, Prof. Amit Shrivastava</span>
+            Seat: <strong className="text-white">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-white">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</span>
           </p>
         </div>
         <Button asChild size="lg" className="rounded-none bg-[var(--accent)] text-black hover:bg-[#b8f025] font-mono text-xs uppercase font-bold tracking-wider shadow-none">
@@ -205,7 +205,7 @@ export function ContestOfflinePage() {
             </p>
             <div className="pt-2 border-t border-[var(--line)]">
               <p className="text-[11px] text-[var(--muted)]">Proctored by:</p>
-              <p className="text-white text-xs font-medium">Dr. Ratnesh Litoriya, Prof. Amit Shrivastava</p>
+              <p className="text-white text-xs font-medium">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</p>
             </div>
           </CardContent>
         </Card>
@@ -268,12 +268,12 @@ export function ContestOfflinePage() {
         <CardHeader className="flex-row items-center gap-2">
           <ShieldCheck className="size-4 text-[var(--accent)]" />
           <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
-            Lab Faculty Proctoring & Verification
+            Lab Proctoring & Cryptographic Verification
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 font-mono text-xs text-[var(--muted)]">
           <div className="grid gap-2 sm:grid-cols-2">
-            {(contest.chief_proctors.length ? contest.chief_proctors : ["Dr. Ratnesh Litoriya", "Prof. Amit Shrivastava", "CCC Operations Desk"]).map((name) => (
+            {(contest.chief_proctors.length ? contest.chief_proctors : ["Chief Proctor", "CCC Operations Desk"]).map((name) => (
               <span key={name} className="flex items-center gap-2 text-white">
                 <CheckCircle2 className="size-3.5 text-[var(--accent)]" />
                 {name}

@@ -18,7 +18,7 @@ from app.schemas.campus_pass import PassVerifyResponse, ContestAttendeeItem
 
 
 class PassService:
-    """Service handling campus pass issuance, cryptographic QR verification, and faculty check-ins."""
+    """Service handling campus pass issuance, cryptographic QR verification, and gate check-ins."""
 
     @staticmethod
     def parse_qr_or_code(raw_input: str) -> str:

@@ -1,6 +1,6 @@
 /**
  * Chaos Computer Club India — Medi-Caps Chapter
- * Dedicated Faculty-Proctored Live Contest Arena (Round 2 Final)
+ * Dedicated Air-Gapped Live Contest Arena (Round 2 Final)
  * Pure Redux Toolkit & React Router Architecture
  */
 
@@ -108,7 +108,7 @@ export function ContestArenaPage() {
   useRealtimeEvents(contestSlug, (event) => {
     if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
       setRemainingSeconds(event.data.remaining_seconds);
-      toast.info("Contest clock updated by Faculty Proctor Command.");
+      toast.info("Contest clock updated by Chief Proctor Command.");
     } else if (event.event === "contest_status_changed" && event.data?.status === "finished") {
       setRemainingSeconds(0);
       toast.warning("Contest concluded by Proctor Command.");
@@ -341,12 +341,12 @@ export function ContestArenaPage() {
           </div>
         </div>
 
-        {/* Center: Faculty Proctor & Workstation Indicator */}
+        {/* Center: Chief Proctor & Workstation Indicator */}
         <div className="hidden lg:flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-[var(--surface-2)] border border-[var(--line)] text-xs font-mono">
             <ShieldCheck className="size-3.5 text-[var(--accent)]" />
             <span className="text-[var(--muted)]">Proctors:</span>
-            <span className="text-white font-medium">Dr. Ratnesh Litoriya, Prof. Amit Shrivastava</span>
+            <span className="text-white font-medium">{arenaData?.chief_proctors?.length ? arenaData.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</span>
           </div>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-[var(--surface-2)] border border-[var(--line)] text-xs font-mono">

@@ -775,7 +775,7 @@ export function ContestsHubPage() {
               {[
                 { n: "01", title: "Air-Gapped Network", desc: "Lab workstations disconnected from the public web." },
                 { n: "02", title: "Campus QR Pass", desc: "Single-use entry pass required at the final venue." },
-                { n: "03", title: "Faculty Proctors", desc: "In-person supervision by Dr. Litoriya & CCC Core." },
+                { n: "03", title: "Chief Proctors", desc: "In-person supervision by CCC Core Proctor Command." },
                 { n: "04", title: "Strict Fair Play", desc: "No external hardware, devices, or unauthorized tabs." },
               ].map(({ n, title, desc }) => (
                 <div key={n} className="flex gap-3">

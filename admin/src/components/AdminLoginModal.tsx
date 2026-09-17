@@ -10,7 +10,7 @@ interface AdminLoginModalProps {
 
 export function AdminLoginModal({ onAuthenticated }: AdminLoginModalProps) {
   const [pin, setPin] = useState("");
-  const [proctorName, setProctorName] = useState("Faculty Proctor (Dr. Ratnesh Litoriya)");
+  const [proctorName, setProctorName] = useState("Chief Proctor (CCC Core)");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export function AdminLoginModal({ onAuthenticated }: AdminLoginModalProps) {
             <ShieldAlert className="w-7 h-7" />
           </div>
           <h1 className="text-base font-bold uppercase text-white tracking-widest">
-            Faculty Proctor Console
+            Proctor Command Console
           </h1>
           <p className="text-xs text-zinc-400">
             Air-Gapped Lab Entry & Contest Operations Gate
@@ -47,13 +47,13 @@ export function AdminLoginModal({ onAuthenticated }: AdminLoginModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-[11px] uppercase text-zinc-400 mb-1.5">
-              Proctor / Faculty Identifier:
+              Proctor / Station Identifier:
             </label>
             <Input
               type="text"
               value={proctorName}
               onChange={(e) => setProctorName(e.target.value)}
-              placeholder="e.g. Dr. Ratnesh Litoriya / Prof. Amit Shrivastava"
+              placeholder="e.g. Chief Proctor / CCC Operations Desk"
               className="bg-black border-zinc-800 text-xs font-mono text-white rounded-none h-10"
               required
             />

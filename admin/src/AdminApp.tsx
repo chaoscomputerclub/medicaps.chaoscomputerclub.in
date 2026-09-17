@@ -17,7 +17,7 @@ export function AdminApp() {
     return localStorage.getItem("ccc_proctor_auth") === "true";
   });
   const [proctorName, setProctorName] = useState<string>(() => {
-    return localStorage.getItem("ccc_proctor_name") || "Chief Proctor (Dr. Ratnesh Litoriya)";
+    return localStorage.getItem("ccc_proctor_name") || "Chief Proctor (CCC Core)";
   });
 
   const [activeTab, setActiveTab] = useState<string>("gate_scanner");

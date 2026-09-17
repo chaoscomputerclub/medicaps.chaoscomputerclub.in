@@ -75,7 +75,7 @@ class DynamicContestCreateRequest(BaseModel):
     venue: str = Field("Medi-Caps University Main Computing Lab (Lab 04)", max_length=120, description="Physical venue / lab room")
     seat_capacity: int = Field(60, ge=10, le=500, description="Maximum physical workstation seats available")
     environment: str = Field("Air-Gapped Workstation LAN · Clang 18 / GCC 14 / Python 3.12", max_length=120, description="Technical environment setup")
-    chief_proctors: List[str] = Field(default_factory=lambda: ["Dr. Ratnesh Litoriya (Chief Proctor)", "Prof. Amit Shrivastava"], description="Faculty & proctor names")
+    chief_proctors: List[str] = Field(default_factory=lambda: ["Chief Proctor (CCC Core)", "CCC Operations Desk"], description="Chief proctors & station officers")
     prize_pool: Optional[str] = Field(None, max_length=80, description="Prize pool description")
     sponsor: Optional[str] = Field("Chaos Computer Club Medi-Caps Chapter", max_length=80, description="Sponsoring organisation")
     summary: str = Field(..., min_length=10, description="Comprehensive contest briefing summary")

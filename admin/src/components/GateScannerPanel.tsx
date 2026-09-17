@@ -76,7 +76,7 @@ export function GateScannerPanel({
               <div className="flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-red-400" />
                 <CardTitle className="font-mono text-sm tracking-wide uppercase text-white font-bold">
-                  Faculty Proctor QR Pass Scanner
+                  Air-Gapped Gate Pass Scanner
                 </CardTitle>
               </div>
               <Badge variant="outline" className="font-mono text-[10px] uppercase bg-zinc-900 border-zinc-700 text-zinc-300">

@@ -708,7 +708,7 @@ async def get_contest_arena_data(
     db: AsyncSession = Depends(get_db),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
-    """Retrieve full arena workspace data, assigned workstation seat, faculty proctors, and problem statements."""
+    """Retrieve full arena workspace data, assigned workstation seat, chief proctors, and problem statements."""
     c_res = await db.execute(
         select(OfflineContest)
         .options(selectinload(OfflineContest.problems))
@@ -781,10 +781,11 @@ async def get_contest_arena_data(
         "ends_at": contest.ends_at.isoformat() if contest.ends_at else "",
         "venue": contest.venue,
         "environment": contest.environment,
-        "chief_proctors": contest.chief_proctors if contest.chief_proctors else ["Dr. Ratnesh Litoriya", "Prof. Amit Shrivastava"],
+        "chief_proctors": contest.chief_proctors if contest.chief_proctors else ["Chief Proctor", "CCC Operations Desk"],
         "assigned_seat": assigned_seat,
         "pass_code": pass_code,
         "check_in_status": check_in_status,
+        "is_proctored": True,
         "is_faculty_proctored": True,
         "problems": arena_problems,
     }

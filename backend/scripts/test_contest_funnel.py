@@ -6,7 +6,7 @@ Tests:
 3. Assessment Session Start & CodeBox Execution
 4. Submission Evaluation & Score Calculation
 5. Top 30 Finalist Qualification & Digital QR Campus Pass Issuance
-6. Faculty / Proctor Gate QR Scanner & Arrival Check-in Verification
+6. Proctor Gate QR Scanner & Arrival Check-in Verification
 7. Duplicate Scan Protection
 """
 
@@ -181,12 +181,12 @@ if __name__ == '__main__':
             p_obj.checked_in_by = None
             await db.commit()
 
-        # 7. Faculty Proctor Gate QR Verification
-        print("\n🔹 Step 6: Faculty / Proctor Entrance Scanner Verification")
+        # 7. Proctor Gate QR Verification
+        print("\n🔹 Step 6: Proctor Entrance Scanner Verification")
         qr_scan_input = f"CCC-PASS:{pass_code}:{member.id}:{seat_num}:QUALIFIED"
         verify_res = await PassService.verify_and_check_in(
             raw_input=qr_scan_input,
-            proctor_name="Dr. Ratnesh Litoriya (Chief Proctor)",
+            proctor_name="Chief Proctor (CCC Core)",
             contest_slug=contest_slug,
             db=db,
         )
@@ -201,7 +201,7 @@ if __name__ == '__main__':
         print("\n🔹 Step 7: Duplicate Scan & Anti-Counterfeit Protection")
         dup_res = await PassService.verify_and_check_in(
             raw_input=qr_scan_input,
-            proctor_name="Dr. Ratnesh Litoriya (Chief Proctor)",
+            proctor_name="Chief Proctor (CCC Core)",
             contest_slug=contest_slug,
             db=db,
         )
