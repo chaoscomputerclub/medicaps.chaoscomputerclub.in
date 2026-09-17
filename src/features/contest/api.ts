@@ -421,6 +421,13 @@ export const contestApi = {
           rank: item["rank"] ?? null,
           participants: Number(item["participants"] ?? 0),
           outcome: (item["outcome"] ?? "registered") as ParticipationRecord["outcome"],
+          assessment_submitted: Boolean(
+            item["assessment_submitted"] ||
+            (item["score"] !== null && item["score"] !== undefined) ||
+            item["outcome"] === "submitted" ||
+            item["outcome"] === "qualified"
+          ),
+          assessment_score: item["assessment_score"] ?? item["score"] ?? null,
         }));
       },
       {

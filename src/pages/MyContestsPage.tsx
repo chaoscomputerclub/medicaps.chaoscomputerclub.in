@@ -258,7 +258,7 @@ export function MyContestsPage() {
                     </dl>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {isLive ? (
+                      {isLive && !c.assessment_submitted && c.score === null ? (
                         <Button
                           asChild
                           className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider rounded-none"
@@ -268,7 +268,7 @@ export function MyContestsPage() {
                             Assessment
                           </Link>
                         </Button>
-                      ) : isUpcoming ? (
+                      ) : isUpcoming && !c.assessment_submitted ? (
                         <Button
                           variant="outline"
                           asChild

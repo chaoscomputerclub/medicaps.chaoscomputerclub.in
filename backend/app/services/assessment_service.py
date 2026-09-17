@@ -175,6 +175,51 @@ class AssessmentService:
         )
         session = s_result.scalars().first()
 
+        # If session already completed or submitted, return clean completed state without re-entry
+        if session and session.status in ("submitted", "disqualified"):
+            # Ensure contest registration is in sync
+            if contest:
+                reg_stmt = select(ContestRegistration).where(
+                    ContestRegistration.contest_id == contest.id,
+                    ContestRegistration.member_id == current_member.id,
+                )
+                reg_res = await db.execute(reg_stmt)
+                reg = reg_res.scalars().first()
+                if reg and (not reg.assessment_taken or reg.assessment_score != session.total_score):
+                    reg.assessment_taken = True
+                    reg.assessment_score = session.total_score
+                    await db.commit()
+
+            return {
+                "assessment": {
+                    "id": assessment.id,
+                    "slug": assessment.slug,
+                    "title": assessment.title,
+                    "summary": assessment.summary,
+                    "duration_minutes": assessment.duration_minutes or ASSESSMENT_DURATION_MINUTES,
+                    "max_violations": assessment.max_violations,
+                    "starts_at": starts_at.isoformat(),
+                    "ends_at": ends_at.isoformat(),
+                    "is_open": False,
+                    "is_completed": True,
+                    "opens_in_seconds": 0,
+                    "closes_in_seconds": 0,
+                },
+                "session": {
+                    "id": session.id,
+                    "status": session.status,
+                    "started_at": session.started_at.isoformat(),
+                    "submitted_at": session.submitted_at.isoformat() if session.submitted_at else None,
+                    "remaining_seconds": 0,
+                    "total_score": session.total_score,
+                    "anti_cheat_violations": session.anti_cheat_violations,
+                    "is_top_30_qualified": session.is_top_30_qualified,
+                },
+                "problems": [],
+                "submissions": {},
+                "message": "Assessment attempt has been finalized and submitted.",
+            }
+
         # If window not open yet and user doesn't have an active session, return waiting state
         if not is_open and not session and opens_in_seconds > 0 and not is_dev_bypass:
             return {
@@ -230,6 +275,16 @@ class AssessmentService:
         if remaining_seconds <= 0 and session.status == "in_progress":
             session.status = "submitted"
             session.submitted_at = expires_at
+            if contest:
+                reg_stmt = select(ContestRegistration).where(
+                    ContestRegistration.contest_id == contest.id,
+                    ContestRegistration.member_id == current_member.id,
+                )
+                reg_res = await db.execute(reg_stmt)
+                reg = reg_res.scalars().first()
+                if reg:
+                    reg.assessment_taken = True
+                    reg.assessment_score = session.total_score
             await db.commit()
 
         # 5. Fetch Problems

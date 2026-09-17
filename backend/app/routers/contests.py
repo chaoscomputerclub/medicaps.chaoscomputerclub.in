@@ -151,18 +151,21 @@ async def get_my_participated_contests(
         sess = sessions.get(contest.slug)
 
         # Determine outcome and status
-        if contest.status == "upcoming":
+        is_sess_submitted = (sess and sess.status == "submitted") or bool(reg and reg.assessment_taken)
+        assessment_submitted = is_sess_submitted
+
+        if is_sess_submitted:
+            outcome = "qualified" if (sess and sess.is_top_30_qualified) else ("submitted" if contest.status == "upcoming" else "pending")
+        elif contest.status == "upcoming":
             outcome = "registered"
         elif contest.status == "live":
             outcome = "live"
         elif sb:
             outcome = "qualified" if sb.rank <= 30 else "not_qualified"
-        elif sess and sess.status == "submitted":
-            outcome = "qualified" if sess.is_top_30_qualified else "pending"
         else:
             outcome = "registered"
 
-        score = sb.score if sb else (round(sess.total_score) if (sess and sess.total_score is not None) else None)
+        score = sb.score if sb else (round(sess.total_score) if (sess and sess.total_score is not None) else (round(reg.assessment_score) if (reg and reg.assessment_score is not None and reg.assessment_taken) else None))
         rank = sb.rank if sb else None
 
         results.append({
@@ -179,6 +182,8 @@ async def get_my_participated_contests(
             "rank": rank,
             "participants": contest.registered_count,
             "outcome": outcome,
+            "assessment_submitted": assessment_submitted,
+            "assessment_score": score,
             "offline_result": f"Certificate CCC-{contest.slug.upper()}" if (sb and sb.rank <= 30) else None,
         })
 
@@ -393,6 +398,7 @@ async def get_registration_status(
         and is_registered
         and not assessment_taken
         and assessment_window_open
+        and assessment_session_status not in ("submitted", "disqualified")
     )
     can_enter_live_contest = (contest_status == "live" and is_top_30_qualified)
 
@@ -401,7 +407,8 @@ async def get_registration_status(
         is_registered = True
         is_top_30_qualified = True
         can_enter_live_contest = True
-        can_take_assessment = not (assessment_taken and assessment_session_status == "submitted")
+        # STRICT: If assessment was already submitted, disqualified, or taken, reattempts are forbidden
+        can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
         assessment_window_open = True
 
     # Contextual eligibility explanation

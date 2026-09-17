@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
 from app.middleware.auth import get_current_member
 from app.middleware.rate_limit import rate_limit
+from app.middleware.assessment_guard import require_active_assessment_session
 from app.engine.enums import Language, Verdict, ComparisonMode
 from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
@@ -71,6 +72,7 @@ async def get_or_start_assessment(
     Retrieve candidate assessment status or active session.
     If the window has not opened yet, returns waiting metadata with opens_in countdown.
     If open, returns/initializes the active session with problems and starter code.
+    If already submitted, returns finalized completed state.
     """
     return await AssessmentService.get_assessment_status(contest_slug, current_member, db)
 
@@ -80,11 +82,13 @@ async def run_sample_code(
     request: Request,
     contest_slug: str,
     payload: RunCodeRequest,
+    active_guard: tuple = Depends(require_active_assessment_session),
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
     _rl: None = Depends(rate_limit("assessment:run", max_calls=30, window_seconds=60)),
 ):
-    """Run code against sample testcases or custom stdin using the CodeBox engine."""
+    """Run code against sample testcases or custom stdin using the CodeBox engine. Blocked if already submitted."""
+    session, assessment, _ = active_guard
     p_result = await db.execute(select(AssessmentProblem).where(AssessmentProblem.id == payload.problem_id))
     problem = p_result.scalars().first()
     if not problem:
@@ -146,26 +150,18 @@ async def submit_assessment_code(
     request: Request,
     contest_slug: str,
     payload: SubmitCodeRequest,
+    active_guard: tuple = Depends(require_active_assessment_session),
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
     _rl: None = Depends(rate_limit("assessment:submit", max_calls=10, window_seconds=60)),
 ):
-    """Submit code for official assessment evaluation against all testcases on CodeBox."""
+    """Submit code for official assessment evaluation against all testcases on CodeBox. Blocked if already submitted."""
+    session, assessment, contest = active_guard
     # 1. Fetch problem & session
     p_result = await db.execute(select(AssessmentProblem).where(AssessmentProblem.id == payload.problem_id))
     problem = p_result.scalars().first()
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found.")
-
-    s_result = await db.execute(
-        select(AssessmentSession).where(
-            AssessmentSession.assessment_id == problem.assessment_id,
-            AssessmentSession.member_id == current_member.id,
-        )
-    )
-    session = s_result.scalars().first()
-    if not session or session.status != "in_progress":
-        raise HTTPException(status_code=400, detail="Assessment session is not currently active.")
 
     # 2. Assemble complete testcases (samples + hidden)
     all_tcs: list[TestCaseSchema] = []
@@ -316,7 +312,7 @@ async def finish_assessment(
     db: AsyncSession = Depends(get_db),
 ):
     """Candidate manually finishes the assessment."""
-    assessment, _ = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
+    assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
 
     s_result = await db.execute(
         select(AssessmentSession).where(
@@ -325,9 +321,33 @@ async def finish_assessment(
         )
     )
     session = s_result.scalars().first()
-    if session and session.status == "in_progress":
+    if not session:
+        raise HTTPException(status_code=404, detail="Assessment session not found.")
+
+    if session.status == "submitted":
+        return {
+            "success": True,
+            "already_submitted": True,
+            "message": "Assessment already submitted.",
+            "total_score": session.total_score,
+        }
+
+    if session.status == "in_progress":
         session.status = "submitted"
         session.submitted_at = now_utc()
+
+        # Sync ContestRegistration
+        if contest:
+            reg_stmt = select(ContestRegistration).where(
+                ContestRegistration.contest_id == contest.id,
+                ContestRegistration.member_id == current_member.id,
+            )
+            reg_res = await db.execute(reg_stmt)
+            reg = reg_res.scalars().first()
+            if reg:
+                reg.assessment_taken = True
+                reg.assessment_score = session.total_score
+
         await db.commit()
         await invalidate_ranking(contest_slug)
 

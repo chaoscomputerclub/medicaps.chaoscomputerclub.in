@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowLeft, Clock, Lock, Play, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Clock, Lock, Play, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,10 +43,9 @@ export function ContestLobbyPage() {
 
   if (!contest) {
     return (
-      <div className="page-wrap space-y-6">
+      <div className="page-wrap space-y-4">
         <Link to="/portal/contests" className="back-link">
-          <ArrowLeft />
-          Back to contests
+          <ArrowLeft /> Back to contests
         </Link>
         <p className="text-sm text-[var(--muted)]">Contest not found.</p>
       </div>
@@ -54,11 +53,16 @@ export function ContestLobbyPage() {
   }
 
   const phase = contestPhase(contest, registration ?? null);
+  const isAssessmentSubmitted = Boolean(
+    phase === "assessment_submitted" ||
+    registration?.assessment_taken ||
+    registration?.assessment_status === "submitted"
+  );
   const opensAt = assessmentOpensAt(contest);
   const closesAt = assessmentClosesAt(contest);
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const notYetOpen = phase === "registration_open" && !isDevBypass;
-  const canStart = Boolean(registration?.can_take_assessment) || phase === "assessment_open" || isDevBypass;
+  const canStart = !isAssessmentSubmitted && (Boolean(registration?.can_take_assessment) || phase === "assessment_open" || isDevBypass);
 
   return (
     <div className="page-wrap space-y-6">
@@ -152,7 +156,27 @@ export function ContestLobbyPage() {
 
           <Separator className="bg-[var(--line)]" />
 
-          {registration && !registration.registered ? (
+          {isAssessmentSubmitted ? (
+            <div className="space-y-4 rounded-none border border-emerald-500/40 bg-emerald-950/20 p-5">
+              <div className="flex items-center gap-2 font-mono text-sm font-bold text-emerald-400">
+                <CheckCircle2 className="size-5 text-emerald-400" />
+                <span>Assessment Attempt Already Completed</span>
+              </div>
+              <p className="font-mono text-xs text-neutral-300 leading-relaxed">
+                You have finalized and submitted your assessment attempt for this contest. Reattempts are not permitted under the single-attempt competitive protocol.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Button asChild className="rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase text-black hover:bg-[var(--accent)]/90">
+                  <Link to={`/portal/contests/${contestSlug}/results`}>
+                    View Standings & Results
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase">
+                  <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
+                </Button>
+              </div>
+            </div>
+          ) : registration && !registration.registered ? (
             <p className="text-sm text-[var(--muted)]">
               You are not registered for this edition yet. Register on the contest page first, then
               come back here when the window opens.

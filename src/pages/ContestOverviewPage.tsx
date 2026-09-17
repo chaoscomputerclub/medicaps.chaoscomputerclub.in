@@ -70,6 +70,11 @@ export function ContestOverviewPage() {
     return <div className="page-wrap"><div className="py-12 text-center font-mono text-xs text-[var(--muted)]">Contest not found.</div></div>;
   }
   const phase = contestPhase(contest, registration ?? null);
+  const isAssessmentSubmitted = Boolean(
+    phase === "assessment_submitted" ||
+    registration?.assessment_taken ||
+    registration?.assessment_status === "submitted"
+  );
   const isRegistered = Boolean(registration?.registered || contest.registered);
   const opensAt = assessmentOpensAt(contest);
   const closesAt = assessmentClosesAt(contest);
@@ -174,7 +179,7 @@ export function ContestOverviewPage() {
                 </Button>
               )}
 
-              {(isRegistered || isDevBypass) && phase !== "assessment_submitted" && (
+              {(isRegistered || isDevBypass) && !isAssessmentSubmitted && (
                 <Button
                   onClick={() => setAssessmentConfirmOpen(true)}
                   size="lg"
@@ -185,7 +190,7 @@ export function ContestOverviewPage() {
                 </Button>
               )}
 
-              {(isRegistered || isDevBypass) && phase !== "assessment_submitted" && (
+              {(isRegistered || isDevBypass) && !isAssessmentSubmitted && (
                 <Button asChild variant="outline" size="lg" className="rounded-none font-mono text-xs uppercase tracking-wider">
                   <Link to={`/portal/contests/${contestSlug}/lobby`}>
                     Assessment Lobby
@@ -193,7 +198,7 @@ export function ContestOverviewPage() {
                 </Button>
               )}
 
-              {phase === "assessment_submitted" && (
+              {isAssessmentSubmitted && (
                 <Button asChild variant="outline" size="lg" className="rounded-none border-emerald-500/40 text-emerald-400 font-mono text-xs uppercase">
                   <Link to={`/portal/contests/${contestSlug}/results`}>
                     <BadgeCheck className="size-4 text-emerald-400 mr-2" />

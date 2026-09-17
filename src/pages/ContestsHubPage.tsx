@@ -140,14 +140,36 @@ export function ContestsHubPage() {
   const weeklyCountdown = useCountdown(upcomingWeekly?.starts_at);
   const biweeklyCountdown = useCountdown(upcomingBiweekly?.starts_at);
 
+  const isContestAssessmentSubmitted = (contest: ContestSummary | null) => {
+    if (!contest) return false;
+    const record = myParticipations.find((p) => p.contest_slug === contest.slug);
+    if (!record) return false;
+    return Boolean(
+      record.assessment_submitted ||
+      (record.score !== null && record.score !== undefined) ||
+      record.outcome === "submitted" ||
+      record.outcome === "qualified" ||
+      record.outcome === "pending" ||
+      record.outcome === "not_qualified"
+    );
+  };
+
   const isWeeklyRegistered = useMemo(() => {
     if (!upcomingWeekly) return false;
     return Boolean(upcomingWeekly.registered || myParticipations.some((p) => p.contest_slug === upcomingWeekly.slug));
   }, [upcomingWeekly, myParticipations]);
 
+  const isWeeklySubmitted = useMemo(() => {
+    return isContestAssessmentSubmitted(upcomingWeekly);
+  }, [upcomingWeekly, myParticipations]);
+
   const isBiweeklyRegistered = useMemo(() => {
     if (!upcomingBiweekly) return false;
     return Boolean(upcomingBiweekly.registered || myParticipations.some((p) => p.contest_slug === upcomingBiweekly.slug));
+  }, [upcomingBiweekly, myParticipations]);
+
+  const isBiweeklySubmitted = useMemo(() => {
+    return isContestAssessmentSubmitted(upcomingBiweekly);
   }, [upcomingBiweekly, myParticipations]);
 
   // Check if user is registered for either upcoming contest or has an active assessment
@@ -170,7 +192,14 @@ export function ContestsHubPage() {
 
     // Check if user has taken assessment
     const record = myParticipations.find((p) => p.contest_slug === contest.slug);
-    const hasTaken = record?.score !== null && record?.score !== undefined;
+    const hasTaken = Boolean(
+      record?.assessment_submitted ||
+      (record?.score !== null && record?.score !== undefined) ||
+      record?.outcome === "submitted" ||
+      record?.outcome === "qualified" ||
+      record?.outcome === "pending" ||
+      record?.outcome === "not_qualified"
+    );
     const isTop30 = record?.outcome === "qualified" || (record?.rank !== null && (record?.rank ?? 99) <= 30);
 
     return {
@@ -383,7 +412,22 @@ export function ContestsHubPage() {
 
                 {/* Registration CTA */}
                 <div className="mt-6 flex items-center gap-3">
-                  {isWeeklyRegistered ? (
+                  {isWeeklySubmitted ? (
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="flex-1 rounded-none border-emerald-500/40 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-950/40 font-mono text-xs font-bold uppercase tracking-wider"
+                      >
+                        <Link to={`/portal/contests/${upcomingWeekly.slug}`}>
+                          <CheckCircle2 className="mr-1.5 size-4 text-emerald-400" /> ASSESSMENT SUBMITTED
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                        <Link to={`/portal/contests/${upcomingWeekly.slug}`}>DETAILS</Link>
+                      </Button>
+                    </div>
+                  ) : isWeeklyRegistered ? (
                     <div className="flex w-full items-center gap-2">
                       <Button
                         onClick={() => {
@@ -461,15 +505,12 @@ export function ContestsHubPage() {
                       </span>
                     </div>
 
-                    <div className="pt-3">
-                      <div className="flex items-baseline justify-between">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                          Contest Countdown
-                        </span>
-                        <span className="font-mono text-[11px] text-cyan-400">Live Ticking</span>
+                    <div className="mt-3">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 font-mono flex items-center justify-between">
+                        <span>Contest Countdown</span>
+                        <span className="text-cyan-400">Live Ticking</span>
                       </div>
-
-                      <div className="mt-2 grid grid-cols-4 gap-2 text-center">
+                      <div className="grid grid-cols-4 gap-1.5 text-center">
                         <div className="rounded-none border border-border bg-card/90 py-1.5">
                           <div className="font-mono text-lg font-black text-foreground">
                             {String(biweeklyCountdown.days).padStart(2, "0")}
@@ -509,7 +550,22 @@ export function ContestsHubPage() {
 
                 {/* Registration CTA */}
                 <div className="mt-6 flex items-center gap-3">
-                  {isBiweeklyRegistered ? (
+                  {isBiweeklySubmitted ? (
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="flex-1 rounded-none border-cyan-500/40 bg-cyan-950/20 text-cyan-400 hover:bg-cyan-950/40 font-mono text-xs font-bold uppercase tracking-wider"
+                      >
+                        <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>
+                          <CheckCircle2 className="mr-1.5 size-4 text-cyan-400" /> ASSESSMENT SUBMITTED
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                        <Link to={`/portal/contests/${upcomingBiweekly.slug}`}>DETAILS</Link>
+                      </Button>
+                    </div>
+                  ) : isBiweeklyRegistered ? (
                     <div className="flex w-full items-center gap-2">
                       <Button
                         onClick={() => {
@@ -544,60 +600,88 @@ export function ContestsHubPage() {
             )}
 
             {/* Other upcoming contests */}
-            {otherUpcomingContests.map((contest) => (
-              <div
-                key={contest.slug}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-primary/50"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="rounded-none font-mono text-[11px] font-bold uppercase">
-                      {contest.cadence}
-                    </Badge>
-                    <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
-                      <Users className="size-3.5" /> {contest.registered_count} Registered
-                    </span>
+            {otherUpcomingContests.map((contest) => {
+              const isSubmitted = isContestAssessmentSubmitted(contest);
+              const isRegistered = Boolean(contest.registered || myParticipations.some((p) => p.contest_slug === contest.slug));
+
+              return (
+                <div
+                  key={contest.slug}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-border bg-card p-6 shadow-md transition-all hover:border-primary/50"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="rounded-none font-mono text-[11px] font-bold uppercase">
+                        {contest.cadence}
+                      </Badge>
+                      <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
+                        <Users className="size-3.5" /> {contest.registered_count} Registered
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        {contest.title}
+                      </h3>
+                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        {contest.summary}
+                      </p>
+                    </div>
+
+                    <div className="rounded-none border border-border/80 bg-background/60 p-4 text-xs flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="size-3.5 text-primary" /> Starts At
+                      </span>
+                      <span className="font-mono font-medium text-foreground">
+                        {new Date(contest.starts_at).toLocaleString("en-IN", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                      {contest.title}
-                    </h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                      {contest.summary}
-                    </p>
-                  </div>
-
-                  <div className="rounded-none border border-border/80 bg-background/60 p-4 text-xs flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Calendar className="size-3.5 text-primary" /> Starts At
-                    </span>
-                    <span className="font-mono font-medium text-foreground">
-                      {new Date(contest.starts_at).toLocaleString("en-IN", {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                  <div className="mt-6 flex items-center gap-3">
+                    {isSubmitted ? (
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="flex-1 rounded-none border-emerald-500/40 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-950/40 font-mono text-xs font-bold uppercase"
+                      >
+                        <Link to={`/portal/contests/${contest.slug}`}>
+                          <CheckCircle2 className="mr-1.5 size-4 text-emerald-400" /> ASSESSMENT SUBMITTED
+                        </Link>
+                      </Button>
+                    ) : isRegistered ? (
+                      <Button
+                        onClick={() => {
+                          setConfirmContestSlug(contest.slug);
+                          setConfirmContestTitle(contest.title);
+                          setAssessmentConfirmOpen(true);
+                        }}
+                        className="flex-1 rounded-none bg-[var(--accent)] font-mono text-xs font-bold uppercase text-black hover:bg-[var(--accent)]/90"
+                      >
+                        <Play className="mr-1.5 size-4 fill-black" /> TAKE ASSESSMENT
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleRegister(contest.slug)}
+                        disabled={registeringSlug === contest.slug}
+                        className="flex-1 rounded-none font-mono text-xs font-bold uppercase"
+                      >
+                        {registeringSlug === contest.slug ? "REGISTERING..." : "REGISTER NOW"}
+                      </Button>
+                    )}
+                    <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+                      <Link to={`/portal/contests/${contest.slug}`}>DETAILS</Link>
+                    </Button>
                   </div>
                 </div>
-
-                <div className="mt-6 flex items-center gap-3">
-                  <Button
-                    onClick={() => handleRegister(contest.slug)}
-                    disabled={registeringSlug === contest.slug || contest.registered}
-                    className="flex-1 rounded-none font-mono text-xs font-bold uppercase"
-                  >
-                    {contest.registered ? "REGISTERED" : "REGISTER NOW"}
-                  </Button>
-                  <Button asChild variant="outline" className="rounded-none font-mono text-xs">
-                    <Link to={`/portal/contests/${contest.slug}`}>DETAILS</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

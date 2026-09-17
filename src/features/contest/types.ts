@@ -125,7 +125,9 @@ export type ParticipationRecord = {
   score: number | null;
   rank: number | null;
   participants: number;
-  outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending";
+  outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending" | "submitted";
+  assessment_submitted?: boolean;
+  assessment_score?: number | null;
 };
 
 /** Phase of the two-round funnel, derived from contest + registration state. */
