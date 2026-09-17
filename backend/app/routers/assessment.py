@@ -363,10 +363,15 @@ async def finish_assessment(
 
         await db.commit()
         await invalidate_ranking(contest_slug)
+        if contest:
+            try:
+                await AssessmentService.evaluate_and_qualify_top_30(contest_slug, db)
+            except Exception:
+                pass
         try:
             from app.core.cache import delete_cache_pattern
             await delete_cache_pattern("cache:*")
-        except Exception as e:
+        except Exception:
             pass
 
     return {"success": True, "total_score": session.total_score if session else 0}

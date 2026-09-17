@@ -50,7 +50,31 @@ class PassService:
         result = await db.execute(stmt)
         row = result.first()
         if not row:
-            return None
+            # Check if member is Top 30 qualified or has submitted assessment for this contest
+            target_contest = None
+            if contest_slug:
+                c_stmt = select(OfflineContest).where(OfflineContest.slug == contest_slug)
+                c_res = await db.execute(c_stmt)
+                target_contest = c_res.scalars().first()
+            else:
+                c_stmt = (
+                    select(OfflineContest)
+                    .join(ContestRegistration, ContestRegistration.contest_id == OfflineContest.id)
+                    .where(ContestRegistration.member_id == member_id)
+                    .order_by(OfflineContest.starts_at.desc())
+                )
+                c_res = await db.execute(c_stmt)
+                target_contest = c_res.scalars().first()
+
+            if target_contest:
+                from app.services.assessment_service import AssessmentService
+                await AssessmentService.evaluate_and_qualify_top_30(target_contest.slug, db)
+                result = await db.execute(stmt)
+                row = result.first()
+                if not row:
+                    return None
+            else:
+                return None
 
         c_pass, contest, member = row
         return {

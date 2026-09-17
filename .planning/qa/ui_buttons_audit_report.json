@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-17T09:39:46.721Z",
-  "totalElements": 256,
-  "functionalCount": 256,
+  "timestamp": "2026-09-17T09:44:32.709Z",
+  "totalElements": 263,
+  "functionalCount": 263,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 39,
-    "backendQueries": 4,
-    "routingNavigation": 155,
+    "backendQueries": 6,
+    "routingNavigation": 160,
     "clientUiState": 41,
     "conditionalLocked": 11,
     "uiPrimitiveWrappers": 6,
@@ -1321,7 +1321,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 95,
+      "line": 108,
       "tag": "<Link>",
       "label": "Back to contests",
       "handler": "\"/portal/contests\"",
@@ -1330,16 +1330,16 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 106,
+      "line": 119,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/portal/contests/${contestSlug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
+      "category": "LIVE_BACKEND_QUERY",
+      "description": "Triggers live backend SWR query / data reload"
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 225,
+      "line": 237,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1348,7 +1348,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 226,
+      "line": 238,
       "tag": "<Link>",
       "label": "Enter Live Contest Arena",
       "handler": "{`/portal/contests/${contestSlug}/arena`}",
@@ -1357,7 +1357,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 230,
+      "line": 242,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1366,16 +1366,25 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 231,
+      "line": 243,
       "tag": "<Link>",
-      "label": "Test proctor verification",
+      "label": "Test Proctor Verification Scan",
       "handler": "{`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 264,
+      "line": 260,
+      "tag": "<Button>",
+      "label": "Refresh Pass",
+      "handler": "{() => refreshData(true)}",
+      "category": "LIVE_BACKEND_QUERY",
+      "description": "Triggers live backend SWR query / data reload"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 290,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1384,10 +1393,64 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 265,
+      "line": 291,
       "tag": "<Link>",
-      "label": "See Standings",
+      "label": "Take Assessment Now",
+      "handler": "{`/assessments/${contestSlug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 295,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 296,
+      "tag": "<Link>",
+      "label": "Contest Lobby",
+      "handler": "{`/portal/contests/${contestSlug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 328,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 329,
+      "tag": "<Link>",
+      "label": "View Standings & Cutoff",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 333,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 334,
+      "tag": "<Link>",
+      "label": "Practice in Archive",
+      "handler": "\"/portal/problems\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },

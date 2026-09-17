@@ -75,8 +75,12 @@ export const fetchContestDetailThunk = createAsyncThunk(
 
 export const fetchCampusPassThunk = createAsyncThunk(
   "contest/fetchPass",
-  async (_, { rejectWithValue }) => {
+  async (contestSlug: string | undefined, { rejectWithValue }) => {
     try {
+      if (contestSlug) {
+        const pass = await contestApi.contestPass(contestSlug);
+        if (pass) return pass;
+      }
       return await contestApi.myPass();
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to load campus pass");
