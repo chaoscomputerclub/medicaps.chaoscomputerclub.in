@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, fetchCampusPassThunk } from "@/store/slices/contestSlice";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 export function ContestQualifiedPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -66,6 +67,17 @@ export function ContestQualifiedPage() {
     return () => clearInterval(id);
   }, [contest?.starts_at]);
 
+  // Instant real-time push: updates pass status the exact millisecond QR is scanned or status changes
+  useRealtimeEvents(contestSlug, (event) => {
+    if (
+      event.event === "pass_checked_in" ||
+      event.event === "contest_status_changed" ||
+      event.event === "top30_qualified"
+    ) {
+      refreshData(true);
+    }
+  });
+
   useEffect(() => {
     if (!contestSlug) return;
 
@@ -79,29 +91,14 @@ export function ContestQualifiedPage() {
       }
     };
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refreshData(true);
-      }
-    };
-
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        refreshData(true);
-      }
-    }, 10000);
-
     window.addEventListener("focus", handleSync);
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
-    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [contestSlug, refreshData]);
 

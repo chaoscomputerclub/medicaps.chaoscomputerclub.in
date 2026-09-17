@@ -181,11 +181,27 @@ class PassService:
         c_pass.checked_in_at = now
         c_pass.checked_in_by = proctor_name
 
-        if reg:
-            reg.checked_in_at = now
-            reg.seat_assigned = c_pass.seat_number
-
         await db.commit()
+
+        # Broadcast real-time event via SSE and Webhooks
+        try:
+            from app.services.event_broadcaster import broadcast_event
+            await broadcast_event(
+                event_type="pass_checked_in",
+                data={
+                    "member_id": member.id,
+                    "handle": member.handle,
+                    "candidate_name": member.full_name or member.handle,
+                    "pass_code": c_pass.pass_code,
+                    "seat_number": c_pass.seat_number,
+                    "status": "checked_in",
+                    "checked_in_at": now.isoformat(),
+                    "checked_in_by": proctor_name,
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception as e:
+            logger.debug("Realtime event broadcast exception: %s", e)
 
         return PassVerifyResponse(
             valid=True,

@@ -26,6 +26,7 @@ from app.services.ranking_service import (
     ranking_released,
     withheld_payload,
 )
+from app.services.event_broadcaster import broadcast_event
 from app.models.db_models import (
     OfflineContest,
     Assessment,
@@ -252,6 +253,24 @@ async def submit_assessment_code(
 
     await db.commit()
     await invalidate_ranking(contest_slug)
+
+    try:
+        await broadcast_event(
+            event_type="submission_evaluated",
+            data={
+                "contest_slug": contest_slug,
+                "problem_id": problem.id,
+                "member_id": current_member.id,
+                "handle": current_member.handle,
+                "full_name": current_member.full_name,
+                "score": points_earned,
+                "verdict": exec_result.verdict.value,
+                "total_score": session.total_score,
+            },
+            contest_slug=contest_slug,
+        )
+    except Exception:
+        pass
 
     return {
         "verdict": exec_result.verdict,

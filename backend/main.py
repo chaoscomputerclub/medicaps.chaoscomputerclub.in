@@ -14,7 +14,7 @@ from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
-from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, feed, leaderboard, passes, scoreboards, social, storage, verify
+from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, events, feed, leaderboard, passes, scoreboards, social, storage, verify, webhooks
 from app.api.v1.router import api_router_v1
 
 
@@ -127,6 +127,11 @@ app.include_router(feed.router, prefix=settings.API_PREFIX)
 app.include_router(assessment.router, prefix=settings.API_PREFIX)
 app.include_router(social.router, prefix=settings.API_PREFIX)
 app.include_router(storage.router, prefix=settings.API_PREFIX)
+app.include_router(events.router, prefix=settings.API_PREFIX)
+app.include_router(webhooks.router, prefix=settings.API_PREFIX)
+
+# OpenAPI 3.1.0 Webhooks specifications for Swagger / ReDoc docs UI
+app.webhooks.include_router(webhooks.webhooks_router)
 
 # Admin maintenance routes (not exposed publicly in prod; protect via network policy)
 app.include_router(admin.router, prefix=settings.API_PREFIX)

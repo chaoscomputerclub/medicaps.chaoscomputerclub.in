@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-17T10:20:28.686Z",
+  "timestamp": "2026-09-17T10:29:57.528Z",
   "totalElements": 289,
   "functionalCount": 289,
   "connectivityRate": "100.0%",
@@ -493,7 +493,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 246,
+      "line": 260,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -502,7 +502,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 247,
+      "line": 261,
       "tag": "<Link>",
       "label": "Return to Cadet Portal",
       "handler": "\"/portal\"",
@@ -511,7 +511,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 309,
+      "line": 323,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n              loadContests();\n              if (selectedSlug) loadAtten",
@@ -520,7 +520,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 399,
+      "line": 413,
       "tag": "<form>",
       "label": "form",
       "handler": "{(e) => {\n                  e.preventDefault();\n                  handleVerifyGa",
@@ -529,7 +529,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 417,
+      "line": 431,
       "tag": "<Button>",
       "label": "{isVerifying ? <RefreshCw className=...",
       "handler": "\"submit\"",
@@ -538,7 +538,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 532,
+      "line": 546,
       "tag": "<Button>",
       "label": "{f === all ? All : f === checked...",
       "handler": "{() => setAttendeeFilter(f)}",
@@ -547,7 +547,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 545,
+      "line": 559,
       "tag": "<Button>",
       "label": "Refresh Roster",
       "handler": "{() => selectedSlug && loadAttendees(selectedSlug)}",
@@ -556,7 +556,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 608,
+      "line": 622,
       "tag": "<Button>",
       "label": "Admit",
       "handler": "{() => {\n                                setQrInput(a.pass_code);\n              ",
@@ -565,7 +565,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 648,
+      "line": 662,
       "tag": "<Button>",
       "label": "Start Round 2 Live Contest",
       "handler": "{() => handleStatusChange(\"live\")}",
@@ -574,7 +574,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 655,
+      "line": 669,
       "tag": "<Button>",
       "label": "Finish Contest & Apply Ratings",
       "handler": "{() => handleStatusChange(\"finished\")}",
@@ -583,7 +583,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 662,
+      "line": 676,
       "tag": "<Button>",
       "label": "Reset to Upcoming",
       "handler": "{() => handleStatusChange(\"upcoming\")}",
@@ -592,7 +592,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 687,
+      "line": 701,
       "tag": "<Button>",
       "label": "Set 30 Mins",
       "handler": "{() => handleResetTimer(30)}",
@@ -601,7 +601,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 695,
+      "line": 709,
       "tag": "<Button>",
       "label": "Set 60 Mins",
       "handler": "{() => handleResetTimer(60)}",
@@ -610,7 +610,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 703,
+      "line": 717,
       "tag": "<Button>",
       "label": "Set 90 Mins (Standard)",
       "handler": "{() => handleResetTimer(90)}",
@@ -619,7 +619,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 711,
+      "line": 725,
       "tag": "<Button>",
       "label": "Set 120 Mins",
       "handler": "{() => handleResetTimer(120)}",
@@ -628,7 +628,7 @@
     },
     {
       "file": "src/pages/AdminConsolePage.tsx",
-      "line": 740,
+      "line": 754,
       "tag": "<Button>",
       "label": "Trigger Top 30 Cutoff",
       "handler": "{handleQualifyTop30}",
@@ -889,7 +889,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 266,
+      "line": 278,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -898,7 +898,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 270,
+      "line": 282,
       "tag": "<Link>",
       "label": "View Your QR Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
@@ -907,7 +907,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 275,
+      "line": 287,
       "tag": "<Button>",
       "label": "Re-check Gate Status",
       "handler": "{() => dispatch(fetchContestArenaThunk(contestSlug))}",
@@ -916,7 +916,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 282,
+      "line": 294,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -925,7 +925,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 287,
+      "line": 299,
       "tag": "<Link>",
       "label": "Exit to Lobby",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -934,7 +934,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 305,
+      "line": 317,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -943,7 +943,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 311,
+      "line": 323,
       "tag": "<Link>",
       "label": "Exit Arena",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -952,7 +952,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 355,
+      "line": 367,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -961,7 +961,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 361,
+      "line": 373,
       "tag": "<Link>",
       "label": "Scoreboard",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
@@ -970,7 +970,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 367,
+      "line": 379,
       "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 className=...",
       "handler": "{toggleFullscreen}",
@@ -979,7 +979,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 386,
+      "line": 398,
       "tag": "<button>",
       "label": "{isSolved && <BadgeCheck className=s...",
       "handler": "{() => {\n                  setActiveIndex(idx);\n                  dispatch(clear",
@@ -988,7 +988,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 425,
+      "line": 437,
       "tag": "<Button>",
       "label": "Reset",
       "handler": "{handleResetStarter}",
@@ -997,7 +997,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 522,
+      "line": 534,
       "tag": "<Button>",
       "label": "{copiedKey === tc_in_${idx} ? (    ...",
       "handler": "{() => copyToClipboard(tc.stdin, `tc_in_${idx}`)}",
@@ -1006,7 +1006,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 603,
+      "line": 615,
       "tag": "<button>",
       "label": "Testcases",
       "handler": "{() => setActiveConsoleTab(\"testcases\")}",
@@ -1015,7 +1015,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 615,
+      "line": 627,
       "tag": "<button>",
       "label": "Console Output {runResult || submitRe...",
       "handler": "{() => setActiveConsoleTab(\"output\")}",
@@ -1024,7 +1024,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 634,
+      "line": 646,
       "tag": "<button>",
       "label": "Case {idx + 1}",
       "handler": "{() => setActiveTestcaseIndex(idx)}",
@@ -1033,7 +1033,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 647,
+      "line": 659,
       "tag": "<button>",
       "label": "Custom Input",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -1042,7 +1042,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 792,
+      "line": 804,
       "tag": "<Button>",
       "label": "{isRunningCode ? Running… : Run Co...",
       "handler": "{handleRunCode}",
@@ -1051,7 +1051,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 803,
+      "line": 815,
       "tag": "<Button>",
       "label": "{isSubmittingCode ? Evaluating… : ...",
       "handler": "{handleSubmitCode}",
@@ -1060,7 +1060,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 852,
+      "line": 864,
       "tag": "<button>",
       "label": "View Final Results Now →",
       "handler": "{() => navigate(`/portal/contests/${contestSlug}/final-results`)}",
@@ -1132,7 +1132,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 86,
+      "line": 79,
       "tag": "<Link>",
       "label": "Back to contests",
       "handler": "\"/portal/contests\"",
@@ -1141,7 +1141,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 111,
+      "line": 104,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1150,7 +1150,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 129,
+      "line": 122,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1159,7 +1159,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 133,
+      "line": 126,
       "tag": "<Link>",
       "label": "View Standings",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
@@ -1168,7 +1168,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 135,
+      "line": 128,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1177,7 +1177,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 136,
+      "line": 129,
       "tag": "<Link>",
       "label": "Back to Contest",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1186,7 +1186,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 150,
+      "line": 143,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1195,7 +1195,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 151,
+      "line": 144,
       "tag": "<Link>",
       "label": "Register for Contest",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1204,7 +1204,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 223,
+      "line": 216,
       "tag": "<div>",
       "label": "{ack && (                   <svg widt...",
       "handler": "{() => setAck((v) => !v)}",
@@ -1213,7 +1213,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 249,
+      "line": 242,
       "tag": "<Button>",
       "label": "Start Assessment",
       "handler": "{() => navigate(`/assessments/${contestSlug}`)}",
@@ -1222,7 +1222,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 257,
+      "line": 250,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1231,7 +1231,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 258,
+      "line": 251,
       "tag": "<Link>",
       "label": "Not now",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1348,7 +1348,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 163,
+      "line": 159,
       "tag": "<Button>",
       "label": "Take Assessment",
       "handler": "{() => setAssessmentConfirmOpen(true)}",
@@ -1357,7 +1357,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 170,
+      "line": 166,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1366,7 +1366,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 171,
+      "line": 167,
       "tag": "<Link>",
       "label": "Enter Final Arena",
       "handler": "{`/portal/contests/${contestSlug}/arena`}",
@@ -1375,7 +1375,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 176,
+      "line": 172,
       "tag": "<Button>",
       "label": "Reset",
       "handler": "{handleResetAttempt}",
@@ -1384,7 +1384,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 191,
+      "line": 187,
       "tag": "<Button>",
       "label": "Register for Contest",
       "handler": "{() => setConfirmOpen(true)}",
@@ -1393,7 +1393,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 206,
+      "line": 202,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1402,7 +1402,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 207,
+      "line": 203,
       "tag": "<Link>",
       "label": "Enter Live Final",
       "handler": "{`/portal/contests/${contestSlug}/arena`}",
@@ -1411,7 +1411,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 211,
+      "line": 207,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1420,7 +1420,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 212,
+      "line": 208,
       "tag": "<Link>",
       "label": "Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
@@ -1429,7 +1429,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 221,
+      "line": 217,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1438,7 +1438,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 222,
+      "line": 218,
       "tag": "<Link>",
       "label": "Submitted · View Standings",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
@@ -1447,7 +1447,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 227,
+      "line": 223,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1456,7 +1456,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 228,
+      "line": 224,
       "tag": "<Link>",
       "label": "Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
@@ -1465,7 +1465,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 242,
+      "line": 238,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1474,7 +1474,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 243,
+      "line": 239,
       "tag": "<Link>",
       "label": "Enter Live Final",
       "handler": "{`/portal/contests/${contestSlug}/arena`}",
@@ -1483,7 +1483,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 247,
+      "line": 243,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1492,7 +1492,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 248,
+      "line": 244,
       "tag": "<Link>",
       "label": "Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
@@ -1501,7 +1501,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 256,
+      "line": 252,
       "tag": "<Button>",
       "label": "Top {FINALIST_SEATS} Only",
       "handler": "none",
@@ -1510,7 +1510,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 264,
+      "line": 260,
       "tag": "<Button>",
       "label": "Take Assessment",
       "handler": "{() => setAssessmentConfirmOpen(true)}",
@@ -1519,7 +1519,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 277,
+      "line": 273,
       "tag": "<Link>",
       "label": "Back to contests",
       "handler": "\"/portal/contests\"",
@@ -1528,7 +1528,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 340,
+      "line": 336,
       "tag": "<Link>",
       "label": "View full rankings →",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
@@ -1537,7 +1537,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 527,
+      "line": 523,
       "tag": "<Button>",
       "label": "Cancel",
       "handler": "{() => setConfirmOpen(false)}",
@@ -1546,7 +1546,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 530,
+      "line": 526,
       "tag": "<Button>",
       "label": "Confirm Registration",
       "handler": "{handleRegister}",
@@ -1555,7 +1555,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 130,
+      "line": 127,
       "tag": "<Link>",
       "label": "Back to contests",
       "handler": "\"/portal/contests\"",
@@ -1564,7 +1564,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 141,
+      "line": 138,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1573,7 +1573,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 294,
+      "line": 291,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1582,7 +1582,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 295,
+      "line": 292,
       "tag": "<Link>",
       "label": "Enter Live Contest Arena",
       "handler": "{`/portal/contests/${contestSlug}/arena`}",
@@ -1591,7 +1591,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 306,
+      "line": 303,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1600,7 +1600,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 307,
+      "line": 304,
       "tag": "<Link>",
       "label": "Proctor Gate Scanner (Admin View)",
       "handler": "{`/portal/admin?pass=${encodeURIComponent(pass.pass_code)}`}",
@@ -1609,7 +1609,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 314,
+      "line": 311,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1618,7 +1618,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 315,
+      "line": 312,
       "tag": "<Link>",
       "label": "Contest Overview",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1627,7 +1627,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 332,
+      "line": 329,
       "tag": "<Button>",
       "label": "Refresh Pass",
       "handler": "{() => refreshData(true)}",
@@ -1636,7 +1636,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 362,
+      "line": 359,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1645,7 +1645,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 363,
+      "line": 360,
       "tag": "<Link>",
       "label": "Take Assessment Now",
       "handler": "{`/assessments/${contestSlug}`}",
@@ -1654,7 +1654,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 367,
+      "line": 364,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1663,7 +1663,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 368,
+      "line": 365,
       "tag": "<Link>",
       "label": "Contest Lobby",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1672,7 +1672,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 400,
+      "line": 397,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1681,7 +1681,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 401,
+      "line": 398,
       "tag": "<Link>",
       "label": "View Standings & Cutoff",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
@@ -1690,7 +1690,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 405,
+      "line": 402,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1699,7 +1699,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 406,
+      "line": 403,
       "tag": "<Link>",
       "label": "Practice in Archive",
       "handler": "\"/portal/problems\"",
@@ -1834,7 +1834,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 330,
+      "line": 325,
       "tag": "<Button>",
       "label": "Problem Archive",
       "handler": "asChild",
@@ -1843,7 +1843,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 330,
+      "line": 325,
       "tag": "<Link>",
       "label": "Problem Archive",
       "handler": "\"/portal/problems\"",
@@ -1852,7 +1852,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 331,
+      "line": 326,
       "tag": "<Button>",
       "label": "Leaderboard",
       "handler": "asChild",
@@ -1861,7 +1861,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 331,
+      "line": 326,
       "tag": "<Link>",
       "label": "Leaderboard",
       "handler": "\"/portal/leaderboard\"",
@@ -1870,7 +1870,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 379,
+      "line": 374,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1879,7 +1879,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 380,
+      "line": 375,
       "tag": "<Link>",
       "label": "View Status & Results",
       "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
@@ -1888,7 +1888,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 382,
+      "line": 377,
       "tag": "<Button>",
       "label": "Contest Details",
       "handler": "asChild",
@@ -1897,7 +1897,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 382,
+      "line": 377,
       "tag": "<Link>",
       "label": "Contest Details",
       "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
@@ -1906,7 +1906,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 386,
+      "line": 381,
       "tag": "<Button>",
       "label": "Enter Screening Assessment",
       "handler": "{() => { setConfirmContestSlug(upcomingWeekly.slug); setConfirmContestTitle(upco",
@@ -1915,7 +1915,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 390,
+      "line": 385,
       "tag": "<Button>",
       "label": "Contest Details",
       "handler": "asChild",
@@ -1924,7 +1924,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 390,
+      "line": 385,
       "tag": "<Link>",
       "label": "Contest Details",
       "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
@@ -1933,7 +1933,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 394,
+      "line": 389,
       "tag": "<Button>",
       "label": "{registeringSlug === upcomingWeekly.s...",
       "handler": "{() => handleRegister(upcomingWeekly.slug)}",
@@ -1942,7 +1942,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 398,
+      "line": 393,
       "tag": "<Button>",
       "label": "Contest Details",
       "handler": "asChild",
@@ -1951,7 +1951,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 398,
+      "line": 393,
       "tag": "<Link>",
       "label": "Contest Details",
       "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
@@ -1960,7 +1960,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 426,
+      "line": 421,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1969,7 +1969,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 427,
+      "line": 422,
       "tag": "<Link>",
       "label": "Submitted",
       "handler": "{`/portal/contests/${contest.slug}`}",
@@ -1978,7 +1978,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 430,
+      "line": 425,
       "tag": "<Button>",
       "label": "Take Assessment",
       "handler": "{() => { setConfirmContestSlug(contest.slug); setConfirmContestTitle(contest.tit",
@@ -1987,7 +1987,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 435,
+      "line": 430,
       "tag": "<Button>",
       "label": "{registeringSlug === contest.slug ? ...",
       "handler": "{() => handleRegister(contest.slug)}",
@@ -1996,7 +1996,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 440,
+      "line": 435,
       "tag": "<Button>",
       "label": "Details",
       "handler": "asChild",
@@ -2005,7 +2005,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 440,
+      "line": 435,
       "tag": "<Link>",
       "label": "Details",
       "handler": "{`/portal/contests/${contest.slug}`}",
@@ -2014,7 +2014,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 525,
+      "line": 520,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2023,7 +2023,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 526,
+      "line": 521,
       "tag": "<Link>",
       "label": "{assessmentInfo.isTop30 ? <><QrCode c...",
       "handler": "{`/portal/contests/${assessmentInfo.contest.slug}${assessmentInfo.isTop30 ? \"/qu",
@@ -2032,7 +2032,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 538,
+      "line": 533,
       "tag": "<Button>",
       "label": "Take Assessment Now",
       "handler": "{() => { setConfirmContestSlug(assessmentInfo.contest.slug); setConfirmContestTi",
@@ -2041,7 +2041,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 554,
+      "line": 549,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2050,7 +2050,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 555,
+      "line": 550,
       "tag": "<Link>",
       "label": "Take Assessment",
       "handler": "{`/assessments/${assessmentInfo.contest.slug}`}",
@@ -2059,7 +2059,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 568,
+      "line": 563,
       "tag": "<Button>",
       "label": "Register to Unlock",
       "handler": "{() => handleRegister(assessmentInfo.contest.slug)}",
@@ -2068,7 +2068,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 576,
+      "line": 571,
       "tag": "<Button>",
       "label": "{registeringSlug === assessmentInfo.c...",
       "handler": "{() => handleRegister(assessmentInfo.contest.slug)}",
@@ -2077,7 +2077,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 599,
+      "line": 594,
       "tag": "<button>",
       "label": "{label}",
       "handler": "{() => setSearchParams({ tab: key })}",
@@ -2086,7 +2086,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 650,
+      "line": 645,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/portal/contests/${contest.slug}`}",
@@ -2095,7 +2095,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 659,
+      "line": 654,
       "tag": "<Button>",
       "label": "Overview",
       "handler": "asChild",
@@ -2104,7 +2104,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 659,
+      "line": 654,
       "tag": "<Link>",
       "label": "Overview",
       "handler": "{`/portal/contests/${contest.slug}`}",
@@ -2113,7 +2113,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 660,
+      "line": 655,
       "tag": "<Button>",
       "label": "Scoreboard",
       "handler": "asChild",
@@ -2122,7 +2122,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 660,
+      "line": 655,
       "tag": "<Link>",
       "label": "Scoreboard",
       "handler": "{`/portal/contests/${contest.slug}/final-results`}",
@@ -2131,7 +2131,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 685,
+      "line": 680,
       "tag": "<Button>",
       "label": "{registeringSlug === upcomingContests...",
       "handler": "{() => handleRegister(upcomingContests[0].slug)}",
@@ -2140,7 +2140,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 715,
+      "line": 710,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2149,7 +2149,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 716,
+      "line": 711,
       "tag": "<Link>",
       "label": "Campus Pass",
       "handler": "{`/portal/contests/${record.contest_slug}/qualified`}",
@@ -2158,7 +2158,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 719,
+      "line": 714,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2167,7 +2167,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 720,
+      "line": 715,
       "tag": "<Link>",
       "label": "Details",
       "handler": "{`/portal/contests/${record.contest_slug}`}",
@@ -2176,7 +2176,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 740,
+      "line": 735,
       "tag": "<Link>",
       "label": "Full",
       "handler": "\"/portal/leaderboard\"",
@@ -2185,7 +2185,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 767,
+      "line": 762,
       "tag": "<Link>",
       "label": "University Rankings",
       "handler": "\"/portal/leaderboard\"",

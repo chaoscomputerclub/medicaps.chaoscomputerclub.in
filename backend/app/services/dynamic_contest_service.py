@@ -646,6 +646,24 @@ class DynamicContestService:
         except Exception:
             pass
 
+        # Broadcast real-time event to all connected clients & SSE streams
+        try:
+            from app.services.event_broadcaster import broadcast_event
+            await broadcast_event(
+                event_type="contest_status_changed",
+                data={
+                    "contest_slug": contest.slug,
+                    "contest_title": contest.title,
+                    "old_status": old_status,
+                    "new_status": cleaned_status,
+                    "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+                    "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception as e:
+            logger.debug("Realtime status broadcast notice: %s", e)
+
         return {
             "success": True,
             "contest_slug": contest.slug,

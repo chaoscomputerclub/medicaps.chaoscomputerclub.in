@@ -1,0 +1,173 @@
+/**
+ * Chaos Computer Club — Medi-Caps Chapter
+ * src/lib/realtime.ts
+ *
+ * Real-Time Event Stream Subsystem & Webhook Triggers
+ * Provides SSE subscriptions to eliminate server interval polling.
+ */
+
+import { useEffect, useRef, useCallback } from "react";
+import { getApiBase, getToken } from "@/lib/auth";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
+
+export interface RealtimeEvent<T = any> {
+  event: string;
+  timestamp: string;
+  contest_slug?: string;
+  data: T;
+}
+
+export type RealtimeEventHandler = (event: RealtimeEvent) => void;
+
+/**
+ * Hook to subscribe to real-time events via Server-Sent Events (SSE).
+ * @param contestSlug Optional contest slug to filter events. If omitted, connects to global stream.
+ * @param onEvent Callback function invoked on every matching real-time event.
+ * @param eventFilter Optional list of event names to listen for (e.g. ["pass_checked_in", "contest_status_changed"]).
+ */
+export function useRealtimeEvents(
+  contestSlug?: string | null,
+  onEvent?: RealtimeEventHandler,
+  eventFilter?: string[]
+) {
+  const handlerRef = useRef(onEvent);
+  handlerRef.current = onEvent;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const base = getApiBase();
+    const endpoint = contestSlug
+      ? `${base}/events/contest/${contestSlug}/stream`
+      : `${base}/events/stream`;
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let isSubscribed = true;
+
+    function connect() {
+      if (!isSubscribed) return;
+
+      try {
+        eventSource = new EventSource(endpoint);
+
+        eventSource.onmessage = (e) => {
+          if (!e.data || e.data.trim() === ": ping" || e.data.trim() === ": connected") {
+            return;
+          }
+
+          try {
+            const parsed: RealtimeEvent = JSON.parse(e.data);
+
+            // Invalidate corresponding SWR cache entries immediately on incoming event
+            if (parsed.event === "pass_checked_in" || parsed.event === "contest_status_changed") {
+              invalidateSwrCache("contest");
+              invalidateSwrCache("pass");
+              invalidateSwrCache("scoreboard");
+            } else if (parsed.event === "top30_qualified" || parsed.event === "submission_evaluated") {
+              invalidateSwrCache("contest");
+              invalidateSwrCache("ranking");
+            }
+
+            // Check if matches filter
+            if (!eventFilter || eventFilter.length === 0 || eventFilter.includes(parsed.event)) {
+              if (handlerRef.current) {
+                handlerRef.current(parsed);
+              }
+            }
+          } catch {
+            // Ignore parse errors for keep-alive frames
+          }
+        };
+
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          if (isSubscribed) {
+            // Reconnect after 3 seconds on drop
+            reconnectTimeout = setTimeout(connect, 3000);
+          }
+        };
+      } catch (err) {
+        if (isSubscribed) {
+          reconnectTimeout = setTimeout(connect, 5000);
+        }
+      }
+    }
+
+    connect();
+
+    return () => {
+      isSubscribed = false;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+  }, [contestSlug, JSON.stringify(eventFilter)]);
+}
+
+/**
+ * Webhook client helper: Inbound Gate Scan (IoT Turnstile / Hardware Scanner).
+ */
+export async function triggerWebhookGateScan(
+  passCodeOrQr: string,
+  proctorName: string = "Hardware Gate Scanner",
+  contestSlug?: string
+) {
+  const base = getApiBase();
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${base}/webhooks/gate-scan`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      pass_code_or_qr: passCodeOrQr,
+      proctor_name: proctorName,
+      contest_slug: contestSlug,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to process gate scan webhook.");
+  }
+
+  return await res.json();
+}
+
+/**
+ * Webhook client helper: Contest Lifecycle / Timer Overrides.
+ */
+export async function triggerWebhookContestEvent(
+  slug: string,
+  action: "start_live" | "finish" | "reset_timer" | "qualify_top30",
+  timerMinutes: number = 90
+) {
+  const base = getApiBase();
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${base}/webhooks/contest-event`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      slug,
+      action,
+      timer_minutes: timerMinutes,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to trigger contest event webhook.");
+  }
+
+  return await res.json();
+}

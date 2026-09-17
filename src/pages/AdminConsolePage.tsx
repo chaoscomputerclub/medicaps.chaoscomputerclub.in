@@ -38,6 +38,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { contestApi } from "@/features/contest/api";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 export function AdminConsolePage() {
   const [searchParams] = useSearchParams();
@@ -114,6 +115,19 @@ export function AdminConsolePage() {
       loadAttendees(selectedSlug);
     }
   }, [selectedSlug, loadAttendees]);
+
+  // Real-time synchronization: live scan updates and contest lifecycle events
+  useRealtimeEvents(selectedSlug, (event) => {
+    if (event.event === "pass_checked_in") {
+      loadAttendees(selectedSlug);
+      const who = event.data?.handle || event.data?.candidate_name || "Candidate";
+      const seat = event.data?.seat_number ? ` (Seat: ${event.data.seat_number})` : "";
+      toast.info(`Gate check-in: ${who}${seat} admitted.`);
+    } else if (event.event === "contest_status_changed" || event.event === "top30_qualified") {
+      loadContests();
+      loadAttendees(selectedSlug);
+    }
+  });
 
   // Handle URL query pass code param
   useEffect(() => {

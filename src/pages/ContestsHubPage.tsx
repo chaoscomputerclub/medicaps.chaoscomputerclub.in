@@ -34,6 +34,7 @@ import { getUniversityLeaderboardData } from "@/organization/data/portal.functio
 import type { LeaderboardEntry } from "@/organization/data/types";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestsHubSkeleton, Skeleton } from "@/organization/components/skeletons";
+import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
 
 function useCountdown(targetIsoDate: string | null | undefined) {
@@ -127,7 +128,17 @@ export function ContestsHubPage() {
     }
   }, [dispatch, member]);
 
-  // Real-time synchronization: active polling + window focus + visibility change + cross-tab storage + custom events
+  // Instant global push: updates list when any contest changes status or qualifiers are published
+  useRealtimeEvents(null, (event) => {
+    if (
+      event.event === "contest_status_changed" ||
+      event.event === "top30_qualified" ||
+      event.event === "pass_checked_in"
+    ) {
+      refreshHubData(true);
+    }
+  });
+
   useEffect(() => {
     const handleSync = () => {
       refreshHubData(true);
@@ -139,30 +150,14 @@ export function ContestsHubPage() {
       }
     };
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refreshHubData(true);
-      }
-    };
-
-    // Polling interval: every 8 seconds while page tab is visible
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        refreshHubData(true);
-      }
-    }, 8000);
-
     window.addEventListener("focus", handleSync);
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
-    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [refreshHubData]);
 

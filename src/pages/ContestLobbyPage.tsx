@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 export function ContestLobbyPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -39,6 +40,13 @@ export function ContestLobbyPage() {
     refreshLobby(false);
   }, [refreshLobby]);
 
+  // Instant real-time push: updates lobby state on contest status changes
+  useRealtimeEvents(contestSlug, (event) => {
+    if (event.event === "contest_status_changed" || event.event === "top30_qualified") {
+      refreshLobby(true);
+    }
+  });
+
   useEffect(() => {
     if (!contestSlug) return;
 
@@ -52,29 +60,14 @@ export function ContestLobbyPage() {
       }
     };
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refreshLobby(true);
-      }
-    };
-
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        refreshLobby(true);
-      }
-    }, 8000);
-
     window.addEventListener("focus", handleSync);
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
-    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [contestSlug, refreshLobby]);
 

@@ -624,6 +624,24 @@ async def check_in_contest(
         await db.commit()
         await delete_cache_pattern("cache:contest*")
 
+        try:
+            from app.services.event_broadcaster import broadcast_event
+            await broadcast_event(
+                event_type="pass_checked_in",
+                data={
+                    "member_id": current_member.id,
+                    "handle": current_member.handle,
+                    "candidate_name": current_member.full_name or current_member.handle,
+                    "pass_code": effective_code,
+                    "seat_number": assigned_seat,
+                    "status": "checked_in",
+                    "checked_in_at": now_utc().isoformat(),
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception as e:
+            logger.debug("Broadcast error: %s", e)
+
     return {
         "success": True,
         "status": "checked_in",
@@ -662,6 +680,20 @@ async def reset_contest_timer(
 
     await db.commit()
     await delete_cache_pattern("cache:contest*")
+
+    try:
+        from app.services.event_broadcaster import broadcast_event
+        await broadcast_event(
+            event_type="contest_timer_reset",
+            data={
+                "contest_slug": slug,
+                "starts_at": new_starts.isoformat(),
+                "countdown_seconds": seconds,
+            },
+            contest_slug=slug,
+        )
+    except Exception as e:
+        logger.debug("Broadcast error: %s", e)
     return {
         "status": "timer_reset",
         "slug": slug,
@@ -944,6 +976,26 @@ async def submit_contest_arena_code(
     await db.commit()
     await delete_cache_pattern("cache:scoreboard*")
     await delete_cache_pattern("cache:contest*")
+
+    try:
+        from app.services.event_broadcaster import broadcast_event
+        await broadcast_event(
+            event_type="submission_evaluated",
+            data={
+                "contest_slug": slug,
+                "problem_index": problem.problem_index,
+                "problem_id": problem.id,
+                "handle": current_member.handle,
+                "verdict": verdict_str,
+                "is_accepted": is_accepted,
+                "points_awarded": points_awarded,
+                "passed_testcases": exec_result.passed_testcases,
+                "total_testcases": exec_result.total_testcases,
+            },
+            contest_slug=slug,
+        )
+    except Exception as e:
+        logger.debug("Broadcast error: %s", e)
 
     return {
         "submission_id": sub.id,

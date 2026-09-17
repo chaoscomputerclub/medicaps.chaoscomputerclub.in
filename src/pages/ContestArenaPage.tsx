@@ -45,6 +45,7 @@ import {
   clearArenaResults,
 } from "@/store/slices/contestSlice";
 import { AssessmentStudioSkeleton, Skeleton } from "@/organization/components/skeletons";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -102,6 +103,17 @@ export function ContestArenaPage() {
       setRemainingSeconds(diff > 0 ? diff : 0);
     }
   }, [arenaData?.ends_at]);
+
+  // Real-time arena clock push: proctors can pause, extend, or reset timers via SSE/Webhooks
+  useRealtimeEvents(contestSlug, (event) => {
+    if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
+      setRemainingSeconds(event.data.remaining_seconds);
+      toast.info("Contest clock updated by Faculty Proctor Command.");
+    } else if (event.event === "contest_status_changed" && event.data?.status === "finished") {
+      setRemainingSeconds(0);
+      toast.warning("Contest concluded by Proctor Command.");
+    }
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {

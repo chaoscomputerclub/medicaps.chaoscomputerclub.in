@@ -39,6 +39,7 @@ from app.services.ranking_service import (
     ranking_released,
     withheld_payload,
 )
+from app.services.event_broadcaster import broadcast_event
 
 logger = logging.getLogger(__name__)
 
@@ -423,6 +424,21 @@ class AssessmentService:
 
         await db.commit()
         await invalidate_ranking(contest_slug)
+
+        # Broadcast Top 30 qualification real-time event
+        try:
+            await broadcast_event(
+                event_type="top30_qualified",
+                data={
+                    "contest_slug": contest_slug,
+                    "total_candidates": len(sessions),
+                    "qualified_count": len(issued_passes),
+                    "qualifiers": issued_passes,
+                },
+                contest_slug=contest_slug,
+            )
+        except Exception as broadcast_err:
+            logger.debug("Failed to broadcast top30_qualified: %s", broadcast_err)
 
         return {
             "success": True,

@@ -33,6 +33,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { contestApi } from "@/features/contest/api";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 import { PhaseBadge, RoundsTimeline } from "@/features/contest/components";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
@@ -71,6 +72,17 @@ export function ContestOverviewPage() {
   }, [refreshDetail]);
 
   // Real-time synchronization: polling + window focus + visibility change + cross-tab storage + custom events
+  // Instant real-time push: updates contest details on status changes or qualifications
+  useRealtimeEvents(contestSlug, (event) => {
+    if (
+      event.event === "contest_status_changed" ||
+      event.event === "top30_qualified" ||
+      event.event === "pass_checked_in"
+    ) {
+      refreshDetail(true);
+    }
+  });
+
   useEffect(() => {
     if (!contestSlug) return;
 
@@ -84,30 +96,14 @@ export function ContestOverviewPage() {
       }
     };
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refreshDetail(true);
-      }
-    };
-
-    // Polling interval: every 8 seconds while page tab is active
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        refreshDetail(true);
-      }
-    }, 8000);
-
     window.addEventListener("focus", handleSync);
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
-    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [contestSlug, refreshDetail]);
 
