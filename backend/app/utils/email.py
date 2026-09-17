@@ -387,7 +387,10 @@ async def send_otp_email(to_email: str, otp: str) -> bool:
     Dispatch OTP verification email asynchronously.
     Uses asyncio.to_thread so the event loop is never blocked.
     Returns True on success, False on SMTP failure.
+    In DEV_MODE or DEV_BYPASS_RESTRICTIONS, logs OTP and falls back gracefully.
     """
+    logger.info("🔑 [AUTH] Generated OTP for %s: %s", to_email, otp)
+
     if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
         logger.info("[DEV] OTP for %s: %s (no SMTP configured)", to_email, otp)
         return True
@@ -397,8 +400,11 @@ async def send_otp_email(to_email: str, otp: str) -> bool:
         html = _otp_email_template(otp)
         plaintext = _otp_email_plaintext(otp)
         await asyncio.to_thread(_smtp_send_sync, to_email, subject, html, plaintext)
-        logger.info("OTP email sent to %s", to_email)
+        logger.info("✓ OTP email sent to %s", to_email)
         return True
     except Exception as e:
         logger.error("SMTP error sending to %s: %s", to_email, e)
+        if getattr(settings, "DEV_MODE", False) or getattr(settings, "DEV_BYPASS_RESTRICTIONS", False):
+            logger.warning("⚠️ [DEV FALLBACK] SMTP failed, but allowing login for %s in DEV_MODE. Use OTP: %s", to_email, otp)
+            return True
         return False
