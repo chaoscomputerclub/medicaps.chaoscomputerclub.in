@@ -660,10 +660,24 @@ class DynamicContestService:
 
         contest_title = contest.title
 
+        # Campus Passes Cascade
+        await db.execute(delete(CampusPass).where(CampusPass.contest_id == contest.id))
+
+        # Contest Arena Submissions & Scoreboards Cascade
+        await db.execute(delete(ContestSubmission).where(ContestSubmission.contest_id == contest.id))
+        await db.execute(delete(ScoreboardEntry).where(ScoreboardEntry.contest_id == contest.id))
+        await db.execute(delete(ContestRegistration).where(ContestRegistration.contest_id == contest.id))
+        await db.execute(delete(ContestProblem).where(ContestProblem.contest_id == contest.id))
+
         # Assessment Cascade
         a_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
         assessment = a_res.scalars().first()
         if assessment:
+            sess_ids = (await db.execute(select(AssessmentSession.id).where(AssessmentSession.assessment_id == assessment.id))).scalars().all()
+            if sess_ids:
+                await db.execute(delete(AssessmentSubmission).where(AssessmentSubmission.session_id.in_(sess_ids)))
+                await db.execute(delete(AssessmentSession).where(AssessmentSession.assessment_id == assessment.id))
+            await db.execute(delete(AssessmentProblem).where(AssessmentProblem.assessment_id == assessment.id))
             await db.delete(assessment)
 
         await db.delete(contest)

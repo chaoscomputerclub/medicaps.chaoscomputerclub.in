@@ -29,6 +29,9 @@ from app.models.db_models import (
 from app.core.cache import delete_cache_pattern
 
 
+from app.services.seed_service import purge_all_contest_data
+
+
 async def launch_contests():
     print("=" * 70)
     print("⚡ [CCC] Launching Official Weekly & Biweekly Contests on Medi-Caps Portal")
@@ -46,16 +49,10 @@ async def launch_contests():
     biweekly_checkin = biweekly_starts - timedelta(hours=1)
 
     async with AsyncSessionLocal() as db:
-        # Clean any old contest with same slugs if existed
-        slugs = ["weekly-contest-42", "biweekly-contest-18"]
-        for s in slugs:
-            old_c = (await db.execute(select(OfflineContest).where(OfflineContest.slug == s))).scalars().first()
-            if old_c:
-                await db.delete(old_c)
-            old_a = (await db.execute(select(Assessment).where(Assessment.slug == s))).scalars().first()
-            if old_a:
-                await db.delete(old_a)
-        await db.commit()
+        # Strictly purge any old contest, submission, registration, or pass records
+        print("\n🔹 Purging old contest records...")
+        await purge_all_contest_data(db)
+        print("  ✓ Old contest data purged cleanly.")
 
         # =====================================================================
         # 1. WEEKLY CONTEST 42
