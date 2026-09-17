@@ -126,12 +126,14 @@ class AuthController:
             )
 
         logger.info("OTP dispatched for %s (txn=%s)", email, result["transaction_id"])
+        dev_otp = otp if settings.is_mail_dispatch_disabled else None
         return SendOTPResponse(
             success=True,
             sent=True,
-            message=f"Verification code sent to {email}",
+            message=f"Verification code sent to {email}" if not settings.is_mail_dispatch_disabled else f"Dev Mode: Code is {otp}",
             transaction_id=result["transaction_id"],
             email=email,
+            dev_otp=dev_otp,
         )
 
     @staticmethod

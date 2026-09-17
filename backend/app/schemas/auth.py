@@ -30,6 +30,7 @@ class SendOTPResponse(BaseModel):
     message: str
     transaction_id: str
     email: Optional[str] = None
+    dev_otp: Optional[str] = None
 
 
 class VerifyOTPRequest(BaseModel):

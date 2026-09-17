@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     # Dynamic Development Testing & Restriction Controls
     DEV_BYPASS_RESTRICTIONS: bool = os.getenv("DEV_BYPASS_RESTRICTIONS", "false").lower() in ("true", "1", "yes")
     DEV_MODE: bool = os.getenv("DEV_MODE", "false").lower() in ("true", "1", "yes")
+    DISABLE_MAIL_DISPATCH: bool = os.getenv("DISABLE_MAIL_DISPATCH", "false").lower() in ("true", "1", "yes")
 
     @property
     def is_dev_bypass_enabled(self) -> bool:
@@ -65,6 +66,12 @@ class Settings(BaseSettings):
         env_bypass = os.getenv("DEV_BYPASS_RESTRICTIONS", "").lower() in ("true", "1", "yes")
         env_mode = os.getenv("DEV_MODE", "").lower() in ("true", "1", "yes")
         return bool(self.DEV_BYPASS_RESTRICTIONS or self.DEV_MODE or env_bypass or env_mode)
+
+    @property
+    def is_mail_dispatch_disabled(self) -> bool:
+        """Returns True if mail dispatching is disabled (dev mode, dev bypass, or explicit toggle)."""
+        env_disable = os.getenv("DISABLE_MAIL_DISPATCH", "").lower() in ("true", "1", "yes")
+        return bool(self.DISABLE_MAIL_DISPATCH or self.is_dev_bypass_enabled or env_disable)
 
     # OTP expiry (minutes)
     OTP_EXPIRE_MINUTES: int = 10
