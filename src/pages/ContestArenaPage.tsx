@@ -4,8 +4,8 @@
  * Pure Redux Toolkit & React Router Architecture
  */
 
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -85,14 +85,19 @@ export function ContestArenaPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(new Set());
 
+  const navigate = useNavigate();
+  const contestOverRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Sync remaining contest clock
   const [remainingSeconds, setRemainingSeconds] = useState<number>(7200);
+  const [isContestOver, setIsContestOver] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
 
   useEffect(() => {
     if (arenaData?.ends_at) {
       const endMs = new Date(arenaData.ends_at).getTime();
       const diff = Math.floor((endMs - Date.now()) / 1000);
-      setRemainingSeconds(diff > 0 ? diff : 7200);
+      setRemainingSeconds(diff > 0 ? diff : 0);
     }
   }, [arenaData?.ends_at]);
 
@@ -102,6 +107,24 @@ export function ContestArenaPage() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Contest over: lock arena and auto-redirect to final results
+  useEffect(() => {
+    if (remainingSeconds > 0 || isContestOver) return;
+    setIsContestOver(true);
+    // Countdown 5 → 0 then navigate
+    let count = 5;
+    const tick = setInterval(() => {
+      count -= 1;
+      setRedirectCountdown(count);
+      if (count <= 0) {
+        clearInterval(tick);
+        navigate(`/portal/contests/${contestSlug}/final-results`);
+      }
+    }, 1000);
+    contestOverRedirectRef.current = tick;
+    return () => clearInterval(tick);
+  }, [remainingSeconds, isContestOver, contestSlug, navigate]);
 
   const activeProblem = problems[activeIndex] || problems[0];
   const problemKey = `${activeProblem?.id || "p"}_${selectedLanguage}`;
@@ -693,17 +716,17 @@ export function ContestArenaPage() {
             {/* ── ACTION FOOTER ─────────────────────────────────────────────────── */}
             <div className="h-12 px-4 border-t border-[var(--line)] flex items-center justify-between bg-[var(--surface)]">
               <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-[var(--muted)]">
-                <span className="size-2 rounded-full bg-[var(--accent)]" />
-                <span>Lab workstation online</span>
+                <span className={`size-2 rounded-full ${isContestOver ? 'bg-red-500' : 'bg-[var(--accent)]'}`} />
+                <span>{isContestOver ? 'Contest ended — submissions locked' : 'Lab workstation online'}</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={isRunningCode || isSubmittingCode}
+                  disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleRunCode}
-                  className="font-mono text-xs uppercase tracking-wider rounded-none border-[var(--line)] bg-[var(--surface-2)] text-white hover:bg-[var(--surface-3)]"
+                  className="font-mono text-xs uppercase tracking-wider rounded-none border-[var(--line)] bg-[var(--surface-2)] text-white hover:bg-[var(--surface-3)] disabled:opacity-30"
                 >
                   <Play className="size-3.5 mr-1 text-[var(--cyan)]" />
                   {isRunningCode ? "Running…" : "Run Code"}
@@ -711,9 +734,9 @@ export function ContestArenaPage() {
 
                 <Button
                   size="sm"
-                  disabled={isRunningCode || isSubmittingCode}
+                  disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleSubmitCode}
-                  className="font-mono text-xs uppercase font-bold tracking-wider rounded-none bg-[var(--accent)] hover:bg-[#b8f025] text-black shadow-none"
+                  className="font-mono text-xs uppercase font-bold tracking-wider rounded-none bg-[var(--accent)] hover:bg-[#b8f025] text-black shadow-none disabled:opacity-30"
                 >
                   <Send className="size-3.5 mr-1" />
                   {isSubmittingCode ? "Evaluating…" : "Submit Solution"}
@@ -723,6 +746,50 @@ export function ContestArenaPage() {
           </div>
         </div>
       </div>
+
+      {/* ── CONTEST OVER OVERLAY ────────────────────────────────────────────── */}
+      {isContestOver && (
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8 bg-black/95 backdrop-blur-sm"
+          style={{ animation: 'fadeIn 0.4s ease' }}
+        >
+          <style>{`@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }`}</style>
+
+          {/* Glow ring */}
+          <div className="relative flex size-28 items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-[var(--accent)]/20 blur-2xl animate-pulse" />
+            <div className="flex size-24 items-center justify-center rounded-full border-2 border-[var(--accent)]/40 bg-[var(--surface)]">
+              <Trophy className="size-10 text-[var(--accent)]" />
+            </div>
+          </div>
+
+          <div className="space-y-3 text-center">
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-[var(--accent)]">Contest Concluded</p>
+            <h2 className="text-4xl font-black uppercase tracking-tight text-white">
+              Time's Up
+            </h2>
+            <p className="max-w-sm text-sm text-[var(--muted)] font-mono leading-relaxed">
+              All submissions are locked. The proctors are collecting results.
+              Final standings will be published shortly.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+            <p className="font-mono text-xs text-[var(--muted)] uppercase tracking-widest">
+              Redirecting to Final Results in
+            </p>
+            <div className="flex size-16 items-center justify-center rounded-full border-2 border-[var(--accent)] bg-[var(--accent)]/10">
+              <span className="text-2xl font-black text-[var(--accent)]">{redirectCountdown}</span>
+            </div>
+            <button
+              onClick={() => navigate(`/portal/contests/${contestSlug}/final-results`)}
+              className="font-mono text-xs font-bold uppercase tracking-widest text-[var(--accent)] border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-6 py-2.5 hover:bg-[var(--accent)]/20 transition-colors"
+            >
+              View Final Results Now →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

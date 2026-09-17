@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft,
@@ -43,6 +43,28 @@ export function ContestQualifiedPage() {
   useEffect(() => {
     refreshData(false);
   }, [refreshData]);
+
+  // Countdown to contest start
+  const [finalCountdown, setFinalCountdown] = useState({ h: 0, m: 0, s: 0, started: false });
+  useEffect(() => {
+    if (!contest?.starts_at) return;
+    const tick = () => {
+      const diff = Math.max(0, Math.floor((new Date(contest.starts_at).getTime() - Date.now()) / 1000));
+      if (diff <= 0) {
+        setFinalCountdown({ h: 0, m: 0, s: 0, started: true });
+        return;
+      }
+      setFinalCountdown({
+        h: Math.floor(diff / 3600),
+        m: Math.floor((diff % 3600) / 60),
+        s: diff % 60,
+        started: false,
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [contest?.starts_at]);
 
   useEffect(() => {
     if (!contestSlug) return;
@@ -191,6 +213,36 @@ export function ContestQualifiedPage() {
                       <p className="text-xs font-bold text-foreground">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</p>
                     </div>
                   </div>
+
+                  {/* Round 2 Countdown */}
+                  {!finalCountdown.started && (finalCountdown.h > 0 || finalCountdown.m > 0 || finalCountdown.s > 0) && contest.status !== "live" && (
+                    <div className="border border-[var(--accent)]/40 bg-[var(--surface)] p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent)] mb-3 flex items-center gap-2">
+                        <span className="size-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+                        Round 2 Final Starts In
+                      </p>
+                      <div className="grid grid-cols-3 divide-x divide-[var(--line)] border border-[var(--line)]">
+                        {[
+                          { label: "Hours", value: finalCountdown.h },
+                          { label: "Minutes", value: finalCountdown.m },
+                          { label: "Seconds", value: finalCountdown.s },
+                        ].map(({ label, value }) => (
+                          <div key={label} className="flex flex-col items-center gap-1 py-3">
+                            <span className="text-2xl font-black font-mono text-[var(--accent)] tabular-nums">
+                              {String(value).padStart(2, "0")}
+                            </span>
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--muted)]">{label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {finalCountdown.started && contest.status === "live" && (
+                    <div className="flex items-center gap-3 border border-emerald-500/40 bg-emerald-950/20 px-4 py-3">
+                      <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <p className="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider">Round 2 Final Is Live — Go to Arena</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -610,6 +610,7 @@ class DynamicContestService:
         """
         Transition contest lifecycle status: 'upcoming' -> 'live' -> 'finished'.
         When transitioning to 'live', optionally triggers auto-qualification of Top 30 finalists.
+        When transitioning to 'finished', computes and applies rating deltas to all participants.
         """
         valid_statuses = {"upcoming", "live", "finished"}
         cleaned_status = target_status.strip().lower()
@@ -631,6 +632,13 @@ class DynamicContestService:
             except Exception as e:
                 logger.warning("Auto qualify Top 30 notice: %s", e)
 
+        rating_summary = None
+        if cleaned_status == "finished":
+            try:
+                rating_summary = await DynamicContestService._apply_final_ratings(contest, db)
+            except Exception as e:
+                logger.warning("Rating application notice: %s", e)
+
         await db.commit()
 
         try:
@@ -645,7 +653,83 @@ class DynamicContestService:
             "previous_status": old_status,
             "current_status": cleaned_status,
             "top_30_qualification": qualify_summary,
+            "rating_summary": rating_summary,
         }
+
+    @staticmethod
+    async def _apply_final_ratings(contest: OfflineContest, db: AsyncSession) -> Dict[str, Any]:
+        """
+        Re-rank ScoreboardEntry rows, compute ELO rating deltas, apply to
+        MemberProfile.rating + peak_rating, and write RatingHistory entries.
+        Called both from change_contest_status("finished") and the background auto-finish task.
+        """
+        from app.models.db_models import MemberProfile, RatingHistory, ScoreboardEntry
+        from app.services.rating_service import calculate_rating_deltas
+        from datetime import timezone
+
+        ends_at = contest.ends_at
+        if ends_at and ends_at.tzinfo is None:
+            ends_at = ends_at.replace(tzinfo=timezone.utc)
+        finalized_at = ends_at or now_utc()
+
+        # Fetch & re-rank scoreboard
+        sb_res = await db.execute(
+            select(ScoreboardEntry)
+            .where(ScoreboardEntry.contest_id == contest.id)
+            .order_by(ScoreboardEntry.score.desc(), ScoreboardEntry.penalty_seconds.asc())
+        )
+        entries = sb_res.scalars().all()
+
+        if not entries:
+            return {"rated_count": 0, "message": "No scoreboard entries to rate."}
+
+        for new_rank, entry in enumerate(entries, start=1):
+            entry.rank = new_rank
+
+        # Build standings for rating calculation
+        standings = []
+        member_map: Dict[str, Any] = {}
+        for entry in entries:
+            m_res = await db.execute(select(MemberProfile).where(MemberProfile.id == entry.member_id))
+            member = m_res.scalars().first()
+            if member:
+                standings.append({
+                    "rank": entry.rank,
+                    "handle": entry.handle,
+                    "member_id": entry.member_id,
+                    "rating": member.rating if member.rating is not None else 1200,
+                })
+                member_map[entry.handle] = member
+
+        # Compute deltas
+        deltas = calculate_rating_deltas(standings)
+        delta_map = {handle: (delta, new_rating) for handle, delta, new_rating in deltas}
+
+        rated = 0
+        for entry in entries:
+            if entry.handle not in delta_map:
+                continue
+            delta, new_rating = delta_map[entry.handle]
+            entry.rating_delta = delta
+            member = member_map.get(entry.handle)
+            if not member:
+                continue
+            old_rating = member.rating if member.rating is not None else 1200
+            member.rating = new_rating
+            if member.peak_rating is None or new_rating > member.peak_rating:
+                member.peak_rating = new_rating
+            db.add(RatingHistory(
+                member_id=member.id,
+                contest_id=contest.id,
+                contest_title=contest.title,
+                contested_at=finalized_at,
+                old_rating=old_rating,
+                new_rating=new_rating,
+                rank=entry.rank,
+            ))
+            rated += 1
+
+        return {"rated_count": rated, "message": f"Ratings applied for {rated} participant(s)."}
 
     @staticmethod
     async def delete_contest(

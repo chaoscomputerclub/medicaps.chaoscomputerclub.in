@@ -1,7 +1,7 @@
 """
 Chaos Computer Club -- Production Background Tasks Service
 
-Two recurring background coroutines run inside the same uvicorn process:
+Three recurring background coroutines run inside the same uvicorn process:
 
   1. Session Expiry Sweeper (every 60s)
      Finds AssessmentSession rows whose 120-minute clock expired but are
@@ -13,7 +13,12 @@ Two recurring background coroutines run inside the same uvicorn process:
      the Top-30 sessions and ContestRegistration rows so the live final gate
      works without organiser intervention.
 
-Both tasks are idempotent.
+  3. Auto-Finish Contest (every 60s)
+     Watches LIVE contests whose ends_at has passed. Transitions them to
+     "finished", re-ranks the ScoreboardEntry table, computes ELO-style
+     rating deltas, and applies them to MemberProfile.rating + RatingHistory.
+
+All tasks are idempotent.
 """
 
 from __future__ import annotations
@@ -28,11 +33,14 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 logger = logging.getLogger("ccc.background")
 
 _auto_qualify_done: set[str] = set()
+_auto_finish_done: set[str] = set()
 
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
+
+# ─── Task 1: Session Expiry Sweeper ──────────────────────────────────────────
 
 async def _sweep_expired_sessions(session_factory: async_sessionmaker) -> None:
     from app.models.db_models import Assessment, AssessmentSession
@@ -79,6 +87,8 @@ async def session_expiry_loop(session_factory: async_sessionmaker, interval: int
         await asyncio.sleep(interval)
         await _sweep_expired_sessions(session_factory)
 
+
+# ─── Task 2: Auto-Qualify Top 30 ─────────────────────────────────────────────
 
 async def _auto_qualify_top30(session_factory: async_sessionmaker) -> None:
     from app.models.db_models import (
@@ -135,10 +145,6 @@ async def _auto_qualify_top30(session_factory: async_sessionmaker) -> None:
                     else:
                         session.is_top_30_qualified = False
 
-                # ContestRegistration has no is_top_30_qualified column.
-                # The registration-status endpoint reads the flag directly from
-                # AssessmentSession.is_top_30_qualified, so no mirror is needed.
-
                 await db.commit()
                 await invalidate_ranking(slug)
                 _auto_qualify_done.add(slug)
@@ -158,10 +164,162 @@ async def auto_qualify_loop(session_factory: async_sessionmaker, interval: int =
         await _auto_qualify_top30(session_factory)
 
 
+# ─── Task 3: Auto-Finish Live Contests ───────────────────────────────────────
+
+async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
+    """
+    Transitions LIVE contests to 'finished' when ends_at has passed.
+    Then:
+      - Re-ranks ScoreboardEntry rows for this contest.
+      - Computes ELO-style rating deltas via rating_service.
+      - Applies deltas to MemberProfile.rating and MemberProfile.peak_rating.
+      - Writes a RatingHistory entry per participant.
+    Idempotent: each contest slug is only processed once per process lifetime.
+    """
+    from app.models.db_models import (
+        MemberProfile, OfflineContest, RatingHistory, ScoreboardEntry,
+    )
+    from app.services.rating_service import calculate_rating_deltas
+    from app.core.cache import delete_cache_pattern
+
+    now = _utcnow()
+
+    async with session_factory() as db:
+        try:
+            live_res = await db.execute(
+                select(OfflineContest).where(OfflineContest.status == "live")
+            )
+            live_contests = live_res.scalars().all()
+
+            for contest in live_contests:
+                slug = contest.slug
+                if slug in _auto_finish_done:
+                    continue
+
+                # Ensure ends_at is timezone-aware before comparing
+                ends_at = contest.ends_at
+                if ends_at is None:
+                    continue
+                if ends_at.tzinfo is None:
+                    ends_at = ends_at.replace(tzinfo=timezone.utc)
+
+                if now < ends_at:
+                    continue  # Contest still running
+
+                logger.info("auto-finish: '%s' ended at %s — transitioning to finished", slug, ends_at.isoformat())
+
+                # 1. Mark as finished
+                contest.status = "finished"
+
+                # 2. Fetch all scoreboard entries, re-rank by score DESC, then penalty ASC
+                sb_res = await db.execute(
+                    select(ScoreboardEntry)
+                    .where(ScoreboardEntry.contest_id == contest.id)
+                    .order_by(
+                        ScoreboardEntry.score.desc(),
+                        ScoreboardEntry.penalty_seconds.asc(),
+                    )
+                )
+                entries = sb_res.scalars().all()
+
+                if not entries:
+                    await db.commit()
+                    _auto_finish_done.add(slug)
+                    logger.info("auto-finish: '%s' → finished (no scoreboard entries)", slug)
+                    continue
+
+                # Re-assign ranks
+                for new_rank, entry in enumerate(entries, start=1):
+                    entry.rank = new_rank
+
+                # 3. Build standings list for rating calculator
+                standings = []
+                for entry in entries:
+                    member_res = await db.execute(
+                        select(MemberProfile).where(MemberProfile.id == entry.member_id)
+                    )
+                    member = member_res.scalars().first()
+                    if member:
+                        standings.append({
+                            "rank": entry.rank,
+                            "handle": entry.handle,
+                            "member_id": entry.member_id,
+                            "rating": member.rating if member.rating is not None else 1200,
+                        })
+
+                # 4. Compute rating deltas
+                deltas = calculate_rating_deltas(standings)  # [(handle, delta, new_rating), ...]
+                delta_map: dict[str, tuple[int, int]] = {
+                    handle: (delta, new_rating) for handle, delta, new_rating in deltas
+                }
+
+                # 5. Apply deltas to members + write RatingHistory + update ScoreboardEntry
+                for entry in entries:
+                    handle = entry.handle
+                    if handle not in delta_map:
+                        continue
+                    delta, new_rating = delta_map[handle]
+                    entry.rating_delta = delta
+
+                    member_res = await db.execute(
+                        select(MemberProfile).where(MemberProfile.id == entry.member_id)
+                    )
+                    member = member_res.scalars().first()
+                    if not member:
+                        continue
+
+                    old_rating = member.rating if member.rating is not None else 1200
+                    member.rating = new_rating
+                    if member.peak_rating is None or new_rating > member.peak_rating:
+                        member.peak_rating = new_rating
+
+                    # Write RatingHistory ledger entry
+                    history = RatingHistory(
+                        member_id=member.id,
+                        contest_id=contest.id,
+                        contest_title=contest.title,
+                        contested_at=ends_at,
+                        old_rating=old_rating,
+                        new_rating=new_rating,
+                        rank=entry.rank,
+                    )
+                    db.add(history)
+                    logger.info(
+                        "rating: %s rank=%d %d→%d (Δ%+d)",
+                        handle, entry.rank, old_rating, new_rating, delta,
+                    )
+
+                await db.commit()
+                _auto_finish_done.add(slug)
+
+                # Bust all caches so the UI reflects the new state immediately
+                try:
+                    await delete_cache_pattern("cache:*")
+                except Exception:
+                    pass
+
+                logger.info(
+                    "auto-finish: '%s' done — %d participants rated", slug, len(entries)
+                )
+
+        except Exception as exc:
+            logger.exception("auto-finish error: %s", exc)
+            await db.rollback()
+
+
+async def auto_finish_loop(session_factory: async_sessionmaker, interval: int = 60) -> None:
+    logger.info("auto-finish contest loop started (interval=%ds)", interval)
+    while True:
+        await asyncio.sleep(interval)
+        await _auto_finish_contests(session_factory)
+
+
+# ─── Entry Point ─────────────────────────────────────────────────────────────
+
 def start_background_tasks(session_factory: async_sessionmaker) -> list[asyncio.Task]:
     """
-    Spawn production background tasks. Returns task handles for clean
-    cancellation in the lifespan shutdown hook.
+    Spawn all three production background tasks.
+    Returns task handles for clean cancellation in the lifespan shutdown hook.
     """
     loop = asyncio.get_event_loop()
     tasks = [
@@ -172,6 +330,10 @@ def start_background_tasks(session_factory: async_sessionmaker) -> list[asyncio.
         loop.create_task(
             auto_qualify_loop(session_factory, interval=120),
             name="ccc.auto_qualify_top30",
+        ),
+        loop.create_task(
+            auto_finish_loop(session_factory, interval=60),
+            name="ccc.auto_finish_contest",
         ),
     ]
     logger.info(
