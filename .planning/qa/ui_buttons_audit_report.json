@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-17T07:31:25.387Z",
+  "timestamp": "2026-09-17T07:38:14.712Z",
   "totalElements": 254,
   "functionalCount": 254,
   "connectivityRate": "100.0%",
@@ -403,7 +403,7 @@
     },
     {
       "file": "src/organization/components/SocialDrawer.tsx",
-      "line": 115,
+      "line": 116,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => dispatch(setDrawerType(\"followers\"))}",
@@ -412,7 +412,7 @@
     },
     {
       "file": "src/organization/components/SocialDrawer.tsx",
-      "line": 140,
+      "line": 141,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => dispatch(setDrawerType(\"following\"))}",
@@ -421,7 +421,7 @@
     },
     {
       "file": "src/organization/components/SocialDrawer.tsx",
-      "line": 180,
+      "line": 181,
       "tag": "<Button>",
       "label": "dispatch(setSocialSearchQuery())}\n ...",
       "handler": "{() => dispatch(setSocialSearchQuery(\"\"))}",
@@ -430,7 +430,7 @@
     },
     {
       "file": "src/organization/components/SocialDrawer.tsx",
-      "line": 256,
+      "line": 257,
       "tag": "<Link>",
       "label": "[to={/portal/profile/${student.handl...",
       "handler": "{() => dispatch(closeSocialDrawer())}",
@@ -439,7 +439,7 @@
     },
     {
       "file": "src/organization/components/SocialDrawer.tsx",
-      "line": 277,
+      "line": 278,
       "tag": "<Link>",
       "label": "@ {student.handle}",
       "handler": "{() => dispatch(closeSocialDrawer())}",
@@ -448,10 +448,10 @@
     },
     {
       "file": "src/organization/components/SocialDrawer.tsx",
-      "line": 307,
+      "line": 308,
       "tag": "<Button>",
       "label": "{isPending ? (                       ...",
-      "handler": "{() =>\n                        dispatch(\n                          toggleFollowT",
+      "handler": "{async () => {\n                        try {\n                          const res",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
@@ -2059,7 +2059,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 127,
+      "line": 137,
       "tag": "<Button>",
       "label": "View Leaderboard",
       "handler": "{() => navigate(\"/portal/leaderboard\")}",
@@ -2068,7 +2068,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 134,
+      "line": 144,
       "tag": "<Button>",
       "label": "Sign In",
       "handler": "{() => navigate(\"/auth\")}",
@@ -2077,7 +2077,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 261,
+      "line": 284,
       "tag": "<Button>",
       "label": "[#profile-edit-btn]",
       "handler": "{() => dispatch(openEditProfileModal())}",
@@ -2086,16 +2086,16 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 273,
+      "line": 296,
       "tag": "<Button>",
-      "label": "{isFollowing ? (                     ...",
+      "label": "{isPendingFollowAction ? (           ...",
       "handler": "{handleFollowToggle}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 296,
+      "line": 324,
       "tag": "<Button>",
       "label": "{copied ? (                       <> ...",
       "handler": "{handleCopyLink}",
@@ -2104,7 +2104,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 344,
+      "line": 372,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2113,7 +2113,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 363,
+      "line": 391,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2122,7 +2122,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 383,
+      "line": 411,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2131,7 +2131,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 394,
+      "line": 422,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2140,7 +2140,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 521,
+      "line": 549,
       "tag": "<Link>",
       "label": "Open verification console",
       "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",

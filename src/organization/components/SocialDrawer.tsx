@@ -36,6 +36,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export function SocialDrawer() {
@@ -309,14 +310,23 @@ export function SocialDrawer() {
                       disabled={isPending}
                       onMouseEnter={() => setHoveredStudentId(student.id)}
                       onMouseLeave={() => setHoveredStudentId(null)}
-                      onClick={() =>
-                        dispatch(
-                          toggleFollowThunk({
-                            targetId: student.id,
-                            targetHandle: student.handle,
-                          }),
-                        )
-                      }
+                      onClick={async () => {
+                        try {
+                          const res = await dispatch(
+                            toggleFollowThunk({
+                              targetId: student.id,
+                              targetHandle: student.handle,
+                            }),
+                          ).unwrap();
+                          if (res.isFollowing) {
+                            toast.success(`Following @${student.handle}`);
+                          } else {
+                            toast.info(`Unfollowed @${student.handle}`);
+                          }
+                        } catch (err: any) {
+                          toast.error(typeof err === "string" ? err : "Action failed");
+                        }
+                      }}
                       className={cn(
                         "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-[1px] flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer h-auto",
                         isFollowing

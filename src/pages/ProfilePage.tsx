@@ -14,9 +14,11 @@ import {
   LockKeyhole,
   ShieldCheck,
   Zap,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { openSocialDrawer, fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
+import { openSocialDrawer, fetchMyFollowingIdsThunk, toggleFollowThunk } from "@/store/slices/socialSlice";
 import { openEditProfileModal } from "@/store/slices/uiSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
@@ -76,15 +78,23 @@ export function ProfilePage() {
     handle.toLowerCase() === "me" ||
     (currentMember?.handle && handle.toLowerCase() === currentMember.handle.toLowerCase());
 
-  const { data: ownProfileData, loading: ownLoading } = useSwrData(
+  const {
+    data: ownProfileData,
+    loading: ownLoading,
+    revalidate: revalidateOwnProfile,
+  } = useSwrData(
     "member:profile:full",
-    () => getMemberProfileData(),
+    () => getMemberProfileData(true),
     { ttl: 5 * 60 * 1000, enabled: isViewingSelf }
   );
 
-  const { data: studentProfileData, loading: studentLoading } = useSwrData(
+  const {
+    data: studentProfileData,
+    loading: studentLoading,
+    revalidate: revalidateStudentProfile,
+  } = useSwrData(
     `student:profile:${handle?.toLowerCase() || ""}`,
-    () => (handle ? getStudentProfileData(handle) : Promise.resolve(null)),
+    () => (handle ? getStudentProfileData(handle, true) : Promise.resolve(null)),
     { ttl: 3 * 60 * 1000, enabled: !isViewingSelf && Boolean(handle) }
   );
 
@@ -199,12 +209,14 @@ export function ProfilePage() {
     const url = `${window.location.origin}/portal/profile/${m.handle}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
+    toast.success("Profile URL copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
   // Follow / Unfollow Handler
   const handleFollowToggle = async () => {
     if (!isAuthenticated()) {
+      toast.error("Please sign in to follow fellow cadets.");
       navigate("/auth");
       return;
     }
@@ -212,14 +224,25 @@ export function ProfilePage() {
 
     setFollowLoading(true);
     try {
-      await dispatch(
+      const res = await dispatch(
         toggleFollowThunk({
           targetId: m.id,
           targetHandle: m.handle,
         })
       ).unwrap();
-    } catch (err) {
+
+      if (res.isFollowing) {
+        toast.success(`You are now following @${m.handle || "student"}`);
+      } else {
+        toast.info(`Unfollowed @${m.handle || "student"}`);
+      }
+
+      if (revalidateStudentProfile) {
+        await revalidateStudentProfile();
+      }
+    } catch (err: any) {
       console.error("Follow action failed:", err);
+      toast.error(typeof err === "string" ? err : "Failed to toggle follow status");
     } finally {
       setFollowLoading(false);
     }
@@ -281,7 +304,12 @@ export function ProfilePage() {
                         : "bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90"
                     )}
                   >
-                    {isFollowing ? (
+                    {isPendingFollowAction ? (
+                      <>
+                        <Loader2 size={12} className="animate-spin" />
+                        <span>Syncing...</span>
+                      </>
+                    ) : isFollowing ? (
                       <>
                         <UserCheck size={12} />
                         <span>Following</span>
