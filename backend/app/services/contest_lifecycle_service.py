@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable, Optional
 
 ASSESSMENT_WINDOW_HOURS = 24
+ASSESSMENT_CLOSES_BEFORE_CONTEST_HOURS = 2
 ASSESSMENT_DURATION_MINUTES = 120
 FINALIST_SEATS = 30
 
@@ -48,14 +49,17 @@ class AssessmentWindow:
             "closes_at": self.closes_at.isoformat(),
             "duration_minutes": ASSESSMENT_DURATION_MINUTES,
             "window_hours": ASSESSMENT_WINDOW_HOURS,
+            "closes_before_contest_hours": ASSESSMENT_CLOSES_BEFORE_CONTEST_HOURS,
         }
 
 
 def assessment_window(contest_starts_at: datetime) -> AssessmentWindow:
-    """Round 1 runs in the 24 hours immediately before the offline final."""
-    closes_at = _aware(contest_starts_at)
+    """Round 1 runs in the 24-hour screening window and closes 2 hours before the offline final."""
+    contest_start = _aware(contest_starts_at)
+    closes_at = contest_start - timedelta(hours=ASSESSMENT_CLOSES_BEFORE_CONTEST_HOURS)
+    opens_at = contest_start - timedelta(hours=ASSESSMENT_WINDOW_HOURS)
     return AssessmentWindow(
-        opens_at=closes_at - timedelta(hours=ASSESSMENT_WINDOW_HOURS),
+        opens_at=opens_at,
         closes_at=closes_at,
     )
 
@@ -79,7 +83,10 @@ def assessment_available(contest_status: str, contest_starts_at: datetime,
             f"{window.opens_at.isoformat()}."
         )
     if moment > window.closes_at:
-        return False, "The Round 1 window has closed."
+        return False, (
+            "The Round 1 screening assessment window closed 2 hours before the contest "
+            "for final score verification and QR campus pass generation."
+        )
     return True, "Round 1 is open."
 
 

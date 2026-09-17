@@ -97,7 +97,7 @@ async def launch_contests():
             summary="Phase 1 online qualification round for CCC Weekly Contest 1. Solve all 4 challenges within 120 minutes.",
             duration_minutes=120,
             starts_at=now - timedelta(minutes=10), # Opened right now for instant testing
-            ends_at=weekly_starts,
+            ends_at=weekly_starts - timedelta(hours=2), # Closes 2 hours before physical contest
             is_active=True,
             max_violations=3,
             created_at=now_utc(),

@@ -155,6 +155,7 @@ export function ContestsHubPage() {
     const contest = registeredUpcomingContest || upcomingWeekly || upcomingContests[0];
     if (!contest) return null;
     const contestStart = new Date(contest.starts_at).getTime();
+    const assessClose = contestStart - 2 * 3600 * 1000;
     const assessOpen = contestStart - 24 * 3600 * 1000;
     const now = Date.now();
     const record = myParticipations.find((p) => p.contest_slug === contest.slug);
@@ -168,13 +169,14 @@ export function ContestsHubPage() {
     );
     const isTop30 = record?.outcome === "qualified" || (record?.rank !== null && (record?.rank ?? 99) <= 30);
     return {
-      contest, contestStart, assessOpen,
-      isOpen: now >= assessOpen && now <= contestStart,
+      contest, contestStart, assessOpen, assessClose,
+      isOpen: now >= assessOpen && now <= assessClose,
       isUpcoming: now < assessOpen,
-      isClosed: now > contestStart,
+      isClosed: now > assessClose,
       hasTaken, isTop30,
       score: record?.score, rank: record?.rank,
       openDateFormatted: new Date(assessOpen).toLocaleString("en-IN", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+      closeDateFormatted: new Date(assessClose).toLocaleString("en-IN", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
     };
   }, [registeredUpcomingContest, upcomingWeekly, upcomingContests, myParticipations]);
 
@@ -182,7 +184,7 @@ export function ContestsHubPage() {
     assessmentInfo?.isUpcoming ? new Date(assessmentInfo.assessOpen).toISOString() : null
   );
   const assessmentRemainingTimer = useCountdown(
-    assessmentInfo?.isOpen ? new Date(assessmentInfo.contestStart).toISOString() : null
+    assessmentInfo?.isOpen ? new Date(assessmentInfo.assessClose).toISOString() : null
   );
 
   const filteredPastContests = useMemo(() =>
@@ -408,7 +410,7 @@ export function ContestsHubPage() {
                   {assessmentInfo.hasTaken ? "Phase 1 · Screening Completed" : "Phase 1 · Online Screening"}
                 </span>
                 <span className="text-[11px] text-[var(--muted)]">
-                  {assessmentInfo.hasTaken ? "Attempt locked & securely recorded" : "Strict 24-hour window before contest"}
+                  {assessmentInfo.hasTaken ? "Attempt locked & securely recorded" : "Strict 24h window · Closes 2h before contest for pass generation"}
                 </span>
               </div>
               <div>

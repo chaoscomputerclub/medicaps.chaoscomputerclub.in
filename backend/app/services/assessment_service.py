@@ -154,7 +154,7 @@ class AssessmentService:
         # 2. Check Assessment Window
         now = now_utc()
         starts_at = assessment.starts_at if assessment.starts_at else (contest.starts_at - timedelta(hours=ASSESSMENT_WINDOW_HOURS) if contest else now)
-        ends_at = assessment.ends_at if assessment.ends_at else (contest.starts_at if contest else now + timedelta(hours=ASSESSMENT_WINDOW_HOURS))
+        ends_at = assessment.ends_at if assessment.ends_at else (contest.starts_at - timedelta(hours=2) if contest else now + timedelta(hours=ASSESSMENT_WINDOW_HOURS))
 
         # Make aware
         if starts_at.tzinfo is None:

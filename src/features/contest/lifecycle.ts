@@ -13,6 +13,7 @@ import type { ContestPhase, ContestSummary, RegistrationStatus } from "./types";
 
 export const FINALIST_SEATS = 30;
 export const ASSESSMENT_WINDOW_HOURS = 24;
+export const ASSESSMENT_CLOSES_BEFORE_CONTEST_HOURS = 2;
 export const ASSESSMENT_DURATION_MINUTES = 120;
 
 export function assessmentOpensAt(contest: ContestSummary): Date {
@@ -22,7 +23,9 @@ export function assessmentOpensAt(contest: ContestSummary): Date {
 }
 
 export function assessmentClosesAt(contest: ContestSummary): Date {
-  return new Date(contest.starts_at);
+  return new Date(
+    new Date(contest.starts_at).getTime() - ASSESSMENT_CLOSES_BEFORE_CONTEST_HOURS * 60 * 60 * 1000,
+  );
 }
 
 export function contestPhase(

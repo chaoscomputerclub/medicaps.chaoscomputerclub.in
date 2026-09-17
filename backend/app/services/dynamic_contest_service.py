@@ -188,7 +188,7 @@ class DynamicContestService:
         if assess_starts.tzinfo is None:
             assess_starts = assess_starts.replace(tzinfo=timezone.utc)
 
-        assess_ends = assess_cfg.ends_at or starts_at
+        assess_ends = assess_cfg.ends_at or (starts_at - timedelta(hours=2))
         if assess_ends.tzinfo is None:
             assess_ends = assess_ends.replace(tzinfo=timezone.utc)
 
