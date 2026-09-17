@@ -27,11 +27,12 @@ echo -e "${CYAN}   🛡️  CCC MEDI-CAPS — AUTOMATED QA PRE-DEPLOYMENT GATE  
 echo -e "${CYAN}================================================================${NC}"
 
 # ------------------------------------------------------------------------------
-# STEP 1: Local Compilation & Static Analysis
+# STEP 1: Local Compilation & Static Analysis (Student Portal & Admin Console)
 # ------------------------------------------------------------------------------
-echo -e "\n${BLUE}[1/3] Running Frontend Compilation & TypeScript Check...${NC}"
+echo -e "\n${BLUE}[1/3] Running Frontend & Admin Console Compilation & TypeScript Check...${NC}"
 npm run build
-echo -e "${GREEN}✓ Frontend bundle compiled with zero errors.${NC}"
+npm run build:admin
+echo -e "${GREEN}✓ Student portal and Admin console bundles compiled with zero errors.${NC}"
 
 # ------------------------------------------------------------------------------
 # STEP 2: Backend Production API Contract Audit

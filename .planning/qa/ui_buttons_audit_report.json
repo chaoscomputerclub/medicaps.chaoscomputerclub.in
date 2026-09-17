@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-09-17T10:29:57.528Z",
-  "totalElements": 289,
-  "functionalCount": 289,
+  "timestamp": "2026-09-17T10:35:48.722Z",
+  "totalElements": 269,
+  "functionalCount": 269,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 43,
-    "backendQueries": 9,
-    "routingNavigation": 171,
-    "clientUiState": 42,
-    "conditionalLocked": 18,
+    "backendMutations": 41,
+    "backendQueries": 6,
+    "routingNavigation": 165,
+    "clientUiState": 41,
+    "conditionalLocked": 10,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
   },
@@ -16,7 +16,7 @@
   "elements": [
     {
       "file": "src/AppRoutes.tsx",
-      "line": 28,
+      "line": 27,
       "tag": "<Navigate>",
       "label": "[to={/portal/profile/${handle ? enco...",
       "handler": "{`/portal/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 35,
+      "line": 34,
       "tag": "<Navigate>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -34,34 +34,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 78,
-      "tag": "<Navigate>",
-      "label": "[to=/portal/admin]",
-      "handler": "\"/portal/admin\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/AppRoutes.tsx",
-      "line": 92,
-      "tag": "<Navigate>",
-      "label": "[to=/portal/admin]",
-      "handler": "\"/portal/admin\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/AppRoutes.tsx",
-      "line": 93,
-      "tag": "<Navigate>",
-      "label": "[to=/portal/admin]",
-      "handler": "\"/portal/admin\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/AppRoutes.tsx",
-      "line": 96,
+      "line": 89,
       "tag": "<Navigate>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -367,7 +340,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 86,
+      "line": 85,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -376,7 +349,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 90,
+      "line": 89,
       "tag": "<Button>",
       "label": "{open ? <X /> : <Menu />}",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -385,7 +358,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 101,
+      "line": 100,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -394,7 +367,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 115,
+      "line": 114,
       "tag": "<Link>",
       "label": "{active && <ChevronRight size={14} />}",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -403,16 +376,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 130,
-      "tag": "<Link>",
-      "label": "[to=/portal/admin]",
-      "handler": "{() => dispatch(setSidebarOpen(false))}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/organization/components/PortalShell.tsx",
-      "line": 164,
+      "line": 146,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => dispatch(logout())}",
@@ -490,150 +454,6 @@
       "handler": "{async () => {\n                        try {\n                          const res",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 260,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 261,
-      "tag": "<Link>",
-      "label": "Return to Cadet Portal",
-      "handler": "\"/portal\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 323,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "{() => {\n              loadContests();\n              if (selectedSlug) loadAtten",
-      "category": "LIVE_BACKEND_QUERY",
-      "description": "Triggers live backend SWR query / data reload"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 413,
-      "tag": "<form>",
-      "label": "form",
-      "handler": "{(e) => {\n                  e.preventDefault();\n                  handleVerifyGa",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 431,
-      "tag": "<Button>",
-      "label": "{isVerifying ? <RefreshCw className=...",
-      "handler": "\"submit\"",
-      "category": "LIVE_BACKEND_QUERY",
-      "description": "Triggers live backend SWR query / data reload"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 546,
-      "tag": "<Button>",
-      "label": "{f === all ? All : f === checked...",
-      "handler": "{() => setAttendeeFilter(f)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 559,
-      "tag": "<Button>",
-      "label": "Refresh Roster",
-      "handler": "{() => selectedSlug && loadAttendees(selectedSlug)}",
-      "category": "LIVE_BACKEND_QUERY",
-      "description": "Triggers live backend SWR query / data reload"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 622,
-      "tag": "<Button>",
-      "label": "Admit",
-      "handler": "{() => {\n                                setQrInput(a.pass_code);\n              ",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 662,
-      "tag": "<Button>",
-      "label": "Start Round 2 Live Contest",
-      "handler": "{() => handleStatusChange(\"live\")}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 669,
-      "tag": "<Button>",
-      "label": "Finish Contest & Apply Ratings",
-      "handler": "{() => handleStatusChange(\"finished\")}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 676,
-      "tag": "<Button>",
-      "label": "Reset to Upcoming",
-      "handler": "{() => handleStatusChange(\"upcoming\")}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 701,
-      "tag": "<Button>",
-      "label": "Set 30 Mins",
-      "handler": "{() => handleResetTimer(30)}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 709,
-      "tag": "<Button>",
-      "label": "Set 60 Mins",
-      "handler": "{() => handleResetTimer(60)}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 717,
-      "tag": "<Button>",
-      "label": "Set 90 Mins (Standard)",
-      "handler": "{() => handleResetTimer(90)}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 725,
-      "tag": "<Button>",
-      "label": "Set 120 Mins",
-      "handler": "{() => handleResetTimer(120)}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AdminConsolePage.tsx",
-      "line": 754,
-      "tag": "<Button>",
-      "label": "Trigger Top 30 Cutoff",
-      "handler": "{handleQualifyTop30}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",

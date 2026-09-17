@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 8081",
+    "dev:admin": "vite dev --config vite.admin.config.ts --port 8082",
     "build": "vite build",
+    "build:admin": "vite build --config vite.admin.config.ts",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --port 8081",
+    "preview:admin": "vite preview --config vite.admin.config.ts --port 8082",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
