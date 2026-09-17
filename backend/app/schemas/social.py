@@ -26,12 +26,15 @@ class FollowResponse(BaseModel):
     is_following: bool
     followers_count: int
     following_count: int
+    target_id: Optional[str] = None
     target_handle: str
     message: str
 
 
 class FollowListResponse(BaseModel):
     count: int
+    followers_count: Optional[int] = None
+    following_count: Optional[int] = None
     students: List[StudentSummary]
 
 

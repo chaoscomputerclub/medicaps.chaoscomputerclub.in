@@ -71,16 +71,19 @@ async def follow_student(
         db.add(follow_record)
         await db.commit()
 
-        # Invalidate social & profile caches
+        # Invalidate social & profile caches across ID and handle patterns
         await delete_cache(f"cache:profile:{target_member.id}")
         await delete_cache(f"cache:profile:{current_member.id}")
         await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
         await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
+        if target_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{target_member.handle.lower()}*")
+        if current_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}*")
         await delete_cache(f"cache:social:my_following:{current_member.id}")
-        await delete_cache_pattern(f"cache:social:*{target_member.id}*")
-        await delete_cache_pattern(f"cache:social:*{current_member.id}*")
+        await delete_cache_pattern("cache:social:*")
 
-    # Recalculate target's followers count and current user's following count
+    # Recalculate target's followers count and current user's following count directly from DB
     followers_count = await db.scalar(
         select(func.count(StudentFollow.id)).where(
             StudentFollow.following_id == target_member.id
@@ -97,6 +100,7 @@ async def follow_student(
         is_following=True,
         followers_count=followers_count,
         following_count=following_count,
+        target_id=str(target_member.id),
         target_handle=target_member.handle or "—",
         message=f"You are now following @{target_member.handle or 'student'}.",
     )
@@ -124,14 +128,17 @@ async def unfollow_student(
         await db.delete(existing)
         await db.commit()
 
-        # Invalidate social & profile caches
+        # Invalidate social & profile caches across ID and handle patterns
         await delete_cache(f"cache:profile:{target_member.id}")
         await delete_cache(f"cache:profile:{current_member.id}")
         await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
         await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
+        if target_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{target_member.handle.lower()}*")
+        if current_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}*")
         await delete_cache(f"cache:social:my_following:{current_member.id}")
-        await delete_cache_pattern(f"cache:social:*{target_member.id}*")
-        await delete_cache_pattern(f"cache:social:*{current_member.id}*")
+        await delete_cache_pattern("cache:social:*")
 
     followers_count = await db.scalar(
         select(func.count(StudentFollow.id)).where(
@@ -149,6 +156,7 @@ async def unfollow_student(
         is_following=False,
         followers_count=followers_count,
         following_count=following_count,
+        target_id=str(target_member.id),
         target_handle=target_member.handle or "—",
         message=f"Unfollowed @{target_member.handle or 'student'}.",
     )
@@ -213,6 +221,13 @@ async def get_student_followers(
     res = await db.execute(stmt)
     followers = res.scalars().all()
 
+    followers_count = len(followers)
+    following_count = await db.scalar(
+        select(func.count(StudentFollow.id)).where(
+            StudentFollow.follower_id == target_member.id
+        )
+    ) or 0
+
     students = []
     for m in followers:
         tier_str = get_rating_tier(m.rating)
@@ -232,7 +247,12 @@ async def get_student_followers(
             )
         )
 
-    return FollowListResponse(count=len(students), students=students)
+    return FollowListResponse(
+        count=len(students),
+        followers_count=followers_count,
+        following_count=following_count,
+        students=students,
+    )
 
 
 @router.get("/{target}/following", response_model=FollowListResponse)
@@ -272,6 +292,13 @@ async def get_student_following(
     res = await db.execute(stmt)
     following = res.scalars().all()
 
+    following_count = len(following)
+    followers_count = await db.scalar(
+        select(func.count(StudentFollow.id)).where(
+            StudentFollow.following_id == target_member.id
+        )
+    ) or 0
+
     students = []
     for m in following:
         tier_str = get_rating_tier(m.rating)
@@ -291,4 +318,9 @@ async def get_student_following(
             )
         )
 
-    return FollowListResponse(count=len(students), students=students)
+    return FollowListResponse(
+        count=len(students),
+        followers_count=followers_count,
+        following_count=following_count,
+        students=students,
+    )

@@ -190,8 +190,8 @@ export async function getRatingDistribution(force = false) {
  */
 export async function getStudentProfileData(handle: string, force = false) {
   const token = getToken();
-  const cleanHandle = (handle || "").trim().toLowerCase();
-  const cacheKey = `student:profile:${cleanHandle}:${token ? token.slice(-8) : "anon"}`;
+  const cleanHandle = (handle || "").replace(/^@+/, "").trim().toLowerCase();
+  const cacheKey = `student:profile:${cleanHandle}`;
 
   return swrFetch(
     cacheKey,

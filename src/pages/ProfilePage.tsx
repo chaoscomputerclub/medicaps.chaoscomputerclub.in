@@ -64,10 +64,10 @@ export function ProfilePage() {
   const { handle } = useParams<{ handle?: string }>();
   const currentMember = useAppSelector((s) => s.auth.member);
   const followingIds = useAppSelector((s) => s.social.followingIds);
+  const hasFetchedFollowing = useAppSelector((s) => s.social.hasFetchedFollowing);
+  const actionPendingId = useAppSelector((s) => s.social.actionPendingId);
 
   const [copied, setCopied] = useState(false);
-  const [isFollowingOptimistic, setIsFollowingOptimistic] = useState<boolean | null>(null);
-  const [followersCountDelta, setFollowersCountDelta] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
 
   // Determine if viewing own profile or another student's profile
@@ -97,11 +97,6 @@ export function ProfilePage() {
   useEffect(() => {
     dispatch(fetchMyFollowingIdsThunk());
   }, [dispatch]);
-
-  useEffect(() => {
-    setIsFollowingOptimistic(null);
-    setFollowersCountDelta(0);
-  }, [handle]);
 
   useEffect(() => {
     if (isViewingSelf && !isAuthenticated()) {
@@ -167,14 +162,31 @@ export function ProfilePage() {
       ? m.handle.slice(0, 2).toUpperCase()
       : "CC";
 
+  const isFollowedInStore =
+    !m.is_self &&
+    (followingIds.includes(m.id) || (m.handle ? followingIds.includes(m.handle) : false));
+
   const isFollowing =
-    isFollowingOptimistic !== null
-      ? isFollowingOptimistic
-      : Boolean(m.is_following);
-  const displayedFollowers = Math.max(0, (m.followers_count || 0) + followersCountDelta);
+    m.is_self
+      ? false
+      : hasFetchedFollowing
+        ? isFollowedInStore
+        : (isFollowedInStore || Boolean(m.is_following));
+
+  const initialFollowed = Boolean(m.is_following);
+  const delta =
+    !m.is_self
+      ? (isFollowing ? 1 : 0) - (initialFollowed ? 1 : 0)
+      : 0;
+  const displayedFollowers = Math.max(0, (m.followers_count || 0) + delta);
   const displayedFollowing = isViewingSelf
-    ? (followingIds.length > 0 ? followingIds.length : (m.following_count ?? 0))
+    ? (hasFetchedFollowing ? followingIds.length : (m.following_count ?? 0))
     : (m.following_count ?? 0);
+
+  const isPendingFollowAction =
+    followLoading ||
+    actionPendingId === m.id ||
+    (m.handle ? actionPendingId === m.handle : false);
 
   // Copy Profile Link Handler
   const handleCopyLink = () => {
@@ -193,31 +205,15 @@ export function ProfilePage() {
     if (m.is_self || isViewingSelf || followLoading) return;
 
     setFollowLoading(true);
-    const newFollowingState = !isFollowing;
-    setIsFollowingOptimistic(newFollowingState);
-    setFollowersCountDelta((prev) => prev + (newFollowingState ? 1 : -1));
-
     try {
-      const backendUrl = getApiBase();
-      const token = getToken();
-      const method = newFollowingState ? "POST" : "DELETE";
-      const res = await fetch(`${backendUrl}/social/follow/${encodeURIComponent(m.handle)}`, {
-        method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        setIsFollowingOptimistic(!newFollowingState);
-        setFollowersCountDelta((prev) => prev + (newFollowingState ? -1 : 1));
-      } else {
-        invalidateSwrCache(`student:profile:${m.handle.toLowerCase()}`);
-      }
-    } catch {
-      setIsFollowingOptimistic(!newFollowingState);
-      setFollowersCountDelta((prev) => prev + (newFollowingState ? -1 : 1));
+      await dispatch(
+        toggleFollowThunk({
+          targetId: m.id,
+          targetHandle: m.handle,
+        })
+      ).unwrap();
+    } catch (err) {
+      console.error("Follow action failed:", err);
     } finally {
       setFollowLoading(false);
     }
@@ -271,7 +267,7 @@ export function ProfilePage() {
                   <Button
                     type="button"
                     onClick={handleFollowToggle}
-                    disabled={followLoading}
+                    disabled={isPendingFollowAction}
                     className={cn(
                       "h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold rounded-none cursor-pointer transition-all",
                       isFollowing
@@ -344,8 +340,11 @@ export function ProfilePage() {
                 onClick={() =>
                   dispatch(
                     openSocialDrawer({
+                      targetId: m.id,
                       targetHandle: m.handle,
                       targetName: m.full_name || m.handle,
+                      followersCount: displayedFollowers,
+                      followingCount: displayedFollowing,
                       type: "followers",
                     })
                   )
@@ -360,8 +359,11 @@ export function ProfilePage() {
                 onClick={() =>
                   dispatch(
                     openSocialDrawer({
+                      targetId: m.id,
                       targetHandle: m.handle,
                       targetName: m.full_name || m.handle,
+                      followersCount: displayedFollowers,
+                      followingCount: displayedFollowing,
                       type: "following",
                     })
                   )

@@ -45,6 +45,8 @@ export function SocialDrawer() {
     drawerType,
     drawerTargetHandle,
     drawerTargetName,
+    followersCount,
+    followingCount,
     studentsList,
     loadingList,
     actionPendingId,
@@ -73,6 +75,16 @@ export function SocialDrawer() {
       (s.department && s.department.toLowerCase().includes(q))
     );
   });
+
+  const displayedFollowersTabCount =
+    drawerType === "followers"
+      ? (loadingList ? "..." : studentsList.length)
+      : followersCount;
+
+  const displayedFollowingTabCount =
+    drawerType === "following"
+      ? (loadingList ? "..." : studentsList.length)
+      : followingCount;
 
   return (
     <Sheet
@@ -117,11 +129,11 @@ export function SocialDrawer() {
                 className={cn(
                   "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
                   drawerType === "followers"
-                    ? "bg-black/20 text-black"
+                    ? "bg-black/20 text-black font-bold"
                     : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]",
                 )}
               >
-                {drawerType === "followers" ? studentsList.length : "•"}
+                {displayedFollowersTabCount}
               </span>
             </Button>
 
@@ -142,11 +154,11 @@ export function SocialDrawer() {
                 className={cn(
                   "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
                   drawerType === "following"
-                    ? "bg-black/20 text-black"
+                    ? "bg-black/20 text-black font-bold"
                     : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]",
                 )}
               >
-                {drawerType === "following" ? studentsList.length : "•"}
+                {displayedFollowingTabCount}
               </span>
             </Button>
           </div>
@@ -217,8 +229,12 @@ export function SocialDrawer() {
             </div>
           ) : (
             filtered.map((student) => {
-              const isFollowing = followingIds.includes(student.id);
-              const isPending = actionPendingId === student.id;
+              const isFollowing =
+                followingIds.includes(student.id) ||
+                (student.handle ? followingIds.includes(student.handle) : false);
+              const isPending =
+                actionPendingId === student.id ||
+                (student.handle ? actionPendingId === student.handle : false);
               const isHovered = hoveredStudentId === student.id;
 
               const initials = student.full_name

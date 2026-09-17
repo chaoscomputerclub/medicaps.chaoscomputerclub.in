@@ -1,18 +1,24 @@
 /**
  * Chaos Computer Club India — Social Redux Slice
- * Manages peer following/followers state, drawer UI, and optimistic updates.
+ * Real-Time peer following/followers state management, drawer UI, and optimistic sync.
  */
 
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { getApiBase, getToken } from "@/lib/auth";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
+import { invalidateFullProfileCache } from "@/organization/data/queries";
 import type { StudentFollowItem } from "@/organization/data/types";
 
 export interface SocialState {
   followingIds: string[];
+  hasFetchedFollowing: boolean;
   drawerOpen: boolean;
   drawerType: "followers" | "following";
   drawerTargetHandle: string | null;
   drawerTargetName: string | null;
+  drawerTargetId: string | null;
+  followersCount: number;
+  followingCount: number;
   studentsList: StudentFollowItem[];
   loadingList: boolean;
   actionPendingId: string | null;
@@ -22,10 +28,14 @@ export interface SocialState {
 
 const initialState: SocialState = {
   followingIds: [],
+  hasFetchedFollowing: false,
   drawerOpen: false,
   drawerType: "followers",
   drawerTargetHandle: null,
   drawerTargetName: null,
+  drawerTargetId: null,
+  followersCount: 0,
+  followingCount: 0,
   studentsList: [],
   loadingList: false,
   actionPendingId: null,
@@ -49,7 +59,7 @@ export const fetchMyFollowingIdsThunk = createAsyncThunk<string[]>(
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return data.following_ids || [];
+      return Array.isArray(data.following_ids) ? Array.from(new Set(data.following_ids)) : [];
     } catch {
       return rejectWithValue("Failed to load following list.");
     }
@@ -57,52 +67,60 @@ export const fetchMyFollowingIdsThunk = createAsyncThunk<string[]>(
 );
 
 // 2. Fetch followers list for a student
-export const fetchFollowersThunk = createAsyncThunk<StudentFollowItem[], string>(
-  "social/fetchFollowers",
-  async (target, { rejectWithValue }) => {
-    try {
-      const cleanTarget = target.replace(/^@+/, "").trim();
-      if (!cleanTarget) return [];
-      const token = getToken();
-      const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/followers`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch followers");
-      const data = await res.json();
-      return data.students || [];
-    } catch (err: any) {
-      return rejectWithValue(err?.message || "Failed to fetch followers");
-    }
-  },
-);
+export const fetchFollowersThunk = createAsyncThunk<
+  { students: StudentFollowItem[]; followersCount: number; followingCount: number },
+  string
+>("social/fetchFollowers", async (target, { rejectWithValue }) => {
+  try {
+    const cleanTarget = target.replace(/^@+/, "").trim();
+    if (!cleanTarget) return { students: [], followersCount: 0, followingCount: 0 };
+    const token = getToken();
+    const apiBase = getApiBase();
+    const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/followers`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!res.ok) throw new Error("Failed to fetch followers");
+    const data = await res.json();
+    return {
+      students: data.students || [],
+      followersCount: data.followers_count ?? data.count ?? (data.students || []).length,
+      followingCount: data.following_count ?? 0,
+    };
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to fetch followers");
+  }
+});
 
 // 3. Fetch following list for a student
-export const fetchFollowingThunk = createAsyncThunk<StudentFollowItem[], string>(
-  "social/fetchFollowing",
-  async (target, { rejectWithValue }) => {
-    try {
-      const cleanTarget = target.replace(/^@+/, "").trim();
-      if (!cleanTarget) return [];
-      const token = getToken();
-      const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/following`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch following");
-      const data = await res.json();
-      return data.students || [];
-    } catch (err: any) {
-      return rejectWithValue(err?.message || "Failed to fetch following");
-    }
-  },
-);
+export const fetchFollowingThunk = createAsyncThunk<
+  { students: StudentFollowItem[]; followersCount: number; followingCount: number },
+  string
+>("social/fetchFollowing", async (target, { rejectWithValue }) => {
+  try {
+    const cleanTarget = target.replace(/^@+/, "").trim();
+    if (!cleanTarget) return { students: [], followersCount: 0, followingCount: 0 };
+    const token = getToken();
+    const apiBase = getApiBase();
+    const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/following`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!res.ok) throw new Error("Failed to fetch following");
+    const data = await res.json();
+    return {
+      students: data.students || [],
+      followersCount: data.followers_count ?? 0,
+      followingCount: data.following_count ?? data.count ?? (data.students || []).length,
+    };
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to fetch following");
+  }
+});
 
 // 4. Toggle Follow / Unfollow
 export const toggleFollowThunk = createAsyncThunk<
@@ -114,7 +132,7 @@ export const toggleFollowThunk = createAsyncThunk<
     followingCount: number;
   },
   { targetId?: string; targetHandle?: string } | string
->("social/toggleFollow", async (arg, { getState, rejectWithValue }) => {
+>("social/toggleFollow", async (arg, { dispatch, rejectWithValue }) => {
   try {
     const token = getToken();
     if (!token) {
@@ -135,7 +153,7 @@ export const toggleFollowThunk = createAsyncThunk<
     });
 
     if (!res.ok) {
-      // If already following, try DELETE to unfollow
+      // If already following or POST returned non-200, perform DELETE
       const delRes = await fetch(`${apiBase}/social/follow/${encodeURIComponent(cleanTarget)}`, {
         method: "DELETE",
         headers: {
@@ -148,8 +166,11 @@ export const toggleFollowThunk = createAsyncThunk<
         return rejectWithValue(err.detail || "Action failed");
       }
       const data = await delRes.json();
+      invalidateSwrCache("member:profile:full");
+      invalidateSwrCache("student:profile:*");
+      invalidateFullProfileCache();
       return {
-        targetId: (typeof arg === "object" && arg.targetId) || cleanTarget,
+        targetId: data.target_id || (typeof arg === "object" && arg.targetId) || cleanTarget,
         targetHandle: data.target_handle || cleanTarget,
         isFollowing: false,
         followersCount: data.followers_count ?? 0,
@@ -158,8 +179,11 @@ export const toggleFollowThunk = createAsyncThunk<
     }
 
     const data = await res.json();
+    invalidateSwrCache("member:profile:full");
+    invalidateSwrCache("student:profile:*");
+    invalidateFullProfileCache();
     return {
-      targetId: (typeof arg === "object" && arg.targetId) || cleanTarget,
+      targetId: data.target_id || (typeof arg === "object" && arg.targetId) || cleanTarget,
       targetHandle: data.target_handle || cleanTarget,
       isFollowing: Boolean(data.is_following),
       followersCount: data.followers_count ?? 0,
@@ -182,6 +206,9 @@ export const socialSlice = createSlice({
         target?: string;
         targetName?: string | null;
         name?: string | null;
+        targetId?: string | null;
+        followersCount?: number;
+        followingCount?: number;
         type?: "followers" | "following";
         mode?: "followers" | "following";
       } | string>,
@@ -196,6 +223,9 @@ export const socialSlice = createSlice({
       state.drawerType = drawerType;
       state.drawerTargetHandle = cleanHandle;
       state.drawerTargetName = rawName || cleanHandle;
+      state.drawerTargetId = payload.targetId || null;
+      if (typeof payload.followersCount === "number") state.followersCount = payload.followersCount;
+      if (typeof payload.followingCount === "number") state.followingCount = payload.followingCount;
       state.searchQuery = "";
       state.studentsList = [];
     },
@@ -209,11 +239,18 @@ export const socialSlice = createSlice({
     setSocialSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
+    updateFollowingIdsDirectly: (state, action: PayloadAction<string[]>) => {
+      state.followingIds = Array.from(new Set(action.payload));
+    },
   },
   extraReducers: (builder) => {
     // My Following IDs
     builder.addCase(fetchMyFollowingIdsThunk.fulfilled, (state, action) => {
-      state.followingIds = action.payload;
+      state.followingIds = Array.from(new Set(action.payload));
+      state.hasFetchedFollowing = true;
+    });
+    builder.addCase(fetchMyFollowingIdsThunk.rejected, (state) => {
+      state.hasFetchedFollowing = true;
     });
 
     // Followers List
@@ -223,7 +260,11 @@ export const socialSlice = createSlice({
     });
     builder.addCase(fetchFollowersThunk.fulfilled, (state, action) => {
       state.loadingList = false;
-      state.studentsList = action.payload;
+      state.studentsList = action.payload.students;
+      state.followersCount = action.payload.followersCount;
+      if (typeof action.payload.followingCount === "number") {
+        state.followingCount = action.payload.followingCount;
+      }
     });
     builder.addCase(fetchFollowersThunk.rejected, (state, action) => {
       state.loadingList = false;
@@ -237,7 +278,11 @@ export const socialSlice = createSlice({
     });
     builder.addCase(fetchFollowingThunk.fulfilled, (state, action) => {
       state.loadingList = false;
-      state.studentsList = action.payload;
+      state.studentsList = action.payload.students;
+      state.followingCount = action.payload.followingCount;
+      if (typeof action.payload.followersCount === "number") {
+        state.followersCount = action.payload.followersCount;
+      }
     });
     builder.addCase(fetchFollowingThunk.rejected, (state, action) => {
       state.loadingList = false;
@@ -248,43 +293,69 @@ export const socialSlice = createSlice({
     builder.addCase(toggleFollowThunk.pending, (state, action) => {
       const arg = action.meta.arg;
       const targetKey = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
-      state.actionPendingId = targetKey;
-      if (state.followingIds.includes(targetKey)) {
-        state.followingIds = state.followingIds.filter((id) => id !== targetKey);
+      const cleanKey = targetKey.replace(/^@+/, "").trim();
+      state.actionPendingId = cleanKey;
+
+      const isCurrentlyFollowing = state.followingIds.includes(cleanKey);
+      if (isCurrentlyFollowing) {
+        state.followingIds = state.followingIds.filter((id) => id !== cleanKey);
       } else {
-        state.followingIds.push(targetKey);
+        state.followingIds = Array.from(new Set([...state.followingIds, cleanKey]));
       }
-      // Also update in current modal list if visible
-      const item = state.studentsList.find((s) => s.id === targetKey || s.handle === targetKey);
+
+      // Update in currently open list if present
+      const item = state.studentsList.find((s) => s.id === cleanKey || s.handle === cleanKey);
       if (item) {
-        item.is_following = !item.is_following;
+        item.is_following = !isCurrentlyFollowing;
       }
     });
     builder.addCase(toggleFollowThunk.fulfilled, (state, action) => {
       state.actionPendingId = null;
-      const { targetId, targetHandle, isFollowing } = action.payload;
+      const { targetId, targetHandle, isFollowing, followersCount } = action.payload;
+
+      const cleanHandle = targetHandle.replace(/^@+/, "").trim();
+      const cleanId = (targetId || "").trim();
+
       if (isFollowing) {
-        if (targetId && !state.followingIds.includes(targetId)) state.followingIds.push(targetId);
-        if (targetHandle && !state.followingIds.includes(targetHandle)) state.followingIds.push(targetHandle);
+        if (cleanId) {
+          state.followingIds = Array.from(new Set([...state.followingIds, cleanId]));
+        }
       } else {
-        state.followingIds = state.followingIds.filter((id) => id !== targetId && id !== targetHandle);
+        state.followingIds = state.followingIds.filter(
+          (id) => id !== cleanId && id !== cleanHandle
+        );
       }
-      const item = state.studentsList.find((s) => s.id === targetId || s.handle === targetHandle);
+
+      // Update in active modal list
+      const item = state.studentsList.find(
+        (s) => (cleanId && s.id === cleanId) || (cleanHandle && s.handle.toLowerCase() === cleanHandle.toLowerCase())
+      );
       if (item) {
         item.is_following = isFollowing;
+      }
+
+      // If drawer is currently focused on this student, update followers count
+      if (
+        state.drawerTargetHandle &&
+        (state.drawerTargetHandle.toLowerCase() === cleanHandle.toLowerCase() ||
+          (cleanId && state.drawerTargetId === cleanId))
+      ) {
+        state.followersCount = followersCount;
       }
     });
     builder.addCase(toggleFollowThunk.rejected, (state, action) => {
       state.actionPendingId = null;
-      // Rollback on rejection
       const arg = action.meta.arg;
       const targetKey = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
-      if (state.followingIds.includes(targetKey)) {
-        state.followingIds = state.followingIds.filter((id) => id !== targetKey);
+      const cleanKey = targetKey.replace(/^@+/, "").trim();
+
+      // Roll back
+      if (state.followingIds.includes(cleanKey)) {
+        state.followingIds = state.followingIds.filter((id) => id !== cleanKey);
       } else {
-        state.followingIds.push(targetKey);
+        state.followingIds = Array.from(new Set([...state.followingIds, cleanKey]));
       }
-      const item = state.studentsList.find((s) => s.id === targetKey || s.handle === targetKey);
+      const item = state.studentsList.find((s) => s.id === cleanKey || s.handle === cleanKey);
       if (item) {
         item.is_following = !item.is_following;
       }
@@ -292,7 +363,13 @@ export const socialSlice = createSlice({
   },
 });
 
-export const { openSocialDrawer, closeSocialDrawer, setDrawerType, setSocialSearchQuery } =
-  socialSlice.actions;
+export const {
+  openSocialDrawer,
+  closeSocialDrawer,
+  setDrawerType,
+  setSocialSearchQuery,
+  updateFollowingIdsDirectly,
+} = socialSlice.actions;
 
 export default socialSlice.reducer;
+
