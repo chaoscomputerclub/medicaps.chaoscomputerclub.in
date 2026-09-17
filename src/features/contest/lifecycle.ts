@@ -36,7 +36,11 @@ export function contestPhase(
   const opens = assessmentOpensAt(contest).getTime();
   const closes = assessmentClosesAt(contest).getTime();
 
-  if (registration?.assessment_status === "submitted" || registration?.assessment_taken) {
+  if (
+    registration?.assessment_status === "submitted" ||
+    registration?.assessment_status === "completed" ||
+    registration?.assessment_taken
+  ) {
     return "assessment_submitted";
   }
   if (now < opens) return "registration_open";

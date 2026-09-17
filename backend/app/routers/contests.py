@@ -135,12 +135,18 @@ async def get_my_participated_contests(
 
     # 3. Fetch all assessment sessions (online screening attempts)
     sess_query = (
-        select(AssessmentSession, Assessment.slug)
+        select(AssessmentSession, Assessment)
         .join(Assessment, AssessmentSession.assessment_id == Assessment.id)
         .where(AssessmentSession.member_id == current_member.id)
     )
     sess_res = await db.execute(sess_query)
-    sessions = {row[1]: row[0] for row in sess_res.all()}
+    sessions_by_contest_id = {}
+    sessions_by_slug = {}
+    for sess, assess in sess_res.all():
+        if assess.contest_id:
+            sessions_by_contest_id[assess.contest_id] = (sess, assess)
+        if assess.slug:
+            sessions_by_slug[assess.slug] = (sess, assess)
 
     results = []
     seen_contest_ids = set()
@@ -148,10 +154,11 @@ async def get_my_participated_contests(
     for reg, contest in registrations:
         seen_contest_ids.add(contest.id)
         sb = scoreboards.get(contest.id)
-        sess = sessions.get(contest.slug)
+        sess_pair = sessions_by_contest_id.get(contest.id) or sessions_by_slug.get(contest.slug)
+        sess = sess_pair[0] if sess_pair else None
 
         # Determine outcome and status
-        is_sess_submitted = (sess and sess.status == "submitted") or bool(reg and reg.assessment_taken)
+        is_sess_submitted = (sess and sess.status in ["submitted", "completed", "expired"]) or bool(reg and reg.assessment_taken)
         assessment_submitted = is_sess_submitted
 
         if is_sess_submitted:
@@ -183,15 +190,46 @@ async def get_my_participated_contests(
             "participants": contest.registered_count,
             "outcome": outcome,
             "assessment_submitted": assessment_submitted,
+            "assessment_status": sess.status if sess else ("submitted" if (reg and reg.assessment_taken) else None),
             "assessment_score": score,
             "offline_result": f"Certificate CCC-{contest.slug.upper()}" if (sb and sb.rank <= 30) else None,
         })
+
+    # Also add any assessment sessions that exist without explicit prior contest registration
+    for contest_id, (sess, assess) in sessions_by_contest_id.items():
+        if contest_id not in seen_contest_ids:
+            contest_row = await db.get(OfflineContest, contest_id)
+            if contest_row:
+                seen_contest_ids.add(contest_id)
+                is_sess_submitted = sess.status in ["submitted", "completed", "expired"]
+                outcome = "qualified" if sess.is_top_30_qualified else ("submitted" if contest_row.status == "upcoming" else "pending")
+                score = round(sess.total_score) if sess.total_score is not None else None
+                results.append({
+                    "contest_id": contest_row.id,
+                    "contest_slug": contest_row.slug,
+                    "contest_title": contest_row.title,
+                    "season": contest_row.season,
+                    "status": contest_row.status,
+                    "venue": contest_row.venue,
+                    "participated_at": sess.started_at.isoformat() if sess.started_at else contest_row.starts_at.isoformat(),
+                    "starts_at": contest_row.starts_at.isoformat() if contest_row.starts_at else None,
+                    "ends_at": contest_row.ends_at.isoformat() if contest_row.ends_at else None,
+                    "score": score,
+                    "rank": None,
+                    "participants": contest_row.registered_count,
+                    "outcome": outcome,
+                    "assessment_submitted": is_sess_submitted,
+                    "assessment_status": sess.status,
+                    "assessment_score": score,
+                    "offline_result": None,
+                })
 
     # Also add any scoreboard entries if not already in registrations
     for contest_id, sb in scoreboards.items():
         if contest_id not in seen_contest_ids:
             contest_row = await db.get(OfflineContest, contest_id)
             if contest_row:
+                seen_contest_ids.add(contest_id)
                 results.append({
                     "contest_id": contest_row.id,
                     "contest_slug": contest_row.slug,
@@ -206,6 +244,9 @@ async def get_my_participated_contests(
                     "rank": sb.rank,
                     "participants": contest_row.registered_count,
                     "outcome": "qualified" if sb.rank <= 30 else "not_qualified",
+                    "assessment_submitted": True,
+                    "assessment_status": "submitted",
+                    "assessment_score": sb.score,
                     "offline_result": f"Certificate CCC-{contest_row.slug.upper()}",
                 })
 

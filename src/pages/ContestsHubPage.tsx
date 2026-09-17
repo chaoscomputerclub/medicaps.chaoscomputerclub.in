@@ -132,6 +132,9 @@ export function ContestsHubPage() {
     if (!record) return false;
     return Boolean(
       record.assessment_submitted ||
+      (record as any).assessment_taken ||
+      (record as any).assessment_status === "submitted" ||
+      (record as any).assessment_status === "completed" ||
       (record.score !== null && record.score !== undefined) ||
       ["submitted", "qualified", "pending", "not_qualified"].includes(record.outcome || "")
     );
@@ -157,6 +160,9 @@ export function ContestsHubPage() {
     const record = myParticipations.find((p) => p.contest_slug === contest.slug);
     const hasTaken = Boolean(
       record?.assessment_submitted ||
+      (record as any)?.assessment_taken ||
+      (record as any)?.assessment_status === "submitted" ||
+      (record as any)?.assessment_status === "completed" ||
       (record?.score !== null && record?.score !== undefined) ||
       ["submitted", "qualified", "pending", "not_qualified"].includes(record?.outcome || "")
     );
@@ -306,11 +312,15 @@ export function ContestsHubPage() {
                   <div className="max-w-md">
                     <CountdownDisplay days={weeklyCountdown.days} hours={weeklyCountdown.hours} minutes={weeklyCountdown.minutes} seconds={weeklyCountdown.seconds} accentSec />
                   </div>
-                  <div className="flex items-center gap-3 pt-2">
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
                     {isWeeklySubmitted ? (
                       <>
+                        <div className="flex items-center gap-2 border border-emerald-500/40 bg-emerald-950/30 px-3.5 py-2 text-xs font-bold text-emerald-400">
+                          <CheckCircle2 className="size-4 text-emerald-400" />
+                          <span>Assessment Completed {assessmentInfo?.score !== undefined && assessmentInfo?.score !== null ? `(${assessmentInfo.score} Pts)` : "· Submitted"}</span>
+                        </div>
                         <Button asChild variant="outline" className="rounded-none border-emerald-500/40 bg-emerald-950/20 text-xs font-bold text-emerald-400 hover:bg-emerald-950/40 px-6 py-2.5">
-                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}><CheckCircle2 className="mr-1.5 size-4" /> Submitted · View Results</Link>
+                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}><CheckCircle2 className="mr-1.5 size-4" /> View Status & Results</Link>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
                       </>
@@ -389,29 +399,37 @@ export function ContestsHubPage() {
             {/* Info side */}
             <div className="flex flex-col justify-center gap-5 p-6 lg:p-8">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]">
-                  <Zap className="size-3" /> Phase 1 · Online Screening
+                <span className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                  assessmentInfo.hasTaken
+                    ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
+                    : "border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent)]"
+                }`}>
+                  {assessmentInfo.hasTaken ? <CheckCircle2 className="size-3 text-emerald-400" /> : <Zap className="size-3" />}
+                  {assessmentInfo.hasTaken ? "Phase 1 · Screening Completed" : "Phase 1 · Online Screening"}
                 </span>
-                <span className="text-[11px] text-[var(--muted)]">Strict 24-hour window before contest</span>
+                <span className="text-[11px] text-[var(--muted)]">
+                  {assessmentInfo.hasTaken ? "Attempt locked & securely recorded" : "Strict 24-hour window before contest"}
+                </span>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-foreground">
-                  {assessmentInfo.hasTaken ? "Screening Complete — Awaiting Results"
+                  {assessmentInfo.hasTaken ? "Screening Complete — Session Locked"
                     : assessmentInfo.isOpen ? "🔴 Assessment Window is LIVE Now"
                     : assessmentInfo.isUpcoming ? "Screening Unlocks 24h Before Contest"
                     : "Online Screening Layer"}
                 </h3>
                 <p className="mt-2 max-w-lg text-sm leading-relaxed text-[var(--muted)]">
-                  Registered cadets solve algorithmic problems in a 120-min proctored session.
-                  The <strong className="text-foreground">Top 30 verified scores</strong> earn a QR pass to the physical air-gapped lab final.
+                  {assessmentInfo.hasTaken
+                    ? "Your screening session has been finalized. Scores and anti-cheat telemetry are securely processed by CodeBox. Top 30 qualifiers receive digital QR passes to the air-gapped lab final."
+                    : "Registered cadets solve algorithmic problems in a 120-min proctored session. The Top 30 verified scores earn a QR pass to the physical air-gapped lab final."}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {[
-                  { label: "Duration", value: "120 Min" },
+                  { label: "Duration", value: assessmentInfo.hasTaken ? "120 Min (Done)" : "120 Min" },
                   { label: "Qualifiers", value: "Top 30", hi: true },
-                  { label: "Proctoring", value: "Automated" },
-                  { label: "Lab Entry", value: "QR Pass", hi: true },
+                  { label: "Proctoring", value: assessmentInfo.hasTaken ? "Verified" : "Automated" },
+                  { label: "Lab Entry", value: assessmentInfo.isTop30 ? "QR Pass Ready" : "Pending Results", hi: assessmentInfo.isTop30 },
                 ].map(({ label, value, hi }) => (
                   <div key={label} className="border border-[var(--line)] bg-[var(--surface-2)] p-3">
                     <span className="block text-[9px] font-semibold uppercase tracking-widest text-[var(--muted)]">{label}</span>
@@ -426,22 +444,30 @@ export function ContestsHubPage() {
                 <>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-[var(--line)] pb-3">
-                      <span className="text-xs text-[var(--muted)]">Your Score</span>
-                      <span className="text-2xl font-black text-[var(--accent)]">{assessmentInfo.score ?? 0}</span>
+                      <span className="text-xs text-[var(--muted)]">Your Screening Score</span>
+                      <span className="text-2xl font-black text-[var(--accent)]">{assessmentInfo.score ?? 0} Pts</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[var(--muted)]">Rank</span>
-                      <span className="text-sm font-bold text-foreground">{assessmentInfo.rank ? `#${assessmentInfo.rank}` : "Recorded"}</span>
+                      <span className="text-xs text-[var(--muted)]">Status</span>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                        <CheckCircle2 className="size-3.5" /> Submitted & Finalized
+                      </span>
                     </div>
+                    {assessmentInfo.rank ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--muted)]">Provisional Rank</span>
+                        <span className="text-sm font-bold text-foreground">#{assessmentInfo.rank}</span>
+                      </div>
+                    ) : null}
                     {assessmentInfo.isTop30 && (
                       <div className="flex items-center gap-2 font-bold text-emerald-400 text-sm">
                         <CheckCircle2 className="size-4" /> Qualified for Lab Final
                       </div>
                     )}
                   </div>
-                  <Button asChild className="w-full rounded-none text-xs font-bold uppercase">
-                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}${assessmentInfo.isTop30 ? "/qualified" : "/results"}`}>
-                      {assessmentInfo.isTop30 ? <><QrCode className="mr-1.5 size-4" /> View Campus Pass</> : "View Standings"}
+                  <Button asChild className="w-full rounded-none text-xs font-bold uppercase bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90">
+                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}${assessmentInfo.isTop30 ? "/qualified" : ""}`}>
+                      {assessmentInfo.isTop30 ? <><QrCode className="mr-1.5 size-4" /> View Campus QR Pass</> : "View Contest Details & Results"}
                     </Link>
                   </Button>
                 </>

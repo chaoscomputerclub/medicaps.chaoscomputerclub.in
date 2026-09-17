@@ -344,7 +344,16 @@ async def finish_assessment(
             )
             reg_res = await db.execute(reg_stmt)
             reg = reg_res.scalars().first()
-            if reg:
+            if not reg:
+                reg = ContestRegistration(
+                    contest_id=contest.id,
+                    member_id=current_member.id,
+                    registered_at=now_utc(),
+                    assessment_taken=True,
+                    assessment_score=session.total_score,
+                )
+                db.add(reg)
+            else:
                 reg.assessment_taken = True
                 reg.assessment_score = session.total_score
 
