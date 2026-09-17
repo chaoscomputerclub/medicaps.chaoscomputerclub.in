@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-17T07:50:46.804Z",
-  "totalElements": 269,
-  "functionalCount": 269,
+  "timestamp": "2026-09-17T08:56:36.621Z",
+  "totalElements": 256,
+  "functionalCount": 256,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 41,
+    "backendMutations": 39,
     "backendQueries": 4,
-    "routingNavigation": 162,
-    "clientUiState": 45,
+    "routingNavigation": 155,
+    "clientUiState": 41,
     "conditionalLocked": 11,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
@@ -898,7 +898,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 47,
+      "line": 37,
       "tag": "<Link>",
       "label": "Back to contests",
       "handler": "\"/portal/contests\"",
@@ -907,16 +907,16 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 69,
+      "line": 62,
       "tag": "<Link>",
-      "label": "Back to contest",
+      "label": "{contest.title}",
       "handler": "{`/portal/contests/${contestSlug}`}",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 169,
+      "line": 80,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -925,16 +925,16 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 170,
+      "line": 84,
       "tag": "<Link>",
-      "label": "View Standings & Results",
+      "label": "View Standings",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 174,
+      "line": 86,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -943,7 +943,7 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
-      "line": 175,
+      "line": 87,
       "tag": "<Link>",
       "label": "Back to Contest",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -952,9 +952,36 @@
     },
     {
       "file": "src/pages/ContestLobbyPage.tsx",
+      "line": 101,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestLobbyPage.tsx",
+      "line": 102,
+      "tag": "<Link>",
+      "label": "Register for Contest",
+      "handler": "{`/portal/contests/${contestSlug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestLobbyPage.tsx",
+      "line": 174,
+      "tag": "<div>",
+      "label": "{ack && (                   <svg widt...",
+      "handler": "{() => setAck((v) => !v)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestLobbyPage.tsx",
       "line": 200,
       "tag": "<Button>",
-      "label": "Take Assessment Now",
+      "label": "Start Assessment",
       "handler": "{() => navigate(`/assessments/${contestSlug}`)}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
@@ -1087,16 +1114,43 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 113,
-      "tag": "<Link>",
-      "label": "Back to contests",
-      "handler": "\"/portal/contests\"",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
+      "line": 110,
+      "tag": "<Button>",
+      "label": "Take Assessment",
+      "handler": "{() => setAssessmentConfirmOpen(true)}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 176,
+      "line": 117,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 118,
+      "tag": "<Link>",
+      "label": "Enter Final Arena",
+      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 123,
+      "tag": "<Button>",
+      "label": "Reset",
+      "handler": "{handleResetAttempt}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 138,
       "tag": "<Button>",
       "label": "Register for Contest",
       "handler": "{() => setConfirmOpen(true)}",
@@ -1105,12 +1159,93 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 183,
+      "line": 153,
       "tag": "<Button>",
-      "label": "Take Assessment",
-      "handler": "{() => setAssessmentConfirmOpen(true)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 154,
+      "tag": "<Link>",
+      "label": "Enter Live Final",
+      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 158,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 159,
+      "tag": "<Link>",
+      "label": "Campus Pass",
+      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 168,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 169,
+      "tag": "<Link>",
+      "label": "Submitted · View Standings",
+      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 174,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 175,
+      "tag": "<Link>",
+      "label": "Campus Pass",
+      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 189,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 190,
+      "tag": "<Link>",
+      "label": "Enter Live Final",
+      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
@@ -1125,149 +1260,50 @@
       "file": "src/pages/ContestOverviewPage.tsx",
       "line": 195,
       "tag": "<Link>",
-      "label": "Assessment Lobby",
-      "handler": "{`/portal/contests/${contestSlug}/lobby`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 202,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
+      "label": "Campus Pass",
+      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
       "line": 203,
-      "tag": "<Link>",
-      "label": "Assessment Submitted · View Standings",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 213,
       "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 214,
-      "tag": "<Link>",
-      "label": "Live Final Arena",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 219,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 220,
-      "tag": "<Link>",
-      "label": "Campus pass & check-in",
-      "handler": "{`/portal/contests/${contestSlug}/offline`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 227,
-      "tag": "<Button>",
-      "label": "Top {FINALIST_SEATS} only",
+      "label": "Top {FINALIST_SEATS} Only",
       "handler": "none",
       "category": "CONDITIONALLY_LOCKED",
       "description": "Disabled conditional gate / status lock"
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 233,
+      "line": 211,
       "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
+      "label": "Take Assessment",
+      "handler": "{() => setAssessmentConfirmOpen(true)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 234,
+      "line": 224,
       "tag": "<Link>",
-      "label": "View ranking",
+      "label": "Back to contests",
+      "handler": "\"/portal/contests\"",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestOverviewPage.tsx",
+      "line": 287,
+      "tag": "<Link>",
+      "label": "View full rankings →",
       "handler": "{`/portal/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 240,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 241,
-      "tag": "<Link>",
-      "label": "Final results",
-      "handler": "{`/portal/contests/${contestSlug}/final-results`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 263,
-      "tag": "<Button>",
-      "label": "Reset Attempt",
-      "handler": "{() => handleResetAttempt()}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 371,
-      "tag": "<a>",
-      "label": "Overview",
-      "handler": "\"#schedule\"",
-      "category": "CLIENT_UI_STATE",
-      "description": "In-page smooth scroll anchor link"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 374,
-      "tag": "<a>",
-      "label": "Problems",
-      "handler": "\"#problems\"",
-      "category": "CLIENT_UI_STATE",
-      "description": "In-page smooth scroll anchor link"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 380,
-      "tag": "<a>",
-      "label": "Rules",
-      "handler": "\"#rules\"",
-      "category": "CLIENT_UI_STATE",
-      "description": "In-page smooth scroll anchor link"
-    },
-    {
-      "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 527,
+      "line": 474,
       "tag": "<Button>",
       "label": "Cancel",
       "handler": "{() => setConfirmOpen(false)}",
@@ -1276,16 +1312,16 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 530,
+      "line": 477,
       "tag": "<Button>",
-      "label": "Confirm registration",
+      "label": "Confirm Registration",
       "handler": "{handleRegister}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 40,
+      "line": 47,
       "tag": "<Link>",
       "label": "Back to contests",
       "handler": "\"/portal/contests\"",
@@ -1294,16 +1330,16 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 51,
+      "line": 58,
       "tag": "<Link>",
-      "label": "Back to contest",
+      "label": "{contest.title}",
       "handler": "{`/portal/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 97,
+      "line": 177,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1312,43 +1348,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 98,
-      "tag": "<Link>",
-      "label": "See the ranking",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 132,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 133,
-      "tag": "<Link>",
-      "label": "Test Proctor Gate Verification",
-      "handler": "{`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 183,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 184,
+      "line": 178,
       "tag": "<Link>",
       "label": "Enter Live Contest Arena",
       "handler": "{`/portal/contests/${contestSlug}/arena`}",
@@ -1357,7 +1357,7 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 189,
+      "line": 182,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1366,25 +1366,43 @@
     },
     {
       "file": "src/pages/ContestQualifiedPage.tsx",
-      "line": 190,
+      "line": 183,
       "tag": "<Link>",
-      "label": "Lab room & workstation check-in",
-      "handler": "{`/portal/contests/${contestSlug}/offline`}",
+      "label": "Test proctor verification",
+      "handler": "{`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 216,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestQualifiedPage.tsx",
+      "line": 217,
+      "tag": "<Link>",
+      "label": "See Standings",
+      "handler": "{`/portal/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 79,
+      "line": 76,
       "tag": "<Link>",
-      "label": "Back to contest",
+      "label": "{contest?.title ?? Back to contest}",
       "handler": "{`/portal/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 113,
+      "line": 123,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1393,34 +1411,16 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 114,
+      "line": 124,
       "tag": "<Link>",
-      "label": "Back to contest",
-      "handler": "{`/portal/contests/${contestSlug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestResultsPage.tsx",
-      "line": 242,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestResultsPage.tsx",
-      "line": 243,
-      "tag": "<Link>",
-      "label": "Qualification & campus pass",
+      "label": "View Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 247,
+      "line": 129,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1429,16 +1429,79 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 248,
+      "line": 130,
       "tag": "<Link>",
-      "label": "Chapter leaderboard",
+      "label": "University Leaderboard →",
       "handler": "\"/portal/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 289,
+      "line": 175,
+      "tag": "<button>",
+      "label": "{key}",
+      "handler": "{() => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set(\"f",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 250,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 251,
+      "tag": "<Link>",
+      "label": "View Campus Pass",
+      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 256,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 257,
+      "tag": "<Link>",
+      "label": "Back to Contest",
+      "handler": "{`/portal/contests/${contestSlug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 259,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 260,
+      "tag": "<Link>",
+      "label": "University Leaderboard →",
+      "handler": "\"/portal/leaderboard\"",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 291,
       "tag": "<Link>",
       "label": "{row.full_name}",
       "handler": "{`/portal/profile/${row.handle}`}",
@@ -1447,7 +1510,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 295,
+      "line": 294,
       "tag": "<Link>",
       "label": "@ {row.handle}",
       "handler": "{`/portal/profile/${row.handle}`}",
@@ -1456,43 +1519,43 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 313,
+      "line": 267,
       "tag": "<Button>",
-      "label": "Button",
+      "label": "Problem Archive",
       "handler": "asChild",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 314,
+      "line": 267,
       "tag": "<Link>",
-      "label": "Explore Problem Archive",
+      "label": "Problem Archive",
       "handler": "\"/portal/problems\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 316,
+      "line": 268,
       "tag": "<Button>",
-      "label": "Button",
+      "label": "Leaderboard",
       "handler": "asChild",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 317,
+      "line": 268,
       "tag": "<Link>",
-      "label": "View Leaderboard",
+      "label": "Leaderboard",
       "handler": "\"/portal/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 417,
+      "line": 312,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1501,16 +1564,88 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 422,
+      "line": 313,
       "tag": "<Link>",
-      "label": "ASSESSMENT SUBMITTED",
+      "label": "Submitted · View Results",
       "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 426,
+      "line": 315,
+      "tag": "<Button>",
+      "label": "Contest Details",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 315,
+      "tag": "<Link>",
+      "label": "Contest Details",
+      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 319,
+      "tag": "<Button>",
+      "label": "Enter Screening Assessment",
+      "handler": "{() => { setConfirmContestSlug(upcomingWeekly.slug); setConfirmContestTitle(upco",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 323,
+      "tag": "<Button>",
+      "label": "Contest Details",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 323,
+      "tag": "<Link>",
+      "label": "Contest Details",
+      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 327,
+      "tag": "<Button>",
+      "label": "{registeringSlug === upcomingWeekly.s...",
+      "handler": "{() => handleRegister(upcomingWeekly.slug)}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 331,
+      "tag": "<Button>",
+      "label": "Contest Details",
+      "handler": "asChild",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 331,
+      "tag": "<Link>",
+      "label": "Contest Details",
+      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 359,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1519,19 +1654,46 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 427,
+      "line": 360,
       "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "label": "Submitted",
+      "handler": "{`/portal/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 432,
+      "line": 363,
       "tag": "<Button>",
-      "label": "TAKE ASSESSMENT",
-      "handler": "{() => {\n                          setConfirmContestSlug(upcomingWeekly.slug);\n ",
+      "label": "Take Assessment",
+      "handler": "{() => { setConfirmContestSlug(contest.slug); setConfirmContestTitle(contest.tit",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 368,
+      "tag": "<Button>",
+      "label": "{registeringSlug === contest.slug ? ...",
+      "handler": "{() => handleRegister(contest.slug)}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 373,
+      "tag": "<Button>",
+      "label": "Details",
+      "handler": "asChild",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 373,
+      "tag": "<Link>",
+      "label": "Details",
+      "handler": "{`/portal/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1548,185 +1710,23 @@
       "file": "src/pages/ContestsHubPage.tsx",
       "line": 443,
       "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "label": "{assessmentInfo.isTop30 ? <><QrCode c...",
+      "handler": "{`/portal/contests/${assessmentInfo.contest.slug}${assessmentInfo.isTop30 ? \"/qu",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 448,
-      "tag": "<Button>",
-      "label": "{registeringSlug === upcomingWeekly.s...",
-      "handler": "{() => handleRegister(upcomingWeekly.slug)}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
       "line": 455,
       "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 456,
-      "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 555,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 560,
-      "tag": "<Link>",
-      "label": "ASSESSMENT SUBMITTED",
-      "handler": "{`/portal/contests/${upcomingBiweekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 564,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 565,
-      "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${upcomingBiweekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 570,
-      "tag": "<Button>",
-      "label": "TAKE ASSESSMENT",
-      "handler": "{() => {\n                          setConfirmContestSlug(upcomingBiweekly.slug);",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 580,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 581,
-      "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${upcomingBiweekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 586,
-      "tag": "<Button>",
-      "label": "{registeringSlug === upcomingBiweekly...",
-      "handler": "{() => handleRegister(upcomingBiweekly.slug)}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 593,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 594,
-      "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${upcomingBiweekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 649,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 654,
-      "tag": "<Link>",
-      "label": "ASSESSMENT SUBMITTED",
-      "handler": "{`/portal/contests/${contest.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 659,
-      "tag": "<Button>",
-      "label": "TAKE ASSESSMENT",
-      "handler": "{() => {\n                          setConfirmContestSlug(contest.slug);\n        ",
+      "label": "Take Assessment Now",
+      "handler": "{() => { setConfirmContestSlug(assessmentInfo.contest.slug); setConfirmContestTi",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 670,
-      "tag": "<Button>",
-      "label": "{registeringSlug === contest.slug ? ...",
-      "handler": "{() => handleRegister(contest.slug)}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 678,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 679,
-      "tag": "<Link>",
-      "label": "DETAILS",
-      "handler": "{`/portal/contests/${contest.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 748,
+      "line": 471,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1735,88 +1735,25 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 749,
+      "line": 472,
       "tag": "<Link>",
-      "label": "Explore Practice Problems",
-      "handler": "\"/portal/problems\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 769,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 770,
-      "tag": "<Link>",
-      "label": "VIEW CAMPUS PASS",
-      "handler": "{`/portal/contests/${assessmentInfo.contest.slug}/qualified`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 776,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 777,
-      "tag": "<Link>",
-      "label": "VIEW FINAL RESULTS",
-      "handler": "{`/portal/contests/${assessmentInfo.contest.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 791,
-      "tag": "<Button>",
-      "label": "TAKE ASSESSMENT NOW",
-      "handler": "{() => {\n                    setConfirmContestSlug(assessmentInfo.contest.slug);",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 817,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 818,
-      "tag": "<Link>",
-      "label": "TAKE ASSESSMENT",
+      "label": "Take Assessment",
       "handler": "{`/assessments/${assessmentInfo.contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 844,
+      "line": 485,
       "tag": "<Button>",
-      "label": "REGISTER TO UNLOCK",
+      "label": "Register to Unlock",
       "handler": "{() => handleRegister(assessmentInfo.contest.slug)}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 860,
+      "line": 493,
       "tag": "<Button>",
       "label": "{registeringSlug === assessmentInfo.c...",
       "handler": "{() => handleRegister(assessmentInfo.contest.slug)}",
@@ -1825,34 +1762,16 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 880,
+      "line": 516,
       "tag": "<button>",
-      "label": "Past Contests ( {pastContests.length} )",
-      "handler": "{() => setSearchParams({ tab: \"past\" })}",
+      "label": "{label}",
+      "handler": "{() => setSearchParams({ tab: key })}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 890,
-      "tag": "<button>",
-      "label": "My Contests ( {myParticipations.lengt...",
-      "handler": "{() => setSearchParams({ tab: \"my-contests\" })}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 906,
-      "tag": "<button>",
-      "label": "{mode}",
-      "handler": "{() => setCadenceFilter(mode)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 998,
+      "line": 567,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/portal/contests/${contest.slug}`}",
@@ -1861,34 +1780,34 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1010,
+      "line": 576,
       "tag": "<Button>",
-      "label": "Button",
+      "label": "Overview",
       "handler": "asChild",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1011,
+      "line": 576,
       "tag": "<Link>",
-      "label": "Virtual Contest",
+      "label": "Overview",
       "handler": "{`/portal/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1015,
+      "line": 577,
       "tag": "<Button>",
-      "label": "Button",
+      "label": "Scoreboard",
       "handler": "asChild",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1016,
+      "line": 577,
       "tag": "<Link>",
       "label": "Scoreboard",
       "handler": "{`/portal/contests/${contest.slug}/final-results`}",
@@ -1897,25 +1816,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1020,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1021,
-      "tag": "<Link>",
-      "label": "Editorials",
-      "handler": "\"/portal/problems\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1070,
+      "line": 602,
       "tag": "<Button>",
       "label": "{registeringSlug === upcomingContests...",
       "handler": "{() => handleRegister(upcomingContests[0].slug)}",
@@ -1924,7 +1825,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1078,
+      "line": 632,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1933,25 +1834,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1079,
-      "tag": "<Link>",
-      "label": "Explore Problem Archive",
-      "handler": "\"/portal/problems\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1129,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1130,
+      "line": 633,
       "tag": "<Link>",
       "label": "Campus Pass",
       "handler": "{`/portal/contests/${record.contest_slug}/qualified`}",
@@ -1960,7 +1843,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1135,
+      "line": 636,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1969,27 +1852,27 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1136,
+      "line": 637,
       "tag": "<Link>",
-      "label": "Contest Details",
+      "label": "Details",
       "handler": "{`/portal/contests/${record.contest_slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1161,
+      "line": 657,
       "tag": "<Link>",
-      "label": "Full Standings",
+      "label": "Full",
       "handler": "\"/portal/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 1217,
+      "line": 684,
       "tag": "<Link>",
-      "label": "View Medi-Caps University Ranking",
+      "label": "University Rankings",
       "handler": "\"/portal/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"

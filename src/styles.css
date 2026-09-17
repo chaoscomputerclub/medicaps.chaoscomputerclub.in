@@ -25,9 +25,34 @@
   --color-border: var(--line);
   --color-input: var(--line-strong);
   --color-ring: var(--accent);
-  --font-sans: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Outfit", "Figtree", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Inter", -apple-system, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Inter", -apple-system, system-ui, sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Inter", -apple-system, system-ui, sans-serif;
+  --font-code: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-color: var(--line);
+  font-family: var(--font-sans);
+}
+.font-mono,
+[class*="font-mono"],
+.font-sans,
+[class*="font-sans"],
+.font-display,
+[class*="font-display"] {
+  font-family: var(--font-sans) !important;
+}
+code,
+pre,
+kbd,
+samp,
+.font-code,
+.monaco-editor,
+.monaco-editor * {
+  font-family: var(--font-code) !important;
 }
 :root {
   --radius: 2px;
