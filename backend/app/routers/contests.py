@@ -89,7 +89,7 @@ async def list_contests(
         if c.slug in ("dev-assessment-round", "dev-offline-final"):
             continue
         if c.status == "live" and not c.slug.startswith("dev-"):
-            is_eligible, _ = await is_member_eligible_for_live_contest(current_member, c, db)
+            is_eligible, _ = await is_member_eligible_for_live_contest(current_member, c, db, require_checked_in=False)
             if not is_eligible:
                 continue
         filtered_contests.append(c)
@@ -287,7 +287,7 @@ async def get_contest_detail(
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
     if contest.status == "live":
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db)
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=False)
         if not is_eligible:
             raise HTTPException(
                 status_code=403,
@@ -322,7 +322,7 @@ async def get_contest_problems(
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
     if contest.status == "live":
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db)
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
         if not is_eligible:
             raise HTTPException(status_code=403, detail=f"Access restricted: {reason}")
 
@@ -433,6 +433,17 @@ async def get_registration_status(
                 (assessment_rank is not None and assessment_rank <= 30)
             )
 
+    # Check candidate CampusPass check-in status
+    pass_res = await db.execute(
+        select(CampusPass).where(
+            CampusPass.contest_id == contest.id,
+            CampusPass.member_id == current_member.id,
+        )
+    )
+    pass_obj = pass_res.scalars().first()
+    check_in_status = pass_obj.check_in_status if pass_obj else "not_issued"
+    is_checked_in = (check_in_status == "checked_in")
+
     # Assessment can only be started if not yet taken AND the lifecycle window is open
     from app.services.contest_lifecycle_service import assessment_available
     assessment_window_open = False
@@ -449,12 +460,13 @@ async def get_registration_status(
         and assessment_window_open
         and assessment_session_status not in ("submitted", "disqualified")
     )
-    can_enter_live_contest = (contest_status == "live" and is_top_30_qualified)
+    can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
 
     # Dev Contest overrides for frictionless testing
     if is_dev_bypass:
         is_registered = True
         is_top_30_qualified = True
+        is_checked_in = True
         can_enter_live_contest = True
         # STRICT: If assessment was already submitted, disqualified, or taken, reattempts are forbidden
         can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
@@ -483,7 +495,10 @@ async def get_registration_status(
             eligibility_message = "Registration confirmed. Round 1 window is open — start your assessment now."
     elif contest_status == "live":
         if is_top_30_qualified:
-            eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Workstation reserved. Enter the Live Contest Lab."
+            if is_checked_in or is_dev_bypass:
+                eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Gate check-in verified. Enter the Live Contest Lab."
+            else:
+                eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Physical QR proctor scan required at lab entrance before entering arena."
         else:
             eligibility_message = "🔒 Live Final is restricted strictly to Top 30 assessment qualifiers. You are currently not eligible."
     else:
@@ -500,6 +515,8 @@ async def get_registration_status(
         "assessment_rank": assessment_rank,
         "assessment_status": assessment_session_status,
         "is_top_30_qualified": is_top_30_qualified,
+        "is_checked_in": is_checked_in,
+        "check_in_status": check_in_status,
         "can_take_assessment": can_take_assessment,
         "can_enter_live_contest": can_enter_live_contest,
         "eligibility_message": eligibility_message,
@@ -670,7 +687,7 @@ async def get_contest_arena_data(
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
     if contest.status == "live" and not slug.startswith("dev-"):
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db)
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
         if not is_eligible:
             raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
 
@@ -749,6 +766,16 @@ async def run_contest_arena_code(
     db: AsyncSession = Depends(get_db),
 ):
     """Run code against sample test cases or custom stdin in the live contest arena."""
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if contest.status == "live" and not slug.startswith("dev-"):
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
+        if not is_eligible:
+            raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
+
     p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
     problem = p_res.scalars().first()
     if not problem:
@@ -819,6 +846,11 @@ async def submit_contest_arena_code(
     contest = c_res.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    if contest.status == "live" and not slug.startswith("dev-"):
+        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
+        if not is_eligible:
+            raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
 
     p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
     problem = p_res.scalars().first()

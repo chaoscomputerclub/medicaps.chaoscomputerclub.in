@@ -91,14 +91,21 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
 
                         member_id = payload.get("sub")
                         m_res = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
-                        member = m_res.scalars().first()
-
-                        is_eligible, reason = await is_member_eligible_for_live_contest(member, contest, db)
+                        require_checked_in = (
+                            "/arena" in path
+                            or path.endswith("/problems")
+                            or path.startswith("/api/assessment/")
+                        )
+                        is_eligible, reason = await is_member_eligible_for_live_contest(
+                            member, contest, db, require_checked_in=require_checked_in
+                        )
                         if not is_eligible:
                             logger.warning(
-                                "Cadet %s denied access to live contest '%s': %s",
+                                "Cadet %s denied access to live contest '%s' (path=%s, require_checked_in=%s): %s",
                                 getattr(member, "handle", member_id),
                                 slug,
+                                path,
+                                require_checked_in,
                                 reason,
                             )
                             return JSONResponse(

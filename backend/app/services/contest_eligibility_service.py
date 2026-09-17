@@ -34,10 +34,17 @@ async def is_member_eligible_for_live_contest(
     member: Optional[MemberProfile],
     contest: OfflineContest,
     db: AsyncSession,
+    require_checked_in: bool = True,
 ) -> Tuple[bool, str]:
     """
-    Check if candidate is eligible to access a live contest.
-    Returns (is_eligible, reason).
+    Check if candidate is eligible to access a live contest or its live arena.
+    
+    If require_checked_in is True (default for arena, submissions, runs, and live problems):
+      - Candidate MUST have completed physical QR check-in at the lab gate (CampusPass.check_in_status == "checked_in").
+      - Remote access from home is strictly denied.
+    
+    If require_checked_in is False (for contest info & pass retrieval):
+      - Top 30 qualifiers can view contest details to fetch and present their QR pass.
     """
     # 0. Global Development Bypass Mode from ENV
     if settings.is_dev_bypass_enabled:
@@ -59,66 +66,93 @@ async def is_member_eligible_for_live_contest(
     if getattr(member, "is_core_member", False):
         return True, "Authorized chapter core team / proctor access."
 
-    # 4. Check direct registration for this live contest
+    # 4. Check whether member is a Top 30 qualified finalist or registered finalist
+    is_qualified = False
+    qualify_reason = ""
+
+    # Check direct registration
     reg_res = await db.execute(
         select(ContestRegistration).where(
             ContestRegistration.contest_id == contest.id,
             ContestRegistration.member_id == member.id,
         )
     )
-    if reg_res.scalars().first():
-        return True, "Confirmed registered finalist for this live contest."
+    reg_obj = reg_res.scalars().first()
+    if reg_obj:
+        is_qualified = True
+        qualify_reason = "Confirmed registered finalist."
 
-    # 5. Check direct CampusPass for this contest
+    # Check Phase 1 Screening Assessment qualification
+    if not is_qualified:
+        assess_res = await db.execute(
+            select(Assessment).where(Assessment.contest_id == contest.id)
+        )
+        assessments = assess_res.scalars().all()
+        if not assessments:
+            all_assess_res = await db.execute(
+                select(Assessment).where(Assessment.is_active == True)
+            )
+            assessments = all_assess_res.scalars().all()
+
+        for assess in assessments:
+            s_res = await db.execute(
+                select(AssessmentSession).where(
+                    AssessmentSession.assessment_id == assess.id,
+                    AssessmentSession.member_id == member.id,
+                )
+            )
+            my_session = s_res.scalars().first()
+            if my_session:
+                if my_session.is_top_30_qualified:
+                    is_qualified = True
+                    qualify_reason = "Top 30 qualified finalist from Phase 1 Screening."
+                    break
+
+                # Calculate rank in assessment
+                all_s_res = await db.execute(
+                    select(AssessmentSession)
+                    .where(
+                        AssessmentSession.assessment_id == assess.id,
+                        AssessmentSession.status.in_(["in_progress", "submitted"]),
+                    )
+                    .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
+                )
+                all_sessions = all_s_res.scalars().all()
+                for rank_num, s in enumerate(all_sessions, start=1):
+                    if s.member_id == member.id:
+                        if rank_num <= 30 and (s.total_score > 0 or len(all_sessions) <= 30):
+                            is_qualified = True
+                            qualify_reason = f"Top 30 screening qualifier (Rank #{rank_num})."
+                        break
+                if is_qualified:
+                    break
+
+    # Also check if they already have an issued CampusPass for this contest
     pass_res = await db.execute(
         select(CampusPass).where(
             CampusPass.member_id == member.id,
             CampusPass.contest_id == contest.id,
-            CampusPass.check_in_status != "revoked",
         )
     )
-    if pass_res.scalars().first():
-        return True, "Valid Digital Campus QR Pass holder."
+    c_pass = pass_res.scalars().first()
+    if c_pass:
+        is_qualified = True
 
-    # 6. Check Phase 1 Screening Assessment qualification
-    # Look for assessments linked to this contest
-    assess_res = await db.execute(
-        select(Assessment).where(Assessment.contest_id == contest.id)
-    )
-    assessments = assess_res.scalars().all()
-    if not assessments:
-        # Companion screening assessment
-        all_assess_res = await db.execute(
-            select(Assessment).where(Assessment.is_active == True)
-        )
-        assessments = all_assess_res.scalars().all()
+    if not is_qualified:
+        return False, "Access restricted: Live Final is strictly restricted to Top 30 qualified cadets."
 
-    for assess in assessments:
-        s_res = await db.execute(
-            select(AssessmentSession).where(
-                AssessmentSession.assessment_id == assess.id,
-                AssessmentSession.member_id == member.id,
-            )
-        )
-        my_session = s_res.scalars().first()
-        if my_session:
-            if my_session.is_top_30_qualified:
-                return True, "Top 30 qualified finalist from Phase 1 Screening."
+    # 5. If checked-in status is not required (e.g., viewing pass or contest info), allow
+    if not require_checked_in:
+        return True, qualify_reason or "Qualified for Round 2 Live Final."
 
-            # Calculate rank in assessment
-            all_s_res = await db.execute(
-                select(AssessmentSession)
-                .where(
-                    AssessmentSession.assessment_id == assess.id,
-                    AssessmentSession.status.in_(["in_progress", "submitted"]),
-                )
-                .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
-            )
-            all_sessions = all_s_res.scalars().all()
-            for rank_num, s in enumerate(all_sessions, start=1):
-                if s.member_id == member.id:
-                    if rank_num <= 30 and (s.total_score > 0 or len(all_sessions) <= 30):
-                        return True, f"Top 30 screening qualifier (Rank #{rank_num})."
-                    break
+    # 6. STRICT PHYSICAL PROCTORING GATE: Require CampusPass.check_in_status == "checked_in"
+    if not c_pass:
+        return False, "No Campus Pass allocated. Please visit the qualification portal to claim your pass."
 
-    return False, "Live Final is strictly restricted to Top 30 qualified cadets."
+    if c_pass.check_in_status == "revoked":
+        return False, "Campus Pass has been revoked by the chief proctor."
+
+    if c_pass.check_in_status != "checked_in":
+        return False, "Physical gate check-in required. Your QR Campus Pass must be scanned by a lab proctor at the venue before entering the live arena."
+
+    return True, f"Verified physical gate check-in at workstation {c_pass.seat_number}."

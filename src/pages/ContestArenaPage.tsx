@@ -14,9 +14,11 @@ import {
   Clock,
   Copy,
   Cpu,
+  Lock,
   Maximize2,
   Minimize2,
   Play,
+  QrCode,
   RotateCcw,
   Send,
   ShieldCheck,
@@ -225,6 +227,72 @@ export function ContestArenaPage() {
 
   if (isLoadingArena && !arenaData) {
     return <AssessmentStudioSkeleton />;
+  }
+
+  if (!arenaData) {
+    return (
+      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[var(--bg)] p-4 text-foreground">
+        <div className="w-full max-w-lg space-y-6 border border-amber-500/40 bg-[var(--surface)] p-8 shadow-2xl relative overflow-hidden text-center">
+          <div className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-amber-500/10 blur-3xl" />
+
+          <div className="mx-auto flex size-16 items-center justify-center border border-amber-500/40 bg-amber-500/10">
+            <ShieldCheck className="size-8 text-amber-400" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-amber-400">
+              Air-Gapped Physical Gate Check-in Required
+            </span>
+            <h1 className="text-xl font-black uppercase tracking-tight text-white font-mono">
+              Proctor Verification Required
+            </h1>
+            <p className="text-xs text-[var(--muted)] font-mono leading-relaxed">
+              Round 2 Live Final is strictly an on-premise, physically proctored event at the Medi-Caps Computing Complex. Remote access from outside the lab gate is blocked until your QR Campus Pass is scanned by a proctor.
+            </p>
+          </div>
+
+          <div className="space-y-2 border border-[var(--line)] bg-[var(--surface-2)] p-4 text-left font-mono text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[var(--muted)]">Round 1 Screening:</span>
+              <span className="font-bold text-emerald-400">✓ Top 30 Confirmed</span>
+            </div>
+            <div className="flex items-center justify-between border-t border-[var(--line)] pt-2">
+              <span className="text-[var(--muted)]">Lab Gate Check-in:</span>
+              <span className="font-bold text-amber-400">● Awaiting Proctor Scan</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 pt-2">
+            <Button
+              asChild
+              className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
+            >
+              <Link to={`/portal/contests/${contestSlug}/qualified`}>
+                <QrCode className="mr-2 size-4" /> View Your QR Campus Pass
+              </Link>
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
+                variant="outline"
+                className="w-full rounded-none font-mono text-xs"
+              >
+                <RotateCcw className="mr-1.5 size-3.5" /> Re-check Gate Status
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="rounded-none font-mono text-xs text-[var(--muted)]"
+              >
+                <Link to={`/portal/contests/${contestSlug}`}>
+                  Exit to Lobby
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const title = arenaData?.title || "Live Contest Arena";

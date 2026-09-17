@@ -172,8 +172,12 @@ export function ContestQualifiedPage() {
                   <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]">
                     Official Medi-Caps Gate Pass
                   </span>
-                  <span className="font-mono text-[10px] uppercase font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-950/20 px-2 py-0.5">
-                    ● {pass.status.toUpperCase()}
+                  <span className={`font-mono text-[10px] uppercase font-bold border px-2 py-0.5 ${
+                    pass.check_in_status === "checked_in" || pass.status === "checked_in"
+                      ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/20"
+                      : "text-amber-400 border-amber-500/30 bg-amber-950/20"
+                  }`}>
+                    ● {pass.check_in_status === "checked_in" || pass.status === "checked_in" ? "CHECKED IN (GATE VERIFIED)" : "ISSUED · AWAITING PROCTOR SCAN"}
                   </span>
                 </div>
 
@@ -286,14 +290,28 @@ export function ContestQualifiedPage() {
 
               {/* Primary CTA */}
               <div className="flex flex-col gap-2">
-                <Button asChild size="lg" className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90">
-                  <Link to={`/portal/contests/${contestSlug}/arena`}>
-                    <Play className="mr-1.5 size-4 fill-black" /> Enter Live Contest Arena
-                  </Link>
-                </Button>
+                {pass.check_in_status === "checked_in" || pass.status === "checked_in" || isDevBypass ? (
+                  <Button asChild size="lg" className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90">
+                    <Link to={`/portal/contests/${contestSlug}/arena`}>
+                      <Play className="mr-1.5 size-4 fill-black" /> Enter Live Contest Arena
+                    </Link>
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 border border-amber-500/40 bg-amber-950/20 p-3 text-xs font-mono text-amber-400">
+                      <Lock className="size-4 shrink-0" />
+                      <span>Physical Gate Lock: Present this QR code to the proctor at the lab entrance to check in.</span>
+                    </div>
+                    <Button asChild size="lg" variant="outline" className="w-full rounded-none border-amber-500/40 font-mono text-xs font-black uppercase tracking-wider text-amber-400 hover:bg-amber-500/10">
+                      <Link to={`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}>
+                        <QrCode className="mr-1.5 size-4" /> Proctor Gate Scanner
+                      </Link>
+                    </Button>
+                  </div>
+                )}
                 <Button asChild variant="ghost" size="sm" className="rounded-none font-mono text-xs text-[var(--muted)]">
-                  <Link to={`/portal/verify?pass=${encodeURIComponent(pass.pass_code)}`}>
-                    <QrCode className="mr-1.5 size-3.5" /> Test Proctor Verification Scan
+                  <Link to={`/portal/contests/${contestSlug}`}>
+                    Contest Overview
                   </Link>
                 </Button>
               </div>
