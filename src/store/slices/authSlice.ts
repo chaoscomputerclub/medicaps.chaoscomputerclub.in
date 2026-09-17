@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import {
   getToken,
+  getStoredMember,
+  setStoredMember,
   setToken as persistToken,
   clearToken as removePersistedToken,
   sendOTP,
@@ -36,20 +38,21 @@ export interface AuthState {
 }
 
 const initialToken = typeof window !== "undefined" ? getToken() : null;
+const initialMember = typeof window !== "undefined" ? getStoredMember() : null;
 
 const initialState: AuthState = {
-  member: null,
+  member: initialMember,
   token: initialToken,
   isAuthenticated: Boolean(initialToken),
   step: "email",
-  email: "",
+  email: initialMember?.email || "",
   transactionId: null,
   otp: "",
-  name: "",
-  handle: "",
-  prn: "",
-  department: "CSE",
-  batch: "2023-27",
+  name: initialMember?.full_name || "",
+  handle: initialMember?.handle || "",
+  prn: initialMember?.prn || "",
+  department: initialMember?.department || "CSE",
+  batch: initialMember?.batch || "2023-27",
   pending: false,
   message: null,
   devOtp: null,
@@ -76,7 +79,7 @@ export const verifyOtpThunk = createAsyncThunk<
 >("auth/verifyOtp", async ({ email, code, transaction_id }, { rejectWithValue }) => {
   try {
     const res = await verifyOTP(email.trim().toLowerCase(), code.trim(), transaction_id);
-    persistToken(res.access_token);
+    persistToken(res.access_token, res.member);
     return res;
   } catch (err: any) {
     return rejectWithValue(err?.message || "Invalid or expired code. Please check and try again.");
@@ -247,6 +250,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = true;
       state.member = action.payload.member;
       if (action.payload.member) {
+        setStoredMember(action.payload.member);
         if (action.payload.member.full_name) state.name = action.payload.member.full_name;
         if (action.payload.member.handle) state.handle = action.payload.member.handle;
       }
@@ -264,6 +268,7 @@ export const authSlice = createSlice({
     builder.addCase(fetchCurrentUserThunk.fulfilled, (state, action) => {
       state.member = action.payload;
       state.isAuthenticated = true;
+      setStoredMember(action.payload);
       if (action.payload.full_name) state.name = action.payload.full_name;
       if (action.payload.handle) state.handle = action.payload.handle;
       if (!action.payload.is_onboarded) {
@@ -275,6 +280,7 @@ export const authSlice = createSlice({
         state.member = null;
         state.token = null;
         state.isAuthenticated = false;
+        setStoredMember(null);
       }
     });
 
@@ -286,6 +292,7 @@ export const authSlice = createSlice({
     builder.addCase(completeOnboardingThunk.fulfilled, (state, action) => {
       state.pending = false;
       state.member = action.payload;
+      setStoredMember(action.payload);
       state.message = null;
     });
     builder.addCase(completeOnboardingThunk.rejected, (state, action) => {
@@ -300,7 +307,9 @@ export const authSlice = createSlice({
     });
     builder.addCase(updateProfileThunk.fulfilled, (state, action) => {
       state.pending = false;
-      state.member = { ...(state.member || {}), ...action.payload } as Member;
+      const updated = { ...(state.member || {}), ...action.payload } as Member;
+      state.member = updated;
+      setStoredMember(updated);
       if (action.payload.full_name) state.name = action.payload.full_name;
       if (action.payload.department) state.department = action.payload.department;
       if (action.payload.batch) state.batch = action.payload.batch;

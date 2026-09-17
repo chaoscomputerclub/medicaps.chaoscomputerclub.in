@@ -16,6 +16,8 @@ from app.core.db import get_db
 from app.core.security import decode_access_token
 from app.models.db_models import MemberProfile
 
+import uuid
+
 logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)
@@ -40,11 +42,38 @@ async def get_current_member(
         raise _UNAUTHORIZED
 
     member_id: Optional[str] = payload.get("sub")
-    if not member_id:
+    email: Optional[str] = payload.get("email")
+    if not member_id and not email:
         raise _UNAUTHORIZED
 
-    result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
-    member = result.scalars().first()
+    member = None
+    if member_id:
+        result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
+        member = result.scalars().first()
+
+    # Fallback lookup by email if ID not found directly
+    if not member and email:
+        result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
+        member = result.scalars().first()
+
+    # Self-heal member profile from cryptographically valid JWT if missing in db
+    if not member and email:
+        clean_email = email.strip().lower()
+        fallback_handle = clean_email.split("@")[0]
+        member = MemberProfile(
+            id=member_id or str(uuid.uuid4()),
+            email=clean_email,
+            handle=fallback_handle,
+            full_name=fallback_handle.capitalize(),
+            rating=1200,
+            peak_rating=1200,
+            is_onboarded=True,
+        )
+        db.add(member)
+        await db.commit()
+        await db.refresh(member)
+        logger.info("Auto-restored session member record for %s from valid JWT", clean_email)
+
     if not member:
         raise _UNAUTHORIZED
 
@@ -74,10 +103,20 @@ async def get_current_member_optional(
         if not payload:
             return None
         member_id: Optional[str] = payload.get("sub")
-        if not member_id:
+        email: Optional[str] = payload.get("email")
+        if not member_id and not email:
             return None
-        result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
-        return result.scalars().first()
+
+        member = None
+        if member_id:
+            result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
+            member = result.scalars().first()
+
+        if not member and email:
+            result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
+            member = result.scalars().first()
+
+        return member
     except Exception:
         return None
 

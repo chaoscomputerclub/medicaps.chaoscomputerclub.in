@@ -15,9 +15,9 @@ export function getApiBase(): string {
   }
 
   if (typeof window !== "undefined") {
-    // 1. Localhost development fallback (connect to live server backend)
+    // 1. Localhost development fallback (connect directly to official live backend)
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      return "https://ccc-medicaps-api.sharexpress.in/api";
+      return "https://medicaps.chaoscomputerclub.in/api";
     }
 
     // 2. Production: Always use relative /api on current origin
@@ -25,7 +25,7 @@ export function getApiBase(): string {
     return `${window.location.origin}/api`;
   }
 
-  return "https://ccc-medicaps-api.sharexpress.in/api";
+  return "https://medicaps.chaoscomputerclub.in/api";
 }
 
 export class ApiError extends Error {
@@ -41,18 +41,43 @@ export class ApiError extends Error {
 }
 
 const TOKEN_KEY = "ccc_medicaps_token";
+const MEMBER_KEY = "ccc_medicaps_member";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
 }
 
-export function setToken(token: string): void {
+export function getStoredMember(): Member | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(MEMBER_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function setToken(token: string, member?: Member | null): void {
   localStorage.setItem(TOKEN_KEY, token);
+  if (member) {
+    localStorage.setItem(MEMBER_KEY, JSON.stringify(member));
+  }
+}
+
+export function setStoredMember(member: Member | null): void {
+  if (typeof window === "undefined") return;
+  if (member) {
+    localStorage.setItem(MEMBER_KEY, JSON.stringify(member));
+  } else {
+    localStorage.removeItem(MEMBER_KEY);
+  }
 }
 
 export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(MEMBER_KEY);
 }
 
 /**

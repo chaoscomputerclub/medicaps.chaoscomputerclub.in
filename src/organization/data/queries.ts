@@ -6,7 +6,7 @@
 export function queryOptions<T extends Record<string, any>>(opts: T): T {
   return opts;
 }
-import { getToken, getApiBase, clearToken } from "@/lib/auth";
+import { getToken, getApiBase, clearToken, isAuthenticated } from "@/lib/auth";
 import {
   getPublicPortalData,
   getMemberProfileData,
@@ -131,10 +131,13 @@ export async function fetchFullProfileData(force = false): Promise<FullProfilePa
           return payload;
         }
         if (res.status === 401) {
-          clearToken();
-          fullProfileCache = null;
-          if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
-            window.location.href = "/auth";
+          const authed = isAuthenticated();
+          if (!authed) {
+            clearToken();
+            fullProfileCache = null;
+            if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
+              window.location.href = "/auth";
+            }
           }
         }
       } catch {

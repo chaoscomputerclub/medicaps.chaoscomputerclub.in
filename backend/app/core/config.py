@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     )
     JWT_PRIVATE_KEY: str = os.getenv("JWT_PRIVATE_KEY", "")
     JWT_PUBLIC_KEY: str = os.getenv("JWT_PUBLIC_KEY", "")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 30)))  # 30 days
 
     # Google OAuth
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
