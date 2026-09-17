@@ -132,7 +132,7 @@ export const toggleFollowThunk = createAsyncThunk<
     followingCount: number;
   },
   { targetId?: string; targetHandle?: string } | string
->("social/toggleFollow", async (arg, { dispatch, rejectWithValue }) => {
+>("social/toggleFollow", async (arg, { rejectWithValue }) => {
   try {
     const token = getToken();
     if (!token) {
@@ -144,7 +144,7 @@ export const toggleFollowThunk = createAsyncThunk<
     if (!cleanTarget) return rejectWithValue("Target student handle is required.");
 
     const apiBase = getApiBase();
-    const res = await fetch(`${apiBase}/social/follow/${encodeURIComponent(cleanTarget)}`, {
+    const res = await fetch(`${apiBase}/social/toggle/${encodeURIComponent(cleanTarget)}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,29 +153,8 @@ export const toggleFollowThunk = createAsyncThunk<
     });
 
     if (!res.ok) {
-      // If already following or POST returned non-200, perform DELETE
-      const delRes = await fetch(`${apiBase}/social/follow/${encodeURIComponent(cleanTarget)}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!delRes.ok) {
-        const err = await delRes.json().catch(() => ({ detail: "Action failed" }));
-        return rejectWithValue(err.detail || "Action failed");
-      }
-      const data = await delRes.json();
-      invalidateSwrCache("member:profile:full");
-      invalidateSwrCache("student:profile:*");
-      invalidateFullProfileCache();
-      return {
-        targetId: data.target_id || (typeof arg === "object" && arg.targetId) || cleanTarget,
-        targetHandle: data.target_handle || cleanTarget,
-        isFollowing: false,
-        followersCount: data.followers_count ?? 0,
-        followingCount: data.following_count ?? 0,
-      };
+      const err = await res.json().catch(() => ({ detail: "Action failed" }));
+      return rejectWithValue(err.detail || "Action failed");
     }
 
     const data = await res.json();
@@ -292,19 +271,39 @@ export const socialSlice = createSlice({
     // Toggle Follow: Optimistic
     builder.addCase(toggleFollowThunk.pending, (state, action) => {
       const arg = action.meta.arg;
-      const targetKey = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
-      const cleanKey = targetKey.replace(/^@+/, "").trim();
+      const targetId = typeof arg === "object" ? arg.targetId?.trim() : undefined;
+      const targetHandle =
+        typeof arg === "object"
+          ? arg.targetHandle?.replace(/^@+/, "").trim()
+          : typeof arg === "string"
+            ? arg.replace(/^@+/, "").trim()
+            : "";
+      const cleanKey = targetId || targetHandle || "";
       state.actionPendingId = cleanKey;
 
-      const isCurrentlyFollowing = state.followingIds.includes(cleanKey);
+      const isCurrentlyFollowing = Boolean(
+        (targetId && state.followingIds.includes(targetId)) ||
+        (targetHandle && state.followingIds.includes(targetHandle))
+      );
+
       if (isCurrentlyFollowing) {
-        state.followingIds = state.followingIds.filter((id) => id !== cleanKey);
+        state.followingIds = state.followingIds.filter(
+          (id) => id !== targetId && id !== targetHandle && id !== cleanKey
+        );
       } else {
-        state.followingIds = Array.from(new Set([...state.followingIds, cleanKey]));
+        if (targetId) {
+          state.followingIds = Array.from(new Set([...state.followingIds, targetId]));
+        } else if (cleanKey) {
+          state.followingIds = Array.from(new Set([...state.followingIds, cleanKey]));
+        }
       }
 
       // Update in currently open list if present
-      const item = state.studentsList.find((s) => s.id === cleanKey || s.handle === cleanKey);
+      const item = state.studentsList.find(
+        (s) =>
+          (targetId && s.id === targetId) ||
+          (targetHandle && s.handle.toLowerCase() === targetHandle.toLowerCase())
+      );
       if (item) {
         item.is_following = !isCurrentlyFollowing;
       }
@@ -346,16 +345,37 @@ export const socialSlice = createSlice({
     builder.addCase(toggleFollowThunk.rejected, (state, action) => {
       state.actionPendingId = null;
       const arg = action.meta.arg;
-      const targetKey = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
-      const cleanKey = targetKey.replace(/^@+/, "").trim();
+      const targetId = typeof arg === "object" ? arg.targetId?.trim() : undefined;
+      const targetHandle =
+        typeof arg === "object"
+          ? arg.targetHandle?.replace(/^@+/, "").trim()
+          : typeof arg === "string"
+            ? arg.replace(/^@+/, "").trim()
+            : "";
+      const cleanKey = targetId || targetHandle || "";
 
       // Roll back
-      if (state.followingIds.includes(cleanKey)) {
-        state.followingIds = state.followingIds.filter((id) => id !== cleanKey);
+      const isCurrentlyInStore = Boolean(
+        (targetId && state.followingIds.includes(targetId)) ||
+        (targetHandle && state.followingIds.includes(targetHandle))
+      );
+
+      if (isCurrentlyInStore) {
+        state.followingIds = state.followingIds.filter(
+          (id) => id !== targetId && id !== targetHandle && id !== cleanKey
+        );
       } else {
-        state.followingIds = Array.from(new Set([...state.followingIds, cleanKey]));
+        if (targetId) {
+          state.followingIds = Array.from(new Set([...state.followingIds, targetId]));
+        } else if (cleanKey) {
+          state.followingIds = Array.from(new Set([...state.followingIds, cleanKey]));
+        }
       }
-      const item = state.studentsList.find((s) => s.id === cleanKey || s.handle === cleanKey);
+      const item = state.studentsList.find(
+        (s) =>
+          (targetId && s.id === targetId) ||
+          (targetHandle && s.handle.toLowerCase() === targetHandle.toLowerCase())
+      );
       if (item) {
         item.is_following = !item.is_following;
       }

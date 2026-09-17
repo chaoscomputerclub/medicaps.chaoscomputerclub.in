@@ -106,6 +106,78 @@ async def follow_student(
     )
 
 
+@router.post("/toggle/{target}", response_model=FollowResponse)
+async def toggle_follow_student(
+    target: str,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Atomically toggle follow/unfollow status for a target student."""
+    target_member = await resolve_member(target, db)
+
+    if target_member.id == current_member.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot follow yourself.",
+        )
+
+    stmt = select(StudentFollow).where(
+        and_(
+            StudentFollow.follower_id == current_member.id,
+            StudentFollow.following_id == target_member.id,
+        )
+    )
+    existing = (await db.execute(stmt)).scalars().first()
+
+    if existing:
+        await db.delete(existing)
+        await db.commit()
+        is_now_following = False
+        msg = f"Unfollowed @{target_member.handle or 'student'}."
+    else:
+        follow_record = StudentFollow(
+            follower_id=current_member.id,
+            following_id=target_member.id,
+        )
+        db.add(follow_record)
+        await db.commit()
+        is_now_following = True
+        msg = f"You are now following @{target_member.handle or 'student'}."
+
+    # Invalidate social & profile caches across ID and handle patterns
+    await delete_cache(f"cache:profile:{target_member.id}")
+    await delete_cache(f"cache:profile:{current_member.id}")
+    await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
+    await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
+    if target_member.handle:
+        await delete_cache_pattern(f"cache:student:profile:{target_member.handle.lower()}*")
+    if current_member.handle:
+        await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}*")
+    await delete_cache(f"cache:social:my_following:{current_member.id}")
+    await delete_cache_pattern("cache:social:*")
+
+    followers_count = await db.scalar(
+        select(func.count(StudentFollow.id)).where(
+            StudentFollow.following_id == target_member.id
+        )
+    ) or 0
+    following_count = await db.scalar(
+        select(func.count(StudentFollow.id)).where(
+            StudentFollow.follower_id == current_member.id
+        )
+    ) or 0
+
+    return FollowResponse(
+        success=True,
+        is_following=is_now_following,
+        followers_count=followers_count,
+        following_count=following_count,
+        target_id=str(target_member.id),
+        target_handle=target_member.handle or "—",
+        message=msg,
+    )
+
+
 @router.delete("/follow/{target}", response_model=FollowResponse)
 @router.post("/unfollow/{target}", response_model=FollowResponse)
 async def unfollow_student(
