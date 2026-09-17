@@ -304,19 +304,22 @@ export function ProfilePage() {
                         : "bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90"
                     )}
                   >
-                    {isPendingFollowAction ? (
+                    {isFollowing ? (
                       <>
-                        <Loader2 size={12} className="animate-spin" />
-                        <span>Syncing...</span>
-                      </>
-                    ) : isFollowing ? (
-                      <>
-                        <UserCheck size={12} />
+                        {isPendingFollowAction ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <UserCheck size={12} />
+                        )}
                         <span>Following</span>
                       </>
                     ) : (
                       <>
-                        <UserPlus size={12} />
+                        {isPendingFollowAction ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <UserPlus size={12} />
+                        )}
                         <span>Follow</span>
                       </>
                     )}

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-17T07:38:14.712Z",
+  "timestamp": "2026-09-17T07:40:27.260Z",
   "totalElements": 254,
   "functionalCount": 254,
   "connectivityRate": "100.0%",
@@ -2088,14 +2088,14 @@
       "file": "src/pages/ProfilePage.tsx",
       "line": 296,
       "tag": "<Button>",
-      "label": "{isPendingFollowAction ? (           ...",
+      "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 324,
+      "line": 327,
       "tag": "<Button>",
       "label": "{copied ? (                       <> ...",
       "handler": "{handleCopyLink}",
@@ -2104,7 +2104,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 372,
+      "line": 375,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2113,7 +2113,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 391,
+      "line": 394,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2122,7 +2122,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 411,
+      "line": 414,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2131,7 +2131,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 422,
+      "line": 425,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2140,7 +2140,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 549,
+      "line": 552,
       "tag": "<Link>",
       "label": "Open verification console",
       "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",
