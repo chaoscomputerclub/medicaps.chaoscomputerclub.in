@@ -46,9 +46,9 @@ const initialState: ContestState = {
 
 export const fetchContestsThunk = createAsyncThunk(
   "contest/fetchContests",
-  async (_, { rejectWithValue }) => {
+  async (force: boolean | undefined = false, { rejectWithValue }) => {
     try {
-      return await contestApi.list();
+      return await contestApi.list(Boolean(force));
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to load contests");
     }
@@ -57,12 +57,14 @@ export const fetchContestsThunk = createAsyncThunk(
 
 export const fetchContestDetailThunk = createAsyncThunk(
   "contest/fetchDetail",
-  async (slug: string, { rejectWithValue }) => {
+  async (arg: string | { slug: string; force?: boolean }, { rejectWithValue }) => {
+    const slug = typeof arg === "string" ? arg : arg.slug;
+    const force = typeof arg === "object" ? Boolean(arg.force) : false;
     try {
       const [contest, registration, problems] = await Promise.all([
-        contestApi.detail(slug),
-        contestApi.registrationStatus(slug).catch(() => null),
-        contestApi.problems(slug).catch(() => []),
+        contestApi.detail(slug, force),
+        contestApi.registrationStatus(slug, force).catch(() => null),
+        contestApi.problems(slug, force).catch(() => []),
       ]);
       return { contest, registration, problems };
     } catch (err: any) {

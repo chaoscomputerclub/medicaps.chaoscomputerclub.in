@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ArrowLeft, CheckCircle2, Clock, Lock, Play, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/features/contest/lifecycle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
 
 export function ContestLobbyPage() {
@@ -25,9 +26,57 @@ export function ContestLobbyPage() {
     (state) => state.contest
   );
 
-  useEffect(() => {
-    if (contestSlug) dispatch(fetchContestDetailThunk(contestSlug));
+  const refreshLobby = useCallback((force = false) => {
+    if (!contestSlug) return;
+    if (force) {
+      invalidateSwrCache("contests:*");
+      invalidateSwrCache(`contest:*:${contestSlug}*`);
+    }
+    dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
   }, [contestSlug, dispatch]);
+
+  useEffect(() => {
+    refreshLobby(false);
+  }, [refreshLobby]);
+
+  useEffect(() => {
+    if (!contestSlug) return;
+
+    const handleSync = () => {
+      refreshLobby(true);
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "ccc:assessment_updated" || e.key === "ccc_member" || e.key?.includes(contestSlug)) {
+        refreshLobby(true);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshLobby(true);
+      }
+    };
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshLobby(true);
+      }
+    }, 8000);
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("assessment:status_changed" as any, handleSync);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("assessment:status_changed" as any, handleSync);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [contestSlug, refreshLobby]);
 
   if (isLoadingDetail && !contest) return <ContestLobbySkeleton />;
 

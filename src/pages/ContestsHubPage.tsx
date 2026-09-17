@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Trophy,
@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestsThunk, registerContestThunk } from "@/store/slices/contestSlice";
 import { contestApi } from "@/features/contest/api";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
@@ -98,17 +99,72 @@ export function ContestsHubPage() {
   const [confirmContestSlug, setConfirmContestSlug] = useState("");
   const [confirmContestTitle, setConfirmContestTitle] = useState("");
 
+  const refreshHubData = useCallback((force = false) => {
+    if (force) {
+      invalidateSwrCache("contests:*");
+      invalidateSwrCache("contest:*");
+      invalidateSwrCache("passes:*");
+    }
+    dispatch(fetchContestsThunk(force));
+    getUniversityLeaderboardData().then((res) => setLeaders(res || []));
+    if (member) {
+      contestApi.participated(force)
+        .then((res: ParticipationRecord[]) => setMyParticipations(res || []))
+        .catch(() => {});
+    }
+  }, [dispatch, member]);
+
+  // Initial load with skeleton indicators
   useEffect(() => {
-    dispatch(fetchContestsThunk());
+    dispatch(fetchContestsThunk(false));
     getUniversityLeaderboardData().then((res) => setLeaders(res || []));
     if (member) {
       setIsLoadingParticipations(true);
-      contestApi.participated()
+      contestApi.participated(true)
         .then((res: ParticipationRecord[]) => setMyParticipations(res || []))
         .catch(() => {})
         .finally(() => setIsLoadingParticipations(false));
     }
   }, [dispatch, member]);
+
+  // Real-time synchronization: active polling + window focus + visibility change + cross-tab storage + custom events
+  useEffect(() => {
+    const handleSync = () => {
+      refreshHubData(true);
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "ccc:assessment_updated" || e.key === "ccc_member" || e.key?.startsWith("contests")) {
+        refreshHubData(true);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshHubData(true);
+      }
+    };
+
+    // Polling interval: every 8 seconds while page tab is visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshHubData(true);
+      }
+    }, 8000);
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("assessment:status_changed" as any, handleSync);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("assessment:status_changed" as any, handleSync);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [refreshHubData]);
 
   const upcomingContests = useMemo(() =>
     contests.filter((c) => c.status !== "finished").sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
@@ -203,8 +259,7 @@ export function ContestsHubPage() {
       setRegisteringSlug(slug);
       await dispatch(registerContestThunk(slug)).unwrap();
       toast.success("Registered! Phase 1 screening unlocks 24h before the contest.");
-      dispatch(fetchContestsThunk());
-      contestApi.participated().then((res: ParticipationRecord[]) => setMyParticipations(res || []));
+      refreshHubData(true);
     } catch (err: any) {
       toast.error(err || "Registration failed");
     } finally {

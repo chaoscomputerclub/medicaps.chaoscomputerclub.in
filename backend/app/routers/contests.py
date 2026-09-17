@@ -104,6 +104,7 @@ async def list_contests(
 
 @router.get("/my/participated", summary="List all contests the current member has registered for or participated in")
 async def get_my_participated_contests(
+    response: Response,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
@@ -112,6 +113,9 @@ async def get_my_participated_contests(
     including upcoming registered contests, active online screening attempts,
     and verified on-campus scoreboard finishes.
     """
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     from app.models.db_models import ContestRegistration, OfflineContest, AssessmentSession, Assessment, ScoreboardEntry
 
     # 1. Fetch all contest registrations for this cadet
@@ -338,10 +342,14 @@ async def get_contest_problems(
 @router.get("/{slug}/registration-status")
 async def get_registration_status(
     slug: str,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
     """Check candidate registration, screening assessment ranking, and Top 30 live final eligibility."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
     contest = c_res.scalars().first()
     if not contest:

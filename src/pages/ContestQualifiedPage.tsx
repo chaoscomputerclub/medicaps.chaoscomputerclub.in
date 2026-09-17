@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft,
@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { FINALIST_SEATS, formatWhen } from "@/features/contest/lifecycle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, fetchCampusPassThunk } from "@/store/slices/contestSlice";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
 
 export function ContestQualifiedPage() {
@@ -28,12 +29,59 @@ export function ContestQualifiedPage() {
     (state) => state.contest
   );
 
-  useEffect(() => {
-    if (contestSlug) {
-      dispatch(fetchContestDetailThunk(contestSlug));
-      dispatch(fetchCampusPassThunk());
+  const refreshData = useCallback((force = false) => {
+    if (!contestSlug) return;
+    if (force) {
+      invalidateSwrCache("contests:*");
+      invalidateSwrCache(`contest:*:${contestSlug}*`);
+      invalidateSwrCache("passes:*");
     }
+    dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
+    dispatch(fetchCampusPassThunk());
   }, [contestSlug, dispatch]);
+
+  useEffect(() => {
+    refreshData(false);
+  }, [refreshData]);
+
+  useEffect(() => {
+    if (!contestSlug) return;
+
+    const handleSync = () => {
+      refreshData(true);
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "ccc:assessment_updated" || e.key === "ccc_member" || e.key?.includes(contestSlug)) {
+        refreshData(true);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshData(true);
+      }
+    };
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshData(true);
+      }
+    }, 10000);
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("assessment:status_changed" as any, handleSync);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("assessment:status_changed" as any, handleSync);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [contestSlug, refreshData]);
 
   const qualified = Boolean(registration?.is_top_30_qualified || registration?.can_enter_live_contest);
   const rank = registration?.assessment_rank ?? null;

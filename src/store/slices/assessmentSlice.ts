@@ -6,6 +6,7 @@ import {
   sendAssessmentTelemetry,
   finishAssessmentTest,
 } from "@/lib/auth";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 
 export interface AssessmentProblemData {
   id: string;
@@ -200,6 +201,16 @@ export const assessmentSlice = createSlice({
         state.session.remaining_seconds -= 1;
         if (state.session.remaining_seconds === 0) {
           state.session.status = "submitted";
+          try {
+            invalidateSwrCache("contests:*");
+            invalidateSwrCache("contest:*");
+            invalidateSwrCache("passes:*");
+            invalidateSwrCache("portal:*");
+            if (typeof window !== "undefined") {
+              localStorage.setItem("ccc:assessment_updated", String(Date.now()));
+              window.dispatchEvent(new CustomEvent("assessment:status_changed"));
+            }
+          } catch {}
         }
       }
     },
@@ -250,9 +261,10 @@ export const assessmentSlice = createSlice({
     builder.addCase(runCodeThunk.rejected, (state, action) => {
       state.isRunning = false;
       state.runResult = {
-        success: false,
-        verdict: "INTERNAL_ERROR",
-        stderr: action.payload || "Execution failure",
+        stdout: "",
+        stderr: action.payload || "Code execution failed",
+        exit_code: 1,
+        execution_time_ms: 0,
       };
     });
 
@@ -292,6 +304,16 @@ export const assessmentSlice = createSlice({
         state.session.anti_cheat_violations = action.payload.violations;
         if (action.payload.is_disqualified) {
           state.session.status = "disqualified";
+          try {
+            invalidateSwrCache("contests:*");
+            invalidateSwrCache("contest:*");
+            invalidateSwrCache("passes:*");
+            invalidateSwrCache("portal:*");
+            if (typeof window !== "undefined") {
+              localStorage.setItem("ccc:assessment_updated", String(Date.now()));
+              window.dispatchEvent(new CustomEvent("assessment:status_changed"));
+            }
+          } catch {}
         }
       }
       state.antiCheatWarningOpen = true;
@@ -301,10 +323,20 @@ export const assessmentSlice = createSlice({
     });
 
     // finishAssessmentThunk
-    builder.addCase(finishAssessmentThunk.fulfilled, (state) => {
+    builder.addCase(finishAssessmentThunk.fulfilled, (state, action) => {
       if (state.session) {
         state.session.status = "submitted";
       }
+      try {
+        invalidateSwrCache("contests:*");
+        invalidateSwrCache("contest:*");
+        invalidateSwrCache("passes:*");
+        invalidateSwrCache("portal:*");
+        if (typeof window !== "undefined") {
+          localStorage.setItem("ccc:assessment_updated", String(Date.now()));
+          window.dispatchEvent(new CustomEvent("assessment:status_changed", { detail: action.payload }));
+        }
+      } catch {}
     });
   },
 });

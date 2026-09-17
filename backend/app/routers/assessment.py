@@ -6,7 +6,7 @@ Powered by CodeBox Execution Engine & Decoupled Assessment Service
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -65,6 +65,7 @@ class TelemetryRequest(BaseModel):
 @router.get("/{contest_slug}")
 async def get_or_start_assessment(
     contest_slug: str,
+    response: Response,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
@@ -74,6 +75,9 @@ async def get_or_start_assessment(
     If open, returns/initializes the active session with problems and starter code.
     If already submitted, returns finalized completed state.
     """
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return await AssessmentService.get_assessment_status(contest_slug, current_member, db)
 
 
@@ -359,6 +363,11 @@ async def finish_assessment(
 
         await db.commit()
         await invalidate_ranking(contest_slug)
+        try:
+            from app.core.cache import delete_cache_pattern
+            await delete_cache_pattern("cache:*")
+        except Exception as e:
+            pass
 
     return {"success": True, "total_score": session.total_score if session else 0}
 

@@ -190,6 +190,10 @@ export function AssessmentWorkspacePage() {
     if (!confirm("Are you sure you want to finalize and submit your assessment session?")) return;
     const action = await dispatch(finishAssessmentThunk(contestSlug));
     if (finishAssessmentThunk.fulfilled.match(action)) {
+      try {
+        localStorage.setItem("ccc:assessment_updated", String(Date.now()));
+        window.dispatchEvent(new CustomEvent("assessment:status_changed", { detail: { contestSlug } }));
+      } catch {}
       toast.success("Assessment completed successfully.");
       if (window.opener) {
         window.close();

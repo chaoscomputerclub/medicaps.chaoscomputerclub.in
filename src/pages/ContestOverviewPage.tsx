@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, registerContestThunk } from "@/store/slices/contestSlice";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { contestApi } from "@/features/contest/api";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { PhaseBadge, RoundsTimeline } from "@/features/contest/components";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
@@ -52,12 +53,63 @@ export function ContestOverviewPage() {
     (state) => state.contest
   );
 
-  useEffect(() => {
-    if (contestSlug) dispatch(fetchContestDetailThunk(contestSlug));
-  }, [contestSlug, dispatch]);
-
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [assessmentConfirmOpen, setAssessmentConfirmOpen] = useState(false);
+
+  const refreshDetail = useCallback((force = false) => {
+    if (!contestSlug) return;
+    if (force) {
+      invalidateSwrCache("contests:*");
+      invalidateSwrCache(`contest:*:${contestSlug}*`);
+    }
+    dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
+  }, [contestSlug, dispatch]);
+
+  // Initial load
+  useEffect(() => {
+    refreshDetail(false);
+  }, [refreshDetail]);
+
+  // Real-time synchronization: polling + window focus + visibility change + cross-tab storage + custom events
+  useEffect(() => {
+    if (!contestSlug) return;
+
+    const handleSync = () => {
+      refreshDetail(true);
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "ccc:assessment_updated" || e.key === "ccc_member" || e.key?.includes(contestSlug)) {
+        refreshDetail(true);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshDetail(true);
+      }
+    };
+
+    // Polling interval: every 8 seconds while page tab is active
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshDetail(true);
+      }
+    }, 8000);
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("assessment:status_changed" as any, handleSync);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("assessment:status_changed" as any, handleSync);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [contestSlug, refreshDetail]);
 
   if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
   if (!contest) {
@@ -85,7 +137,7 @@ export function ContestOverviewPage() {
     try {
       const res = await contestApi.resetDevSession(contestSlug);
       toast.success(res.message || "Session reset.");
-      dispatch(fetchContestDetailThunk(contestSlug));
+      refreshDetail(true);
     } catch (err: any) {
       toast.error(err.message || "Reset failed");
     }
@@ -96,6 +148,7 @@ export function ContestOverviewPage() {
     if (registerContestThunk.fulfilled.match(res)) {
       toast.success("Registered for Round 1.");
       setConfirmOpen(false);
+      refreshDetail(true);
     } else {
       toast.error(String(res.payload || "Registration failed"));
     }
