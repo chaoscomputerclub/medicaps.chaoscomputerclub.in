@@ -35,12 +35,12 @@ echo -e "${CYAN}   🚀 CCC MEDI-CAPS — GET SHIT DONE (GSD) SYNC PIPELINE     
 echo -e "${CYAN}================================================================${NC}"
 
 # ------------------------------------------------------------------------------
-# STEP 1: Local Verification
+# STEP 1: Full Automated QA Gatekeeper (Local Build, In-Process API, and Action Simulation)
 # ------------------------------------------------------------------------------
-echo -e "\n${BLUE}[1/5] Verifying local build integrity...${NC}"
-npm run build
+echo -e "\n${BLUE}[1/5] Executing GSD Automated QA Pre-Deployment Gate...${NC}"
+./scripts/gsd_qa_gate.sh
 
-echo -e "${GREEN}✓ Local build passed without errors.${NC}"
+echo -e "${GREEN}✓ All Automated QA verification checks passed successfully.${NC}"
 
 # ------------------------------------------------------------------------------
 # STEP 2: Git Atomic Commit & Push to GitHub

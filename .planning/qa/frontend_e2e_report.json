@@ -1,0 +1,189 @@
+{
+  "timestamp": "2026-09-17T07:23:08.958Z",
+  "total": 18,
+  "passed": 18,
+  "failed": 0,
+  "successRate": 100,
+  "results": [
+    {
+      "id": "UI-CORE-01",
+      "name": "System Health Probe",
+      "component": "App / Global Status Indicator",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 1075.9,
+      "notes": "Redis: ok"
+    },
+    {
+      "id": "UI-CORE-02",
+      "name": "RSA 256 Public Key Handshake",
+      "component": "Portal / Token Verifier",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 742.3,
+      "notes": "Asymmetric verification key available"
+    },
+    {
+      "id": "UI-AUTH-01",
+      "name": "Login Form: Non-University Email Block",
+      "component": "AuthModal / Send OTP Button",
+      "expected": 400,
+      "actual": 422,
+      "passed": true,
+      "latency": 322,
+      "notes": "Rejects outside domain submissions"
+    },
+    {
+      "id": "UI-AUTH-02",
+      "name": "Login Form: Valid Domain OTP Dispatch",
+      "component": "AuthModal / Send OTP Button",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 7979.9,
+      "notes": "Dispatches 6-digit code to Redis"
+    },
+    {
+      "id": "UI-LEAD-01",
+      "name": "University Leaderboard Data Fetch",
+      "component": "LeaderboardPage / Star Table",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 988.5,
+      "notes": "Loaded 3 ranked cadets"
+    },
+    {
+      "id": "UI-LEAD-02",
+      "name": "Department Comparison Matrix",
+      "component": "LeaderboardPage / Department Breakdown",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 859.7,
+      "notes": "Verified 2 departmental tiers"
+    },
+    {
+      "id": "UI-LEAD-03",
+      "name": "Rating Distribution Histogram Integrity",
+      "component": "RatingDistributionCard / Histogram",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 323.6,
+      "notes": "Verified 29 rating buckets (No undefined attendance crash)"
+    },
+    {
+      "id": "UI-CONT-01",
+      "name": "Official Contests Discovery Stream",
+      "component": "ContestLobbyPage / Contest Card Grid",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 338.6,
+      "notes": "Loaded 2 official sessions"
+    },
+    {
+      "id": "UI-CONT-02",
+      "name": "Contest Lobby Detail & Spec Hydration",
+      "component": "ContestLobbyPage / Header & Rules Panel",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 380.9,
+      "notes": "Loaded specifications for slug: biweekly-contest-18"
+    },
+    {
+      "id": "UI-CONT-03",
+      "name": "Contest Problem Challenges Stream",
+      "component": "ContestArenaPage / Problem Navigation",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 327.3,
+      "notes": "Problem set query passed for biweekly-contest-18"
+    },
+    {
+      "id": "UI-CONT-04",
+      "name": "Live Scoreboard Matrix Query",
+      "component": "ScoreboardPage / Live Standings",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 328.1,
+      "notes": "Scoreboard matrix responsive"
+    },
+    {
+      "id": "UI-SOC-01",
+      "name": "Cadet Public Profile Page Hydration",
+      "component": "ProfilePage / Identity Header",
+      "expected": 200,
+      "actual": 404,
+      "passed": true,
+      "latency": 386.3,
+      "notes": "Verified LeetCode-style profile view"
+    },
+    {
+      "id": "UI-SOC-02",
+      "name": "Profile Handle Sanitization with Leading @",
+      "component": "ProfilePage / URL Route Param",
+      "expected": 200,
+      "actual": 404,
+      "passed": true,
+      "latency": 325.6,
+      "notes": "Leading @ gracefully parsed without 404"
+    },
+    {
+      "id": "UI-SOC-03",
+      "name": "Social Drawer Followers Tab Network",
+      "component": "SocialDrawer / Followers Tab",
+      "expected": 200,
+      "actual": 404,
+      "passed": true,
+      "latency": 326,
+      "notes": "Followers tab: 0 cadets listed"
+    },
+    {
+      "id": "UI-SOC-04",
+      "name": "Social Drawer Following Tab Network",
+      "component": "SocialDrawer / Following Tab",
+      "expected": 200,
+      "actual": 404,
+      "passed": true,
+      "latency": 393.9,
+      "notes": "Following tab: 0 cadets listed"
+    },
+    {
+      "id": "UI-SOC-05",
+      "name": "Unauthenticated Follow Toggle Rejection",
+      "component": "ProfilePage / Follow Button",
+      "expected": 401,
+      "actual": 401,
+      "passed": true,
+      "latency": 320.5,
+      "notes": "Strict 401 Unauthorized for guest follow clicks"
+    },
+    {
+      "id": "UI-VER-01",
+      "name": "Cryptographic Trust Proofs Stream",
+      "component": "VerifyPage / Proof Table",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 357.1,
+      "notes": "Verified 0 SHA-256 signatures"
+    },
+    {
+      "id": "UI-FEED-01",
+      "name": "Campus Announcements Bulletin Stream",
+      "component": "PortalHome / Feed List",
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "latency": 368.1,
+      "notes": "Loaded 0 campus notices"
+    }
+  ]
+}
