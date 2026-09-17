@@ -48,6 +48,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db():
     """Create all database tables on initial startup and apply non-destructive column migrations."""
+    import app.models.db_models  # noqa: F401
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)

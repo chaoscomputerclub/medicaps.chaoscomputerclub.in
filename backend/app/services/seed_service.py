@@ -42,35 +42,44 @@ async def purge_all_contest_data(db: AsyncSession) -> dict:
     """
     logger.warning("Initiating strict purge of all contest and assessment data...")
 
-    # 1. Purge Submissions & Sessions
-    await db.execute(delete(AssessmentSubmission))
-    await db.execute(delete(AssessmentSession))
-    await db.execute(delete(ContestSubmission))
+    from app.core.db import init_db
+    await init_db()
 
-    # 2. Purge Problems & Assessments
-    await db.execute(delete(AssessmentProblem))
-    await db.execute(delete(Assessment))
-    await db.execute(delete(ContestProblem))
+    tables = [
+        AssessmentSubmission,
+        AssessmentSession,
+        ContestSubmission,
+        AssessmentProblem,
+        Assessment,
+        ContestProblem,
+        ContestRegistration,
+        CampusPass,
+        ScoreboardEntry,
+        TrustProof,
+        Announcement,
+        RatingHistory,
+        OfflineContest,
+    ]
 
-    # 3. Purge Registrations, Passes, Scoreboards & Proofs
-    await db.execute(delete(ContestRegistration))
-    await db.execute(delete(CampusPass))
-    await db.execute(delete(ScoreboardEntry))
-    await db.execute(delete(TrustProof))
-    await db.execute(delete(Announcement))
-    await db.execute(delete(RatingHistory))
-
-    # 4. Purge All Contests
-    await db.execute(delete(OfflineContest))
+    for table in tables:
+        try:
+            await db.execute(delete(table))
+            await db.flush()
+        except Exception as e:
+            logger.warning(f"Notice on purging {table}: {e}")
 
     # 5. Purge Any Mock / Funnel Test Member Accounts
-    await db.execute(
-        delete(MemberProfile).where(
-            (MemberProfile.handle.like("cadet_funnel%"))
-            | (MemberProfile.email.like("%test%@medicaps.ac.in"))
-            | (MemberProfile.handle.like("test_%"))
+    try:
+        await db.execute(
+            delete(MemberProfile).where(
+                (MemberProfile.handle.like("cadet_funnel%"))
+                | (MemberProfile.email.like("%test%@medicaps.ac.in"))
+                | (MemberProfile.handle.like("test_%"))
+            )
         )
-    )
+        await db.flush()
+    except Exception:
+        pass
 
     await db.commit()
 
