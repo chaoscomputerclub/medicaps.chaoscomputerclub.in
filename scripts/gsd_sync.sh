@@ -27,6 +27,7 @@ SSH_KEY="$HOME/.ssh/shopground_era_key"
 REMOTE_REPO="/root/projects/medicaps.chaoscomputerclub.in"
 REMOTE_API_DIR="/root/projects/ccc-medicaps-api"
 REMOTE_WEB_DIR="/var/www/ccc-medicaps"
+REMOTE_ADMIN_DIR="/var/www/ccc-medicaps-admin"
 
 COMMIT_MSG="${1:-feat: sync latest changes and deploy via GSD framework}"
 
@@ -99,11 +100,16 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
   echo '→ Backend service restarted.'
 "
 
-  # 3. Sync local pre-built verified dist bundle to remote web directory
-  echo '→ Syncing verified frontend bundle...'
+  # 3. Sync local pre-built verified student portal to remote web directory
+  echo '→ Syncing verified student portal frontend bundle...'
   rsync -avz -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" dist/ "${SERVER_USER}@${SERVER_HOST}:${REMOTE_WEB_DIR}/.output/public/"
 
-  ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
+  # 4. Sync local pre-built verified admin console to remote admin web directory
+  echo '→ Syncing verified admin console frontend bundle...'
+  ssh -n -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "mkdir -p ${REMOTE_ADMIN_DIR}"
+  rsync -avz -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" dist-admin/ "${SERVER_USER}@${SERVER_HOST}:${REMOTE_ADMIN_DIR}/"
+
+  ssh -n -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
     systemctl reload nginx
   "
 
