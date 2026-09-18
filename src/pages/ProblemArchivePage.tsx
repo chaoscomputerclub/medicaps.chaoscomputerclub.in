@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
-import { SectionHeader, EmptyState } from "@/organization/components/ui";
+import { SectionHeader, PageHeader, EmptyState } from "@/organization/components/ui";
 import { ProblemArchiveSkeleton } from "@/organization/components/skeletons";
 import { useSwrData } from "@/lib/cache/swrCache";
 
@@ -21,25 +21,25 @@ export function ProblemArchivePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
-        <div className="space-y-2">
-          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
+      <PageHeader
+        kicker="03 // Problem Repository"
+        index="INDEX 3.0 · ARCHIVE"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
             Read-only Institutional Record
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            Problem Archive
-          </h1>
-          <p className="max-w-xl text-sm leading-relaxed text-zinc-400">
-            Official algorithmic problem statements and editorials released after each contest room concludes.
-          </p>
-        </div>
-        <div className="flex size-14 items-center justify-center rounded-none border border-white/10 bg-zinc-950/60 text-lime-400 shadow-inner">
-          <BookOpenCheck className="size-7" />
-        </div>
-      </header>
+        }
+        title="Problem Archive"
+        description="Official algorithmic problem statements and editorials released after each contest room concludes."
+        action={
+          <div className="flex size-14 items-center justify-center rounded-none border border-white/10 bg-zinc-950/60 text-lime-400 shadow-inner">
+            <BookOpenCheck className="size-7" />
+          </div>
+        }
+      />
 
       <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
-        <SectionHeader kicker="Released sets" title="Completed contest problems" />
+        <SectionHeader kicker="01 // Released Sets" index="INDEX 3.1" title="Completed Contest Problems" />
 
         {complete.length === 0 ? (
           <EmptyState

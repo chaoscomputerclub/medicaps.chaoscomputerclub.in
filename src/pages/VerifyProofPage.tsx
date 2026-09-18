@@ -18,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProofBadge } from "@/organization/components/ProofBadge";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { VerifyProofSkeleton } from "@/organization/components/skeletons";
+import { PageHeader } from "@/organization/components/ui";
 import { useSwrData } from "@/lib/cache/swrCache";
 
 export function VerifyProofPage() {
@@ -55,23 +56,18 @@ export function VerifyProofPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6">
-      <header className="flex flex-col justify-between gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="flex size-2 rounded-full bg-lime-400 animate-pulse" />
-            <p className="font-mono text-xs uppercase tracking-widest text-lime-400 font-bold">
-              Chaos Computer Club · Medi-Caps Chapter
-            </p>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-mono font-black text-white uppercase tracking-tight">
-            Certificate & Proof Verification
-          </h1>
-          <p className="text-sm text-zinc-400 mt-1">
-            Public SHA-256 Cryptographic Credential & Contest Achievement Verification Console.
-          </p>
-        </div>
-        <ShieldCheck className="w-10 h-10 text-lime-400 opacity-90 shrink-0" />
-      </header>
+      <PageHeader
+        kicker="07 // Cryptographic Trust"
+        index="INDEX 7.0 · PROOF VERIFICATION"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
+            SHA-256 Verified Credentials
+          </span>
+        }
+        title="Proof Verification"
+        description="Public SHA-256 Cryptographic Credential & Contest Achievement Verification Console."
+        action={<ShieldCheck className="w-10 h-10 text-lime-400 opacity-90 shrink-0" />}
+      />
 
       {/* ── SEARCH CARD ── */}
       <Card className="rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl overflow-hidden">

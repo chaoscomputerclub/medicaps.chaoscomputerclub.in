@@ -328,6 +328,9 @@ export function ContestArenaPage() {
           <div className="h-4 w-px bg-white/10" />
 
           <div className="flex items-center gap-2.5 min-w-0">
+            <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400 hidden sm:inline">
+              (02 // Final Arena)
+            </span>
             <h1 className="text-xs font-bold uppercase tracking-wider text-white font-mono truncate max-w-[200px] md:max-w-[320px]">
               {title}
             </h1>
@@ -453,10 +456,13 @@ export function ContestArenaPage() {
             <div className="space-y-5">
               <div className="space-y-2 border-b border-white/10 pb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold uppercase tracking-tight text-white font-mono">
-                    {activeProblem.problem_index}. {activeProblem.title}
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                    (01 // Problem {activeProblem.problem_index})
                   </span>
                 </div>
+                <h2 className="text-xl font-bold uppercase tracking-tight text-white font-mono">
+                  {activeProblem.title}
+                </h2>
                 <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
                   <Badge
                     variant="outline"
@@ -485,8 +491,8 @@ export function ContestArenaPage() {
               {/* Input Format */}
               {activeProblem.input_format && (
                 <div className="space-y-1.5">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
-                    Input Format
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
+                    (01 // Input Format)
                   </h3>
                   <div className="text-xs text-zinc-200 font-mono p-3 rounded-none bg-zinc-900 border border-white/10 whitespace-pre-line">
                     {activeProblem.input_format}
@@ -497,8 +503,8 @@ export function ContestArenaPage() {
               {/* Output Format */}
               {activeProblem.output_format && (
                 <div className="space-y-1.5">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
-                    Output Format
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
+                    (02 // Output Format)
                   </h3>
                   <div className="text-xs text-zinc-200 font-mono p-3 rounded-none bg-zinc-900 border border-white/10 whitespace-pre-line">
                     {activeProblem.output_format}
@@ -509,8 +515,8 @@ export function ContestArenaPage() {
               {/* Constraints */}
               {activeProblem.constraints && (
                 <div className="space-y-1.5">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
-                    Constraints
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
+                    (03 // Constraints)
                   </h3>
                   <div className="text-xs text-amber-300 font-mono p-3 rounded-none bg-amber-950/20 border border-amber-500/20 whitespace-pre-line">
                     {activeProblem.constraints}
@@ -520,8 +526,8 @@ export function ContestArenaPage() {
 
               {/* Sample Testcases */}
               <div className="space-y-3 pt-2">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
-                  Sample Test Cases
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
+                  (04 // Sample Testcases)
                 </h3>
                 {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 ? (
                   activeProblem.sample_testcases.map((tc, idx) => (

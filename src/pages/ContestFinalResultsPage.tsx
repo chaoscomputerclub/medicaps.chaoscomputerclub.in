@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/organization/components/ui";
 
 import { formatWhen } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
@@ -56,19 +57,17 @@ export function ContestFinalResultsPage() {
         <ArrowLeft className="size-3.5" /> Back to contest
       </Link>
 
-      <header className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl space-y-2">
-        <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
-          Round 2 · Offline Campus Final
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
-          {contest ? `${contest.title} — Final Results` : "Final Results"}
-        </h1>
-        <p className="max-w-2xl text-sm text-zinc-400">
-          {contest
-            ? `Held ${formatWhen(contest.starts_at)} at ${contest.venue}. Proctored, air-gapped, and verified.`
-            : "Proctored, air-gapped, and verified standings."}
-        </p>
-      </header>
+      <PageHeader
+        kicker="02 // Offline Final Results"
+        index="ROUND 2 · AIR-GAPPED VERIFIED"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
+            Round 2 · Offline Campus Final
+          </span>
+        }
+        title={contest ? `${contest.title} — Final Results` : "Final Results"}
+        description={contest ? `Held ${formatWhen(contest.starts_at)} at ${contest.venue}. Proctored, air-gapped, and verified.` : "Proctored, air-gapped, and verified standings."}
+      />
 
       {rows.length === 0 ? (
         <Card className="rounded-none border-dashed border-white/10 bg-zinc-900/40">

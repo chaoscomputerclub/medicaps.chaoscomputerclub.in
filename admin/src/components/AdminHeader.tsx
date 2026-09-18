@@ -45,22 +45,22 @@ export function AdminHeader({
       <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
         {/* Branding & Console Identifier */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 flex-shrink-0">
+          <div className="w-9 h-9 rounded-none bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 flex-shrink-0">
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase tracking-widest font-black text-white">
-                CHAOS COMPUTER CLUB
+              <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
+                (99 // Proctor Command)
               </span>
-              <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px] font-mono uppercase px-1.5 py-0">
+              <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px] font-mono uppercase px-1.5 py-0 rounded-none">
                 PROCTOR CONSOLE
               </Badge>
             </div>
             <div className="text-[11px] font-mono text-zinc-400 flex items-center gap-2">
-              <span>Medi-Caps Chapter</span>
+              <span className="text-white font-bold font-mono">CHAOS COMPUTER CLUB</span>
               <span className="text-zinc-600">·</span>
-              <span className="text-zinc-400 font-medium">Air-Gapped Lab Command Center</span>
+              <span className="text-zinc-400 font-medium">Medi-Caps Chapter Command</span>
             </div>
           </div>
         </div>

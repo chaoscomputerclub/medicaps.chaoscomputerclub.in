@@ -58,7 +58,10 @@ export function AssessmentConfirmModal({
               <AlertTriangle className="size-4" />
             </div>
             <div>
-              <DialogTitle className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+              <span className="block font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
+                (01 // Assessment Gate)
+              </span>
+              <DialogTitle className="font-mono text-xs font-bold uppercase tracking-wider text-white mt-0.5">
                 Strict Assessment Confirmation
               </DialogTitle>
             </div>
@@ -74,7 +77,7 @@ export function AssessmentConfirmModal({
             <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
               Medi-Caps Arena · Round 1 Screening
             </span>
-            <h2 className="text-lg font-bold text-white mt-1 leading-snug">
+            <h2 className="text-lg font-bold font-mono uppercase text-white mt-1 leading-snug">
               {contestTitle}
             </h2>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">

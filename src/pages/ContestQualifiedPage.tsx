@@ -19,6 +19,7 @@ import { fetchContestDetailThunk, fetchCampusPassThunk } from "@/store/slices/co
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
+import { PageHeader, SectionHeader } from "@/organization/components/ui";
 
 export function ContestQualifiedPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -140,34 +141,31 @@ export function ContestQualifiedPage() {
       {/* ─── SCENARIO 1: ASSESSMENT ENDED + QUALIFIED TOP 30 (CAMPUS PASS HERO) ───────────── */}
       {isAssessmentEnded && isTop30Qualified ? (
         <>
-          {/* Status Badge */}
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="size-5 text-emerald-400" />
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-lime-400 font-bold">
-                Round 2 · Air-Gapped Lab Final Pass
-              </p>
-              <h1 className="text-xl font-black text-white">
-                {rank ? `Rank #${rank}` : "Verified Top 30"} — Lab Pass Issued
-              </h1>
-            </div>
-            <span className="ml-auto rounded-none border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-black text-lime-400 tabular-nums">
-              {score} pts
-            </span>
-          </div>
+          {/* Status PageHeader */}
+          <PageHeader
+            kicker="02 // Campus Pass"
+            index="ROUND 2 · AIR-GAPPED FINAL"
+            title={`${rank ? `Rank #${rank}` : "Verified Top 30"} — Lab Pass Issued`}
+            description="Official air-gapped lab final workstation access pass for verified qualifiers."
+            badge={
+              <span className="rounded-none border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-black text-lime-400 tabular-nums">
+                {score} PTS
+              </span>
+            }
+          />
 
           {pass ? (
             <div className="space-y-6">
               {/* QR code — full hero card */}
               <div className="flex flex-col items-center gap-5 rounded-none border border-lime-400/30 bg-zinc-900/60 p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
-                <div className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-lime-400/10 blur-3xl" />
+                <div className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-none bg-lime-400/10 blur-3xl" />
                 
                 {/* Header chip */}
                 <div className="flex items-center justify-between w-full border-b border-white/10 pb-3">
                   <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
                     Official Medi-Caps Gate Pass
                   </span>
-                  <span className={`font-mono text-[10px] uppercase font-bold rounded border px-2 py-0.5 ${
+                  <span className={`font-mono text-[10px] uppercase font-bold rounded-none border px-2 py-0.5 ${
                     pass.check_in_status === "checked_in" || pass.status === "checked_in"
                       ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/30"
                       : "text-amber-400 border-amber-500/30 bg-amber-950/30"
@@ -246,8 +244,8 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Day of instructions */}
-              <div className="space-y-3 rounded-none border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md shadow-xl">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-white">Day-Of Lab Instructions</p>
+              <div className="space-y-4 rounded-none border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
+                <SectionHeader kicker="01 // Protocol" index="LAB PROTOCOL" title="Day-Of Lab Instructions" />
                 <ul className="space-y-2">
                   {[
                     "Carry your physical university ID card (PRN verification at entrance).",
@@ -264,8 +262,8 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Venue */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-5 space-y-3 backdrop-blur-md shadow-xl">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-white">Venue & Hardware Environment</p>
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
+                <SectionHeader kicker="02 // Hardware Specs" index="TERMINAL ENVIRONMENT" title="Venue & Environment" />
                 <div className="space-y-2 font-mono">
                   <div className="flex items-start gap-3">
                     <MapPin className="mt-0.5 size-4 shrink-0 text-lime-400" />
@@ -326,22 +324,19 @@ export function ContestQualifiedPage() {
       ) : !isAssessmentEnded ? (
         /* ─── SCENARIO 2: ASSESSMENT NOT YET COMPLETED ────────────────────── */
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Clock className="size-5 text-amber-400" />
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-amber-400 font-bold">
-                Phase 1 Screening Required
-              </p>
-              <h1 className="text-xl font-black text-white">Assessment Not Completed</h1>
-            </div>
-          </div>
+          <PageHeader
+            kicker="01 // Screening Status"
+            index="ROUND 1 · SCREENING PENDING"
+            title="Assessment Not Completed"
+            description="Campus Passes are exclusively awarded to the Top 30 verified cadets in Round 1 screening."
+          />
 
           <div className="flex flex-col items-center gap-4 rounded-none border border-amber-500/30 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
             <div className="flex size-16 items-center justify-center rounded-none border border-amber-500/30 bg-amber-950/20 text-amber-400">
               <Lock className="size-7" />
             </div>
             <div className="space-y-2 max-w-md">
-              <h3 className="font-bold text-base text-white font-mono">Complete Phase 1 Online Screening</h3>
+              <h3 className="font-bold text-base text-white font-mono uppercase">Complete Phase 1 Online Screening</h3>
               <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                 Campus Passes are exclusively awarded to the Top 30 verified cadets in Round 1 screening. Complete your 120-minute proctored session before the assessment window ends.
               </p>
@@ -361,18 +356,17 @@ export function ContestQualifiedPage() {
       ) : (
         /* ─── SCENARIO 3: ASSESSMENT ENDED BUT DID NOT QUALIFY IN TOP 30 ──── */
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Lock className="size-5 text-zinc-500" />
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-zinc-400 font-bold">
-                Qualification Status
-              </p>
-              <h1 className="text-xl font-black text-white">Did Not Qualify (Cutoff: Top 30)</h1>
-            </div>
-            <span className="ml-auto rounded-none border border-white/10 bg-zinc-800/60 px-3 py-1 font-mono text-xs font-bold text-zinc-400 tabular-nums">
-              {score} pts
-            </span>
-          </div>
+          <PageHeader
+            kicker="02 // Qualification Matrix"
+            index="CUTOFF TOP 30 · CONCLUDED"
+            title="Did Not Qualify"
+            description="Your screening attempt was recorded. Only the top 30 participants advance to the physical on-campus lab final."
+            badge={
+              <span className="rounded-none border border-white/10 bg-zinc-800/60 px-3 py-1 font-mono text-xs font-bold text-zinc-400 tabular-nums">
+                {score} PTS
+              </span>
+            }
+          />
 
           <div className="flex flex-col items-center gap-4 rounded-none border border-white/10 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
             <div className="flex size-16 items-center justify-center rounded-none border border-white/10 bg-zinc-950/60 text-zinc-500">

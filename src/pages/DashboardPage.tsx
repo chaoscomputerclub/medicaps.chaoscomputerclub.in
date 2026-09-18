@@ -7,6 +7,7 @@ import { RatingChart } from "@/organization/components/RatingChart";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";
 import {
   Metric,
+  PageHeader,
   SectionHeader,
   StatusDot,
   TierBadge,
@@ -67,28 +68,23 @@ export function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header Profile Summary */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
-        <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
-            Member Operations Console
-          </p>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mt-1.5">
-            Good morning{greetingName ? `, ${greetingName}.` : "."}
-          </h1>
-          <p className="text-sm text-slate-400 mt-1 max-w-xl">
-            Your official competitive record is sealed inside verified Medi-Caps workstation laboratories.
-          </p>
-        </div>
-        <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-xs min-w-[200px]">
-          <TierBadge>{member?.tier || "1★ Explorer"}</TierBadge>
-          <strong className="text-3xl md:text-4xl font-mono font-bold text-white tracking-tight tabular-nums">
-            {member?.rating ?? 1200}
-          </strong>
-          <span className="text-[10px] font-mono font-bold tracking-wider text-slate-500 uppercase">
-            University Rank #{member?.university_rank ?? 0}
-          </span>
-        </div>
-      </header>
+      <PageHeader
+        kicker="00 // Operations"
+        index="INDEX 0.0 · CADET OPS"
+        title={`Good morning${greetingName ? `, ${greetingName}.` : "."}`}
+        description="Your official competitive record is sealed inside verified Medi-Caps workstation laboratories."
+        action={
+          <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-xs min-w-[200px]">
+            <TierBadge>{member?.tier || "1★ Explorer"}</TierBadge>
+            <strong className="text-3xl md:text-4xl font-mono font-bold text-white tracking-tight tabular-nums">
+              {member?.rating ?? 1200}
+            </strong>
+            <span className="text-[10px] font-mono font-bold tracking-wider text-slate-500 uppercase">
+              University Rank #{member?.university_rank ?? 0}
+            </span>
+          </div>
+        }
+      />
 
       {/* Live Contest Command or Upcoming Briefing */}
       {live ? (
@@ -99,12 +95,12 @@ export function DashboardPage() {
               <div className="flex items-center gap-3">
                 <StatusDot status="live" />
                 <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">
-                  Active Championship · {live.season}
+                  Live Arena Now Active
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{live.title}</h2>
-              <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">{live.summary}</p>
-              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-2">
+              <h2 className="text-2xl md:text-3xl font-mono font-bold text-white uppercase">{live.title}</h2>
+              <p className="text-sm text-slate-300 max-w-xl leading-relaxed">{live.summary}</p>
+              <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-slate-400">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-lime-400" />
                   {live.venue}
@@ -115,7 +111,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="pt-2">
-                <Button asChild className="bg-lime-400 hover:bg-lime-300 text-black font-bold font-bold px-6">
+                <Button asChild className="bg-lime-400 hover:bg-lime-300 text-black font-bold px-6">
                   <Link to={`/portal/contests/${live.slug}`}>
                     Enter Live Arena <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
@@ -130,7 +126,7 @@ export function DashboardPage() {
           </div>
         </section>
       ) : next ? (
-        <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <StatusDot status="upcoming" />
@@ -138,7 +134,7 @@ export function DashboardPage() {
                 Next Campus Contest
               </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold text-white">{next.title}</h2>
+            <h2 className="text-xl md:text-2xl font-mono font-bold text-white uppercase">{next.title}</h2>
             <p className="text-sm text-slate-400 max-w-xl">{next.summary}</p>
           </div>
           <div className="flex flex-wrap items-center gap-6 font-mono text-xs">
@@ -163,7 +159,8 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
           <SectionHeader
-            kicker="Performance Trajectory"
+            kicker="01 // Rating Progression"
+            index="INDEX 0.1"
             title="University Contest Rating"
             action={
               <Link to="/portal/profile" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
@@ -176,7 +173,7 @@ export function DashboardPage() {
 
         <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm flex flex-col justify-between">
           <div>
-            <SectionHeader kicker="Hardware Pass" title="Lab Workstation" />
+            <SectionHeader kicker="02 // Hardware Pass" index="INDEX 0.2" title="Lab Workstation" />
             <div className="p-5 rounded-none border border-white/10 bg-zinc-950/80 font-mono space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-lime-400">CCC / MCU</span>
@@ -211,7 +208,8 @@ export function DashboardPage() {
       {/* Campus Scoreboard Radar */}
       <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
         <SectionHeader
-          kicker="Division Radar"
+          kicker="03 // Standings Radar"
+          index="INDEX 0.3"
           title="Verified Campus Scoreboard"
           action={
             <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
@@ -225,7 +223,8 @@ export function DashboardPage() {
       {/* Live Campus Activity Stream */}
       <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
         <SectionHeader
-          kicker="Campus Network"
+          kicker="04 // Network Feed"
+          index="INDEX 0.4"
           title="Live Activity Stream"
           action={
             <Link to="/portal/verify" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">

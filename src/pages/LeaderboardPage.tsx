@@ -3,6 +3,7 @@ import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronUp, Minus, Trophy } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import { LeaderboardRowSkeleton } from "@/organization/components/skeletons";
+import { PageHeader } from "@/organization/components/ui";
 import { useSwrData } from "@/lib/cache/swrCache";
 import {
   Table,
@@ -40,26 +41,24 @@ export function LeaderboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
-              <Trophy className="size-3 text-lime-400" /> Verified Elo Standings
-            </span>
+      <PageHeader
+        kicker="02 // Standings"
+        index="INDEX 2.0 · ELO MATRIX"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
+            <Trophy className="size-3 text-lime-400" /> Verified Elo Standings
+          </span>
+        }
+        title="University Leaderboard"
+        description="Unified rankings across CSE, IT, AIDS, and Cyber Security. Only verified contest performance impacts student Elo rating."
+        action={
+          <div className="flex flex-col items-start md:items-end justify-center rounded-none border border-white/10 bg-zinc-950/60 p-4 min-w-[200px] backdrop-blur-sm">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-400">Rating Cycle</span>
+            <strong className="font-mono text-lg font-black text-white">MONSOON '26</strong>
+            <small className="font-mono text-xs text-lime-400 tabular-nums">{data.length} active members</small>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            University Leaderboard
-          </h1>
-          <p className="max-w-xl text-sm leading-relaxed text-zinc-400">
-            Unified rankings across CSE, IT, AIDS, and Cyber Security. Only verified contest performance impacts student Elo rating.
-          </p>
-        </div>
-        <div className="flex flex-col items-start md:items-end justify-center rounded-none border border-white/10 bg-zinc-950/60 p-4 min-w-[200px] backdrop-blur-sm">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-400">Rating Cycle</span>
-          <strong className="font-mono text-lg font-black text-white">MONSOON '26</strong>
-          <small className="font-mono text-xs text-lime-400 tabular-nums">{data.length} active members</small>
-        </div>
-      </header>
+        }
+      />
 
       {/* Table Container */}
       <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-md">

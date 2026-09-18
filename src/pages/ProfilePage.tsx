@@ -271,11 +271,16 @@ export function ProfilePage() {
           </Avatar>
 
           <div className="space-y-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
-              Competitive Identity
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                (05 // Cadet Identity)
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+                INDEX 5.0 · INSTITUTIONAL DOSSIER
+              </span>
+            </div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white uppercase tracking-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white uppercase font-mono tracking-tight">
                 {m.full_name || m.handle}
               </h1>
 
@@ -357,7 +362,7 @@ export function ProfilePage() {
               {m.is_core_member && (
                 <>
                   <span>•</span>
-                  <span className="bg-amber-400/10 border border-amber-400/40 text-amber-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                  <span className="bg-amber-400/10 border border-amber-400/40 text-amber-400 px-1.5 py-0.5 rounded-none text-[10px] font-bold">
                     CORE
                   </span>
                 </>
@@ -471,7 +476,7 @@ export function ProfilePage() {
       {/* Charts & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
-          <SectionHeader kicker="Rating archive" title="Competitive trajectory" />
+          <SectionHeader kicker="01 // Rating Archive" index="INDEX 5.1 · TRAJECTORY" title="Competitive Trajectory" />
           <RatingChart data={history} />
         </div>
         <div>
@@ -481,7 +486,7 @@ export function ProfilePage() {
 
       {/* Offline Battle History */}
       <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
-        <SectionHeader kicker="Permanent record" title="Offline battle history" />
+        <SectionHeader kicker="02 // Permanent Record" index="INDEX 5.2 · CONTEST LOGS" title="Offline Battle History" />
         <div className="divide-y divide-white/5">
           {battles.length === 0 ? (
             <div className="text-center py-8 text-zinc-500 font-mono text-xs">
@@ -498,7 +503,7 @@ export function ProfilePage() {
                   })}
                 </time>
                 <div>
-                  <h3 className="text-sm font-bold text-white">{b.contest}</h3>
+                  <h3 className="text-sm font-bold text-white font-mono uppercase">{b.contest}</h3>
                   <code className="font-mono text-[10px] text-zinc-500">{b.certificate_id}</code>
                 </div>
                 <div className="flex items-center gap-4 font-mono text-xs">
@@ -518,7 +523,7 @@ export function ProfilePage() {
       {/* Achievement Ledger & Proof */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
-          <SectionHeader kicker="Milestones" title="Achievement ledger" />
+          <SectionHeader kicker="03 // Milestones" index="INDEX 5.3 · HONORS LEDGER" title="Achievement Ledger" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {achievements.length === 0 ? (
               <div className="text-center py-8 text-zinc-500 font-mono text-xs col-span-2">
@@ -545,7 +550,7 @@ export function ProfilePage() {
         </div>
 
         <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
-          <SectionHeader kicker="Cryptographic result" title="Latest proof" />
+          <SectionHeader kicker="04 // Cryptographic Result" index="INDEX 5.4 · CHAIN PROOF" title="Latest Proof" />
           {proofs[0] ? (
             <>
               <ProofBadge proof={proofs[0]} />

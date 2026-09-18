@@ -1,20 +1,87 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+export function PageHeader({
+  kicker,
+  index,
+  title,
+  description,
+  action,
+  badge,
+  className,
+}: {
+  kicker: string;
+  index?: string;
+  title: ReactNode;
+  description?: ReactNode;
+  action?: ReactNode;
+  badge?: ReactNode;
+  className?: string;
+}) {
+  const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
+  return (
+    <header
+      className={cn(
+        "rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-end justify-between gap-6",
+        className
+      )}
+    >
+      <div className="space-y-2 max-w-2xl">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+            {formattedKicker}
+          </span>
+          {index && (
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+              {index}
+            </span>
+          )}
+          {badge}
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase font-mono">
+          {title}
+        </h1>
+        {description && (
+          <p className="text-sm leading-relaxed text-zinc-400 font-sans">
+            {description}
+          </p>
+        )}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </header>
+  );
+}
+
 export function SectionHeader({
   kicker,
   title,
+  index,
   action,
+  className,
 }: {
   kicker: string;
-  title: string;
+  title: ReactNode;
+  index?: string;
   action?: ReactNode;
+  className?: string;
 }) {
+  const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
   return (
-    <div className="flex items-end justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+    <div className={cn("flex items-end justify-between gap-4 border-b border-white/10 pb-4 mb-6", className)}>
       <div>
-        <p className="text-[10px] font-mono font-bold tracking-wider text-lime-400 uppercase">{kicker}</p>
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-1">{title}</h2>
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] font-mono font-bold tracking-[0.2em] text-lime-400 uppercase">
+            {formattedKicker}
+          </p>
+          {index && (
+            <span className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase tabular-nums">
+              {index}
+            </span>
+          )}
+        </div>
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-1 uppercase font-mono">
+          {title}
+        </h2>
       </div>
       {action && <div>{action}</div>}
     </div>

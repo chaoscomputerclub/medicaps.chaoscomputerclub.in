@@ -4,6 +4,7 @@ import { ArrowLeft, Ban, CheckCircle2 } from "lucide-react";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ProblemDetailSkeleton } from "@/organization/components/skeletons";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { PageHeader, SectionHeader } from "@/organization/components/ui";
 
 export function ProblemDetailPage() {
   const { problemSlug } = useParams<{ problemSlug: string }>();
@@ -58,27 +59,22 @@ export function ProblemDetailPage() {
         <ArrowLeft className="size-3.5" /> Problem archive
       </Link>
 
-      <header className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-start gap-5">
-        <span className="font-mono text-3xl font-black text-lime-400 border border-lime-400/40 rounded-none px-4 py-2 bg-lime-400/10 shrink-0">
-          {problem.index}
-        </span>
-        <div className="min-w-0">
-          <p className="font-mono text-xs uppercase tracking-wider text-zinc-400">
-            {contest.title} · <span className="text-white font-bold">{problem.points} points</span>
-          </p>
-          <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white uppercase mt-1">
-            {problem.title}
-          </h1>
-          <p className="font-mono text-xs text-zinc-400 mt-1">
-            {problem.topic} · <span className="tabular-nums text-white">{problem.solved_count}</span> verified solves
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        kicker="03 // Problem Dossier"
+        index={`INDEX 3.${problem.index} · ${problem.points} PTS`}
+        title={problem.title}
+        description={`${contest.title} · ${problem.topic} · ${problem.solved_count} verified solves recorded from campus workstations.`}
+        badge={
+          <span className="font-mono text-sm font-black text-lime-400 border border-lime-400/40 rounded-none px-3 py-1 bg-lime-400/10">
+            PROBLEM {problem.index}
+          </span>
+        }
+      />
 
       <div className="flex items-start gap-4 p-4 rounded-none border border-amber-500/30 bg-amber-950/20 text-amber-300">
         <Ban className="size-5 shrink-0 mt-0.5" />
         <div>
-          <strong className="font-mono text-sm block">No online submission surface</strong>
+          <strong className="font-mono text-sm block uppercase">No online submission surface</strong>
           <p className="text-xs text-zinc-300 mt-0.5">
             This statement is preserved for study. Official attempts were accepted only from assigned campus workstations during the contest window.
           </p>
@@ -86,14 +82,11 @@ export function ProblemDetailPage() {
       </div>
 
       <article className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
-        <div>
-          <span className="inline-block rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-widest text-lime-400 mb-2">
-            Official Editorial
-          </span>
-          <h2 className="text-xl font-mono font-bold text-white uppercase">
-            Post-Contest Analysis
-          </h2>
-        </div>
+        <SectionHeader
+          kicker="01 // Official Editorial"
+          index={`ANALYSIS · ${problem.points} PTS`}
+          title="Post-Contest Analysis"
+        />
 
         <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">
           {problem.editorial}

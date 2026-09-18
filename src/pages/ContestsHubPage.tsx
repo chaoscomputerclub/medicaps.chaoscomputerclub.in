@@ -29,6 +29,7 @@ import { getUniversityLeaderboardData } from "@/organization/data/portal.functio
 import type { LeaderboardEntry } from "@/organization/data/types";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestsHubSkeleton, Skeleton } from "@/organization/components/skeletons";
+import { PageHeader, SectionHeader } from "@/organization/components/ui";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
 
@@ -263,28 +264,17 @@ export function ContestsHubPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
 
       {/* ─── HERO HEADER ─────────────────────────────── */}
-      <header className="relative overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-10 backdrop-blur-md shadow-2xl">
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-lime-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-lime-400/5 blur-3xl" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-widest text-lime-400">
-                <Flame className="size-3 text-lime-400" /> CCC ARENA · SEASON 2026
-              </span>
-              <span className="hidden rounded-none border border-white/10 bg-zinc-800/60 px-2.5 py-1 text-[11px] font-mono text-zinc-400 sm:inline-block">
-                Air-Gapped Finals Enabled
-              </span>
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
-                Weekly Contests
-              </h1>
-              <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-zinc-400">
-                Weekly algorithmic battles for Medi-Caps cadets. Top 30 online screening qualifiers earn an authenticated QR pass to the physical air-gapped lab final.
-              </p>
-            </div>
-          </div>
+      <PageHeader
+        kicker="01 // Contests & Arena"
+        index="INDEX 1.0 · SEASON 2026"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-widest text-lime-400">
+            <Flame className="size-3 text-lime-400" /> Air-Gapped Finals Enabled
+          </span>
+        }
+        title="Weekly Contests"
+        description="Weekly algorithmic battles for Medi-Caps cadets. Top 30 online screening qualifiers earn an authenticated QR pass to the physical air-gapped lab final."
+        action={
           <div className="grid grid-cols-3 divide-x divide-white/10 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-sm lg:min-w-[320px]">
             {[
               { label: "Upcoming", value: upcomingContests.length },
@@ -297,15 +287,16 @@ export function ContestsHubPage() {
               </div>
             ))}
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* ─── UPCOMING CONTESTS ───────────────────────── */}
       <section className="space-y-5">
-        <div className="flex items-center gap-2">
-          <div className="size-2 rounded-full bg-lime-400 animate-pulse" />
-          <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">Upcoming Weekly Contest</h2>
-        </div>
+        <SectionHeader
+          kicker="01 // Active Battle"
+          index="ROUND 0.1"
+          title="Upcoming Weekly Contest"
+        />
 
         {upcomingContests.length === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-none border border-white/10 bg-zinc-900/40 py-16 text-center backdrop-blur-sm">

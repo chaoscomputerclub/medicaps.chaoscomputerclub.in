@@ -54,6 +54,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PageHeader } from "@/organization/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { SettingsSkeleton } from "@/organization/components/skeletons";
 
@@ -198,16 +199,17 @@ export function SettingsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Page Header */}
-      <header className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-center justify-between">
-        <div className="space-y-1">
+      <PageHeader
+        kicker="06 // Configuration"
+        index="INDEX 6.0 · SECURITY & PREFS"
+        badge={
           <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
             Member Configuration & Security
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase">
-            Settings
-          </h1>
-        </div>
-      </header>
+        }
+        title="Settings"
+        description="Manage your verified identity, email delivery preferences, account security, and terminal sessions."
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Left Sub-navigation */}

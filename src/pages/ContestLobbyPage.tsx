@@ -75,9 +75,17 @@ export function ContestLobbyPage() {
       {isAssessmentSubmitted ? (
         <div className="space-y-8 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">
           <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                (01 // Assessment Concluded)
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+                ROUND 1 · RECORDED
+              </span>
+            </div>
             <div className="flex items-center gap-3">
               <CheckCircle2 className="size-6 text-emerald-400" />
-              <h1 className="text-2xl font-black text-white">Assessment Submitted</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-white font-mono uppercase">Assessment Submitted</h1>
             </div>
             <p className="text-sm leading-relaxed text-zinc-400">
               Your attempt is locked and recorded. Results are published once the screening window closes.
@@ -99,9 +107,19 @@ export function ContestLobbyPage() {
       ) : !registration?.registered ? (
         /* ─── NOT REGISTERED ─────────────────────────────── */
         <div className="space-y-6 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">
-          <div className="space-y-2">
-            <Lock className="size-6 text-zinc-500" />
-            <h1 className="text-2xl font-black text-white">Not Registered</h1>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                (01 // Gated Entry)
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+                ROUND 1 · UNREGISTERED
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Lock className="size-6 text-zinc-500" />
+              <h1 className="text-2xl sm:text-3xl font-black text-white font-mono uppercase">Registration Required</h1>
+            </div>
             <p className="text-sm text-zinc-400">
               Register for this contest first, then return here when the assessment window opens.
             </p>
@@ -115,10 +133,15 @@ export function ContestLobbyPage() {
         <div className="space-y-10 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">
           {/* Title */}
           <div className="space-y-2">
-            <span className="inline-block rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase tracking-widest text-lime-400">
-              Round 1 · Online Assessment
-            </span>
-            <h1 className="text-3xl font-black leading-tight text-white">{contest.title}</h1>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                (01 // Assessment Lobby)
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                ROUND 1 · ONLINE
+              </span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight text-white uppercase font-mono">{contest.title}</h1>
           </div>
 
           {/* Warning */}
@@ -185,7 +208,7 @@ export function ContestLobbyPage() {
                 tabIndex={0}
                 onClick={() => setAck((v) => !v)}
                 onKeyDown={(e) => e.key === " " && setAck((v) => !v)}
-                className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded border transition-colors focus:outline-none ${
+                className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-none border transition-colors focus:outline-none ${
                   ack
                     ? "border-lime-400 bg-lime-400 text-black"
                     : "border-white/20 bg-transparent hover:border-lime-400/60"
@@ -193,7 +216,7 @@ export function ContestLobbyPage() {
               >
                 {ack && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </div>

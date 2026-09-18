@@ -11,16 +11,21 @@ import { type ReactNode } from "react";
 
 /** Instrumental auth chrome: single unified box card with high-impact typography. */
 export function AuthLayout({
+  kicker = "00 // Identity Gate",
+  index = "INDEX 0.0 · CREDENTIAL ENTRY",
   title,
   description,
   children,
   footer,
 }: {
+  kicker?: string;
+  index?: string;
   title: ReactNode;
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center bg-black px-4 py-12 sm:py-8 overflow-hidden">
       {/* Ambient background grid & lighting */}
@@ -46,6 +51,16 @@ export function AuthLayout({
         {/* Main Box Card */}
         <div className="relative z-10 w-full rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-xl shadow-2xl overflow-hidden">
           <div className="border-b border-white/10 px-6 py-6 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                {formattedKicker}
+              </span>
+              {index && (
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+                  {index}
+                </span>
+              )}
+            </div>
             <h1 className="font-mono font-black uppercase tracking-tight text-white text-3xl sm:text-4xl leading-tight">
               {title}
             </h1>

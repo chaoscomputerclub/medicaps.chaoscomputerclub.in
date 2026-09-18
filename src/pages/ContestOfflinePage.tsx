@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/organization/components/ui";
 import { Countdown } from "@/features/contest/components";
 import { FINALIST_SEATS } from "@/features/contest/lifecycle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -113,20 +114,17 @@ export function ContestOfflinePage() {
         Back to contest
       </Link>
 
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        kicker="02 // Air-Gapped Lab Final"
+        index="INDEX 2.0 · ON-PREMISE"
+        badge={
           <Badge variant="outline" className="rounded-none border border-lime-400/40 bg-lime-400/10 font-mono text-[10px] uppercase font-bold tracking-wider text-lime-400">
-            Finalist access granted
+            Finalist Access Granted
           </Badge>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
-            Round 2 · On-Premise Lab Arena
-          </span>
-        </div>
-        <h1 className="text-3xl font-black tracking-tight text-white">{contest.title}</h1>
-        <p className="max-w-2xl text-sm text-zinc-400">
-          The live final is attended directly in the campus computing lab under air-gapped lab proctoring. Present your QR pass at the entrance desk, verify check-in at your assigned seat, and enter the live arena to solve problems.
-        </p>
-      </header>
+        }
+        title={contest.title}
+        description="The live final is attended directly in the campus computing lab under air-gapped lab proctoring. Present your QR pass at the entrance desk, verify check-in at your assigned seat, and enter the live arena to solve problems."
+      />
 
       {/* Hero Live Arena Launcher Banner */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border border-lime-400/30 bg-zinc-900/70 rounded-none backdrop-blur-md shadow-xl">

@@ -278,6 +278,8 @@ export function AuthPage() {
     window.location.href = getGoogleLoginURL();
   }
 
+  let kicker = "00 // Identity Gate";
+  let index = "INDEX 0.0 · CREDENTIAL ENTRY";
   let title: React.ReactNode = (
     <>
       <span className="block whitespace-nowrap">ENTER</span>
@@ -288,6 +290,8 @@ export function AuthPage() {
   let description: React.ReactNode = null;
 
   if (step === "otp") {
+    kicker = "00 // Identity Verification";
+    index = "INDEX 0.1 · OTP VERIFICATION";
     title = (
       <>
         <span className="block whitespace-nowrap">VERIFY</span>
@@ -297,6 +301,8 @@ export function AuthPage() {
     );
     description = `Enter the six-digit code sent to ${email}.`;
   } else if (step === "onboarding") {
+    kicker = "00 // Member Onboarding";
+    index = "INDEX 0.2 · CADET REGISTRATION";
     title = (
       <>
         <span className="block whitespace-nowrap">COMPLETE</span>
@@ -309,7 +315,7 @@ export function AuthPage() {
   }
 
   return (
-    <AuthLayout title={title} description={description}>
+    <AuthLayout kicker={kicker} index={index} title={title} description={description}>
       {step === "email" && (
         <>
           <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>

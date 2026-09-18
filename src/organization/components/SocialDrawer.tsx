@@ -101,8 +101,8 @@ export function SocialDrawer() {
             <div className="flex items-center gap-2.5">
               <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
               <div>
-                <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-lime-400">
-                  PEER NETWORK
+                <p className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
+                  (05 // Peer Network)
                 </p>
                 <SheetTitle className="font-mono text-sm font-bold text-white uppercase tracking-tight">
                   {drawerTargetName || `@${drawerTargetHandle}`}

@@ -77,9 +77,11 @@ export function RegisterConfirmModal({
         {/* Modal Header */}
         <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={18} className="text-lime-400" />
+            <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
+              (01 // Registration Protocol)
+            </span>
             <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
-              Confirm Contest Registration
+              Confirm Registration
             </DialogTitle>
           </div>
         </DialogHeader>
@@ -90,9 +92,9 @@ export function RegisterConfirmModal({
             <span className="rounded-none border border-white/10 bg-zinc-800/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-300">
               {contest.season}
             </span>
-            <h1 className="text-xl font-bold text-white mt-2 leading-snug">
+            <h2 className="text-xl font-bold font-mono uppercase text-white mt-2 leading-snug">
               {contest.title}
-            </h1>
+            </h2>
             <p className="text-xs text-zinc-400 mt-1">
               {contest.summary}
             </p>

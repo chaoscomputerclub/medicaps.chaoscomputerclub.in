@@ -256,8 +256,10 @@ export function EditProfileModal() {
       <DialogContent className="max-w-3xl rounded-none bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden max-h-[90vh] shadow-2xl">
         {/* Modal Header */}
         <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center gap-2">
-            <User size={16} className="text-lime-400" />
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
+              (05 // Profile Config)
+            </span>
             <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
               Edit Competitive Profile
             </DialogTitle>

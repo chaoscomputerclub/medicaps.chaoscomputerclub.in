@@ -9,6 +9,7 @@ import { FINALIST_SEATS } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
 import type { RankingRow, AssessmentRanking } from "@/features/contest/types";
 import { ContestResultsSkeleton } from "@/organization/components/skeletons";
+import { PageHeader, SectionHeader } from "@/organization/components/ui";
 
 const FILTERS = ["all", "qualified", "eliminated"] as const;
 type FilterKey = (typeof FILTERS)[number];
@@ -147,17 +148,17 @@ export function ContestResultsPage() {
         </div>
       ) : (
         /* Header for non-participants */
-        <header className="space-y-2">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-zinc-400">
-            Round 1 · Online Assessment
-          </p>
-          <h1 className="text-3xl font-black tracking-tight text-white">
-            {contest?.title ?? "Assessment Ranking"}
-          </h1>
-          <p className="text-sm text-zinc-400">
-            Ranked by score, then by penalty time. Cut-off at rank {ranking.cutoff}.
-          </p>
-        </header>
+        <PageHeader
+          kicker="01 // Screening Standings"
+          index={`CUTOFF #${ranking.cutoff}`}
+          badge={
+            <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
+              Round 1 · Online Assessment
+            </span>
+          }
+          title={contest?.title ?? "Assessment Ranking"}
+          description={`Ranked by score, then by penalty time. Official cut-off set at rank ${ranking.cutoff}.`}
+        />
       )}
 
       {/* ─── RANKING SEALED NOTICE ───────────────────────── */}
@@ -179,6 +180,13 @@ export function ContestResultsPage() {
           </div>
         </div>
       )}
+
+      {/* ─── STANDINGS SECTION HEADER ─────────────────────── */}
+      <SectionHeader
+        kicker="02 // Competitive Standings"
+        index="QUALIFIER MATRIX"
+        title="Cadet Assessment Standings"
+      />
 
       {/* ─── FILTERS + SEARCH ────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3">

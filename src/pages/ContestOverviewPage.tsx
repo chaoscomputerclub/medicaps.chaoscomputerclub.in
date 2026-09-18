@@ -37,6 +37,7 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { PhaseBadge, RoundsTimeline } from "@/features/contest/components";
 import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
+import { SectionHeader } from "@/organization/components/ui";
 import {
   ASSESSMENT_DURATION_MINUTES,
   FINALIST_SEATS,
@@ -277,12 +278,15 @@ export function ContestOverviewPage() {
         <div className="flex flex-col justify-between gap-8 p-7">
           {/* Phase + cadence chips */}
           <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+              (01 // Contest Briefing)
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              INDEX 1.0 · {contest.season}
+            </span>
             <PhaseBadge phase={phase} />
             <span className="rounded-none border border-white/10 bg-zinc-800/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
               {cadenceLabel(contest)} {contest.edition || ""}
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
-              {contest.season}
             </span>
             {isDevBypass && (
               <span className="rounded-none border border-emerald-500/40 bg-emerald-950/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
@@ -298,7 +302,7 @@ export function ContestOverviewPage() {
                 <Trophy className="size-5" />
               </div>
               <div>
-                <h1 className="text-3xl font-black leading-tight text-white md:text-4xl">
+                <h1 className="text-3xl font-black leading-tight text-white md:text-4xl uppercase font-mono">
                   {contest.title}
                 </h1>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-zinc-400">
@@ -427,9 +431,11 @@ export function ContestOverviewPage() {
 
       {/* ─── ROUNDS TIMELINE ──────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
-          Your path to the final
-        </h2>
+        <SectionHeader
+          kicker="01 // Progression Timeline"
+          index="ROUNDS 1 & 2"
+          title="Your Path to the Final"
+        />
         <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
           <RoundsTimeline contest={contest} phase={phase} />
         </div>
@@ -438,12 +444,11 @@ export function ContestOverviewPage() {
       {/* ─── RULES & PROBLEM SET ──────────────────────────── */}
       <section className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
-          <div className="flex items-center justify-between">
-            <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">Contest Rules</h2>
-            <span className="rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-xs font-black text-lime-400">
-              Top {FINALIST_SEATS}
-            </span>
-          </div>
+          <SectionHeader
+            kicker="02 // Tournament Rules"
+            index={`TOP ${FINALIST_SEATS}`}
+            title="Contest Regulations"
+          />
           <ol className="space-y-3">
             {(contest.rules.length
               ? contest.rules

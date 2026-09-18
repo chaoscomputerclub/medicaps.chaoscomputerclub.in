@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { contestSystemService } from "@/organization/data/contest-system";
-import { SectionHeader } from "@/organization/components/ui";
+import { SectionHeader, PageHeader } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyContestsSkeleton } from "@/organization/components/skeletons";
@@ -48,30 +48,28 @@ export function MyContestsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
       {/* Header with quick stats */}
-      <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-lime-400 font-bold mb-1">Your competition record</p>
-          <h1 className="text-3xl sm:text-4xl font-mono font-black text-white uppercase tracking-tight">My contests</h1>
-          <p className="text-sm text-zinc-400 mt-1">
-            Everything you entered, qualified for, or completed — in one place.
-          </p>
-        </div>
-
-        <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
-          <div className="flex flex-col border-l-2 border-lime-400 pl-3">
-            <strong className="font-mono tabular-nums text-2xl font-bold text-white">{data.length}</strong>
-            <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOTAL ENTERED</span>
+      <PageHeader
+        kicker="04 // Participation Record"
+        index="INDEX 4.0 · CADET DOSSIER"
+        title="My Contests"
+        description="Everything you entered, qualified for, or completed — in one place."
+        action={
+          <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
+            <div className="flex flex-col border-l-2 border-lime-400 pl-3">
+              <strong className="font-mono tabular-nums text-2xl font-bold text-white">{data.length}</strong>
+              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOTAL ENTERED</span>
+            </div>
+            <div className="flex flex-col border-l-2 border-amber-500 pl-3">
+              <strong className="font-mono tabular-nums text-2xl font-bold text-white">{registeredCount}</strong>
+              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">ACTIVE STANDBY</span>
+            </div>
+            <div className="flex flex-col border-l-2 border-emerald-500 pl-3">
+              <strong className="font-mono tabular-nums text-2xl font-bold text-white">{qualifiedCount}</strong>
+              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOP 30 QUALIFIED</span>
+            </div>
           </div>
-          <div className="flex flex-col border-l-2 border-amber-500 pl-3">
-            <strong className="font-mono tabular-nums text-2xl font-bold text-white">{registeredCount}</strong>
-            <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">ACTIVE STANDBY</span>
-          </div>
-          <div className="flex flex-col border-l-2 border-emerald-500 pl-3">
-            <strong className="font-mono tabular-nums text-2xl font-bold text-white">{qualifiedCount}</strong>
-            <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOP 30 QUALIFIED</span>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Segmented Filter Controls using shadcn Tabs */}
       <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-6">

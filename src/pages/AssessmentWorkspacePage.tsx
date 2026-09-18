@@ -392,10 +392,10 @@ export function AssessmentWorkspacePage() {
       <header className="flex h-11 shrink-0 items-center justify-between border-b border-[#1c1c1c] bg-[#0c0c0c] px-3 z-20">
         {/* Left: Problem selector pill tabs */}
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-accent mr-2 hidden sm:inline">
-            PROCTORED WORKSPACE
+          <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400 mr-2 hidden sm:inline">
+            (01 // Proctored Terminal)
           </span>
-          <div className="h-4 w-px bg-[#222] mr-1 hidden sm:inline" />
+          <div className="h-4 w-px bg-white/10 mr-1 hidden sm:inline" />
           {problems.map((prob, idx) => {
             const sub = submissionsMap[prob.id];
             const isFullScore = sub && sub.score === prob.points;
@@ -407,16 +407,16 @@ export function AssessmentWorkspacePage() {
                 key={prob.id}
                 type="button"
                 onClick={() => dispatch(setActiveProblemIndex(idx))}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-mono transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-[#202020] text-white border border-[#383838] font-semibold"
-                    : "text-[#888] hover:text-[#ddd] hover:bg-[#141414] border border-transparent"
+                    ? "bg-zinc-800 text-white border border-lime-400/50 font-semibold"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent"
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>
-                <span className="text-[10px] text-[#666] font-normal">({prob.points}p)</span>
-                {isFullScore && <CheckCircle2 size={12} className="text-emerald-400" />}
-                {isPartial && <span className="size-1.5 rounded-full bg-amber-400" />}
+                <span className="text-[10px] text-zinc-500 font-normal">({prob.points}p)</span>
+                {isFullScore && <CheckCircle2 size={12} className="text-lime-400" />}
+                {isPartial && <span className="size-1.5 rounded-none bg-amber-400" />}
               </button>
             );
           })}
@@ -425,10 +425,10 @@ export function AssessmentWorkspacePage() {
         {/* Center: Minimal Countdown Timer */}
         {session && (
           <div
-            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-mono text-xs border ${
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-none font-mono text-xs border ${
               session.remaining_seconds < 600
                 ? "border-destructive/40 bg-destructive/10 text-destructive animate-pulse"
-                : "border-[#252525] bg-[#121212] text-[#bbb]"
+                : "border-white/10 bg-zinc-900 text-zinc-200"
             }`}
           >
             <Clock size={12} />
@@ -507,35 +507,35 @@ export function AssessmentWorkspacePage() {
           {activeProblem ? (
             <div className="space-y-6">
               {/* Problem Title & Points */}
-              <div className="border-b border-[#181818] pb-4">
+              <div className="border-b border-white/10 pb-4">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-accent font-bold">
-                    PROBLEM {activeProblem.problem_index}
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+                    (01 // Problem {activeProblem.problem_index})
                   </span>
-                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-[#161616] text-[#888] border border-[#222]">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-zinc-900 text-zinc-400 border border-white/10 uppercase tracking-wider">
                     {activeProblem.difficulty}
                   </span>
-                  <span className="text-xs font-mono text-[#888]">
+                  <span className="text-xs font-mono text-zinc-400 tabular-nums">
                     {activeProblem.points} Points
                   </span>
                 </div>
-                <h1 className="text-lg font-bold text-white tracking-tight mt-1.5">
+                <h1 className="text-xl font-bold font-mono text-white uppercase tracking-tight mt-1.5">
                   {activeProblem.title}
                 </h1>
               </div>
 
               {/* Problem Description */}
-              <div className="text-xs font-mono text-[#ccc] leading-relaxed whitespace-pre-line">
+              <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
                 {activeProblem.description}
               </div>
 
               {/* Input Format */}
               {activeProblem.input_format && (
                 <div className="space-y-1.5">
-                  <h3 className="font-mono text-xs uppercase font-bold text-[#888] tracking-wider">
-                    Input Format
+                  <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
+                    (01 // Input Format)
                   </h3>
-                  <div className="text-xs font-mono text-[#bbb] bg-[#0e0e0e] border border-[#1b1b1b] p-3 rounded leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-mono text-zinc-200 bg-zinc-950 border border-white/10 p-3 rounded-none leading-relaxed whitespace-pre-line">
                     {activeProblem.input_format}
                   </div>
                 </div>
@@ -544,10 +544,10 @@ export function AssessmentWorkspacePage() {
               {/* Output Format */}
               {activeProblem.output_format && (
                 <div className="space-y-1.5">
-                  <h3 className="font-mono text-xs uppercase font-bold text-[#888] tracking-wider">
-                    Output Format
+                  <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
+                    (02 // Output Format)
                   </h3>
-                  <div className="text-xs font-mono text-[#bbb] bg-[#0e0e0e] border border-[#1b1b1b] p-3 rounded leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-mono text-zinc-200 bg-zinc-950 border border-white/10 p-3 rounded-none leading-relaxed whitespace-pre-line">
                     {activeProblem.output_format}
                   </div>
                 </div>
@@ -556,10 +556,10 @@ export function AssessmentWorkspacePage() {
               {/* Constraints */}
               {activeProblem.constraints && (
                 <div className="space-y-1.5">
-                  <h3 className="font-mono text-xs uppercase font-bold text-[#888] tracking-wider">
-                    Constraints
+                  <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
+                    (03 // Constraints)
                   </h3>
-                  <pre className="text-xs font-mono text-[#aaa] bg-[#0e0e0e] border border-[#1b1b1b] p-3 rounded overflow-x-auto whitespace-pre-wrap">
+                  <pre className="text-xs font-mono text-amber-300 bg-zinc-950 border border-white/10 p-3 rounded-none overflow-x-auto whitespace-pre-wrap">
                     {activeProblem.constraints}
                   </pre>
                 </div>
@@ -567,8 +567,8 @@ export function AssessmentWorkspacePage() {
 
               {/* Sample Examples */}
               <div className="space-y-4 pt-2">
-                <h3 className="font-mono text-xs uppercase font-bold text-[#888] tracking-wider">
-                  Sample Examples
+                <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
+                  (04 // Sample Testcases)
                 </h3>
                 {activeProblem.sample_testcases?.map((s, idx) => {
                   const inputVal = s.stdin || (s as any).input || "";
@@ -577,7 +577,7 @@ export function AssessmentWorkspacePage() {
                   return (
                     <div
                       key={idx}
-                      className="p-3.5 rounded bg-[#0d0d0d] border border-[#1d1d1d] space-y-2.5 text-xs font-mono"
+                      className="p-3.5 rounded-none bg-zinc-950 border border-white/10 space-y-2.5 text-xs font-mono"
                     >
                       <div className="flex items-center justify-between text-[#888] font-bold">
                         <span>Example {idx + 1}</span>
