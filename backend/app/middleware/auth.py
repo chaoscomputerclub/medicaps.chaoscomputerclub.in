@@ -17,6 +17,7 @@ from app.core.security import decode_access_token
 from app.models.db_models import MemberProfile
 
 import uuid
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -60,14 +61,17 @@ async def get_current_member(
     if not member and email:
         clean_email = email.strip().lower()
         fallback_handle = clean_email.split("@")[0]
+        enrollment_id = fallback_handle.upper()
+        is_enrollment = bool(re.match(r"^[a-z]{2}\d{2}[a-z]{2}\d+", fallback_handle, re.I))
         member = MemberProfile(
             id=member_id or str(uuid.uuid4()),
             email=clean_email,
             handle=fallback_handle,
-            full_name=fallback_handle.capitalize(),
+            full_name=None if is_enrollment else fallback_handle,
+            prn=enrollment_id if is_enrollment else None,
             rating=1200,
             peak_rating=1200,
-            is_onboarded=True,
+            is_onboarded=not is_enrollment,
         )
         db.add(member)
         await db.commit()
