@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-09-18T12:30:00.759Z",
-  "totalElements": 275,
-  "functionalCount": 275,
+  "timestamp": "2026-09-18T12:44:34.270Z",
+  "totalElements": 268,
+  "functionalCount": 268,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 36,
+    "backendMutations": 40,
     "backendQueries": 6,
-    "routingNavigation": 174,
-    "clientUiState": 44,
-    "conditionalLocked": 9,
+    "routingNavigation": 169,
+    "clientUiState": 39,
+    "conditionalLocked": 8,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
   },
@@ -268,7 +268,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 83,
+      "line": 82,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -277,7 +277,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 87,
+      "line": 86,
       "tag": "<Button>",
       "label": "{open ? <X className=w-5 h-5 /> : <...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -286,7 +286,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 100,
+      "line": 99,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -295,7 +295,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 113,
+      "line": 112,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -304,7 +304,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 136,
+      "line": 135,
       "tag": "<Link>",
       "label": "{active && <ChevronRight className=w...",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 177,
+      "line": 181,
       "tag": "<button>",
       "label": "dispatch(logout())}\n            aria-...",
       "handler": "{() => dispatch(logout())}",
@@ -2140,7 +2140,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 139,
+      "line": 115,
       "tag": "<Button>",
       "label": "View Leaderboard",
       "handler": "{() => navigate(\"/portal/leaderboard\")}",
@@ -2149,7 +2149,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 146,
+      "line": 122,
       "tag": "<Button>",
       "label": "Sign In",
       "handler": "{() => navigate(\"/auth\")}",
@@ -2158,7 +2158,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 295,
+      "line": 264,
       "tag": "<Button>",
       "label": "[#profile-edit-btn]",
       "handler": "asChild",
@@ -2167,7 +2167,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 300,
+      "line": 269,
       "tag": "<Link>",
       "label": "[to=/portal/settings]",
       "handler": "\"/portal/settings\"",
@@ -2176,7 +2176,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 308,
+      "line": 277,
       "tag": "<Button>",
       "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
@@ -2185,7 +2185,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 339,
+      "line": 308,
       "tag": "<Button>",
       "label": "{copied ? (                       <> ...",
       "handler": "{handleCopyLink}",
@@ -2194,7 +2194,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 402,
+      "line": 348,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2203,7 +2203,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 421,
+      "line": 367,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2212,7 +2212,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 441,
+      "line": 387,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2221,7 +2221,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 452,
+      "line": 398,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2230,7 +2230,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 467,
+      "line": 413,
       "tag": "<a>",
       "label": "[href={profilePrefs.url.startsWith(ht...",
       "handler": "{profilePrefs.url.startsWith(\"http\") ? profilePrefs.url : `https://${profilePref",
@@ -2239,7 +2239,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 602,
+      "line": 548,
       "tag": "<Link>",
       "label": "Open verification console",
       "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",
@@ -2248,7 +2248,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 469,
+      "line": 369,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2257,7 +2257,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 474,
+      "line": 375,
       "tag": "<Link>",
       "label": "[to=/portal/profile]",
       "handler": "\"/portal/profile\"",
@@ -2266,106 +2266,97 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 491,
+      "line": 387,
       "tag": "<button>",
-      "label": "button",
+      "label": "setActiveTab(profile)}\n          >",
       "handler": "{() => setActiveTab(\"profile\")}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 505,
+      "line": 400,
       "tag": "<button>",
-      "label": "button",
+      "label": "setActiveTab(account)}\n          >",
       "handler": "{() => setActiveTab(\"account\")}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 527,
+      "line": 413,
       "tag": "<button>",
-      "label": "button",
-      "handler": "{() => setActiveTab(\"workspace\")}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 549,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => setActiveTab(\"security\")}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 571,
-      "tag": "<button>",
-      "label": "button",
+      "label": "setActiveTab(danger)}\n          >",
       "handler": "{() => setActiveTab(\"danger\")}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 608,
-      "tag": "<form>",
-      "label": "form",
-      "handler": "{handleUpdateProfile}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1019,
+      "line": 458,
       "tag": "<Button>",
-      "label": "{isUpdatingProfile ? (               ...",
-      "handler": "\"submit\"",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1060,
-      "tag": "<Button>",
-      "label": "{isUploadingImage ? (                ...",
+      "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => fileInputRef.current?.click()}",
       "category": "CONDITIONALLY_LOCKED",
       "description": "Disabled conditional gate / status lock"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1083,
-      "tag": "<Button>",
-      "label": "downloadCoolPfp(activeCoolPfp, member...",
-      "handler": "{() => downloadCoolPfp(activeCoolPfp, member.handle || \"cadet\")}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1096,
+      "line": 480,
       "tag": "<Button>",
       "label": "Button",
-      "handler": "{handleRemovePicture}",
+      "handler": "{handleRemovePhoto}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1131,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => handleSelectCoolPfp(pfp)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
+      "line": 559,
+      "tag": "<Button>",
+      "label": "Save",
+      "handler": "{() => handleSaveField(\"full_name\", fullName.trim())}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1205,
+      "line": 590,
+      "tag": "<Button>",
+      "label": "Save Bio",
+      "handler": "{() => handleSaveField(\"bio\", bio.trim())}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/SettingsPage.tsx",
+      "line": 726,
+      "tag": "<Button>",
+      "label": "Save",
+      "handler": "{() => handleSaveField(\"github_username\", github.trim())}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/SettingsPage.tsx",
+      "line": 755,
+      "tag": "<Button>",
+      "label": "Save",
+      "handler": "{() => handleSaveField(\"linkedin_url\", linkedin.trim())}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/SettingsPage.tsx",
+      "line": 772,
+      "tag": "<Button>",
+      "label": "{isSavingAll ? (                     ...",
+      "handler": "{() => handleSaveAllProfile()}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/SettingsPage.tsx",
+      "line": 828,
       "tag": "<Button>",
       "label": "Change handle",
       "handler": "{handleSaveHandle}",
@@ -2374,25 +2365,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1272,
-      "tag": "<Button>",
-      "label": "Start export",
-      "handler": "{handleExportData}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1366,
-      "tag": "<Button>",
-      "label": "Save workspace preferences",
-      "handler": "{() => toast.success(\"Workspace preferences saved.\")}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1473,
+      "line": 961,
       "tag": "<Button>",
       "label": "Log Out",
       "handler": "{() => logout()}",
@@ -2401,7 +2374,16 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1515,
+      "line": 984,
+      "tag": "<Button>",
+      "label": "Export Profile as JSON",
+      "handler": "{handleExportData}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/SettingsPage.tsx",
+      "line": 1025,
       "tag": "<Button>",
       "label": "Delete Account",
       "handler": "none",
@@ -2410,7 +2392,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1548,
+      "line": 1058,
       "tag": "<AlertDialogCancel>",
       "label": "Cancel",
       "handler": "{() => setDeleteConfirmText(\"\")}",
@@ -2419,57 +2401,12 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1554,
+      "line": 1064,
       "tag": "<AlertDialogAction>",
       "label": "{isDeleting ? <Loader2 className=ani...",
       "handler": "{handleDeleteAccount}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1576,
-      "tag": "<Link>",
-      "label": "Portal",
-      "handler": "\"/portal\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1577,
-      "tag": "<Link>",
-      "label": "Contests",
-      "handler": "\"/portal/contests\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1578,
-      "tag": "<Link>",
-      "label": "Leaderboard",
-      "handler": "\"/portal/leaderboard\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1579,
-      "tag": "<Link>",
-      "label": "Cryptographic Proofs",
-      "handler": "\"/portal/verify\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/SettingsPage.tsx",
-      "line": 1580,
-      "tag": "<a>",
-      "label": "GitHub",
-      "handler": "\"https://github.com/chaoscomputerclub\"",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/VerifyProofPage.tsx",

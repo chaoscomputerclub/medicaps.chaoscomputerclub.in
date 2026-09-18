@@ -17,7 +17,6 @@ import {
   Globe,
   MapPin,
   Building,
-  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -28,7 +27,6 @@ import { ProofBadge } from "@/organization/components/ProofBadge";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { CyberAvatar } from "@/organization/components/CyberAvatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
 import {
   getMemberProfileData,
@@ -39,29 +37,7 @@ import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 
-const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; text: string }> = {
-  volt: { icon: "⚡", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
-  binary: { icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
-  quantum: {
-    icon: "⚛️",
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/40",
-    text: "text-purple-400",
-  },
-  matrix: {
-    icon: "💻",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/40",
-    text: "text-emerald-400",
-  },
-  grandmaster: {
-    icon: "🏆",
-    bg: "bg-lime-400/10",
-    border: "border-lime-400/40",
-    text: "text-lime-400",
-  },
-  cipher: { icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
-};
+
 
 export function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -161,7 +137,7 @@ export function ProfilePage() {
   const proofs = profileData?.proofs || [];
   const achievements = profileData?.achievements || [];
 
-  const activeEmblem = m.avatar_url ? EMBLEM_MAP[m.avatar_url] : null;
+
   const initials = m.full_name
     ? m.full_name
         .split(" ")
@@ -250,31 +226,24 @@ export function ProfilePage() {
     }
   };
 
-  // Extended GitHub-style profile attributes
-  const profilePrefs = (() => {
-    if (!isSelfUser || !m?.id || typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem(`ccc_medicaps_profile_prefs_${m.id}`);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  })();
 
-  const pronouns = profilePrefs?.pronouns && profilePrefs.pronouns !== "Don't specify"
-    ? (profilePrefs.pronouns === "Custom" ? profilePrefs.customPronouns : profilePrefs.pronouns)
-    : null;
-  const isProBadgeActive = profilePrefs ? profilePrefs.displayProBadge : m.is_core_member;
-  const isAvailableForHire = Boolean(profilePrefs?.availableForHire);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Profile Header */}
       <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
         <div className="flex items-start gap-5">
-          <div className="size-16 sm:size-20 rounded-none border border-white/10 bg-zinc-950 shrink-0 shadow-inner overflow-hidden">
-            <CyberAvatar avatarUrl={m.avatar_url} fallbackText={initials} />
-          </div>
+          <Avatar className="size-16 sm:size-20 rounded-none border border-white/10 bg-zinc-950 shrink-0 shadow-inner">
+            {m.avatar_url &&
+            (m.avatar_url.startsWith("http") ||
+              m.avatar_url.startsWith("/media/") ||
+              m.avatar_url.startsWith("/")) ? (
+              <AvatarImage src={m.avatar_url} alt={m.full_name || m.handle} className="object-cover rounded-none" />
+            ) : null}
+            <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-xl flex items-center justify-center w-full h-full">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -366,29 +335,6 @@ export function ProfilePage() {
               <span className="text-zinc-300">{m.batch}</span>
               <span>•</span>
               <span className="text-lime-400 font-bold">@{m.handle}</span>
-              {pronouns && (
-                <>
-                  <span>•</span>
-                  <span className="text-zinc-500 font-mono">({pronouns})</span>
-                </>
-              )}
-              {isProBadgeActive && (
-                <>
-                  <span>•</span>
-                  <span className="bg-lime-400/10 border border-lime-400/40 text-lime-400 px-1.5 py-0.5 rounded-none text-[10px] font-bold tracking-wider">
-                    PRO
-                  </span>
-                </>
-              )}
-              {isAvailableForHire && (
-                <>
-                  <span>•</span>
-                  <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-1.5 py-0.5 rounded-none text-[10px] font-bold inline-flex items-center gap-1">
-                    <Briefcase size={10} />
-                    AVAILABLE FOR HIRE
-                  </span>
-                </>
-              )}
             </div>
 
             {m.bio && (

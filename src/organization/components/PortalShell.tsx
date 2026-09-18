@@ -15,7 +15,6 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { CyberAvatar } from "./CyberAvatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
@@ -164,9 +163,14 @@ export function PortalShell() {
         {/* User Card */}
         <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-none border border-white/15 bg-zinc-900 text-lime-400 shrink-0 overflow-hidden">
-              <CyberAvatar avatarUrl={member?.avatar_url} fallbackText={initials} />
-            </div>
+            <Avatar className="w-8 h-8 rounded-none border border-white/15 bg-zinc-900 text-lime-400 shrink-0">
+              {member?.avatar_url && (member.avatar_url.startsWith("http") || member.avatar_url.startsWith("/media/")) ? (
+                <AvatarImage src={member.avatar_url} alt={member.handle || "avatar"} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-xs">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
             <div className="min-w-0">
               <strong className="block font-mono text-xs font-semibold text-white truncate">{displayHandle}</strong>
               <span className="block font-mono text-[10px] text-slate-400 truncate tabular-nums">
