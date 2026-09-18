@@ -14,11 +14,14 @@ import {
   LockKeyhole,
   Zap,
   Loader2,
+  Globe,
+  MapPin,
+  Building,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { openSocialDrawer, fetchMyFollowingIdsThunk, toggleFollowThunk } from "@/store/slices/socialSlice";
-import { openEditProfileModal } from "@/store/slices/uiSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { ProofBadge } from "@/organization/components/ProofBadge";
@@ -246,6 +249,23 @@ export function ProfilePage() {
     }
   };
 
+  // Extended GitHub-style profile attributes
+  const profilePrefs = (() => {
+    if (!isSelfUser || !m?.id || typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(`ccc_medicaps_profile_prefs_${m.id}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const pronouns = profilePrefs?.pronouns && profilePrefs.pronouns !== "Don't specify"
+    ? (profilePrefs.pronouns === "Custom" ? profilePrefs.customPronouns : profilePrefs.pronouns)
+    : null;
+  const isProBadgeActive = profilePrefs ? profilePrefs.displayProBadge : m.is_core_member;
+  const isAvailableForHire = Boolean(profilePrefs?.availableForHire);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Profile Header */}
@@ -284,16 +304,17 @@ export function ProfilePage() {
                 {m.full_name || m.handle}
               </h1>
 
-              {/* If viewing own profile: Edit button */}
+              {/* If viewing own profile: Direct link to Settings */}
               {isSelfUser ? (
                 <Button
-                  type="button"
+                  asChild
                   id="profile-edit-btn"
-                  onClick={() => dispatch(openEditProfileModal())}
                   className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-lime-400 bg-lime-400/10 border border-lime-400/30 hover:bg-lime-400 hover:text-black rounded-none cursor-pointer"
                 >
-                  <Edit3 size={12} />
-                  <span>Edit Profile</span>
+                  <Link to="/portal/settings">
+                    <Edit3 size={12} />
+                    <span>Edit Profile</span>
+                  </Link>
                 </Button>
               ) : (
                 /* If viewing another student: Follow & Share buttons */
@@ -359,11 +380,26 @@ export function ProfilePage() {
               <span className="text-zinc-300">{m.batch}</span>
               <span>•</span>
               <span className="text-lime-400 font-bold">@{m.handle}</span>
-              {m.is_core_member && (
+              {pronouns && (
                 <>
                   <span>•</span>
-                  <span className="bg-amber-400/10 border border-amber-400/40 text-amber-400 px-1.5 py-0.5 rounded-none text-[10px] font-bold">
-                    CORE
+                  <span className="text-zinc-500 font-mono">({pronouns})</span>
+                </>
+              )}
+              {isProBadgeActive && (
+                <>
+                  <span>•</span>
+                  <span className="bg-lime-400/10 border border-lime-400/40 text-lime-400 px-1.5 py-0.5 rounded-none text-[10px] font-bold tracking-wider">
+                    PRO
+                  </span>
+                </>
+              )}
+              {isAvailableForHire && (
+                <>
+                  <span>•</span>
+                  <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-1.5 py-0.5 rounded-none text-[10px] font-bold inline-flex items-center gap-1">
+                    <Briefcase size={10} />
+                    AVAILABLE FOR HIRE
                   </span>
                 </>
               )}
@@ -440,6 +476,29 @@ export function ProfilePage() {
                   <Linkedin size={12} />
                   <span>LinkedIn</span>
                 </a>
+              )}
+              {profilePrefs?.url && (
+                <a
+                  href={profilePrefs.url.startsWith("http") ? profilePrefs.url : `https://${profilePrefs.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-300 hover:text-white bg-zinc-800/60 border border-white/10 hover:border-zinc-500 rounded-none"
+                >
+                  <Globe size={12} />
+                  <span>{profilePrefs.url.replace(/^https?:\/\//, "")}</span>
+                </a>
+              )}
+              {profilePrefs?.location && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 bg-zinc-800/60 border border-white/10 rounded-none">
+                  <MapPin size={12} className="text-lime-400" />
+                  <span>{profilePrefs.location}</span>
+                </span>
+              )}
+              {profilePrefs?.company && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 bg-zinc-800/60 border border-white/10 rounded-none">
+                  <Building size={12} className="text-lime-400" />
+                  <span>{profilePrefs.company}</span>
+                </span>
               )}
             </div>
           </div>

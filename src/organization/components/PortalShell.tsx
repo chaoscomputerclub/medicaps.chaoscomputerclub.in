@@ -1,4 +1,3 @@
-import { EditProfileModal } from "./EditProfileModal";
 import { SocialDrawer } from "./SocialDrawer";
 import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -196,7 +195,6 @@ export function PortalShell() {
       </main>
 
       <SocialDrawer />
-      <EditProfileModal />
     </div>
   );
 }
