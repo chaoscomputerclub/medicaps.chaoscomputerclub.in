@@ -800,13 +800,18 @@ class DynamicContestService:
         preset_req: PresetContestLaunchRequest,
         db: AsyncSession,
     ) -> Dict[str, Any]:
-        """One-click API to deploy standard Weekly or Biweekly campus contest editions with algorithmic challenges."""
-        now = now_utc()
-        starts_at = now + timedelta(hours=preset_req.starts_in_hours)
-        ends_at = starts_at + timedelta(hours=2)
-
         cadence = preset_req.cadence.lower().strip()
         edition = preset_req.edition
+
+        if cadence == "weekly":
+            from app.services.contest_schedule_service import get_next_wednesday_schedule
+            w_start, w_end, _, _ = get_next_wednesday_schedule()
+            starts_at = w_start
+            ends_at = w_end
+        else:
+            now = now_utc()
+            starts_at = now + timedelta(hours=preset_req.starts_in_hours)
+            ends_at = starts_at + timedelta(hours=2)
 
         if cadence == "biweekly":
             title = f"CCC Biweekly Contest {edition}"
@@ -870,7 +875,7 @@ class DynamicContestService:
             slug = f"weekly-contest-{edition}"
             venue = preset_req.venue or "Medi-Caps University Main Computing Lab (Lab 04)"
             prize = preset_req.prize_pool or f"₹15,000 Cash Prize + Edition #{edition} Certificates"
-            summary = f"Sunday algorithmic showdown. Weekly #{edition} featuring 4 algorithmic challenges testing graph theory, dynamic programming, and greedy heuristics."
+            summary = f"Wednesday algorithmic showdown for Medi-Caps cadets. Weekly #{edition} featuring 4 algorithmic challenges testing graph theory, dynamic programming, and greedy heuristics."
             problems = [
                 ProblemCreateSchema(
                     problem_index="A",

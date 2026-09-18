@@ -8,6 +8,7 @@ Launches 1 Official Weekly Contest and 1 Official Biweekly Contest with:
 - Cache invalidation and clean DB transaction
 """
 
+import argparse
 import asyncio
 import os
 import sys
@@ -27,37 +28,54 @@ from app.models.db_models import (
     now_utc,
 )
 from app.core.cache import delete_cache_pattern
-
-
 from app.services.seed_service import purge_all_contest_data
+from app.services.contest_schedule_service import get_next_wednesday_schedule
 
 
-async def launch_contests():
+async def launch_contests(force: bool = False):
     print("=" * 70)
-    print("⚡ [CCC] Launching Official Weekly & Biweekly Contests on Medi-Caps Portal")
+    print("⚡ [CCC] Launching / Verifying Official Weekly Contest on Medi-Caps Portal")
     print("=" * 70)
 
     await init_db()
 
-    now = datetime.now(timezone.utc)
-    weekly_starts = now + timedelta(days=1)
-    weekly_ends = weekly_starts + timedelta(hours=2)
-    weekly_checkin = weekly_starts - timedelta(hours=1)
-
-    biweekly_starts = now + timedelta(days=3)
-    biweekly_ends = biweekly_starts + timedelta(hours=2)
-    biweekly_checkin = biweekly_starts - timedelta(hours=1)
-
     async with AsyncSessionLocal() as db:
-        # Strictly purge any old contest, submission, registration, or pass records
-        print("\n🔹 Purging old contest records...")
-        await purge_all_contest_data(db)
-        print("  ✓ Old contest data purged cleanly.")
+        # Check if an active or upcoming contest already exists in DB
+        existing_res = await db.execute(
+            select(OfflineContest).where(
+                (OfflineContest.slug == "weekly-contest-1") |
+                (OfflineContest.status.in_(["upcoming", "live"]))
+            )
+        )
+        existing_contest = existing_res.scalars().first()
+
+        if existing_contest and not force:
+            print("\n🔒 [IMMUTABLE TIMERS ACTIVE]")
+            print(f"  ✓ Official contest '{existing_contest.title}' ({existing_contest.slug}) is already established.")
+            print(f"  ✓ Starts at (UTC): {existing_contest.starts_at}")
+            print(f"  ✓ Ends at (UTC):   {existing_contest.ends_at}")
+            print("  ✓ Preserving existing contest schedule, countdown timers, and participant records with ZERO changes.")
+            return
+
+        if force or not existing_contest:
+            print("\n🔹 Purging old contest records for clean canonical schedule...")
+            await purge_all_contest_data(db)
+            print("  ✓ Old contest data purged cleanly.")
+
+        # Canonical Wednesday Schedule: Every Wednesday 3:00 PM – 4:30 PM IST (09:30 – 11:00 UTC)
+        weekly_starts, weekly_ends, weekly_checkin, assess_closes = get_next_wednesday_schedule()
+
+        now = datetime.now(timezone.utc)
 
         # =====================================================================
         # 1. WEEKLY CONTEST 1
         # =====================================================================
-        print("\n🔹 [1/1] Creating Weekly Contest 1...")
+        print("\n🔹 [1/1] Creating Weekly Contest 1 (Canonical Wednesday Schedule)...")
+        print(f"  Starts at (UTC): {weekly_starts.isoformat()} (3:00 PM IST)")
+        print(f"  Ends at (UTC):   {weekly_ends.isoformat()} (4:30 PM IST)")
+        print(f"  Check-in (UTC):  {weekly_checkin.isoformat()} (2:00 PM IST)")
+        print(f"  Screening Close: {assess_closes.isoformat()} (1:00 PM IST)")
+
         weekly_contest = OfflineContest(
             slug="weekly-contest-1",
             title="CCC Weekly Contest 1",
@@ -77,9 +95,10 @@ async def launch_contests():
             chief_proctors=["Chief Proctor (CCC Core)", "CCC Operations Desk"],
             prize_pool="₹15,000 Cash Prize + Merit Certificates",
             sponsor="Chaos Computer Club Medi-Caps Chapter",
-            summary="Sunday algorithmic showdown for Medi-Caps cadets. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Top 30 online screening qualifiers advance to the air-gapped lab final.",
+            summary="Wednesday algorithmic showdown for Medi-Caps cadets. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Top 30 online screening qualifiers advance to the air-gapped lab final.",
             rules=[
-                "Phase 1 Online Screening: 120-minute timed round in anti-cheat browser arena.",
+                "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the on-premise air-gapped lab.",
+                "Phase 1 Online Screening: 90-minute proctored session in anti-cheat browser arena.",
                 "Top 30 verified scorers qualify for the Phase 2 on-premise air-gapped lab final.",
                 "Submissions evaluated via CodeBox with sub-millisecond precision.",
                 "Standard penalty: 20 minutes per non-accepted submission on tie-breaks."
@@ -94,10 +113,10 @@ async def launch_contests():
             contest_id=weekly_contest.id,
             slug="weekly-contest-1",
             title="Weekly Contest 1 — Online Screening Round",
-            summary="Phase 1 online qualification round for CCC Weekly Contest 1. Solve all 4 challenges within 120 minutes.",
-            duration_minutes=120,
-            starts_at=now - timedelta(minutes=10), # Opened right now for instant testing
-            ends_at=weekly_starts - timedelta(hours=2), # Closes 2 hours before physical contest
+            summary="Phase 1 online qualification round for CCC Weekly Contest 1. Solve all 4 challenges within 90 minutes.",
+            duration_minutes=90,
+            starts_at=now - timedelta(minutes=10), # Opened right now for instant testing and qualification
+            ends_at=assess_closes, # Closes Wednesday 1:00 PM IST (2 hours before physical contest)
             is_active=True,
             max_violations=3,
             created_at=now_utc(),
@@ -298,4 +317,7 @@ async def launch_contests():
 
 
 if __name__ == "__main__":
-    asyncio.run(launch_contests())
+    parser = argparse.ArgumentParser(description="Launch or Ensure Official CCC Contests")
+    parser.add_argument("--force", action="store_true", help="Force wipe and recreate contest with canonical Wednesday timers")
+    args = parser.parse_args()
+    asyncio.run(launch_contests(force=args.force))

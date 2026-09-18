@@ -335,7 +335,7 @@ export function ContestsHubPage() {
                   <div>
                     <h3 className="text-xl md:text-2xl font-bold leading-tight text-white transition-colors group-hover:text-lime-400">{upcomingWeekly.title}</h3>
                     <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">
-                      {upcomingWeekly.summary || "Sunday algorithmic showdown. 4 challenges covering graph traversal, greedy heuristics, and dynamic programming."}
+                      {upcomingWeekly.summary || "Wednesday algorithmic showdown for Medi-Caps cadets. 4 challenges covering graph traversal, greedy heuristics, and dynamic programming."}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-6 text-xs text-zinc-400 font-mono">
@@ -343,7 +343,7 @@ export function ContestsHubPage() {
                       <Calendar className="size-4 text-lime-400" />
                       {new Date(upcomingWeekly.starts_at).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                     </span>
-                    <span className="flex items-center gap-1.5"><Clock className="size-3.5" /> 2 Hours assessment</span>
+                    <span className="flex items-center gap-1.5"><Clock className="size-3.5" /> 90 Mins (3:00 – 4:30 PM IST)</span>
                     <span className="flex items-center gap-1.5"><Code2 className="size-3.5" /> {upcomingWeekly.problem_count || 4} Problems</span>
                     <span className="flex items-center gap-1.5"><TrendingUp className="size-3.5 text-emerald-400" /> Rating Rated</span>
                   </div>
