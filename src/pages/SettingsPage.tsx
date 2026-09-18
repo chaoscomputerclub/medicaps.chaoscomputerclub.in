@@ -1,30 +1,35 @@
 /**
  * Chaos Computer Club India — Medi-Caps Chapter
- * Settings Page — Profile Configuration, Security & Account Lifecycle.
- * Restored previous 3-tab architecture with clean SANS-SERIF typography,
- * MinIO avatar upload, and empty initials fallback.
+ * Settings — GitHub-philosophy architecture with CCC tactical design language.
+ * Left sticky nav · Section cards · Field-level save · Zero border-radius.
  */
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
-  Camera,
+  AtSign,
+  Bell,
   Check,
+  ChevronRight,
   Download,
   ExternalLink,
   Github,
+  KeyRound,
   Laptop,
   Linkedin,
   Loader2,
   Lock,
   LogOut,
+  Monitor,
   ShieldAlert,
   ShieldCheck,
   Trash2,
   Upload,
+  User,
   UserRound,
   X,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -39,7 +44,6 @@ import {
 } from "@/store/slices/authSlice";
 import { uploadMedia } from "@/lib/storage";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
-import { PageHeader } from "@/organization/components/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -64,22 +68,158 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { SettingsSkeleton } from "@/organization/components/skeletons";
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
 const DEPARTMENTS = [
-  "CSE (Computer Science & Engineering)",
-  "IT (Information Technology)",
-  "AIDS (AI & Data Science)",
-  "Cyber Security",
-  "CSBS (Computer Science & Business)",
-  "ECE (Electronics & Communication)",
-  "Other",
+  { value: "CSE", label: "CSE — Computer Science & Engineering" },
+  { value: "IT", label: "IT — Information Technology" },
+  { value: "AIDS", label: "AIDS — AI & Data Science" },
+  { value: "Cyber Security", label: "Cyber Security" },
+  { value: "CSBS", label: "CSBS — Computer Science & Business Systems" },
+  { value: "ECE", label: "ECE — Electronics & Communication" },
+  { value: "Other", label: "Other" },
 ];
 
 const BATCHES = ["2022-26", "2023-27", "2024-28", "2025-29", "Alumni / Special"];
 
-type SettingsTab = "profile" | "account" | "danger";
+type SettingsTab = "profile" | "account" | "notifications" | "security" | "danger";
+
+// ─── Nav definition ───────────────────────────────────────────────────────────
+
+const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType; danger?: boolean }[] = [
+  { id: "profile",       label: "Public Profile",    icon: UserRound },
+  { id: "account",       label: "Account",           icon: AtSign },
+  { id: "notifications", label: "Notifications",     icon: Bell },
+  { id: "security",      label: "Security & Session", icon: ShieldCheck },
+  { id: "danger",        label: "Danger Zone",       icon: AlertTriangle, danger: true },
+];
+
+// ─── Small shared UI pieces ───────────────────────────────────────────────────
+
+function SettingSection({
+  title,
+  description,
+  children,
+  danger,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  danger?: boolean;
+}) {
+  return (
+    <section
+      className={cn(
+        "border rounded-none",
+        danger ? "border-red-500/30 bg-red-950/10" : "border-white/10 bg-zinc-900/50"
+      )}
+    >
+      <div
+        className={cn(
+          "px-6 py-5 border-b",
+          danger ? "border-red-500/20" : "border-white/10"
+        )}
+      >
+        <h2
+          className={cn(
+            "text-sm font-semibold",
+            danger ? "text-red-300" : "text-white"
+          )}
+        >
+          {title}
+        </h2>
+        {description && (
+          <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">{description}</p>
+        )}
+      </div>
+      <div className="px-6 py-5 space-y-5">{children}</div>
+    </section>
+  );
+}
+
+function SettingRow({
+  label,
+  hint,
+  htmlFor,
+  children,
+  borderless,
+}: {
+  label: string;
+  hint?: string;
+  htmlFor?: string;
+  children: React.ReactNode;
+  borderless?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col sm:flex-row sm:items-start gap-4",
+        !borderless && "pb-5 border-b border-white/8"
+      )}
+    >
+      <div className="sm:w-48 shrink-0 pt-0.5">
+        {htmlFor ? (
+          <Label
+            htmlFor={htmlFor}
+            className="text-xs font-medium text-zinc-200 cursor-pointer"
+          >
+            {label}
+          </Label>
+        ) : (
+          <span className="text-xs font-medium text-zinc-200">{label}</span>
+        )}
+        {hint && <p className="text-[11px] text-zinc-500 mt-0.5 leading-relaxed">{hint}</p>}
+      </div>
+      <div className="flex-1 min-w-0">{children}</div>
+    </div>
+  );
+}
+
+function SaveIndicator({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
+  if (status === "idle") return null;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-[11px] font-mono ml-2 transition-opacity",
+        status === "saving" && "text-zinc-400",
+        status === "saved" && "text-emerald-400",
+        status === "error" && "text-red-400"
+      )}
+    >
+      {status === "saving" && <Loader2 size={11} className="animate-spin" />}
+      {status === "saved" && <Check size={11} />}
+      {status === "error" && <X size={11} />}
+      {status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Error"}
+    </span>
+  );
+}
+
+function SaveButton({
+  onClick,
+  disabled,
+  saving,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  saving?: boolean;
+}) {
+  return (
+    <Button
+      type="button"
+      size="sm"
+      disabled={disabled || saving}
+      onClick={onClick}
+      className="h-8 px-4 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 active:bg-lime-500 disabled:opacity-40 rounded-none cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+    >
+      {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
+      {saving ? "Saving…" : "Save"}
+    </Button>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export function SettingsPage() {
   const navigate = useNavigate();
@@ -87,23 +227,17 @@ export function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const member = useAppSelector((state) => state.auth.member);
-  const handleStatus = useAppSelector((state) => state.auth.handleStatus);
+  const member = useAppSelector((s) => s.auth.member);
+  const handleStatus = useAppSelector((s) => s.auth.handleStatus);
 
-  // Tab navigation state (?tab=profile | account | danger)
-  const currentTabParam = searchParams.get("tab") as SettingsTab;
+  // Tab
+  const raw = searchParams.get("tab") as SettingsTab;
   const activeTab: SettingsTab =
-    currentTabParam && ["profile", "account", "danger"].includes(currentTabParam)
-      ? currentTabParam
-      : "profile";
+    raw && NAV_ITEMS.some((n) => n.id === raw) ? raw : "profile";
+  const setActiveTab = (t: SettingsTab) => setSearchParams({ tab: t });
 
-  const setActiveTab = (tab: SettingsTab) => {
-    setSearchParams({ tab });
-  };
-
-  // Local form state
+  // ── Form state ──
   const [fullName, setFullName] = useState("");
-  const [handleInput, setHandleInput] = useState("");
   const [bio, setBio] = useState("");
   const [department, setDepartment] = useState("CSE");
   const [batch, setBatch] = useState("2023-27");
@@ -111,850 +245,697 @@ export function SettingsPage() {
   const [linkedin, setLinkedin] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  // Loading & feedback states
-  const [saveStatus, setSaveStatus] = useState<Record<string, "idle" | "saving" | "saved" | "error">>({});
+  // ── Account tab ──
+  const [handleInput, setHandleInput] = useState("");
+
+  // ── Notification toggles ──
+  const [notifContests, setNotifContests] = useState(true);
+  const [notifRatings, setNotifRatings] = useState(true);
+  const [notifFollows, setNotifFollows] = useState(false);
+
+  // ── Loading states ──
+  const [fieldStatus, setFieldStatusState] = useState<Record<string, "idle" | "saving" | "saved" | "error">>({});
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isSavingAll, setIsSavingAll] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Notification toggles
-  const [notifContests, setNotifContests] = useState(true);
-  const [notifRatings, setNotifRatings] = useState(true);
-
-  // Auth Guard
+  // Auth guard
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate("/auth", { replace: true });
-    }
+    if (!isAuthenticated()) navigate("/auth", { replace: true });
   }, [navigate]);
 
-  // Sync member profile into form state
+  // Sync member → form
   useEffect(() => {
-    if (member) {
-      setFullName(member.full_name || "");
-      setHandleInput(member.handle || "");
-      setBio(member.bio || "");
-      setDepartment(member.department || "CSE");
-      setBatch(member.batch || "2023-27");
-      setGithub(member.github_username || "");
-      setLinkedin(member.linkedin_url || "");
-      setAvatarUrl(member.avatar_url || "");
-    }
+    if (!member) return;
+    setFullName(member.full_name || "");
+    setHandleInput(member.handle || "");
+    setBio(member.bio || "");
+    setDepartment(member.department || "CSE");
+    setBatch(member.batch || "2023-27");
+    setGithub(member.github_username || "");
+    setLinkedin(member.linkedin_url || "");
+    const url = member.avatar_url || "";
+    setAvatarUrl(
+      url.startsWith("http") || url.startsWith("/media/") || url.startsWith("/") ? url : ""
+    );
   }, [member]);
 
-  // Compute initials (Firstname initial + Lastname initial)
-  const initials = fullName
-    ? fullName
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .map((w: string) => w[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : (member?.handle?.slice(0, 2) || "CC").toUpperCase();
+  // Initials fallback
+  const initials = (fullName || member?.handle || "CC")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-  // Debounced handle check for username changes
+  // Debounced handle check
   useEffect(() => {
     const clean = handleInput.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-    if (!member || clean === member.handle?.toLowerCase()) {
-      dispatch(setHandleStatus("idle"));
-      return;
-    }
-    if (clean.length < 3) {
+    if (!member || clean === member.handle?.toLowerCase() || clean.length < 3) {
       dispatch(setHandleStatus("idle"));
       return;
     }
     dispatch(setHandleStatus("checking"));
-    const timer = setTimeout(() => {
-      dispatch(checkHandleThunk(clean));
-    }, 450);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => dispatch(checkHandleThunk(clean)), 450);
+    return () => clearTimeout(t);
   }, [handleInput, member, dispatch]);
 
-  const setFieldStatus = (field: string, status: "idle" | "saving" | "saved" | "error") => {
-    setSaveStatus((prev) => ({ ...prev, [field]: status }));
-    if (status === "saved") {
-      setTimeout(() => {
-        setSaveStatus((prev) => ({ ...prev, [field]: "idle" }));
-      }, 2500);
-    }
-  };
+  // ── Field save helpers ──
+  const markField = useCallback(
+    (key: string, status: "saving" | "saved" | "error") => {
+      setFieldStatusState((p) => ({ ...p, [key]: status }));
+      if (status === "saved") {
+        setTimeout(() => setFieldStatusState((p) => ({ ...p, [key]: "idle" })), 2500);
+      }
+    },
+    []
+  );
 
-  // Save single field helper
-  const handleSaveField = async (field: string, value: any) => {
-    if (!member) return;
-    setFieldStatus(field, "saving");
-    try {
-      const payload: Record<string, any> = {};
-      payload[field] = value;
-      await dispatch(updateProfileThunk(payload)).unwrap();
-      dispatch(fetchCurrentUserThunk());
-      invalidateFullProfileCache();
-      setFieldStatus(field, "saved");
-      toast.success("Saved successfully.");
-    } catch (err: any) {
-      setFieldStatus(field, "error");
-      toast.error(err || `Failed to update ${field}.`);
-    }
-  };
+  const saveField = useCallback(
+    async (key: string, payload: Record<string, any>) => {
+      if (!member) return;
+      markField(key, "saving");
+      try {
+        await dispatch(updateProfileThunk(payload)).unwrap();
+        dispatch(fetchCurrentUserThunk());
+        invalidateFullProfileCache();
+        markField(key, "saved");
+      } catch (err: any) {
+        markField(key, "error");
+        toast.error(err || `Failed to update ${key}.`);
+      }
+    },
+    [member, dispatch, markField]
+  );
 
-  // Save full profile
-  const handleSaveAllProfile = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!fullName.trim() || fullName.trim().length < 2) {
-      toast.error("Full name must be at least 2 characters.");
-      return;
-    }
+  // ── Avatar upload ──
+  const uploadAvatar = useCallback(
+    async (file: File) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please upload a PNG, JPG, WebP or GIF image.");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File must be under 10 MB.");
+        return;
+      }
+      setIsUploadingAvatar(true);
+      const tid = toast.loading("Uploading photo…");
+      try {
+        const res = await uploadMedia(file, "avatars");
+        setAvatarUrl(res.public_url);
+        await dispatch(updateProfileThunk({ avatar_url: res.public_url })).unwrap();
+        dispatch(fetchCurrentUserThunk());
+        invalidateFullProfileCache();
+        toast.success("Profile photo updated!", { id: tid });
+      } catch (err: any) {
+        toast.error(err?.message || "Upload failed.", { id: tid });
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    },
+    [dispatch]
+  );
 
-    setIsSavingAll(true);
-    try {
-      await dispatch(
-        updateProfileThunk({
-          full_name: fullName.trim(),
-          department,
-          batch,
-          bio: bio.trim(),
-          github_username: github.trim().replace(/^@/, ""),
-          linkedin_url: linkedin.trim(),
-          avatar_url: avatarUrl.trim(),
-        })
-      ).unwrap();
-
-      dispatch(fetchCurrentUserThunk());
-      invalidateFullProfileCache();
-      toast.success("Profile saved successfully!");
-    } catch (err: any) {
-      toast.error(err || "Failed to update profile.");
-    } finally {
-      setIsSavingAll(false);
-    }
-  };
-
-  // MinIO Photo Upload
-  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
     e.target.value = "";
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file (PNG, JPG, WebP, GIF).");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File exceeds 10MB limit. Please choose a smaller image.");
-      return;
-    }
-
-    setIsUploadingAvatar(true);
-    const toastId = toast.loading("Uploading photo to MinIO storage...");
-
-    try {
-      const res = await uploadMedia(file, "avatars");
-      setAvatarUrl(res.public_url);
-      await dispatch(updateProfileThunk({ avatar_url: res.public_url })).unwrap();
-      dispatch(fetchCurrentUserThunk());
-      invalidateFullProfileCache();
-      toast.success("Profile photo uploaded and saved!", { id: toastId });
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload image.", { id: toastId });
-    } finally {
-      setIsUploadingAvatar(false);
-    }
+    if (file) uploadAvatar(file);
   };
 
-  // Remove Photo -> Reverts to firstname + lastname initials placeholder
-  const handleRemovePhoto = async () => {
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) uploadAvatar(file);
+  };
+
+  const removeAvatar = async () => {
     setAvatarUrl("");
-    try {
-      await dispatch(updateProfileThunk({ avatar_url: "" })).unwrap();
-      dispatch(fetchCurrentUserThunk());
-      invalidateFullProfileCache();
-      toast.info("Photo removed. Initial placeholder is now active.");
-    } catch (err: any) {
-      toast.error(err || "Failed to remove photo.");
-    }
+    await saveField("avatar", { avatar_url: "" });
+    toast.info("Photo removed — initials placeholder restored.");
   };
 
-  // Save Handle Alias
-  const handleSaveHandle = async () => {
+  // ── Handle save ──
+  const saveHandle = async () => {
     const clean = handleInput.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-    if (!clean || clean.length < 3 || clean === member?.handle) return;
-    if (handleStatus === "taken") {
-      toast.error("This handle is already taken. Please pick another.");
-      return;
-    }
-    setFieldStatus("handle", "saving");
-    try {
-      await dispatch(updateProfileThunk({ handle: clean })).unwrap();
-      dispatch(fetchCurrentUserThunk());
-      invalidateFullProfileCache();
-      setFieldStatus("handle", "saved");
-      toast.success("Handle updated successfully.");
-    } catch (err: any) {
-      setFieldStatus("handle", "error");
-      toast.error(err?.message || "Failed to update handle.");
-    }
+    if (!clean || clean.length < 3 || clean === member?.handle || handleStatus === "taken") return;
+    await saveField("handle", { handle: clean });
   };
 
-  // Export Account Data as JSON
-  const handleExportData = () => {
+  // ── Export ──
+  const handleExport = () => {
     if (!member) return;
-    const exportData = {
+    const data = {
       timestamp: new Date().toISOString(),
-      platform: "Chaos Computer Club India — Medi-Caps Chapter",
+      platform: "CCC Medi-Caps Chapter Portal",
       cadet: {
-        id: member.id,
-        handle: member.handle,
-        full_name: member.full_name,
-        email: member.email,
-        prn: member.prn,
-        department: member.department,
-        batch: member.batch,
-        rating: member.rating,
-        peak_rating: member.peak_rating,
-        tier: member.tier,
-        bio: member.bio,
-        github_username: member.github_username,
-        linkedin_url: member.linkedin_url,
+        id: member.id, handle: member.handle, full_name: member.full_name,
+        email: member.email, prn: member.prn, department: member.department,
+        batch: member.batch, rating: member.rating, tier: member.tier,
+        bio: member.bio, github_username: member.github_username, linkedin_url: member.linkedin_url,
       },
     };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    const downloadUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = `ccc-medicaps-profile-${member.handle || "cadet"}.json`;
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    a.download = `ccc-${member.handle || "cadet"}-profile.json`;
     a.click();
-    URL.revokeObjectURL(downloadUrl);
-    toast.success("Profile dossier exported as JSON.");
+    toast.success("Profile exported as JSON.");
   };
 
-  // Delete Account
-  const handleDeleteAccount = async () => {
-    if (!member) return;
+  // ── Delete account ──
+  const handleDelete = async () => {
     setIsDeleting(true);
     try {
       await dispatch(deleteAccountThunk()).unwrap();
-      toast.success("Account permanently purged.");
+      toast.success("Account permanently deleted.");
       navigate("/auth", { replace: true });
     } catch (err: any) {
       setIsDeleting(false);
-      toast.error(err || "Failed to delete account.");
+      toast.error(err || "Deletion failed.");
     }
   };
 
-  const isHandleChanged = Boolean(member && handleInput.trim().toLowerCase() !== member.handle?.toLowerCase());
+  const isHandleChanged = Boolean(
+    member && handleInput.trim().toLowerCase() !== member.handle?.toLowerCase()
+  );
 
-  if (!member) {
-    return <SettingsSkeleton />;
-  }
+  if (!member) return <SettingsSkeleton />;
 
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="font-sans max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-zinc-100">
-      {/* ── RESTORED HEADER BANNER ────────────────────────────────────────── */}
-      <PageHeader
-        kicker="06 // Configuration"
-        index="INDEX 6.0 · PREFS & SECURITY"
-        badge={
-          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
-            Member Configuration & Security
-          </span>
-        }
-        title="Settings"
-        description="Manage your verified identity, campus attribution, account credentials, and workstation sessions."
-        action={
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="font-sans text-xs text-zinc-300 hover:text-white border-white/15 bg-zinc-900/60 rounded-none cursor-pointer"
-          >
-            <Link to="/portal/profile">
-              <span>View Public Profile</span>
-              <ExternalLink size={12} className="ml-1.5 opacity-70" />
-            </Link>
-          </Button>
-        }
-      />
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      {/* ── Top bar ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-lime-400 font-bold">
+              ⚙ Configuration
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Settings</h1>
+          <p className="text-sm text-zinc-400 mt-0.5">
+            Manage your competitive identity, security, and account preferences.
+          </p>
+        </div>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="hidden sm:flex text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-none gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
+        >
+          <Link to="/portal/profile">
+            View profile
+            <ExternalLink size={12} className="opacity-60" />
+          </Link>
+        </Button>
+      </div>
 
-      {/* ── RESTORED PREVIOUS 3-TAB ARCHITECTURE ──────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-        {/* Left Sub-navigation Sidebar */}
-        <nav className="flex flex-row md:flex-col gap-2 overflow-x-auto" aria-label="Settings navigation">
-          <button
-            type="button"
-            className={cn(
-              "flex items-center gap-2.5 px-4 py-3 font-sans text-xs uppercase tracking-wider text-left border rounded-none transition-all cursor-pointer",
-              activeTab === "profile"
-                ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
-                : "border-white/10 bg-zinc-900/60 text-zinc-400 hover:text-white hover:border-white/20"
-            )}
-            onClick={() => setActiveTab("profile")}
-          >
-            <UserRound size={15} />
-            <span>Profile</span>
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "flex items-center gap-2.5 px-4 py-3 font-sans text-xs uppercase tracking-wider text-left border rounded-none transition-all cursor-pointer",
-              activeTab === "account"
-                ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
-                : "border-white/10 bg-zinc-900/60 text-zinc-400 hover:text-white hover:border-white/20"
-            )}
-            onClick={() => setActiveTab("account")}
-          >
-            <ShieldCheck size={15} />
-            <span>Account & Security</span>
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "flex items-center gap-2.5 px-4 py-3 font-sans text-xs uppercase tracking-wider text-left border rounded-none transition-all cursor-pointer",
-              activeTab === "danger"
-                ? "bg-rose-950/80 text-rose-300 border-rose-500/60 font-bold shadow-md shadow-rose-950/40"
-                : "border-white/10 bg-zinc-900/60 text-rose-400 hover:border-rose-800/60 hover:bg-rose-950/20"
-            )}
-            onClick={() => setActiveTab("danger")}
-          >
-            <AlertTriangle size={15} />
-            <span>Danger Zone</span>
-          </button>
+      <div className="flex gap-8 items-start">
+        {/* ── Left sidebar nav ─────────────────────────────────────────────── */}
+        <nav className="hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-0.5" aria-label="Settings navigation">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-left rounded-none transition-colors duration-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400",
+                  active
+                    ? item.danger
+                      ? "bg-red-950/40 text-red-300 border-l-2 border-red-500"
+                      : "bg-lime-400/10 text-lime-400 border-l-2 border-lime-400"
+                    : item.danger
+                    ? "text-red-400 hover:text-red-300 hover:bg-red-950/20 border-l-2 border-transparent"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/60 border-l-2 border-transparent"
+                )}
+              >
+                <Icon size={14} />
+                <span>{item.label}</span>
+                {active && <ChevronRight size={12} className="ml-auto opacity-60" />}
+              </button>
+            );
+          })}
         </nav>
 
-        {/* Right Settings Panel */}
-        <div className="md:col-span-3 space-y-6">
-          {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 1: PROFILE SETTINGS                                          */}
-          {/* ═════════════════════════════════════════════════════════════════ */}
-          {activeTab === "profile" && (
-            <div className="space-y-6">
-              {/* Profile Photo (MinIO Upload & Initials Fallback) */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Profile Photo
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Upload a custom photo stored securely in MinIO object storage, or display your name initials.
-                  </p>
-                </div>
+        {/* Mobile tab strip */}
+        <div className="md:hidden w-full mb-4 flex gap-1 overflow-x-auto pb-1">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium whitespace-nowrap rounded-none border cursor-pointer transition-colors",
+                  active
+                    ? item.danger
+                      ? "bg-red-950/40 text-red-300 border-red-500/50"
+                      : "bg-lime-400/10 text-lime-400 border-lime-400/40"
+                    : item.danger
+                    ? "text-red-400 border-white/10 hover:bg-red-950/20"
+                    : "text-zinc-400 border-white/10 hover:bg-zinc-900"
+                )}
+              >
+                <Icon size={12} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-4 bg-zinc-950 border border-white/10">
-                  <Avatar className="size-20 rounded-none border border-white/15 bg-zinc-900 shrink-0 shadow-md">
+        {/* ── Right content panel ──────────────────────────────────────────── */}
+        <div className="flex-1 min-w-0 space-y-4">
+
+          {/* ═══════════════════ TAB: PUBLIC PROFILE ═══════════════════════ */}
+          {activeTab === "profile" && (
+            <>
+              {/* Avatar */}
+              <SettingSection
+                title="Profile Photo"
+                description="Your avatar appears on the public leaderboard, contest scoreboards, and peer dossiers."
+              >
+                <div className="flex flex-col sm:flex-row items-start gap-6">
+                  {/* Avatar preview */}
+                  <Avatar className="size-20 rounded-none border-2 border-white/15 bg-zinc-900 shrink-0">
                     {avatarUrl ? (
                       <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />
                     ) : null}
-                    <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-2xl flex items-center justify-center w-full h-full">
+                    <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-2xl">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
 
-                  <div className="space-y-2 flex-1 min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isUploadingAvatar}
-                        onClick={() => fileInputRef.current?.click()}
-                        className="font-sans text-xs font-medium border-white/15 bg-zinc-900 hover:bg-zinc-800 text-white rounded-none cursor-pointer"
-                      >
-                        {isUploadingAvatar ? (
-                          <>
-                            <Loader2 size={13} className="animate-spin mr-1.5" />
-                            <span>Uploading to MinIO...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Upload size={13} className="mr-1.5 text-lime-400" />
-                            <span>Upload New Photo</span>
-                          </>
-                        )}
-                      </Button>
-
-                      {avatarUrl && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRemovePhoto}
-                          className="font-sans text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 rounded-none cursor-pointer"
-                        >
-                          <Trash2 size={13} className="mr-1" />
-                          <span>Remove Photo</span>
-                        </Button>
+                  <div className="flex-1 min-w-0 space-y-3">
+                    {/* Drop zone */}
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={handleDrop}
+                      onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
+                      className={cn(
+                        "border-2 border-dashed px-5 py-6 text-center cursor-pointer transition-colors",
+                        isDragging
+                          ? "border-lime-400 bg-lime-400/5"
+                          : "border-white/15 hover:border-white/30 hover:bg-zinc-900/40"
+                      )}
+                    >
+                      {isUploadingAvatar ? (
+                        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs">
+                          <Loader2 size={14} className="animate-spin text-lime-400" />
+                          <span>Uploading to MinIO…</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload size={18} className="mx-auto text-zinc-500 mb-2" />
+                          <p className="text-xs text-zinc-400">
+                            <span className="text-lime-400 font-medium">Click to upload</span> or drag &amp; drop
+                          </p>
+                          <p className="text-[11px] text-zinc-600 mt-1">PNG, JPG, WebP, GIF — max 10 MB</p>
+                        </>
                       )}
                     </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
 
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      {avatarUrl ? (
-                        <span className="text-emerald-400 flex items-center gap-1 font-mono text-[11px]">
-                          <Check size={12} /> Custom photo active in MinIO storage.
-                        </span>
-                      ) : (
-                        <span>
-                          No photo uploaded. Showing empty placeholder with firstname and lastname initials:{" "}
-                          <strong className="text-lime-400 font-mono">{initials}</strong>.
-                        </span>
-                      )}
-                    </p>
-                    <span className="text-[11px] text-zinc-500 block">
-                      Supported formats: PNG, JPG, WebP, GIF (Max 10MB)
-                    </span>
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif"
-                    onChange={handleAvatarFileChange}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-
-              {/* Competitive Identity */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Competitive Identity
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Your public identifier and competitive bio displayed on leaderboard rankings and member dossiers.
-                  </p>
-                </div>
-
-                {/* Full Name */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="s-fullname" className="font-sans text-xs font-semibold text-zinc-300">
-                      Full Name <span className="text-lime-400">*</span>
-                    </Label>
-                    {saveStatus["full_name"] === "saving" && (
-                      <span className="font-mono text-[10px] text-lime-400 flex items-center gap-1">
-                        <Loader2 className="animate-spin size-3" /> saving...
-                      </span>
+                    {avatarUrl && (
+                      <button
+                        type="button"
+                        onClick={removeAvatar}
+                        className="text-[11px] text-red-400 hover:text-red-300 cursor-pointer underline underline-offset-2 transition-colors"
+                      >
+                        Remove photo — revert to initials placeholder
+                      </button>
                     )}
-                    {saveStatus["full_name"] === "saved" && (
-                      <span className="font-mono text-[10px] text-emerald-400 flex items-center gap-1">
-                        <Check size={12} /> Saved ✓
-                      </span>
+
+                    {!avatarUrl && (
+                      <p className="text-[11px] text-zinc-500">
+                        Currently showing initials placeholder:{" "}
+                        <strong className="text-lime-400 font-mono">{initials}</strong>
+                      </p>
                     )}
                   </div>
+                </div>
+              </SettingSection>
+
+              {/* Identity */}
+              <SettingSection
+                title="Competitive Identity"
+                description="Your public name, bio, and institutional details visible across the portal."
+              >
+                <SettingRow label="Full Name" htmlFor="s-fullname" hint="Appears on your public profile and contest scoreboards.">
                   <div className="flex gap-2">
                     <Input
                       id="s-fullname"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveField("full_name", fullName.trim());
-                      }}
-                      className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400"
-                      placeholder="e.g. Ada Lovelace"
+                      onKeyDown={(e) => e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })}
+                      placeholder="Ada Lovelace"
+                      className="h-9 text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="font-sans text-xs uppercase border-white/15 rounded-none shrink-0"
-                      disabled={saveStatus["full_name"] === "saving" || fullName.trim() === (member?.full_name || "")}
-                      onClick={() => handleSaveField("full_name", fullName.trim())}
-                    >
-                      Save
-                    </Button>
+                    <SaveButton
+                      onClick={() => saveField("full_name", { full_name: fullName.trim() })}
+                      disabled={fullName.trim() === (member?.full_name || "")}
+                      saving={fieldStatus["full_name"] === "saving"}
+                    />
+                    <SaveIndicator status={fieldStatus["full_name"] || "idle"} />
                   </div>
-                </div>
+                </SettingRow>
 
-                {/* Bio */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="s-bio" className="font-sans text-xs font-semibold text-zinc-300">
-                      Bio / Competitive Focus
-                    </Label>
-                    <span className="text-[11px] text-zinc-500 tabular-nums">{bio.length}/500</span>
-                  </div>
-                  <Textarea
-                    id="s-bio"
-                    value={bio}
-                    maxLength={500}
-                    onChange={(e) => setBio(e.target.value)}
-                    rows={3}
-                    placeholder="Competitive programmer, learning graph algorithms, CSE undergraduate at Medi-Caps..."
-                    className="font-sans text-xs resize-none bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400"
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="font-sans text-xs uppercase border-white/15 rounded-none"
-                      disabled={saveStatus["bio"] === "saving" || bio.trim() === (member?.bio || "")}
-                      onClick={() => handleSaveField("bio", bio.trim())}
-                    >
-                      Save Bio
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Academic Details */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Academic Attribution
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Your institutional department, branch, and graduation cohort.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <SettingRow label="Bio / Focus" htmlFor="s-bio" hint="Up to 500 characters. Share your competitive focus and learning trajectory.">
                   <div className="space-y-2">
-                    <Label className="font-sans text-xs font-semibold text-zinc-300">
-                      Department / Branch
-                    </Label>
-                    <Select
-                      value={department}
-                      onValueChange={(val) => {
-                        setDepartment(val);
-                        void handleSaveField("department", val);
-                      }}
-                    >
-                      <SelectTrigger className="font-sans text-xs bg-zinc-950 border-white/15 text-white rounded-none">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none">
-                        {DEPARTMENTS.map((d) => (
-                          <SelectItem key={d} value={d.split(" ")[0]} className="font-sans text-xs">
-                            {d}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-sans text-xs font-semibold text-zinc-300">
-                      Graduation Batch
-                    </Label>
-                    <Select
-                      value={batch}
-                      onValueChange={(val) => {
-                        setBatch(val);
-                        void handleSaveField("batch", val);
-                      }}
-                    >
-                      <SelectTrigger className="font-sans text-xs bg-zinc-950 border-white/15 text-white rounded-none">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none">
-                        {BATCHES.map((b) => (
-                          <SelectItem key={b} value={b} className="font-sans text-xs">
-                            {b}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Locked Institutional Registrations */}
-                <div className="pt-4 border-t border-white/10 space-y-3">
-                  <div className="flex items-center gap-2 text-xs text-zinc-400 font-sans font-medium">
-                    <Lock size={13} className="text-zinc-500" />
-                    <span>Locked Institutional Registrations (Verified by Medi-Caps)</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="font-sans text-[10px] uppercase text-zinc-500">
-                        Enrollment PRN
-                      </Label>
-                      <Input
-                        value={member?.prn || "—"}
-                        readOnly
-                        disabled
-                        className="font-mono text-xs bg-zinc-950/40 text-zinc-400 cursor-not-allowed border-white/10 rounded-none mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="font-sans text-[10px] uppercase text-zinc-500">
-                        Institutional Email Address
-                      </Label>
-                      <Input
-                        value={member?.email || ""}
-                        readOnly
-                        disabled
-                        className="font-mono text-xs bg-zinc-950/40 text-zinc-400 cursor-not-allowed border-white/10 rounded-none mt-1"
-                      />
+                    <Textarea
+                      id="s-bio"
+                      value={bio}
+                      maxLength={500}
+                      onChange={(e) => setBio(e.target.value)}
+                      rows={3}
+                      placeholder="Competitive programmer, building expertise in graph algorithms and dynamic programming…"
+                      className="text-sm resize-none bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-zinc-600 tabular-nums">{bio.length}/500</span>
+                      <div className="flex items-center gap-1">
+                        <SaveButton
+                          onClick={() => saveField("bio", { bio: bio.trim() })}
+                          disabled={bio.trim() === (member?.bio || "")}
+                          saving={fieldStatus["bio"] === "saving"}
+                        />
+                        <SaveIndicator status={fieldStatus["bio"] || "idle"} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </SettingRow>
 
-              {/* Developer & Social Links */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Developer & Social Links
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Connect your GitHub and LinkedIn profiles to display on your verified cadet dossier.
-                  </p>
-                </div>
+                <SettingRow label="Department" htmlFor="s-dept">
+                  <Select
+                    value={department}
+                    onValueChange={(v) => { setDepartment(v); saveField("department", { department: v }); }}
+                  >
+                    <SelectTrigger id="s-dept" className="h-9 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus:ring-0 focus:border-lime-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none">
+                      {DEPARTMENTS.map((d) => (
+                        <SelectItem key={d.value} value={d.value} className="text-xs">{d.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </SettingRow>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* GitHub */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-github" className="font-sans text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Github size={13} /> GitHub Handle
-                    </Label>
-                    <div className="flex gap-2">
+                <SettingRow label="Graduation Batch" htmlFor="s-batch" borderless>
+                  <Select
+                    value={batch}
+                    onValueChange={(v) => { setBatch(v); saveField("batch", { batch: v }); }}
+                  >
+                    <SelectTrigger id="s-batch" className="h-9 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus:ring-0 focus:border-lime-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none">
+                      {BATCHES.map((b) => (
+                        <SelectItem key={b} value={b} className="text-xs">{b}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </SettingRow>
+              </SettingSection>
+
+              {/* Social links */}
+              <SettingSection
+                title="Developer Links"
+                description="Connect your public developer profiles to display on your cadet dossier."
+              >
+                <SettingRow label="GitHub" htmlFor="s-github" hint="Your GitHub username (without @).">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Github size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-github"
                         value={github}
                         onChange={(e) => setGithub(e.target.value.replace(/^@/, ""))}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleSaveField("github_username", github.trim());
-                        }}
+                        onKeyDown={(e) => e.key === "Enter" && saveField("github", { github_username: github.trim() })}
                         placeholder="octocat"
-                        className="font-sans text-xs bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400"
+                        className="h-9 pl-8 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="font-sans text-xs uppercase border-white/15 rounded-none shrink-0"
-                        disabled={saveStatus["github_username"] === "saving" || github.trim() === (member?.github_username || "")}
-                        onClick={() => handleSaveField("github_username", github.trim())}
-                      >
-                        Save
-                      </Button>
                     </div>
+                    <SaveButton
+                      onClick={() => saveField("github", { github_username: github.trim() })}
+                      disabled={github.trim() === (member?.github_username || "")}
+                      saving={fieldStatus["github"] === "saving"}
+                    />
+                    <SaveIndicator status={fieldStatus["github"] || "idle"} />
                   </div>
+                  {github && (
+                    <a
+                      href={`https://github.com/${github}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
+                    >
+                      <ExternalLink size={10} />
+                      github.com/{github}
+                    </a>
+                  )}
+                </SettingRow>
 
-                  {/* LinkedIn */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-linkedin" className="font-sans text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Linkedin size={13} className="text-cyan-400" /> LinkedIn Profile
-                    </Label>
-                    <div className="flex gap-2">
+                <SettingRow label="LinkedIn" htmlFor="s-linkedin" hint="Full profile URL or handle." borderless>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500" />
                       <Input
                         id="s-linkedin"
                         value={linkedin}
                         onChange={(e) => setLinkedin(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleSaveField("linkedin_url", linkedin.trim());
-                        }}
+                        onKeyDown={(e) => e.key === "Enter" && saveField("linkedin", { linkedin_url: linkedin.trim() })}
                         placeholder="https://linkedin.com/in/username"
-                        className="font-sans text-xs bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400"
+                        className="h-9 pl-8 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="font-sans text-xs uppercase border-white/15 rounded-none shrink-0"
-                        disabled={saveStatus["linkedin_url"] === "saving" || linkedin.trim() === (member?.linkedin_url || "")}
-                        onClick={() => handleSaveField("linkedin_url", linkedin.trim())}
-                      >
-                        Save
-                      </Button>
+                    </div>
+                    <SaveButton
+                      onClick={() => saveField("linkedin", { linkedin_url: linkedin.trim() })}
+                      disabled={linkedin.trim() === (member?.linkedin_url || "")}
+                      saving={fieldStatus["linkedin"] === "saving"}
+                    />
+                    <SaveIndicator status={fieldStatus["linkedin"] || "idle"} />
+                  </div>
+                </SettingRow>
+              </SettingSection>
+
+              {/* Locked registrations */}
+              <SettingSection
+                title="Institutional Registrations"
+                description="Verified by Medi-Caps University. These cannot be changed."
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <Lock size={11} /> Enrollment PRN
+                    </Label>
+                    <div className="h-9 px-3 flex items-center bg-zinc-950/60 border border-white/8 text-zinc-400 font-mono text-xs select-all">
+                      {member.prn || "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <Lock size={11} /> Institutional Email
+                    </Label>
+                    <div className="h-9 px-3 flex items-center bg-zinc-950/60 border border-white/8 text-zinc-400 font-mono text-xs truncate select-all">
+                      {member.email}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Master Save Button */}
-              <div className="flex justify-end pt-2">
-                <Button
-                  type="button"
-                  disabled={isSavingAll || isUploadingAvatar}
-                  onClick={() => handleSaveAllProfile()}
-                  className="font-sans px-6 py-2.5 bg-lime-400 text-black hover:bg-lime-300 font-bold text-xs uppercase tracking-wider rounded-none shadow-md shadow-lime-400/20 cursor-pointer flex items-center gap-2"
-                >
-                  {isSavingAll ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      <span>Saving Changes...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check size={14} />
-                      <span>Save All Profile Changes</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+              </SettingSection>
+            </>
           )}
 
-          {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 2: ACCOUNT & SECURITY                                        */}
-          {/* ═════════════════════════════════════════════════════════════════ */}
+          {/* ═══════════════════ TAB: ACCOUNT ══════════════════════════════ */}
           {activeTab === "account" && (
-            <div className="space-y-6">
-              {/* Username / Handle Alias */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Username / Handle Alias
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Your unique campus handle used in battle telemetry, arena submissions, and rankings.
-                  </p>
-                </div>
-
-                <div className="space-y-2 max-w-md">
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 font-mono">
-                        @
-                      </span>
-                      <Input
-                        id="acc-handle"
-                        value={handleInput}
-                        onChange={(e) => setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                        className={cn(
-                          "font-mono text-xs pl-8 bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400",
-                          isHandleChanged && handleStatus === "available" && "border-emerald-500/60",
-                          isHandleChanged && handleStatus === "taken" && "border-rose-500/60 text-rose-200"
-                        )}
-                        placeholder="handle"
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={!isHandleChanged || handleInput.trim().length < 3 || handleStatus !== "available"}
-                      onClick={handleSaveHandle}
-                      className="bg-lime-400 text-black hover:bg-lime-300 font-semibold text-xs font-sans rounded-none px-4 shrink-0"
-                    >
-                      Change handle
-                    </Button>
-                  </div>
-                  <div className="flex items-center h-4 text-xs">
-                    {!isHandleChanged && <span className="text-zinc-500 text-[11px] font-sans">Current verified handle</span>}
-                    {isHandleChanged && handleStatus === "checking" && (
-                      <span className="text-lime-400 flex items-center gap-1 text-[11px] font-mono">
-                        <Loader2 className="animate-spin size-3" /> checking availability...
-                      </span>
-                    )}
-                    {isHandleChanged && handleStatus === "available" && (
-                      <span className="text-emerald-400 flex items-center gap-1 text-[11px] font-sans font-medium">
-                        <Check size={12} /> Handle is available
-                      </span>
-                    )}
-                    {isHandleChanged && handleStatus === "taken" && (
-                      <span className="text-rose-400 flex items-center gap-1 text-[11px] font-sans font-medium">
-                        <X size={12} /> Handle is already taken
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Connected SSO Accounts */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Connected Single Sign-On (SSO)
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Institutional authentication provider linked to your Medi-Caps portal account.
-                  </p>
-                </div>
-
-                <div className="divide-y divide-white/5">
-                  <div className="py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-none bg-zinc-950 border border-white/15 flex items-center justify-center font-bold text-xs text-white">
-                        G
+            <>
+              <SettingSection
+                title="Username / Handle"
+                description="Your unique @handle used across leaderboards, contest submissions, and peer mentions."
+              >
+                <SettingRow label="Handle alias" htmlFor="acc-handle" hint="Lowercase letters, numbers, and underscores only. Min 3 characters." borderless>
+                  <div className="space-y-2 max-w-xs">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-xs">@</span>
+                        <Input
+                          id="acc-handle"
+                          value={handleInput}
+                          onChange={(e) => setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                          className={cn(
+                            "h-9 pl-7 text-xs font-mono bg-zinc-950 border-white/15 text-white rounded-none focus-visible:ring-0",
+                            isHandleChanged && handleStatus === "available" && "border-emerald-500/60 focus-visible:border-emerald-500",
+                            isHandleChanged && handleStatus === "taken" && "border-red-500/60 focus-visible:border-red-500",
+                            (!isHandleChanged || handleStatus === "idle") && "focus-visible:border-lime-400"
+                          )}
+                          placeholder="handle"
+                        />
                       </div>
-                      <div>
-                        <strong className="font-sans text-xs font-semibold text-white block">Google Workspace SSO</strong>
-                        <span className="font-mono text-[11px] text-zinc-400">{member?.email}</span>
-                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={!isHandleChanged || handleInput.length < 3 || handleStatus !== "available" || fieldStatus["handle"] === "saving"}
+                        onClick={saveHandle}
+                        className="h-9 px-3 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 disabled:opacity-40 rounded-none cursor-pointer"
+                      >
+                        {fieldStatus["handle"] === "saving" ? <Loader2 size={12} className="animate-spin" /> : "Update"}
+                      </Button>
                     </div>
-                    <Badge variant="outline" className="font-mono text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-none">
-                      CONNECTED
-                    </Badge>
+                    <div className="h-4 flex items-center">
+                      {!isHandleChanged && <span className="text-[11px] text-zinc-600">Current handle: <strong className="text-zinc-400 font-mono">@{member.handle}</strong></span>}
+                      {isHandleChanged && handleStatus === "checking" && (
+                        <span className="flex items-center gap-1 text-[11px] text-zinc-500">
+                          <Loader2 size={10} className="animate-spin" /> Checking availability…
+                        </span>
+                      )}
+                      {isHandleChanged && handleStatus === "available" && (
+                        <span className="flex items-center gap-1 text-[11px] text-emerald-400">
+                          <Check size={11} /> Available
+                        </span>
+                      )}
+                      {isHandleChanged && handleStatus === "taken" && (
+                        <span className="flex items-center gap-1 text-[11px] text-red-400">
+                          <X size={11} /> Handle already taken
+                        </span>
+                      )}
+                      {fieldStatus["handle"] === "saved" && <SaveIndicator status="saved" />}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </SettingRow>
+              </SettingSection>
 
-              {/* Notification Preferences */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Notification Preferences
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Control contest reminders and rating trajectory announcements sent to your registered email.
-                  </p>
-                </div>
-
-                <div className="divide-y divide-white/5 font-sans">
-                  <div className="py-3 flex items-center justify-between gap-4">
+              <SettingSection
+                title="Connected Accounts"
+                description="Authentication providers linked to your Medi-Caps institutional credential."
+              >
+                <div className="flex items-center justify-between py-1">
+                  <div className="flex items-center gap-3">
+                    <div className="size-9 bg-zinc-950 border border-white/10 flex items-center justify-center shrink-0">
+                      <span className="font-bold text-sm text-white">G</span>
+                    </div>
                     <div>
-                      <strong className="text-xs font-medium text-white block">Contest Announcements</strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
-                        Receive reminder alerts before scheduled proctored campus battles.
-                      </span>
+                      <p className="text-sm font-medium text-white">Google Workspace SSO</p>
+                      <p className="text-[11px] text-zinc-500 font-mono mt-0.5">{member.email}</p>
                     </div>
-                    <Switch
-                      checked={notifContests}
-                      onCheckedChange={(val) => {
-                        setNotifContests(val);
-                        toast.success(`Contest notifications ${val ? "enabled" : "disabled"}`);
-                      }}
-                    />
                   </div>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-emerald-500/40 bg-emerald-950/20 text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+                    <span className="size-1.5 rounded-full bg-emerald-400" /> Connected
+                  </span>
+                </div>
+              </SettingSection>
 
-                  <div className="py-3 flex items-center justify-between gap-4">
-                    <div>
-                      <strong className="text-xs font-medium text-white block">Rating & Standings Updates</strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
-                        Notifications when post-contest rating shifts and badges are computed.
-                      </span>
-                    </div>
-                    <Switch
-                      checked={notifRatings}
-                      onCheckedChange={(val) => {
-                        setNotifRatings(val);
-                        toast.success(`Rating notifications ${val ? "enabled" : "disabled"}`);
-                      }}
-                    />
+              <SettingSection
+                title="Data Export"
+                description="Download a full snapshot of your contest history, rating trajectory, and profile records."
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-zinc-300">Export profile as JSON</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">Includes all contest entries, rating data, and cadet identity records.</p>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExport}
+                    className="text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-none gap-1.5 cursor-pointer"
+                  >
+                    <Download size={13} />
+                    Export
+                  </Button>
                 </div>
-              </div>
+              </SettingSection>
+            </>
+          )}
 
-              {/* Active Workstation Session */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Active Session & Security
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Current terminal device authorization and cryptographic session tokens.
-                  </p>
+          {/* ═══════════════════ TAB: NOTIFICATIONS ═════════════════════════ */}
+          {activeTab === "notifications" && (
+            <SettingSection
+              title="Notification Preferences"
+              description="Control what CCC platform alerts are dispatched to your institutional email."
+            >
+              {[
+                {
+                  key: "contests",
+                  label: "Contest Announcements",
+                  desc: "Reminder alerts before scheduled proctored campus battles start.",
+                  value: notifContests,
+                  set: setNotifContests,
+                },
+                {
+                  key: "ratings",
+                  label: "Rating & Standings Updates",
+                  desc: "Notifications when post-contest Elo shifts and tier promotions are computed.",
+                  value: notifRatings,
+                  set: setNotifRatings,
+                },
+                {
+                  key: "follows",
+                  label: "New Followers",
+                  desc: "Alert when a peer follows your cadet dossier.",
+                  value: notifFollows,
+                  set: setNotifFollows,
+                },
+              ].map((item, i, arr) => (
+                <div
+                  key={item.key}
+                  className={cn(
+                    "flex items-start justify-between gap-4 py-3",
+                    i < arr.length - 1 && "border-b border-white/8"
+                  )}
+                >
+                  <div>
+                    <p className="text-sm font-medium text-zinc-200">{item.label}</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">{item.desc}</p>
+                  </div>
+                  <Switch
+                    checked={item.value}
+                    onCheckedChange={(v) => {
+                      item.set(v);
+                      toast.success(`${item.label} ${v ? "enabled" : "disabled"}`);
+                    }}
+                    className="shrink-0 mt-0.5"
+                  />
                 </div>
+              ))}
+            </SettingSection>
+          )}
 
-                <div className="flex items-start justify-between gap-4 p-4 rounded-none bg-zinc-950 border border-white/10">
+          {/* ═══════════════════ TAB: SECURITY & SESSION ════════════════════ */}
+          {activeTab === "security" && (
+            <>
+              <SettingSection
+                title="Active Session"
+                description="Current terminal device authorization and cryptographic token parameters."
+              >
+                <div className="flex items-start justify-between gap-4 p-4 bg-zinc-950 border border-white/10">
                   <div className="flex items-start gap-3">
-                    <Laptop className="size-5 text-lime-400 mt-0.5" />
+                    <Monitor size={18} className="text-lime-400 mt-0.5 shrink-0" />
                     <div>
-                      <strong className="font-sans text-xs font-semibold text-white block">
-                        {typeof window !== "undefined" ? window.navigator.platform || "Workstation Session" : "Workstation Session"}
-                      </strong>
-                      <p className="font-sans text-[11px] text-zinc-400 mt-0.5">
-                        Stateless HMAC-SHA256 JWT Token · Active Now
+                      <p className="text-sm font-medium text-white">
+                        {typeof window !== "undefined" ? window.navigator.platform || "Workstation" : "Workstation"}
                       </p>
-                      <span className="inline-flex items-center gap-1.5 mt-2 font-mono text-[10px] text-emerald-400">
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        Stateless HMAC-SHA256 JWT · Session storage
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-mono text-emerald-400">
                         <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        ACTIVE NOW
+                        Active now
                       </span>
                     </div>
                   </div>
@@ -962,117 +943,108 @@ export function SettingsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="font-sans text-xs uppercase border-white/15 rounded-none text-zinc-300 hover:text-white"
                     onClick={() => logout()}
+                    className="text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 hover:text-red-400 hover:border-red-500/40 rounded-none gap-1.5 cursor-pointer"
                   >
-                    <LogOut size={13} className="mr-1.5" /> Log Out
+                    <LogOut size={12} />
+                    Sign out
                   </Button>
                 </div>
-              </div>
+              </SettingSection>
 
-              {/* Data Portability */}
-              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
-                <div>
-                  <h3 className="text-base font-sans font-bold text-white uppercase tracking-tight">
-                    Data Portability
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1">
-                    Download your full contest history, rating trajectory, and profile records.
-                  </p>
+              <SettingSection
+                title="Cryptographic Proof Certificates"
+                description="Your contest participation is anchored to HMAC-SHA256 sealed proof certificates."
+              >
+                <div className="p-4 bg-zinc-950 border border-white/8 flex items-start gap-3">
+                  <Zap size={15} className="text-lime-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-zinc-300">Proof certificates are immutable</p>
+                    <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                      Each contest you participate in generates a cryptographic proof sealed with your PRN and timestamp.
+                      These certificates are permanently anchored to your institutional identity and cannot be revoked or altered.
+                    </p>
+                    <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 rounded-none gap-1.5 cursor-pointer">
+                      <Link to="/portal/verify">
+                        View my proof certificates
+                        <ChevronRight size={12} />
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-
-                <Button
-                  type="button"
-                  onClick={handleExportData}
-                  variant="outline"
-                  size="sm"
-                  className="font-sans text-xs border-white/15 rounded-none text-zinc-200 hover:text-white bg-zinc-950"
-                >
-                  <Download size={13} className="mr-1.5" /> Export Profile as JSON
-                </Button>
-              </div>
-            </div>
+              </SettingSection>
+            </>
           )}
 
-          {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 3: DANGER ZONE                                               */}
-          {/* ═════════════════════════════════════════════════════════════════ */}
+          {/* ═══════════════════ TAB: DANGER ZONE ══════════════════════════ */}
           {activeTab === "danger" && (
-            <div className="rounded-none border border-rose-500/40 bg-rose-950/10 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="size-5 text-rose-500 shrink-0 mt-0.5" />
+            <SettingSection
+              title="Danger Zone"
+              description="Irreversible actions that permanently affect your account."
+              danger
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-red-500/20 bg-red-950/10">
                 <div>
-                  <h3 className="font-sans text-base font-bold uppercase tracking-tight text-rose-300">
-                    Permanent Account Purge
-                  </h3>
-                  <p className="text-xs text-rose-200/80 leading-relaxed mt-1">
-                    Deleting your account is permanent and irreversible. Your competitive rating record,
-                    contest submissions, and leaderboard standings will be permanently erased.
+                  <p className="text-sm font-semibold text-red-200">Delete this account</p>
+                  <p className="text-[11px] text-red-300/70 mt-0.5 leading-relaxed">
+                    Permanently erases your rating record, contest history, and leaderboard standings.
+                    This cannot be undone.
                   </p>
                 </div>
-              </div>
-
-              <div className="pt-4 border-t border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <strong className="font-sans text-xs text-rose-200 block">Irrevocable action</strong>
-                  <span className="font-sans text-[11px] text-rose-300/70">
-                    Requires explicit confirmation of your handle (@{member?.handle || "user"}).
-                  </span>
-                </div>
-
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="destructive"
-                      className="font-sans text-xs font-semibold uppercase tracking-wider rounded-none bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-950/50 cursor-pointer"
+                      size="sm"
+                      className="shrink-0 text-xs font-semibold rounded-none bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer"
                     >
-                      <Trash2 size={14} className="mr-1.5" /> Delete Account
+                      <Trash2 size={13} className="mr-1.5" />
+                      Delete account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="border-rose-500/50 bg-zinc-950 text-white rounded-none font-sans">
+                  <AlertDialogContent className="bg-zinc-950 border-red-500/40 rounded-none text-white">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-base font-semibold text-rose-400 flex items-center gap-2">
-                        <ShieldAlert className="size-5 text-rose-500" />
-                        Confirm Account Deletion
+                      <AlertDialogTitle className="text-red-400 flex items-center gap-2 text-base">
+                        <ShieldAlert size={18} />
+                        Confirm account deletion
                       </AlertDialogTitle>
-                      <AlertDialogDescription className="text-xs text-zinc-400 leading-relaxed space-y-2">
+                      <AlertDialogDescription className="text-zinc-400 text-xs leading-relaxed space-y-2">
                         <p>
-                          This will permanently delete <strong className="text-white">@{member?.handle}</strong> and all associated records.
+                          This will permanently delete <strong className="text-white">@{member.handle}</strong>{" "}
+                          and all associated records including contest history, rating certificates, and standings.
                         </p>
                         <p>
-                          To confirm, please type your handle <code className="text-lime-400 bg-zinc-900 px-1.5 py-0.5 rounded-none border border-white/10 font-mono">{member?.handle}</code> below:
+                          Type <code className="font-mono text-lime-400 bg-zinc-900 px-1.5 py-0.5 border border-white/10">{member.handle}</code> to confirm:
                         </p>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-
-                    <div className="my-2">
+                    <div className="my-1">
                       <Input
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        placeholder={member?.handle || "handle"}
-                        className="font-mono text-sm bg-zinc-900 border-rose-500/40 text-white rounded-none focus-visible:ring-rose-500"
+                        placeholder={member.handle || "handle"}
+                        className="font-mono text-sm bg-zinc-900 border-red-500/40 text-white rounded-none focus-visible:ring-0 focus-visible:border-red-400"
                       />
                     </div>
-
                     <AlertDialogFooter>
                       <AlertDialogCancel
                         onClick={() => setDeleteConfirmText("")}
-                        className="font-sans text-xs rounded-none border-white/15"
+                        className="text-xs rounded-none border-white/15 bg-transparent hover:bg-zinc-900"
                       >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        disabled={deleteConfirmText.trim().toLowerCase() !== member?.handle?.toLowerCase() || isDeleting}
-                        onClick={handleDeleteAccount}
-                        className="font-sans text-xs rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold disabled:opacity-50"
+                        disabled={deleteConfirmText.trim().toLowerCase() !== member.handle?.toLowerCase() || isDeleting}
+                        onClick={handleDelete}
+                        className="text-xs rounded-none bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-40"
                       >
-                        {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently Delete"}
+                        {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently delete"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-            </div>
+            </SettingSection>
           )}
         </div>
       </div>
