@@ -287,11 +287,13 @@ export function ContestLobbyPage() {
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <Button
-                  onClick={() => navigate(`/assessments/${contestSlug}`)}
+                  asChild
                   size="lg"
                   className="rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
                 >
-                  <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                  <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
+                    <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                  </a>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/portal/contests/${contestSlug}`}>Back to Overview</Link>
@@ -328,12 +330,21 @@ export function ContestLobbyPage() {
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button
+                  asChild
                   disabled={!ack || !canStart}
-                  onClick={() => navigate(`/assessments/${contestSlug}`)}
                   size="lg"
                   className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20 disabled:opacity-40"
                 >
-                  <Play className="mr-1.5 size-4 fill-black" /> Start Assessment
+                  <a
+                    href={(!ack || !canStart) ? undefined : `/assessments/${contestSlug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (!ack || !canStart) e.preventDefault();
+                    }}
+                  >
+                    <Play className="mr-1.5 size-4 fill-black" /> Start Assessment (New Window)
+                  </a>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>

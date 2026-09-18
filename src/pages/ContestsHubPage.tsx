@@ -28,7 +28,6 @@ import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
-import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestsHubSkeleton, Skeleton } from "@/organization/components/skeletons";
 import { PageHeader, SectionHeader } from "@/organization/components/ui";
 import { useRealtimeEvents } from "@/lib/realtime";
@@ -93,9 +92,6 @@ export function ContestsHubPage() {
   const [myParticipations, setMyParticipations] = useState<ParticipationRecord[]>([]);
   const [isLoadingParticipations, setIsLoadingParticipations] = useState(false);
   const [registeringSlug, setRegisteringSlug] = useState<string | null>(null);
-  const [assessmentConfirmOpen, setAssessmentConfirmOpen] = useState(false);
-  const [confirmContestSlug, setConfirmContestSlug] = useState("");
-  const [confirmContestTitle, setConfirmContestTitle] = useState("");
 
   const refreshHubData = useCallback((force = false) => {
     if (force) {
@@ -437,14 +433,15 @@ export function ContestsHubPage() {
                         </Button>
                       ) : isContestAssessmentInProgress(contest) ? (
                         <Button asChild className="flex-1 rounded-none bg-amber-400 text-xs font-bold uppercase text-black hover:bg-amber-300 shadow-md shadow-amber-400/20 border border-amber-300">
-                          <Link to={`/portal/contests/${contest.slug}/assessment`}>
+                          <a href={`/assessments/${contest.slug}`} target="_blank" rel="noopener noreferrer">
                             <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
-                          </Link>
+                          </a>
                         </Button>
                       ) : isReg ? (
-                        <Button onClick={() => { setConfirmContestSlug(contest.slug); setConfirmContestTitle(contest.title); setAssessmentConfirmOpen(true); }}
-                          className="flex-1 rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-md shadow-lime-400/20">
-                          <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+                        <Button asChild className="flex-1 rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-md shadow-lime-400/20">
+                          <a href={`/assessments/${contest.slug}`} target="_blank" rel="noopener noreferrer">
+                            <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+                          </a>
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
@@ -554,9 +551,9 @@ export function ContestsHubPage() {
                   </div>
                   <Button asChild
                     className="w-full rounded-none bg-amber-400 text-xs font-bold uppercase text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300">
-                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}/assessment`}>
+                    <a href={`/assessments/${assessmentInfo.contest.slug}`} target="_blank" rel="noopener noreferrer">
                       <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
-                    </Link>
+                    </a>
                   </Button>
                   <p className="text-center font-mono text-[10px] text-zinc-400">Proctored session active · Server clock synchronized</p>
                 </>
@@ -567,9 +564,11 @@ export function ContestsHubPage() {
                     <span className="text-xs font-bold text-emerald-400">Registration Active · Window Open</span>
                     <span className="ml-auto font-mono text-xs text-lime-400 font-bold">120 MIN</span>
                   </div>
-                  <Button onClick={() => { setConfirmContestSlug(assessmentInfo.contest.slug); setConfirmContestTitle(assessmentInfo.contest.title); setAssessmentConfirmOpen(true); }}
+                  <Button asChild
                     className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
-                    <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
+                    <a href={`/assessments/${assessmentInfo.contest.slug}`} target="_blank" rel="noopener noreferrer">
+                      <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
+                    </a>
                   </Button>
                   <p className="text-center font-mono text-[10px] text-zinc-400">Full-screen Monaco IDE · Anti-cheat active</p>
                 </>
@@ -604,7 +603,7 @@ export function ContestsHubPage() {
                     </span>
                   </div>
                   <Button asChild className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
-                    <Link to={`/assessments/${assessmentInfo.contest.slug}`}><Play className="mr-1.5 size-4 fill-black" /> Take Assessment</Link>
+                    <a href={`/assessments/${assessmentInfo.contest.slug}`} target="_blank" rel="noopener noreferrer"><Play className="mr-1.5 size-4 fill-black" /> Take Assessment</a>
                   </Button>
                 </>
               ) : assessmentInfo.isUpcoming ? (
@@ -847,13 +846,6 @@ export function ContestsHubPage() {
           </div>
         </aside>
       </div>
-
-      <AssessmentConfirmModal
-        open={assessmentConfirmOpen}
-        onOpenChange={setAssessmentConfirmOpen}
-        contestSlug={confirmContestSlug}
-        contestTitle={confirmContestTitle}
-      />
     </div>
   );
 }

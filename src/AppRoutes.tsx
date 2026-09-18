@@ -27,6 +27,11 @@ function ProfileHandleRedirect() {
   return <Navigate to={`/portal/profile/${handle ? encodeURIComponent(handle) : ""}`} replace />;
 }
 
+function ContestAssessmentRedirect() {
+  const { contestSlug } = useParams<{ contestSlug: string }>();
+  return <Navigate to={`/assessments/${contestSlug ? encodeURIComponent(contestSlug) : ""}`} replace />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -40,7 +45,7 @@ export function AppRoutes() {
 
       {/* Strictly Protected Inner Platform Routes */}
       <Route element={<AuthGuard />}>
-        {/* Standalone Assessment Workspace (FullScreen distraction-free testing) */}
+        {/* Standalone Assessment Workspace (FullScreen distraction-free testing in dedicated window) */}
         <Route path="/assessments/:contestSlug" element={<AssessmentWorkspacePage />} />
 
         {/* Portal Shell Routes */}
@@ -53,7 +58,7 @@ export function AppRoutes() {
           <Route path="contests/:contestSlug" element={<ContestOverviewPage />} />
           <Route path="contests/:contestSlug/lobby" element={<ContestLobbyPage />} />
           <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
-          <Route path="contests/:contestSlug/assessment" element={<AssessmentWorkspacePage />} />
+          <Route path="contests/:contestSlug/assessment" element={<ContestAssessmentRedirect />} />
           <Route path="contests/:contestSlug/offline" element={<ContestOfflinePage />} />
           <Route path="contests/:contestSlug/qualified" element={<ContestQualifiedPage />} />
           <Route path="contests/:contestSlug/results" element={<ContestResultsPage />} />

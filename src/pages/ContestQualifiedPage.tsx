@@ -343,9 +343,9 @@ export function ContestQualifiedPage() {
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <Button asChild className="rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 px-6 py-2.5 shadow-md shadow-lime-400/20">
-                <Link to={`/assessments/${contestSlug}`}>
+                <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
                   <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
-                </Link>
+                </a>
               </Button>
               <Button asChild variant="outline" className="rounded-none font-mono text-xs border-white/10">
                 <Link to={`/portal/contests/${contestSlug}`}>Contest Lobby</Link>

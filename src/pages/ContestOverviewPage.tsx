@@ -36,7 +36,6 @@ import { contestApi } from "@/features/contest/api";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { PhaseBadge, RoundsTimeline } from "@/features/contest/components";
-import { AssessmentConfirmModal } from "@/organization/components/AssessmentConfirmModal";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { SectionHeader } from "@/organization/components/ui";
 import {
@@ -57,7 +56,6 @@ export function ContestOverviewPage() {
   );
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [assessmentConfirmOpen, setAssessmentConfirmOpen] = useState(false);
 
   const refreshDetail = useCallback((force = false) => {
     if (!contestSlug) return;
@@ -167,9 +165,9 @@ export function ContestOverviewPage() {
             size="lg"
             className="rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
           >
-            <Link to={`/portal/contests/${contestSlug}/assessment`}>
+            <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
               <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
-            </Link>
+            </a>
           </Button>
           <div className="flex items-center gap-2 px-3 py-2 border border-amber-500/40 bg-amber-950/30 text-amber-300 font-mono text-xs">
             <ShieldAlert size={14} className="text-amber-400 shrink-0" />
@@ -196,10 +194,12 @@ export function ContestOverviewPage() {
       return (
         <div className="flex flex-wrap items-center gap-3">
           <Button
-            onClick={() => setAssessmentConfirmOpen(true)}
+            asChild
             className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-md shadow-lime-400/20"
           >
-            <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+            <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
+              <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+            </a>
           </Button>
           {(phase === "final_live" || isDevBypass) && (
             <Button asChild className="rounded-none bg-cyan-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
@@ -327,11 +327,13 @@ export function ContestOverviewPage() {
     // Assessment is genuinely open or dev sandbox contest
     return (
       <Button
-        onClick={() => setAssessmentConfirmOpen(true)}
+        asChild
         size="lg"
         className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20"
       >
-        <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+        <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
+          <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+        </a>
       </Button>
     );
   };
@@ -369,9 +371,9 @@ export function ContestOverviewPage() {
             size="lg"
             className="shrink-0 rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
           >
-            <Link to={`/portal/contests/${contestSlug}/assessment`}>
+            <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
               <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
-            </Link>
+            </a>
           </Button>
         </div>
       )}
@@ -635,14 +637,6 @@ export function ContestOverviewPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <AssessmentConfirmModal
-        open={assessmentConfirmOpen}
-        onOpenChange={setAssessmentConfirmOpen}
-        contestSlug={contestSlug}
-        contestTitle={contest.title}
-        durationMinutes={ASSESSMENT_DURATION_MINUTES}
-      />
     </div>
   );
 }

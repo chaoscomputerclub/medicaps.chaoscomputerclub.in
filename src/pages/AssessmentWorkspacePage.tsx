@@ -19,6 +19,7 @@ import {
   Check,
   AlertCircle,
   XCircle,
+  X,
   ShieldAlert,
   Lock,
   Trophy,
@@ -203,6 +204,20 @@ export function AssessmentWorkspacePage() {
     }
   }
 
+  function handleExitWindow() {
+    if (
+      confirm(
+        "Your code and progress are automatically saved on this device. You can resume this contest session before the assessment window closes. Close assessment window now?",
+      )
+    ) {
+      if (window.opener) {
+        window.close();
+      } else {
+        navigate(`/portal/contests/${contestSlug}`);
+      }
+    }
+  }
+
   async function handleDirectRegister() {
     try {
       setIsRegistering(true);
@@ -269,20 +284,33 @@ export function AssessmentWorkspacePage() {
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.opener) {
+                  window.close();
+                } else {
+                  navigate(`/portal/contests/${contestSlug}`);
+                }
+              }}
+              className="w-full py-2 px-4 rounded-none bg-lime-400 text-black font-bold font-mono text-xs hover:bg-lime-300 transition-colors uppercase tracking-wider cursor-pointer"
+            >
+              Close Assessment Window
+            </button>
             <button
               type="button"
               onClick={() => navigate(`/portal/contests/${contestSlug}/results`)}
-              className="w-full py-2 px-4 rounded-none bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90 transition-colors"
+              className="w-full py-2 px-4 rounded-none bg-zinc-900 border border-white/10 text-white font-bold font-mono text-xs hover:bg-zinc-800 transition-colors uppercase tracking-wider cursor-pointer"
             >
               View Round 1 Ranking
             </button>
             <button
               type="button"
               onClick={() => navigate(`/portal/contests/${contestSlug}`)}
-              className="w-full py-2 px-4 rounded-none border border-[#2a2a2a] text-[#aaa] font-mono text-xs hover:bg-[#161616] transition-colors"
+              className="w-full py-2 px-4 rounded-none border border-[#2a2a2a] text-[#aaa] font-mono text-xs hover:bg-[#161616] transition-colors cursor-pointer"
             >
-              Return to Contest
+              Return to Contest Details
             </button>
           </div>
         </div>
@@ -316,10 +344,13 @@ export function AssessmentWorkspacePage() {
             </div>
           </div>
           <Button
-            onClick={() => navigate(`/portal/contests/${contestSlug}`)}
+            onClick={() => {
+              if (window.opener) window.close();
+              else navigate(`/portal/contests/${contestSlug}`);
+            }}
             className="w-full bg-lime-400 text-black font-mono font-bold text-xs uppercase rounded-none hover:bg-lime-300 shadow-lg shadow-lime-400/20"
           >
-            Return to Contest Lobby
+            Close Window & Return
           </Button>
         </div>
       </div>
@@ -393,7 +424,7 @@ export function AssessmentWorkspacePage() {
         {/* Left: Problem selector pill tabs */}
         <div className="flex items-center gap-1.5">
           <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400 mr-2 hidden sm:inline">
-            (01 // Proctored Terminal)
+            (01 // {assessment?.title ? assessment.title.slice(0, 26) : "Proctored Terminal"})
           </span>
           <div className="h-4 w-px bg-white/10 mr-1 hidden sm:inline" />
           {problems.map((prob, idx) => {
@@ -506,12 +537,24 @@ export function AssessmentWorkspacePage() {
             <span>{isSubmitting ? "Judging..." : "Submit"}</span>
           </Button>
 
+          {/* Exit Window Button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleExitWindow}
+            className="h-7 px-2 text-[11px] font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-zinc-800"
+            title="Save code & exit assessment window (you can resume later)"
+          >
+            <X size={12} className="mr-1" />
+            <span className="hidden sm:inline">Exit Window</span>
+          </Button>
+
           {/* Finish Button */}
           <Button
             size="sm"
             variant="ghost"
             onClick={handleFinish}
-            className="h-7 px-2 text-[11px] font-mono text-[#777] hover:text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
+            className="h-7 px-2 text-[11px] font-mono text-destructive/80 hover:text-destructive hover:bg-destructive/10 border border-destructive/30"
           >
             Finish
           </Button>
