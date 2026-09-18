@@ -122,7 +122,7 @@ class AssessmentService:
         If window is open or dev bypass active, returns/initializes the active session and problem challenges.
         """
         assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
-        is_dev_bypass = settings.is_dev_bypass_enabled or getattr(current_member, "is_core_member", False) or contest_slug.startswith("dev-")
+        is_dev_bypass = settings.is_dev_bypass_enabled or contest_slug.startswith("dev-")
 
         # 1. Check if user is registered for the contest
         is_registered = False

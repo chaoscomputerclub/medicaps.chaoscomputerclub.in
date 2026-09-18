@@ -10,7 +10,8 @@ Canonical Schedule:
 - UTC Start: 09:30 UTC
 - UTC End: 11:00 UTC
 - Check-in Opens: 2:00 PM IST (14:00 IST / 08:30 UTC), 1 hour before start
-- Screening Assessment: Closes 2 hours before physical contest (13:00 IST / 07:30 UTC)
+- Screening Assessment Opens: Tuesday 3:00 PM IST (15:00 IST / 09:30 UTC), strictly 24 hours before start
+- Screening Assessment Closes: Wednesday 1:00 PM IST (13:00 IST / 07:30 UTC), strictly 2 hours before start
 
 Strict Immutability Guarantee:
 - Once an official contest is created/scheduled in the database, its timers are strictly immutable.
@@ -25,13 +26,14 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 def get_next_wednesday_schedule(
     reference_dt: Optional[datetime] = None,
-) -> Tuple[datetime, datetime, datetime, datetime]:
+) -> Tuple[datetime, datetime, datetime, datetime, datetime]:
     """
     Computes canonical Wednesday contest timestamps:
     - starts_at: Wednesday 15:00 IST (09:30 UTC)
     - ends_at: Wednesday 16:30 IST (11:00 UTC)
     - check_in_opens_at: Wednesday 14:00 IST (08:30 UTC)
-    - assessment_closes_at: Wednesday 13:00 IST (07:30 UTC)
+    - assessment_opens_at: Tuesday 15:00 IST (09:30 UTC) [strictly 24h prior]
+    - assessment_closes_at: Wednesday 13:00 IST (07:30 UTC) [strictly 2h prior]
 
     Returns all datetimes in timezone-aware UTC.
     """
@@ -54,11 +56,13 @@ def get_next_wednesday_schedule(
     starts_at_ist = datetime(target_date.year, target_date.month, target_date.day, 15, 0, 0, tzinfo=IST)
     ends_at_ist = datetime(target_date.year, target_date.month, target_date.day, 16, 30, 0, tzinfo=IST)
     checkin_ist = datetime(target_date.year, target_date.month, target_date.day, 14, 0, 0, tzinfo=IST)
-    assess_closes_ist = datetime(target_date.year, target_date.month, target_date.day, 13, 0, 0, tzinfo=IST)
+    assess_opens_ist = starts_at_ist - timedelta(hours=24) # Strictly 24 hours prior (Tuesday 3:00 PM IST)
+    assess_closes_ist = datetime(target_date.year, target_date.month, target_date.day, 13, 0, 0, tzinfo=IST) # Strictly 2 hours prior
 
     return (
         starts_at_ist.astimezone(timezone.utc),
         ends_at_ist.astimezone(timezone.utc),
         checkin_ist.astimezone(timezone.utc),
+        assess_opens_ist.astimezone(timezone.utc),
         assess_closes_ist.astimezone(timezone.utc),
     )

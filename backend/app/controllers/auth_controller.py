@@ -523,18 +523,20 @@ class AuthController:
             select(func.count(MemberProfile.id)).where(
                 MemberProfile.rating > current_member.rating
             )
-        )        # Campus pass formatting
-        pass_data = {
-            "pass_code": getattr(campus_pass, "pass_code", None) or "NONE",
-            "member_name": current_member.full_name or current_member.email,
-            "handle": current_member.handle or "—",
-            "prn_hash": f"PRN-{current_member.prn[-4:]}" if current_member.prn else "N/A",
-            "contest_title": "Offline Contest Session",
-            "seat": getattr(campus_pass, "seat", None) or "Assigned Physical Lab",
-            "venue": "Campus Computer Center",
-            "check_in_opens_at": datetime.now(timezone.utc).isoformat(),
-            "status": "issued" if campus_pass else "expired",
-        }
+        )        # Campus pass formatting — strictly None if not issued/qualified
+        pass_data = None
+        if campus_pass:
+            pass_data = {
+                "pass_code": campus_pass.pass_code,
+                "member_name": current_member.full_name or current_member.email,
+                "handle": current_member.handle or "—",
+                "prn_hash": f"PRN-{current_member.prn[-4:]}" if current_member.prn else "N/A",
+                "contest_title": "Offline Contest Session",
+                "seat": getattr(campus_pass, "seat_number", None) or getattr(campus_pass, "seat", None) or "Assigned Physical Lab",
+                "venue": "Campus Computer Center",
+                "check_in_opens_at": datetime.now(timezone.utc).isoformat(),
+                "status": campus_pass.check_in_status or "issued",
+            }
 
         # Query attended scoreboards / battles
         sb_rows = await db.execute(

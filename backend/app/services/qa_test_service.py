@@ -805,7 +805,7 @@ class ProductionQAService:
                 "endpoint": f"/api/assessment/{target_slug}",
                 "headers": auth_headers,
                 "body": None,
-                "expected_status": [200, 404],
+                "expected_status": [200, 403, 404],
                 "required_keys": [],
                 "notes": "Checks Phase 1 screening round availability and countdown timer.",
             },

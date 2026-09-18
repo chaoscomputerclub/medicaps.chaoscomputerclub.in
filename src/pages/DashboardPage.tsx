@@ -68,6 +68,17 @@ export function DashboardPage() {
   const contests = publicData.contests || [];
   const history = profile?.ratingHistory || [];
   const pass = profile?.campusPass;
+  const isRealPass = Boolean(
+    pass &&
+    pass.pass_code &&
+    pass.pass_code !== "NONE" &&
+    pass.pass_code !== "CCC-PASS-0001" &&
+    pass.status !== "expired" &&
+    pass.seat &&
+    pass.seat !== "LAB-04-WS-12" &&
+    pass.seat !== "Assigned Physical Lab" &&
+    pass.seat !== "Unassigned"
+  );
 
   const live = contests.find((c) => c.status === "live");
   const next = contests.find((c) => c.status === "upcoming");
@@ -182,28 +193,56 @@ export function DashboardPage() {
         <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm flex flex-col justify-between">
           <div>
             <SectionHeader kicker="02 // Hardware Pass" index="INDEX 0.2" title="Lab Workstation" />
-            <div className="p-5 rounded-none border border-white/10 bg-zinc-950/80 font-mono space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-lime-400">CCC / MCU</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-slate-300 border border-white/8 uppercase">
-                  {pass?.status?.toUpperCase() ?? "STANDBY"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Assigned Event</span>
-                <strong className="text-sm text-white block mt-0.5 truncate">{pass?.contest_title ?? "Weekly Championship"}</strong>
-              </div>
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/8">
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Seat</span>
-                  <strong className="text-sm text-white block mt-0.5">{pass?.seat ?? "LAB-04-WS-12"}</strong>
+            {isRealPass && pass ? (
+              <div className="p-5 rounded-none border border-lime-400/30 bg-zinc-950/80 font-mono space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-lime-400">CCC / MCU</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-lime-400/10 text-lime-400 border border-lime-400/30 uppercase font-bold">
+                    {pass.status.toUpperCase()}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Pass Code</span>
-                  <strong className="text-xs text-lime-400 block mt-0.5 truncate">{pass?.pass_code ?? "CCC-PASS-0001"}</strong>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Assigned Event</span>
+                  <strong className="text-sm text-white block mt-0.5 truncate">{pass.contest_title}</strong>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/8">
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Seat</span>
+                    <strong className="text-sm text-white block mt-0.5">{pass.seat}</strong>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Pass Code</span>
+                    <strong className="text-xs text-lime-400 block mt-0.5 truncate">{pass.pass_code}</strong>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-5 rounded-none border border-white/10 bg-zinc-950/80 font-mono space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-500">CCC / MCU</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-amber-400/80 border border-amber-500/20 uppercase font-mono">
+                    LOCKED · TOP 30 ONLY
+                  </span>
+                </div>
+                <div className="py-1.5">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Hardware Pass Status</span>
+                  <strong className="text-xs text-zinc-200 block mt-1">No Active Lab Pass</strong>
+                  <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                    Physical air-gapped lab passes with assigned workstations are awarded exclusively to Top 30 online screening qualifiers.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/8 text-[11px]">
+                  <div>
+                    <span className="text-[10px] text-zinc-600 uppercase tracking-wider block">Seat</span>
+                    <span className="text-zinc-500 font-bold block mt-0.5">—</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-600 uppercase tracking-wider block">Pass Code</span>
+                    <span className="text-zinc-500 font-bold block mt-0.5">UNALLOCATED</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div className="pt-4">
             <Button asChild variant="outline" className="w-full border-white/10 hover:bg-zinc-800 text-xs font-mono">

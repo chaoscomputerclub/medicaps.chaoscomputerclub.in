@@ -805,7 +805,7 @@ class DynamicContestService:
 
         if cadence == "weekly":
             from app.services.contest_schedule_service import get_next_wednesday_schedule
-            w_start, w_end, _, _ = get_next_wednesday_schedule()
+            w_start, w_end, _, _, _ = get_next_wednesday_schedule()
             starts_at = w_start
             ends_at = w_end
         else:

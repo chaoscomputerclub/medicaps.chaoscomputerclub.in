@@ -63,7 +63,7 @@ async def launch_contests(force: bool = False):
             print("  ✓ Old contest data purged cleanly.")
 
         # Canonical Wednesday Schedule: Every Wednesday 3:00 PM – 4:30 PM IST (09:30 – 11:00 UTC)
-        weekly_starts, weekly_ends, weekly_checkin, assess_closes = get_next_wednesday_schedule()
+        weekly_starts, weekly_ends, weekly_checkin, assess_opens, assess_closes = get_next_wednesday_schedule()
 
         now = datetime.now(timezone.utc)
 
@@ -71,10 +71,11 @@ async def launch_contests(force: bool = False):
         # 1. WEEKLY CONTEST 1
         # =====================================================================
         print("\n🔹 [1/1] Creating Weekly Contest 1 (Canonical Wednesday Schedule)...")
-        print(f"  Starts at (UTC): {weekly_starts.isoformat()} (3:00 PM IST)")
-        print(f"  Ends at (UTC):   {weekly_ends.isoformat()} (4:30 PM IST)")
-        print(f"  Check-in (UTC):  {weekly_checkin.isoformat()} (2:00 PM IST)")
-        print(f"  Screening Close: {assess_closes.isoformat()} (1:00 PM IST)")
+        print(f"  Starts at (UTC): {weekly_starts.isoformat()} (Wednesday 3:00 PM IST)")
+        print(f"  Ends at (UTC):   {weekly_ends.isoformat()} (Wednesday 4:30 PM IST)")
+        print(f"  Check-in (UTC):  {weekly_checkin.isoformat()} (Wednesday 2:00 PM IST)")
+        print(f"  Screening Open:  {assess_opens.isoformat()} (Tuesday 3:00 PM IST - Exactly 24h prior)")
+        print(f"  Screening Close: {assess_closes.isoformat()} (Wednesday 1:00 PM IST - Exactly 2h prior)")
 
         weekly_contest = OfflineContest(
             slug="weekly-contest-1",
@@ -115,8 +116,8 @@ async def launch_contests(force: bool = False):
             title="Weekly Contest 1 — Online Screening Round",
             summary="Phase 1 online qualification round for CCC Weekly Contest 1. Solve all 4 challenges within 90 minutes.",
             duration_minutes=90,
-            starts_at=now - timedelta(minutes=10), # Opened right now for instant testing and qualification
-            ends_at=assess_closes, # Closes Wednesday 1:00 PM IST (2 hours before physical contest)
+            starts_at=assess_opens, # Strictly unlocks 24 hours prior (Tuesday 3:00 PM IST)
+            ends_at=assess_closes, # Strictly closes 2 hours before physical contest (Wednesday 1:00 PM IST)
             is_active=True,
             max_violations=3,
             created_at=now_utc(),

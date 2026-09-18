@@ -253,7 +253,37 @@ export function ContestOverviewPage() {
       );
     }
 
-    // Assessment is open or registered-waiting
+    // Assessment is not yet open (Strict 24h window)
+    if (phase === "registration_open" && !isDevBypass) {
+      return (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            disabled
+            size="lg"
+            className="rounded-none font-mono text-xs uppercase border-amber-500/30 bg-amber-950/20 text-amber-400 cursor-not-allowed"
+          >
+            <Lock className="mr-1.5 size-4 text-amber-400" /> Assessment Unlocks {formatWhen(opensAt.toISOString())}
+          </Button>
+        </div>
+      );
+    }
+
+    // Assessment entry window has concluded (2h prior to physical final)
+    if (phase === "assessment_closed" && !isDevBypass) {
+      return (
+        <Button
+          variant="outline"
+          disabled
+          size="lg"
+          className="rounded-none font-mono text-xs uppercase border-white/10 text-zinc-500 cursor-not-allowed"
+        >
+          <Lock className="mr-1.5 size-4" /> Assessment Closed (Verification In Progress)
+        </Button>
+      );
+    }
+
+    // Assessment is genuinely open or dev sandbox contest
     return (
       <Button
         onClick={() => setAssessmentConfirmOpen(true)}

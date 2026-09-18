@@ -451,7 +451,8 @@ async def get_registration_status(
         assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
 
     from app.core.config import settings
-    is_dev_bypass = settings.is_dev_bypass_enabled or getattr(current_member, "is_core_member", False) or slug.startswith("dev-")
+    is_dev_contest = slug.startswith("dev-")
+    is_dev_bypass = bool(settings.is_dev_bypass_enabled or is_dev_contest)
 
     can_take_assessment = (
         contest_status == "upcoming"
@@ -462,8 +463,8 @@ async def get_registration_status(
     )
     can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
 
-    # Dev Contest overrides for frictionless testing
-    if is_dev_bypass:
+    # Dev Contest overrides for frictionless testing (ONLY for dev- prefixed sandbox contests)
+    if is_dev_contest:
         is_registered = True
         is_top_30_qualified = True
         is_checked_in = True
@@ -471,6 +472,9 @@ async def get_registration_status(
         # STRICT: If assessment was already submitted, disqualified, or taken, reattempts are forbidden
         can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
         assessment_window_open = True
+    elif is_dev_bypass:
+        is_registered = True
+        can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
 
     # Contextual eligibility explanation
     if is_dev_bypass:

@@ -102,18 +102,18 @@ export function ContestQualifiedPage() {
   }, [contestSlug, refreshData]);
 
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
+  const isDevContest = contestSlug.startsWith("dev-");
   const isAssessmentEnded = Boolean(
     registration?.assessment_taken ||
     registration?.assessment_status === "submitted" ||
     registration?.assessment_status === "completed" ||
     (contest && (new Date(contest.starts_at).getTime() - 2 * 3600 * 1000 <= Date.now() || contest.status === "live" || contest.status === "finished")) ||
-    isDevBypass
+    (isDevBypass && isDevContest)
   );
   const isTop30Qualified = Boolean(
     registration?.is_top_30_qualified ||
-    registration?.can_enter_live_contest ||
     (registration?.assessment_rank !== null && registration?.assessment_rank !== undefined && registration.assessment_rank <= FINALIST_SEATS) ||
-    isDevBypass
+    (isDevBypass && isDevContest)
   );
   const rank = registration?.assessment_rank ?? 1;
   const score = registration?.assessment_score ?? 0;

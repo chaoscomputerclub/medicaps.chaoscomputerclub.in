@@ -128,6 +128,71 @@ export function ContestLobbyPage() {
             <Link to={`/portal/contests/${contestSlug}`}>Register for Contest</Link>
           </Button>
         </div>
+      ) : notYetOpen ? (
+        /* ─── NOT YET OPEN (LOCKED WAITING ROOM) ─────────── */
+        <div className="space-y-6 rounded-none border border-amber-500/30 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl font-mono">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
+                (01 // Screening Window Locked)
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+                ROUND 1 · SCHEDULED
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Lock className="size-6 text-amber-400" />
+              <h1 className="text-2xl sm:text-3xl font-black text-white uppercase">Screening Window Locked</h1>
+            </div>
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Registration confirmed. The Phase 1 Online Screening Assessment strictly unlocks 24 hours prior to the physical contest final:
+            </p>
+            <div className="p-4 rounded-none border border-white/10 bg-zinc-950 text-xs space-y-2">
+              <div className="flex items-center justify-between text-zinc-400">
+                <span>Assessment Opens:</span>
+                <span className="text-lime-400 font-bold">{formatWhen(opensAt.toISOString())}</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-400">
+                <span>Assessment Closes:</span>
+                <span className="text-white font-bold">{formatWhen(assessmentClosesAt(contest).toISOString())}</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-400 border-t border-white/5 pt-2">
+                <span>Offline Final Contest:</span>
+                <span className="text-cyan-400 font-bold">{formatWhen(contest.starts_at)}</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-zinc-500">
+              * The assessment terminal will activate automatically when the screening window opens on Tuesday at 3:00 PM IST.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="rounded-none text-xs border-white/10 text-zinc-300 hover:text-white">
+            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest Overview</Link>
+          </Button>
+        </div>
+      ) : (phase === "assessment_closed" && !isDevBypass) ? (
+        /* ─── WINDOW CONCLUDED ───────────────────────────── */
+        <div className="space-y-6 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl font-mono">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-400">
+                (01 // Window Concluded)
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
+                ROUND 1 · CLOSED
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Lock className="size-6 text-red-400" />
+              <h1 className="text-2xl sm:text-3xl font-black text-white uppercase">Screening Window Closed</h1>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              The Phase 1 screening assessment window closed 2 hours before the physical lab final. Entry is sealed for score verification and Top 30 finalist workstation assignment.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="rounded-none text-xs border-white/10 text-zinc-300 hover:text-white">
+            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest Overview</Link>
+          </Button>
+        </div>
       ) : (
         /* ─── READY TO ATTEMPT ───────────────────────────── */
         <div className="space-y-10 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">

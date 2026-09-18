@@ -363,13 +363,23 @@ export function ContestsHubPage() {
                         <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
                       </>
                     ) : isWeeklyRegistered ? (
-                      <>
-                        <Button onClick={() => { setConfirmContestSlug(upcomingWeekly.slug); setConfirmContestTitle(upcomingWeekly.title); setAssessmentConfirmOpen(true); }}
-                          className="rounded-none bg-lime-400 text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-300 px-8 py-2.5 shadow-lg shadow-lime-400/20">
-                          <Play className="mr-1.5 size-4 fill-black" /> Enter Screening Assessment
-                        </Button>
-                        <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
-                      </>
+                      assessmentInfo?.isOpen ? (
+                        <>
+                          <Button onClick={() => { setConfirmContestSlug(upcomingWeekly.slug); setConfirmContestTitle(upcomingWeekly.title); setAssessmentConfirmOpen(true); }}
+                            className="rounded-none bg-lime-400 text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-300 px-8 py-2.5 shadow-lg shadow-lime-400/20">
+                            <Play className="mr-1.5 size-4 fill-black" /> Enter Screening Assessment
+                          </Button>
+                          <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 rounded-none border border-lime-400/30 bg-lime-400/10 px-4 py-2 text-xs font-mono text-lime-400">
+                            <CheckCircle2 className="size-4 text-lime-400" />
+                            <span>Registered · Screening Unlocks Tuesday 3:00 PM IST</span>
+                          </div>
+                          <Button asChild variant="outline" size="sm" className="rounded-none text-xs font-mono border-white/10"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
+                        </>
+                      )
                     ) : (
                       <>
                         <Button onClick={() => handleRegister(upcomingWeekly.slug)} disabled={registeringSlug === upcomingWeekly.slug}
@@ -509,11 +519,11 @@ export function ContestsHubPage() {
                     </Link>
                   </Button>
                 </>
-              ) : registeredUpcomingContest || isWeeklyRegistered ? (
+              ) : (registeredUpcomingContest || isWeeklyRegistered) && assessmentInfo.isOpen ? (
                 <>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-400">Registration Active</span>
+                    <span className="text-xs font-bold text-emerald-400">Registration Active · Window Open</span>
                     <span className="ml-auto font-mono text-xs text-lime-400 font-bold">120 MIN</span>
                   </div>
                   <Button onClick={() => { setConfirmContestSlug(assessmentInfo.contest.slug); setConfirmContestTitle(assessmentInfo.contest.title); setAssessmentConfirmOpen(true); }}
@@ -521,6 +531,26 @@ export function ContestsHubPage() {
                     <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
                   </Button>
                   <p className="text-center font-mono text-[10px] text-zinc-400">Full-screen Monaco IDE · Anti-cheat active</p>
+                </>
+              ) : (registeredUpcomingContest || isWeeklyRegistered) ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-lime-400" />
+                    <span className="text-xs font-bold text-lime-400">Registration Active</span>
+                    <span className="ml-auto font-mono text-[10px] text-zinc-500 uppercase">Phase 1</span>
+                  </div>
+                  <div className="p-3 bg-zinc-950/80 border border-white/10 rounded-none space-y-1.5 font-mono">
+                    <div className="flex items-center gap-1.5 text-xs text-zinc-300">
+                      <Lock className="size-3.5 text-amber-400" />
+                      <span>Screening Window Locked</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 leading-relaxed">
+                      Unlocks Tuesday 3:00 PM IST (strictly 24h prior) and closes Wednesday 1:00 PM IST (strictly 2h prior).
+                    </p>
+                  </div>
+                  <Button asChild variant="outline" className="w-full rounded-none border-white/10 text-xs font-mono">
+                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}`}>View Contest Details</Link>
+                  </Button>
                 </>
               ) : assessmentInfo.isOpen ? (
                 <>
