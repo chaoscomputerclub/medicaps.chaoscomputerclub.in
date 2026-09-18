@@ -249,8 +249,8 @@ export function ProfilePage() {
 
   const isNameDefaultEnrollment = Boolean(
     isSelfUser &&
-    m.full_name &&
-    (m.full_name.trim().toLowerCase() === enrollmentNo.toLowerCase() ||
+    (!m.full_name ||
+      m.full_name.trim().toLowerCase() === enrollmentNo.toLowerCase() ||
       m.full_name.trim().toLowerCase() === (m.handle || "").toLowerCase() ||
       /^EN\d{2}[A-Z]{2}\d+/i.test(m.full_name.trim()))
   );

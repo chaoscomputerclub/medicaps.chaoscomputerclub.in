@@ -88,6 +88,8 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
     --exclude 'venv' \
     --exclude '__pycache__' \
     --exclude '.pytest_cache' \
+    --exclude '*.db*' \
+    --exclude 'ccc_medicaps.db' \
     ${REMOTE_REPO}/backend/ ${REMOTE_API_DIR}/
 
   # 2. Ensure official contest state is initialized with canonical schedule
