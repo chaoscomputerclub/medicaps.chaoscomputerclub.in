@@ -36,12 +36,17 @@ logger = logging.getLogger(__name__)
 
 
 def _to_member_public(member: MemberProfile) -> MemberPublic:
+    enrollment = member.prn
+    if not enrollment or enrollment in ("N/A", "—"):
+        if member.email and "@" in member.email:
+            enrollment = member.email.split("@")[0].upper()
+
     return MemberPublic(
         id=member.id,
         handle=member.handle,
         full_name=member.full_name,
         email=member.email,
-        prn=member.prn,
+        prn=enrollment or "—",
         department=member.department,
         batch=member.batch,
         rating=member.rating,
@@ -826,6 +831,8 @@ class AuthController:
         member = m_result.scalars().first()
         is_new = False
 
+        enrollment_candidate = email.split("@")[0].upper() if "@" in email else None
+
         if not member:
             is_new = True
             member = MemberProfile(
@@ -833,6 +840,7 @@ class AuthController:
                 google_id=google_id,
                 avatar_url=picture or None,
                 full_name=name or None,
+                prn=enrollment_candidate,
                 rating=1200,
                 peak_rating=1200,
                 is_onboarded=False,
@@ -843,7 +851,9 @@ class AuthController:
             logger.info("New member registered via Google OAuth: %s", email)
         else:
             member.google_id = google_id
-            if picture:
+            if not member.prn and enrollment_candidate:
+                member.prn = enrollment_candidate
+            if picture and not member.avatar_url:
                 member.avatar_url = picture
             member.updated_at = datetime.now(timezone.utc)
             await db.commit()

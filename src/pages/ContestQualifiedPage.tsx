@@ -248,7 +248,7 @@ export function ContestQualifiedPage() {
                 <SectionHeader kicker="01 // Protocol" index="LAB PROTOCOL" title="Day-Of Lab Instructions" />
                 <ul className="space-y-2">
                   {[
-                    "Carry your physical university ID card (PRN verification at entrance).",
+                    "Carry your physical university ID card (Enrollment verification at entrance).",
                     "Show this QR code at the lab entrance for proctor scan.",
                     "Arrive at the Campus Computing Complex before check-in closes.",
                     "Air-gapped lab environment: no personal laptops, phones, or smart devices.",

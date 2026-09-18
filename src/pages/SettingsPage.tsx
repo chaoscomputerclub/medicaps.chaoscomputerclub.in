@@ -596,7 +596,11 @@ export function SettingsPage() {
                 title="Competitive Identity"
                 description="Your public name, bio, and institutional details visible across the portal."
               >
-                <SettingRow label="Full Name" htmlFor="s-fullname" hint="Appears on your public profile and contest scoreboards.">
+                <SettingRow
+                  label="Full Name"
+                  htmlFor="s-fullname"
+                  hint="Your actual human name (e.g. Rahul Sharma). Medi-Caps Google accounts default to your enrollment number, so enter your real name here."
+                >
                   <div className="flex gap-2">
                     <Input
                       id="s-fullname"
@@ -742,10 +746,14 @@ export function SettingsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <Lock size={11} /> Enrollment PRN
+                      <Lock size={11} /> Enrollment Number
                     </Label>
                     <div className="h-9 px-3 flex items-center bg-zinc-950/60 border border-white/8 text-zinc-400 font-mono text-xs select-all">
-                      {member.prn || "—"}
+                      {member.prn && member.prn !== "N/A" && member.prn !== "—"
+                        ? member.prn
+                        : member.email?.includes("@")
+                          ? member.email.split("@")[0].toUpperCase()
+                          : member.handle?.toUpperCase() || "—"}
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -961,7 +969,7 @@ export function SettingsPage() {
                   <div>
                     <p className="text-sm font-medium text-zinc-300">Proof certificates are immutable</p>
                     <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
-                      Each contest you participate in generates a cryptographic proof sealed with your PRN and timestamp.
+                      Each contest you participate in generates a cryptographic proof sealed with your Enrollment Number and timestamp.
                       These certificates are permanently anchored to your institutional identity and cannot be revoked or altered.
                     </p>
                     <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 rounded-none gap-1.5 cursor-pointer">

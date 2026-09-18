@@ -147,11 +147,26 @@ export function ProfilePage() {
       ? m.handle.slice(0, 2).toUpperCase()
       : "CC";
 
+  const enrollmentNo =
+    m.prn && m.prn !== "N/A" && m.prn !== "—"
+      ? m.prn
+      : m.email?.includes("@")
+        ? m.email.split("@")[0].toUpperCase()
+        : m.handle?.toUpperCase() || "—";
+
   const isSelfUser =
     Boolean(m.is_self) ||
     isViewingSelf ||
     Boolean(currentMember?.id && m.id && currentMember.id === m.id) ||
     Boolean(currentMember?.handle && m.handle && currentMember.handle.toLowerCase() === m.handle.toLowerCase());
+
+  const isNameDefaultEnrollment = Boolean(
+    isSelfUser &&
+    m.full_name &&
+    (m.full_name.trim().toLowerCase() === enrollmentNo.toLowerCase() ||
+      m.full_name.trim().toLowerCase() === (m.handle || "").toLowerCase() ||
+      /^EN\d{2}[A-Z]{2}\d+/i.test(m.full_name.trim()))
+  );
 
   const isFollowedInStore =
     !isSelfUser &&
@@ -340,6 +355,15 @@ export function ProfilePage() {
               </p>
             )}
 
+            {isNameDefaultEnrollment && (
+              <p className="text-[11px] font-sans text-amber-400/90 pt-1 flex items-center gap-1.5 flex-wrap">
+                <span>Displaying enrollment number as name.</span>
+                <Link to="/portal/settings" className="text-lime-400 hover:underline font-medium">
+                  Update to your real name in Settings →
+                </Link>
+              </p>
+            )}
+
             {/* Followers / Following and CP Links */}
             <div className="flex items-center gap-2 flex-wrap pt-2">
               <button
@@ -412,8 +436,8 @@ export function ProfilePage() {
 
         <dl className="flex sm:flex-col gap-4 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-6">
           <div>
-            <dt className="text-zinc-500 uppercase text-[10px]">PRN</dt>
-            <dd className="text-zinc-200 font-bold tabular-nums">{m.prn}</dd>
+            <dt className="text-zinc-500 uppercase text-[10px]">Enrollment No.</dt>
+            <dd className="text-zinc-200 font-bold tabular-nums">{enrollmentNo}</dd>
           </div>
           <div>
             <dt className="text-zinc-500 uppercase text-[10px]">Institutional mail</dt>
