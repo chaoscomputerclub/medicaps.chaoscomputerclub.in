@@ -1,11 +1,10 @@
 /**
  * Chaos Computer Club India — Medi-Caps Chapter
  * Settings & Profile Architecture — GitHub-Style Personal Account Suite.
- * Replaces the legacy modal with full 2-column GitHub-modeled architecture:
- * Access (Public profile, Account), Code & Workspace, Security & Danger Zone.
+ * Fully SANS-SERIF typography, clean layout, and GitHub-ready cool PFPs.
  */
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
@@ -13,7 +12,6 @@ import {
   Check,
   Clock,
   Code2,
-  CreditCard,
   Download,
   ExternalLink,
   Github,
@@ -27,12 +25,11 @@ import {
   MapPin,
   ShieldAlert,
   ShieldCheck,
-  Terminal,
+  Sparkles,
   Trash2,
   Upload,
   UserRound,
   X,
-  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -47,6 +44,13 @@ import {
 } from "@/store/slices/authSlice";
 import { uploadMedia } from "@/lib/storage";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
+import {
+  COOL_PFPS,
+  CyberAvatar,
+  downloadCoolPfp,
+  getCoolPfp,
+  CoolPfp,
+} from "@/organization/components/CyberAvatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -72,17 +76,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingsSkeleton } from "@/organization/components/skeletons";
-
-const PRESET_EMBLEMS = [
-  { id: "volt", label: "Volt", icon: "⚡", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
-  { id: "binary", label: "Binary", icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
-  { id: "quantum", label: "Quantum", icon: "⚛️", bg: "bg-purple-500/10", border: "border-purple-500/40", text: "text-purple-400" },
-  { id: "matrix", label: "Matrix", icon: "💻", bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-400" },
-  { id: "grandmaster", label: "Grandmaster", icon: "🏆", bg: "bg-lime-400/10", border: "border-lime-400/40", text: "text-lime-400" },
-  { id: "cipher", label: "Cipher", icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
-];
 
 const LANGUAGES = [
   "No Preference",
@@ -150,13 +144,12 @@ export function SettingsPage() {
   const [editorKeybindings, setEditorKeybindings] = useState("standard");
   const [soundVerdict, setSoundVerdict] = useState(true);
   const [soundCountdown, setSoundCountdown] = useState(true);
-  const [terminalTheme, setTerminalTheme] = useState("obsidian");
 
   // Security & Notification state
   const [notifContests, setNotifContests] = useState(true);
   const [notifRatings, setNotifRatings] = useState(true);
 
-  // Status & loaders
+  // Loaders
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -169,7 +162,7 @@ export function SettingsPage() {
     }
   }, [navigate]);
 
-  // Live Local Time updates
+  // Live Local Time calculation
   useEffect(() => {
     const updateTime = () => {
       try {
@@ -198,7 +191,6 @@ export function SettingsPage() {
       setLinkedin(member.linkedin_url || "");
       setAvatarUrl(member.avatar_url || "");
 
-      // Load extended GitHub-style preferences
       try {
         const raw = localStorage.getItem(`ccc_medicaps_profile_prefs_${member.id}`);
         if (raw) {
@@ -244,14 +236,13 @@ export function SettingsPage() {
     return () => clearTimeout(timer);
   }, [handleInput, member, dispatch]);
 
-  // Save All Profile Parameters (GitHub "Update profile" primary action)
+  // Update Profile Form Submission
   const handleUpdateProfile = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!member) return;
 
     setIsUpdatingProfile(true);
     try {
-      // 1. Update Core Database fields via API
       await dispatch(
         updateProfileThunk({
           full_name: fullName.trim(),
@@ -264,7 +255,6 @@ export function SettingsPage() {
         })
       ).unwrap();
 
-      // 2. Persist extended GitHub preferences to localStorage
       const prefsPayload = {
         pronouns,
         customPronouns: pronouns === "Custom" ? customPronouns.trim() : "",
@@ -282,11 +272,10 @@ export function SettingsPage() {
       };
       localStorage.setItem(`ccc_medicaps_profile_prefs_${member.id}`, JSON.stringify(prefsPayload));
 
-      // 3. Refresh Store & Invalidate Caches
       dispatch(fetchCurrentUserThunk());
       invalidateFullProfileCache();
 
-      toast.success("Public profile updated successfully.");
+      toast.success("Profile updated successfully.");
     } catch (err: any) {
       console.error("Profile update error:", err);
       toast.error(typeof err === "string" ? err : err?.message || "Failed to update profile.");
@@ -295,7 +284,7 @@ export function SettingsPage() {
     }
   };
 
-  // Direct MinIO Image Upload
+  // MinIO Image Upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -315,12 +304,11 @@ export function SettingsPage() {
       const newUrl = uploadResult.public_url;
       setAvatarUrl(newUrl);
 
-      // Instantly sync avatar to user profile
       await dispatch(updateProfileThunk({ avatar_url: newUrl })).unwrap();
       dispatch(fetchCurrentUserThunk());
       invalidateFullProfileCache();
 
-      toast.success("Profile picture uploaded and updated.");
+      toast.success("Profile picture updated.");
     } catch (err: any) {
       console.error("Upload failed:", err);
       toast.error(err?.message || "Failed to upload image.");
@@ -344,17 +332,17 @@ export function SettingsPage() {
     }
   };
 
-  // Select Preset Cyber Emblem
-  const handleSelectEmblem = async (emblemId: string) => {
+  // Select Cool GitHub PFP
+  const handleSelectCoolPfp = async (pfp: CoolPfp) => {
     if (!member) return;
-    setAvatarUrl(emblemId);
+    setAvatarUrl(pfp.id);
     try {
-      await dispatch(updateProfileThunk({ avatar_url: emblemId })).unwrap();
+      await dispatch(updateProfileThunk({ avatar_url: pfp.id })).unwrap();
       dispatch(fetchCurrentUserThunk());
       invalidateFullProfileCache();
-      toast.success(`Active emblem updated to ${emblemId.toUpperCase()}.`);
+      toast.success(`Selected "${pfp.name}" as your active avatar.`);
     } catch (err: any) {
-      toast.error(err?.message || "Failed to update emblem.");
+      toast.error(err?.message || "Failed to update avatar.");
     }
   };
 
@@ -422,7 +410,7 @@ export function SettingsPage() {
     a.download = `ccc-cadet-export-${member.handle || "profile"}.json`;
     a.click();
     URL.revokeObjectURL(downloadUrl);
-    toast.success("Institutional dossier exported successfully.");
+    toast.success("Account dossier exported as JSON.");
   };
 
   // Delete Account
@@ -440,7 +428,7 @@ export function SettingsPage() {
   };
 
   const isHandleChanged = Boolean(member && handleInput.trim().toLowerCase() !== member.handle?.toLowerCase());
-  const activeEmblem = PRESET_EMBLEMS.find((e) => e.id === avatarUrl);
+  const activeCoolPfp = getCoolPfp(avatarUrl);
   const initials = member?.full_name
     ? member.full_name
         .split(" ")
@@ -455,34 +443,24 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="font-sans max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-zinc-100">
       {/* ── TOP GITHUB-STYLE USER & SETTINGS HEADER ──────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div className="flex items-center gap-4">
-          <Avatar className="size-12 rounded-none border border-white/10 bg-zinc-950 shrink-0">
-            {avatarUrl && (avatarUrl.startsWith("http") || avatarUrl.startsWith("/media/") || avatarUrl.startsWith("/")) ? (
-              <AvatarImage src={avatarUrl} alt={member.handle || "avatar"} className="object-cover rounded-none" />
-            ) : null}
-            <AvatarFallback
-              className={cn(
-                "rounded-none font-mono text-base font-bold flex items-center justify-center w-full h-full",
-                activeEmblem ? cn(activeEmblem.bg, activeEmblem.border, activeEmblem.text) : "bg-lime-400 text-black"
-              )}
-            >
-              {activeEmblem ? activeEmblem.icon : initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="size-12 rounded-none border border-white/15 bg-zinc-950 shrink-0 overflow-hidden">
+            <CyberAvatar avatarUrl={avatarUrl} fallbackText={initials} />
+          </div>
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-mono font-extrabold text-white tracking-tight">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
                 {member.full_name || member.handle}
-                {member.handle && <span className="text-zinc-500 font-normal ml-1.5">({member.handle})</span>}
+                {member.handle && <span className="text-zinc-400 font-normal ml-2">({member.handle})</span>}
               </h1>
-              <Badge variant="outline" className="font-mono text-[10px] uppercase border-lime-400/30 text-lime-400 rounded-none">
-                Settings
-              </Badge>
+              <span className="text-xs font-medium px-2 py-0.5 rounded-none bg-zinc-800 text-zinc-300 border border-white/10">
+                settings
+              </span>
             </div>
-            <p className="font-mono text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Your personal account · Medi-Caps Engineering Division
             </p>
           </div>
@@ -491,36 +469,36 @@ export function SettingsPage() {
         <Button
           asChild
           variant="outline"
-          className="h-auto font-mono text-xs uppercase font-bold text-zinc-300 hover:text-white border-white/10 hover:border-zinc-500 bg-zinc-900/60 rounded-none cursor-pointer self-start sm:self-center"
+          className="h-9 font-sans text-xs font-medium text-zinc-300 hover:text-white border-white/15 hover:border-zinc-500 bg-zinc-900/60 rounded-none cursor-pointer self-start sm:self-center"
         >
           <Link to="/portal/profile">
-            <span>Go to personal profile</span>
-            <ExternalLink size={12} className="ml-1.5" />
+            <span>Go to your personal profile</span>
+            <ExternalLink size={12} className="ml-1.5 opacity-70" />
           </Link>
         </Button>
       </div>
 
       {/* ── 2-COLUMN SETTINGS ARCHITECTURE ───────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT NAVIGATION SIDEBAR (GitHub Categories) */}
-        <aside className="lg:col-span-3 space-y-6">
+        {/* LEFT NAVIGATION SIDEBAR (Clean GitHub Sans-Serif Categories) */}
+        <aside className="lg:col-span-3 space-y-6" aria-label="Settings Categories">
           {/* Access Category */}
           <div className="space-y-1">
-            <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-500 px-3 block mb-1">
+            <span className="text-xs font-semibold text-zinc-400 px-3 py-1 block">
               Access
             </span>
-            <nav className="flex flex-col gap-1" aria-label="Access settings">
+            <nav className="flex flex-col gap-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab("profile")}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 text-xs font-mono uppercase tracking-wider text-left rounded-none border transition-all cursor-pointer",
+                  "flex items-center gap-2.5 px-3 py-2 text-sm text-left rounded-none transition-colors cursor-pointer w-full",
                   activeTab === "profile"
-                    ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
-                    : "border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80"
+                    ? "bg-zinc-800/90 text-white font-medium border-l-2 border-lime-400 pl-2.5"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40"
                 )}
               >
-                <UserRound size={14} className={activeTab === "profile" ? "text-black" : "text-zinc-400"} />
+                <UserRound size={15} className={activeTab === "profile" ? "text-lime-400" : "text-zinc-500"} />
                 <span>Public profile</span>
               </button>
 
@@ -528,35 +506,35 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab("account")}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 text-xs font-mono uppercase tracking-wider text-left rounded-none border transition-all cursor-pointer",
+                  "flex items-center gap-2.5 px-3 py-2 text-sm text-left rounded-none transition-colors cursor-pointer w-full",
                   activeTab === "account"
-                    ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
-                    : "border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80"
+                    ? "bg-zinc-800/90 text-white font-medium border-l-2 border-lime-400 pl-2.5"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40"
                 )}
               >
-                <KeyRound size={14} className={activeTab === "account" ? "text-black" : "text-zinc-400"} />
+                <KeyRound size={15} className={activeTab === "account" ? "text-lime-400" : "text-zinc-500"} />
                 <span>Account</span>
               </button>
             </nav>
           </div>
 
-          {/* Code & Workspace Category */}
+          {/* Code, planning, and automation Category */}
           <div className="space-y-1">
-            <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-500 px-3 block mb-1">
+            <span className="text-xs font-semibold text-zinc-400 px-3 py-1 block">
               Code, planning, and automation
             </span>
-            <nav className="flex flex-col gap-1" aria-label="Code settings">
+            <nav className="flex flex-col gap-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab("workspace")}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 text-xs font-mono uppercase tracking-wider text-left rounded-none border transition-all cursor-pointer",
+                  "flex items-center gap-2.5 px-3 py-2 text-sm text-left rounded-none transition-colors cursor-pointer w-full",
                   activeTab === "workspace"
-                    ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
-                    : "border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80"
+                    ? "bg-zinc-800/90 text-white font-medium border-l-2 border-lime-400 pl-2.5"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40"
                 )}
               >
-                <Code2 size={14} className={activeTab === "workspace" ? "text-black" : "text-zinc-400"} />
+                <Code2 size={15} className={activeTab === "workspace" ? "text-lime-400" : "text-zinc-500"} />
                 <span>Contest & Workspace</span>
               </button>
             </nav>
@@ -564,40 +542,43 @@ export function SettingsPage() {
 
           {/* Security Category */}
           <div className="space-y-1">
-            <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-500 px-3 block mb-1">
+            <span className="text-xs font-semibold text-zinc-400 px-3 py-1 block">
               Security
             </span>
-            <nav className="flex flex-col gap-1" aria-label="Security settings">
+            <nav className="flex flex-col gap-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab("security")}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 text-xs font-mono uppercase tracking-wider text-left rounded-none border transition-all cursor-pointer",
+                  "flex items-center gap-2.5 px-3 py-2 text-sm text-left rounded-none transition-colors cursor-pointer w-full",
                   activeTab === "security"
-                    ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
-                    : "border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80"
+                    ? "bg-zinc-800/90 text-white font-medium border-l-2 border-lime-400 pl-2.5"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40"
                 )}
               >
-                <ShieldCheck size={14} className={activeTab === "security" ? "text-black" : "text-zinc-400"} />
+                <ShieldCheck size={15} className={activeTab === "security" ? "text-lime-400" : "text-zinc-500"} />
                 <span>Authentication & Sessions</span>
               </button>
             </nav>
           </div>
 
           {/* Danger Zone Category */}
-          <div className="space-y-1 pt-2 border-t border-white/10">
-            <nav className="flex flex-col gap-1" aria-label="Danger settings">
+          <div className="pt-2 border-t border-white/10 space-y-1">
+            <span className="text-xs font-semibold text-rose-400/80 px-3 py-1 block">
+              Danger Zone
+            </span>
+            <nav className="flex flex-col gap-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab("danger")}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 text-xs font-mono uppercase tracking-wider text-left rounded-none border transition-all cursor-pointer",
+                  "flex items-center gap-2.5 px-3 py-2 text-sm text-left rounded-none transition-colors cursor-pointer w-full",
                   activeTab === "danger"
-                    ? "bg-rose-950/80 text-rose-300 border-rose-500/60 font-bold shadow-md shadow-rose-950/40"
-                    : "border-transparent text-rose-400 hover:bg-rose-950/20 hover:border-rose-900/40"
+                    ? "bg-rose-950/60 text-rose-200 font-medium border-l-2 border-rose-500 pl-2.5"
+                    : "text-rose-400/80 hover:text-rose-200 hover:bg-rose-950/20"
                 )}
               >
-                <AlertTriangle size={14} className="text-rose-500" />
+                <AlertTriangle size={15} className="text-rose-500" />
                 <span>Danger Zone</span>
               </button>
             </nav>
@@ -607,27 +588,27 @@ export function SettingsPage() {
         {/* RIGHT MAIN PANEL */}
         <main className="lg:col-span-9">
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 1: PUBLIC PROFILE (Two-Column Layout like GitHub)             */}
+          {/* TAB 1: PUBLIC PROFILE (Clean SANS-SERIF 2-Column Layout)         */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeTab === "profile" && (
-            <div className="rounded-none border border-white/10 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
-              {/* Section Heading */}
+            <div className="rounded-none border border-white/10 bg-zinc-900/30 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
+              {/* Clean GitHub Section Header */}
               <div className="border-b border-white/10 pb-4">
-                <h2 className="text-xl font-mono font-bold uppercase text-white tracking-wide">
+                <h2 className="text-2xl font-semibold text-white tracking-tight">
                   Public profile
                 </h2>
-                <p className="text-xs text-zinc-400 font-mono mt-1">
-                  Manage your personal presentation, institutional affiliation, and social verification.
+                <p className="text-sm text-zinc-400 mt-1">
+                  Manage your verified cadet identity, developer links, and GitHub-ready avatar.
                 </p>
               </div>
 
-              {/* Two-Column Grid: Form on Left (8 cols), Profile Picture on Right (4 cols) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+              {/* Two-Column Layout: Form (7-8 cols), Avatar Studio (4-5 cols) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 {/* Form Fields Column */}
-                <form onSubmit={handleUpdateProfile} className="md:col-span-8 space-y-6">
+                <form onSubmit={handleUpdateProfile} className="lg:col-span-7 space-y-5">
                   {/* Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-fullname" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-fullname" className="text-sm font-medium text-zinc-200">
                       Name
                     </Label>
                     <Input
@@ -635,42 +616,42 @@ export function SettingsPage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Santusht Kotai"
-                      className="font-mono text-sm bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                      className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                     />
-                    <p className="text-[11px] text-zinc-500 leading-normal">
-                      Your name may appear around the club portal where you contribute or are mentioned. You can remove it at any time.
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Your name may appear around GitHub and the club portal where you contribute or are mentioned. You can remove it at any time.
                     </p>
                   </div>
 
                   {/* Public Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-public-email" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-public-email" className="text-sm font-medium text-zinc-200">
                       Public email
                     </Label>
                     <Select
                       value={publicEmailOption}
                       onValueChange={(val: "public" | "private") => setPublicEmailOption(val)}
                     >
-                      <SelectTrigger id="s-public-email" className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                      <SelectTrigger id="s-public-email" className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                      <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                         <SelectItem value="public">{member.email} (verified institutional)</SelectItem>
-                        <SelectItem value="private">Don't display my email publicly</SelectItem>
+                        <SelectItem value="private">Don&apos;t display my email publicly</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-[11px] text-zinc-500 leading-normal">
+                    <p className="text-xs text-zinc-400 leading-relaxed">
                       Select a verified email to display. To toggle privacy, choose &ldquo;Don&apos;t display my email publicly&rdquo;.
                     </p>
                   </div>
 
                   {/* Bio */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="s-bio" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                      <Label htmlFor="s-bio" className="text-sm font-medium text-zinc-200">
                         Bio
                       </Label>
-                      <span className="font-mono text-[10px] text-zinc-500 tabular-nums">{bio.length}/500</span>
+                      <span className="text-xs text-zinc-400 tabular-nums">{bio.length}/500</span>
                     </div>
                     <Textarea
                       id="s-bio"
@@ -679,24 +660,24 @@ export function SettingsPage() {
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
                       placeholder="Tell us a little bit about yourself, cybersecurity research, and competitive goals"
-                      className="font-mono text-xs resize-none bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                      className="font-sans text-sm resize-none bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                     />
-                    <p className="text-[11px] text-zinc-500 leading-normal">
-                      You can @mention other cadets and chapter squads to link to them.
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      You can @mention other cadets and squads to link to them.
                     </p>
                   </div>
 
                   {/* Pronouns */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-pronouns" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-pronouns" className="text-sm font-medium text-zinc-200">
                       Pronouns
                     </Label>
                     <div className="flex gap-2">
                       <Select value={pronouns} onValueChange={(val) => setPronouns(val)}>
-                        <SelectTrigger id="s-pronouns" className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                        <SelectTrigger id="s-pronouns" className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                        <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                           <SelectItem value="Don't specify">Don&apos;t specify</SelectItem>
                           <SelectItem value="they/them">they/them</SelectItem>
                           <SelectItem value="she/her">she/her</SelectItem>
@@ -709,100 +690,98 @@ export function SettingsPage() {
                           value={customPronouns}
                           onChange={(e) => setCustomPronouns(e.target.value)}
                           placeholder="e.g. ze/zir"
-                          className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none"
+                          className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none"
                         />
                       )}
                     </div>
                   </div>
 
                   {/* URL */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-url" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-url" className="text-sm font-medium text-zinc-200">
                       URL
                     </Label>
                     <div className="relative">
-                      <Globe size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-url"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://santusht.dev"
-                        className="pl-8 font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                        className="pl-9 font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                       />
                     </div>
-                    <p className="text-[11px] text-zinc-500 leading-normal">
+                    <p className="text-xs text-zinc-400 leading-relaxed">
                       Your personal engineering portfolio, laboratory notebook, or research index.
                     </p>
                   </div>
 
                   {/* Social accounts */}
-                  <div className="space-y-3">
-                    <Label className="font-mono text-xs uppercase text-zinc-300 font-bold block">
+                  <div className="space-y-2.5">
+                    <Label className="text-sm font-medium text-zinc-200 block">
                       Social accounts
                     </Label>
                     <div className="space-y-2">
-                      {/* GitHub */}
                       <div className="relative">
-                        <Github size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                        <Github size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                         <Input
                           value={github}
                           onChange={(e) => setGithub(e.target.value.replace(/^@/, ""))}
                           placeholder="GitHub username (e.g. santusht06)"
-                          className="pl-8 font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                          className="pl-9 font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                         />
                       </div>
-                      {/* LinkedIn */}
                       <div className="relative">
-                        <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400" />
+                        <Linkedin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400" />
                         <Input
                           value={linkedin}
                           onChange={(e) => setLinkedin(e.target.value)}
                           placeholder="LinkedIn URL (e.g. https://linkedin.com/in/username)"
-                          className="pl-8 font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                          className="pl-9 font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                         />
                       </div>
                     </div>
-                    <p className="text-[11px] text-zinc-500 leading-normal">
-                      Link your developer identities to display verified badges and open-source contributions on your dossier.
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Link your developer identities to display verified badges on your profile.
                     </p>
                   </div>
 
-                  {/* Company / Squad */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-company" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  {/* Company */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-company" className="text-sm font-medium text-zinc-200">
                       Company
                     </Label>
                     <div className="relative">
-                      <Building size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <Building size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-company"
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                         placeholder="e.g. @Chaos-Computer-Club or Department Lab"
-                        className="pl-8 font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                        className="pl-9 font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                       />
                     </div>
-                    <p className="text-[11px] text-zinc-500 leading-normal">
+                    <p className="text-xs text-zinc-400 leading-relaxed">
                       You can @mention your company&apos;s or research lab&apos;s organization to link it.
                     </p>
                   </div>
 
                   {/* Location & Local Time */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-location" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-location" className="text-sm font-medium text-zinc-200">
                       Location
                     </Label>
                     <div className="relative">
-                      <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-location"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="Indore, Madhya Pradesh, India"
-                        className="pl-8 font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
+                        className="pl-9 font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400"
                       />
                     </div>
-                    <div className="flex items-start gap-2.5 pt-1.5">
+                    <div className="flex items-start gap-2.5 pt-1">
                       <Checkbox
                         id="s-display-time"
                         checked={displayLocalTime}
@@ -812,14 +791,14 @@ export function SettingsPage() {
                       <div className="space-y-0.5">
                         <label
                           htmlFor="s-display-time"
-                          className="font-mono text-xs text-zinc-300 cursor-pointer select-none font-bold"
+                          className="text-xs text-zinc-200 cursor-pointer select-none font-medium"
                         >
                           Display current local time
                         </label>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-xs text-zinc-400">
                           Other cadets will see the time difference from their local time.{" "}
                           {displayLocalTime && (
-                            <span className="text-lime-400 font-mono font-bold">
+                            <span className="text-lime-400 font-medium">
                               Current local time: {currentTimeStr}
                             </span>
                           )}
@@ -829,34 +808,34 @@ export function SettingsPage() {
                   </div>
 
                   {/* ORCID iD / Institutional Enrollment PRN */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-orcid" className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="s-orcid" className="text-sm font-medium text-zinc-200">
                       ORCID iD / Institutional PRN
                     </Label>
                     <div className="relative">
-                      <Lock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-orcid"
                         value={member.prn || "—"}
                         readOnly
                         disabled
-                        className="pl-8 font-mono text-xs bg-zinc-950/50 text-zinc-400 border-white/10 rounded-none cursor-not-allowed"
+                        className="pl-9 font-sans text-sm bg-zinc-950/50 text-zinc-400 border-white/15 rounded-none cursor-not-allowed"
                       />
                     </div>
-                    <p className="text-[11px] text-zinc-500 leading-normal">
+                    <p className="text-xs text-zinc-400 leading-relaxed">
                       ORCID and Enrollment PRN provide persistent identifiers that distinguish you from other researchers and students.
                     </p>
                   </div>
 
                   {/* Academic Department & Batch Cohort */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="space-y-2">
-                      <Label className="font-mono text-xs uppercase text-zinc-300 font-bold">Department</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-zinc-200">Department</Label>
                       <Select value={department} onValueChange={(val) => setDepartment(val)}>
-                        <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                        <SelectTrigger className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                        <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                           <SelectItem value="CSE">CSE (Computer Science & Engineering)</SelectItem>
                           <SelectItem value="IT">IT (Information Technology)</SelectItem>
                           <SelectItem value="AIDS">AIDS (AI & Data Science)</SelectItem>
@@ -866,13 +845,13 @@ export function SettingsPage() {
                       </Select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="font-mono text-xs uppercase text-zinc-300 font-bold">Graduation Batch</Label>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-zinc-200">Graduation Batch</Label>
                       <Select value={batch} onValueChange={(val) => setBatch(val)}>
-                        <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                        <SelectTrigger className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                        <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                           <SelectItem value="2022-26">2022–2026</SelectItem>
                           <SelectItem value="2023-27">2023–2027</SelectItem>
                           <SelectItem value="2024-28">2024–2028</SelectItem>
@@ -882,17 +861,16 @@ export function SettingsPage() {
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-zinc-500 italic pt-2 leading-relaxed">
+                  <p className="text-xs text-zinc-400 italic pt-1 leading-relaxed">
                     All of the fields on this page are optional and can be updated at any time, and by filling them out, you&apos;re giving us consent to share this data wherever your user profile appears.
                   </p>
 
-                  {/* Divider */}
-                  <div className="border-t border-white/10 pt-6 space-y-4">
-                    <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                  {/* Contributions & activity */}
+                  <div className="border-t border-white/10 pt-6 space-y-3.5">
+                    <h3 className="text-sm font-semibold text-white">
                       Contributions & activity
                     </h3>
 
-                    {/* Make profile private and hide activity */}
                     <div className="flex items-start gap-2.5">
                       <Checkbox
                         id="s-hide-activity"
@@ -903,17 +881,16 @@ export function SettingsPage() {
                       <div className="space-y-0.5">
                         <label
                           htmlFor="s-hide-activity"
-                          className="font-mono text-xs text-zinc-300 cursor-pointer select-none font-bold"
+                          className="text-sm text-zinc-200 cursor-pointer select-none font-medium"
                         >
                           Make profile private and hide activity
                         </label>
-                        <p className="text-[11px] text-zinc-500 leading-normal">
+                        <p className="text-xs text-zinc-400 leading-relaxed">
                           Enabling this will hide your contributions and activity from your profile and from social features like followers, rankings, feeds, and releases.
                         </p>
                       </div>
                     </div>
 
-                    {/* Include private contributions on my profile */}
                     <div className="flex items-start gap-2.5">
                       <Checkbox
                         id="s-private-contribs"
@@ -924,24 +901,23 @@ export function SettingsPage() {
                       <div className="space-y-0.5">
                         <label
                           htmlFor="s-private-contribs"
-                          className="font-mono text-xs text-zinc-300 cursor-pointer select-none font-bold"
+                          className="text-sm text-zinc-200 cursor-pointer select-none font-medium"
                         >
                           Include private contributions on my profile
                         </label>
-                        <p className="text-[11px] text-zinc-500 leading-normal">
+                        <p className="text-xs text-zinc-400 leading-relaxed">
                           Your contribution graph, achievements, and activity overview will show your private practice solves without revealing unreleased contest problem information.
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Divider */}
-                  <div className="border-t border-white/10 pt-6 space-y-4">
-                    <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                  {/* Profile settings */}
+                  <div className="border-t border-white/10 pt-6 space-y-3.5">
+                    <h3 className="text-sm font-semibold text-white">
                       Profile settings
                     </h3>
 
-                    {/* Display PRO badge */}
                     <div className="flex items-start gap-2.5">
                       <Checkbox
                         id="s-pro-badge"
@@ -952,17 +928,16 @@ export function SettingsPage() {
                       <div className="space-y-0.5">
                         <label
                           htmlFor="s-pro-badge"
-                          className="font-mono text-xs text-zinc-300 cursor-pointer select-none font-bold"
+                          className="text-sm text-zinc-200 cursor-pointer select-none font-medium"
                         >
                           Display PRO badge
                         </label>
-                        <p className="text-[11px] text-zinc-500 leading-normal">
+                        <p className="text-xs text-zinc-400 leading-relaxed">
                           This will display the Pro / Cadet badge on your public profile page.
                         </p>
                       </div>
                     </div>
 
-                    {/* Show Achievements on my profile */}
                     <div className="flex items-start gap-2.5">
                       <Checkbox
                         id="s-achievements"
@@ -973,24 +948,23 @@ export function SettingsPage() {
                       <div className="space-y-0.5">
                         <label
                           htmlFor="s-achievements"
-                          className="font-mono text-xs text-zinc-300 cursor-pointer select-none font-bold"
+                          className="text-sm text-zinc-200 cursor-pointer select-none font-medium"
                         >
                           Show Achievements on my profile
                         </label>
-                        <p className="text-[11px] text-zinc-500 leading-normal">
+                        <p className="text-xs text-zinc-400 leading-relaxed">
                           Your achievements and verified podium finishes will be shown on your profile.
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Divider */}
-                  <div className="border-t border-white/10 pt-6 space-y-4">
-                    <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                  {/* Jobs profile */}
+                  <div className="border-t border-white/10 pt-6 space-y-3.5">
+                    <h3 className="text-sm font-semibold text-white">
                       Jobs profile
                     </h3>
 
-                    {/* Available for hire */}
                     <div className="flex items-start gap-2.5">
                       <Checkbox
                         id="s-available-hire"
@@ -1001,32 +975,32 @@ export function SettingsPage() {
                       <div className="space-y-0.5">
                         <label
                           htmlFor="s-available-hire"
-                          className="font-mono text-xs text-zinc-300 cursor-pointer select-none font-bold"
+                          className="text-sm text-zinc-200 cursor-pointer select-none font-medium"
                         >
                           Available for hire
                         </label>
-                        <p className="text-[11px] text-zinc-500 leading-normal">
+                        <p className="text-xs text-zinc-400 leading-relaxed">
                           Signal to campus recruiters, labs, and hackathon squads that you are open to opportunities.
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Divider */}
-                  <div className="border-t border-white/10 pt-6 space-y-4">
-                    <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                  {/* Trending settings */}
+                  <div className="border-t border-white/10 pt-6 space-y-3.5">
+                    <h3 className="text-sm font-semibold text-white">
                       Trending settings
                     </h3>
 
-                    <div className="space-y-2">
-                      <Label className="font-mono text-xs uppercase text-zinc-300 font-bold">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-zinc-200">
                         Preferred spoken & coding language
                       </Label>
                       <Select value={preferredLanguage} onValueChange={(val) => setPreferredLanguage(val)}>
-                        <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                        <SelectTrigger className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                        <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                           {LANGUAGES.map((lang) => (
                             <SelectItem key={lang} value={lang}>
                               {lang}
@@ -1034,18 +1008,18 @@ export function SettingsPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-[11px] text-zinc-500 leading-normal">
+                      <p className="text-xs text-zinc-400 leading-relaxed">
                         We&apos;ll use this language preference to filter problem recommendations and arena code templates.
                       </p>
                     </div>
                   </div>
 
                   {/* Primary Update Profile Button */}
-                  <div className="pt-4">
+                  <div className="pt-3">
                     <Button
                       type="submit"
                       disabled={isUpdatingProfile}
-                      className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold uppercase rounded-none px-6 py-2.5 shadow-md shadow-lime-400/20 cursor-pointer"
+                      className="bg-lime-400 text-black hover:bg-lime-300 font-sans text-sm font-semibold rounded-none px-5 py-2 shadow-xs cursor-pointer"
                     >
                       {isUpdatingProfile ? (
                         <>
@@ -1059,33 +1033,17 @@ export function SettingsPage() {
                   </div>
                 </form>
 
-                {/* Right Column: Profile Picture & Cyber Emblems */}
-                <div className="md:col-span-4 space-y-6">
-                  <div>
-                    <Label className="font-mono text-xs uppercase text-zinc-300 font-bold block mb-3">
+                {/* Right Column: Profile Picture & GitHub-Ready Cool PFPs */}
+                <div className="lg:col-span-5 space-y-6">
+                  {/* Active PFP Preview Box */}
+                  <div className="p-4 bg-zinc-950/60 border border-white/10 rounded-none space-y-4">
+                    <Label className="text-sm font-semibold text-white block">
                       Profile picture
                     </Label>
-                    {/* Large Square Image Container */}
-                    <div className="relative group size-48 sm:size-52 border border-white/15 bg-zinc-950 rounded-none overflow-hidden flex items-center justify-center shadow-2xl">
-                      {avatarUrl && (avatarUrl.startsWith("http") || avatarUrl.startsWith("/media/") || avatarUrl.startsWith("/")) ? (
-                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-none" />
-                      ) : activeEmblem ? (
-                        <div
-                          className={cn(
-                            "w-full h-full flex flex-col items-center justify-center p-4",
-                            activeEmblem.bg
-                          )}
-                        >
-                          <span className="text-6xl mb-2">{activeEmblem.icon}</span>
-                          <span className={cn("font-mono text-xs font-bold uppercase", activeEmblem.text)}>
-                            {activeEmblem.label}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full bg-lime-400/10 flex items-center justify-center text-lime-400 font-mono text-4xl font-extrabold">
-                          {initials}
-                        </div>
-                      )}
+
+                    {/* Large Square PFP Viewport */}
+                    <div className="relative size-48 border border-white/15 bg-zinc-950 rounded-none overflow-hidden flex items-center justify-center shadow-lg">
+                      <CyberAvatar avatarUrl={avatarUrl} fallbackText={initials} />
 
                       {/* Hidden File Input */}
                       <input
@@ -1097,15 +1055,15 @@ export function SettingsPage() {
                       />
                     </div>
 
-                    {/* Action Buttons under picture */}
-                    <div className="flex flex-col gap-2 mt-3 max-w-[208px]">
+                    {/* PFP Actions */}
+                    <div className="flex flex-col gap-2 max-w-[192px]">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         disabled={isUploadingImage}
                         onClick={() => fileInputRef.current?.click()}
-                        className="font-mono text-xs uppercase border-white/10 bg-zinc-900/80 hover:bg-zinc-800 text-white rounded-none cursor-pointer w-full"
+                        className="font-sans text-xs font-medium border-white/15 bg-zinc-900 hover:bg-zinc-800 text-white rounded-none cursor-pointer w-full justify-center"
                       >
                         {isUploadingImage ? (
                           <>
@@ -1115,10 +1073,24 @@ export function SettingsPage() {
                         ) : (
                           <>
                             <Upload size={13} className="mr-1.5" />
-                            <span>Edit / Upload picture</span>
+                            <span>Upload photo</span>
                           </>
                         )}
                       </Button>
+
+                      {/* Download PFP for GitHub */}
+                      {activeCoolPfp && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadCoolPfp(activeCoolPfp, member.handle || "cadet")}
+                          className="font-sans text-xs font-medium border-lime-400/40 bg-lime-400/10 hover:bg-lime-400 hover:text-black text-lime-400 rounded-none cursor-pointer w-full justify-center transition-colors"
+                        >
+                          <Download size={13} className="mr-1.5" />
+                          <span>Download for GitHub</span>
+                        </Button>
+                      )}
 
                       {avatarUrl && (
                         <Button
@@ -1126,41 +1098,63 @@ export function SettingsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={handleRemovePicture}
-                          className="font-mono text-xs uppercase text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 rounded-none cursor-pointer w-full"
+                          className="font-sans text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 rounded-none cursor-pointer w-full justify-center"
                         >
                           <Trash2 size={13} className="mr-1.5" />
-                          <span>Remove</span>
+                          <span>Remove picture</span>
                         </Button>
                       )}
                     </div>
                   </div>
 
-                  {/* Preset Cyber Emblems */}
-                  <div className="pt-4 border-t border-white/10 space-y-2.5">
-                    <Label className="font-mono text-[11px] uppercase text-zinc-400 font-bold block">
-                      Cyber Emblem Presets
-                    </Label>
-                    <p className="text-[11px] text-zinc-500">
-                      Or pick an official CCC tactical emblem:
+                  {/* GitHub-Ready Cool PFPs Gallery */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles size={14} className="text-lime-400" />
+                        <h3 className="text-sm font-semibold text-white">
+                          GitHub-Ready Cool PFPs
+                        </h3>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] text-lime-400 border-lime-400/30 font-mono">
+                        Vector SVG
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Select any cool developer avatar to use immediately on CCC and download for your GitHub profile:
                     </p>
-                    <div className="grid grid-cols-3 gap-2 pt-1">
-                      {PRESET_EMBLEMS.map((emblem) => {
-                        const isSelected = avatarUrl === emblem.id;
+
+                    <div className="grid grid-cols-2 gap-2.5 pt-1">
+                      {COOL_PFPS.map((pfp) => {
+                        const isSelected = avatarUrl === pfp.id;
                         return (
                           <button
-                            key={emblem.id}
+                            key={pfp.id}
                             type="button"
-                            onClick={() => handleSelectEmblem(emblem.id)}
+                            onClick={() => handleSelectCoolPfp(pfp)}
                             className={cn(
-                              "flex flex-col items-center justify-center p-2.5 border rounded-none transition-all cursor-pointer text-center",
+                              "group relative p-2.5 border rounded-none text-left transition-all cursor-pointer bg-zinc-950/70 hover:bg-zinc-900/90",
                               isSelected
-                                ? cn(emblem.border, emblem.bg, "ring-2 ring-lime-400")
-                                : "border-white/10 bg-zinc-950/70 hover:border-zinc-500 hover:bg-zinc-900"
+                                ? "border-lime-400 ring-1 ring-lime-400/50 bg-lime-400/5"
+                                : "border-white/10 hover:border-zinc-500"
                             )}
                           >
-                            <span className="text-xl mb-0.5">{emblem.icon}</span>
-                            <span className={cn("font-mono text-[9px] uppercase font-bold", isSelected ? emblem.text : "text-zinc-400")}>
-                              {emblem.label}
+                            <div className="size-14 mx-auto rounded-none overflow-hidden border border-white/10 bg-zinc-900 mb-2">
+                              <div
+                                className="w-full h-full"
+                                dangerouslySetInnerHTML={{ __html: pfp.svgContent }}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between gap-1">
+                              <strong className="text-xs font-medium text-white block truncate">
+                                {pfp.name}
+                              </strong>
+                              {isSelected && (
+                                <Check size={12} className="text-lime-400 shrink-0" />
+                              )}
+                            </div>
+                            <span className="text-[10px] text-zinc-500 block truncate">
+                              {pfp.category}
                             </span>
                           </button>
                         );
@@ -1173,27 +1167,27 @@ export function SettingsPage() {
           )}
 
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 2: ACCOUNT                                                   */}
+          {/* TAB 2: ACCOUNT (Clean SANS-SERIF Layout)                          */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeTab === "account" && (
-            <div className="rounded-none border border-white/10 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
+            <div className="rounded-none border border-white/10 bg-zinc-900/30 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
               <div className="border-b border-white/10 pb-4">
-                <h2 className="text-xl font-mono font-bold uppercase text-white tracking-wide">
+                <h2 className="text-2xl font-semibold text-white tracking-tight">
                   Account settings
                 </h2>
-                <p className="text-xs text-zinc-400 font-mono mt-1">
+                <p className="text-sm text-zinc-400 mt-1">
                   Manage your handle, institutional verification credentials, and data exports.
                 </p>
               </div>
 
               {/* Change Username / Handle */}
-              <div className="space-y-3">
-                <Label htmlFor="acc-handle" className="font-mono text-xs uppercase text-zinc-300 font-bold block">
+              <div className="space-y-3 max-w-lg">
+                <Label htmlFor="acc-handle" className="text-sm font-medium text-zinc-200 block">
                   Change username / handle
                 </Label>
-                <div className="flex items-center gap-2 max-w-md">
+                <div className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-zinc-500">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500 font-mono">
                       @
                     </span>
                     <Input
@@ -1201,7 +1195,7 @@ export function SettingsPage() {
                       value={handleInput}
                       onChange={(e) => setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                       className={cn(
-                        "font-mono text-sm pl-8 bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400",
+                        "font-mono text-sm pl-8 bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400",
                         isHandleChanged && handleStatus === "available" && "border-emerald-500/60",
                         isHandleChanged && handleStatus === "taken" && "border-rose-500/60 text-rose-200"
                       )}
@@ -1212,56 +1206,56 @@ export function SettingsPage() {
                     type="button"
                     disabled={!isHandleChanged || handleInput.trim().length < 3 || handleStatus !== "available"}
                     onClick={handleSaveHandle}
-                    className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold uppercase rounded-none px-4 shrink-0"
+                    className="bg-lime-400 text-black hover:bg-lime-300 font-sans text-sm font-semibold rounded-none px-4 shrink-0"
                   >
                     Change handle
                   </Button>
                 </div>
-                <div className="flex items-center h-4 font-mono text-[10px]">
+                <div className="flex items-center h-4 text-xs">
                   {!isHandleChanged && <span className="text-zinc-500">current handle</span>}
                   {isHandleChanged && handleStatus === "checking" && (
-                    <span className="text-lime-400 flex items-center gap-1">
+                    <span className="text-lime-400 flex items-center gap-1 font-mono">
                       <Loader2 className="animate-spin size-3" /> checking availability...
                     </span>
                   )}
                   {isHandleChanged && handleStatus === "available" && (
-                    <span className="text-emerald-400 flex items-center gap-1">
+                    <span className="text-emerald-400 flex items-center gap-1 font-medium">
                       <Check size={12} /> available
                     </span>
                   )}
                   {isHandleChanged && handleStatus === "taken" && (
-                    <span className="text-rose-400 flex items-center gap-1">
+                    <span className="text-rose-400 flex items-center gap-1 font-medium">
                       <X size={12} /> handle is taken
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-zinc-500 max-w-md">
+                <p className="text-xs text-zinc-400 leading-relaxed">
                   Changing your username will redirect your public profile link (<code>/u/{member.handle}</code>).
                 </p>
               </div>
 
               {/* Institutional Registration Locks */}
               <div className="border-t border-white/10 pt-6 space-y-4">
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                <h3 className="text-sm font-semibold text-white">
                   Institutional Identifiers
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
                   <div>
-                    <Label className="font-mono text-[10px] uppercase text-zinc-500">Enrollment PRN</Label>
+                    <Label className="text-xs font-medium text-zinc-400">Enrollment PRN</Label>
                     <Input
                       value={member.prn || "—"}
                       readOnly
                       disabled
-                      className="font-mono text-xs bg-zinc-950/50 text-zinc-400 cursor-not-allowed border-white/10 rounded-none mt-1"
+                      className="font-mono text-xs bg-zinc-950/50 text-zinc-400 cursor-not-allowed border-white/15 rounded-none mt-1"
                     />
                   </div>
                   <div>
-                    <Label className="font-mono text-[10px] uppercase text-zinc-500">Registered Institutional Email</Label>
+                    <Label className="text-xs font-medium text-zinc-400">Registered Institutional Email</Label>
                     <Input
                       value={member.email || "—"}
                       readOnly
                       disabled
-                      className="font-mono text-xs bg-zinc-950/50 text-zinc-400 cursor-not-allowed border-white/10 rounded-none mt-1"
+                      className="font-mono text-xs bg-zinc-950/50 text-zinc-400 cursor-not-allowed border-white/15 rounded-none mt-1"
                     />
                   </div>
                 </div>
@@ -1269,17 +1263,17 @@ export function SettingsPage() {
 
               {/* Export Account Data */}
               <div className="border-t border-white/10 pt-6 space-y-3">
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                <h3 className="text-sm font-semibold text-white">
                   Export account data
                 </h3>
-                <p className="text-[11px] text-zinc-400 max-w-md">
+                <p className="text-xs text-zinc-400 max-w-md leading-relaxed">
                   Export all your personal profile records, contest participation ledger, rating milestones, and preferences as JSON.
                 </p>
                 <Button
                   type="button"
                   onClick={handleExportData}
                   variant="outline"
-                  className="font-mono text-xs uppercase border-white/10 rounded-none text-zinc-200 hover:text-white bg-zinc-950 cursor-pointer"
+                  className="font-sans text-xs font-medium border-white/15 rounded-none text-zinc-200 hover:text-white bg-zinc-950 cursor-pointer"
                 >
                   <Download size={13} className="mr-1.5" /> Start export
                 </Button>
@@ -1288,29 +1282,29 @@ export function SettingsPage() {
           )}
 
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 3: CONTEST & WORKSPACE PREFERENCES                           */}
+          {/* TAB 3: CONTEST & WORKSPACE PREFERENCES (Clean SANS Layout)       */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeTab === "workspace" && (
-            <div className="rounded-none border border-white/10 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
+            <div className="rounded-none border border-white/10 bg-zinc-900/30 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
               <div className="border-b border-white/10 pb-4">
-                <h2 className="text-xl font-mono font-bold uppercase text-white tracking-wide">
+                <h2 className="text-2xl font-semibold text-white tracking-tight">
                   Contest & Workspace Preferences
                 </h2>
-                <p className="text-xs text-zinc-400 font-mono mt-1">
-                  Configure your Monaco code editor defaults, compiler language, and arena telemetry sound effects.
+                <p className="text-sm text-zinc-400 mt-1">
+                  Configure your code editor defaults, compiler language, and arena telemetry sound effects.
                 </p>
               </div>
 
               {/* Default Judge Language */}
-              <div className="space-y-2 max-w-md">
-                <Label className="font-mono text-xs uppercase text-zinc-300 font-bold">
+              <div className="space-y-1.5 max-w-md">
+                <Label className="text-sm font-medium text-zinc-200">
                   Default Judge Language
                 </Label>
                 <Select value={defaultJudgeLang} onValueChange={(val) => setDefaultJudgeLang(val)}>
-                  <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                  <SelectTrigger className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                  <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                     <SelectItem value="C++20 (GCC 13.2)">C++20 (GCC 13.2 with -O3)</SelectItem>
                     <SelectItem value="Python 3.12 (CPython)">Python 3.12 (CPython)</SelectItem>
                     <SelectItem value="Java 21 (OpenJDK)">Java 21 (OpenJDK)</SelectItem>
@@ -1318,21 +1312,21 @@ export function SettingsPage() {
                     <SelectItem value="Go 1.22">Go 1.22</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-[11px] text-zinc-500">
-                  Pre-selected when launching into proctored offline battles and problem archive.
+                <p className="text-xs text-zinc-400">
+                  Pre-selected when launching into proctored battles and problem archive.
                 </p>
               </div>
 
               {/* Editor Keybindings */}
-              <div className="space-y-2 max-w-md">
-                <Label className="font-mono text-xs uppercase text-zinc-300 font-bold">
+              <div className="space-y-1.5 max-w-md">
+                <Label className="text-sm font-medium text-zinc-200">
                   Editor Keybindings
                 </Label>
                 <Select value={editorKeybindings} onValueChange={(val) => setEditorKeybindings(val)}>
-                  <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
+                  <SelectTrigger className="font-sans text-sm bg-zinc-950 border-white/15 text-white rounded-none">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none font-mono text-xs">
+                  <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none font-sans text-sm">
                     <SelectItem value="standard">Standard (VS Code default)</SelectItem>
                     <SelectItem value="vim">Vim Mode</SelectItem>
                     <SelectItem value="emacs">Emacs Mode</SelectItem>
@@ -1342,23 +1336,23 @@ export function SettingsPage() {
 
               {/* Audio feedback & telemetry */}
               <div className="border-t border-white/10 pt-6 space-y-4 max-w-xl">
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                <h3 className="text-sm font-semibold text-white">
                   Auditory Telemetry
                 </h3>
                 <div className="divide-y divide-white/5">
                   <div className="py-3 flex items-center justify-between gap-4">
                     <div>
-                      <strong className="font-mono text-xs block text-white">Verdict Chime</strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
-                        Audio bell on Accepted or Rejected test suite execution.
+                      <strong className="text-sm font-medium text-white block">Verdict Chime</strong>
+                      <span className="text-xs text-zinc-400 block mt-0.5">
+                        Audio chime on Accepted or Rejected test execution.
                       </span>
                     </div>
                     <Switch checked={soundVerdict} onCheckedChange={(val) => setSoundVerdict(val)} />
                   </div>
                   <div className="py-3 flex items-center justify-between gap-4">
                     <div>
-                      <strong className="font-mono text-xs block text-white">Timer Warning Pulse</strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
+                      <strong className="text-sm font-medium text-white block">Timer Warning Pulse</strong>
+                      <span className="text-xs text-zinc-400 block mt-0.5">
                         Audible alert when less than 5 minutes remain in the contest.
                       </span>
                     </div>
@@ -1372,7 +1366,7 @@ export function SettingsPage() {
                 <Button
                   type="button"
                   onClick={() => toast.success("Workspace preferences saved.")}
-                  className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold uppercase rounded-none px-5 py-2"
+                  className="bg-lime-400 text-black hover:bg-lime-300 font-sans text-sm font-semibold rounded-none px-5 py-2"
                 >
                   Save workspace preferences
                 </Button>
@@ -1381,35 +1375,35 @@ export function SettingsPage() {
           )}
 
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 4: SECURITY & SESSIONS                                       */}
+          {/* TAB 4: SECURITY & SESSIONS (Clean SANS Layout)                   */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeTab === "security" && (
-            <div className="rounded-none border border-white/10 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
+            <div className="rounded-none border border-white/10 bg-zinc-900/30 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-8">
               <div className="border-b border-white/10 pb-4">
-                <h2 className="text-xl font-mono font-bold uppercase text-white tracking-wide">
-                  Security & Sessions
+                <h2 className="text-2xl font-semibold text-white tracking-tight">
+                  Authentication & Sessions
                 </h2>
-                <p className="text-xs text-zinc-400 font-mono mt-1">
-                  Manage connected single sign-on credentials, notification alerts, and active terminal sessions.
+                <p className="text-sm text-zinc-400 mt-1">
+                  Manage connected single sign-on credentials, notification delivery, and active terminal sessions.
                 </p>
               </div>
 
               {/* Connected Accounts */}
               <div className="space-y-3">
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
-                  Connected SSO Providers
+                <h3 className="text-sm font-semibold text-white">
+                  Connected Single Sign-On
                 </h3>
-                <div className="p-4 bg-zinc-950 border border-white/10 flex items-center justify-between gap-4 max-w-xl">
+                <div className="p-4 bg-zinc-950 border border-white/15 flex items-center justify-between gap-4 max-w-xl">
                   <div className="flex items-center gap-3">
-                    <div className="size-8 rounded-none bg-zinc-900 border border-white/10 flex items-center justify-center font-bold text-xs text-white">
+                    <div className="size-8 rounded-none bg-zinc-900 border border-white/15 flex items-center justify-center font-bold text-xs text-white">
                       G
                     </div>
                     <div>
-                      <strong className="font-mono text-xs block text-white">Google Workspace SSO</strong>
-                      <span className="font-mono text-[10px] text-zinc-400">{member.email}</span>
+                      <strong className="text-sm font-medium text-white block">Google Workspace SSO</strong>
+                      <span className="text-xs text-zinc-400">{member.email}</span>
                     </div>
                   </div>
-                  <Badge variant="outline" className="font-mono text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-none">
+                  <Badge variant="outline" className="font-sans text-xs text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-none">
                     CONNECTED
                   </Badge>
                 </div>
@@ -1417,14 +1411,14 @@ export function SettingsPage() {
 
               {/* Notification Preferences */}
               <div className="border-t border-white/10 pt-6 space-y-4 max-w-xl">
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                <h3 className="text-sm font-semibold text-white">
                   Notification Delivery
                 </h3>
                 <div className="divide-y divide-white/5">
                   <div className="py-3 flex items-center justify-between gap-4">
                     <div>
-                      <strong className="font-mono text-xs block text-white">Contest Announcements</strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
+                      <strong className="text-sm font-medium text-white block">Contest Announcements</strong>
+                      <span className="text-xs text-zinc-400 block mt-0.5">
                         Receive reminder alerts before scheduled proctored campus battles.
                       </span>
                     </div>
@@ -1439,8 +1433,8 @@ export function SettingsPage() {
 
                   <div className="py-3 flex items-center justify-between gap-4">
                     <div>
-                      <strong className="font-mono text-xs block text-white">Rating & Standings Updates</strong>
-                      <span className="text-[11px] text-zinc-400 block mt-0.5">
+                      <strong className="text-sm font-medium text-white block">Rating & Standings Updates</strong>
+                      <span className="text-xs text-zinc-400 block mt-0.5">
                         Notifications when post-contest rating shifts and badges are computed.
                       </span>
                     </div>
@@ -1457,20 +1451,20 @@ export function SettingsPage() {
 
               {/* Active Session & Security */}
               <div className="border-t border-white/10 pt-6 space-y-4 max-w-xl">
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+                <h3 className="text-sm font-semibold text-white">
                   Active Terminal Session
                 </h3>
-                <div className="flex items-start justify-between gap-4 p-4 bg-zinc-950 border border-white/10">
+                <div className="flex items-start justify-between gap-4 p-4 bg-zinc-950 border border-white/15">
                   <div className="flex items-start gap-3">
                     <Laptop className="size-5 text-lime-400 mt-0.5" />
                     <div>
-                      <strong className="font-mono text-xs block text-white">
+                      <strong className="text-sm font-medium text-white block">
                         {typeof window !== "undefined" ? window.navigator.platform || "Workstation Session" : "Workstation Session"}
                       </strong>
-                      <p className="font-mono text-[10px] text-zinc-400 mt-0.5">
+                      <p className="text-xs text-zinc-400 mt-0.5">
                         Stateless HMAC-SHA256 JWT · Stored in Local Session Storage
                       </p>
-                      <span className="inline-flex items-center gap-1.5 mt-2 font-mono text-[10px] text-emerald-400">
+                      <span className="inline-flex items-center gap-1.5 mt-2 text-xs text-emerald-400 font-medium">
                         <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         ACTIVE NOW
                       </span>
@@ -1480,7 +1474,7 @@ export function SettingsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="font-mono text-xs uppercase border-white/10 rounded-none text-zinc-300 hover:text-white"
+                    className="font-sans text-xs font-medium border-white/15 rounded-none text-zinc-300 hover:text-white"
                     onClick={() => logout()}
                   >
                     <LogOut size={13} className="mr-1.5" /> Log Out
@@ -1491,14 +1485,14 @@ export function SettingsPage() {
           )}
 
           {/* ═════════════════════════════════════════════════════════════════ */}
-          {/* TAB 5: DANGER ZONE                                               */}
+          {/* TAB 5: DANGER ZONE (Clean SANS Layout)                            */}
           {/* ═════════════════════════════════════════════════════════════════ */}
           {activeTab === "danger" && (
-            <div className="rounded-none border border-rose-500/40 bg-rose-950/10 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-6">
+            <div className="rounded-none border border-rose-500/30 bg-rose-950/10 p-6 sm:p-8 backdrop-blur-md shadow-xl space-y-6">
               <div className="flex items-start gap-3 border-b border-rose-500/20 pb-4">
                 <AlertTriangle className="size-6 text-rose-500 shrink-0 mt-0.5" />
                 <div>
-                  <h2 className="font-mono text-base font-bold uppercase tracking-wider text-rose-300">
+                  <h2 className="text-lg font-semibold text-rose-200">
                     Danger Zone · Permanent Account Purge
                   </h2>
                   <p className="text-xs text-rose-200/80 leading-relaxed mt-1">
@@ -1510,8 +1504,8 @@ export function SettingsPage() {
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                 <div>
-                  <strong className="font-mono text-xs text-rose-200 block">Irrevocable purge action</strong>
-                  <span className="font-mono text-[10px] text-rose-300/70">
+                  <strong className="text-xs text-rose-200 block font-medium">Irrevocable purge action</strong>
+                  <span className="text-xs text-rose-300/70">
                     Requires explicit confirmation of your handle (@{member.handle || "user"}).
                   </span>
                 </div>
@@ -1520,14 +1514,14 @@ export function SettingsPage() {
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="destructive"
-                      className="font-mono text-xs uppercase tracking-wider rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-lg shadow-rose-950/50 cursor-pointer"
+                      className="font-sans text-xs font-medium rounded-none bg-rose-600 hover:bg-rose-700 text-white shadow-md cursor-pointer"
                     >
                       <Trash2 size={14} className="mr-1.5" /> Delete Account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="border-rose-500/50 bg-zinc-950 text-white rounded-none">
+                  <AlertDialogContent className="border-rose-500/50 bg-zinc-950 text-white rounded-none font-sans">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="font-mono uppercase text-rose-400 flex items-center gap-2">
+                      <AlertDialogTitle className="text-base font-semibold text-rose-400 flex items-center gap-2">
                         <ShieldAlert className="size-5 text-rose-500" />
                         Confirm Account Deletion
                       </AlertDialogTitle>
@@ -1536,7 +1530,7 @@ export function SettingsPage() {
                           This will permanently delete <strong className="text-white">@{member.handle}</strong> and all associated records.
                         </p>
                         <p>
-                          To confirm, please type your handle <code className="text-lime-400 bg-zinc-900 px-1.5 py-0.5 rounded-none border border-white/10">{member.handle}</code> below:
+                          To confirm, please type your handle <code className="text-lime-400 bg-zinc-900 px-1.5 py-0.5 rounded-none border border-white/10 font-mono">{member.handle}</code> below:
                         </p>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -1553,14 +1547,14 @@ export function SettingsPage() {
                     <AlertDialogFooter>
                       <AlertDialogCancel
                         onClick={() => setDeleteConfirmText("")}
-                        className="font-mono text-xs uppercase rounded-none border-white/10"
+                        className="font-sans text-xs rounded-none border-white/15"
                       >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
                         disabled={deleteConfirmText.trim().toLowerCase() !== member.handle?.toLowerCase() || isDeleting}
                         onClick={handleDeleteAccount}
-                        className="font-mono text-xs uppercase rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold disabled:opacity-50"
+                        className="font-sans text-xs rounded-none bg-rose-600 hover:bg-rose-700 text-white font-medium disabled:opacity-50"
                       >
                         {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently Delete"}
                       </AlertDialogAction>
@@ -1574,17 +1568,17 @@ export function SettingsPage() {
       </div>
 
       {/* ── GITHUB-STYLE FOOTER ────────────────────────────────────────── */}
-      <footer className="pt-12 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-zinc-500">
+      <footer className="pt-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
         <div>
           © 2026 Chaos Computer Club India — Medi-Caps Chapter. All rights reserved.
         </div>
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-5 flex-wrap">
           <Link to="/portal" className="hover:text-zinc-300 transition-colors">Portal</Link>
           <Link to="/portal/contests" className="hover:text-zinc-300 transition-colors">Contests</Link>
           <Link to="/portal/leaderboard" className="hover:text-zinc-300 transition-colors">Leaderboard</Link>
-          <Link to="/portal/verify" className="hover:text-zinc-300 transition-colors">Cryptographic Verification</Link>
+          <Link to="/portal/verify" className="hover:text-zinc-300 transition-colors">Cryptographic Proofs</Link>
           <a
-            href="https://github.com/santusht06"
+            href="https://github.com/chaoscomputerclub"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-zinc-300 transition-colors"

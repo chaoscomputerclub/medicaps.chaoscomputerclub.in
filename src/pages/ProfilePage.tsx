@@ -28,6 +28,7 @@ import { ProofBadge } from "@/organization/components/ProofBadge";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { CyberAvatar } from "@/organization/components/CyberAvatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
 import {
   getMemberProfileData,
@@ -271,24 +272,9 @@ export function ProfilePage() {
       {/* Profile Header */}
       <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
         <div className="flex items-start gap-5">
-          <Avatar className="size-16 sm:size-20 rounded-none border border-white/10 bg-zinc-950 shrink-0 shadow-inner">
-            {m.avatar_url &&
-            (m.avatar_url.startsWith("http") ||
-              m.avatar_url.startsWith("/media/") ||
-              m.avatar_url.startsWith("/")) ? (
-              <AvatarImage src={m.avatar_url} alt={m.full_name || m.handle} className="object-cover rounded-none" />
-            ) : null}
-            <AvatarFallback
-              className={cn(
-                "rounded-none font-mono text-xl font-bold flex items-center justify-center w-full h-full",
-                activeEmblem
-                  ? cn(activeEmblem.bg, activeEmblem.border, activeEmblem.text)
-                  : "bg-lime-400 text-black"
-              )}
-            >
-              {activeEmblem ? activeEmblem.icon : initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="size-16 sm:size-20 rounded-none border border-white/10 bg-zinc-950 shrink-0 shadow-inner overflow-hidden">
+            <CyberAvatar avatarUrl={m.avatar_url} fallbackText={initials} />
+          </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
