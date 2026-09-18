@@ -1,4 +1,5 @@
 from app.core.cache import get_cache, set_cache, delete_cache, delete_cache_pattern
+import re
 import httpx
 from fastapi import Request
 from fastapi.responses import RedirectResponse
@@ -220,6 +221,19 @@ class AuthController:
         Step 3 — Post-auth onboarding: set handle, name, PRN, department, batch.
         Idempotent — can be re-submitted if partial.
         """
+        # Reject enrollment IDs masquerading as human names
+        _ENROLLMENT_RE = re.compile(r"^[a-z]{2}\d{2}[a-z]{2}\d+", re.I)
+        clean_name = (payload.full_name or "").strip()
+        if not clean_name:
+            raise HTTPException(status_code=400, detail="Full name is required.")
+        if _ENROLLMENT_RE.match(clean_name):
+            raise HTTPException(
+                status_code=400,
+                detail="Full name cannot be an enrollment number. Please enter your real name (e.g. Rahul Sharma)."
+            )
+        if len(clean_name) < 2:
+            raise HTTPException(status_code=400, detail="Full name must be at least 2 characters.")
+
         # Handle uniqueness check
         existing = await db.execute(
             select(MemberProfile).where(
@@ -231,7 +245,7 @@ class AuthController:
             raise HTTPException(status_code=409, detail="Handle already taken. Choose another.")
 
         current_member.handle = payload.handle
-        current_member.full_name = payload.full_name
+        current_member.full_name = clean_name
         if payload.prn:
             current_member.prn = payload.prn
         if payload.department:
@@ -243,17 +257,55 @@ class AuthController:
         await db.commit()
         await db.refresh(current_member)
 
-        # Invalidate profile and leaderboard caches
-        await delete_cache(f"cache:profile:{current_member.id}")
-        await delete_cache_pattern("cache:leaderboard:*")
-
-        # Invalidate profile and leaderboard caches
         await delete_cache(f"cache:profile:{current_member.id}")
         await delete_cache_pattern("cache:leaderboard:*")
 
         return {
             "success": True,
             "message": "Onboarding complete. Welcome to the arena.",
+            "member": _to_member_public(current_member).model_dump(),
+        }
+
+    @staticmethod
+    async def re_onboard(
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> dict:
+        """
+        Allows a member whose full_name was incorrectly set to their enrollment ID
+        (by the old JWT self-heal code) to re-enter the onboarding flow.
+        Resets full_name to None and is_onboarded to False so the frontend
+        shows the onboarding form on next login.
+        """
+        _ENROLLMENT_RE = re.compile(r"^[a-z]{2}\d{2}[a-z]{2}\d+", re.I)
+        current_name = current_member.full_name or ""
+        is_corrupted = _ENROLLMENT_RE.match(current_name.strip())
+
+        if not is_corrupted:
+            # Name already looks like a real name — nothing to reset
+            return {
+                "success": False,
+                "message": "Your name is already set correctly and does not need to be reset.",
+                "member": _to_member_public(current_member).model_dump(),
+            }
+
+        current_member.full_name = None
+        current_member.is_onboarded = False
+        current_member.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(current_member)
+
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+
+        logger.info(
+            "Re-onboard triggered for %s — full_name was '%s' (enrollment pattern).",
+            current_member.email,
+            current_name,
+        )
+        return {
+            "success": True,
+            "message": "Name reset. Please complete onboarding to set your real name.",
             "member": _to_member_public(current_member).model_dump(),
         }
 
@@ -314,6 +366,12 @@ class AuthController:
         current_member.updated_at = datetime.now(timezone.utc)
         await db.commit()
         await db.refresh(current_member)
+
+        from app.core.cache import delete_cache, delete_cache_pattern
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+        # Also invalidate public student profile cache
+        await delete_cache_pattern(f"cache:student:profile:{current_member.id}:*")
 
         return {
             "success": True,

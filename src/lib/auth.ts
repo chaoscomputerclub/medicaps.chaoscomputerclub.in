@@ -272,6 +272,16 @@ export async function completeOnboarding(
   });
 }
 
+/**
+ * Resets full_name + is_onboarded for accounts whose name was auto-set to
+ * an enrollment ID by the old JWT self-healing code.
+ * Safe to call for all users — backend is a no-op if the name is already correct.
+ */
+export async function reOnboard(): Promise<{ success: boolean; message: string; member: Member }> {
+  return apiFetch("/auth/re-onboard", { method: "POST" });
+}
+
+
 export async function checkHandle(
   handle: string,
 ): Promise<{ available: boolean; handle: string; reason?: string }> {

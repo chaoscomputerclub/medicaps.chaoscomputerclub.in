@@ -9,6 +9,7 @@ import {
   verifyOTP,
   getMe,
   completeOnboarding,
+  reOnboard,
   updateProfile,
   checkHandle,
   deleteAccount,
@@ -40,6 +41,16 @@ export interface AuthState {
 const initialToken = typeof window !== "undefined" ? getToken() : null;
 const initialMember = typeof window !== "undefined" ? getStoredMember() : null;
 
+/** Returns true if a name string looks like an enrollment ID (e.g. en23cs301927) rather than a real human name. */
+function _isEnrollmentId(name: string | null | undefined): boolean {
+  if (!name) return false;
+  return /^[a-z]{2}\d{2}[a-z]{2}\d+/i.test(name.trim());
+}
+
+// Don't pre-seed the auth form with an enrollment ID that may have been
+// auto-assigned by the old JWT self-heal code — always start the name field blank.
+const _storedName = initialMember?.full_name || "";
+
 const initialState: AuthState = {
   member: initialMember,
   token: initialToken,
@@ -48,7 +59,7 @@ const initialState: AuthState = {
   email: initialMember?.email || "",
   transactionId: null,
   otp: "",
-  name: initialMember?.full_name || "",
+  name: _isEnrollmentId(_storedName) ? "" : _storedName,
   handle: initialMember?.handle || "",
   prn: initialMember?.prn || "",
   department: initialMember?.department || "CSE",
@@ -163,6 +174,26 @@ export const updateProfileThunk = createAsyncThunk<
   }
 });
 
+/**
+ * Calls POST /auth/re-onboard to reset the member's name + is_onboarded flag
+ * when the stored full_name looks like an enrollment ID.
+ * On success the member is marked as !is_onboarded so the onboarding form
+ * is shown the next time the user visits /auth.
+ */
+export const reOnboardThunk = createAsyncThunk<
+  Member,
+  void,
+  { rejectValue: string }
+>("auth/reOnboard", async (_, { rejectWithValue }) => {
+  try {
+    const res = await reOnboard();
+    return res.member;
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to reset name. Please try again.");
+  }
+});
+
+
 export const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -251,11 +282,21 @@ export const authSlice = createSlice({
       state.member = action.payload.member;
       if (action.payload.member) {
         setStoredMember(action.payload.member);
-        if (action.payload.member.full_name) state.name = action.payload.member.full_name;
+        // Only copy full_name into form state if it is a genuine human name.
+        // Enrollment IDs (e.g. en23cs301927) must never pre-fill the onboarding form.
+        const dbName = action.payload.member.full_name;
+        if (dbName && !_isEnrollmentId(dbName)) {
+          state.name = dbName;
+        }
         if (action.payload.member.handle) state.handle = action.payload.member.handle;
       }
       if (action.payload.is_new_user || !action.payload.member?.is_onboarded) {
         state.step = "onboarding";
+        // Always start the name field blank when entering onboarding so the
+        // user sees a clean form — never pre-populate with an enrollment ID.
+        if (!state.name || _isEnrollmentId(state.name)) {
+          state.name = "";
+        }
       }
       state.message = null;
     });
@@ -337,6 +378,24 @@ export const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.step = "email";
+    });
+
+    // reOnboardThunk — resets corrupted enrollment-ID name so user can set their real name
+    builder.addCase(reOnboardThunk.pending, (state) => {
+      state.pending = true;
+      state.message = null;
+    });
+    builder.addCase(reOnboardThunk.fulfilled, (state, action) => {
+      state.pending = false;
+      state.member = action.payload;
+      setStoredMember(action.payload);
+      // Clear the stale name so the onboarding form starts blank
+      state.name = "";
+      state.message = null;
+    });
+    builder.addCase(reOnboardThunk.rejected, (state, action) => {
+      state.pending = false;
+      state.message = action.payload || "Failed to reset name.";
     });
   },
 });

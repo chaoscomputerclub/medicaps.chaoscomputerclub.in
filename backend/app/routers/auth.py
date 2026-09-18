@@ -59,6 +59,17 @@ async def complete_onboarding(
     return await AuthController.complete_onboarding(payload, current_member, db)
 
 
+@router.post("/re-onboard", summary="Reset name if it was auto-set to enrollment ID; triggers fresh onboarding")
+async def re_onboard(
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Allows a member whose full_name was incorrectly auto-set to their enrollment ID
+    to re-enter the onboarding flow. Only acts if the name matches an enrollment pattern.
+    """
+    return await AuthController.re_onboard(current_member, db)
+
 
 @router.put("/profile", summary="Update current member's profile details")
 @router.patch("/profile", summary="Update current member's profile details")
