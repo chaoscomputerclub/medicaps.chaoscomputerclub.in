@@ -54,27 +54,27 @@ export function VerifyProofPage() {
   }
 
   return (
-    <div className="page-wrap verify-wrap p-6 max-w-4xl mx-auto space-y-6">
-      <header className="flex flex-col justify-between gap-4 border-b border-[var(--line)] pb-6 md:flex-row md:items-end">
+    <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6">
+      <header className="flex flex-col justify-between gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="flex size-2 rounded-full bg-[var(--accent)] animate-pulse" />
-            <p className="font-mono text-xs uppercase tracking-widest text-[var(--accent)] font-semibold">
+            <span className="flex size-2 rounded-full bg-orange-500 animate-pulse" />
+            <p className="font-mono text-xs uppercase tracking-widest text-orange-400 font-bold">
               Chaos Computer Club · Medi-Caps Chapter
             </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-mono font-bold text-white uppercase tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-mono font-black text-white uppercase tracking-tight">
             Certificate & Proof Verification
           </h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="text-sm text-zinc-400 mt-1">
             Public SHA-256 Cryptographic Credential & Contest Achievement Verification Console.
           </p>
         </div>
-        <ShieldCheck className="w-10 h-10 text-[var(--accent)] opacity-80" />
+        <ShieldCheck className="w-10 h-10 text-orange-400 opacity-90 shrink-0" />
       </header>
 
       {/* ── SEARCH CARD ── */}
-      <Card className="rounded-none border border-[#262626] bg-[#0d0d0d]">
+      <Card className="rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl overflow-hidden">
         <CardContent className="p-6 space-y-4">
           <form
             onSubmit={(e) => {
@@ -83,24 +83,24 @@ export function VerifyProofPage() {
             }}
             className="space-y-3"
           >
-            <label htmlFor="verifyTerm" className="block font-mono text-xs uppercase tracking-wider text-neutral-300 font-bold">
+            <label htmlFor="verifyTerm" className="block font-mono text-xs uppercase tracking-wider text-zinc-300 font-bold">
               Enter Certificate ID or SHA-256 Digest
             </label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-3.5 size-4 text-neutral-500" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
                 <Input
                   id="verifyTerm"
                   type="text"
                   placeholder="e.g. CCC-MCU-2026-001 or e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                   value={term}
                   onChange={(e) => dispatch(setVerifyTerm(e.target.value))}
-                  className="font-mono text-sm bg-black border-[#333] pl-10 h-11 rounded-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
+                  className="font-mono text-sm bg-zinc-950/60 border-white/10 pl-10 h-12 rounded-xl text-white placeholder:text-zinc-500 focus-visible:border-orange-500/60"
                 />
               </div>
               <Button
                 type="submit"
-                className="h-11 px-6 rounded-none bg-[var(--accent)] text-black font-mono text-xs font-bold uppercase tracking-wider hover:bg-[var(--accent)]/90"
+                className="h-12 px-6 rounded-xl bg-orange-500 text-black font-mono text-xs font-bold uppercase tracking-wider hover:bg-orange-400 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
               >
                 Verify Proof
               </Button>
@@ -111,7 +111,7 @@ export function VerifyProofPage() {
           {submitted && (
             <div className="pt-2">
               {result ? (
-                <div className="border border-emerald-500/40 bg-emerald-950/20 p-6 space-y-4 font-mono">
+                <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-6 space-y-4 font-mono shadow-inner">
                   <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">
                     <div className="flex items-center gap-2.5">
                       <CheckCircle2 className="size-5 text-emerald-400 shrink-0" />
@@ -120,42 +120,42 @@ export function VerifyProofPage() {
                         <p className="text-[11px] text-emerald-400">Authenticity Verified on Medi-Caps Ledger</p>
                       </div>
                     </div>
-                    <Badge className="rounded-none bg-emerald-500 text-black text-xs font-bold uppercase">
+                    <Badge className="rounded-md bg-emerald-500 text-black text-xs font-bold uppercase">
                       VERIFIED
                     </Badge>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div className="border border-[var(--line)] bg-black/40 p-3">
-                      <p className="text-[9px] uppercase tracking-widest text-[var(--muted)]">Recipient</p>
+                    <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-3">
+                      <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono">Recipient</p>
                       <p className="font-bold text-white mt-0.5">{result.recipient_name || "Cadet"}</p>
                     </div>
-                    <div className="border border-[var(--line)] bg-black/40 p-3">
-                      <p className="text-[9px] uppercase tracking-widest text-[var(--muted)]">Certificate ID</p>
-                      <p className="font-bold text-[var(--accent)] mt-0.5">{result.certificate_id}</p>
+                    <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-3">
+                      <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono">Certificate ID</p>
+                      <p className="font-bold text-orange-400 mt-0.5">{result.certificate_id}</p>
                     </div>
-                    <div className="border border-[var(--line)] bg-black/40 p-3">
-                      <p className="text-[9px] uppercase tracking-widest text-[var(--muted)]">Title / Achievement</p>
+                    <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-3">
+                      <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono">Title / Achievement</p>
                       <p className="font-bold text-white mt-0.5">{result.title}</p>
                     </div>
-                    <div className="border border-[var(--line)] bg-black/40 p-3">
-                      <p className="text-[9px] uppercase tracking-widest text-[var(--muted)]">Issued Date</p>
-                      <p className="font-bold text-white mt-0.5">{result.issued_at}</p>
+                    <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-3">
+                      <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono">Issued Date</p>
+                      <p className="font-bold text-white mt-0.5 font-mono tabular-nums">{result.issued_at}</p>
                     </div>
-                    <div className="border border-[var(--line)] bg-black/40 p-3 md:col-span-2">
-                      <p className="text-[9px] uppercase tracking-widest text-[var(--muted)]">SHA-256 Digest</p>
+                    <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-3 md:col-span-2">
+                      <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono">SHA-256 Digest</p>
                       <p className="text-[11px] text-emerald-300 font-mono mt-0.5 break-all">{result.sha256_digest}</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="border border-red-500/40 bg-red-950/20 p-6 space-y-2 font-mono">
+                <div className="rounded-xl border border-rose-500/40 bg-rose-950/20 p-6 space-y-2 font-mono shadow-inner">
                   <div className="flex items-center gap-2.5">
-                    <ShieldAlert className="size-5 text-red-400 shrink-0" />
+                    <ShieldAlert className="size-5 text-rose-400 shrink-0" />
                     <h3 className="text-sm font-bold text-white uppercase">No Verification Record Found</h3>
                   </div>
-                  <p className="text-xs text-red-300">
-                    The certificate ID or hash <code className="text-white bg-black/50 px-1 py-0.5">{submitted}</code> is not registered on the Medi-Caps Chapter public ledger.
+                  <p className="text-xs text-rose-300">
+                    The certificate ID or hash <code className="text-white bg-black/50 px-1.5 py-0.5 rounded font-mono">{submitted}</code> is not registered on the Medi-Caps Chapter public ledger.
                   </p>
                 </div>
               )}

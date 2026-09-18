@@ -293,31 +293,31 @@ export function AssessmentWorkspacePage() {
   // ── Waiting Room Gate (When Assessment Window has not opened yet) ───────────
   if (assessment && !session) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070707] text-[#e0e0e0] font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-none bg-[#0e0e0e] border border-[#262626] text-center space-y-6">
-          <div className="size-14 rounded-none bg-[#141414] border border-[#333] flex items-center justify-center mx-auto text-[var(--accent)]">
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-950 text-zinc-100 font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-2xl bg-zinc-900/80 border border-white/10 text-center space-y-6 backdrop-blur-md shadow-2xl">
+          <div className="size-14 rounded-2xl bg-zinc-800/60 border border-white/10 flex items-center justify-center mx-auto text-orange-500">
             <Clock size={28} />
           </div>
           <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent)] font-bold">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-orange-400 font-bold">
               Round 1 Screening Gated
             </span>
             <h2 className="text-xl font-bold font-mono text-white uppercase">
               {assessment.title}
             </h2>
-            <p className="text-xs text-neutral-400 font-mono leading-relaxed">
+            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
               The 2-hour proctored assessment window opens strictly prior to the contest final. Please wait in the lobby until the timer unlocks.
             </p>
           </div>
-          <div className="p-4 bg-black border border-[#222]">
-            <span className="font-mono text-xs text-neutral-500 block uppercase">Opens In</span>
-            <div className="font-mono text-2xl font-bold text-white mt-1">
+          <div className="p-4 bg-zinc-950/80 rounded-xl border border-white/10">
+            <span className="font-mono text-xs text-zinc-400 block uppercase">Opens In</span>
+            <div className="font-mono text-2xl font-bold text-white mt-1 tabular-nums">
               {formatTimer(assessment.opens_in_seconds || 0)}
             </div>
           </div>
           <Button
             onClick={() => navigate(`/portal/contests/${contestSlug}`)}
-            className="w-full bg-[var(--accent)] text-black font-mono font-bold text-xs uppercase rounded-none hover:bg-[#b8f025]"
+            className="w-full bg-orange-500 text-white font-mono font-bold text-xs uppercase rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/20"
           >
             Return to Contest Lobby
           </Button>

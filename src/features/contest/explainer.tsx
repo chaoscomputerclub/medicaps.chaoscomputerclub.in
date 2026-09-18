@@ -56,44 +56,44 @@ export function FirstContestExplainer() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : dismiss())}>
-      <DialogContent className="rounded-none border-[var(--line)] bg-[var(--surface-1)] sm:max-w-lg">
-        <DialogHeader>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent)]">
+      <DialogContent className="rounded-2xl border border-white/10 bg-zinc-950 text-white sm:max-w-lg p-6 shadow-2xl backdrop-blur-xl space-y-4">
+        <DialogHeader className="space-y-2">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-orange-400 font-bold">
             How a CCC contest works · {step + 1} of {STEPS.length}
           </span>
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold uppercase tracking-tight text-white">
-            <Icon className="size-5 text-[var(--accent)]" />
+          <DialogTitle className="flex items-center gap-2.5 text-lg font-bold uppercase tracking-tight text-white">
+            <Icon className="size-5 text-orange-400" />
             {current.title}
           </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed text-[var(--muted)]">
+          <DialogDescription className="text-sm leading-relaxed text-zinc-400">
             {current.body}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-1" aria-hidden>
+        <div className="flex gap-1.5 py-1" aria-hidden>
           {STEPS.map((s, index) => (
             <span
               key={s.title}
               className={
                 index <= step
-                  ? "h-0.5 flex-1 bg-[var(--accent)]"
-                  : "h-0.5 flex-1 bg-[var(--line)]"
+                  ? "h-1 flex-1 rounded-full bg-orange-500"
+                  : "h-1 flex-1 rounded-full bg-zinc-800"
               }
             />
           ))}
         </div>
 
-        <DialogFooter className="gap-2 sm:justify-between">
+        <DialogFooter className="gap-2 sm:justify-between pt-2">
           <Button
             variant="ghost"
             onClick={dismiss}
-            className="rounded-none font-mono text-xs uppercase"
+            className="rounded-xl font-mono text-xs uppercase text-zinc-400 hover:text-white"
           >
             Skip
           </Button>
           <Button
             onClick={() => (isLast ? dismiss() : setStep(step + 1))}
-            className="rounded-none font-mono text-xs font-bold uppercase tracking-wider"
+            className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]"
           >
             {isLast ? (
               <>

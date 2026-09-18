@@ -114,7 +114,7 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
 
   if (loading) {
     return (
-      <p className="py-8 text-center font-mono text-xs text-[var(--muted)] animate-pulse">
+      <p className="py-8 text-center font-mono text-xs text-zinc-500 animate-pulse">
         Loading contest activity…
       </p>
     );
@@ -122,29 +122,29 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
 
   if (events.length === 0) {
     return (
-      <p className="py-8 text-center font-mono text-xs text-[var(--muted)]">
+      <p className="py-8 text-center font-mono text-xs text-zinc-500">
         No contest activity yet. New editions appear here as soon as they are scheduled.
       </p>
     );
   }
 
   return (
-    <div className="feed-list space-y-4">
+    <div className="space-y-4">
       {events.map((event) => {
         const Icon = event.icon;
         return (
-          <article key={event.key} className="border-b border-[#292929] pb-3 last:border-b-0">
-            <span className="font-mono text-[10px] uppercase text-[var(--accent)] block tracking-wider mb-1">
+          <article key={event.key} className="border-b border-white/10 pb-3 last:border-b-0">
+            <span className="font-mono text-[10px] uppercase text-orange-400 font-bold block tracking-wider mb-1">
               {event.kind}
             </span>
-            <h3 className="font-bold text-sm text-white hover:text-[var(--accent)] transition-colors">
+            <h3 className="font-bold text-sm text-white hover:text-orange-400 transition-colors">
               <Link to={`/portal/contests/${event.slug}`}>
                 {event.title}
               </Link>
             </h3>
-            <p className="text-xs text-neutral-400 mt-0.5">{event.body}</p>
-            <time className="inline-flex items-center gap-1 font-mono text-[10px] text-neutral-500 mt-1">
-              <Icon className="size-3" />
+            <p className="text-xs text-zinc-400 mt-0.5">{event.body}</p>
+            <time className="inline-flex items-center gap-1 font-mono text-[10px] text-zinc-500 mt-1">
+              <Icon className="size-3 text-orange-400" />
               {formatWhen(new Date(event.at).toISOString())}
             </time>
           </article>

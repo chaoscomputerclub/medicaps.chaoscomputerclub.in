@@ -20,25 +20,31 @@ export function ProblemArchivePage() {
   const complete = contests.filter((c: any) => c.status === "finished");
 
   return (
-    <div className="page-wrap space-y-6">
-      <header className="page-header">
-        <div>
-          <p className="kicker">Read-only institutional record</p>
-          <h1>Problem archive.</h1>
-          <p>
-            Official statements and editorials are released after each room closes. This portal never accepts code.
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
+        <div className="space-y-2">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
+            Read-only Institutional Record
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Problem Archive
+          </h1>
+          <p className="max-w-xl text-sm leading-relaxed text-zinc-400">
+            Official algorithmic problem statements and editorials released after each contest room concludes.
           </p>
         </div>
-        <BookOpenCheck className="header-glyph" />
+        <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/60 text-orange-500 shadow-inner">
+          <BookOpenCheck className="size-7" />
+        </div>
       </header>
 
-      <section className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-6">
+      <section className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
         <SectionHeader kicker="Released sets" title="Completed contest problems" />
 
         {complete.length === 0 ? (
           <EmptyState
             title="Archive Empty"
-            body="No archived problem sets released yet. Completed offline contest problems and official editorials will appear here."
+            body="No archived problem sets released yet. Completed contest problems and official editorials will appear here."
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -46,33 +52,33 @@ export function ProblemArchivePage() {
               (c.problems || []).map((p: any) => (
                 <article
                   key={`${c.slug}-${p.index}`}
-                  className="flex items-center justify-between p-4 border border-[#292929] bg-neutral-900/40 hover:border-[var(--accent)] transition-colors group"
+                  className="flex items-center justify-between p-5 rounded-xl border border-white/10 bg-zinc-950/60 hover:border-orange-500/40 transition-all duration-200 group shadow-sm"
                 >
-                  <div className="flex items-center gap-4">
-                    <span className="font-mono text-lg font-bold text-[var(--accent)] w-8 text-center">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <span className="font-mono text-lg font-black text-orange-400 w-8 text-center shrink-0">
                       {p.index}
                     </span>
-                    <div>
-                      <small className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider block">
+                    <div className="min-w-0">
+                      <small className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block truncate">
                         {c.title}
                       </small>
-                      <h2 className="text-base font-bold text-white group-hover:text-[var(--accent)] transition-colors">
+                      <h2 className="text-base font-bold text-white group-hover:text-orange-400 transition-colors truncate">
                         {p.title}
                       </h2>
-                      <p className="text-xs text-neutral-400">
-                        {p.topic} · {p.solved_count} verified solves
+                      <p className="font-mono text-xs text-zinc-400">
+                        {p.topic} · <span className="tabular-nums">{p.solved_count}</span> verified solves
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <strong className="font-mono text-sm text-neutral-300">
+                  <div className="flex items-center gap-4 shrink-0 pl-3">
+                    <strong className="font-mono text-sm tabular-nums text-zinc-300">
                       {p.points} pts
                     </strong>
                     <Link
                       to={`/portal/problems/${c.slug}--${p.index.toLowerCase()}`}
-                      className="p-2 bg-neutral-800 hover:bg-[var(--accent)] text-white hover:text-black transition-colors"
+                      className="p-2.5 rounded-lg bg-zinc-800 hover:bg-orange-500 text-white transition-colors flex items-center justify-center"
                     >
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="size-4" />
                     </Link>
                   </div>
                 </article>

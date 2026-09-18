@@ -54,11 +54,11 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-6 bg-black text-white font-mono selection:bg-[var(--accent)] selection:text-black">
-          <div className="max-w-2xl w-full border border-rose-900/60 bg-[#0c0c0c] p-6 sm:p-8 space-y-6 shadow-2xl relative">
-            <div className="flex items-start justify-between gap-4 border-b border-[#292929] pb-4">
+        <div className="min-h-[400px] flex items-center justify-center p-6 bg-zinc-950 text-white font-mono selection:bg-orange-500 selection:text-black">
+          <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-2xl rounded-2xl relative">
+            <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 border border-rose-800/80 bg-rose-950/40 text-rose-400">
+                <div className="p-2.5 rounded-xl border border-rose-500/30 bg-rose-950/40 text-rose-400">
                   <AlertTriangle size={20} />
                 </div>
                 <div>
@@ -70,20 +70,20 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                   </h2>
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-neutral-500 bg-neutral-900 border border-neutral-800 px-2 py-0.5">
+              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-white/10 px-2.5 py-1 rounded-lg">
                 500-CLI-CRASH
               </span>
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs text-neutral-300 font-mono leading-relaxed">
+              <p className="text-xs text-zinc-300 font-mono leading-relaxed">
                 An unexpected component rendering state was isolated by the CCC integrity watchdog. 
                 Your session and cryptographic contest seals remain intact.
               </p>
 
               {this.state.error && (
-                <div className="p-3 bg-black border border-neutral-800 font-mono text-xs text-rose-300 overflow-x-auto max-h-40">
-                  <div className="flex items-center gap-1.5 text-neutral-500 text-[10px] pb-1 border-b border-neutral-900 uppercase">
+                <div className="p-3.5 bg-zinc-950/90 border border-white/10 rounded-xl font-mono text-xs text-rose-300 overflow-x-auto max-h-40">
+                  <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] pb-1 border-b border-white/5 uppercase">
                     <Terminal size={12} />
                     <span>Exception Message</span>
                   </div>
@@ -96,7 +96,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
               <Button
                 type="button"
                 onClick={this.handleReset}
-                className="bg-[var(--accent)] text-black hover:bg-[var(--accent)]/90 font-mono text-xs uppercase font-bold rounded-none h-auto px-4 py-2 cursor-pointer flex items-center gap-1.5"
+                className="bg-orange-500 text-black hover:bg-orange-400 font-mono text-xs uppercase font-bold rounded-xl h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
               >
                 <RefreshCw size={13} />
                 <span>Reload Interface</span>
@@ -108,7 +108,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                 onClick={() => {
                   window.location.href = "/portal";
                 }}
-                className="border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-mono text-xs uppercase font-bold rounded-none h-auto px-4 py-2 cursor-pointer flex items-center gap-1.5"
+                className="border-white/10 bg-zinc-900/70 hover:bg-zinc-800 hover:text-white text-zinc-200 font-mono text-xs uppercase font-bold rounded-xl h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
               >
                 <Home size={13} />
                 <span>Return to Portal</span>
@@ -118,7 +118,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                 type="button"
                 variant="ghost"
                 onClick={this.handleCopyDiagnostic}
-                className="border border-neutral-800 hover:border-neutral-600 text-neutral-400 hover:text-white font-mono text-xs uppercase rounded-none h-auto px-3 py-2 cursor-pointer flex items-center gap-1.5 ml-auto"
+                className="border border-white/10 hover:border-white/20 text-zinc-400 hover:text-white font-mono text-xs uppercase rounded-xl h-10 px-3 cursor-pointer flex items-center gap-1.5 ml-auto transition-colors"
               >
                 {this.state.copied ? (
                   <>

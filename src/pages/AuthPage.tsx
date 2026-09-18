@@ -364,7 +364,7 @@ export function AuthPage() {
             )}
 
             <Button
-              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-black font-bold hover:bg-accent/90 cursor-pointer disabled:opacity-50"
+              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-400 cursor-pointer disabled:opacity-50 transition-colors"
               disabled={pending || isInvalidDomain}
               type="submit"
             >
@@ -378,16 +378,16 @@ export function AuthPage() {
 
           {/* Divider: ---- or ---- */}
           <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border/80" />
-            <span className="font-mono text-[0.6875rem] uppercase tracking-widest text-muted-foreground/70 select-none">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="font-mono text-[0.6875rem] uppercase tracking-widest text-zinc-500 select-none">
               or
             </span>
-            <div className="h-px flex-1 bg-border/80" />
+            <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <button
             type="button"
-            className="w-full h-11 px-4 font-sans text-xs sm:text-sm font-medium border border-border/80 bg-zinc-900/50 hover:bg-zinc-800/80 hover:border-zinc-500 text-zinc-200 hover:text-white transition-all flex items-center justify-center gap-2.5 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full h-11 px-4 font-sans text-xs sm:text-sm font-medium border border-white/10 bg-zinc-900/60 hover:bg-zinc-800/80 hover:border-zinc-500 text-zinc-200 hover:text-white transition-all flex items-center justify-center gap-2.5 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             onClick={handleGoogle}
             disabled={pending}
           >
@@ -402,7 +402,7 @@ export function AuthPage() {
           <div>
             <Label
               htmlFor="otp"
-              className="font-mono text-[0.625rem] uppercase tracking-wider text-muted-foreground"
+              className="font-mono text-[0.625rem] uppercase tracking-wider text-zinc-400"
             >
               Authentication code
             </Label>
@@ -421,24 +421,24 @@ export function AuthPage() {
                 }}
                 autoFocus
               >
-                <InputOTPGroup>
+                <InputOTPGroup className="gap-2 sm:gap-2.5">
                   {[0, 1, 2, 3, 4, 5].map((i) => (
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="size-11 rounded-none border-border bg-background font-mono text-base tabular-nums"
+                      className="size-11 rounded-xl border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white"
                     />
                   ))}
                 </InputOTPGroup>
               </InputOTP>
             </div>
-            <div className="mt-2.5 flex items-center justify-between font-mono text-[0.625rem] text-muted-foreground">
+            <div className="mt-2.5 flex items-center justify-between font-mono text-[0.625rem] text-zinc-400">
               <span>Six digits · expires in 10 minutes</span>
               <button
                 type="button"
                 onClick={handleResendOtp}
                 disabled={pending}
-                className="hover:text-accent transition-colors underline-offset-4 hover:underline cursor-pointer"
+                className="hover:text-orange-400 transition-colors underline-offset-4 hover:underline cursor-pointer"
               >
                 Resend code
               </button>
@@ -446,13 +446,13 @@ export function AuthPage() {
           </div>
 
           {devOtp && (
-            <div className="border border-dashed border-accent/40 bg-accent/10 px-3 py-2 text-center font-mono text-xs text-accent">
+            <div className="border border-dashed border-orange-500/40 bg-orange-500/10 px-3 py-2 text-center font-mono text-xs text-orange-400 rounded-xl">
               <span>[DEV OTP] {devOtp}</span>
             </div>
           )}
 
           {message && (
-            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
+            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-xl">
               <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                 <span>[ AUTHENTICATION ERROR ]</span>
@@ -462,7 +462,7 @@ export function AuthPage() {
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-10 font-semibold"
+            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-400 cursor-pointer disabled:opacity-50 transition-colors"
             disabled={pending || otp.length < 6}
             type="submit"
           >
@@ -476,7 +476,7 @@ export function AuthPage() {
               dispatch(setOtp(""));
               dispatch(setMessage(null));
             }}
-            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-[0.625rem] tracking-[0.16em] text-muted-foreground uppercase transition-colors hover:text-accent cursor-pointer pt-1"
+            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-[0.625rem] tracking-[0.16em] text-zinc-400 uppercase transition-colors hover:text-orange-400 cursor-pointer pt-1"
           >
             <ArrowLeft className="size-3" /> Use another email address
           </button>
@@ -491,7 +491,7 @@ export function AuthPage() {
           <div>
             <Label
               htmlFor="ob-name"
-              className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground block mb-1.5"
+              className="font-mono text-[0.6875rem] uppercase tracking-wider text-zinc-400 block mb-1.5"
             >
               Full name
             </Label>
@@ -505,7 +505,7 @@ export function AuthPage() {
               placeholder="Ada Lovelace"
               required
               autoFocus
-              className="font-mono text-sm h-10"
+              className="font-mono text-sm h-10 rounded-xl"
             />
           </div>
 
@@ -513,13 +513,13 @@ export function AuthPage() {
             <div className="flex items-center justify-between mb-1.5">
               <Label
                 htmlFor="ob-handle"
-                className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground"
+                className="font-mono text-[0.6875rem] uppercase tracking-wider text-zinc-400"
               >
                 Member handle / alias
               </Label>
               <div className="flex items-center h-4">
                 {handleStatus === "checking" && (
-                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-accent/90 font-mono transition-opacity animate-pulse">
+                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-orange-400/90 font-mono transition-opacity animate-pulse">
                     <Loader2 className="spin size-3" /> checking...
                   </span>
                 )}
@@ -533,16 +533,10 @@ export function AuthPage() {
                     <X size={12} className="text-rose-400" /> handle taken
                   </span>
                 )}
-                {handleStatus === "idle" && handle.length > 0 && handle.length < 3 && (
-                  <span className="text-[0.6875rem] text-muted-foreground font-mono">
-                    min 3 characters
-                  </span>
-                )}
               </div>
             </div>
-
             <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-muted-foreground select-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sm text-zinc-500">
                 @
               </span>
               <Input
@@ -552,22 +546,22 @@ export function AuthPage() {
                   dispatch(setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")));
                   if (message) dispatch(setMessage(null));
                 }}
-                placeholder="ada_core"
+                placeholder="adalovelace"
                 required
                 className={cn(
-                  "font-mono text-sm h-10 pl-8 transition-colors",
-                  handleStatus === "available" && "border-emerald-500/70 focus-visible:ring-emerald-500",
+                  "font-mono text-sm pl-8 h-10 rounded-xl",
+                  handleStatus === "available" && "border-emerald-500/70 focus-visible:ring-emerald-500 text-emerald-200",
                   handleStatus === "taken" && "border-rose-500/70 focus-visible:ring-rose-500 text-rose-200",
                 )}
               />
             </div>
-            <p className="mt-1.5 font-mono text-[0.6875rem] text-muted-foreground">
+            <p className="mt-1.5 font-mono text-[0.6875rem] text-zinc-500">
               Letters, numbers, and underscores only. This will be your permanent campus alias.
             </p>
           </div>
 
           {message && (
-            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
+            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-xl">
               <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                 <span>[ REGISTRATION ERROR ]</span>
@@ -577,7 +571,7 @@ export function AuthPage() {
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-accent text-black font-bold hover:bg-accent/90 cursor-pointer disabled:opacity-50"
+            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-400 cursor-pointer disabled:opacity-50 transition-colors"
             disabled={
               pending ||
               !name.trim() ||

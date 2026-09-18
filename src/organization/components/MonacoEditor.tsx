@@ -104,17 +104,17 @@ export const MonacoEditor = memo(function MonacoEditor({
           { token: "delimiter", foreground: "8f918d" },
         ],
         colors: {
-          "editor.background": "#080808",
+          "editor.background": "#09090b",
           "editor.foreground": "#eeede5",
-          "editorCursor.foreground": "#c8ff36",
-          "editor.lineHighlightBackground": "#141414",
-          "editorLineNumber.foreground": "#414141",
-          "editorLineNumber.activeForeground": "#c8ff36",
-          "editor.selectionBackground": "#292929",
-          "editor.inactiveSelectionBackground": "#1d1d1d",
-          "editorGutter.background": "#080808",
-          "editorIndentGuide.background1": "#1d1d1d",
-          "editorIndentGuide.activeBackground1": "#414141",
+          "editorCursor.foreground": "#f97316",
+          "editor.lineHighlightBackground": "#18181b",
+          "editorLineNumber.foreground": "#52525b",
+          "editorLineNumber.activeForeground": "#f97316",
+          "editor.selectionBackground": "#27272a",
+          "editor.inactiveSelectionBackground": "#18181b",
+          "editorGutter.background": "#09090b",
+          "editorIndentGuide.background1": "#18181b",
+          "editorIndentGuide.activeBackground1": "#27272a",
         },
       });
 
@@ -123,7 +123,7 @@ export const MonacoEditor = memo(function MonacoEditor({
         language: LANG_TO_MONACO[languageRef.current] ?? "python",
         theme: "ccc-dark",
         fontSize: 13,
-        fontFamily: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',
+        fontFamily: '"Geist Mono", "JetBrains Mono", Consolas, monospace',
         fontLigatures: true,
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
@@ -176,15 +176,13 @@ export const MonacoEditor = memo(function MonacoEditor({
   }, [language, value]);
 
   return (
-    <div style={{ position: "relative", height, width: "100%", background: "#080808" }}>
+    <div className="relative w-full h-full bg-zinc-950 overflow-hidden">
       {!loaded && (
-        <div
-          style={{ padding: "1rem", color: "#8f918d", fontFamily: "var(--font-mono, monospace)", fontSize: "0.8125rem" }}
-        >
+        <div className="p-4 text-xs font-mono text-zinc-500 animate-pulse">
           Initializing terminal code editor…
         </div>
       )}
-      <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
+      <div ref={containerRef} className="h-full w-full" />
     </div>
   );
 });

@@ -1,7 +1,7 @@
 import { DashboardSkeleton } from "@/organization/components/skeletons";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowRight, CalendarClock, MapPin, Radio, ShieldCheck } from "lucide-react";
+import { ArrowRight, MapPin, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";
@@ -53,7 +53,6 @@ export function DashboardPage() {
 
   const member = profile?.member;
   const contests = publicData.contests || [];
-  const feed = publicData.announcements || [];
   const history = profile?.ratingHistory || [];
   const pass = profile?.campusPass;
 
@@ -66,131 +65,171 @@ export function DashboardPage() {
       : "";
 
   return (
-    <div className="page-wrap">
-      <header className="page-header">
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Header Profile Summary */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
         <div>
-          <p className="kicker">Member operations console</p>
-          <h1>Good morning{greetingName ? `, ${greetingName}.` : "."}</h1>
-          <p>Your competitive record is only written inside a verified Medi-Caps contest room.</p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-orange-500">
+            Member Operations Console
+          </p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mt-1.5">
+            Good morning{greetingName ? `, ${greetingName}.` : "."}
+          </h1>
+          <p className="text-sm text-slate-400 mt-1 max-w-xl">
+            Your official competitive record is sealed inside verified Medi-Caps workstation laboratories.
+          </p>
         </div>
-        <div className="member-rating">
+        <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-xl border border-white/8 bg-zinc-900/50 backdrop-blur-xs min-w-[200px]">
           <TierBadge>{member?.tier || "1★ Explorer"}</TierBadge>
-          <strong>{member?.rating ?? 1200}</strong>
-          <span>UNIVERSITY RANK #{member?.university_rank ?? 0}</span>
+          <strong className="text-3xl md:text-4xl font-mono font-bold text-white tracking-tight tabular-nums">
+            {member?.rating ?? 1200}
+          </strong>
+          <span className="text-[10px] font-mono font-bold tracking-wider text-slate-500 uppercase">
+            University Rank #{member?.university_rank ?? 0}
+          </span>
         </div>
       </header>
 
+      {/* Live Contest Command or Upcoming Briefing */}
       {live ? (
-        <section className="live-command">
-          <div className="live-copy">
-            <StatusDot status="live" />
-            <p className="kicker">Now running · {live.season}</p>
-            <h2>{live.title}</h2>
-            <p>{live.summary}</p>
-            <div className="event-facts">
-              <span>
-                <MapPin size={14} />
-                {live.venue}
-              </span>
-              <span>
-                <Radio size={14} />
-                Division {live.division}
-              </span>
+        <section className="relative rounded-2xl border border-orange-500/30 bg-zinc-900/90 overflow-hidden shadow-lg shadow-orange-950/20">
+          <div className="absolute top-0 left-0 bottom-0 w-1 bg-orange-500" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+            <div className="p-6 md:p-8 lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-3">
+                <StatusDot status="live" />
+                <span className="font-mono text-xs font-semibold text-orange-400 uppercase tracking-wider">
+                  Active Championship · {live.season}
+                </span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{live.title}</h2>
+              <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">{live.summary}</p>
+              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-2">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-orange-400" />
+                  {live.venue}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Radio className="w-3.5 h-3.5 text-cyan-400" />
+                  Division {live.division}
+                </span>
+              </div>
+              <div className="pt-2">
+                <Button asChild className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-6">
+                  <Link to={`/portal/contests/${live.slug}`}>
+                    Enter Live Arena <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <div className="action-row">
-              <Button asChild className="primary-btn">
-                <Link to={`/portal/contests/${live.slug}`}>
-                  Enter live room <ArrowRight size={15} />
-                </Link>
-              </Button>
+            <div className="p-6 md:p-8 flex flex-col justify-center gap-4 bg-zinc-950/40">
+              <Metric label="Workstations Seated" value={`${live.registered_count}/${live.seat_capacity}`} />
+              <Metric label="Problems Unsealed" value={live.problem_count} />
+              <Metric label="Workstation Pass" value={pass?.seat ?? "Desk Assigned"} />
             </div>
-          </div>
-          <div className="live-telemetry">
-            <Metric label="Workstations seated" value={`${live.registered_count}/${live.seat_capacity}`} />
-            <Metric label="Problems unsealed" value={live.problem_count} />
-            <Metric label="Campus check-in" value={pass?.seat ?? "Pass verified"} />
           </div>
         </section>
       ) : next ? (
-        <section className="upcoming-briefing">
-          <div>
-            <StatusDot status="upcoming" />
-            <p className="kicker">Next campus contest</p>
-            <h2>{next.title}</h2>
-            <p>{next.summary}</p>
+        <section className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <StatusDot status="upcoming" />
+              <span className="font-mono text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Next Campus Contest
+              </span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold text-white">{next.title}</h2>
+            <p className="text-sm text-slate-400 max-w-xl">{next.summary}</p>
           </div>
-          <div className="briefing-meta">
+          <div className="flex flex-wrap items-center gap-6 font-mono text-xs">
             <div>
-              <span>Check-in opens</span>
-              <strong>{formatContestDate(next.check_in_opens_at)}</strong>
+              <span className="block text-[10px] text-slate-500 uppercase tracking-wider">Check-in Opens</span>
+              <strong className="block text-slate-200 text-sm mt-0.5">{formatContestDate(next.check_in_opens_at)}</strong>
             </div>
             <div>
-              <span>Venue</span>
-              <strong>{next.venue}</strong>
+              <span className="block text-[10px] text-slate-500 uppercase tracking-wider">Venue</span>
+              <strong className="block text-slate-200 text-sm mt-0.5">{next.venue}</strong>
             </div>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="border-white/15 hover:bg-zinc-800">
               <Link to={`/portal/contests/${next.slug}`}>
-                Contest briefing <ArrowRight size={14} />
+                Contest Briefing <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
               </Link>
             </Button>
           </div>
         </section>
       ) : null}
 
-      <div className="dashboard-grid">
-        <section className="panel chart-panel">
+      {/* Grid: Rating Analytics & Pass Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="lg:col-span-2 p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
           <SectionHeader
-            kicker="Performance trajectory"
-            title="University contest rating"
+            kicker="Performance Trajectory"
+            title="University Contest Rating"
             action={
-              <Link to="/portal/profile" className="panel-link">
-                Full battle log
+              <Link to="/portal/profile" className="text-xs font-mono font-medium text-orange-400 hover:text-orange-300">
+                Full Battle Log →
               </Link>
             }
           />
           <RatingChart data={history} />
         </section>
 
-        <section className="panel pass-panel">
-          <SectionHeader kicker="Hardware pass" title="Offline lab entry" />
-          <div className="pass-card">
-            <div className="pass-chip">CCC / MCU</div>
-            <p className="pass-title">{pass?.contest_title ?? "Next campus session"}</p>
-            <div className="pass-grid">
-              <div>
-                <span>Seat</span>
-                <strong>{pass?.seat ?? "Desk assign"}</strong>
+        <section className="p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm flex flex-col justify-between">
+          <div>
+            <SectionHeader kicker="Hardware Pass" title="Lab Workstation" />
+            <div className="p-5 rounded-xl border border-white/10 bg-zinc-950/80 font-mono space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-orange-500">CCC / MCU</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-slate-300 border border-white/8 uppercase">
+                  {pass?.status?.toUpperCase() ?? "STANDBY"}
+                </span>
               </div>
               <div>
-                <span>Status</span>
-                <strong className="text-[var(--accent)]">{pass?.status?.toUpperCase() ?? "STANDBY"}</strong>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Assigned Event</span>
+                <strong className="text-sm text-white block mt-0.5 truncate">{pass?.contest_title ?? "Weekly Championship"}</strong>
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/8">
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Seat</span>
+                  <strong className="text-sm text-white block mt-0.5">{pass?.seat ?? "LAB-04-WS-12"}</strong>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Pass Code</span>
+                  <strong className="text-xs text-orange-400 block mt-0.5 truncate">{pass?.pass_code ?? "CCC-PASS-0001"}</strong>
+                </div>
               </div>
             </div>
-            <div className="pass-barcode">{pass?.pass_code ?? "CCC-AUTH-0000"}</div>
+          </div>
+          <div className="pt-4">
+            <Button asChild variant="outline" className="w-full border-white/10 hover:bg-zinc-800 text-xs font-mono">
+              <Link to="/portal/contests">View Tournament Schedule</Link>
+            </Button>
           </div>
         </section>
       </div>
 
-      <section className="panel">
+      {/* Campus Scoreboard Radar */}
+      <section className="p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
         <SectionHeader
-          kicker="Division radar"
-          title="Verified campus scoreboard"
+          kicker="Division Radar"
+          title="Verified Campus Scoreboard"
           action={
-            <Link to="/portal/leaderboard" className="panel-link">
-              University rankings
+            <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-orange-400 hover:text-orange-300">
+              University Rankings →
             </Link>
           }
         />
         <ScoreboardMatrix entries={publicData.standings} problems={publicData.problems} />
       </section>
 
-      <section className="panel">
+      {/* Live Campus Activity Stream */}
+      <section className="p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
         <SectionHeader
-          kicker="Campus network"
-          title="Live activity stream"
+          kicker="Campus Network"
+          title="Live Activity Stream"
           action={
-            <Link to="/portal/verify" className="panel-link">
-              Verify proof log
+            <Link to="/portal/verify" className="text-xs font-mono font-medium text-orange-400 hover:text-orange-300">
+              Verify Proof Log →
             </Link>
           }
         />

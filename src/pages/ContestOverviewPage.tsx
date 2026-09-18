@@ -71,8 +71,7 @@ export function ContestOverviewPage() {
     refreshDetail(false);
   }, [refreshDetail]);
 
-  // Real-time synchronization: polling + window focus + visibility change + cross-tab storage + custom events
-  // Instant real-time push: updates contest details on status changes or qualifications
+  // Real-time synchronization
   useRealtimeEvents(contestSlug, (event) => {
     if (
       event.event === "contest_status_changed" ||
@@ -110,8 +109,8 @@ export function ContestOverviewPage() {
   if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
   if (!contest) {
     return (
-      <div className="page-wrap">
-        <div className="py-20 text-center font-mono text-xs text-[var(--muted)]">Contest not found.</div>
+      <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-400">
+        Contest not found.
       </div>
     );
   }
@@ -124,8 +123,6 @@ export function ContestOverviewPage() {
   );
   const isRegistered = Boolean(registration?.registered || contest.registered);
   const opensAt = assessmentOpensAt(contest);
-  const closesAt = assessmentClosesAt(contest);
-  const now = Date.now();
   const qualified = Boolean(registration?.is_top_30_qualified || registration?.can_enter_live_contest);
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
 
@@ -158,14 +155,14 @@ export function ContestOverviewPage() {
         <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={() => setAssessmentConfirmOpen(true)}
-            className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
+            className="rounded-xl bg-orange-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600 shadow-md shadow-orange-500/20"
           >
-            <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+            <Play className="mr-1.5 size-4 fill-white" /> Take Assessment
           </Button>
           {(phase === "final_live" || isDevBypass) && (
-            <Button asChild className="rounded-none bg-[var(--cyan)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--cyan)]/90">
+            <Button asChild className="rounded-xl bg-cyan-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
               <Link to={`/portal/contests/${contestSlug}/arena`}>
-                <Zap className="mr-1.5 size-4 fill-black" /> Enter Final Arena
+                <Zap className="mr-1.5 size-4 fill-white" /> Enter Final Arena
               </Link>
             </Button>
           )}
@@ -173,7 +170,7 @@ export function ContestOverviewPage() {
             variant="outline"
             size="sm"
             onClick={handleResetAttempt}
-            className="rounded-none border-[var(--line)] font-mono text-xs text-[var(--muted)] hover:text-foreground"
+            className="rounded-xl border-white/10 font-mono text-xs text-zinc-400 hover:text-white"
           >
             <RotateCcw className="mr-1.5 size-3.5" /> Reset
           </Button>
@@ -187,7 +184,7 @@ export function ContestOverviewPage() {
         <Button
           onClick={() => setConfirmOpen(true)}
           size="lg"
-          className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
+          className="rounded-xl bg-orange-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20"
         >
           <Sparkles className="mr-1.5 size-4" /> Register for Contest
         </Button>
@@ -199,14 +196,14 @@ export function ContestOverviewPage() {
       if (qualified && (phase === "final_live" || phase === "complete")) {
         return (
           <div className="flex flex-wrap items-center gap-3">
-            <Button asChild size="lg" className="rounded-none bg-[var(--cyan)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--cyan)]/90">
+            <Button asChild size="lg" className="rounded-xl bg-cyan-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
               <Link to={`/portal/contests/${contestSlug}/arena`}>
-                <Play className="mr-1.5 size-4 fill-black" /> Enter Live Final
+                <Play className="mr-1.5 size-4 fill-white" /> Enter Live Final
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-none border-[var(--line)] font-mono text-xs uppercase text-foreground hover:bg-[var(--surface-2)]">
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-white/10 font-mono text-xs uppercase text-white hover:bg-zinc-800">
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-1.5 size-4" /> Campus Pass
+                <QrCode className="mr-1.5 size-4 text-orange-400" /> Campus Pass
               </Link>
             </Button>
           </div>
@@ -214,15 +211,15 @@ export function ContestOverviewPage() {
       }
       return (
         <div className="flex flex-wrap items-center gap-3">
-          <Button asChild variant="outline" size="lg" className="rounded-none border-emerald-500/40 bg-emerald-950/20 font-mono text-xs font-bold uppercase text-emerald-400 hover:bg-emerald-950/40">
+          <Button asChild variant="outline" size="lg" className="rounded-xl border-emerald-500/40 bg-emerald-950/20 font-mono text-xs font-bold uppercase text-emerald-400 hover:bg-emerald-950/40">
             <Link to={`/portal/contests/${contestSlug}/results`}>
               <BadgeCheck className="mr-1.5 size-4" /> Submitted · View Standings
             </Link>
           </Button>
           {qualified && (
-            <Button asChild variant="outline" size="lg" className="rounded-none font-mono text-xs uppercase">
+            <Button asChild variant="outline" size="lg" className="rounded-xl font-mono text-xs uppercase border-white/10">
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-1.5 size-4 text-[var(--accent)]" /> Campus Pass
+                <QrCode className="mr-1.5 size-4 text-orange-400" /> Campus Pass
               </Link>
             </Button>
           )}
@@ -235,21 +232,21 @@ export function ContestOverviewPage() {
       if (qualified) {
         return (
           <div className="flex flex-wrap items-center gap-3">
-            <Button asChild size="lg" className="rounded-none bg-[var(--cyan)] font-mono text-xs font-black uppercase text-black">
+            <Button asChild size="lg" className="rounded-xl bg-cyan-500 font-mono text-xs font-black uppercase text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
               <Link to={`/portal/contests/${contestSlug}/arena`}>
-                <Play className="mr-1.5 size-4 fill-black" /> Enter Live Final
+                <Play className="mr-1.5 size-4 fill-white" /> Enter Live Final
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-none font-mono text-xs uppercase">
+            <Button asChild variant="outline" size="lg" className="rounded-xl font-mono text-xs uppercase border-white/10">
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-1.5 size-4 text-[var(--accent)]" /> Campus Pass
+                <QrCode className="mr-1.5 size-4 text-orange-400" /> Campus Pass
               </Link>
             </Button>
           </div>
         );
       }
       return (
-        <Button variant="outline" disabled size="lg" className="rounded-none font-mono text-xs uppercase">
+        <Button variant="outline" disabled size="lg" className="rounded-xl font-mono text-xs uppercase border-white/10">
           <Lock className="mr-1.5 size-4" /> Top {FINALIST_SEATS} Only
         </Button>
       );
@@ -260,35 +257,35 @@ export function ContestOverviewPage() {
       <Button
         onClick={() => setAssessmentConfirmOpen(true)}
         size="lg"
-        className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90"
+        className="rounded-xl bg-orange-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20"
       >
-        <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+        <Play className="mr-1.5 size-4 fill-white" /> Take Assessment
       </Button>
     );
   };
 
   return (
-    <div className="page-wrap max-w-5xl space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Back */}
-      <Link to="/portal/contests" className="back-link">
-        <ArrowLeft /> Back to contests
+      <Link to="/portal/contests" className="inline-flex items-center gap-2 font-mono text-xs text-zinc-400 hover:text-white transition-colors">
+        <ArrowLeft className="size-3.5" /> Back to contests
       </Link>
 
       {/* ─── HERO HEADER ──────────────────────────────────── */}
-      <header className="grid gap-0 overflow-hidden border border-[var(--line)] bg-[var(--surface)] lg:grid-cols-[1fr_280px]">
+      <header className="grid gap-0 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl lg:grid-cols-[1fr_280px]">
         {/* Left: Identity */}
         <div className="flex flex-col justify-between gap-8 p-7">
           {/* Phase + cadence chips */}
           <div className="flex flex-wrap items-center gap-2">
             <PhaseBadge phase={phase} />
-            <span className="border border-[var(--line)] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
+            <span className="rounded-md border border-white/10 bg-zinc-800/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
               {cadenceLabel(contest)} {contest.edition || ""}
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
               {contest.season}
             </span>
             {isDevBypass && (
-              <span className="border border-emerald-500/40 bg-emerald-950/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
+              <span className="rounded-md border border-emerald-500/40 bg-emerald-950/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
                 ⚡ Dev Bypass
               </span>
             )}
@@ -297,14 +294,14 @@ export function ContestOverviewPage() {
           {/* Title */}
           <div className="space-y-3">
             <div className="flex items-start gap-4">
-              <div className="hidden size-12 shrink-0 items-center justify-center border border-[var(--line)] bg-[var(--surface-2)] sm:flex">
-                <Trophy className="size-5 text-[var(--accent)]" />
+              <div className="hidden size-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-zinc-950/60 text-orange-500 sm:flex shadow-inner">
+                <Trophy className="size-5" />
               </div>
               <div>
-                <h1 className="text-3xl font-black leading-tight text-foreground md:text-4xl">
+                <h1 className="text-3xl font-black leading-tight text-white md:text-4xl">
                   {contest.title}
                 </h1>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-zinc-400">
                   {contest.summary}
                 </p>
               </div>
@@ -312,17 +309,17 @@ export function ContestOverviewPage() {
           </div>
 
           {/* Meta pills */}
-          <div className="flex flex-wrap items-center gap-5 text-xs text-[var(--muted)]">
+          <div className="flex flex-wrap items-center gap-5 text-xs text-zinc-400 font-mono">
             <span className="flex items-center gap-1.5">
-              <Clock className="size-3.5 text-[var(--accent)]" />
+              <Clock className="size-3.5 text-orange-400" />
               {ASSESSMENT_DURATION_MINUTES} min assessment
             </span>
             <span className="flex items-center gap-1.5">
-              <Users className="size-3.5 text-[var(--accent)]" />
+              <Users className="size-3.5 text-orange-400" />
               Top {FINALIST_SEATS} advance
             </span>
             <span className="flex items-center gap-1.5">
-              <MapPin className="size-3.5 text-[var(--accent)]" />
+              <MapPin className="size-3.5 text-orange-400" />
               Campus final
             </span>
           </div>
@@ -335,7 +332,7 @@ export function ContestOverviewPage() {
             {(isAssessmentSubmitted || pastContestsHaveResults(phase)) && (
               <Link
                 to={`/portal/contests/${contestSlug}/results`}
-                className="w-fit font-mono text-xs text-[var(--muted)] underline-offset-4 hover:text-foreground hover:underline"
+                className="w-fit font-mono text-xs text-zinc-400 underline-offset-4 hover:text-white hover:underline"
               >
                 View full rankings →
               </Link>
@@ -344,10 +341,10 @@ export function ContestOverviewPage() {
 
           {/* Registration status strip */}
           {isRegistered && (
-            <div className="flex items-center gap-3 border-t border-[var(--line)] pt-5">
-              <CheckCircle2 className="size-4 shrink-0 text-[var(--accent)]" />
+            <div className="flex items-center gap-3 border-t border-white/10 pt-5">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-foreground">
+                <p className="text-xs font-semibold text-white">
                   {isAssessmentSubmitted
                     ? "Your answers are safely recorded"
                     : phase === "complete"
@@ -355,13 +352,13 @@ export function ContestOverviewPage() {
                       : "Your place is reserved"}
                 </p>
                 {!isAssessmentSubmitted && (
-                  <p className="text-xs text-[var(--muted)]">
+                  <p className="text-xs text-zinc-400">
                     Timer starts the moment you enter — it cannot be paused.
                   </p>
                 )}
               </div>
               {registration?.assessment_rank && (
-                <span className="ml-auto shrink-0 border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-2.5 py-0.5 font-mono text-xs font-bold text-[var(--accent)]">
+                <span className="ml-auto shrink-0 rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-xs font-bold tabular-nums text-orange-400">
                   Rank #{registration.assessment_rank} · {registration.assessment_score ?? 0} pts
                 </span>
               )}
@@ -370,57 +367,57 @@ export function ContestOverviewPage() {
         </div>
 
         {/* Right: Next milestone sidebar */}
-        <div className="flex flex-col justify-between border-t border-[var(--line)] bg-[var(--surface-2)] p-6 lg:border-l lg:border-t-0">
+        <div className="flex flex-col justify-between border-t border-white/10 bg-zinc-950/60 p-6 lg:border-l lg:border-t-0">
           <div className="space-y-5">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
               Next milestone
             </p>
             <dl className="space-y-4">
               <div className="flex gap-3">
-                <CalendarDays className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
+                <CalendarDays className="mt-0.5 size-4 shrink-0 text-orange-400" />
                 <div>
-                  <dt className="text-xs text-[var(--muted)]">Round 1 opens</dt>
-                  <dd className="mt-0.5 text-xs font-semibold text-foreground">
+                  <dt className="text-xs text-zinc-400">Round 1 opens</dt>
+                  <dd className="mt-0.5 text-xs font-semibold text-white">
                     {formatWhen(opensAt.toISOString())}
                   </dd>
                 </div>
               </div>
               <div className="flex gap-3">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
+                <MapPin className="mt-0.5 size-4 shrink-0 text-orange-400" />
                 <div>
-                  <dt className="text-xs text-[var(--muted)]">Offline final</dt>
-                  <dd className="mt-0.5 text-xs font-semibold text-foreground">
+                  <dt className="text-xs text-zinc-400">Offline final</dt>
+                  <dd className="mt-0.5 text-xs font-semibold text-white">
                     {formatWhen(contest.starts_at)}
                   </dd>
                   {contest.venue && (
-                    <dd className="text-xs text-[var(--muted)]">{contest.venue}</dd>
+                    <dd className="text-xs text-zinc-400">{contest.venue}</dd>
                   )}
                 </div>
               </div>
               {contest.environment && (
                 <div className="flex gap-3">
-                  <Code2 className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
+                  <Code2 className="mt-0.5 size-4 shrink-0 text-orange-400" />
                   <div>
-                    <dt className="text-xs text-[var(--muted)]">Environment</dt>
-                    <dd className="mt-0.5 text-xs font-semibold text-foreground">{contest.environment}</dd>
+                    <dt className="text-xs text-zinc-400">Environment</dt>
+                    <dd className="mt-0.5 text-xs font-semibold text-white">{contest.environment}</dd>
                   </div>
                 </div>
               )}
             </dl>
           </div>
 
-          <div className="mt-6 border-t border-[var(--line)] pt-5">
-            <div className="flex items-baseline justify-between">
-              <span className="font-mono text-2xl font-black text-foreground">
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <div className="flex items-baseline justify-between font-mono">
+              <span className="text-2xl font-black tabular-nums text-white">
                 {contest.registered_count}
               </span>
-              <span className="font-mono text-xs text-[var(--muted)]">
+              <span className="text-xs tabular-nums text-zinc-400">
                 / {contest.seat_capacity} registered
               </span>
             </div>
-            <div className="mt-2 h-1 w-full overflow-hidden bg-[var(--line)]">
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
               <div
-                className="h-full bg-[var(--accent)] transition-all"
+                className="h-full bg-orange-500 transition-all rounded-full"
                 style={{ width: `${Math.min(100, ((contest.registered_count || 0) / (contest.seat_capacity || 60)) * 100)}%` }}
               />
             </div>
@@ -430,20 +427,20 @@ export function ContestOverviewPage() {
 
       {/* ─── ROUNDS TIMELINE ──────────────────────────────── */}
       <section className="space-y-4">
-        <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
+        <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
           Your path to the final
         </h2>
-        <div className="border border-[var(--line)] bg-[var(--surface)] p-6">
+        <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
           <RoundsTimeline contest={contest} phase={phase} />
         </div>
       </section>
 
-      {/* ─── RULES ────────────────────────────────────────── */}
+      {/* ─── RULES & PROBLEM SET ──────────────────────────── */}
       <section className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-        <div className="border border-[var(--line)] bg-[var(--surface)] p-6 space-y-4">
+        <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
           <div className="flex items-center justify-between">
-            <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-[var(--muted)]">Contest Rules</h2>
-            <span className="border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-2.5 py-0.5 font-mono text-xs font-black text-[var(--accent)]">
+            <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">Contest Rules</h2>
+            <span className="rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-xs font-black text-orange-400">
               Top {FINALIST_SEATS}
             </span>
           </div>
@@ -457,50 +454,50 @@ export function ContestOverviewPage() {
                   "Offline final uses campus workstations with QR pass entry.",
                 ]
             ).map((rule, i) => (
-              <li key={rule} className="flex gap-3 text-xs leading-relaxed text-[var(--muted)]">
-                <span className="font-mono font-bold text-[var(--accent)]">{String(i + 1).padStart(2, "0")}</span>
+              <li key={rule} className="flex gap-3 text-xs leading-relaxed text-zinc-300">
+                <span className="font-mono font-bold text-orange-400">{String(i + 1).padStart(2, "0")}</span>
                 {rule}
               </li>
             ))}
           </ol>
           {contest.prize_pool && (
-            <div className="flex items-center gap-2 border-t border-[var(--line)] pt-4 text-xs font-semibold text-foreground">
-              <Gift className="size-4 text-[var(--accent)]" />
+            <div className="flex items-center gap-2 border-t border-white/10 pt-4 text-xs font-semibold text-white">
+              <Gift className="size-4 text-orange-400" />
               {contest.prize_pool}
             </div>
           )}
         </div>
 
         {/* ─── PROBLEM SET ────────────────────────────────── */}
-        <div className="border border-[var(--line)] bg-[var(--surface)] space-y-0">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--line)]">
-            <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-[var(--muted)]">Problem Set</h2>
-            <span className="font-mono text-xs text-[var(--muted)]">
+        <div className="rounded-2xl border border-white/10 bg-zinc-900/60 overflow-hidden backdrop-blur-md shadow-xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">Problem Set</h2>
+            <span className="font-mono text-xs tabular-nums text-zinc-400">
               {problems.length || contest.problem_count} problems
             </span>
           </div>
           <Table>
             <TableHeader>
-              <TableRow className="border-[var(--line)] hover:bg-transparent">
-                <TableHead className="w-10 font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">#</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Problem</TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Pts</TableHead>
+              <TableRow className="border-white/10 hover:bg-transparent bg-zinc-950/40">
+                <TableHead className="w-12 font-mono text-[10px] uppercase tracking-widest text-zinc-400">#</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Problem</TableHead>
+                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Pts</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {problems.length === 0 ? (
-                <TableRow className="border-[var(--line)]">
-                  <TableCell colSpan={3} className="py-10 text-center font-mono text-xs text-[var(--muted)]">
-                    <Lock className="mx-auto mb-2 size-4" />
+                <TableRow className="border-white/5">
+                  <TableCell colSpan={3} className="py-10 text-center font-mono text-xs text-zinc-400">
+                    <Lock className="mx-auto mb-2 size-4 text-zinc-500" />
                     Sealed until Round 1 opens
                   </TableCell>
                 </TableRow>
               ) : (
                 problems.map((p) => (
-                  <TableRow key={p.problem_index} className="border-[var(--line)]">
-                    <TableCell className="font-mono text-xs font-bold text-[var(--accent)]">{p.problem_index}</TableCell>
-                    <TableCell className="text-sm font-medium text-foreground">{p.title}</TableCell>
-                    <TableCell className="text-right font-mono text-xs font-bold text-foreground">{p.points}</TableCell>
+                  <TableRow key={p.problem_index} className="border-white/5 hover:bg-zinc-800/40">
+                    <TableCell className="font-mono text-xs font-bold text-orange-400">{p.problem_index}</TableCell>
+                    <TableCell className="text-sm font-medium text-white">{p.title}</TableCell>
+                    <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-white">{p.points}</TableCell>
                   </TableRow>
                 ))
               )}
@@ -511,19 +508,19 @@ export function ContestOverviewPage() {
 
       {/* Registration dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="border-[var(--line)] bg-[var(--surface)]">
+        <DialogContent className="border-white/10 bg-zinc-900 text-white rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Register for {contest.title}?</DialogTitle>
-            <DialogDescription className="text-[var(--muted)]">
+            <DialogTitle className="text-white">Register for {contest.title}?</DialogTitle>
+            <DialogDescription className="text-zinc-400">
               This reserves your Round 1 slot. The assessment opens {formatWhen(opensAt.toISOString())} and stays open for 24 hours.
               Your {ASSESSMENT_DURATION_MINUTES}-minute timer starts the moment you enter and cannot be paused.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" className="rounded-none" onClick={() => setConfirmOpen(false)}>
+            <Button variant="outline" className="rounded-xl border-white/10" onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
-            <Button className="rounded-none font-mono text-xs font-bold" onClick={handleRegister}>
+            <Button className="rounded-xl font-mono text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white" onClick={handleRegister}>
               Confirm Registration
             </Button>
           </DialogFooter>

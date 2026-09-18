@@ -58,11 +58,11 @@ import { Badge } from "@/components/ui/badge";
 import { SettingsSkeleton } from "@/organization/components/skeletons";
 
 const PRESET_EMBLEMS = [
-  { id: "volt", label: "Volt", icon: "⚡", bg: "bg-lime-500/10", border: "border-lime-500/40", text: "text-lime-400" },
+  { id: "volt", label: "Volt", icon: "⚡", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
   { id: "binary", label: "Binary", icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
   { id: "quantum", label: "Quantum", icon: "⚛️", bg: "bg-purple-500/10", border: "border-purple-500/40", text: "text-purple-400" },
   { id: "matrix", label: "Matrix", icon: "💻", bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-400" },
-  { id: "grandmaster", label: "Grandmaster", icon: "🏆", bg: "bg-amber-500/10", border: "border-amber-500/40", text: "text-amber-400" },
+  { id: "grandmaster", label: "Grandmaster", icon: "🏆", bg: "bg-orange-500/10", border: "border-orange-500/40", text: "text-orange-400" },
   { id: "cipher", label: "Cipher", icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
 ];
 
@@ -94,7 +94,6 @@ export function SettingsPage() {
   // Notification toggles
   const [notifContests, setNotifContests] = useState(true);
   const [notifRatings, setNotifRatings] = useState(true);
-  const [notifBulletins, setNotifBulletins] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -197,14 +196,18 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="page-wrap space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Page Header */}
-      <div className="section-heading">
-        <div>
-          <p className="kicker">MEMBER CONFIGURATION & SECURITY</p>
-          <h2>SETTINGS</h2>
+      <header className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-center justify-between">
+        <div className="space-y-1">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
+            Member Configuration & Security
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase">
+            Settings
+          </h1>
         </div>
-      </div>
+      </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Left Sub-navigation */}
@@ -212,10 +215,10 @@ export function SettingsPage() {
           <button
             type="button"
             className={cn(
-              "flex items-center gap-2 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-none transition-colors",
+              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-xl transition-all cursor-pointer",
               activeTab === "profile"
-                ? "bg-[var(--accent)] text-black border-[var(--accent)] font-bold"
-                : "border-[#292929] bg-[#0d0d0d] text-neutral-400 hover:text-white hover:border-neutral-700"
+                ? "bg-orange-500 text-white border-orange-500 font-bold shadow-md shadow-orange-500/20"
+                : "border-white/10 bg-zinc-900/60 text-zinc-400 hover:text-white hover:border-white/20"
             )}
             onClick={() => setActiveTab("profile")}
           >
@@ -225,10 +228,10 @@ export function SettingsPage() {
           <button
             type="button"
             className={cn(
-              "flex items-center gap-2 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-none transition-colors",
+              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-xl transition-all cursor-pointer",
               activeTab === "account"
-                ? "bg-[var(--accent)] text-black border-[var(--accent)] font-bold"
-                : "border-[#292929] bg-[#0d0d0d] text-neutral-400 hover:text-white hover:border-neutral-700"
+                ? "bg-orange-500 text-white border-orange-500 font-bold shadow-md shadow-orange-500/20"
+                : "border-white/10 bg-zinc-900/60 text-zinc-400 hover:text-white hover:border-white/20"
             )}
             onClick={() => setActiveTab("account")}
           >
@@ -238,10 +241,10 @@ export function SettingsPage() {
           <button
             type="button"
             className={cn(
-              "flex items-center gap-2 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-none transition-colors",
+              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-xl transition-all cursor-pointer",
               activeTab === "danger"
-                ? "bg-rose-950 text-rose-300 border-rose-500 font-bold"
-                : "border-[#292929] bg-[#0d0d0d] text-rose-400 hover:border-rose-800"
+                ? "bg-rose-950/80 text-rose-300 border-rose-500/60 font-bold shadow-md shadow-rose-950/40"
+                : "border-white/10 bg-zinc-900/60 text-rose-400 hover:border-rose-800/60 hover:bg-rose-950/20"
             )}
             onClick={() => setActiveTab("danger")}
           >
@@ -256,10 +259,10 @@ export function SettingsPage() {
           {activeTab === "profile" && (
             <div className="space-y-6">
               {/* Identity Parameters */}
-              <div className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-5">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Competitive Identity</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1">
                     Your public identifier, handle alias, and institutional attribution shown on leaderboards.
                   </p>
                 </div>
@@ -267,12 +270,12 @@ export function SettingsPage() {
                 {/* Full Name */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="s-fullname" className="font-mono text-xs uppercase text-neutral-400">
+                    <Label htmlFor="s-fullname" className="font-mono text-xs uppercase text-zinc-400">
                       Full Name
                     </Label>
                     {saveStatus["full_name"] === "saving" && (
-                      <span className="font-mono text-[10px] text-[var(--accent)] flex items-center gap-1">
-                        <Loader2 className="animate-spin w-3 h-3" /> saving...
+                      <span className="font-mono text-[10px] text-orange-400 flex items-center gap-1">
+                        <Loader2 className="animate-spin size-3" /> saving...
                       </span>
                     )}
                     {saveStatus["full_name"] === "saved" && (
@@ -289,14 +292,14 @@ export function SettingsPage() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSaveField("full_name", fullName.trim());
                       }}
-                      className="font-mono text-sm bg-black border-[#292929] text-white rounded-none"
+                      className="font-mono text-sm bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
                       placeholder="Ada Lovelace"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase border-[#292929] rounded-none shrink-0"
+                      className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
                       disabled={saveStatus["full_name"] === "saving" || fullName.trim() === member?.full_name}
                       onClick={() => handleSaveField("full_name", fullName.trim())}
                     >
@@ -308,16 +311,16 @@ export function SettingsPage() {
                 {/* Username / Handle */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="s-handle" className="font-mono text-xs uppercase text-neutral-400">
+                    <Label htmlFor="s-handle" className="font-mono text-xs uppercase text-zinc-400">
                       Handle / Alias
                     </Label>
                     <div className="flex items-center h-4 font-mono text-[10px]">
                       {!isHandleChanged && (
-                        <span className="text-neutral-500">current handle</span>
+                        <span className="text-zinc-500">current handle</span>
                       )}
                       {isHandleChanged && handleStatus === "checking" && (
-                        <span className="text-[var(--accent)] flex items-center gap-1">
-                          <Loader2 className="animate-spin w-3 h-3" /> checking...
+                        <span className="text-orange-400 flex items-center gap-1">
+                          <Loader2 className="animate-spin size-3" /> checking...
                         </span>
                       )}
                       {isHandleChanged && handleStatus === "available" && (
@@ -339,7 +342,7 @@ export function SettingsPage() {
                   </div>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-neutral-500">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-zinc-500">
                         @
                       </span>
                       <Input
@@ -352,7 +355,7 @@ export function SettingsPage() {
                           }
                         }}
                         className={cn(
-                          "font-mono text-sm pl-8 bg-black border-[#292929] text-white rounded-none",
+                          "font-mono text-sm pl-8 bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500",
                           isHandleChanged && handleStatus === "available" && "border-emerald-500/60",
                           isHandleChanged && handleStatus === "taken" && "border-rose-500/60 text-rose-200"
                         )}
@@ -363,7 +366,7 @@ export function SettingsPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase border-[#292929] rounded-none shrink-0"
+                      className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
                       disabled={
                         !isHandleChanged ||
                         handleInput.trim().length < 3 ||
@@ -372,7 +375,7 @@ export function SettingsPage() {
                       }
                       onClick={handleSaveHandle}
                     >
-                      {saveStatus["handle"] === "saving" ? <Loader2 className="animate-spin w-3 h-3" /> : "Save"}
+                      {saveStatus["handle"] === "saving" ? <Loader2 className="animate-spin size-3" /> : "Save"}
                     </Button>
                   </div>
                 </div>
@@ -380,10 +383,10 @@ export function SettingsPage() {
                 {/* Bio */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="s-bio" className="font-mono text-xs uppercase text-neutral-400">
+                    <Label htmlFor="s-bio" className="font-mono text-xs uppercase text-zinc-400">
                       Bio / Tagline
                     </Label>
-                    <span className="font-mono text-[10px] text-neutral-500">{bio.length}/500</span>
+                    <span className="font-mono text-[10px] text-zinc-500">{bio.length}/500</span>
                   </div>
                   <Textarea
                     id="s-bio"
@@ -392,14 +395,14 @@ export function SettingsPage() {
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
                     placeholder="Competitive programmer, CSE undergraduate..."
-                    className="font-mono text-xs resize-none bg-black border-[#292929] text-white rounded-none"
+                    className="font-mono text-xs resize-none bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
                   />
                   <div className="flex justify-end">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase border-[#292929] rounded-none"
+                      className="font-mono text-xs uppercase border-white/10 rounded-xl"
                       disabled={saveStatus["bio"] === "saving" || bio.trim() === (member?.bio || "")}
                       onClick={() => handleSaveField("bio", bio.trim())}
                     >
@@ -410,17 +413,17 @@ export function SettingsPage() {
               </div>
 
               {/* Academic & Emblem */}
-              <div className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-5">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Academic & Cyber Visuals</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1">
                     Your institutional affiliation, graduation cohort, and customized emblem.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="font-mono text-xs uppercase text-neutral-400">Department</Label>
+                    <Label className="font-mono text-xs uppercase text-zinc-400">Department</Label>
                     <Select
                       value={department}
                       onValueChange={(val) => {
@@ -428,10 +431,10 @@ export function SettingsPage() {
                         void handleSaveField("department", val);
                       }}
                     >
-                      <SelectTrigger className="font-mono text-xs bg-black border-[#292929] text-white rounded-none">
+                      <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-neutral-900 border-[#292929] text-white rounded-none">
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
                         <SelectItem value="CSE">CSE (Computer Science & Engineering)</SelectItem>
                         <SelectItem value="IT">IT (Information Technology)</SelectItem>
                         <SelectItem value="AIDS">AIDS (AI & Data Science)</SelectItem>
@@ -442,7 +445,7 @@ export function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="font-mono text-xs uppercase text-neutral-400">Graduation Batch</Label>
+                    <Label className="font-mono text-xs uppercase text-zinc-400">Graduation Batch</Label>
                     <Select
                       value={batch}
                       onValueChange={(val) => {
@@ -450,10 +453,10 @@ export function SettingsPage() {
                         void handleSaveField("batch", val);
                       }}
                     >
-                      <SelectTrigger className="font-mono text-xs bg-black border-[#292929] text-white rounded-none">
+                      <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-neutral-900 border-[#292929] text-white rounded-none">
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
                         <SelectItem value="2022-26">2022–2026</SelectItem>
                         <SelectItem value="2023-27">2023–2027</SelectItem>
                         <SelectItem value="2024-28">2024–2028</SelectItem>
@@ -465,7 +468,7 @@ export function SettingsPage() {
 
                 {/* Preset Emblem Selector */}
                 <div className="space-y-2">
-                  <Label className="font-mono text-xs uppercase text-neutral-400">Cyber Profile Emblem</Label>
+                  <Label className="font-mono text-xs uppercase text-zinc-400">Cyber Profile Emblem</Label>
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
                     {PRESET_EMBLEMS.map((emblem) => {
                       const isSelected = avatarUrl === emblem.id;
@@ -478,14 +481,14 @@ export function SettingsPage() {
                             void handleSaveField("avatar_url", emblem.id);
                           }}
                           className={cn(
-                            "flex flex-col items-center justify-center p-3 border rounded-none transition-all cursor-pointer text-center",
+                            "flex flex-col items-center justify-center p-3 border rounded-xl transition-all cursor-pointer text-center",
                             isSelected
-                              ? cn(emblem.border, emblem.bg, "ring-1 ring-[var(--accent)]")
-                              : "border-[#292929] bg-neutral-950 hover:border-neutral-600"
+                              ? cn(emblem.border, emblem.bg, "ring-2 ring-orange-500")
+                              : "border-white/10 bg-zinc-950 hover:border-zinc-500"
                           )}
                         >
                           <span className="text-xl mb-1">{emblem.icon}</span>
-                          <span className={cn("font-mono text-[10px] uppercase font-bold", isSelected ? emblem.text : "text-neutral-400")}>
+                          <span className={cn("font-mono text-[10px] uppercase font-bold", isSelected ? emblem.text : "text-zinc-400")}>
                             {emblem.label}
                           </span>
                         </button>
@@ -495,32 +498,32 @@ export function SettingsPage() {
                 </div>
 
                 {/* Immutable Identifiers */}
-                <div className="pt-4 border-t border-[#292929] space-y-3">
-                  <div className="flex items-center gap-2 text-xs text-neutral-400 font-mono">
-                    <Lock size={13} className="text-neutral-500" />
+                <div className="pt-4 border-t border-white/10 space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
+                    <Lock size={13} className="text-zinc-500" />
                     <span>Locked Institutional Registrations</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label className="font-mono text-[10px] uppercase text-neutral-500">
+                      <Label className="font-mono text-[10px] uppercase text-zinc-500">
                         Enrollment PRN
                       </Label>
                       <Input
                         value={member?.prn || "—"}
                         readOnly
                         disabled
-                        className="font-mono text-xs bg-black/40 text-neutral-500 cursor-not-allowed border-[#292929] rounded-none mt-1"
+                        className="font-mono text-xs bg-zinc-950/40 text-zinc-500 cursor-not-allowed border-white/10 rounded-xl mt-1"
                       />
                     </div>
                     <div>
-                      <Label className="font-mono text-[10px] uppercase text-neutral-500">
+                      <Label className="font-mono text-[10px] uppercase text-zinc-500">
                         Institutional Email Address
                       </Label>
                       <Input
                         value={member?.email || ""}
                         readOnly
                         disabled
-                        className="font-mono text-xs bg-black/40 text-neutral-500 cursor-not-allowed border-[#292929] rounded-none mt-1"
+                        className="font-mono text-xs bg-zinc-950/40 text-zinc-500 cursor-not-allowed border-white/10 rounded-xl mt-1"
                       />
                     </div>
                   </div>
@@ -528,10 +531,10 @@ export function SettingsPage() {
               </div>
 
               {/* Developer & Social Links */}
-              <div className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-5">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Developer & Social Links</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1">
                     Connect your GitHub and LinkedIn to display on your campus member badge.
                   </p>
                 </div>
@@ -539,7 +542,7 @@ export function SettingsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* GitHub */}
                   <div className="space-y-2">
-                    <Label htmlFor="s-github" className="font-mono text-xs uppercase text-neutral-400 flex items-center gap-1.5">
+                    <Label htmlFor="s-github" className="font-mono text-xs uppercase text-zinc-400 flex items-center gap-1.5">
                       <Github size={13} /> GitHub Handle
                     </Label>
                     <div className="flex gap-2">
@@ -551,13 +554,13 @@ export function SettingsPage() {
                           if (e.key === "Enter") handleSaveField("github_username", github.trim());
                         }}
                         placeholder="octocat"
-                        className="font-mono text-xs bg-black border-[#292929] text-white rounded-none"
+                        className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="font-mono text-xs uppercase border-[#292929] rounded-none shrink-0"
+                        className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
                         disabled={saveStatus["github_username"] === "saving" || github.trim() === (member?.github_username || "")}
                         onClick={() => handleSaveField("github_username", github.trim())}
                       >
@@ -568,7 +571,7 @@ export function SettingsPage() {
 
                   {/* LinkedIn */}
                   <div className="space-y-2">
-                    <Label htmlFor="s-linkedin" className="font-mono text-xs uppercase text-neutral-400 flex items-center gap-1.5">
+                    <Label htmlFor="s-linkedin" className="font-mono text-xs uppercase text-zinc-400 flex items-center gap-1.5">
                       <Linkedin size={13} /> LinkedIn Profile
                     </Label>
                     <div className="flex gap-2">
@@ -580,13 +583,13 @@ export function SettingsPage() {
                           if (e.key === "Enter") handleSaveField("linkedin_url", linkedin.trim());
                         }}
                         placeholder="https://linkedin.com/in/username"
-                        className="font-mono text-xs bg-black border-[#292929] text-white rounded-none"
+                        className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="font-mono text-xs uppercase border-[#292929] rounded-none shrink-0"
+                        className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
                         disabled={saveStatus["linkedin_url"] === "saving" || linkedin.trim() === (member?.linkedin_url || "")}
                         onClick={() => handleSaveField("linkedin_url", linkedin.trim())}
                       >
@@ -603,26 +606,26 @@ export function SettingsPage() {
           {activeTab === "account" && (
             <div className="space-y-6">
               {/* Connected Accounts */}
-              <div className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Connected Accounts</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1">
                     Authentication providers linked to your Medi-Caps portal credential.
                   </p>
                 </div>
 
-                <div className="divide-y divide-[#292929]">
+                <div className="divide-y divide-white/5">
                   <div className="py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-neutral-900 border border-[#292929] flex items-center justify-center font-bold text-xs text-white">
+                      <div className="size-8 rounded-lg bg-zinc-950 border border-white/10 flex items-center justify-center font-bold text-xs text-white">
                         G
                       </div>
                       <div>
                         <strong className="font-mono text-xs block text-white">Google Workspace SSO</strong>
-                        <span className="font-mono text-[10px] text-neutral-400">{member?.email}</span>
+                        <span className="font-mono text-[10px] text-zinc-400">{member?.email}</span>
                       </div>
                     </div>
-                    <Badge variant="outline" className="font-mono text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-none">
+                    <Badge variant="outline" className="font-mono text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-md">
                       CONNECTED
                     </Badge>
                   </div>
@@ -630,19 +633,19 @@ export function SettingsPage() {
               </div>
 
               {/* Notification Preferences */}
-              <div className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Notification Preferences</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1">
                     Control institutional advisories delivered to your registered mailbox.
                   </p>
                 </div>
 
-                <div className="divide-y divide-[#292929]">
+                <div className="divide-y divide-white/5">
                   <div className="py-3 flex items-center justify-between gap-4">
                     <div>
                       <strong className="font-mono text-xs block text-white">Contest Announcements</strong>
-                      <span className="text-[10px] text-neutral-400 block mt-0.5">
+                      <span className="text-[10px] text-zinc-400 block mt-0.5">
                         Receive reminder alerts before scheduled proctored campus battles.
                       </span>
                     </div>
@@ -658,7 +661,7 @@ export function SettingsPage() {
                   <div className="py-3 flex items-center justify-between gap-4">
                     <div>
                       <strong className="font-mono text-xs block text-white">Rating & Standings Updates</strong>
-                      <span className="text-[10px] text-neutral-400 block mt-0.5">
+                      <span className="text-[10px] text-zinc-400 block mt-0.5">
                         Notifications when post-contest rating shifts and badges are computed.
                       </span>
                     </div>
@@ -674,26 +677,26 @@ export function SettingsPage() {
               </div>
 
               {/* Active Session */}
-              <div className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Active Session & Security</h3>
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1">
                     Current terminal device authorization and cryptographic token parameters.
                   </p>
                 </div>
 
-                <div className="flex items-start justify-between gap-4 p-4 bg-black border border-[#292929]">
+                <div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-zinc-950 border border-white/10">
                   <div className="flex items-start gap-3">
-                    <Laptop className="w-5 h-5 text-[var(--accent)] mt-0.5" />
+                    <Laptop className="size-5 text-orange-400 mt-0.5" />
                     <div>
                       <strong className="font-mono text-xs block text-white">
                         {typeof window !== "undefined" ? window.navigator.platform || "Workstation Session" : "Workstation Session"}
                       </strong>
-                      <p className="font-mono text-[10px] text-neutral-400 mt-0.5">
+                      <p className="font-mono text-[10px] text-zinc-400 mt-0.5">
                         Stateless HMAC-SHA256 JWT · Stored in Local Session Storage
                       </p>
                       <span className="inline-flex items-center gap-1.5 mt-2 font-mono text-[10px] text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         ACTIVE NOW
                       </span>
                     </div>
@@ -702,7 +705,7 @@ export function SettingsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="font-mono text-xs uppercase border-[#292929] rounded-none text-neutral-400 hover:text-white"
+                    className="font-mono text-xs uppercase border-white/10 rounded-xl text-zinc-300 hover:text-white"
                     onClick={() => logout()}
                   >
                     <LogOut size={13} className="mr-1.5" /> Log Out
@@ -714,9 +717,9 @@ export function SettingsPage() {
 
           {/* TAB 3: DANGER ZONE */}
           {activeTab === "danger" && (
-            <div className="border border-rose-500/40 bg-rose-950/10 p-6 space-y-4">
+            <div className="rounded-2xl border border-rose-500/40 bg-rose-950/10 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                <AlertTriangle className="size-5 text-rose-500 shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-rose-300">
                     Permanent Account Purge
@@ -740,23 +743,23 @@ export function SettingsPage() {
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="destructive"
-                      className="font-mono text-xs uppercase tracking-wider rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold"
+                      className="font-mono text-xs uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-lg shadow-rose-950/50"
                     >
                       <Trash2 size={14} className="mr-1.5" /> Delete Account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="border-rose-500/50 bg-neutral-950 text-white rounded-none">
+                  <AlertDialogContent className="border-rose-500/50 bg-zinc-950 text-white rounded-2xl">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="font-mono uppercase text-rose-400 flex items-center gap-2">
-                        <ShieldAlert className="w-5 h-5 text-rose-500" />
+                        <ShieldAlert className="size-5 text-rose-500" />
                         Confirm Account Deletion
                       </AlertDialogTitle>
-                      <AlertDialogDescription className="text-xs text-neutral-400 leading-relaxed space-y-2">
+                      <AlertDialogDescription className="text-xs text-zinc-400 leading-relaxed space-y-2">
                         <p>
                           This will permanently delete <strong className="text-white">@{member?.handle}</strong> and all associated records.
                         </p>
                         <p>
-                          To confirm, please type your handle <code className="text-[var(--accent)] bg-black px-1 py-0.5 border border-neutral-800">{member?.handle}</code> below:
+                          To confirm, please type your handle <code className="text-orange-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-white/10">{member?.handle}</code> below:
                         </p>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -766,23 +769,23 @@ export function SettingsPage() {
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
                         placeholder={member?.handle || "handle"}
-                        className="font-mono text-sm bg-black border-rose-500/40 text-white rounded-none focus-visible:ring-rose-500"
+                        className="font-mono text-sm bg-zinc-900 border-rose-500/40 text-white rounded-xl focus-visible:ring-rose-500"
                       />
                     </div>
 
                     <AlertDialogFooter>
                       <AlertDialogCancel
                         onClick={() => setDeleteConfirmText("")}
-                        className="font-mono text-xs uppercase rounded-none border-[#292929]"
+                        className="font-mono text-xs uppercase rounded-xl border-white/10"
                       >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
                         disabled={deleteConfirmText.trim().toLowerCase() !== member?.handle?.toLowerCase() || isDeleting}
                         onClick={handleDeleteAccount}
-                        className="font-mono text-xs uppercase rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold disabled:opacity-50"
+                        className="font-mono text-xs uppercase rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold disabled:opacity-50"
                       >
-                        {isDeleting ? <Loader2 className="animate-spin w-4 h-4" /> : "Permanently Delete"}
+                        {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently Delete"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

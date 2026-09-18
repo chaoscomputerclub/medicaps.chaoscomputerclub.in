@@ -35,12 +35,12 @@ export function ProblemDetailPage() {
 
   if (!data) {
     return (
-      <div className="page-wrap p-6 max-w-4xl mx-auto py-16 space-y-4">
-        <Link to="/portal/problems" className="inline-flex items-center gap-2 text-xs font-mono text-neutral-400 hover:text-white">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to problem archive
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 space-y-4">
+        <Link to="/portal/problems" className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-white transition-colors">
+          <ArrowLeft className="size-3.5" /> Back to problem archive
         </Link>
         <h1 className="text-2xl font-mono font-bold text-white uppercase">Archived problem not found</h1>
-        <p className="text-neutral-400 text-sm">
+        <p className="text-zinc-400 text-sm">
           The requested problem is either unreleased, ongoing, or invalid.
         </p>
       </div>
@@ -50,69 +50,69 @@ export function ProblemDetailPage() {
   const { contest, problem } = data;
 
   return (
-    <div className="page-wrap p-6 max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <Link
         to="/portal/problems"
-        className="inline-flex items-center gap-2 text-xs font-mono text-neutral-400 hover:text-[var(--accent)] transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-orange-400 transition-colors"
       >
-        <ArrowLeft className="w-3.5 h-3.5" /> Problem archive
+        <ArrowLeft className="size-3.5" /> Problem archive
       </Link>
 
-      <header className="border-b border-[#292929] pb-6 flex items-start gap-5">
-        <span className="font-mono text-3xl font-black text-[var(--accent)] border border-[var(--accent)] px-3 py-1 bg-[var(--accent)]/10">
+      <header className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-start gap-5">
+        <span className="font-mono text-3xl font-black text-orange-400 border border-orange-500/40 rounded-xl px-4 py-2 bg-orange-500/10 shrink-0">
           {problem.index}
         </span>
-        <div>
-          <p className="font-mono text-xs uppercase tracking-wider text-neutral-400">
-            {contest.title} · {problem.points} points
+        <div className="min-w-0">
+          <p className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+            {contest.title} · <span className="text-white font-bold">{problem.points} points</span>
           </p>
           <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white uppercase mt-1">
             {problem.title}
           </h1>
-          <p className="text-xs text-neutral-400 mt-1">
-            {problem.topic} · {problem.solved_count} verified solves
+          <p className="font-mono text-xs text-zinc-400 mt-1">
+            {problem.topic} · <span className="tabular-nums text-white">{problem.solved_count}</span> verified solves
           </p>
         </div>
       </header>
 
-      <div className="flex items-start gap-4 p-4 border border-yellow-500/30 bg-yellow-950/20 text-yellow-300">
-        <Ban className="w-5 h-5 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-300">
+        <Ban className="size-5 shrink-0 mt-0.5" />
         <div>
           <strong className="font-mono text-sm block">No online submission surface</strong>
-          <p className="text-xs text-neutral-300 mt-0.5">
+          <p className="text-xs text-zinc-300 mt-0.5">
             This statement is preserved for study. Official attempts were accepted only from assigned campus workstations during the contest window.
           </p>
         </div>
       </div>
 
-      <article className="border border-[#292929] bg-[#0d0d0d] p-6 space-y-6">
+      <article className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
         <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-[var(--accent)] font-semibold mb-1">
-            Official editorial
-          </p>
+          <span className="inline-block rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-widest text-orange-400 mb-2">
+            Official Editorial
+          </span>
           <h2 className="text-xl font-mono font-bold text-white uppercase">
-            Post-contest analysis
+            Post-Contest Analysis
           </h2>
         </div>
 
-        <p className="text-neutral-300 text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">
           {problem.editorial}
         </p>
 
         <div className="space-y-2">
           <h3 className="text-sm font-mono font-bold text-white uppercase tracking-wider">
-            Core observation
+            Core Observation
           </h3>
-          <p className="text-xs text-neutral-400 leading-relaxed">
+          <p className="text-xs text-zinc-400 leading-relaxed">
             Model the invariant before choosing a data structure. The intended solution maintains a monotonic decision boundary and proves every discarded state cannot improve the final answer.
           </p>
-          <pre className="p-3 bg-black border border-[#292929] font-mono text-xs text-[var(--accent)]">
+          <pre className="rounded-xl p-4 bg-zinc-950 border border-white/10 font-mono text-xs text-orange-400 overflow-x-auto">
             <code>{`complexity: O(n log n)\nspace: O(n)\nverdict source: sealed judge replay`}</code>
           </pre>
         </div>
 
-        <div className="pt-4 border-t border-[#292929] flex items-center gap-2 text-xs text-neutral-400">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-zinc-400">
+          <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
           <span>The solve count and first-accept timing were reconciled against workstation logs before publication.</span>
         </div>
       </article>

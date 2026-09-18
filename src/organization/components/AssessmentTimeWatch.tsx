@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from "react";
 import { Clock, Lock, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AssessmentTimeWatchProps {
   startsAt: string;
@@ -115,77 +116,85 @@ export function AssessmentTimeWatch({
   }).format(new Date(unlockMs));
 
   return (
-    <div className={`time-watch-card ${className}`}>
-      <div className="time-watch-top">
-        <div className="time-watch-kicker">
-          <Clock className="w-3.5 h-3.5 text-[var(--accent)]" />
+    <div className={cn("rounded-2xl border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md shadow-xl space-y-4", className)}>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase font-bold tracking-widest text-orange-400">
+          <Clock className="w-3.5 h-3.5 text-orange-400" />
           <span>PHASE 1 SCREENING CLOCK</span>
         </div>
-        <span className={`time-watch-pill ${badgeClass}`}>
-          <i className="pill-dot" />
+        <span
+          className={cn(
+            "rounded-md border px-2.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider inline-flex items-center gap-1.5",
+            isLocked && "border-amber-500/30 bg-amber-950/30 text-amber-400",
+            isUnlocked && !isLive && "border-emerald-500/30 bg-emerald-950/30 text-emerald-400",
+            isLive && "border-orange-500/40 bg-orange-500/10 text-orange-400 animate-pulse",
+            isConcluded && "border-white/10 bg-zinc-800/60 text-zinc-400",
+          )}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-current" />
           {statusBadge}
         </span>
       </div>
 
-      <div className="time-watch-digits">
-        <div className="time-digit-unit">
-          <span className="digit-val">{remaining.days}</span>
-          <span className="digit-sub">DAYS</span>
+      <div className="flex items-center justify-between gap-1 sm:gap-2 rounded-xl border border-white/10 bg-zinc-950/60 p-4 font-mono shadow-inner">
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-2xl sm:text-3xl font-black tabular-nums text-white tracking-tight">{remaining.days}</span>
+          <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">DAYS</span>
         </div>
-        <span className="digit-colon">:</span>
-        <div className="time-digit-unit">
-          <span className="digit-val">{remaining.hours}</span>
-          <span className="digit-sub">HOURS</span>
+        <span className="text-xl font-bold text-zinc-600 self-center -mt-3">:</span>
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-2xl sm:text-3xl font-black tabular-nums text-white tracking-tight">{remaining.hours}</span>
+          <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">HOURS</span>
         </div>
-        <span className="digit-colon">:</span>
-        <div className="time-digit-unit">
-          <span className="digit-val">{remaining.minutes}</span>
-          <span className="digit-sub">MINS</span>
+        <span className="text-xl font-bold text-zinc-600 self-center -mt-3">:</span>
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-2xl sm:text-3xl font-black tabular-nums text-white tracking-tight">{remaining.minutes}</span>
+          <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">MINS</span>
         </div>
-        <span className="digit-colon">:</span>
-        <div className="time-digit-unit digit-seconds">
-          <span className="digit-val">{remaining.seconds}</span>
-          <span className="digit-sub">SECS</span>
+        <span className="text-xl font-bold text-zinc-600 self-center -mt-3">:</span>
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-2xl sm:text-3xl font-black tabular-nums text-orange-400 tracking-tight">{remaining.seconds}</span>
+          <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">SECS</span>
         </div>
       </div>
 
-      <div className="time-watch-info">
-        <div className="info-row">
+      <div className="space-y-1.5 pt-2 border-t border-white/10 font-mono text-xs text-zinc-400">
+        <div className="flex justify-between items-center">
           <span>Target:</span>
-          <strong>{targetLabel}</strong>
+          <strong className="text-white">{targetLabel}</strong>
         </div>
-        <div className="info-row">
+        <div className="flex justify-between items-center">
           <span>Live Start:</span>
-          <strong>{formattedStart} IST</strong>
+          <strong className="text-white">{formattedStart} IST</strong>
         </div>
-        <div className="info-row">
+        <div className="flex justify-between items-center">
           <span>Assessment Unlocks:</span>
-          <strong>{formattedUnlock} IST</strong>
+          <strong className="text-white">{formattedUnlock} IST</strong>
         </div>
       </div>
 
-      <div className="time-watch-notice">
+      <div className="pt-1">
         {isLocked && (
-          <p className="notice-locked">
-            <Lock className="w-3.5 h-3.5 inline mr-1 text-[var(--warning)]" />
+          <p className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-mono text-amber-300 leading-relaxed">
+            <Lock className="w-3.5 h-3.5 inline mr-1.5 text-amber-400" />
             Assessment unlocks <strong>strictly 24 hours</strong> before live contest. Questions remain sealed.
           </p>
         )}
         {isUnlocked && !isLive && (
-          <p className="notice-unlocked">
-            <CheckCircle2 className="w-3.5 h-3.5 inline mr-1 text-[var(--accent)]" />
+          <p className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs font-mono text-emerald-300 leading-relaxed">
+            <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5 text-emerald-400" />
             Assessment option is <strong>unlocked</strong> for registered cadets!
           </p>
         )}
         {isLive && (
-          <p className="notice-live">
-            <Sparkles className="w-3.5 h-3.5 inline mr-1 text-[var(--accent)]" />
+          <p className="rounded-xl border border-orange-500/30 bg-orange-950/20 p-3 text-xs font-mono text-orange-300 leading-relaxed">
+            <Sparkles className="w-3.5 h-3.5 inline mr-1.5 text-orange-400" />
             Contest screening is <strong>live</strong>. All submissions actively scored.
           </p>
         )}
         {isConcluded && (
-          <p className="notice-concluded">
-            <AlertCircle className="w-3.5 h-3.5 inline mr-1 text-[var(--muted)]" />
+          <p className="rounded-xl border border-white/10 bg-zinc-800/40 p-3 text-xs font-mono text-zinc-400 leading-relaxed">
+            <AlertCircle className="w-3.5 h-3.5 inline mr-1.5 text-zinc-400" />
             Assessment window has ended.
           </p>
         )}

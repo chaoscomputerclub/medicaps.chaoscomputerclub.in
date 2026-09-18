@@ -46,59 +46,59 @@ export function MyContestsPage() {
   });
 
   return (
-    <div className="page-wrap p-6 max-w-7xl mx-auto space-y-6">
+    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
       {/* Header with quick stats */}
-      <header className="flex flex-col justify-between gap-5 border-b border-border pb-6 md:flex-row md:items-end">
+      <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end">
         <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-[var(--accent)] font-semibold mb-1">Your competition record</p>
-          <h1 className="text-3xl sm:text-4xl font-mono font-bold text-white uppercase tracking-tight">My contests</h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="font-mono text-xs uppercase tracking-widest text-orange-400 font-bold mb-1">Your competition record</p>
+          <h1 className="text-3xl sm:text-4xl font-mono font-black text-white uppercase tracking-tight">My contests</h1>
+          <p className="text-sm text-zinc-400 mt-1">
             Everything you entered, qualified for, or completed — in one place.
           </p>
         </div>
 
-        <div className="flex gap-3 sm:gap-6 items-center flex-wrap">
-          <div className="flex flex-col border-l-2 border-[var(--accent)] pl-3">
-            <strong className="font-mono text-xl font-bold text-white">{data.length}</strong>
-            <span className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">TOTAL ENTERED</span>
+        <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
+          <div className="flex flex-col border-l-2 border-orange-500 pl-3">
+            <strong className="font-mono tabular-nums text-2xl font-bold text-white">{data.length}</strong>
+            <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOTAL ENTERED</span>
           </div>
-          <div className="flex flex-col border-l-2 border-yellow-500 pl-3">
-            <strong className="font-mono text-xl font-bold text-white">{registeredCount}</strong>
-            <span className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">ACTIVE STANDBY</span>
+          <div className="flex flex-col border-l-2 border-amber-500 pl-3">
+            <strong className="font-mono tabular-nums text-2xl font-bold text-white">{registeredCount}</strong>
+            <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">ACTIVE STANDBY</span>
           </div>
           <div className="flex flex-col border-l-2 border-emerald-500 pl-3">
-            <strong className="font-mono text-xl font-bold text-white">{qualifiedCount}</strong>
-            <span className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">TOP 30 QUALIFIED</span>
+            <strong className="font-mono tabular-nums text-2xl font-bold text-white">{qualifiedCount}</strong>
+            <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOP 30 QUALIFIED</span>
           </div>
         </div>
       </header>
 
       {/* Segmented Filter Controls using shadcn Tabs */}
       <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-6">
-        <TabsList className="h-auto flex-wrap rounded-none border border-[#292929] bg-[#0d0d0d] p-1">
-          <TabsTrigger value="all" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-neutral-400 rounded-none">
-            All ({data.length})
+        <TabsList className="h-auto flex-wrap gap-1 rounded-xl border border-white/10 bg-zinc-900/60 p-1.5 backdrop-blur-md">
+          <TabsTrigger value="all" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+            All (<span className="tabular-nums">{data.length}</span>)
           </TabsTrigger>
-          <TabsTrigger value="registered" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-neutral-400 rounded-none">
-            Registered ({registeredCount})
+          <TabsTrigger value="registered" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+            Registered (<span className="tabular-nums">{registeredCount}</span>)
           </TabsTrigger>
-          <TabsTrigger value="live" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-neutral-400 rounded-none">
-            Live Screening ({liveCount})
+          <TabsTrigger value="live" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+            Live Screening (<span className="tabular-nums">{liveCount}</span>)
           </TabsTrigger>
-          <TabsTrigger value="completed" className="font-mono text-xs uppercase font-bold data-[state=active]:bg-[var(--accent)] data-[state=active]:text-black text-neutral-400 rounded-none">
-            Completed ({completedCount})
+          <TabsTrigger value="completed" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+            Completed (<span className="tabular-nums">{completedCount}</span>)
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="overflow-hidden rounded-none border border-[#292929] bg-[#0d0d0d]">
-        <div className="flex items-center justify-between border-b border-[#292929] bg-neutral-900/50 p-4 sm:p-6">
+      <section className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
+        <div className="flex items-center justify-between border-b border-white/10 bg-zinc-950/40 p-4 sm:p-6">
           <SectionHeader
             kicker="Contest Ledger"
             title={`Showing ${filteredContests.length} ${filter === "all" ? "participations" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild className="font-mono text-xs text-white border-[#292929] hover:border-[var(--accent)] rounded-none">
+          <Button variant="outline" size="sm" asChild className="rounded-xl font-mono text-xs text-zinc-300 border-white/10 bg-zinc-900/60 hover:border-white/20 hover:text-white active:scale-[0.98]">
             <Link to="/portal/contests">
               Browse All Contests
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -108,21 +108,21 @@ export function MyContestsPage() {
 
         {filteredContests.length === 0 ? (
           <div className="py-16 px-6 text-center">
-            <Trophy className="w-10 h-10 text-neutral-600 mx-auto mb-3 opacity-60" />
+            <Trophy className="w-10 h-10 text-zinc-600 mx-auto mb-3 opacity-60" />
             <h3 className="font-mono text-base font-bold text-white uppercase tracking-wider">
               No contests found in this view
             </h3>
-            <p className="text-sm text-neutral-400 max-w-md mx-auto mt-1 mb-6">
+            <p className="text-sm text-zinc-400 max-w-md mx-auto mt-1 mb-6">
               {filter === "registered"
                 ? "You haven't registered for upcoming contests yet. Explore the contest calendar and claim your workstation seat."
                 : "Enter two-round campus contests to build your verified competitive record."}
             </p>
-            <Button asChild className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-bold text-xs font-mono uppercase tracking-wider rounded-none">
+            <Button asChild className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]">
               <Link to="/portal/contests">Explore Active Contests</Link>
             </Button>
           </div>
         ) : (
-          <div className="divide-y divide-[#292929]">
+          <div className="divide-y divide-white/5">
             {filteredContests.map((c) => {
               const isUpcoming = c.status === "upcoming" || c.outcome === "registered";
               const isLive = c.status === "live" || c.outcome === "live";
@@ -132,29 +132,29 @@ export function MyContestsPage() {
               return (
                 <article
                   key={c.contest_slug}
-                  className="flex flex-col justify-between gap-5 p-5 transition-colors hover:bg-neutral-900/40 sm:p-6 lg:flex-row lg:items-center"
+                  className="flex flex-col justify-between gap-5 p-5 transition-colors hover:bg-white/[0.02] sm:p-6 lg:flex-row lg:items-center"
                 >
                   {/* Left: Status Icon & Details */}
                   <div className="flex items-start gap-4">
                     <div className="shrink-0 mt-1">
                       {isQualified ? (
-                        <div className="w-10 h-10 rounded-none bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shadow-sm">
                           <CheckCircle2 size={20} />
                         </div>
                       ) : isLive ? (
-                        <div className="w-10 h-10 rounded-none bg-amber-950/80 border border-amber-500/50 flex items-center justify-center text-amber-400">
+                        <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-sm">
                           <Radio size={20} className="animate-pulse" />
                         </div>
                       ) : isUpcoming ? (
-                        <div className="w-10 h-10 rounded-none bg-yellow-950/40 border border-yellow-500/40 flex items-center justify-center text-yellow-400">
+                        <div className="w-10 h-10 rounded-xl bg-amber-950/30 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm">
                           <Clock3 size={20} />
                         </div>
                       ) : isPending ? (
-                        <div className="w-10 h-10 rounded-none bg-blue-950/50 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                        <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-sm">
                           <Clock3 size={20} />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-none bg-neutral-900 border border-[#292929] flex items-center justify-center text-neutral-400">
+                        <div className="w-10 h-10 rounded-xl bg-zinc-800/60 border border-white/10 flex items-center justify-center text-zinc-400 shadow-sm">
                           <MinusCircle size={20} />
                         </div>
                       )}
@@ -162,35 +162,35 @@ export function MyContestsPage() {
 
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 bg-neutral-800 text-neutral-300 border border-neutral-700">{c.season}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-white/10">{c.season}</span>
                         {isQualified && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-emerald-400 bg-emerald-950/80 px-2 py-0.5 border border-emerald-500/40">
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-500/40">
                             <ShieldCheck size={11} />
                             Top 30 Qualified
                           </span>
                         )}
                         {isUpcoming && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-yellow-400 bg-yellow-950/50 px-2 py-0.5 border border-yellow-500/40">
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-500/40">
                             Registered · Seat Confirmed
                           </span>
                         )}
                         {isLive && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/60 px-2 py-0.5 border border-amber-500/50">
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-500/50">
                             <i className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-ping" />
                             Screening Active
                           </span>
                         )}
                       </div>
 
-                      <h2 className="text-base sm:text-lg font-bold text-white hover:text-[var(--accent)] transition-colors">
+                      <h2 className="text-base sm:text-lg font-bold text-white hover:text-orange-400 transition-colors">
                         <Link to={`/portal/contests/${c.contest_slug}`}>
                           {c.contest_title}
                         </Link>
                       </h2>
 
-                      <div className="flex items-center gap-4 text-xs text-neutral-400 flex-wrap">
+                      <div className="flex items-center gap-4 text-xs text-zinc-400 flex-wrap font-mono">
                         <span className="inline-flex items-center gap-1.5">
-                          <CalendarDays size={13} />
+                          <CalendarDays size={13} className="text-zinc-500" />
                           {c.starts_at
                             ? new Date(c.starts_at).toLocaleDateString("en-IN", {
                                 day: "2-digit",
@@ -208,33 +208,33 @@ export function MyContestsPage() {
 
                         {c.venue && (
                           <span className="inline-flex items-center gap-1.5">
-                            <MapPin size={13} />
+                            <MapPin size={13} className="text-zinc-500" />
                             {c.venue}
                           </span>
                         )}
 
                         <span className="inline-flex items-center gap-1.5">
-                          <Users size={13} />
-                          {c.participants} competitors
+                          <Users size={13} className="text-zinc-500" />
+                          <span className="tabular-nums text-white font-bold">{c.participants}</span> competitors
                         </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Right: Score Metrics & Action Buttons */}
-                  <div className="flex items-center gap-4 sm:gap-6 justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-[#292929]">
-                    <dl className="flex items-center gap-4 sm:gap-6 text-right">
+                  <div className="flex items-center gap-4 sm:gap-6 justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-white/10">
+                    <dl className="flex items-center gap-4 sm:gap-6 text-right font-mono">
                       {c.rank !== null ? (
                         <div>
-                          <dt className="font-mono text-[10px] text-neutral-400 uppercase">Rank</dt>
-                          <dd className="font-mono text-sm sm:text-base font-extrabold text-white">
+                          <dt className="text-[10px] text-zinc-400 uppercase">Rank</dt>
+                          <dd className="text-sm sm:text-base font-extrabold text-white tabular-nums">
                             #{c.rank}
                           </dd>
                         </div>
                       ) : isUpcoming ? (
                         <div>
-                          <dt className="font-mono text-[10px] text-neutral-400 uppercase">Status</dt>
-                          <dd className="font-mono text-xs font-bold text-[var(--accent)]">
+                          <dt className="text-[10px] text-zinc-400 uppercase">Status</dt>
+                          <dd className="text-xs font-bold text-orange-400">
                             Standby
                           </dd>
                         </div>
@@ -242,15 +242,15 @@ export function MyContestsPage() {
 
                       {c.score !== null ? (
                         <div>
-                          <dt className="font-mono text-[10px] text-neutral-400 uppercase">Score</dt>
-                          <dd className="font-mono text-sm sm:text-base font-extrabold text-[var(--accent)]">
+                          <dt className="text-[10px] text-zinc-400 uppercase">Score</dt>
+                          <dd className="text-sm sm:text-base font-extrabold text-orange-400 tabular-nums">
                             {c.score}/100
                           </dd>
                         </div>
                       ) : isUpcoming ? (
                         <div>
-                          <dt className="font-mono text-[10px] text-neutral-400 uppercase">Workstation</dt>
-                          <dd className="font-mono text-xs font-semibold text-white">
+                          <dt className="text-[10px] text-zinc-400 uppercase">Workstation</dt>
+                          <dd className="text-xs font-semibold text-white">
                             Allocated
                           </dd>
                         </div>
@@ -261,10 +261,10 @@ export function MyContestsPage() {
                       {isLive && !c.assessment_submitted && c.score === null ? (
                         <Button
                           asChild
-                          className="bg-[var(--accent)] text-black hover:brightness-110 hover:text-black font-mono text-xs font-bold uppercase tracking-wider rounded-none"
+                          className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]"
                         >
                           <Link to={`/assessments/${c.contest_slug}`}>
-                            <Play className="w-3.5 h-3.5 mr-1" />
+                            <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
                             Assessment
                           </Link>
                         </Button>
@@ -272,22 +272,22 @@ export function MyContestsPage() {
                         <Button
                           variant="outline"
                           asChild
-                          className="border-[#292929] text-white hover:border-[var(--accent)] font-mono text-xs font-semibold uppercase rounded-none"
+                          className="rounded-xl border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}`}>
                             View Brief
-                            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                           </Link>
                         </Button>
                       ) : (
                         <Button
                           variant="outline"
                           asChild
-                          className="border-[#292929] text-white hover:border-[var(--accent)] font-mono text-xs font-semibold uppercase rounded-none"
+                          className="rounded-xl border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}/results`}>
                             Scoreboard
-                            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                           </Link>
                         </Button>
                       )}

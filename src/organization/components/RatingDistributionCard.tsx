@@ -70,10 +70,10 @@ export function RatingDistributionCard({
   const MAX_BAR_PX = 72;
 
   return (
-    <div className="panel flex flex-col justify-between h-full bg-[var(--surface)] border border-[var(--line)] p-6">
+    <div className="flex flex-col justify-between h-full rounded-2xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
       {/* Top Percentile Display */}
       <div>
-        <span className="text-xs font-medium text-[var(--muted)] font-sans tracking-wide block">
+        <span className="text-xs font-medium text-zinc-400 font-sans tracking-wide block">
           {hasAttended ? "Percentile" : "Standing"}
         </span>
         <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-0.5 font-sans">
@@ -85,7 +85,7 @@ export function RatingDistributionCard({
       <div className="my-6 relative">
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <span className="text-[10px] font-mono text-[var(--muted)] tracking-widest opacity-70">
+            <span className="text-[10px] font-mono text-zinc-500 tracking-widest opacity-80">
               NO CONTEST DATA YET
             </span>
           </div>
@@ -113,8 +113,8 @@ export function RatingDistributionCard({
               >
                 {/* Tooltip */}
                 {isHovered && !isEmpty && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-zinc-700 text-[10px] font-mono text-zinc-200 rounded whitespace-nowrap z-20 pointer-events-none shadow-lg">
-                    {bucket.min}–{bucket.min + 50}: {count}
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-white/10 text-[10px] font-mono text-zinc-200 rounded-md whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                    {bucket.min}–{bucket.min + 50}: <span className="tabular-nums font-bold">{count}</span>
                   </div>
                 )}
                 {/* Bar */}
@@ -123,14 +123,14 @@ export function RatingDistributionCard({
                   className={cn(
                     "w-full rounded-t-[2px] transition-all duration-150",
                     isEmpty
-                      ? "bg-[#222222] opacity-40"
+                      ? "bg-zinc-800 opacity-40"
                       : isUserBucket
-                      ? "bg-[var(--accent)] shadow-md shadow-[var(--accent)]/40 brightness-110"
+                      ? "bg-orange-500 shadow-md shadow-orange-500/40 brightness-110"
                       : isHovered
-                      ? "bg-zinc-500"
+                      ? "bg-zinc-400"
                       : count === 0
-                      ? "bg-[#1e1e1e]"
-                      : "bg-[#333333]"
+                      ? "bg-zinc-800/40"
+                      : "bg-zinc-700/60"
                   )}
                 />
               </div>
@@ -140,28 +140,28 @@ export function RatingDistributionCard({
       </div>
 
       {/* Stats Summary Footer */}
-      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[var(--line)] text-left">
+      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/10 text-left">
         <div>
-          <span className="text-[10px] font-mono text-[var(--muted)] uppercase block">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase block">
             Contest Rating
           </span>
-          <strong className="text-sm font-mono font-bold text-white block mt-0.5">
+          <strong className="text-sm font-mono font-bold text-orange-400 block mt-0.5 tabular-nums">
             {(userRating ?? member?.rating)?.toLocaleString() ?? 1200}
           </strong>
         </div>
         <div>
-          <span className="text-[10px] font-mono text-[var(--muted)] uppercase block">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase block">
             Global Rank
           </span>
-          <strong className="text-sm font-mono font-bold text-white block mt-0.5">
+          <strong className="text-sm font-mono font-bold text-white block mt-0.5 tabular-nums">
             {rankDisplay}
           </strong>
         </div>
         <div>
-          <span className="text-[10px] font-mono text-[var(--muted)] uppercase block">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase block">
             Attended
           </span>
-          <strong className="text-sm font-mono font-bold text-white block mt-0.5">
+          <strong className="text-sm font-mono font-bold text-white block mt-0.5 tabular-nums">
             {attendanceCount}
           </strong>
         </div>

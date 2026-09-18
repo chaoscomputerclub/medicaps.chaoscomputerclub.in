@@ -42,28 +42,28 @@ export function OtpStep({
       <div className="space-y-2">
         <Label
           htmlFor="otp"
-          className="font-mono text-[0.5625rem] tracking-[0.16em] text-subtle-foreground uppercase"
+          className="font-mono text-[0.6875rem] tracking-wider text-zinc-400 uppercase"
         >
-          Code sent to {email}
+          Code sent to <span className="text-white font-medium">{email}</span>
         </Label>
         <InputOTP id="otp" maxLength={6} value={code} onChange={setCode} autoFocus>
-          <InputOTPGroup>
+          <InputOTPGroup className="gap-2 sm:gap-2.5">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <InputOTPSlot
                 key={i}
                 index={i}
-                className="size-11 rounded-none border-border bg-background font-mono text-base tabular-nums"
+                className="size-11 rounded-xl border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white"
               />
             ))}
           </InputOTPGroup>
         </InputOTP>
-        <p className="font-mono text-[0.625rem] tabular-nums text-subtle-foreground">
+        <p className="font-mono text-xs tabular-nums text-zinc-500">
           Six digits · expires in 10 minutes
         </p>
       </div>
 
       {error ? (
-        <p role="alert" className="text-[0.8125rem] text-destructive">
+        <p role="alert" className="text-xs text-rose-400 font-mono">
           {error}
         </p>
       ) : null}
@@ -71,7 +71,7 @@ export function OtpStep({
       <Button
         type="submit"
         disabled={pending || code.length < 6}
-        className="w-full rounded-none bg-accent font-mono text-[0.625rem] tracking-[0.16em] text-black font-bold uppercase hover:bg-accent/90"
+        className="w-full rounded-xl bg-orange-500 font-mono text-xs tracking-wider text-black font-bold uppercase hover:bg-orange-400 h-11 transition-colors cursor-pointer disabled:opacity-50"
       >
         {pending ? "Checking…" : submitLabel}
       </Button>
@@ -80,14 +80,14 @@ export function OtpStep({
         <button
           type="button"
           onClick={onResend}
-          className="font-mono text-[0.625rem] tracking-[0.16em] text-muted-foreground uppercase underline-offset-4 transition-colors duration-150 hover:text-accent hover:underline"
+          className="font-mono text-xs tracking-wider text-zinc-400 uppercase underline-offset-4 transition-colors duration-150 hover:text-orange-400 hover:underline cursor-pointer"
         >
           Resend code
         </button>
         <button
           type="button"
           onClick={onChangeEmail}
-          className="font-mono text-[0.625rem] tracking-[0.16em] text-muted-foreground uppercase underline-offset-4 transition-colors duration-150 hover:text-accent hover:underline"
+          className="font-mono text-xs tracking-wider text-zinc-400 uppercase underline-offset-4 transition-colors duration-150 hover:text-orange-400 hover:underline cursor-pointer"
         >
           Use another email
         </button>

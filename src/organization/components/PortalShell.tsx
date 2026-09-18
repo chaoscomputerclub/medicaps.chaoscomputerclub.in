@@ -4,14 +4,11 @@ import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Archive,
-  History,
-  Award,
   ChevronRight,
   LayoutDashboard,
   LogOut,
   Menu,
   Settings,
-  ShieldCheck,
   Trophy,
   UserRound,
   X,
@@ -27,14 +24,14 @@ import { getToken, decodeJwtPayload } from "@/lib/auth";
 const links = [
   { to: "/portal", label: "Operations", icon: LayoutDashboard, exact: true },
   { to: "/portal/contests", label: "Contests", icon: Trophy, exact: false },
-  { to: "/portal/leaderboard", label: "Leaderboard", icon: Award, exact: true },
+  { to: "/portal/leaderboard", label: "Leaderboard", icon: Trophy, exact: true },
   { to: "/portal/problems", label: "Archive", icon: Archive, exact: false },
   { to: "/portal/profile", label: "Profile", icon: UserRound, exact: true },
   { to: "/portal/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
 
 export function PortalShell() {
-  const [hydrated, setHydrated] = useState(false);
+  const [, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -73,39 +70,64 @@ export function PortalShell() {
 
   if (isFullscreenWorkspace) {
     return (
-      <main className="portal-main-assessment">
+      <main className="min-h-screen bg-zinc-950 text-slate-100">
         <Outlet />
       </main>
     );
   }
 
   return (
-    <div className="portal-frame">
-      <header className="mobile-topbar">
-        <Link to="/portal" className="brand-lockup">
-          <img src="/logo.png" alt="Chaos Computer Club Medi-Caps" />
-          <span>CCC / MCU</span>
+    <div className="min-h-screen bg-zinc-950 text-slate-100 flex flex-col md:flex-row antialiased selection:bg-orange-500 selection:text-white">
+      {/* Mobile Topbar */}
+      <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-40">
+        <Link to="/portal" className="flex items-center gap-2.5">
+          <img src="/logo.png" alt="CCC Logo" className="w-7 h-7 object-contain" />
+          <span className="font-mono font-bold text-xs tracking-wider text-white">CCC / MCU</span>
         </Link>
         <Button
           variant="ghost"
           size="icon"
+          className="text-slate-300 hover:text-white hover:bg-zinc-800"
           onClick={() => dispatch(toggleSidebar())}
           aria-label="Toggle navigation"
         >
-          {open ? <X /> : <Menu />}
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
       </header>
 
-      <aside className={open ? "portal-sidebar open" : "portal-sidebar"}>
-        <Link to="/portal" className="brand-lockup" onClick={() => dispatch(setSidebarOpen(false))}>
-          <img src="/logo.png" alt="Chaos Computer Club Medi-Caps" />
-          <div>
-            <strong>CHAOS COMPUTER CLUB</strong>
-            <span>MEDI-CAPS CHAPTER</span>
+      {/* Backdrop overlay for mobile drawer */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden"
+          onClick={() => dispatch(setSidebarOpen(false))}
+        />
+      )}
+
+      {/* Sidebar Navigation */}
+      <aside
+        className={`fixed inset-y-0 left-0 w-64 bg-zinc-950 border-r border-white/10 p-5 flex flex-col z-50 transition-transform duration-200 ease-out md:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Brand Header */}
+        <Link
+          to="/portal"
+          className="flex items-center gap-3 pb-5 mb-3 border-b border-white/10 group"
+          onClick={() => dispatch(setSidebarOpen(false))}
+        >
+          <img
+            src="/logo.png"
+            alt="Chaos Computer Club Medi-Caps"
+            className="w-9 h-9 object-contain group-hover:scale-105 transition-transform duration-150"
+          />
+          <div className="flex flex-col">
+            <strong className="font-mono text-xs font-bold tracking-wider text-white">CHAOS COMPUTER CLUB</strong>
+            <span className="font-mono text-[9px] font-medium text-slate-400 tracking-wider">MEDI-CAPS CHAPTER</span>
           </div>
         </Link>
 
-        <nav aria-label="Portal navigation">
+        {/* Navigation Links */}
+        <nav aria-label="Portal navigation" className="flex flex-col gap-1 my-2">
           {links.map((item) => {
             const active = item.exact
               ? cleanPath === item.to
@@ -114,49 +136,65 @@ export function PortalShell() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={active ? "nav-item active" : "nav-item"}
                 onClick={() => dispatch(setSidebarOpen(false))}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors duration-150 ${
+                  active
+                    ? "bg-orange-500/12 text-orange-400 border border-orange-500/25 font-bold shadow-xs"
+                    : "text-slate-400 hover:text-white hover:bg-zinc-900 border border-transparent font-medium"
+                }`}
               >
-                <item.icon size={17} />
-                <span>{item.label}</span>
-                {active && <ChevronRight size={14} />}
+                <item.icon className="w-4 h-4 shrink-0" />
+                <span className="flex-1">{item.label}</span>
+                {active && <ChevronRight className="w-3.5 h-3.5 text-orange-500" />}
               </Link>
             );
           })}
         </nav>
 
-        <div className="offline-manifest">
-          <span>OFFLINE BY DESIGN</span>
-          <p>No browser submissions. Every result begins at a proctored Medi-Caps workstation.</p>
+        {/* Offline Mission Banner */}
+        <div className="mt-auto mb-4 p-3.5 rounded-lg border border-white/8 bg-zinc-900/50 backdrop-blur-xs">
+          <span className="block font-mono text-[10px] font-bold text-orange-400 tracking-wider uppercase">
+            Offline By Design
+          </span>
+          <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+            No remote submissions. Every official result is verified at a physical Medi-Caps workstation.
+          </p>
         </div>
 
-        <div className="sidebar-user">
-          <Avatar className="w-8 h-8 rounded-[1px] border border-[var(--line)] bg-[var(--accent)] text-[var(--accent-ink)] flex-shrink-0">
-            {member?.avatar_url && (member.avatar_url.startsWith("http") || member.avatar_url.startsWith("/media/")) ? (
-              <AvatarImage src={member.avatar_url || undefined} alt={member.handle || "avatar"} className="object-cover" />
-            ) : null}
-            <AvatarFallback className="rounded-[1px] bg-[var(--accent)] text-[var(--accent-ink)] font-mono font-bold text-xs">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <strong>{displayHandle}</strong>
-            <span>{member ? `${member.rating} · ${member.department ?? "Member"}` : "Verified Member"}</span>
+        {/* User Card */}
+        <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar className="w-8 h-8 rounded-md border border-white/15 bg-zinc-900 text-orange-400 shrink-0">
+              {member?.avatar_url && (member.avatar_url.startsWith("http") || member.avatar_url.startsWith("/media/")) ? (
+                <AvatarImage src={member.avatar_url || undefined} alt={member.handle || "avatar"} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="rounded-md bg-orange-500/10 text-orange-400 font-mono font-bold text-xs">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <strong className="block font-mono text-xs font-semibold text-white truncate">{displayHandle}</strong>
+              <span className="block font-mono text-[10px] text-slate-400 truncate tabular-nums">
+                {member ? `${member.rating} · ${member.department ?? "Member"}` : "Verified Member"}
+              </span>
+            </div>
           </div>
           <button
             type="button"
             onClick={() => dispatch(logout())}
             aria-label="Sign out"
-            style={{ background: "none", border: 0, color: "var(--muted)", cursor: "pointer" }}
+            className="text-slate-400 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
           >
-            <LogOut size={16} />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </aside>
 
-      <main className="portal-main">
+      {/* Main Viewport */}
+      <main className="flex-1 md:ml-64 min-h-screen bg-zinc-950 p-4 md:p-8 relative">
         <Outlet />
       </main>
+
       <SocialDrawer />
       <EditProfileModal />
     </div>

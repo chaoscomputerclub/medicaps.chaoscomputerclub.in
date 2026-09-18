@@ -4,7 +4,6 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft,
   ArrowRight,
-  CalendarDays,
   CheckCircle2,
   Clock,
   Code2,
@@ -12,7 +11,6 @@ import {
   MapPin,
   Play,
   QrCode,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FINALIST_SEATS, formatWhen } from "@/features/contest/lifecycle";
@@ -123,20 +121,20 @@ export function ContestQualifiedPage() {
 
   if (!contest) {
     return (
-      <div className="page-wrap space-y-6">
-        <Link to="/portal/contests" className="back-link">
-          <ArrowLeft /> Back to contests
+      <div className="max-w-2xl mx-auto px-4 py-16 space-y-6">
+        <Link to="/portal/contests" className="inline-flex items-center gap-2 font-mono text-xs text-zinc-400 hover:text-white transition-colors">
+          <ArrowLeft className="size-3.5" /> Back to contests
         </Link>
-        <p className="text-sm text-[var(--muted)]">Contest not found.</p>
+        <p className="text-sm text-zinc-400">Contest not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="page-wrap max-w-2xl space-y-8">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       {/* Back */}
-      <Link to={`/portal/contests/${contestSlug}`} className="back-link">
-        <ArrowLeft /> {contest.title}
+      <Link to={`/portal/contests/${contestSlug}`} className="inline-flex items-center gap-2 font-mono text-xs text-zinc-400 hover:text-white transition-colors">
+        <ArrowLeft className="size-3.5" /> {contest.title}
       </Link>
 
       {/* ─── SCENARIO 1: ASSESSMENT ENDED + QUALIFIED TOP 30 (CAMPUS PASS HERO) ───────────── */}
@@ -144,16 +142,16 @@ export function ContestQualifiedPage() {
         <>
           {/* Status Badge */}
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="size-5 text-[var(--accent)]" />
+            <CheckCircle2 className="size-5 text-emerald-400" />
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--accent)] font-bold">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-orange-400 font-bold">
                 Round 2 · Air-Gapped Lab Final Pass
               </p>
-              <h1 className="text-xl font-black text-foreground">
+              <h1 className="text-xl font-black text-white">
                 {rank ? `Rank #${rank}` : "Verified Top 30"} — Lab Pass Issued
               </h1>
             </div>
-            <span className="ml-auto border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-3 py-1 font-mono text-xs font-black text-[var(--accent)]">
+            <span className="ml-auto rounded-md border border-orange-500/30 bg-orange-500/10 px-3 py-1 font-mono text-xs font-black text-orange-400 tabular-nums">
               {score} pts
             </span>
           </div>
@@ -161,25 +159,25 @@ export function ContestQualifiedPage() {
           {pass ? (
             <div className="space-y-6">
               {/* QR code — full hero card */}
-              <div className="flex flex-col items-center gap-5 border border-[var(--accent)]/30 bg-[var(--surface)] p-8 shadow-2xl relative overflow-hidden">
-                <div className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-[var(--accent)]/10 blur-3xl" />
+              <div className="flex flex-col items-center gap-5 rounded-2xl border border-orange-500/30 bg-zinc-900/60 p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                <div className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-orange-500/10 blur-3xl" />
                 
                 {/* Header chip */}
-                <div className="flex items-center justify-between w-full border-b border-[var(--line)] pb-3">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]">
+                <div className="flex items-center justify-between w-full border-b border-white/10 pb-3">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
                     Official Medi-Caps Gate Pass
                   </span>
-                  <span className={`font-mono text-[10px] uppercase font-bold border px-2 py-0.5 ${
+                  <span className={`font-mono text-[10px] uppercase font-bold rounded border px-2 py-0.5 ${
                     pass.check_in_status === "checked_in" || pass.status === "checked_in"
-                      ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/20"
-                      : "text-amber-400 border-amber-500/30 bg-amber-950/20"
+                      ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/30"
+                      : "text-amber-400 border-amber-500/30 bg-amber-950/30"
                   }`}>
                     ● {pass.check_in_status === "checked_in" || pass.status === "checked_in" ? "CHECKED IN (GATE VERIFIED)" : "ISSUED · AWAITING PROCTOR SCAN"}
                   </span>
                 </div>
 
                 {/* White QR Code container */}
-                <div className="flex flex-col items-center gap-3 rounded-none bg-white p-6 shadow-md">
+                <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 shadow-xl">
                   <QRCodeSVG
                     value={`CCC-PASS:${pass.pass_code}:${pass.seat || "LAB-04-PC01"}:QUALIFIED`}
                     size={220}
@@ -199,47 +197,47 @@ export function ContestQualifiedPage() {
                       { label: "Assigned Workstation", value: pass.seat || "LAB-04-PC01", hi: true },
                       { label: "Screening Rank", value: `#${rank} (${score} Pts)` },
                     ].map(({ label, value, hi }) => (
-                      <div key={label} className="border border-[var(--line)] bg-[var(--surface-2)] p-3">
-                        <p className="text-[9px] uppercase tracking-widest text-[var(--muted)]">{label}</p>
-                        <p className={`mt-0.5 text-xs font-bold ${hi ? "text-[var(--accent)]" : "text-foreground"}`}>{value}</p>
+                      <div key={label} className="rounded-xl border border-white/10 bg-zinc-950/60 p-3">
+                        <p className="text-[9px] uppercase tracking-widest text-zinc-400">{label}</p>
+                        <p className={`mt-0.5 text-xs font-bold ${hi ? "text-orange-400" : "text-white"}`}>{value}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Check-in time */}
-                  <div className="flex items-center gap-3 border border-[var(--accent)]/30 bg-[var(--accent)]/5 px-4 py-3">
-                    <Clock className="size-4 shrink-0 text-[var(--accent)]" />
+                  <div className="flex items-center gap-3 rounded-xl border border-orange-500/30 bg-orange-500/5 px-4 py-3">
+                    <Clock className="size-4 shrink-0 text-orange-400" />
                     <div>
-                      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Gate Check-in Opens</p>
-                      <p className="text-xs font-bold text-foreground">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</p>
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Gate Check-in Opens</p>
+                      <p className="text-xs font-bold text-white">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</p>
                     </div>
                   </div>
 
                   {/* Round 2 Countdown */}
                   {!finalCountdown.started && (finalCountdown.h > 0 || finalCountdown.m > 0 || finalCountdown.s > 0) && contest.status !== "live" && (
-                    <div className="border border-[var(--accent)]/40 bg-[var(--surface)] p-4">
-                      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent)] mb-3 flex items-center gap-2">
-                        <span className="size-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+                    <div className="rounded-xl border border-orange-500/40 bg-zinc-900 p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-orange-400 mb-3 flex items-center gap-2">
+                        <span className="size-1.5 rounded-full bg-orange-500 animate-pulse" />
                         Round 2 Final Starts In
                       </p>
-                      <div className="grid grid-cols-3 divide-x divide-[var(--line)] border border-[var(--line)]">
+                      <div className="grid grid-cols-3 divide-x divide-white/10 rounded-lg border border-white/10">
                         {[
                           { label: "Hours", value: finalCountdown.h },
                           { label: "Minutes", value: finalCountdown.m },
                           { label: "Seconds", value: finalCountdown.s },
                         ].map(({ label, value }) => (
                           <div key={label} className="flex flex-col items-center gap-1 py-3">
-                            <span className="text-2xl font-black font-mono text-[var(--accent)] tabular-nums">
+                            <span className="text-2xl font-black font-mono text-orange-400 tabular-nums">
                               {String(value).padStart(2, "0")}
                             </span>
-                            <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--muted)]">{label}</span>
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-400">{label}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
                   {finalCountdown.started && contest.status === "live" && (
-                    <div className="flex items-center gap-3 border border-emerald-500/40 bg-emerald-950/20 px-4 py-3">
+                    <div className="flex items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-950/20 px-4 py-3">
                       <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
                       <p className="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider">Round 2 Final Is Live — Go to Arena</p>
                     </div>
@@ -248,8 +246,8 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Day of instructions */}
-              <div className="space-y-3 border border-[var(--line)] bg-[var(--surface)] p-5">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-foreground">Day-Of Lab Instructions</p>
+              <div className="space-y-3 rounded-2xl border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md shadow-xl">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-white">Day-Of Lab Instructions</p>
                 <ul className="space-y-2">
                   {[
                     "Carry your physical university ID card (PRN verification at entrance).",
@@ -257,8 +255,8 @@ export function ContestQualifiedPage() {
                     "Arrive at the Campus Computing Complex before check-in closes.",
                     "Air-gapped lab environment: no personal laptops, phones, or smart devices.",
                   ].map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-xs text-[var(--muted)] font-mono">
-                      <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-[var(--accent)]" />
+                    <li key={item} className="flex items-start gap-3 text-xs text-zinc-300 font-mono">
+                      <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-400" />
                       {item}
                     </li>
                   ))}
@@ -266,20 +264,20 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Venue */}
-              <div className="border border-[var(--line)] bg-[var(--surface)] p-5 space-y-3">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-foreground">Venue & Hardware Environment</p>
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-5 space-y-3 backdrop-blur-md shadow-xl">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-white">Venue & Hardware Environment</p>
                 <div className="space-y-2 font-mono">
                   <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
+                    <MapPin className="mt-0.5 size-4 shrink-0 text-orange-400" />
                     <div>
-                      <p className="text-xs font-bold text-foreground">{contest.venue}</p>
-                      <p className="text-[11px] text-[var(--muted)]">{formatWhen(contest.starts_at)}</p>
+                      <p className="text-xs font-bold text-white">{contest.venue}</p>
+                      <p className="text-[11px] text-zinc-400">{formatWhen(contest.starts_at)}</p>
                     </div>
                   </div>
                   {contest.environment && (
                     <div className="flex items-start gap-3">
-                      <Code2 className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" />
-                      <p className="text-[11px] text-[var(--muted)]">{contest.environment}</p>
+                      <Code2 className="mt-0.5 size-4 shrink-0 text-orange-400" />
+                      <p className="text-[11px] text-zinc-400">{contest.environment}</p>
                     </div>
                   )}
                 </div>
@@ -288,20 +286,20 @@ export function ContestQualifiedPage() {
               {/* Primary CTA */}
               <div className="flex flex-col gap-2">
                 {pass.check_in_status === "checked_in" || pass.status === "checked_in" || isDevBypass ? (
-                  <Button asChild size="lg" className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-[var(--accent)]/90">
+                  <Button asChild size="lg" className="rounded-xl bg-orange-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20">
                     <Link to={`/portal/contests/${contestSlug}/arena`}>
-                      <Play className="mr-1.5 size-4 fill-black" /> Enter Live Contest Arena
+                      <Play className="mr-1.5 size-4 fill-white" /> Enter Live Contest Arena
                     </Link>
                   </Button>
                 ) : (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 border border-amber-500/40 bg-amber-950/20 p-3 text-xs font-mono text-amber-400">
+                    <div className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-950/20 p-3 text-xs font-mono text-amber-400">
                       <Lock className="size-4 shrink-0" />
                       <span>Physical Gate Lock: Present this QR code to the proctor at the lab entrance to check in.</span>
                     </div>
                   </div>
                 )}
-                <Button asChild variant="ghost" size="sm" className="rounded-none font-mono text-xs text-[var(--muted)]">
+                <Button asChild variant="ghost" size="sm" className="rounded-xl font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/portal/contests/${contestSlug}`}>
                     Contest Overview
                   </Link>
@@ -309,17 +307,17 @@ export function ContestQualifiedPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4 border border-[var(--accent)]/20 bg-[var(--surface)] p-12 text-center">
-              <div className="flex size-16 items-center justify-center border border-[var(--line)] bg-[var(--surface-2)] animate-pulse">
-                <QrCode className="size-7 text-[var(--accent)]" />
+            <div className="flex flex-col items-center gap-4 rounded-2xl border border-orange-500/20 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
+              <div className="flex size-16 items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/60 animate-pulse text-orange-500">
+                <QrCode className="size-7" />
               </div>
               <div className="space-y-1">
-                <p className="font-bold text-foreground">Allocating Workstation Pass...</p>
-                <p className="text-xs text-[var(--muted)] font-mono">
+                <p className="font-bold text-white">Allocating Workstation Pass...</p>
+                <p className="text-xs text-zinc-400 font-mono">
                   Your Top 30 seat is confirmed. Generating unique cryptographic pass code...
                 </p>
               </div>
-              <Button onClick={() => refreshData(true)} variant="outline" size="sm" className="rounded-none font-mono text-xs">
+              <Button onClick={() => refreshData(true)} variant="outline" size="sm" className="rounded-xl font-mono text-xs border-white/10">
                 Refresh Pass
               </Button>
             </div>
@@ -334,27 +332,27 @@ export function ContestQualifiedPage() {
               <p className="font-mono text-[11px] uppercase tracking-widest text-amber-400 font-bold">
                 Phase 1 Screening Required
               </p>
-              <h1 className="text-xl font-black text-foreground">Assessment Not Completed</h1>
+              <h1 className="text-xl font-black text-white">Assessment Not Completed</h1>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4 border border-amber-500/30 bg-[var(--surface)] p-12 text-center">
-            <div className="flex size-16 items-center justify-center border border-amber-500/30 bg-amber-950/20 text-amber-400">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-500/30 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
+            <div className="flex size-16 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-950/20 text-amber-400">
               <Lock className="size-7" />
             </div>
             <div className="space-y-2 max-w-md">
-              <h3 className="font-bold text-base text-foreground font-mono">Complete Phase 1 Online Screening</h3>
-              <p className="text-xs text-[var(--muted)] font-mono leading-relaxed">
+              <h3 className="font-bold text-base text-white font-mono">Complete Phase 1 Online Screening</h3>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                 Campus Passes are exclusively awarded to the Top 30 verified cadets in Round 1 screening. Complete your 120-minute proctored session before the assessment window ends.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <Button asChild className="rounded-none bg-[var(--accent)] text-xs font-bold uppercase text-black hover:bg-[var(--accent)]/90 px-6 py-2.5">
+              <Button asChild className="rounded-xl bg-orange-500 text-xs font-bold uppercase text-white hover:bg-orange-600 px-6 py-2.5 shadow-md shadow-orange-500/20">
                 <Link to={`/assessments/${contestSlug}`}>
-                  <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
+                  <Play className="mr-1.5 size-4 fill-white" /> Take Assessment Now
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+              <Button asChild variant="outline" className="rounded-xl font-mono text-xs border-white/10">
                 <Link to={`/portal/contests/${contestSlug}`}>Contest Lobby</Link>
               </Button>
             </div>
@@ -364,35 +362,35 @@ export function ContestQualifiedPage() {
         /* ─── SCENARIO 3: ASSESSMENT ENDED BUT DID NOT QUALIFY IN TOP 30 ──── */
         <div className="space-y-6">
           <div className="flex items-center gap-3">
-            <Lock className="size-5 text-[var(--muted)]" />
+            <Lock className="size-5 text-zinc-500" />
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)] font-bold">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-zinc-400 font-bold">
                 Qualification Status
               </p>
-              <h1 className="text-xl font-black text-foreground">Did Not Qualify (Cutoff: Top 30)</h1>
+              <h1 className="text-xl font-black text-white">Did Not Qualify (Cutoff: Top 30)</h1>
             </div>
-            <span className="ml-auto border border-[var(--line)] bg-[var(--surface-2)] px-3 py-1 font-mono text-xs font-bold text-[var(--muted)]">
+            <span className="ml-auto rounded-md border border-white/10 bg-zinc-800/60 px-3 py-1 font-mono text-xs font-bold text-zinc-400 tabular-nums">
               {score} pts
             </span>
           </div>
 
-          <div className="flex flex-col items-center gap-4 border border-[var(--line)] bg-[var(--surface)] p-12 text-center">
-            <div className="flex size-16 items-center justify-center border border-[var(--line)] bg-[var(--surface-2)] text-[var(--muted)]">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
+            <div className="flex size-16 items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/60 text-zinc-500">
               <Lock className="size-7" />
             </div>
             <div className="space-y-2 max-w-md">
-              <h3 className="font-bold text-base text-foreground font-mono">Campus Pass Reserved for Top 30</h3>
-              <p className="text-xs text-[var(--muted)] font-mono leading-relaxed">
-                Your screening attempt was recorded with a score of <strong>{score} pts</strong> (Rank #{rank || "—"}). Only the top 30 participants advance to the physical on-campus lab final.
+              <h3 className="font-bold text-base text-white font-mono">Campus Pass Reserved for Top 30</h3>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                Your screening attempt was recorded with a score of <strong className="text-white">{score} pts</strong> (Rank #{rank || "—"}). Only the top 30 participants advance to the physical on-campus lab final.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+              <Button asChild variant="outline" className="rounded-xl font-mono text-xs border-white/10">
                 <Link to={`/portal/contests/${contestSlug}/results`}>
                   View Standings & Cutoff <ArrowRight className="ml-1.5 size-4" />
                 </Link>
               </Button>
-              <Button asChild variant="ghost" className="rounded-none font-mono text-xs">
+              <Button asChild variant="ghost" className="rounded-xl font-mono text-xs text-zinc-400 hover:text-white">
                 <Link to="/portal/problems">Practice in Archive</Link>
               </Button>
             </div>

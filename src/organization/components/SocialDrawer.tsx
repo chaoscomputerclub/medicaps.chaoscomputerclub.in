@@ -94,14 +94,14 @@ export function SocialDrawer() {
         if (!open) dispatch(closeSocialDrawer());
       }}
     >
-      <SheetContent side="right" className="w-full max-w-md bg-[var(--surface)] border-l border-[var(--line)] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md">
+      <SheetContent side="right" className="w-full max-w-md bg-zinc-950 border-l border-white/10 text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md">
         {/* Header Section */}
-        <SheetHeader className="p-4 border-b border-[var(--line)] bg-[var(--bg)]/70 backdrop-blur-md text-left space-y-0">
+        <SheetHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md text-left space-y-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
               <div>
-                <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--accent)]">
+                <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-orange-400">
                   PEER NETWORK
                 </p>
                 <SheetTitle className="font-mono text-sm font-bold text-white uppercase tracking-tight">
@@ -112,26 +112,26 @@ export function SocialDrawer() {
           </div>
 
           {/* Segmented Tab Switcher */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px]">
+          <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-zinc-900 border border-white/10 rounded-xl">
             <Button
               type="button"
               variant="ghost"
               onClick={() => dispatch(setDrawerType("followers"))}
               className={cn(
-                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-transparent",
+                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer",
                 drawerType === "followers"
-                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm hover:bg-[var(--accent)] hover:text-black"
-                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50",
+                  ? "bg-orange-500 text-black shadow-sm hover:bg-orange-400 hover:text-black"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5",
               )}
             >
               <Users size={12} />
               <span>Followers</span>
               <span
                 className={cn(
-                  "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
+                  "text-[10px] px-1.5 py-0.5 rounded-md font-mono tabular-nums",
                   drawerType === "followers"
                     ? "bg-black/20 text-black font-bold"
-                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]",
+                    : "bg-zinc-800 text-zinc-400 border border-white/10",
                 )}
               >
                 {displayedFollowersTabCount}
@@ -143,20 +143,20 @@ export function SocialDrawer() {
               variant="ghost"
               onClick={() => dispatch(setDrawerType("following"))}
               className={cn(
-                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-[1px] transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-transparent",
+                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer",
                 drawerType === "following"
-                  ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-sm hover:bg-[var(--accent)] hover:text-black"
-                  : "text-[var(--muted)] hover:text-white hover:bg-[var(--surface)]/50",
+                  ? "bg-orange-500 text-black shadow-sm hover:bg-orange-400 hover:text-black"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5",
               )}
             >
               <UserCheck size={12} />
               <span>Following</span>
               <span
                 className={cn(
-                  "text-[10px] px-1.5 py-0.2 rounded-[1px] font-mono",
+                  "text-[10px] px-1.5 py-0.5 rounded-md font-mono tabular-nums",
                   drawerType === "following"
                     ? "bg-black/20 text-black font-bold"
-                    : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]",
+                    : "bg-zinc-800 text-zinc-400 border border-white/10",
                 )}
               >
                 {displayedFollowingTabCount}
@@ -168,14 +168,14 @@ export function SocialDrawer() {
           <div className="relative mt-3">
             <Search
               size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
             />
             <Input
               type="text"
               value={searchQuery}
               onChange={(e) => dispatch(setSocialSearchQuery(e.target.value))}
               placeholder="Search handle, name, or department..."
-              className="h-8 pl-8 pr-8 text-xs font-mono bg-[var(--surface-2)] border border-[var(--line)] rounded-[1px] text-white placeholder:text-[var(--muted)]/60 focus:border-[var(--accent)]/70 transition-colors"
+              className="h-9 pl-8 pr-8 text-xs font-mono bg-zinc-900 border border-white/10 rounded-xl text-white placeholder:text-zinc-500 focus-visible:border-orange-500/60 transition-colors"
             />
             {searchQuery && (
               <Button
@@ -183,7 +183,7 @@ export function SocialDrawer() {
                 variant="ghost"
                 size="icon"
                 onClick={() => dispatch(setSocialSearchQuery(""))}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-[var(--muted)] hover:text-white"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-500 hover:text-white"
               >
                 <X size={12} />
               </Button>
@@ -198,29 +198,29 @@ export function SocialDrawer() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] rounded-[1px]"
+                  className="flex items-center justify-between p-3.5 border border-white/10 bg-zinc-900/50 rounded-xl"
                 >
                   <div className="flex items-center gap-3">
-                    <Skeleton className="w-9 h-9 bg-[var(--surface-3)] rounded-[1px]" />
+                    <Skeleton className="w-10 h-10 bg-zinc-800 rounded-xl" />
                     <div className="space-y-1.5">
-                      <Skeleton className="h-3 w-24 bg-[var(--surface-3)]" />
-                      <Skeleton className="h-2.5 w-32 bg-[var(--surface-3)]" />
-                      <Skeleton className="h-2 w-16 bg-[var(--surface-3)]" />
+                      <Skeleton className="h-3 w-24 bg-zinc-800" />
+                      <Skeleton className="h-2.5 w-32 bg-zinc-800" />
+                      <Skeleton className="h-2 w-16 bg-zinc-800" />
                     </div>
                   </div>
-                  <Skeleton className="h-7 w-20 bg-[var(--surface-3)] rounded-[1px]" />
+                  <Skeleton className="h-7 w-20 bg-zinc-800 rounded-lg" />
                 </div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="w-12 h-12 rounded-[1px] border border-[var(--line)] bg-[var(--surface-2)] text-[var(--muted)] flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-xl border border-white/10 bg-zinc-900 text-zinc-500 flex items-center justify-center mx-auto mb-3">
                 <Users size={20} />
               </div>
               <h3 className="font-mono text-xs font-bold text-white uppercase tracking-wider">
                 {searchQuery ? "No matching peers" : "No connections recorded"}
               </h3>
-              <p className="text-[11px] text-[var(--muted)] font-mono mt-1 max-w-[240px] mx-auto leading-relaxed">
+              <p className="text-[11px] text-zinc-400 font-mono mt-1 max-w-[240px] mx-auto leading-relaxed">
                 {searchQuery
                   ? `No students found matching "${searchQuery}". Try searching by handle or department.`
                   : drawerType === "followers"
@@ -251,7 +251,7 @@ export function SocialDrawer() {
               return (
                 <article
                   key={student.id}
-                  className="flex items-center justify-between p-3 border border-[var(--line)] bg-[var(--surface-2)] hover:border-[var(--line-strong,var(--line))] hover:bg-[var(--surface)] transition-all rounded-[1px]"
+                  className="flex items-center justify-between p-3.5 border border-white/10 bg-zinc-900/50 hover:border-white/20 hover:bg-zinc-900/80 transition-all rounded-xl shadow-sm"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Link
@@ -259,7 +259,7 @@ export function SocialDrawer() {
                       onClick={() => dispatch(closeSocialDrawer())}
                       className="cursor-pointer"
                     >
-                      <Avatar className="w-9 h-9 rounded-[1px] border border-[var(--line)] bg-zinc-900 hover:border-[var(--accent)] transition-colors">
+                      <Avatar className="w-10 h-10 rounded-xl border border-white/10 bg-zinc-800 hover:border-orange-500/50 transition-colors">
                         {student.avatar_url ? (
                           <AvatarImage
                             src={student.avatar_url}
@@ -267,7 +267,7 @@ export function SocialDrawer() {
                             className="object-cover"
                           />
                         ) : null}
-                        <AvatarFallback className="rounded-[1px] bg-[var(--surface)] text-[var(--accent)] font-mono text-xs font-bold">
+                        <AvatarFallback className="rounded-xl bg-zinc-800 text-orange-400 font-mono text-xs font-bold">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
@@ -278,21 +278,21 @@ export function SocialDrawer() {
                         <Link
                           to={`/portal/profile/${student.handle}`}
                           onClick={() => dispatch(closeSocialDrawer())}
-                          className="text-xs font-mono text-white truncate tracking-tight hover:text-[var(--accent)] hover:underline transition-colors"
+                          className="text-xs font-mono text-white truncate tracking-tight hover:text-orange-400 transition-colors font-semibold"
                         >
                           @{student.handle}
                         </Link>
-                        <span className="text-[10px] text-[var(--accent)] font-mono font-bold">
+                        <span className="text-[10px] text-orange-400 font-mono font-bold tabular-nums">
                           {student.rating}
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-[var(--muted)] truncate font-sans mt-0.5">
+                      <p className="text-[11px] text-zinc-400 truncate font-sans mt-0.5">
                         {student.full_name || `@${student.handle}`}
                       </p>
 
                       <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[9px] font-mono uppercase bg-[var(--surface)] border border-[var(--line)] text-[var(--muted)] px-1.5 py-0.2 rounded-[1px]">
+                        <span className="text-[9px] font-mono uppercase bg-zinc-800/80 border border-white/10 text-zinc-400 px-1.5 py-0.5 rounded-md">
                           {student.department} · {student.batch}
                         </span>
                         <TierBadge>{student.tier}</TierBadge>
@@ -301,7 +301,7 @@ export function SocialDrawer() {
                   </div>
 
                   {student.is_self ? (
-                    <span className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)] rounded-[1px]">
+                    <span className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase bg-zinc-800/80 text-zinc-400 border border-white/10 rounded-lg">
                       You
                     </span>
                   ) : (
@@ -328,12 +328,12 @@ export function SocialDrawer() {
                         }
                       }}
                       className={cn(
-                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-[1px] flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer h-auto",
+                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-lg flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer h-auto active:scale-[0.98]",
                         isFollowing
                           ? isHovered
-                            ? "bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20"
-                            : "bg-[var(--surface)] border-[var(--line)] text-[var(--muted)] hover:text-white"
-                          : "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-ink)] shadow-[0_0_10px_rgba(200,255,54,0.06)]",
+                            ? "bg-rose-500/10 border-rose-500/40 text-rose-400 hover:bg-rose-500/20"
+                            : "bg-zinc-800/60 border-white/10 text-zinc-300 hover:text-white"
+                          : "bg-orange-500/10 border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-black shadow-sm",
                       )}
                     >
                       {isPending ? (
@@ -365,8 +365,8 @@ export function SocialDrawer() {
         </div>
 
         {/* Footer */}
-        <footer className="p-3 border-t border-[var(--line)] bg-[var(--bg)]/90 backdrop-blur-md text-center">
-          <p className="text-[9px] text-[var(--muted)] font-mono uppercase tracking-widest">
+        <footer className="p-3 border-t border-white/10 bg-zinc-950/90 backdrop-blur-md text-center">
+          <p className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest">
             AUTHENTICATED CAMPUS SOCIAL GRAPH • MEDI-CAPS CHAPTER
           </p>
         </footer>

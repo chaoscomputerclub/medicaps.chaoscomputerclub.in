@@ -65,34 +65,36 @@ export function ContestOfflinePage() {
 
   if (!contest) {
     return (
-      <div className="page-wrap space-y-6">
-        <Link to="/portal/contests" className="back-link">
-          <ArrowLeft />
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+        <Link to="/portal/contests" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-white">
+          <ArrowLeft className="size-4" />
           Back to contests
         </Link>
-        <p className="text-sm text-[var(--muted)]">Contest not found.</p>
+        <p className="text-sm text-zinc-400">Contest not found.</p>
       </div>
     );
   }
 
   if (!qualified) {
     return (
-      <div className="page-wrap space-y-6">
-        <Link to={`/portal/contests/${contestSlug}`} className="back-link">
-          <ArrowLeft />
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+        <Link to={`/portal/contests/${contestSlug}`} className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-white">
+          <ArrowLeft className="size-4" />
           Back to contest
         </Link>
-        <Card className="rounded-none border-amber-500/40 bg-[var(--surface-1)]">
-          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-            <Lock className="size-8 text-amber-300" />
+        <Card className="rounded-2xl border border-amber-500/30 bg-zinc-900/60 backdrop-blur-md shadow-xl">
+          <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-950/30 text-amber-400">
+              <Lock className="size-7" />
+            </div>
             <h1 className="text-xl font-black uppercase tracking-tight text-white">
               Final room restricted to the Top {FINALIST_SEATS}
             </h1>
-            <p className="max-w-lg text-sm text-[var(--muted)]">
+            <p className="max-w-lg text-sm text-zinc-400">
               {registration?.eligibility_message ??
                 "This room opens only for cadets who qualified within the Round 1 cut-off."}
             </p>
-            <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase border-[var(--line)]">
+            <Button asChild variant="outline" className="rounded-xl font-mono text-xs uppercase border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white active:scale-[0.98]">
               <Link to={`/portal/contests/${contestSlug}/results`}>
                 View Round 1 ranking
                 <ArrowRight className="ml-2 size-4" />
@@ -105,39 +107,39 @@ export function ContestOfflinePage() {
   }
 
   return (
-    <div className="page-wrap space-y-6">
-      <Link to={`/portal/contests/${contestSlug}`} className="back-link">
-        <ArrowLeft />
+    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
+      <Link to={`/portal/contests/${contestSlug}`} className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-white">
+        <ArrowLeft className="size-4" />
         Back to contest
       </Link>
 
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="rounded-none border-[var(--accent)] font-mono text-[10px] uppercase text-[var(--accent)]">
+          <Badge variant="outline" className="rounded-md border border-orange-500/40 bg-orange-500/10 font-mono text-[10px] uppercase font-bold tracking-wider text-orange-400">
             Finalist access granted
           </Badge>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
             Round 2 · On-Premise Lab Arena
           </span>
         </div>
-        <h1 className="text-2xl font-black uppercase tracking-tight text-white">{contest.title}</h1>
-        <p className="max-w-2xl text-sm text-[var(--muted)]">
+        <h1 className="text-3xl font-black tracking-tight text-white">{contest.title}</h1>
+        <p className="max-w-2xl text-sm text-zinc-400">
           The live final is attended directly in the campus computing lab under air-gapped lab proctoring. Present your QR pass at the entrance desk, verify check-in at your assigned seat, and enter the live arena to solve problems.
         </p>
       </header>
 
       {/* Hero Live Arena Launcher Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 border border-[var(--accent)]/40 bg-[var(--surface-1)] rounded-none">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border border-orange-500/30 bg-zinc-900/70 rounded-2xl backdrop-blur-md shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="flex size-2 rounded-full bg-[var(--accent)] animate-pulse" />
-            <h3 className="font-bold text-white text-sm uppercase tracking-wide font-mono">Air-Gapped Live Arena Ready</h3>
+            <span className="flex size-2 rounded-full bg-orange-500 animate-pulse" />
+            <h3 className="font-bold text-white text-sm uppercase tracking-wider font-mono">Air-Gapped Live Arena Ready</h3>
           </div>
-          <p className="text-xs text-[var(--muted)] font-mono">
-            Seat: <strong className="text-white">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-white">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</span>
+          <p className="text-xs text-zinc-400 font-mono">
+            Seat: <strong className="text-orange-400">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</span>
           </p>
         </div>
-        <Button asChild size="lg" className="rounded-none bg-[var(--accent)] text-black hover:bg-[#b8f025] font-mono text-xs uppercase font-bold tracking-wider shadow-none">
+        <Button asChild size="lg" className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-mono text-xs uppercase font-bold tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]">
           <Link to={`/portal/contests/${contestSlug}/arena`}>
             <Play className="size-4 fill-current mr-2" />
             Enter Contest Arena
@@ -147,9 +149,9 @@ export function ContestOfflinePage() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         {/* Countdown Card */}
-        <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
+        <Card className="rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-lg">
           <CardHeader>
-            <CardTitle className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+            <CardTitle className="font-mono text-xs uppercase tracking-widest text-zinc-400">
               {started ? "Contest ends in" : "Start bell in"}
             </CardTitle>
           </CardHeader>
@@ -159,27 +161,27 @@ export function ContestOfflinePage() {
         </Card>
 
         {/* Check-In & QR Code Card */}
-        <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
+        <Card className="rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-lg">
           <CardHeader className="flex-row items-center gap-2">
-            <QrCode className="size-4 text-[var(--accent)]" />
+            <QrCode className="size-4 text-orange-400" />
             <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
               Attendance Pass
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 font-mono text-xs text-[var(--muted)]">
-            <div className="flex justify-center bg-white p-2.5 rounded-none">
+          <CardContent className="space-y-3 font-mono text-xs text-zinc-400">
+            <div className="flex justify-center bg-white p-3 rounded-xl shadow-inner">
               <QRCodeSVG value={pass?.pass_code || `CCC-${contestSlug.toUpperCase()}-WS07`} size={110} level="M" />
             </div>
             <div className="flex justify-between items-center text-[11px]">
               <span>Pass code:</span>
-              <span className="text-white font-bold">{pass?.pass_code || "CCC-PASS-TOP30"}</span>
+              <span className="text-orange-400 font-bold font-mono">{pass?.pass_code || "CCC-PASS-TOP30"}</span>
             </div>
             <div className="flex justify-between items-center text-[11px]">
               <span>Assigned Seat:</span>
-              <span className="text-white font-bold">{pass?.seat ?? "Lab-04-WS-07"}</span>
+              <span className="text-white font-bold font-mono">{pass?.seat ?? "Lab-04-WS-07"}</span>
             </div>
             <Button
-              className="w-full rounded-none font-mono text-xs font-bold uppercase"
+              className="w-full rounded-xl bg-orange-500 font-mono text-xs font-bold uppercase text-black hover:bg-orange-400 active:scale-[0.98] disabled:opacity-50"
               disabled={checkedIn || isCheckingIn}
               onClick={handleCheckIn}
             >
@@ -189,22 +191,22 @@ export function ContestOfflinePage() {
         </Card>
 
         {/* Workstation Lab Info Card */}
-        <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
+        <Card className="rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-lg">
           <CardHeader className="flex-row items-center gap-2">
-            <Cpu className="size-4 text-[var(--accent)]" />
+            <Cpu className="size-4 text-orange-400" />
             <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
               Workstation
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 font-mono text-xs text-[var(--muted)]">
+          <CardContent className="space-y-2 font-mono text-xs text-zinc-400">
             <p className="text-white">{contest.environment || "Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20"}</p>
             <p>{contest.venue}</p>
             <p className="flex items-center gap-2">
-              <Users className="size-3.5" />
-              {contest.registered_count} finalists seated
+              <Users className="size-3.5 text-zinc-500" />
+              <span className="font-mono tabular-nums text-white">{contest.registered_count}</span> finalists seated
             </p>
-            <div className="pt-2 border-t border-[var(--line)]">
-              <p className="text-[11px] text-[var(--muted)]">Proctored by:</p>
+            <div className="pt-2 border-t border-white/10">
+              <p className="text-[11px] text-zinc-500">Proctored by:</p>
               <p className="text-white text-xs font-medium">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</p>
             </div>
           </CardContent>
@@ -214,43 +216,43 @@ export function ContestOfflinePage() {
       {/* Problem Set Table */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+          <h2 className="font-mono text-xs uppercase tracking-widest text-zinc-400">
             Final problem set
           </h2>
-          <Button asChild variant="outline" size="sm" className="rounded-none border-[var(--line)] font-mono text-xs hover:bg-[var(--surface-2)] text-white">
+          <Button asChild variant="outline" size="sm" className="rounded-xl border-white/10 bg-zinc-900/60 font-mono text-xs hover:border-white/20 hover:text-white text-zinc-300 active:scale-[0.98]">
             <Link to={`/portal/contests/${contestSlug}/arena`}>
-              <Play className="size-3.5 mr-1 text-[var(--accent)]" /> Open in Arena
+              <Play className="size-3.5 mr-1.5 text-orange-400" /> Open in Arena
             </Link>
           </Button>
         </div>
-        <div className="border border-[var(--line)] bg-[var(--surface-1)]">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
           <Table>
             <TableHeader>
-              <TableRow className="border-[var(--line)]">
-                <TableHead className="w-16 font-mono text-[10px] uppercase tracking-widest">#</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest">Problem</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest">Topic</TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">Points</TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest">Action</TableHead>
+              <TableRow className="border-b border-white/10 bg-zinc-950/40 hover:bg-transparent">
+                <TableHead className="w-16 font-mono text-[10px] uppercase tracking-widest text-zinc-400">#</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Problem</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Topic</TableHead>
+                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Points</TableHead>
+                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {problems.length === 0 ? (
-                <TableRow className="border-[var(--line)]">
-                  <TableCell colSpan={5} className="py-12 text-center text-xs text-[var(--muted)]">
-                    <Timer className="mx-auto mb-2 size-4" />
+                <TableRow className="border-b border-white/5">
+                  <TableCell colSpan={5} className="py-12 text-center text-xs text-zinc-500 font-mono">
+                    <Timer className="mx-auto mb-2 size-5 text-zinc-600" />
                     The problem set unseals at the start bell.
                   </TableCell>
                 </TableRow>
               ) : (
                 problems.map((problem) => (
-                  <TableRow key={problem.problem_index} className="border-[var(--line)]">
-                    <TableCell className="font-mono text-xs text-[var(--accent)]">{problem.problem_index}</TableCell>
+                  <TableRow key={problem.problem_index} className="border-b border-white/5 transition-colors hover:bg-white/[0.02]">
+                    <TableCell className="font-mono text-xs font-bold text-orange-400">{problem.problem_index}</TableCell>
                     <TableCell className="font-semibold text-white">{problem.title}</TableCell>
-                    <TableCell className="font-mono text-xs text-[var(--muted)]">{problem.topic}</TableCell>
-                    <TableCell className="text-right font-mono text-xs text-white">{problem.points}</TableCell>
+                    <TableCell className="font-mono text-xs text-zinc-400">{problem.topic}</TableCell>
+                    <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-white">{problem.points}</TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm" variant="ghost" className="text-[var(--accent)] hover:text-white font-mono text-xs rounded-none">
+                      <Button asChild size="sm" variant="ghost" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 font-mono text-xs rounded-lg active:scale-[0.98]">
                         <Link to={`/portal/contests/${contestSlug}/arena?problem=${problem.problem_index}`}>
                           Attempt <ArrowRight className="size-3 ml-1" />
                         </Link>
@@ -264,23 +266,23 @@ export function ContestOfflinePage() {
         </div>
       </section>
 
-      <Card className="rounded-none border-[var(--line)] bg-[var(--surface-1)]">
+      <Card className="rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-lg">
         <CardHeader className="flex-row items-center gap-2">
-          <ShieldCheck className="size-4 text-[var(--accent)]" />
+          <ShieldCheck className="size-4 text-orange-400" />
           <CardTitle className="text-sm font-bold uppercase tracking-wide text-white">
             Lab Proctoring & Cryptographic Verification
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 font-mono text-xs text-[var(--muted)]">
+        <CardContent className="space-y-3 font-mono text-xs text-zinc-400">
           <div className="grid gap-2 sm:grid-cols-2">
             {(contest.chief_proctors.length ? contest.chief_proctors : ["Chief Proctor", "CCC Operations Desk"]).map((name) => (
               <span key={name} className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="size-3.5 text-[var(--accent)]" />
+                <CheckCircle2 className="size-3.5 text-orange-400" />
                 {name}
               </span>
             ))}
           </div>
-          <p className="text-[11px] text-[var(--muted)] pt-2 border-t border-[var(--line)]">
+          <p className="text-[11px] text-zinc-500 pt-2 border-t border-white/10">
             Rule note: Submissions are judged in real-time. Scoreboard is frozen in the final 15 minutes of competition.
           </p>
         </CardContent>

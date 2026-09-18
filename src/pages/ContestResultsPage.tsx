@@ -71,62 +71,75 @@ export function ContestResultsPage() {
   }
 
   return (
-    <div className="page-wrap max-w-5xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
       {/* Back */}
-      <Link to={`/portal/contests/${contestSlug}`} className="back-link">
-        <ArrowLeft /> {contest?.title ?? "Back to contest"}
+      <Link
+        to={`/portal/contests/${contestSlug}`}
+        className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-white"
+      >
+        <ArrowLeft className="size-4" /> {contest?.title ?? "Back to contest"}
       </Link>
 
       {/* ─── YOUR STANDING HERO ───────────────────────────── */}
       {myRow ? (
-        <div className={cn(
-          "relative overflow-hidden border bg-[var(--surface)]",
-          isQualified ? "border-[var(--accent)]/40" : "border-[var(--line)]"
-        )}>
+        <div
+          className={cn(
+            "relative overflow-hidden rounded-2xl border bg-zinc-900/60 backdrop-blur-md transition-all shadow-xl",
+            isQualified ? "border-orange-500/40 shadow-orange-500/5" : "border-white/10"
+          )}
+        >
           {isQualified && (
-            <div className="h-0.5 w-full bg-[var(--accent)]" />
+            <div className="h-1 w-full bg-gradient-to-r from-orange-500 to-amber-500" />
           )}
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
               {/* Rank number */}
-              <div className={cn(
-                "flex h-16 w-16 shrink-0 items-center justify-center border text-center font-mono",
-                isQualified ? "border-[var(--accent)]/40 bg-[var(--accent)]/10" : "border-[var(--line)] bg-[var(--surface-2)]"
-              )}>
+              <div
+                className={cn(
+                  "flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border text-center font-mono",
+                  isQualified
+                    ? "border-orange-500/40 bg-orange-500/10 shadow-inner"
+                    : "border-white/10 bg-zinc-800/50"
+                )}
+              >
                 <div>
-                  <div className={cn("text-2xl font-black leading-none", isQualified ? "text-[var(--accent)]" : "text-foreground")}>
+                  <div className={cn("text-2xl font-black leading-none font-mono tabular-nums", isQualified ? "text-orange-400" : "text-white")}>
                     #{myRow.rank}
                   </div>
-                  <div className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-[var(--muted)]">rank</div>
+                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-zinc-400">rank</div>
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "border px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-widest",
-                    isQualified ? "border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent)]" : "border-amber-500/40 bg-amber-950/20 text-amber-400"
-                  )}>
+                  <span
+                    className={cn(
+                      "rounded-md border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest",
+                      isQualified
+                        ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
+                        : "border-amber-500/40 bg-amber-950/30 text-amber-400"
+                    )}
+                  >
                     {isQualified ? "✓ Qualified for Final" : "Below the cut"}
                   </span>
                 </div>
-                <p className="text-lg font-bold text-foreground">
-                  {myRow.total_score} <span className="text-sm font-normal text-[var(--muted)]">points</span>
+                <p className="text-xl font-bold text-white font-mono tabular-nums">
+                  {myRow.total_score} <span className="font-sans text-sm font-normal text-zinc-400">points</span>
                 </p>
-                <p className="text-xs text-[var(--muted)]">
-                  {myRow.full_name} · {myRow.department} · Penalty {myRow.penalty_minutes}m
+                <p className="text-xs text-zinc-400">
+                  {myRow.full_name} · {myRow.department} · Penalty <span className="font-mono tabular-nums">{myRow.penalty_minutes}m</span>
                 </p>
               </div>
             </div>
 
             {/* CTA based on result */}
             {isQualified ? (
-              <Button asChild className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90 shrink-0">
+              <Button asChild className="rounded-xl bg-orange-500 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-orange-400 shrink-0 shadow-lg shadow-orange-500/20 active:scale-[0.98]">
                 <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                  <QrCode className="mr-1.5 size-4" /> View Campus Pass
+                  <QrCode className="mr-2 size-4" /> View Campus Pass
                 </Link>
               </Button>
             ) : (
-              <Button asChild variant="outline" className="rounded-none border-[var(--line)] font-mono text-xs shrink-0">
+              <Button asChild variant="outline" className="rounded-xl border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white shrink-0 active:scale-[0.98]">
                 <Link to="/portal/leaderboard">University Leaderboard →</Link>
               </Button>
             )}
@@ -135,13 +148,13 @@ export function ContestResultsPage() {
       ) : (
         /* Header for non-participants */
         <header className="space-y-2">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-zinc-400">
             Round 1 · Online Assessment
           </p>
-          <h1 className="text-2xl font-black text-foreground">
+          <h1 className="text-3xl font-black tracking-tight text-white">
             {contest?.title ?? "Assessment Ranking"}
           </h1>
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-zinc-400">
             Ranked by score, then by penalty time. Cut-off at rank {ranking.cutoff}.
           </p>
         </header>
@@ -149,17 +162,17 @@ export function ContestResultsPage() {
 
       {/* ─── RANKING SEALED NOTICE ───────────────────────── */}
       {!ranking.released && (
-        <div className="flex items-start gap-4 border border-[var(--line)] bg-[var(--surface)] p-5">
-          <Lock className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
+        <div className="flex items-start gap-4 rounded-2xl border border-amber-500/30 bg-amber-950/20 p-5 backdrop-blur-md">
+          <Lock className="mt-0.5 size-5 shrink-0 text-amber-400" />
           <div className="space-y-1">
-            <p className="font-mono text-xs font-bold uppercase tracking-wider text-foreground">
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-white">
               Ranking Sealed
             </p>
-            <p className="text-sm text-[var(--muted)]">
+            <p className="text-sm text-zinc-400">
               {ranking.message ?? "Results stay hidden while the assessment window is open — no candidate can pace against live rivals."}
             </p>
             {ranking.releases_at && (
-              <p className="font-mono text-xs text-[var(--accent)]">
+              <p className="font-mono text-xs text-orange-400">
                 Publishes {new Date(ranking.releases_at).toLocaleString("en-IN")}
               </p>
             )}
@@ -170,16 +183,16 @@ export function ContestResultsPage() {
       {/* ─── FILTERS + SEARCH ────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3">
         {/* Pill filters */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {FILTERS.map((key) => (
             <button
               key={key}
               onClick={() => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("filter", key); return p; })}
               className={cn(
-                "rounded-none px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors",
+                "rounded-lg px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-all",
                 filter === key
-                  ? "bg-[var(--accent)] text-black font-bold"
-                  : "border border-[var(--line)] text-[var(--muted)] hover:text-foreground"
+                  ? "bg-orange-500 text-black font-bold shadow-md shadow-orange-500/20"
+                  : "border border-white/10 bg-zinc-900/60 text-zinc-400 hover:border-white/20 hover:text-white"
               )}
             >
               {key}
@@ -188,44 +201,44 @@ export function ContestResultsPage() {
         </div>
 
         {/* Search */}
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             value={query}
             onChange={(e) => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("query", e.target.value); return p; })}
             placeholder="Search name or handle..."
-            className="rounded-none border-[var(--line)] bg-[var(--surface)] pl-9 font-mono text-xs placeholder:text-[var(--muted)]"
+            className="rounded-xl border-white/10 bg-zinc-900/60 pl-9 font-mono text-xs text-white placeholder:text-zinc-500 focus-visible:border-orange-500/60"
           />
         </div>
 
         {/* Stats inline */}
-        <div className="ml-auto flex items-center gap-4 text-xs text-[var(--muted)]">
+        <div className="ml-auto flex items-center gap-4 text-xs text-zinc-400 font-mono">
           <span className="flex items-center gap-1.5">
-            <Trophy className="size-3.5 text-[var(--accent)]" />
-            {ranking.total_participants} participants
+            <Trophy className="size-3.5 text-orange-400" />
+            <span className="tabular-nums font-bold text-white">{ranking.total_participants}</span> participants
           </span>
-          <span className="text-[var(--line)]">·</span>
-          <span>{ranking.cutoff} finalist seats</span>
+          <span className="text-zinc-700">·</span>
+          <span><span className="tabular-nums font-bold text-white">{ranking.cutoff}</span> finalist seats</span>
         </div>
       </div>
 
       {/* ─── RANKINGS TABLE ──────────────────────────────── */}
-      <div className="overflow-hidden border border-[var(--line)] bg-[var(--surface)]">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
         <Table>
           <TableHeader>
-            <TableRow className="border-[var(--line)] hover:bg-transparent">
-              <TableHead className="w-14 font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Rank</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Cadet</TableHead>
-              <TableHead className="hidden font-mono text-[10px] uppercase tracking-widest text-[var(--muted)] sm:table-cell">Dept</TableHead>
-              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Score</TableHead>
-              <TableHead className="hidden text-right font-mono text-[10px] uppercase tracking-widest text-[var(--muted)] sm:table-cell">Penalty</TableHead>
-              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">Status</TableHead>
+            <TableRow className="border-b border-white/10 bg-zinc-950/40 hover:bg-transparent">
+              <TableHead className="w-16 font-mono text-[10px] uppercase tracking-widest text-zinc-400">Rank</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Cadet</TableHead>
+              <TableHead className="hidden font-mono text-[10px] uppercase tracking-widest text-zinc-400 sm:table-cell">Dept</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Score</TableHead>
+              <TableHead className="hidden text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400 sm:table-cell">Penalty</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
-              <TableRow className="border-[var(--line)]">
-                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-[var(--muted)]">
+              <TableRow className="border-b border-white/5">
+                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-zinc-500">
                   No submissions match this view.
                 </TableCell>
               </TableRow>
@@ -247,16 +260,16 @@ export function ContestResultsPage() {
       {/* ─── BOTTOM ACTIONS ──────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3">
         {isQualified && (
-          <Button asChild className="rounded-none bg-[var(--accent)] font-mono text-xs font-black uppercase text-black hover:bg-[var(--accent)]/90">
+          <Button asChild className="rounded-xl bg-orange-500 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-orange-400 shadow-md shadow-orange-500/20 active:scale-[0.98]">
             <Link to={`/portal/contests/${contestSlug}/qualified`}>
-              <QrCode className="mr-1.5 size-4" /> View Campus Pass
+              <QrCode className="mr-2 size-4" /> View Campus Pass
             </Link>
           </Button>
         )}
-        <Button asChild variant="outline" className="rounded-none font-mono text-xs">
+        <Button asChild variant="outline" className="rounded-xl border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white active:scale-[0.98]">
           <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
         </Button>
-        <Button asChild variant="ghost" className="rounded-none font-mono text-xs">
+        <Button asChild variant="ghost" className="rounded-xl font-mono text-xs text-zinc-400 hover:text-white active:scale-[0.98]">
           <Link to="/portal/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>
@@ -273,44 +286,44 @@ function RankRow({
   return (
     <>
       {showCutLine && (
-        <TableRow className="border-[var(--accent)]/30 bg-[var(--surface-2)]">
-          <TableCell colSpan={6} className="py-2 text-center font-mono text-[10px] uppercase tracking-widest text-[var(--accent)]">
+        <TableRow className="border-y border-orange-500/30 bg-orange-500/10">
+          <TableCell colSpan={6} className="py-2.5 text-center font-mono text-[10px] uppercase tracking-widest text-orange-400 font-bold">
             ── Top {cutoff} qualification line ──
           </TableCell>
         </TableRow>
       )}
-      <TableRow className={cn("border-[var(--line)] transition-colors", isMe && "bg-[var(--accent)]/8")}>
-        <TableCell className="font-mono text-sm font-black text-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            {row.rank <= 3 && <Crown className="size-3.5 text-[var(--accent)]" />}
+      <TableRow className={cn("border-b border-white/5 transition-colors hover:bg-white/[0.02]", isMe && "bg-orange-500/10 hover:bg-orange-500/15")}>
+        <TableCell className="font-mono text-sm font-black text-white">
+          <span className="inline-flex items-center gap-1.5 tabular-nums">
+            {row.rank <= 3 && <Crown className="size-3.5 text-amber-400" />}
             {row.rank}
           </span>
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-0.5">
-            <Link to={`/portal/profile/${row.handle}`} className="text-sm font-semibold text-foreground transition-colors hover:text-[var(--accent)]">
+            <Link to={`/portal/profile/${row.handle}`} className="text-sm font-semibold text-white transition-colors hover:text-orange-400">
               {row.full_name}
             </Link>
-            <Link to={`/portal/profile/${row.handle}`} className="font-mono text-[10px] text-[var(--muted)] transition-colors hover:text-foreground">
+            <Link to={`/portal/profile/${row.handle}`} className="font-mono text-[10px] text-zinc-400 transition-colors hover:text-zinc-200">
               @{row.handle}
             </Link>
           </div>
         </TableCell>
-        <TableCell className="hidden font-mono text-xs text-[var(--muted)] sm:table-cell">
+        <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
           {row.department}
         </TableCell>
-        <TableCell className="text-right font-mono text-sm font-black text-[var(--accent)]">
+        <TableCell className="text-right font-mono text-sm font-black tabular-nums text-orange-400">
           {row.total_score}
         </TableCell>
-        <TableCell className="hidden text-right font-mono text-xs text-[var(--muted)] sm:table-cell">
+        <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-400 sm:table-cell">
           {row.penalty_minutes}m
         </TableCell>
         <TableCell className="text-right">
           <span className={cn(
-            "border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest",
+            "rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest font-semibold",
             qualified
-              ? "border-[var(--accent)]/40 text-[var(--accent)]"
-              : "border-[var(--line)] text-[var(--muted)]"
+              ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
+              : "border-white/10 bg-zinc-800/40 text-zinc-400"
           )}>
             {qualified ? "Qualified" : row.status === "in_progress" ? "In progress" : "Ranked"}
           </span>

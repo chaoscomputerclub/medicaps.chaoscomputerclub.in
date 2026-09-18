@@ -1,20 +1,20 @@
 {
-  "audit_id": "QA-20260918-105205",
-  "timestamp_utc": "2026-09-18T10:52:05.879446+00:00",
+  "audit_id": "QA-20260918-112804",
+  "timestamp_utc": "2026-09-18T11:28:04.337688+00:00",
   "environment": "Production Live Probe",
   "base_url": "http://testserver",
   "total_tests": 51,
   "passed_tests": 51,
   "failed_tests": 0,
   "overall_success_rate_percent": 100.0,
-  "total_execution_time_ms": 342.67,
+  "total_execution_time_ms": 332.39,
   "categories": [
     {
       "category": "System & Health",
       "total_tests": 1,
       "passed_tests": 1,
       "failed_tests": 0,
-      "avg_latency_ms": 42.09,
+      "avg_latency_ms": 34.71,
       "success_rate_percent": 100.0
     },
     {
@@ -22,7 +22,7 @@
       "total_tests": 12,
       "passed_tests": 12,
       "failed_tests": 0,
-      "avg_latency_ms": 2.79,
+      "avg_latency_ms": 2.95,
       "success_rate_percent": 100.0
     },
     {
@@ -30,7 +30,7 @@
       "total_tests": 4,
       "passed_tests": 4,
       "failed_tests": 0,
-      "avg_latency_ms": 5.04,
+      "avg_latency_ms": 4.96,
       "success_rate_percent": 100.0
     },
     {
@@ -38,7 +38,7 @@
       "total_tests": 4,
       "passed_tests": 4,
       "failed_tests": 0,
-      "avg_latency_ms": 2.17,
+      "avg_latency_ms": 2.16,
       "success_rate_percent": 100.0
     },
     {
@@ -46,7 +46,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.35,
+      "avg_latency_ms": 2.26,
       "success_rate_percent": 100.0
     },
     {
@@ -54,7 +54,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.33,
+      "avg_latency_ms": 2.38,
       "success_rate_percent": 100.0
     },
     {
@@ -62,7 +62,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.61,
+      "avg_latency_ms": 2.58,
       "success_rate_percent": 100.0
     },
     {
@@ -70,7 +70,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.02,
+      "avg_latency_ms": 1.98,
       "success_rate_percent": 100.0
     },
     {
@@ -78,7 +78,7 @@
       "total_tests": 9,
       "passed_tests": 9,
       "failed_tests": 0,
-      "avg_latency_ms": 3.21,
+      "avg_latency_ms": 3.15,
       "success_rate_percent": 100.0
     },
     {
@@ -86,7 +86,7 @@
       "total_tests": 3,
       "passed_tests": 3,
       "failed_tests": 0,
-      "avg_latency_ms": 9.87,
+      "avg_latency_ms": 9.63,
       "success_rate_percent": 100.0
     },
     {
@@ -94,7 +94,7 @@
       "total_tests": 7,
       "passed_tests": 7,
       "failed_tests": 0,
-      "avg_latency_ms": 6.18,
+      "avg_latency_ms": 5.83,
       "success_rate_percent": 100.0
     },
     {
@@ -102,7 +102,7 @@
       "total_tests": 1,
       "passed_tests": 1,
       "failed_tests": 0,
-      "avg_latency_ms": 4.48,
+      "avg_latency_ms": 3.59,
       "success_rate_percent": 100.0
     },
     {
@@ -110,7 +110,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 1.38,
+      "avg_latency_ms": 1.32,
       "success_rate_percent": 100.0
     }
   ],
@@ -124,11 +124,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 42.09,
+      "latency_ms": 34.71,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['status', 'chapter', 'version', 'services']",
       "actual_response_summary": "Dict with keys: ['status', 'chapter', 'environment', 'version', 'services']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 42.09ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 34.71ms)",
       "request_payload": null,
       "actual_response_sample": {
         "status": "operational",
@@ -152,11 +152,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.83,
+      "latency_ms": 3.51,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['algorithm', 'public_key']",
       "actual_response_summary": "Dict with keys: ['algorithm', 'public_key']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.83ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.51ms)",
       "request_payload": null,
       "actual_response_sample": {
         "algorithm": "RS256",
@@ -172,11 +172,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.58,
+      "latency_ms": 1.34,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['available', 'handle']",
       "actual_response_summary": "Dict with keys: ['available', 'handle']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.58ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.34ms)",
       "request_payload": null,
       "actual_response_sample": {
         "available": true,
@@ -195,11 +195,11 @@
       ],
       "actual_status": 422,
       "passed": true,
-      "latency_ms": 0.81,
+      "latency_ms": 0.83,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 0.81ms)",
+      "diff_notes": "✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 0.83ms)",
       "request_payload": {
         "email": "outsider@gmail.com"
       },
@@ -229,21 +229,21 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.31,
+      "latency_ms": 1.25,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message']",
       "actual_response_summary": "Dict with keys: ['success', 'sent', 'message', 'transaction_id', 'email', 'dev_otp']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.31ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.25ms)",
       "request_payload": {
         "email": "qa.organizer@medicaps.ac.in"
       },
       "actual_response_sample": {
         "success": true,
         "sent": true,
-        "message": "Dev Mode: Code is 286654",
-        "transaction_id": "a30d0ba5-8b50-454d-ad53-4191735b8298",
+        "message": "Dev Mode: Code is 256768",
+        "transaction_id": "75a0fd0b-fc7a-4fcd-b5c6-39d010f2685f",
         "email": "qa.organizer@medicaps.ac.in",
-        "dev_otp": "286654"
+        "dev_otp": "256768"
       }
     },
     {
@@ -255,11 +255,11 @@
       "expected_status": 401,
       "actual_status": 401,
       "passed": true,
-      "latency_ms": 0.56,
+      "latency_ms": 0.54,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.56ms)",
+      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.54ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Authentication required. Please sign in."
@@ -274,11 +274,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 8.81,
+      "latency_ms": 11.15,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'campusPass', 'ratingHistory']",
       "actual_response_summary": "Dict with keys: ['member', 'campusPass', 'ratingHistory', 'recentBattles', 'achievements', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 8.81ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 11.15ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
@@ -318,7 +318,7 @@
           "contest_title": "Offline Contest Session",
           "seat": "Assigned Physical Lab",
           "venue": "Campus Computer Center",
-          "check_in_opens_at": "2026-09-18T10:52:05.704412+00:00",
+          "check_in_opens_at": "2026-09-18T11:28:04.166111+00:00",
           "status": "expired"
         },
         "ratingHistory": [],
@@ -336,11 +336,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 6.47,
+      "latency_ms": 7.43,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'ratingHistory', 'problemStats', 'submissionCalendar']",
       "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 6.47ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 7.43ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
@@ -433,11 +433,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.6,
+      "latency_ms": 1.64,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'ratingHistory', 'problemStats']",
       "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.6ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.64ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
@@ -530,11 +530,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.22,
+      "latency_ms": 1.28,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'campusPass']",
       "actual_response_summary": "Dict with keys: ['member', 'campusPass', 'ratingHistory', 'recentBattles', 'achievements', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.22ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.28ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
@@ -574,7 +574,7 @@
           "contest_title": "Offline Contest Session",
           "seat": "Assigned Physical Lab",
           "venue": "Campus Computer Center",
-          "check_in_opens_at": "2026-09-18T10:52:05.704412+00:00",
+          "check_in_opens_at": "2026-09-18T11:28:04.166111+00:00",
           "status": "expired"
         },
         "ratingHistory": [],
@@ -592,11 +592,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.53,
+      "latency_ms": 1.64,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'ratingHistory', 'problemStats']",
       "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.53ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.64ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
@@ -689,11 +689,11 @@
       "expected_status": 404,
       "actual_status": 404,
       "passed": true,
-      "latency_ms": 1.02,
+      "latency_ms": 0.91,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.02ms)",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 0.91ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Student cadet '@non_existent_cadet_99999' was not found."
@@ -708,11 +708,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.69,
+      "latency_ms": 3.85,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'problemStats', 'ratingHistory', 'recentBattles']",
       "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 3.69ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 3.85ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
@@ -805,11 +805,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 12.55,
+      "latency_ms": 11.87,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['id', 'title', 'slug', 'status', 'starts_at', 'ends_at', 'division', 'seat_capacity']",
       "actual_response_summary": "List [1 items]. First item keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 8 schema keys verified in list items (Latency: 12.55ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 8 schema keys verified in list items (Latency: 11.87ms)",
       "request_payload": null,
       "actual_response_sample": [
         {
@@ -915,11 +915,11 @@
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.59,
+      "latency_ms": 3.47,
       "cache_header": "MISS",
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "Dict with keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.59ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.47ms)",
       "request_payload": null,
       "actual_response_sample": {
         "id": "72f2b84a-93f3-4cc3-a7e5-df92be405e8c",
@@ -1023,11 +1023,11 @@
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.55,
+      "latency_ms": 3.03,
       "cache_header": "MISS",
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "List [4 items]. First item keys: ['id', 'contest_id', 'problem_index', 'title', 'topic', 'points', 'solved_count', 'first_ac_seconds']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.55ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.03ms)",
       "request_payload": null,
       "actual_response_sample": [
         {
@@ -1104,11 +1104,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.38,
+      "latency_ms": 4.27,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['rank', 'handle', 'rating', 'department', 'tier', 'ratings']",
       "actual_response_summary": "List [4 items]. First item keys: ['id', 'avatar_url', 'rank', 'university_rank', 'previous_rank', 'handle', 'full_name', 'prn']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 6 schema keys verified in list items (Latency: 4.38ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 6 schema keys verified in list items (Latency: 4.27ms)",
       "request_payload": null,
       "actual_response_sample": [
         {
@@ -1210,11 +1210,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.98,
+      "latency_ms": 2.06,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['department', 'total_members', 'avg_rating', 'top_rating']",
       "actual_response_summary": "List [4 items]. First item keys: ['department', 'total_members', 'avg_rating', 'top_rating']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.98ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 2.06ms)",
       "request_payload": null,
       "actual_response_sample": [
         {
@@ -1252,11 +1252,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.5,
+      "latency_ms": 1.55,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['total', 'buckets']",
       "actual_response_summary": "Dict with keys: ['total', 'buckets']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.5ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.55ms)",
       "request_payload": null,
       "actual_response_sample": {
         "total": 4,
@@ -1418,11 +1418,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 0.8,
+      "latency_ms": 0.75,
       "cache_header": "HIT",
       "expected_schema_summary": "Keys: ['buckets']",
       "actual_response_summary": "Dict with keys: ['total', 'buckets']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 0.8ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 0.75ms)",
       "request_payload": null,
       "actual_response_sample": {
         "total": 4,
@@ -1587,11 +1587,11 @@
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.61,
+      "latency_ms": 2.41,
       "cache_header": "MISS",
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.61ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.41ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1607,11 +1607,11 @@
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.1,
+      "latency_ms": 2.11,
       "cache_header": "MISS",
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.1ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.11ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1624,11 +1624,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.05,
+      "latency_ms": 3.03,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['certificate_id', 'sha256_digest', 'issued_at', 'status']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.05ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.03ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1641,11 +1641,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.62,
+      "latency_ms": 1.73,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['is_valid', 'message']",
       "actual_response_summary": "Dict with keys: ['is_valid', 'proof', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.62ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.73ms)",
       "request_payload": {
         "certificate_id_or_hash": "NON_EXISTENT_FAKE_HASH_000"
       },
@@ -1667,11 +1667,11 @@
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.05,
+      "latency_ms": 3.94,
       "cache_header": null,
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 4.05ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.94ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1684,11 +1684,11 @@
       "expected_status": 404,
       "actual_status": 404,
       "passed": true,
-      "latency_ms": 1.18,
+      "latency_ms": 1.22,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.18ms)",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.22ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Gate pass 'INVALID_PASS_9999' not found."
@@ -1703,11 +1703,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.6,
+      "latency_ms": 2.49,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['id', 'title', 'content', 'kind', 'published_at']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 2.6ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 2.49ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1720,11 +1720,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.45,
+      "latency_ms": 1.46,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['id', 'title', 'kind']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 1.45ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 1.46ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1737,11 +1737,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 7.56,
+      "latency_ms": 7.71,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 7.56ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 7.71ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
@@ -1759,11 +1759,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.17,
+      "latency_ms": 2.23,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.17ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.23ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
@@ -1781,11 +1781,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.88,
+      "latency_ms": 1.97,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['following_ids']",
       "actual_response_summary": "Dict with keys: ['following_ids']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 1.88ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 1.97ms)",
       "request_payload": null,
       "actual_response_sample": {
         "following_ids": []
@@ -1800,11 +1800,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.37,
+      "latency_ms": 1.58,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.37ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.58ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
@@ -1822,11 +1822,11 @@
       "expected_status": 400,
       "actual_status": 400,
       "passed": true,
-      "latency_ms": 1.79,
+      "latency_ms": 1.65,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.79ms)",
+      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.65ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "You cannot follow yourself."
@@ -1841,11 +1841,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.77,
+      "latency_ms": 1.58,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.77ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.58ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
@@ -1863,11 +1863,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 5.7,
+      "latency_ms": 6.13,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle']",
       "actual_response_summary": "Dict with keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 6 schema keys present in response object (Latency: 5.7ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 6 schema keys present in response object (Latency: 6.13ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
@@ -1888,11 +1888,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 5.33,
+      "latency_ms": 4.13,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'is_following', 'followers_count', 'following_count']",
       "actual_response_summary": "Dict with keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 5.33ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 4.13ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
@@ -1913,11 +1913,11 @@
       "expected_status": 400,
       "actual_status": 400,
       "passed": true,
-      "latency_ms": 1.3,
+      "latency_ms": 1.35,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.3ms)",
+      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.35ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "You cannot follow yourself."
@@ -1932,11 +1932,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 27.56,
+      "latency_ms": 26.76,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['version', 'contest_model', 'assessment_duration_minutes']",
       "actual_response_summary": "Dict with keys: ['version', 'contest_model', 'assessment_window_hours', 'assessment_duration_minutes', 'finalist_seats']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 27.56ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 26.76ms)",
       "request_payload": null,
       "actual_response_sample": {
         "version": "v1",
@@ -1955,11 +1955,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.17,
+      "latency_ms": 1.2,
       "cache_header": "HIT",
       "expected_schema_summary": "Keys: ['id', 'title', 'slug', 'status']",
       "actual_response_summary": "List [1 items]. First item keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.17ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.2ms)",
       "request_payload": null,
       "actual_response_sample": [
         {
@@ -2062,11 +2062,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 0.88,
+      "latency_ms": 0.94,
       "cache_header": "HIT",
       "expected_schema_summary": "Keys: ['rank', 'handle', 'rating', 'department']",
       "actual_response_summary": "List [4 items]. First item keys: ['id', 'avatar_url', 'rank', 'university_rank', 'previous_rank', 'handle', 'full_name', 'prn']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 0.88ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 0.94ms)",
       "request_payload": null,
       "actual_response_sample": [
         {
@@ -2168,11 +2168,11 @@
       "expected_status": 201,
       "actual_status": 201,
       "passed": true,
-      "latency_ms": 8.36,
+      "latency_ms": 6.86,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'slug', 'contest_id']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'contest_id', 'slug', 'title', 'cadence', 'edition', 'status']",
-      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 8.36ms)",
+      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 6.86ms)",
       "request_payload": {
         "contest_type": "weekly",
         "edition": 999
@@ -2180,19 +2180,19 @@
       "actual_response_sample": {
         "success": true,
         "message": "Contest 'CCC Weekly Contest 999' created and published successfully.",
-        "contest_id": "3577c8b9-154f-4cc5-b279-051ad9933b29",
+        "contest_id": "4dbcb880-184c-4b61-ac5d-24e527a01182",
         "slug": "weekly-contest-999",
         "title": "CCC Weekly Contest 999",
         "cadence": "weekly",
         "edition": 999,
         "status": "upcoming",
-        "starts_at": "2026-09-19T10:52:05.830372+00:00",
-        "ends_at": "2026-09-19T12:52:05.830372+00:00",
+        "starts_at": "2026-09-19T11:28:04.291860+00:00",
+        "ends_at": "2026-09-19T13:28:04.291860+00:00",
         "screening_round": {
-          "assessment_id": "1e560c24-0028-4ced-a9cc-db6ace4855a7",
+          "assessment_id": "6d9f1f3d-1eac-4a92-a9da-eb1834265f6e",
           "slug": "weekly-contest-999",
-          "starts_at": "2026-09-18T10:47:05.830737+00:00",
-          "ends_at": "2026-09-19T08:52:05.830372+00:00",
+          "starts_at": "2026-09-18T11:23:04.292238+00:00",
+          "ends_at": "2026-09-19T09:28:04.291860+00:00",
           "duration_minutes": 120,
           "is_active": true
         },
@@ -2233,11 +2233,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 6.05,
+      "latency_ms": 6.15,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message', 'problem_count']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'problem_index', 'problem_count']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 6.05ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 6.15ms)",
       "request_payload": {
         "problem_index": "D",
         "title": "Quantum Bit Manipulation Relay",
@@ -2274,11 +2274,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.06,
+      "latency_ms": 3.11,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'contest']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'contest']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.06ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.11ms)",
       "request_payload": {
         "venue": "Medi-Caps Advanced Supercomputing Lab (Lab 01)",
         "max_seats": 250,
@@ -2288,11 +2288,11 @@
         "success": true,
         "message": "Contest 'weekly-contest-999' updated successfully.",
         "contest": {
-          "id": "3577c8b9-154f-4cc5-b279-051ad9933b29",
+          "id": "4dbcb880-184c-4b61-ac5d-24e527a01182",
           "slug": "weekly-contest-999",
           "title": "CCC Weekly Contest 999",
           "status": "upcoming",
-          "starts_at": "2026-09-19T10:52:05.830372",
+          "starts_at": "2026-09-19T11:28:04.291860",
           "venue": "Medi-Caps Advanced Supercomputing Lab (Lab 01)"
         }
       }
@@ -2306,11 +2306,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.31,
+      "latency_ms": 4.19,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'current_status']",
       "actual_response_summary": "Dict with keys: ['success', 'contest_slug', 'title', 'previous_status', 'current_status', 'top_30_qualification', 'rating_summary']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.31ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.19ms)",
       "request_payload": {
         "status": "live"
       },
@@ -2339,33 +2339,33 @@
       "expected_status": 201,
       "actual_status": 201,
       "passed": true,
-      "latency_ms": 6.19,
+      "latency_ms": 5.6,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'slug', 'contest_id']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'contest_id', 'slug', 'title', 'cadence', 'edition', 'status']",
-      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 6.19ms)",
+      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 5.6ms)",
       "request_payload": {
         "new_title": "CCC Weekly Contest 999 — Edition 2",
         "new_slug": "weekly-contest-999-v2",
-        "starts_at": "2026-09-25T10:52:05.646238+00:00",
-        "ends_at": "2026-09-25T13:52:05.646248+00:00"
+        "starts_at": "2026-09-25T11:28:04.115162+00:00",
+        "ends_at": "2026-09-25T14:28:04.115174+00:00"
       },
       "actual_response_sample": {
         "success": true,
         "message": "Contest 'CCC Weekly Contest 999 — Edition 2' created and published successfully.",
-        "contest_id": "7b048cd7-7291-45ae-8e6e-2cbfda23d014",
+        "contest_id": "09fc57de-d5ee-4571-9a54-88acc75a8e20",
         "slug": "weekly-contest-999-v2",
         "title": "CCC Weekly Contest 999 — Edition 2",
         "cadence": "weekly",
         "edition": 1000,
         "status": "upcoming",
-        "starts_at": "2026-09-25T10:52:05.646238+00:00",
-        "ends_at": "2026-09-25T13:52:05.646248+00:00",
+        "starts_at": "2026-09-25T11:28:04.115162+00:00",
+        "ends_at": "2026-09-25T14:28:04.115174+00:00",
         "screening_round": {
-          "assessment_id": "4635788a-58cc-481d-aeb7-8c4376bc8f13",
+          "assessment_id": "f51c8ac5-d900-4e92-a064-60c455ab8570",
           "slug": "weekly-contest-999-v2",
-          "starts_at": "2026-09-18T10:47:05.853893+00:00",
-          "ends_at": "2026-09-25T08:52:05.646238+00:00",
+          "starts_at": "2026-09-18T11:23:04.313648+00:00",
+          "ends_at": "2026-09-25T09:28:04.115162+00:00",
           "duration_minutes": 120,
           "is_active": true
         },
@@ -2406,11 +2406,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 9.65,
+      "latency_ms": 9.63,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message']",
       "actual_response_summary": "Dict with keys: ['success', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 9.65ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 9.63ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
@@ -2426,11 +2426,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 5.64,
+      "latency_ms": 5.29,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message']",
       "actual_response_summary": "Dict with keys: ['success', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 5.64ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 5.29ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
@@ -2449,11 +2449,11 @@
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.48,
+      "latency_ms": 3.59,
       "cache_header": null,
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "Dict with keys: ['assessment', 'session', 'problems', 'submissions', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 4.48ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.59ms)",
       "request_payload": null,
       "actual_response_sample": {
         "assessment": {
@@ -2494,11 +2494,11 @@
       "expected_status": 422,
       "actual_status": 422,
       "passed": true,
-      "latency_ms": 1.49,
+      "latency_ms": 1.36,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 1.49ms)",
+      "diff_notes": "✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 1.36ms)",
       "request_payload": {
         "title": "Incomplete Contest"
       },
@@ -2538,11 +2538,11 @@
       "expected_status": 401,
       "actual_status": 401,
       "passed": true,
-      "latency_ms": 1.26,
+      "latency_ms": 1.28,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 1.26ms)",
+      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 1.28ms)",
       "request_payload": {},
       "actual_response_sample": {
         "detail": "Authentication required. Please sign in."
