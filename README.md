@@ -64,44 +64,126 @@ Engineered for ultra-low latency, air-gapped lab resilience, and anti-cheat enfo
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## 🏗️ Architecture & System Topology
 
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#18181b',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#f97316',
+    'lineColor': '#f97316',
+    'secondaryColor': '#27272a',
+    'tertiaryColor': '#09090b',
+    'edgeLabelBackground': '#18181b',
+    'clusterBkg': '#0f0f11',
+    'clusterBorder': '#f97316'
+  }
+}}%%
+flowchart TB
+    subgraph Client_Tier ["🌐 Client Presentation Tier"]
+        CadetPortal["💻 Cadet Web Portal\n(medicaps.chaoscomputerclub.in)\nReact 19 + TypeScript + Vite"]
+        AdminConsole["🛡️ Admin & Proctor Command Console\n(admin.chaoscomputerclub.in)\nReact 19 + Vite Standalone"]
+        TurnstileScanner["📷 Hardware Gate Scanner / Turnstile\nLaser Barcode & Direct REST Ingestion"]
+    end
+
+    subgraph Edge_Tier ["⚡ Edge & Reverse Proxy Layer"]
+        Cloudflare["☁️ Cloudflare Global Anycast DNS\nWAF + DDoS Mitigation + SSL Offload"]
+        Nginx["🔒 Production Nginx 1.24+ Reverse Proxy\nSSL Termination + Real-Time SSE Buffering Off"]
+    end
+
+    subgraph App_Tier ["⚙️ FastAPI Application Core"]
+        FastAPICore["🚀 FastAPI High-Throughput Core (Python 3.12)\nUvicorn Multi-Worker (Port 8002) • AsyncIO Loop"]
+        GateMiddleware["🔐 Contest Eligibility Middleware\nPhysical Gate Lock • Lab 04 Workstation Binding"]
+        SSEBroadcaster["📡 Event Broadcaster & Telemetry Engine\nReal-Time SSE Streams • OpenAPI 3.1.0 Webhooks"]
+    end
+
+    subgraph Judge_Cluster ["⚡ Sandboxed Execution Cluster"]
+        JudgeDispatch["🎯 Judge Engine Dispatcher\nDynamic Provider Matrix (CodeBox / Docker)"]
+        subgraph Sandbox_Runtimes ["📦 Isolated Sandboxes (cgroups)"]
+            CodeBoxService["⚡ CodeBox Microservice (Node.js 20 LTS)\nBullMQ Worker + Dockerode (Port 3000)"]
+            DockerPool["🐳 Pre-Warmed Docker Container Pool\n2.0s CPU Quota • 256MB RAM • No Network"]
+        end
+    end
+
+    subgraph Persistence_Tier ["🗄️ Persistence & Telemetry Tier"]
+        Database[("💾 SQLite AsyncIO / PostgreSQL\nSQLAlchemy 2.0 Async Session DB")]
+        RedisCache[("⚡ Redis 7.0 In-Memory Store\nBullMQ Queues • SWR Caching • Rate Limits")]
+    end
+
+    CadetPortal -->|HTTPS / WSS| Cloudflare
+    AdminConsole -->|HTTPS / WSS| Cloudflare
+    TurnstileScanner -->|HTTPS POST| Cloudflare
+
+    Cloudflare -->|Proxy SSL| Nginx
+    Nginx -->|Static Cadet Bundle| CadetPortal
+    Nginx -->|Static Admin Bundle| AdminConsole
+    Nginx -->|API Reverse Proxy :8002| FastAPICore
+
+    FastAPICore --> GateMiddleware
+    FastAPICore --> SSEBroadcaster
+    FastAPICore --> JudgeDispatch
+
+    JudgeDispatch -->|BullMQ Jobs| RedisCache
+    JudgeDispatch -->|HTTP Execution| CodeBoxService
+    CodeBoxService --> DockerPool
+
+    FastAPICore -->|Async ORM Queries| Database
+    FastAPICore -->|SWR Cache & Invalidation| RedisCache
 ```
-                                  CLIENT TIER
-                 ┌───────────────────────────────────────────┐
-                 │  React 19 + TypeScript + Vite + Tailwind  │
-                 │  Monaco Editor • Radix UI • Recharts      │
-                 └─────────────────────┬─────────────────────┘
-                                       │ HTTPS / WSS
-                                       ▼
-                              REVERSE PROXY & CDN
-                 ┌───────────────────────────────────────────┐
-                 │             Nginx / Caddy SSL             │
-                 │    medicaps.chaoscomputerclub.in:443      │
-                 └──────────────┬─────────────┬──────────────┘
-                                │             │
-                /api (REST)     │             │  Static SPA Assets
-                                ▼             ▼
-                        ┌──────────────┐ ┌──────────────┐
-                        │ FastAPI App  │ │ Dist Bundle  │
-                        │ Port: 8000   │ │ /var/www/... │
-                        └──────┬───────┘ └──────────────┘
-                               │
-            ┌──────────────────┼──────────────────┐
-            ▼                  ▼                  ▼
-     ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-     │ SQLite/PgSQL │   │ Redis Queue  │   │ CodeBox Judge│
-     │ SQLAlchemy   │   │  & Caching   │   │ Engine (Node)│
-     │ Async Session│   │  Port: 6379  │   │ Port: 3000   │
-     └──────────────┘   └──────────────┘   └──────┬───────┘
-                                                  │
-                                          ┌───────┴───────┐
-                                          ▼               ▼
-                                   ┌──────────────┐┌──────────────┐
-                                   │ Docker Pool  ││ Linux Isolate│
-                                   │ Container VMs││  Subprocess  │
-                                   └──────────────┘└──────────────┘
+
+---
+
+## 🔄 Request Flow
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#18181b',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#f97316',
+    'lineColor': '#f97316',
+    'secondaryColor': '#27272a',
+    'tertiaryColor': '#09090b',
+    'noteBkgColor': '#ea580c',
+    'noteTextColor': '#ffffff',
+    'noteBorderColor': '#f97316',
+    'actorBkg': '#18181b',
+    'actorBorder': '#f97316',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#f97316',
+    'signalColor': '#f97316',
+    'signalTextColor': '#ffffff',
+    'labelBoxBkgColor': '#18181b',
+    'labelBoxBorderColor': '#f97316',
+    'labelTextColor': '#ffffff'
+  }
+}}%%
+sequenceDiagram
+    actor User as 👤 User
+    participant Auth as 🔐 Auth Service
+    participant API as ⚙️ FastAPI Backend
+    participant Judge as ⚡ CodeBox Sandbox Engine
+    participant DB as 🗄️ Redis + Database
+
+    User->>Auth: University PRN / Email-OTP verification
+    Auth-->>User: JWT session created (RS256)
+    User->>API: Start contest assessment (role, track, slug)
+    API->>Judge: Dispatch submission (cgroups, 2.0s limit)
+    Judge-->>API: Testcase execution output
+    API-->>User: Stream execution verdict (AC / WA / TLE)
+    User->>API: Submit final solution code
+    API->>Judge: Evaluate against hidden testcases
+    Judge-->>API: Score calculation + runtime telemetry
+    API->>DB: Persist contest state & submissions
+    Note over API,DB: Repeats until contest or assessment completes
+    API->>DB: Generate & store final report / rating deltas
+    API-->>User: Comprehensive report & verified Campus Pass
 ```
+
+---
 
 ### Technology Matrix
 

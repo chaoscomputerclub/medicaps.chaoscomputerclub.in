@@ -18,6 +18,20 @@ The architecture segregates the user-facing attack surface from the internal jud
 ### 1.1 Architectural Component Diagram
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#18181b',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#f97316',
+    'lineColor': '#f97316',
+    'secondaryColor': '#27272a',
+    'tertiaryColor': '#09090b',
+    'edgeLabelBackground': '#18181b',
+    'clusterBkg': '#0f0f11',
+    'clusterBorder': '#f97316'
+  }
+}}%%
 flowchart TB
     subgraph Client_Tier [Client Presentation Layer]
         CadetPortal["Cadet Web Portal\n(medicaps.chaoscomputerclub.in:443)\nReact 19 + TypeScript + Vite\nPort 8081 (Dev)"]
@@ -77,16 +91,39 @@ The platform's operational core governs the progression from online registration
 ### 2.1 Complete Two-Phase Tournament Sequence Diagram
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#18181b',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#f97316',
+    'lineColor': '#f97316',
+    'secondaryColor': '#27272a',
+    'tertiaryColor': '#09090b',
+    'noteBkgColor': '#ea580c',
+    'noteTextColor': '#ffffff',
+    'noteBorderColor': '#f97316',
+    'actorBkg': '#18181b',
+    'actorBorder': '#f97316',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#f97316',
+    'signalColor': '#f97316',
+    'signalTextColor': '#ffffff',
+    'labelBoxBkgColor': '#18181b',
+    'labelBoxBorderColor': '#f97316',
+    'labelTextColor': '#ffffff'
+  }
+}}%%
 sequenceDiagram
     autonumber
-    actor Cadet as Competitor Cadet
-    participant Web as Cadet Portal (medicaps.*)
-    participant API as FastAPI Backend (api.*)
-    participant Redis as Redis 7 Cache & Queue
-    participant CodeBox as CodeBox Judge Engine
-    participant DB as Relational Database
-    actor Proctor as Chief Proctor (Gate)
-    participant Admin as Admin Console (admin.*)
+    actor Cadet as 👤 Competitor Cadet
+    participant Web as 💻 Cadet Portal (medicaps.*)
+    participant API as ⚙️ FastAPI Backend (api.*)
+    participant Redis as ⚡ Redis 7 Cache & Queue
+    participant CodeBox as 📦 CodeBox Judge Engine
+    participant DB as 🗄️ Relational Database
+    actor Proctor as 🛡️ Chief Proctor (Gate)
+    participant Admin as 🖥️ Admin Console (admin.*)
 
     Note over Cadet,Admin: Phase 1: Online Screening Assessment
     Cadet->>Web: Navigate to /portal/contests/:slug/lobby
