@@ -7,6 +7,7 @@ import {
   Lock,
   Play,
   Shield,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -52,17 +53,23 @@ export function ContestLobbyPage() {
   }
 
   const phase = contestPhase(contest, registration ?? null);
+  const isInProgress = Boolean(
+    registration?.can_resume_assessment ||
+    (registration?.assessment_status === "in_progress" && !registration?.assessment_taken)
+  );
   const isAssessmentSubmitted = Boolean(
-    phase === "assessment_submitted" ||
-    registration?.assessment_taken ||
-    registration?.assessment_status === "submitted"
+    !isInProgress && (
+      phase === "assessment_submitted" ||
+      registration?.assessment_taken ||
+      registration?.assessment_status === "submitted"
+    )
   );
   const opensAt = assessmentOpensAt(contest);
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const notYetOpen = phase === "registration_open" && !isDevBypass;
   const canStart =
     !isAssessmentSubmitted &&
-    (Boolean(registration?.can_take_assessment) || phase === "assessment_open" || isDevBypass);
+    (Boolean(registration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
 
   return (
     <div className="flex min-h-[calc(100vh-120px)] max-w-2xl mx-auto px-4 sm:px-6 py-12 flex-col justify-center space-y-10">
@@ -264,54 +271,82 @@ export function ContestLobbyPage() {
             </div>
           )}
 
-          {/* Acknowledgment + Start */}
-          <div className="space-y-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <div
-                role="checkbox"
-                aria-checked={ack}
-                tabIndex={0}
-                onClick={() => setAck((v) => !v)}
-                onKeyDown={(e) => e.key === " " && setAck((v) => !v)}
-                className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-none border transition-colors focus:outline-none ${
-                  ack
-                    ? "border-lime-400 bg-lime-400 text-black"
-                    : "border-white/20 bg-transparent hover:border-lime-400/60"
-                }`}
-              >
-                {ack && (
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
+          {/* Acknowledgment + Start OR In-Progress Resume */}
+          {isInProgress ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 border border-amber-500/40 bg-amber-950/25 text-amber-300 font-mono text-xs">
+                <ShieldAlert className="size-5 shrink-0 text-amber-400 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-bold uppercase tracking-wider text-amber-400">
+                    Active Assessment Session Detected
+                  </div>
+                  <p className="text-zinc-300 leading-relaxed">
+                    You have an ongoing attempt in progress. Sudden disconnect or window exit was recorded (Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}). Resume now to continue your test without losing elapsed time.
+                  </p>
+                </div>
               </div>
-              <span className="text-sm text-zinc-300">
-                I understand this is my only attempt, the {ASSESSMENT_DURATION_MINUTES}-minute clock
-                starts immediately and cannot be paused, and my work is submitted automatically when
-                time runs out.
-              </span>
-            </label>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                disabled={!ack || !canStart}
-                onClick={() => navigate(`/assessments/${contestSlug}`)}
-                size="lg"
-                className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20 disabled:opacity-40"
-              >
-                <Play className="mr-1.5 size-4 fill-black" /> Start Assessment
-              </Button>
-              <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
-                <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  onClick={() => navigate(`/assessments/${contestSlug}`)}
+                  size="lg"
+                  className="rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
+                >
+                  <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                </Button>
+                <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
+                  <Link to={`/portal/contests/${contestSlug}`}>Back to Overview</Link>
+                </Button>
+              </div>
             </div>
+          ) : (
+            <div className="space-y-5">
+              <label className="flex cursor-pointer items-start gap-3">
+                <div
+                  role="checkbox"
+                  aria-checked={ack}
+                  tabIndex={0}
+                  onClick={() => setAck((v) => !v)}
+                  onKeyDown={(e) => e.key === " " && setAck((v) => !v)}
+                  className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-none border transition-colors focus:outline-none ${
+                    ack
+                      ? "border-lime-400 bg-lime-400 text-black"
+                      : "border-white/20 bg-transparent hover:border-lime-400/60"
+                  }`}
+                >
+                  {ack && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-sm text-zinc-300">
+                  I understand this is my only attempt, the {ASSESSMENT_DURATION_MINUTES}-minute clock
+                  starts immediately and cannot be paused, and my work is submitted automatically when
+                  time runs out.
+                </span>
+              </label>
 
-            {!canStart && !notYetOpen && (
-              <p className="font-mono text-xs text-amber-300">
-                {registration?.eligibility_message ?? "Assessment is not accepting attempts right now."}
-              </p>
-            )}
-          </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  disabled={!ack || !canStart}
+                  onClick={() => navigate(`/assessments/${contestSlug}`)}
+                  size="lg"
+                  className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20 disabled:opacity-40"
+                >
+                  <Play className="mr-1.5 size-4 fill-black" /> Start Assessment
+                </Button>
+                <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
+                  <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>
+                </Button>
+              </div>
+
+              {!canStart && !notYetOpen && (
+                <p className="font-mono text-xs text-amber-300">
+                  {registration?.eligibility_message ?? "Assessment is not accepting attempts right now."}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Security footer */}
           <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">

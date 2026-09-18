@@ -51,6 +51,7 @@ export interface AssessmentState {
     total_score: number;
     anti_cheat_violations: number;
     is_top_30_qualified: boolean;
+    is_resumed?: boolean;
   } | null;
   problems: AssessmentProblemData[];
   activeProblemIndex: number;
@@ -231,6 +232,14 @@ export const assessmentSlice = createSlice({
       state.problems = action.payload.problems;
       state.submissionsMap = action.payload.submissions || {};
       state.contestSlug = action.payload.assessment?.slug || null;
+
+      // Detect session resumption after disconnect/power cut
+      if (action.payload.session?.is_resumed && action.payload.session?.status === "in_progress") {
+        const violations = action.payload.session.anti_cheat_violations || 1;
+        const maxViolations = action.payload.assessment?.max_violations || 3;
+        state.antiCheatWarningOpen = true;
+        state.antiCheatWarningMessage = `Session Resumed · Warning ${violations} of ${maxViolations}: You left the assessment without finishing (sudden power cut or window exit detected). Your session has resumed. Timer continues from the server clock. Stay inside this window.`;
+      }
 
       // Populate starter codes if codeMap is empty for problem
       for (const p of action.payload.problems) {

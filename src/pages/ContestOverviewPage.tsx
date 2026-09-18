@@ -15,6 +15,7 @@ import {
   Play,
   QrCode,
   RotateCcw,
+  ShieldAlert,
   Sparkles,
   Trophy,
   Users,
@@ -117,10 +118,17 @@ export function ContestOverviewPage() {
   }
 
   const phase = contestPhase(contest, registration ?? null);
+  const isInProgress = Boolean(
+    registration?.can_resume_assessment ||
+    (registration?.assessment_status === "in_progress" && !registration?.assessment_taken)
+  );
   const isAssessmentSubmitted = Boolean(
-    phase === "assessment_submitted" ||
-    registration?.assessment_taken ||
-    registration?.assessment_status === "submitted"
+    !isInProgress && (
+      phase === "assessment_submitted" ||
+      registration?.assessment_taken ||
+      registration?.assessment_status === "submitted" ||
+      registration?.assessment_status === "completed"
+    )
   );
   const isRegistered = Boolean(registration?.registered || contest.registered);
   const opensAt = assessmentOpensAt(contest);
@@ -150,6 +158,39 @@ export function ContestOverviewPage() {
 
   // Determine the single primary action for this phase
   const renderPrimaryAction = () => {
+    // In-progress assessment attempt (e.g. left due to sudden power cut or by mistake)
+    if (isInProgress) {
+      return (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            asChild
+            size="lg"
+            className="rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
+          >
+            <Link to={`/portal/contests/${contestSlug}/assessment`}>
+              <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+            </Link>
+          </Button>
+          <div className="flex items-center gap-2 px-3 py-2 border border-amber-500/40 bg-amber-950/30 text-amber-300 font-mono text-xs">
+            <ShieldAlert size={14} className="text-amber-400 shrink-0" />
+            <span>
+              Session Active · Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}
+            </span>
+          </div>
+          {isDevBypass && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetAttempt}
+              className="rounded-none border-white/10 font-mono text-xs text-zinc-400 hover:text-white"
+            >
+              <RotateCcw className="mr-1.5 size-3.5" /> Reset
+            </Button>
+          )}
+        </div>
+      );
+    }
+
     // Dev bypass reset
     if (isDevBypass) {
       return (
@@ -301,6 +342,39 @@ export function ContestOverviewPage() {
       <Link to="/portal/contests" className="inline-flex items-center gap-2 font-mono text-xs text-zinc-400 hover:text-white transition-colors">
         <ArrowLeft className="size-3.5" /> Back to contests
       </Link>
+
+      {/* Active In-Progress Session Alert (Power cut / window exit recovery) */}
+      {isInProgress && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-none border border-amber-500/50 bg-amber-950/30 backdrop-blur-md shadow-lg shadow-amber-950/40">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2 rounded-none bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
+              <ShieldAlert className="size-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-amber-300">
+                  Active Assessment Session in Progress
+                </span>
+                <span className="font-mono text-[10px] px-2 py-0.5 rounded-none border border-amber-500/40 bg-amber-900/40 text-amber-300 uppercase font-semibold">
+                  Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}
+                </span>
+              </div>
+              <p className="font-mono text-xs text-zinc-300 leading-relaxed max-w-2xl">
+                You left your Phase 1 assessment without submitting (sudden power cut or window exit detected). Your session is still active with strict server-side clock synchronization. Resume immediately to complete your test.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="shrink-0 rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
+          >
+            <Link to={`/portal/contests/${contestSlug}/assessment`}>
+              <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+            </Link>
+          </Button>
+        </div>
+      )}
 
       {/* ─── HERO HEADER ──────────────────────────────────── */}
       <header className="grid gap-0 overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl lg:grid-cols-[1fr_280px]">

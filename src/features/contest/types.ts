@@ -59,9 +59,13 @@ export type RegistrationStatus = {
   assessment_status: string | null;
   is_top_30_qualified: boolean;
   can_take_assessment: boolean;
+  can_resume_assessment?: boolean;
   can_enter_live_contest: boolean;
   eligibility_message: string | null;
   is_dev_bypass?: boolean;
+  remaining_seconds?: number | null;
+  anti_cheat_violations?: number;
+  max_violations?: number;
 };
 
 export type RankingRow = {

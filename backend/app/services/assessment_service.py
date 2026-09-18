@@ -251,6 +251,7 @@ class AssessmentService:
             )
 
         # 3. Create session if not present and window is open
+        is_resumed_session = False
         if not session:
             session = AssessmentSession(
                 assessment_id=assessment.id,
@@ -265,6 +266,9 @@ class AssessmentService:
             db.add(session)
             await db.commit()
             await db.refresh(session)
+        else:
+            if session.status == "in_progress":
+                is_resumed_session = True
 
         # 4. Compute Remaining Seconds
         started_at = session.started_at
@@ -272,6 +276,15 @@ class AssessmentService:
             started_at = started_at.replace(tzinfo=timezone.utc)
         expires_at = started_at + timedelta(minutes=assessment.duration_minutes or ASSESSMENT_DURATION_MINUTES)
         remaining_seconds = max(0, int((expires_at - now_utc()).total_seconds()))
+
+        # If user left the assessment (power cut, closed window, or mistake) and has now resumed:
+        # If no violation was logged prior to disconnect, record 1 warning for the interruption
+        if is_resumed_session and session.status == "in_progress" and remaining_seconds > 0:
+            elapsed_since_start = (now_utc() - started_at).total_seconds()
+            if elapsed_since_start > 10 and session.anti_cheat_violations == 0:
+                session.anti_cheat_violations = 1
+                await db.commit()
+                await db.refresh(session)
 
         if remaining_seconds <= 0 and session.status == "in_progress":
             session.status = "submitted"
@@ -335,6 +348,7 @@ class AssessmentService:
                 "total_score": session.total_score,
                 "anti_cheat_violations": session.anti_cheat_violations,
                 "is_top_30_qualified": session.is_top_30_qualified,
+                "is_resumed": is_resumed_session,
             },
             "problems": [AssessmentService.public_problem_data(p) for p in problems],
             "submissions": sub_map,

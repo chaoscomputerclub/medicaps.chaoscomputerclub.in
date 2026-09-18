@@ -196,8 +196,13 @@ export const contestApi = {
             assessment_status: raw["assessment_status"] ?? null,
             is_top_30_qualified: Boolean(raw["is_top_30_qualified"]),
             can_take_assessment: Boolean(raw["can_take_assessment"]),
+            can_resume_assessment: Boolean(raw["can_resume_assessment"]),
             can_enter_live_contest: Boolean(raw["can_enter_live_contest"]),
             eligibility_message: raw["eligibility_message"] ?? null,
+            is_dev_bypass: Boolean(raw["is_dev_bypass"]),
+            remaining_seconds: raw["remaining_seconds"] ?? null,
+            anti_cheat_violations: raw["anti_cheat_violations"] ?? 0,
+            max_violations: raw["max_violations"] ?? 3,
           };
         } catch (error) {
           if (error instanceof ContestApiError && (error.status === 401 || error.status === 403)) {

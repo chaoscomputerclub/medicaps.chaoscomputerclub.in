@@ -422,19 +422,37 @@ export function AssessmentWorkspacePage() {
           })}
         </div>
 
-        {/* Center: Minimal Countdown Timer */}
-        {session && (
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-none font-mono text-xs border ${
-              session.remaining_seconds < 600
-                ? "border-destructive/40 bg-destructive/10 text-destructive animate-pulse"
-                : "border-white/10 bg-zinc-900 text-zinc-200"
-            }`}
-          >
-            <Clock size={12} />
-            <span className="font-bold tracking-wider">{formatTimer(session.remaining_seconds)}</span>
-          </div>
-        )}
+        {/* Center: Minimal Countdown Timer & Warning Status Indicator */}
+        <div className="flex items-center gap-2">
+          {session && (
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-none font-mono text-xs border ${
+                session.remaining_seconds < 600
+                  ? "border-destructive/40 bg-destructive/10 text-destructive animate-pulse"
+                  : "border-white/10 bg-zinc-900 text-zinc-200"
+              }`}
+            >
+              <Clock size={12} />
+              <span className="font-bold tracking-wider">{formatTimer(session.remaining_seconds)}</span>
+            </div>
+          )}
+
+          {session && (
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-none font-mono text-xs border transition-colors ${
+                (session.anti_cheat_violations || 0) > 0
+                  ? "border-amber-500/50 bg-amber-950/40 text-amber-300 font-medium shadow-sm shadow-amber-500/10"
+                  : "border-white/10 bg-zinc-900/80 text-zinc-400"
+              }`}
+              title={`Proctor Warnings: ${session.anti_cheat_violations || 0} of ${assessment?.max_violations || 3} warnings consumed.`}
+            >
+              <ShieldAlert size={12} className={(session.anti_cheat_violations || 0) > 0 ? "text-amber-400 animate-pulse" : "text-zinc-500"} />
+              <span className="tabular-nums font-semibold tracking-wide">
+                Warning: {session.anti_cheat_violations || 0} of {assessment?.max_violations || 3}
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Right: Controls & Actions */}
         <div className="flex items-center gap-2">
@@ -828,17 +846,22 @@ export function AssessmentWorkspacePage() {
       {/* Anti-cheat telemetry warning dialog */}
       {antiCheatWarningOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full p-5 rounded-none bg-[#141414] border border-amber-500/40 text-center space-y-3">
-            <div className="w-10 h-10 rounded-none bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
-              <ShieldAlert size={20} />
+          <div className="max-w-md w-full p-6 rounded-none bg-[#141414] border border-amber-500/40 text-center space-y-4 shadow-2xl shadow-black">
+            <div className="w-11 h-11 rounded-none bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+              <ShieldAlert size={22} />
             </div>
-            <h3 className="text-sm font-bold font-mono text-white">Proctored Session Warning</h3>
-            <p className="text-xs text-[#aaa] font-mono leading-relaxed">
-              {antiCheatWarningMessage || "Tab switch or window blur detected. All environment focus events are logged."}
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">Proctored Session Warning</h3>
+              <div className="inline-block px-2.5 py-0.5 rounded-none border border-amber-500/30 bg-amber-950/40 text-amber-300 font-mono text-xs font-semibold tabular-nums">
+                Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
+              </div>
+            </div>
+            <p className="text-xs text-zinc-300 font-mono leading-relaxed px-2">
+              {antiCheatWarningMessage || "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
             </p>
             <Button
               onClick={() => dispatch(dismissAntiCheatWarning())}
-              className="w-full bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs"
+              className="w-full rounded-none bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs font-bold uppercase tracking-wider"
             >
               Acknowledge & Continue
             </Button>

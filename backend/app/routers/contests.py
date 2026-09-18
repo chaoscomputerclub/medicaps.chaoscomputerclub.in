@@ -394,13 +394,20 @@ async def get_registration_status(
         )
         assessment = assess_season_res.scalars().first()
 
+    from datetime import timedelta, timezone
+
     assessment_taken = False
     assessment_score = 0.0
     assessment_rank = None
     assessment_session_status = None
     is_top_30_qualified = False
+    can_resume_assessment = False
+    anti_cheat_violations = 0
+    max_violations = 3
+    remaining_seconds = 0
 
     if assessment:
+        max_violations = assessment.max_violations
         s_res = await db.execute(
             select(AssessmentSession).where(
                 AssessmentSession.assessment_id == assessment.id,
@@ -409,9 +416,26 @@ async def get_registration_status(
         )
         my_session = s_res.scalars().first()
         if my_session:
-            assessment_taken = True
             assessment_score = my_session.total_score
             assessment_session_status = my_session.status
+            anti_cheat_violations = my_session.anti_cheat_violations
+
+            started_at = my_session.started_at
+            if started_at.tzinfo is None:
+                started_at = started_at.replace(tzinfo=timezone.utc)
+            duration = (assessment.duration_minutes or 45)
+            expires_at = started_at + timedelta(minutes=duration)
+            is_session_expired = (now_utc() >= expires_at)
+
+            if my_session.status in ("submitted", "disqualified") or is_session_expired:
+                assessment_taken = True
+                can_resume_assessment = False
+                remaining_seconds = 0
+            else:
+                # Active in-progress session that candidate can resume
+                assessment_taken = False
+                can_resume_assessment = True
+                remaining_seconds = max(0, int((expires_at - now_utc()).total_seconds()))
 
             # Calculate candidate rank in screening leaderboard
             all_sessions_res = await db.execute(
@@ -479,6 +503,9 @@ async def get_registration_status(
     # Contextual eligibility explanation
     if is_dev_bypass:
         eligibility_message = "⚡ DEV BYPASS ACTIVE: Unrestricted development testing mode enabled."
+    elif can_resume_assessment:
+        mins_left = remaining_seconds // 60
+        eligibility_message = f"⚠️ Assessment in progress ({mins_left}m remaining, Warning {anti_cheat_violations} of {max_violations}). Click 'Resume Contest' to continue."
     elif contest_status == "upcoming":
         if not is_registered:
             eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
@@ -518,6 +545,10 @@ async def get_registration_status(
         "assessment_score": assessment_score,
         "assessment_rank": assessment_rank,
         "assessment_status": assessment_session_status,
+        "can_resume_assessment": can_resume_assessment,
+        "anti_cheat_violations": anti_cheat_violations,
+        "max_violations": max_violations,
+        "remaining_seconds": remaining_seconds,
         "is_top_30_qualified": is_top_30_qualified,
         "is_checked_in": is_checked_in,
         "check_in_status": check_in_status,

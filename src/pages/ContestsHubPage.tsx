@@ -17,6 +17,7 @@ import {
   Flame,
   TrendingUp,
   QrCode,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -173,8 +174,19 @@ export function ContestsHubPage() {
 
   const weeklyCountdown = useCountdown(upcomingWeekly?.starts_at);
 
+  const isContestAssessmentInProgress = (contest: ContestSummary | null | undefined): boolean => {
+    if (!contest) return false;
+    const record = myParticipations.find((p) => p.contest_slug === contest.slug);
+    if (!record) return false;
+    return Boolean(
+      (record as any).assessment_status === "in_progress" ||
+      (record as any).can_resume_assessment
+    );
+  };
+
   const isContestAssessmentSubmitted = (contest: ContestSummary | null) => {
     if (!contest) return false;
+    if (isContestAssessmentInProgress(contest)) return false;
     const record = myParticipations.find((p) => p.contest_slug === contest.slug);
     if (!record) return false;
     return Boolean(
@@ -206,7 +218,11 @@ export function ContestsHubPage() {
     const assessOpen = contestStart - 24 * 3600 * 1000;
     const now = Date.now();
     const record = myParticipations.find((p) => p.contest_slug === contest.slug);
-    const hasTaken = Boolean(
+    const isInProgress = Boolean(
+      (record as any)?.assessment_status === "in_progress" ||
+      (record as any)?.can_resume_assessment
+    );
+    const hasTaken = !isInProgress && Boolean(
       record?.assessment_submitted ||
       (record as any)?.assessment_taken ||
       (record as any)?.assessment_status === "submitted" ||
@@ -217,10 +233,12 @@ export function ContestsHubPage() {
     const isTop30 = record?.outcome === "qualified" || (record?.rank !== null && (record?.rank ?? 99) <= 30);
     return {
       contest, contestStart, assessOpen, assessClose,
-      isOpen: now >= assessOpen && now <= assessClose,
-      isUpcoming: now < assessOpen,
-      isClosed: now > assessClose,
-      hasTaken, isTop30,
+      isOpen: (now >= assessOpen && now <= assessClose) || isInProgress,
+      isUpcoming: now < assessOpen && !isInProgress,
+      isClosed: now > assessClose && !isInProgress,
+      hasTaken, isInProgress, isTop30,
+      antiCheatViolations: (record as any)?.anti_cheat_violations || 1,
+      maxViolations: (record as any)?.max_violations || 3,
       score: record?.score, rank: record?.rank,
       openDateFormatted: new Date(assessOpen).toLocaleString("en-IN", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
       closeDateFormatted: new Date(assessClose).toLocaleString("en-IN", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
@@ -417,6 +435,12 @@ export function ContestsHubPage() {
                         <Button asChild variant="outline" className="flex-1 rounded-none border-emerald-500/40 text-emerald-400 text-xs font-bold">
                           <Link to={`/portal/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Submitted</Link>
                         </Button>
+                      ) : isContestAssessmentInProgress(contest) ? (
+                        <Button asChild className="flex-1 rounded-none bg-amber-400 text-xs font-bold uppercase text-black hover:bg-amber-300 shadow-md shadow-amber-400/20 border border-amber-300">
+                          <Link to={`/portal/contests/${contest.slug}/assessment`}>
+                            <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                          </Link>
+                        </Button>
                       ) : isReg ? (
                         <Button onClick={() => { setConfirmContestSlug(contest.slug); setConfirmContestTitle(contest.title); setAssessmentConfirmOpen(true); }}
                           className="flex-1 rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-md shadow-lime-400/20">
@@ -518,6 +542,23 @@ export function ContestsHubPage() {
                       {assessmentInfo.isTop30 ? <><QrCode className="mr-1.5 size-4" /> View Campus QR Pass</> : "View Contest Details & Results"}
                     </Link>
                   </Button>
+                </>
+              ) : assessmentInfo.isInProgress ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="size-4 text-amber-400" />
+                    <span className="text-xs font-bold text-amber-400">Attempt In Progress · Disconnect Detected</span>
+                    <span className="ml-auto font-mono text-xs text-amber-300 font-bold">
+                      Warning {assessmentInfo.antiCheatViolations} of {assessmentInfo.maxViolations}
+                    </span>
+                  </div>
+                  <Button asChild
+                    className="w-full rounded-none bg-amber-400 text-xs font-bold uppercase text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300">
+                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}/assessment`}>
+                      <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                    </Link>
+                  </Button>
+                  <p className="text-center font-mono text-[10px] text-zinc-400">Proctored session active · Server clock synchronized</p>
                 </>
               ) : (registeredUpcomingContest || isWeeklyRegistered) && assessmentInfo.isOpen ? (
                 <>

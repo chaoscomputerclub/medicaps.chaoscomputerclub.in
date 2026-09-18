@@ -39,12 +39,22 @@ export function contestPhase(
   const opens = assessmentOpensAt(contest).getTime();
   const closes = assessmentClosesAt(contest).getTime();
 
-  if (
-    registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed" ||
-    registration?.assessment_taken
-  ) {
+  const isInProgress = Boolean(
+    registration?.can_resume_assessment ||
+    (registration?.assessment_status === "in_progress" && !registration?.assessment_taken)
+  );
+
+  const isSubmitted =
+    !isInProgress &&
+    (registration?.assessment_status === "submitted" ||
+      registration?.assessment_status === "completed" ||
+      registration?.assessment_taken);
+
+  if (isSubmitted) {
     return "assessment_submitted";
+  }
+  if (isInProgress) {
+    return "assessment_open";
   }
   if (now < opens) return "registration_open";
   if (now <= closes) return "assessment_open";
