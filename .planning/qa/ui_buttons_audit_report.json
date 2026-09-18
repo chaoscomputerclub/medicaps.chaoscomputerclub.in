@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-18T16:45:34.608Z",
+  "timestamp": "2026-09-18T17:14:39.552Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -259,7 +259,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 85,
+      "line": 84,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -268,7 +268,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 89,
+      "line": 88,
       "tag": "<Button>",
       "label": "{open ? <X className=w-5 h-5 /> : <...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -277,7 +277,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 102,
+      "line": 101,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -286,7 +286,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 115,
+      "line": 114,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -295,7 +295,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 138,
+      "line": 137,
       "tag": "<Link>",
       "label": "{active && <ChevronRight className=w...",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -304,7 +304,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 168,
+      "line": 167,
       "tag": "<Link>",
       "label": "[to=/portal/profile]",
       "handler": "\"/portal/profile\"",
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 190,
+      "line": 189,
       "tag": "<button>",
       "label": "dispatch(logout())}\n            aria-...",
       "handler": "{() => dispatch(logout())}",
@@ -2410,7 +2410,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 189,
+      "line": 196,
       "tag": "<Button>",
       "label": "View Leaderboard",
       "handler": "{() => navigate(\"/portal/leaderboard\")}",
@@ -2419,7 +2419,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 196,
+      "line": 203,
       "tag": "<Button>",
       "label": "Sign In",
       "handler": "{() => navigate(\"/auth\")}",
@@ -2428,7 +2428,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 352,
+      "line": 359,
       "tag": "<button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2437,7 +2437,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 410,
+      "line": 417,
       "tag": "<Button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2446,7 +2446,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 425,
+      "line": 432,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleAvatarRemove}",
@@ -2455,7 +2455,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 437,
+      "line": 444,
       "tag": "<Button>",
       "label": "[#profile-edit-btn]",
       "handler": "asChild",
@@ -2464,7 +2464,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 442,
+      "line": 449,
       "tag": "<Link>",
       "label": "[to=/portal/settings]",
       "handler": "\"/portal/settings\"",
@@ -2473,7 +2473,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 451,
+      "line": 458,
       "tag": "<Button>",
       "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
@@ -2482,7 +2482,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 482,
+      "line": 489,
       "tag": "<Button>",
       "label": "{copied ? (                       <> ...",
       "handler": "{handleCopyLink}",
@@ -2491,7 +2491,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 523,
+      "line": 530,
       "tag": "<Link>",
       "label": "Update to your real name in Settings →",
       "handler": "\"/portal/settings\"",
@@ -2500,7 +2500,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 531,
+      "line": 538,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2509,7 +2509,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 550,
+      "line": 557,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2518,7 +2518,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 570,
+      "line": 577,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2527,7 +2527,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 581,
+      "line": 588,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2536,7 +2536,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 708,
+      "line": 715,
       "tag": "<Link>",
       "label": "Open verification console",
       "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",

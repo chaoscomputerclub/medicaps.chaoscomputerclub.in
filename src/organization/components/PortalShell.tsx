@@ -47,10 +47,9 @@ export function PortalShell() {
       return;
     }
     dispatch(fetchMyFollowingIdsThunk());
-    if (!member && !pending) {
-      dispatch(fetchCurrentUserThunk());
-    }
-  }, [dispatch, member, pending, navigate]);
+    // Always refresh profile from server on mount to sync any updates
+    dispatch(fetchCurrentUserThunk());
+  }, [dispatch, navigate]);
 
   const token = getToken();
   const tokenPayload = token ? decodeJwtPayload(token) : null;

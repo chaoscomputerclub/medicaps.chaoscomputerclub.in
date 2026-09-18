@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
 import { openSocialDrawer, fetchMyFollowingIdsThunk, toggleFollowThunk } from "@/store/slices/socialSlice";
 import { uploadAvatarThunk, removeAvatarThunk, fetchCurrentUserThunk } from "@/store/slices/authSlice";
+import { invalidateFullProfileCache } from "@/organization/data/queries";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { ProofBadge } from "@/organization/components/ProofBadge";
@@ -163,8 +164,14 @@ export function ProfilePage() {
   useEffect(() => {
     if (isViewingSelf && !isAuthenticated()) {
       navigate("/auth", { replace: true });
+    } else if (isViewingSelf) {
+      dispatch(fetchCurrentUserThunk());
+      invalidateFullProfileCache();
+      if (revalidateOwnProfile) {
+        void revalidateOwnProfile(true);
+      }
     }
-  }, [isViewingSelf, navigate]);
+  }, [isViewingSelf, navigate, dispatch, revalidateOwnProfile]);
 
   const profileData = isViewingSelf ? ownProfileData : studentProfileData;
   const profileLoading = isViewingSelf ? ownLoading : studentLoading;
@@ -225,9 +232,11 @@ export function ProfilePage() {
     Boolean(currentMember?.id && m.id && currentMember.id === m.id) ||
     Boolean(currentMember?.handle && m.handle && currentMember.handle.toLowerCase() === m.handle.toLowerCase());
 
-  const formattedFullName = formatFullName(
-    (isSelfUser ? currentMember?.full_name : null) || m.full_name
-  );
+  const formattedFromStore = formatFullName(currentMember?.full_name);
+  const formattedFromProfile = formatFullName(m.full_name);
+  const formattedFullName = isSelfUser
+    ? (formattedFromStore || formattedFromProfile)
+    : (formattedFromProfile || formattedFromStore);
   const displayName = formattedFullName || m.handle || "Cadet";
 
   const initials = formattedFullName
@@ -249,10 +258,8 @@ export function ProfilePage() {
 
   const isNameDefaultEnrollment = Boolean(
     isSelfUser &&
-    (!m.full_name ||
-      m.full_name.trim().toLowerCase() === enrollmentNo.toLowerCase() ||
-      m.full_name.trim().toLowerCase() === (m.handle || "").toLowerCase() ||
-      /^EN\d{2}[A-Z]{2}\d+/i.test(m.full_name.trim()))
+    (!formattedFullName ||
+      m.handle?.toLowerCase() === enrollmentNo.toLowerCase())
   );
 
   const isFollowedInStore =

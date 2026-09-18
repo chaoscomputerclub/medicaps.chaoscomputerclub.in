@@ -41,13 +41,20 @@ export interface AuthState {
 }
 
 const initialToken = typeof window !== "undefined" ? getToken() : null;
-const initialMember = typeof window !== "undefined" ? getStoredMember() : null;
+const rawStoredMember = typeof window !== "undefined" ? getStoredMember() : null;
 
 /** Returns true if a name string looks like an enrollment ID (e.g. en23cs301927) rather than a real human name. */
 function _isEnrollmentId(name: string | null | undefined): boolean {
   if (!name) return false;
   return /^[a-z]{2}\d{2}[a-z]{2}\d+/i.test(name.trim());
 }
+
+const initialMember = rawStoredMember
+  ? {
+      ...rawStoredMember,
+      full_name: _isEnrollmentId(rawStoredMember.full_name) ? null : rawStoredMember.full_name,
+    }
+  : null;
 
 // Don't pre-seed the auth form with an enrollment ID that may have been
 // auto-assigned by the old JWT self-heal code — always start the name field blank.
@@ -346,11 +353,15 @@ export const authSlice = createSlice({
 
     // fetchCurrentUserThunk
     builder.addCase(fetchCurrentUserThunk.fulfilled, (state, action) => {
-      state.member = action.payload;
+      const cleanMember = {
+        ...action.payload,
+        full_name: _isEnrollmentId(action.payload.full_name) ? null : action.payload.full_name,
+      };
+      state.member = cleanMember;
       state.isAuthenticated = true;
-      setStoredMember(action.payload);
-      if (action.payload.full_name) state.name = action.payload.full_name;
-      if (action.payload.handle) state.handle = action.payload.handle;
+      setStoredMember(cleanMember);
+      if (cleanMember.full_name) state.name = cleanMember.full_name;
+      if (cleanMember.handle) state.handle = cleanMember.handle;
       if (!action.payload.is_onboarded) {
         state.step = "onboarding";
       }

@@ -53,7 +53,11 @@ export function getStoredMember(): Member | null {
   const raw = localStorage.getItem(MEMBER_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    const m = JSON.parse(raw);
+    if (m && typeof m === "object" && m.full_name && /^[a-z]{2}\d{2}[a-z]{2}\d+/i.test(m.full_name)) {
+      m.full_name = null;
+    }
+    return m;
   } catch {
     return null;
   }

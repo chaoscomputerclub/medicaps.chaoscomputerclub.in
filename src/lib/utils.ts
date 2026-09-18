@@ -5,13 +5,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const ENROLLMENT_PATTERN = /^[a-z]{2}\d{2}[a-z]{2}\d+/i;
+
+/**
+ * Checks if a string looks like an enrollment number (e.g. EN23CS301927).
+ */
+export function isEnrollmentId(name?: string | null): boolean {
+  if (!name || typeof name !== "string") return false;
+  return ENROLLMENT_PATTERN.test(name.trim());
+}
+
 /**
  * Gracefully formats user full name into Title Case, handling mixed casing (e.g. "santusht Kotai" -> "Santusht Kotai").
+ * Strictly rejects enrollment IDs, placeholders, and cadet fallbacks.
  */
 export function formatFullName(name?: string | null): string {
   if (!name || typeof name !== "string") return "";
   const trimmed = name.trim();
-  if (!trimmed || trimmed.toLowerCase() === "cadet") return "";
+  if (!trimmed || trimmed.toLowerCase() === "cadet" || isEnrollmentId(trimmed)) return "";
   return trimmed
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -26,7 +37,9 @@ export function getFirstName(name?: string | null, fallback?: string | null): st
   if (formatted) return formatted.split(" ")[0];
   if (fallback && typeof fallback === "string" && fallback.trim().toLowerCase() !== "cadet") {
     const clean = fallback.trim().replace(/^@/, "");
-    return clean.charAt(0).toUpperCase() + clean.slice(1);
+    if (!isEnrollmentId(clean)) {
+      return clean.charAt(0).toUpperCase() + clean.slice(1);
+    }
   }
   return "Cadet";
 }
