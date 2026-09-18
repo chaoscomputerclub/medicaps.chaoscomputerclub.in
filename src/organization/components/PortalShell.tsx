@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { getToken, decodeJwtPayload } from "@/lib/auth";
+import { formatFullName, resolveAvatarUrl } from "@/lib/utils";
 
 const links = [
   { to: "/portal", label: "Operations", icon: LayoutDashboard, exact: true },
@@ -55,14 +56,16 @@ export function PortalShell() {
   const tokenPayload = token ? decodeJwtPayload(token) : null;
   const fallbackHandle = tokenPayload?.handle || (tokenPayload?.email ? tokenPayload.email.split("@")[0] : "Cadet");
   const displayHandle = member?.handle || fallbackHandle;
-  const initials = member?.full_name
-    ? member.full_name
+  const formattedName = formatFullName(member?.full_name);
+  const initials = formattedName
+    ? formattedName
         .split(" ")
         .map((w: string) => w[0])
         .join("")
         .slice(0, 2)
         .toUpperCase()
     : (displayHandle.slice(0, 2) || "CC").toUpperCase();
+  const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
 
   const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
   const isFullscreenWorkspace = cleanPath.includes("/assessment") || cleanPath.includes("/arena");
@@ -162,22 +165,28 @@ export function PortalShell() {
 
         {/* User Card */}
         <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <Avatar className="w-8 h-8 rounded-none border border-white/15 bg-zinc-900 text-lime-400 shrink-0">
-              {member?.avatar_url && (member.avatar_url.startsWith("http") || member.avatar_url.startsWith("/media/")) ? (
-                <AvatarImage src={member.avatar_url} alt={member.handle || "avatar"} className="object-cover" />
+          <Link
+            to="/portal/profile"
+            className="flex items-center gap-2.5 min-w-0 group hover:opacity-95 transition-opacity"
+            title="View Cadet Profile Dossier"
+          >
+            <Avatar className="w-8 h-8 rounded-none border border-white/15 bg-zinc-900 text-lime-400 shrink-0 group-hover:border-lime-400/50 transition-colors">
+              {resolvedAvatar ? (
+                <AvatarImage src={resolvedAvatar} alt={formattedName || displayHandle} className="object-cover" />
               ) : null}
               <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-xs">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <strong className="block font-mono text-xs font-semibold text-white truncate">{displayHandle}</strong>
+              <strong className="block font-mono text-xs font-semibold text-white truncate group-hover:text-lime-400 transition-colors">
+                {formattedName || displayHandle}
+              </strong>
               <span className="block font-mono text-[10px] text-slate-400 truncate tabular-nums">
-                {member ? `${member.rating} · ${member.department ?? "Member"}` : "Verified Member"}
+                {member?.handle ? `@${member.handle}` : `@${displayHandle}`} · {member ? `${member.rating} · ${member.department ?? "Member"}` : "Verified Member"}
               </span>
             </div>
-          </div>
+          </Link>
           <button
             type="button"
             onClick={() => dispatch(logout())}

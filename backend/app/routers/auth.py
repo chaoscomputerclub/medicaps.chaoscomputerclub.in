@@ -13,7 +13,7 @@ Flow:
   POST /auth/logout           → client-side token drop (stateless JWT)
 """
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -79,6 +79,25 @@ async def update_profile(
     db: AsyncSession = Depends(get_db),
 ):
     return await AuthController.update_profile(payload, current_member, db)
+
+
+@router.post("/profile/avatar", summary="Upload profile avatar directly to MinIO and update profile")
+async def upload_avatar(
+    file: UploadFile = File(...),
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Directly uploads an avatar image to MinIO S3 and binds it to the authenticated member."""
+    return await AuthController.upload_avatar(file, current_member, db)
+
+
+@router.delete("/profile/avatar", summary="Remove custom profile avatar and revert to initials")
+async def remove_avatar(
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Removes the member's custom avatar and reverts to initials."""
+    return await AuthController.remove_avatar(current_member, db)
 
 
 @router.get("/me", summary="Get own authenticated profile")

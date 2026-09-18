@@ -32,7 +32,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { isAuthenticated, logout } from "@/lib/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -41,6 +41,8 @@ import {
   fetchCurrentUserThunk,
   setHandleStatus,
   updateProfileThunk,
+  uploadAvatarThunk,
+  removeAvatarThunk,
 } from "@/store/slices/authSlice";
 import { uploadMedia } from "@/lib/storage";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
@@ -343,16 +345,15 @@ export function SettingsPage() {
         return;
       }
       setIsUploadingAvatar(true);
-      const tid = toast.loading("Uploading photo…");
+      const tid = toast.loading("Uploading photo to MinIO…");
       try {
-        const res = await uploadMedia(file, "avatars");
-        setAvatarUrl(res.public_url);
-        await dispatch(updateProfileThunk({ avatar_url: res.public_url })).unwrap();
+        const res = await dispatch(uploadAvatarThunk(file)).unwrap();
+        setAvatarUrl(res.avatar_url);
         dispatch(fetchCurrentUserThunk());
         invalidateFullProfileCache();
-        toast.success("Profile photo updated!", { id: tid });
+        toast.success("Profile photo updated in real time via MinIO!", { id: tid });
       } catch (err: any) {
-        toast.error(err?.message || "Upload failed.", { id: tid });
+        toast.error(typeof err === "string" ? err : err?.message || "Upload failed.", { id: tid });
       } finally {
         setIsUploadingAvatar(false);
       }
@@ -374,9 +375,16 @@ export function SettingsPage() {
   };
 
   const removeAvatar = async () => {
-    setAvatarUrl("");
-    await saveField("avatar", { avatar_url: "" });
-    toast.info("Photo removed — initials placeholder restored.");
+    const tid = toast.loading("Removing photo…");
+    try {
+      await dispatch(removeAvatarThunk()).unwrap();
+      setAvatarUrl("");
+      dispatch(fetchCurrentUserThunk());
+      invalidateFullProfileCache();
+      toast.info("Photo removed — initials placeholder restored.", { id: tid });
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to remove avatar.", { id: tid });
+    }
   };
 
   // ── Handle save ──
@@ -527,7 +535,7 @@ export function SettingsPage() {
                   {/* Avatar preview */}
                   <Avatar className="size-20 rounded-none border-2 border-white/15 bg-zinc-900 shrink-0">
                     {avatarUrl ? (
-                      <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />
+                      <AvatarImage src={resolveAvatarUrl(avatarUrl)} alt={fullName} className="object-cover" />
                     ) : null}
                     <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-2xl">
                       {initials}

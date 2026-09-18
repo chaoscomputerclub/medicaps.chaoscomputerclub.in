@@ -18,6 +18,8 @@ import {
   type UpdateProfilePayload,
   type CompleteOnboardingPayload,
 } from "@/lib/auth";
+import { uploadAvatarDirect, removeAvatarDirect } from "@/lib/storage";
+import { invalidateFullProfileCache } from "@/organization/data/queries";
 
 export interface AuthState {
   member: Member | null;
@@ -190,6 +192,43 @@ export const reOnboardThunk = createAsyncThunk<
     return res.member;
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to reset name. Please try again.");
+  }
+});
+
+/**
+ * Uploads avatar image file directly to MinIO and binds it to current user profile in real-time.
+ */
+export const uploadAvatarThunk = createAsyncThunk<
+  { member: Member; avatar_url: string },
+  File,
+  { rejectValue: string }
+>("auth/uploadAvatar", async (file, { rejectWithValue }) => {
+  try {
+    const res = await uploadAvatarDirect(file);
+    invalidateFullProfileCache();
+    return {
+      member: res.member,
+      avatar_url: res.avatar_url,
+    };
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to upload avatar to MinIO.");
+  }
+});
+
+/**
+ * Removes custom avatar and reverts profile to initials placeholder.
+ */
+export const removeAvatarThunk = createAsyncThunk<
+  Member,
+  void,
+  { rejectValue: string }
+>("auth/removeAvatar", async (_, { rejectWithValue }) => {
+  try {
+    const res = await removeAvatarDirect();
+    invalidateFullProfileCache();
+    return res.member;
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to remove avatar.");
   }
 });
 
@@ -396,6 +435,48 @@ export const authSlice = createSlice({
     builder.addCase(reOnboardThunk.rejected, (state, action) => {
       state.pending = false;
       state.message = action.payload || "Failed to reset name.";
+    });
+
+    // uploadAvatarThunk
+    builder.addCase(uploadAvatarThunk.pending, (state) => {
+      state.pending = true;
+      state.message = null;
+    });
+    builder.addCase(uploadAvatarThunk.fulfilled, (state, action) => {
+      state.pending = false;
+      const updated = {
+        ...(state.member || {}),
+        ...(action.payload.member || {}),
+        avatar_url: action.payload.avatar_url,
+      } as Member;
+      state.member = updated;
+      setStoredMember(updated);
+      state.message = null;
+    });
+    builder.addCase(uploadAvatarThunk.rejected, (state, action) => {
+      state.pending = false;
+      state.message = action.payload || "Failed to upload avatar.";
+    });
+
+    // removeAvatarThunk
+    builder.addCase(removeAvatarThunk.pending, (state) => {
+      state.pending = true;
+      state.message = null;
+    });
+    builder.addCase(removeAvatarThunk.fulfilled, (state, action) => {
+      state.pending = false;
+      const updated = {
+        ...(state.member || {}),
+        ...(action.payload || {}),
+        avatar_url: null,
+      } as Member;
+      state.member = updated;
+      setStoredMember(updated);
+      state.message = null;
+    });
+    builder.addCase(removeAvatarThunk.rejected, (state, action) => {
+      state.pending = false;
+      state.message = action.payload || "Failed to remove avatar.";
     });
   },
 });

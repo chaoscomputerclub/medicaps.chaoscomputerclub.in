@@ -14,7 +14,7 @@ Routers call these; controllers call utils/lib/models.
 from typing import Optional, Dict, List, Any
 import logging
 from datetime import datetime, timezone
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -361,7 +361,8 @@ class AuthController:
             current_member.linkedin_url = payload.linkedin_url.strip()
 
         if payload.avatar_url is not None:
-            current_member.avatar_url = payload.avatar_url.strip()
+            clean_avatar = payload.avatar_url.strip()
+            current_member.avatar_url = clean_avatar if clean_avatar else None
 
         current_member.updated_at = datetime.now(timezone.utc)
         await db.commit()
@@ -370,12 +371,118 @@ class AuthController:
         from app.core.cache import delete_cache, delete_cache_pattern
         await delete_cache(f"cache:profile:{current_member.id}")
         await delete_cache_pattern("cache:leaderboard:*")
-        # Also invalidate public student profile cache
         await delete_cache_pattern(f"cache:student:profile:{current_member.id}:*")
+        if current_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}:*")
 
         return {
             "success": True,
             "message": "Competitive profile updated successfully.",
+            "member": _to_member_public(current_member).model_dump(),
+        }
+
+    @staticmethod
+    async def upload_avatar(
+        file: UploadFile,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> dict:
+        """
+        Directly uploads an avatar image to MinIO S3 and binds it to current_member.avatar_url.
+        Performs atomic DB update and invalidates Redis caches.
+        """
+        content_type = file.content_type or "application/octet-stream"
+        allowed_types = {
+            "image/jpeg": ".jpg",
+            "image/jpg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp",
+            "image/gif": ".gif",
+        }
+        if content_type not in allowed_types:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported image type '{content_type}'. Allowed types: {', '.join(allowed_types.keys())}",
+            )
+
+        try:
+            file_bytes = await file.read()
+        except Exception as e:
+            logger.error(f"Error reading avatar file stream: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to read uploaded file stream.",
+            )
+
+        if not file_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty (0 bytes).",
+            )
+
+        max_size = 10 * 1024 * 1024  # 10MB
+        if len(file_bytes) > max_size:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="File exceeds maximum allowed size of 10MB.",
+            )
+
+        from app.core.storage import storage_service
+        try:
+            result = storage_service.upload_file(
+                file_bytes=file_bytes,
+                filename=file.filename or "avatar.png",
+                content_type=content_type,
+                prefix="avatars",
+            )
+        except Exception as e:
+            logger.error(f"Failed to store avatar in MinIO: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to store avatar in MinIO object storage.",
+            )
+
+        public_url = result.get("public_url")
+        current_member.avatar_url = public_url
+        current_member.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(current_member)
+
+        from app.core.cache import delete_cache, delete_cache_pattern
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+        await delete_cache_pattern(f"cache:student:profile:{current_member.id}:*")
+        if current_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}:*")
+
+        return {
+            "success": True,
+            "message": "Avatar uploaded to MinIO and updated successfully.",
+            "avatar_url": public_url,
+            "member": _to_member_public(current_member).model_dump(),
+        }
+
+    @staticmethod
+    async def remove_avatar(
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> dict:
+        """Removes the member's custom avatar and reverts to initials."""
+        current_member.avatar_url = None
+        current_member.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(current_member)
+
+        from app.core.cache import delete_cache, delete_cache_pattern
+        await delete_cache(f"cache:profile:{current_member.id}")
+        await delete_cache_pattern("cache:leaderboard:*")
+        await delete_cache_pattern(f"cache:student:profile:{current_member.id}:*")
+        if current_member.handle:
+            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}:*")
+
+        return {
+            "success": True,
+            "message": "Avatar removed successfully.",
             "member": _to_member_public(current_member).model_dump(),
         }
 
@@ -468,7 +575,7 @@ class AuthController:
             "member": {
                 "id": current_member.id,
                 "handle": current_member.handle or "cadet",
-                "full_name": current_member.full_name or "Cadet",
+                "full_name": current_member.full_name,
                 "email": current_member.email,
                 "prn": current_member.prn or "N/A",
                 "department": current_member.department or "CSE",
@@ -696,7 +803,7 @@ class AuthController:
             "member": {
                 "id": student.id,
                 "handle": student.handle or f"cadet_{student.id[:6]}",
-                "full_name": student.full_name or student.handle or "Cadet",
+                "full_name": student.full_name or student.handle,
                 "email": student.email if is_self else "",  # email only visible to self for privacy
                 "prn": masked_prn,
                 "department": student.department or "CSE",

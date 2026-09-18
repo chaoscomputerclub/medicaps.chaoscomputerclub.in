@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Users,
@@ -14,10 +14,14 @@ import {
   LockKeyhole,
   Zap,
   Loader2,
+  Camera,
+  Trash2,
+  UploadCloud,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
 import { openSocialDrawer, fetchMyFollowingIdsThunk, toggleFollowThunk } from "@/store/slices/socialSlice";
+import { uploadAvatarThunk, removeAvatarThunk, fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { ProofBadge } from "@/organization/components/ProofBadge";
@@ -57,11 +61,84 @@ export function ProfilePage() {
   const {
     data: ownProfileData,
     loading: ownLoading,
+    revalidate: revalidateOwnProfile,
+    mutate: mutateOwnProfile,
   } = useSwrData(
     "member:profile:full",
     () => getMemberProfileData(true),
     { ttl: 5 * 60 * 1000, enabled: isViewingSelf }
   );
+
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a PNG, JPG, WebP, or GIF image.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File exceeds 10MB limit.");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    const tid = toast.loading("Uploading photo to MinIO Object Storage…");
+    try {
+      const res = await dispatch(uploadAvatarThunk(file)).unwrap();
+      if (mutateOwnProfile) {
+        mutateOwnProfile((prev: any) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            member: {
+              ...(prev.member || {}),
+              avatar_url: res.avatar_url,
+            },
+          };
+        });
+      }
+      if (revalidateOwnProfile) {
+        await revalidateOwnProfile();
+      }
+      dispatch(fetchCurrentUserThunk());
+      toast.success("Profile photo updated in real time via MinIO!", { id: tid });
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to upload avatar.", { id: tid });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    const tid = toast.loading("Removing avatar…");
+    try {
+      await dispatch(removeAvatarThunk()).unwrap();
+      if (mutateOwnProfile) {
+        mutateOwnProfile((prev: any) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            member: {
+              ...(prev.member || {}),
+              avatar_url: null,
+            },
+          };
+        });
+      }
+      if (revalidateOwnProfile) {
+        await revalidateOwnProfile();
+      }
+      dispatch(fetchCurrentUserThunk());
+      toast.success("Profile photo removed. Reverted to initials.", { id: tid });
+    } catch (err: any) {
+      toast.error(typeof err === "string" ? err : "Failed to remove avatar.", { id: tid });
+    }
+  };
 
   const {
     data: studentProfileData,
@@ -135,18 +212,6 @@ export function ProfilePage() {
   const achievements = profileData?.achievements || [];
 
 
-  const initials = m.full_name
-    ? m.full_name
-        .split(" ")
-        .map((w: string) => w[0])
-        .filter(Boolean)
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
-    : m.handle
-      ? m.handle.slice(0, 2).toUpperCase()
-      : "CC";
-
   const enrollmentNo =
     m.prn && m.prn !== "N/A" && m.prn !== "—"
       ? m.prn
@@ -159,6 +224,28 @@ export function ProfilePage() {
     isViewingSelf ||
     Boolean(currentMember?.id && m.id && currentMember.id === m.id) ||
     Boolean(currentMember?.handle && m.handle && currentMember.handle.toLowerCase() === m.handle.toLowerCase());
+
+  const formattedFullName = formatFullName(
+    (isSelfUser ? currentMember?.full_name : null) || m.full_name
+  );
+  const displayName = formattedFullName || m.handle || "Cadet";
+
+  const initials = formattedFullName
+    ? formattedFullName
+        .split(" ")
+        .map((w: string) => w[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : m.handle
+      ? m.handle.slice(0, 2).toUpperCase()
+      : "CC";
+
+  const effectiveAvatar = isSelfUser
+    ? (currentMember?.avatar_url ?? m.avatar_url)
+    : m.avatar_url;
+  const resolvedAvatar = resolveAvatarUrl(effectiveAvatar);
 
   const isNameDefaultEnrollment = Boolean(
     isSelfUser &&
@@ -245,17 +332,63 @@ export function ProfilePage() {
       {/* Profile Header */}
       <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
         <div className="flex items-start gap-5">
-          <Avatar className="size-16 sm:size-20 rounded-none border border-white/10 bg-zinc-950 shrink-0 shadow-inner">
-            {m.avatar_url &&
-            (m.avatar_url.startsWith("http") ||
-              m.avatar_url.startsWith("/media/") ||
-              m.avatar_url.startsWith("/")) ? (
-              <AvatarImage src={m.avatar_url} alt={m.full_name || m.handle} className="object-cover rounded-none" />
-            ) : null}
-            <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-xl flex items-center justify-center w-full h-full">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          {/* Avatar Container with Real-Time MinIO Interaction */}
+          <div className="relative group shrink-0">
+            <Avatar className="size-16 sm:size-20 rounded-none border border-white/15 bg-zinc-950 shadow-inner overflow-hidden transition-all duration-150 group-hover:border-lime-400/60">
+              {resolvedAvatar ? (
+                <AvatarImage
+                  src={resolvedAvatar}
+                  alt={displayName}
+                  className="object-cover rounded-none transition-transform duration-200 group-hover:scale-105"
+                />
+              ) : null}
+              <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-xl flex items-center justify-center w-full h-full">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+
+            {isSelfUser && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  aria-label="Change profile picture"
+                  className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-mono text-[9px] font-bold uppercase tracking-wider backdrop-blur-xs p-1 text-center"
+                >
+                  {isUploadingAvatar ? (
+                    <Loader2 className="size-4 animate-spin text-lime-400" />
+                  ) : (
+                    <>
+                      <Camera className="size-4" />
+                      <span>Upload</span>
+                    </>
+                  )}
+                </button>
+
+                {/* MinIO telemetry badge */}
+                <div
+                  className="absolute -bottom-1 -right-1 bg-zinc-950 border border-white/20 px-1 py-0.2 flex items-center gap-1 text-[8px] font-mono select-none"
+                  title="MinIO S3 Media Status"
+                >
+                  <span className={cn("size-1.5 rounded-full", resolvedAvatar ? "bg-lime-400 animate-pulse" : "bg-zinc-600")} />
+                  <span className="tracking-tighter uppercase font-bold text-[8px] text-zinc-300">
+                    {resolvedAvatar ? "MINIO" : "INIT"}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {isSelfUser && (
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+          )}
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -268,21 +401,50 @@ export function ProfilePage() {
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white uppercase font-mono tracking-tight">
-                {m.full_name || m.handle}
+                {displayName}
               </h1>
 
-              {/* If viewing own profile: Direct link to Settings */}
+              {/* If viewing own profile: Photo upload and Direct link to Settings */}
               {isSelfUser ? (
-                <Button
-                  asChild
-                  id="profile-edit-btn"
-                  className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-lime-400 bg-lime-400/10 border border-lime-400/30 hover:bg-lime-400 hover:text-black rounded-none cursor-pointer"
-                >
-                  <Link to="/portal/settings">
-                    <Edit3 size={12} />
-                    <span>Edit Profile</span>
-                  </Link>
-                </Button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    type="button"
+                    onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-black bg-lime-400 hover:bg-lime-300 rounded-none cursor-pointer shadow-sm shadow-lime-400/20"
+                  >
+                    {isUploadingAvatar ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <Camera size={12} />
+                    )}
+                    <span>{resolvedAvatar ? "Change Photo" : "Upload Photo"}</span>
+                  </Button>
+
+                  {resolvedAvatar && (
+                    <Button
+                      type="button"
+                      onClick={handleAvatarRemove}
+                      variant="outline"
+                      className="h-auto inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs uppercase font-medium text-red-400 border-red-500/30 hover:bg-red-950/40 hover:text-red-300 rounded-none cursor-pointer"
+                      title="Revert to initials callsign"
+                    >
+                      <Trash2 size={11} />
+                      <span className="hidden sm:inline">Remove</span>
+                    </Button>
+                  )}
+
+                  <Button
+                    asChild
+                    id="profile-edit-btn"
+                    className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-lime-400 bg-lime-400/10 border border-lime-400/30 hover:bg-lime-400 hover:text-black rounded-none cursor-pointer"
+                  >
+                    <Link to="/portal/settings">
+                      <Edit3 size={12} />
+                      <span>Edit Profile</span>
+                    </Link>
+                  </Button>
+                </div>
               ) : (
                 /* If viewing another student: Follow & Share buttons */
                 <div className="flex items-center gap-2">

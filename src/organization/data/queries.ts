@@ -7,6 +7,7 @@ export function queryOptions<T extends Record<string, any>>(opts: T): T {
   return opts;
 }
 import { getToken, getApiBase, clearToken, isAuthenticated } from "@/lib/auth";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
   getPublicPortalData,
   getMemberProfileData,
@@ -388,4 +389,7 @@ export const portalQueries = {
 
 export function invalidateFullProfileCache(): void {
   fullProfileCache = null;
+  invalidateSwrCache("member:profile:full");
+  invalidateSwrCache("student:profile:*");
+  invalidateSwrCache("leaderboard:*");
 }

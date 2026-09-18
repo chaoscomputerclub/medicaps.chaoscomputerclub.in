@@ -18,10 +18,13 @@ import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useAppSelector } from "@/store/hooks";
+import { getFirstName, formatFullName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const currentMember = useAppSelector((s) => s.auth.member);
 
   const { data: profile, loading: profileLoading } = useSwrData<FullProfilePayload | null>(
     "member:profile:full",
@@ -52,18 +55,23 @@ export function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  const member = profile?.member;
+  const member = {
+    ...(profile?.member || {}),
+    ...(currentMember ? {
+      full_name: currentMember.full_name || profile?.member?.full_name,
+      handle: currentMember.handle || profile?.member?.handle,
+      rating: currentMember.rating ?? profile?.member?.rating,
+      department: currentMember.department || profile?.member?.department,
+      tier: (profile?.member as any)?.tier,
+    } : {}),
+  };
   const contests = publicData.contests || [];
   const history = profile?.ratingHistory || [];
   const pass = profile?.campusPass;
 
   const live = contests.find((c) => c.status === "live");
   const next = contests.find((c) => c.status === "upcoming");
-  const greetingName = member?.full_name
-    ? member.full_name.split(" ")[0]
-    : member?.handle && member.handle.toLowerCase() !== "cadet"
-      ? member.handle
-      : "";
+  const greetingName = getFirstName(member?.full_name, member?.handle);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -71,7 +79,7 @@ export function DashboardPage() {
       <PageHeader
         kicker="00 // Operations"
         index="INDEX 0.0 · CADET OPS"
-        title={`Good morning${greetingName ? `, ${greetingName}.` : "."}`}
+        title={`Good morning, ${greetingName}.`}
         description="Your official competitive record is sealed inside verified Medi-Caps workstation laboratories."
         action={
           <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-xs min-w-[200px]">

@@ -4,7 +4,7 @@
  * Supports direct multipart upload, public unsigned CDN URLs, and presigned signed URLs.
  */
 
-import { getApiBase, getToken } from "./auth";
+import { getApiBase, getToken, updateProfile } from "./auth";
 
 export interface StorageUploadResult {
   bucket: string;
@@ -144,4 +144,87 @@ export async function getPresignedDownloadUrl(
 
   const json = await res.json();
   return json.data.signed_url;
+}
+
+/**
+ * Uploads a profile avatar directly to MinIO and binds it to the member's profile in one atomic call.
+ */
+export async function uploadAvatarDirect(
+  file: File
+): Promise<{ success: boolean; message: string; avatar_url: string; member?: any }> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Authentication required to upload avatar.");
+  }
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please upload a PNG, JPG, WebP, or GIF image.");
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("File exceeds 10MB limit. Please select an image under 10MB.");
+  }
+
+  const apiBase = getApiBase();
+  const formData = new FormData();
+  formData.append("file", file);
+
+  // 1. Attempt atomic backend endpoint
+  try {
+    const res = await fetch(`${apiBase}/auth/profile/avatar`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // Fall through to resilient fallback
+  }
+
+  // 2. Resilient fallback: upload to MinIO via /storage/upload and update profile via /auth/profile
+  const uploadRes = await uploadMedia(file, "avatars");
+  const updateRes = await updateProfile({ avatar_url: uploadRes.public_url });
+
+  return {
+    success: true,
+    message: "Profile avatar uploaded successfully",
+    avatar_url: uploadRes.public_url,
+    member: updateRes.member,
+  };
+}
+
+/**
+ * Removes the member's custom avatar and reverts to initials.
+ */
+export async function removeAvatarDirect(): Promise<{ success: boolean; message: string; member?: any }> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Authentication required.");
+  }
+  const apiBase = getApiBase();
+
+  try {
+    const res = await fetch(`${apiBase}/auth/profile/avatar`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // Fall through
+  }
+
+  const updateRes = await updateProfile({ avatar_url: "" });
+  return {
+    success: true,
+    message: "Avatar removed successfully",
+    member: updateRes.member,
+  };
 }
