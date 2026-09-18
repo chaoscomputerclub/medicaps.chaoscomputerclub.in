@@ -29,38 +29,51 @@ export function ScoreboardMatrix({
   const safeProblems = problems || [];
 
   return (
-    <div className="table-scroll">
-      <table className="scoreboard">
-        <thead>
+    <div className="overflow-x-auto border border-white/10 bg-black rounded-none">
+      <table className="w-full text-left font-mono text-xs border-collapse">
+        <thead className="bg-zinc-950 text-slate-400 text-[10px] uppercase tracking-wider border-b border-white/10">
           <tr>
-            <th>#</th>
-            <th>Contestant</th>
-            {!compact && <th>Dept.</th>}
+            <th className="p-3 w-12 text-center">#</th>
+            <th className="p-3">Contestant</th>
+            {!compact && <th className="p-3">Dept.</th>}
             {safeProblems.map((p) => (
-              <th key={p.index} title={p.title}>
+              <th key={p.index} title={p.title} className="p-3 text-center w-16">
                 {p.index}
               </th>
             ))}
-            <th>Solved</th>
-            <th>Penalty</th>
-            <th>Δ</th>
+            <th className="p-3 text-center w-16">Solved</th>
+            <th className="p-3 text-right w-24">Penalty</th>
+            <th className="p-3 text-right w-16">Δ</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-white/5">
           {entries.map((row) => (
-            <tr key={row.handle} className={cn(row.is_you && "is-you")}>
-              <td>
-                <strong>{row.rank}</strong>
+            <tr
+              key={row.handle}
+              className={cn(
+                "hover:bg-zinc-900/50 transition-colors duration-100",
+                row.is_you ? "bg-lime-400/5 border-l-2 border-l-lime-400" : ""
+              )}
+            >
+              <td className="p-3 text-center font-bold text-slate-300 tabular-nums">
+                {row.rank}
               </td>
-              <td>
-                <div className="competitor">
-                  <strong>{row.handle}</strong>
-                  <span>{row.full_name}</span>
+              <td className="p-3">
+                <div className="flex flex-col">
+                  <strong className="text-white font-semibold flex items-center gap-1.5">
+                    {row.handle}
+                    {row.is_you && (
+                      <span className="text-[9px] px-1 py-0.2 bg-lime-400 text-black font-bold uppercase">
+                        YOU
+                      </span>
+                    )}
+                  </strong>
+                  <span className="text-[11px] text-slate-400 font-sans">{row.full_name}</span>
                 </div>
               </td>
               {!compact && (
-                <td>
-                  <span className="mono-tag">
+                <td className="p-3">
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono bg-zinc-900 border border-white/10 text-slate-300">
                     {row.department} · {row.batch.slice(2)}
                   </span>
                 </td>
@@ -68,12 +81,17 @@ export function ScoreboardMatrix({
               {safeProblems.map((p, i) => {
                 const cell = row.problems?.[i];
                 return (
-                  <td key={p.index}>
+                  <td key={p.index} className="p-2 text-center">
                     <span
                       className={cn(
-                        "problem-cell",
-                        cell?.solved ? "solved" : "missed",
-                        cell?.first_ac && "first-ac",
+                        "inline-flex items-center justify-center min-w-[3rem] px-1.5 py-0.5 text-[11px] font-mono tabular-nums",
+                        cell?.solved
+                          ? cell.first_ac
+                            ? "bg-lime-400 text-black font-bold border border-lime-400"
+                            : "bg-lime-400/15 text-lime-400 font-bold border border-lime-400/30"
+                          : cell?.wrong_attempts
+                            ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                            : "text-slate-600"
                       )}
                     >
                       {cell?.solved
@@ -85,9 +103,22 @@ export function ScoreboardMatrix({
                   </td>
                 );
               })}
-              <td className="score-value">{row.solved}</td>
-              <td className="mono-value">{formatPenalty(row.penalty_seconds)}</td>
-              <td className={cn("delta", row.rating_delta >= 0 ? "positive" : "negative")}>
+              <td className="p-3 text-center font-bold text-white tabular-nums text-sm">
+                {row.solved}
+              </td>
+              <td className="p-3 text-right text-slate-300 tabular-nums">
+                {formatPenalty(row.penalty_seconds)}
+              </td>
+              <td
+                className={cn(
+                  "p-3 text-right font-bold tabular-nums",
+                  row.rating_delta > 0
+                    ? "text-lime-400"
+                    : row.rating_delta < 0
+                      ? "text-red-400"
+                      : "text-slate-400"
+                )}
+              >
                 {row.rating_delta > 0 ? "+" : ""}
                 {row.rating_delta}
               </td>

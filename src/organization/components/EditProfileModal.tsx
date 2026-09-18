@@ -96,7 +96,7 @@ const PRESET_EMBLEMS: EmblemDef[] = [
     id: "grandmaster",
     label: "Grandmaster",
     icon: "🏆",
-    bg: "from-amber-500/20 to-orange-900/40",
+    bg: "from-amber-500/20 to-amber-950/40",
     border: "border-amber-500/60",
     text: "text-amber-400",
   },
@@ -253,15 +253,15 @@ export function EditProfileModal() {
         if (!open) dispatch(closeEditProfileModal());
       }}
     >
-      <DialogContent className="max-w-3xl rounded-2xl bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden max-h-[90vh] shadow-2xl">
+      <DialogContent className="max-w-3xl rounded-none bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden max-h-[90vh] shadow-2xl">
         {/* Modal Header */}
         <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
-            <User size={16} className="text-orange-400" />
+            <User size={16} className="text-lime-400" />
             <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
               Edit Competitive Profile
             </DialogTitle>
-            <span className="rounded-md border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest text-orange-400 inline-flex items-center gap-1">
+            <span className="rounded-none border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest text-lime-400 inline-flex items-center gap-1">
               <Sparkles size={10} />
               INTERLEET V4
             </span>
@@ -278,14 +278,14 @@ export function EditProfileModal() {
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-bold">
                   Profile Avatar & Emblem
                 </label>
-                <div className="flex items-center gap-1 border border-white/10 rounded-xl p-0.5 bg-zinc-900">
+                <div className="flex items-center gap-1 border border-white/10 rounded-none p-0.5 bg-zinc-900">
                   <button
                     type="button"
                     onClick={() => setAvatarMode("custom")}
                     className={cn(
-                      "px-2.5 py-1 text-[9px] font-mono uppercase font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1",
+                      "px-2.5 py-1 text-[9px] font-mono uppercase font-bold rounded-none transition-all cursor-pointer flex items-center gap-1",
                       avatarMode === "custom"
-                        ? "bg-orange-500 text-black shadow-sm"
+                        ? "bg-lime-400 text-black shadow-sm"
                         : "text-zinc-400 hover:text-white",
                     )}
                   >
@@ -296,9 +296,9 @@ export function EditProfileModal() {
                     type="button"
                     onClick={() => setAvatarMode("emblem")}
                     className={cn(
-                      "px-2.5 py-1 text-[9px] font-mono uppercase font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1",
+                      "px-2.5 py-1 text-[9px] font-mono uppercase font-bold rounded-none transition-all cursor-pointer flex items-center gap-1",
                       avatarMode === "emblem"
-                        ? "bg-orange-500 text-black shadow-sm"
+                        ? "bg-lime-400 text-black shadow-sm"
                         : "text-zinc-400 hover:text-white",
                     )}
                   >
@@ -318,8 +318,8 @@ export function EditProfileModal() {
               />
 
               {avatarMode === "custom" ? (
-                <div className="p-3.5 border border-white/10 bg-zinc-900/60 rounded-xl flex items-center gap-3.5">
-                  <div className="relative w-14 h-14 rounded-xl border border-white/10 bg-zinc-900 overflow-hidden flex-shrink-0 flex items-center justify-center group shadow-md">
+                <div className="p-3.5 border border-white/10 bg-zinc-900/60 rounded-none flex items-center gap-3.5">
+                  <div className="relative w-14 h-14 rounded-none border border-white/10 bg-zinc-900 overflow-hidden flex-shrink-0 flex items-center justify-center group shadow-md">
                     {customAvatarUrl ? (
                       <img
                         src={customAvatarUrl}
@@ -332,7 +332,7 @@ export function EditProfileModal() {
 
                     {uploadingAvatar && (
                       <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-                        <Loader2 size={16} className="text-orange-400 animate-spin" />
+                        <Loader2 size={16} className="text-lime-400 animate-spin" />
                       </div>
                     )}
                   </div>
@@ -343,7 +343,7 @@ export function EditProfileModal() {
                         type="button"
                         disabled={uploadingAvatar}
                         onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono uppercase font-bold text-orange-400 bg-orange-500/10 border border-orange-500/40 hover:bg-orange-500 hover:text-black rounded-lg transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono uppercase font-bold text-lime-400 bg-lime-400/10 border border-lime-400/40 hover:bg-lime-400 hover:text-black rounded-none transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98]"
                       >
                         {uploadingAvatar ? (
                           <>
@@ -365,7 +365,7 @@ export function EditProfileModal() {
                             setCustomAvatarUrl(null);
                             setAvatarMode("emblem");
                           }}
-                          className="p-1.5 text-zinc-400 hover:text-rose-400 border border-white/10 hover:border-rose-500/50 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-zinc-400 hover:text-rose-400 border border-white/10 hover:border-rose-500/50 rounded-none transition-colors cursor-pointer"
                           title="Remove custom photo and revert to emblem"
                         >
                           <Trash2 size={12} />
@@ -385,10 +385,10 @@ export function EditProfileModal() {
                       type="button"
                       onClick={() => setAvatarEmblem(emblem.id)}
                       className={cn(
-                        "h-11 rounded-xl border flex flex-col items-center justify-center text-sm transition-all cursor-pointer relative group",
+                        "h-11 rounded-none border flex flex-col items-center justify-center text-sm transition-all cursor-pointer relative group",
                         avatarEmblem === emblem.id
                           ? cn(
-                              "border-orange-500 shadow-md shadow-orange-500/20 bg-orange-500/10",
+                              "border-lime-400 shadow-md shadow-lime-400/20 bg-lime-400/10",
                               emblem.bg,
                             )
                           : "border-white/10 bg-zinc-900/60 hover:border-white/20",
@@ -397,7 +397,7 @@ export function EditProfileModal() {
                     >
                       <span className="text-base">{emblem.icon}</span>
                       {avatarEmblem === emblem.id && (
-                        <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-orange-500" />
+                        <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-lime-400" />
                       )}
                     </button>
                   ))}
@@ -408,7 +408,7 @@ export function EditProfileModal() {
             {/* Full Name */}
             <div>
               <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-1 font-bold">
-                Competitive Full Name <span className="text-orange-400">*</span>
+                Competitive Full Name <span className="text-lime-400">*</span>
               </label>
               <input
                 type="text"
@@ -417,7 +417,7 @@ export function EditProfileModal() {
                 maxLength={60}
                 required
                 placeholder="e.g. Santusht Kotai"
-                className="w-full px-3 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-orange-500/60 text-white outline-none rounded-xl transition-colors"
+                className="w-full px-3 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-lime-400/60 text-white outline-none rounded-none transition-colors"
               />
             </div>
 
@@ -430,7 +430,7 @@ export function EditProfileModal() {
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-2.5 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-orange-500/60 text-white outline-none rounded-xl transition-colors cursor-pointer"
+                  className="w-full px-2.5 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-lime-400/60 text-white outline-none rounded-none transition-colors cursor-pointer"
                 >
                   {DEPARTMENTS.map((dept) => (
                     <option key={dept} value={dept} className="bg-zinc-900 text-white">
@@ -447,7 +447,7 @@ export function EditProfileModal() {
                 <select
                   value={batch}
                   onChange={(e) => setBatch(e.target.value)}
-                  className="w-full px-2.5 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-orange-500/60 text-white outline-none rounded-xl transition-colors cursor-pointer"
+                  className="w-full px-2.5 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-lime-400/60 text-white outline-none rounded-none transition-colors cursor-pointer"
                 >
                   {BATCHES.map((b) => (
                     <option key={b} value={b} className="bg-zinc-900 text-white">
@@ -472,7 +472,7 @@ export function EditProfileModal() {
                 maxLength={280}
                 rows={3}
                 placeholder="Share your algorithms trajectory, preferred languages, and competitive goals..."
-                className="w-full px-3 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-orange-500/60 text-white outline-none rounded-xl transition-colors resize-none leading-relaxed"
+                className="w-full px-3 py-2 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-lime-400/60 text-white outline-none rounded-none transition-colors resize-none leading-relaxed"
               />
             </div>
 
@@ -492,7 +492,7 @@ export function EditProfileModal() {
                     value={githubUsername}
                     onChange={(e) => setGithubUsername(e.target.value)}
                     placeholder="octocat"
-                    className="w-full pl-6 pr-3 py-1.5 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-orange-500/60 text-white outline-none rounded-xl"
+                    className="w-full pl-6 pr-3 py-1.5 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-lime-400/60 text-white outline-none rounded-none"
                   />
                 </div>
               </div>
@@ -511,20 +511,20 @@ export function EditProfileModal() {
                     value={linkedinUrl}
                     onChange={(e) => setLinkedinUrl(e.target.value)}
                     placeholder="username"
-                    className="w-full pl-7 pr-3 py-1.5 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-orange-500/60 text-white outline-none rounded-xl"
+                    className="w-full pl-7 pr-3 py-1.5 text-xs font-mono bg-zinc-900/60 border border-white/10 focus:border-lime-400/60 text-white outline-none rounded-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Immutable Locked Fields Banner */}
-            <div className="p-3.5 bg-zinc-900/60 border border-white/10 rounded-xl space-y-2">
-              <div className="flex items-center gap-2 text-[10px] font-mono uppercase font-bold text-orange-400">
+            <div className="p-3.5 bg-zinc-900/60 border border-white/10 rounded-none space-y-2">
+              <div className="flex items-center gap-2 text-[10px] font-mono uppercase font-bold text-lime-400">
                 <Lock size={12} />
                 <span>Cryptographically Locked Credentials</span>
               </div>
               <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
-                <div className="p-2.5 bg-zinc-950/60 border border-white/10 rounded-lg">
+                <div className="p-2.5 bg-zinc-950/60 border border-white/10 rounded-none">
                   <span className="text-[9px] uppercase text-zinc-500 block font-mono">
                     Institutional Email
                   </span>
@@ -532,7 +532,7 @@ export function EditProfileModal() {
                     {member?.email || "—"}
                   </strong>
                 </div>
-                <div className="p-2.5 bg-zinc-950/60 border border-white/10 rounded-lg">
+                <div className="p-2.5 bg-zinc-950/60 border border-white/10 rounded-none">
                   <span className="text-[9px] uppercase text-zinc-500 block font-mono">
                     Medi-Caps PRN
                   </span>
@@ -552,21 +552,21 @@ export function EditProfileModal() {
               <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 REAL-TIME CARD PREVIEW
               </span>
-              <span className="text-[9px] font-mono text-orange-400 uppercase font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
+              <span className="text-[9px] font-mono text-lime-400 uppercase font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-lime-400 animate-ping" />
                 Live Sync
               </span>
             </div>
 
             {/* Live Interactive Card */}
-            <div className="relative rounded-2xl border border-white/10 bg-zinc-900/60 p-5 shadow-2xl overflow-hidden space-y-4 backdrop-blur-md">
+            <div className="relative rounded-none border border-white/10 bg-zinc-900/60 p-5 shadow-2xl overflow-hidden space-y-4 backdrop-blur-md">
               {/* Background ambient gradient */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-3xl pointer-events-none" />
 
               {/* Card Header with MinIO Photo / Emblem & Verified Identity */}
               <div className="flex items-start gap-3.5">
                 {avatarMode === "custom" && customAvatarUrl ? (
-                  <div className="w-12 h-12 rounded-xl border border-white/10 bg-zinc-900 overflow-hidden flex-shrink-0 shadow-lg">
+                  <div className="w-12 h-12 rounded-none border border-white/10 bg-zinc-900 overflow-hidden flex-shrink-0 shadow-lg">
                     <img
                       src={customAvatarUrl}
                       alt={fullName}
@@ -576,7 +576,7 @@ export function EditProfileModal() {
                 ) : (
                   <div
                     className={cn(
-                      "w-12 h-12 rounded-xl border flex items-center justify-center font-mono text-base font-bold flex-shrink-0 shadow-lg",
+                      "w-12 h-12 rounded-none border flex items-center justify-center font-mono text-base font-bold flex-shrink-0 shadow-lg",
                       selectedEmblem.bg,
                       selectedEmblem.border,
                       selectedEmblem.text,
@@ -591,18 +591,18 @@ export function EditProfileModal() {
                     <h3 className="font-bold text-sm text-white truncate tracking-tight">
                       {fullName || "New Cadet"}
                     </h3>
-                    <span className="rounded-md border border-emerald-500/40 bg-emerald-950/40 px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase text-emerald-400 inline-flex items-center gap-1">
+                    <span className="rounded-none border border-emerald-500/40 bg-emerald-950/40 px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase text-emerald-400 inline-flex items-center gap-1">
                       <ShieldCheck size={10} />
                       VERIFIED
                     </span>
                   </div>
 
-                  <p className="text-xs font-mono text-orange-400">
+                  <p className="text-xs font-mono text-lime-400">
                     @{member?.handle || "cadet"}
                   </p>
 
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-[9px] font-mono uppercase bg-zinc-800/80 border border-white/10 text-zinc-400 px-1.5 py-0.5 rounded-md">
+                    <span className="text-[9px] font-mono uppercase bg-zinc-800/80 border border-white/10 text-zinc-400 px-1.5 py-0.5 rounded-none">
                       {department} · {batch}
                     </span>
                     <TierBadge>{member?.tier || "1★ Explorer"}</TierBadge>
@@ -611,7 +611,7 @@ export function EditProfileModal() {
               </div>
 
               {/* Live Bio Quote */}
-              <div className="p-3 bg-zinc-950/60 border border-white/10 rounded-xl">
+              <div className="p-3 bg-zinc-950/60 border border-white/10 rounded-none">
                 <p className="text-xs text-zinc-300 italic leading-relaxed line-clamp-3">
                   "
                   {bio ||
@@ -623,13 +623,13 @@ export function EditProfileModal() {
               {/* Live Social Badges */}
               <div className="flex items-center gap-2 flex-wrap pt-1">
                 {githubUsername && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-white bg-zinc-950/60 border border-white/10 px-2 py-1 rounded-lg">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-white bg-zinc-950/60 border border-white/10 px-2 py-1 rounded-none">
                     <Github size={11} />
                     <span>github.com/{githubUsername}</span>
                   </span>
                 )}
                 {linkedinUrl && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#38bdf8] bg-zinc-950/60 border border-white/10 px-2 py-1 rounded-lg">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#38bdf8] bg-zinc-950/60 border border-white/10 px-2 py-1 rounded-none">
                     <Linkedin size={11} />
                     <span>in/{linkedinUrl}</span>
                   </span>
@@ -643,15 +643,15 @@ export function EditProfileModal() {
 
               {/* Performance Metrics Quick Strip */}
               <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-3 text-center">
-                <div className="p-2 rounded-xl bg-zinc-950/60 border border-white/10">
+                <div className="p-2 rounded-none bg-zinc-950/60 border border-white/10">
                   <span className="text-[8px] uppercase font-mono text-zinc-500 block">
                     Rating
                   </span>
-                  <strong className="text-xs font-mono text-orange-400 mt-0.5 block tabular-nums">
+                  <strong className="text-xs font-mono text-lime-400 mt-0.5 block tabular-nums">
                     {member?.rating || 1200}
                   </strong>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-950/60 border border-white/10">
+                <div className="p-2 rounded-none bg-zinc-950/60 border border-white/10">
                   <span className="text-[8px] uppercase font-mono text-zinc-500 block">
                     Campus Rank
                   </span>
@@ -659,7 +659,7 @@ export function EditProfileModal() {
                     #{member?.university_rank || 1}
                   </strong>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-950/60 border border-white/10">
+                <div className="p-2 rounded-none bg-zinc-950/60 border border-white/10">
                   <span className="text-[8px] uppercase font-mono text-zinc-500 block">
                     Followers
                   </span>
@@ -679,7 +679,7 @@ export function EditProfileModal() {
             variant="outline"
             disabled={saving || uploadingAvatar}
             onClick={() => dispatch(closeEditProfileModal())}
-            className="px-4 py-2 font-mono text-xs uppercase font-bold text-zinc-300 border-white/10 hover:border-white/20 hover:text-white rounded-xl transition-all cursor-pointer active:scale-[0.98]"
+            className="px-4 py-2 font-mono text-xs uppercase font-bold text-zinc-300 border-white/10 hover:border-white/20 hover:text-white rounded-none transition-all cursor-pointer active:scale-[0.98]"
           >
             Cancel
           </Button>
@@ -688,7 +688,7 @@ export function EditProfileModal() {
             type="submit"
             form="edit-profile-form"
             disabled={saving || uploadingAvatar}
-            className="px-5 py-2 font-mono text-xs uppercase font-bold bg-orange-500 text-black hover:bg-orange-400 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20 active:scale-[0.98] disabled:opacity-50"
+            className="px-5 py-2 font-mono text-xs uppercase font-bold bg-lime-400 text-black hover:bg-lime-400 rounded-none flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-lime-400/20 active:scale-[0.98] disabled:opacity-50"
           >
             {saving ? (
               <>

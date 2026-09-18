@@ -7,11 +7,11 @@
 ## 1. Visual Theme & Atmosphere
 
 ### 1.1 Mood & Atmosphere
-The CCC Medi-Caps Chapter platform is a **high-precision competitive programming tournament arena and cybersecurity command center**. It fuses the tactile discipline of an air-gapped mission control terminal with the sleek, hyper-performant polish of modern developer tooling (Linear, Vercel, Raycast).
+The CCC Medi-Caps Chapter platform is a **high-precision competitive programming tournament arena and cybersecurity command center**. It fuses the tactile discipline of an air-gapped mission control terminal with the sleek, hyper-performant polish of modern developer tooling.
 
-- **Dominant Tone:** Void-black / obsidian surfaces (`#09090b`, `#0f0f11`, `#18181b`) paired with sharp, high-contrast industrial orange accents (`#f97316`) and telemetry cyan (`#06b6d4`).
-- **Texture & Light:** Deep matte charcoal surfaces with layered semi-transparent borders (`border-white/10`) and subtle dual-layer ambient shadows. Zero muddy drop shadows. Zero low-contrast gray-on-gray text.
-- **Anti-Slop Ban:** No generic AI-purple mesh gradients, no centered floating cards over dark blob backgrounds, no rounded cards-inside-cards-inside-cards, and no non-functional placeholder elements.
+- **Dominant Tone:** Void-black surfaces (`#000000`, `#080808`) paired with sharp, high-contrast **Lime Acid** accents (`#CCFF00` / `lime-400`), crisp pure white (`#ffffff` / `#eaeaea`), and subtle telemetry cyan (`#00e5ff`).
+- **Texture & Light:** Deep matte black surfaces with layered semi-transparent borders (`border-white/10`) and sharp rectangular contours. Zero rounded corners. Zero muddy drop shadows. Zero low-contrast gray-on-gray text.
+- **Brutalist Zero-Radius Standard:** Strictly **NO border radius (`rounded-none`)** across all containers, cards, buttons, badges, tabs, and inputs, directly aligned with the design language of [chaoscomputerclub.in](https://chaoscomputerclub.in).
 
 ### 1.2 The Three Design Dials (Taste Skill Configuration)
 Every frontend surface in this repository is governed by the three calibrated dials:
@@ -30,24 +30,24 @@ All colors are strictly mapped to semantic functional roles. Ad-hoc hex codes in
 
 | Semantic Token | Hex Code | HSL / Tailwind | Functional Role |
 | :--- | :--- | :--- | :--- |
-| `--bg-canvas` | `#09090b` | `zinc-950` | Primary viewport background (root layout) |
-| `--bg-surface-1` | `#0f0f11` | `zinc-900/90` | Top-level containers, sidebar shells, fixed navigation |
-| `--bg-surface-2` | `#18181b` | `zinc-900` | Interactive cards, modal dialogs, drawer panels |
-| `--bg-surface-3` | `#27272a` | `zinc-800` | Input fields, code editors, nested sub-panels |
-| `--bg-surface-hover` | `#3f3f46` | `zinc-700` | Hover highlight on secondary buttons and table rows |
-| `--accent-brand` | `#f97316` | `orange-500` | Primary action buttons, active tab indicators, focus rings |
-| `--accent-brand-hover` | `#ea580c` | `orange-600` | Active/hover state for primary action buttons |
-| `--accent-brand-subtle`| `rgba(249,115,22,0.12)` | `orange-500/12` | Active badges, selected list rows, subtle highlights |
-| `--accent-cyan` | `#06b6d4` | `cyan-500` | Live tournament telemetry, timer countdowns, SSE stream status |
+| `--bg-canvas` | `#000000` | `black` | Primary viewport background (root layout) |
+| `--bg-surface-1` | `#080808` | `zinc-950` | Top-level containers, sidebar shells, fixed navigation |
+| `--bg-surface-2` | `#111111` | `zinc-900` | Interactive cards, modal dialogs, drawer panels |
+| `--bg-surface-3` | `#161616` | `zinc-900/60` | Input fields, code editors, nested sub-panels |
+| `--bg-surface-hover` | `#222222` | `zinc-800` | Hover highlight on secondary buttons and table rows |
+| `--accent-brand` | `#CCFF00` | `lime-400` | Primary action buttons, active tab indicators, focus rings |
+| `--accent-brand-hover` | `#e6ff66` | `lime-300` | Active/hover state for primary action buttons |
+| `--accent-brand-subtle`| `rgba(204,255,0,0.12)`| `lime-400/12` | Active badges, selected list rows, subtle highlights |
+| `--accent-cyan` | `#00e5ff` | `cyan-400` | Live tournament telemetry, timer countdowns, SSE stream status |
 | `--status-success` | `#10b981` | `emerald-500` | Accepted (`AC`), checked-in campus pass, system operational |
-| `--status-error` | `#ef4444` | `red-500` | Wrong Answer (`WA`), Runtime Error, disqualified session |
+| `--status-error` | `#ff3344` | `red-500` | Wrong Answer (`WA`), Runtime Error, disqualified session |
 | `--status-warning` | `#f59e0b` | `amber-500` | Time Limit Exceeded (`TLE`), anti-cheat warning trigger |
 | `--border-subtle` | `rgba(255,255,255,0.08)` | `white/8` | Standard card and container perimeter borders |
 | `--border-strong` | `rgba(255,255,255,0.16)` | `white/16` | Active input borders, table header dividers |
-| `--border-accent` | `#f97316` | `orange-500` | Focused inputs, active contest phase outline |
-| `--text-primary` | `#f8fafc` | `slate-50` | Headings, primary labels, code editor syntax foreground |
-| `--text-secondary` | `#94a3b8` | `slate-400` | Subtitles, metadata labels, testcase parameters |
-| `--text-muted` | `#64748b` | `slate-500` | Timestamps, disabled control text, keyboard hints |
+| `--border-accent` | `#CCFF00` | `lime-400` | Focused inputs, active contest phase outline |
+| `--text-primary` | `#ffffff` | `white` | Headings, primary labels, code editor syntax foreground |
+| `--text-secondary` | `#a1a1aa` | `zinc-400` | Subtitles, metadata labels, testcase parameters |
+| `--text-muted` | `#71717a` | `zinc-500` | Timestamps, disabled control text, keyboard hints |
 
 ---
 
@@ -82,7 +82,8 @@ All colors are strictly mapped to semantic functional roles. Ad-hoc hex codes in
 
 ### 4.1 Buttons & Interactive Controls
 - **Hit Targets:** Minimum $24\text{px} \times 24\text{px}$ visual hit area on desktop; **minimum $44\text{px} \times 44\text{px}$** on touch/mobile devices.
-- **Focus Rings:** Every button, link, and input MUST show a clear, visible `:focus-visible` ring (`ring-2 ring-orange-500 ring-offset-2 ring-offset-zinc-950`). Never suppress focus rings.
+- **Focus Rings:** Every button, link, and input MUST show a clear, visible `:focus-visible` ring (`ring-2 ring-lime-400 ring-offset-2 ring-offset-black`). Never suppress focus rings.
+- **Zero Border Radius:** All buttons and interactive elements must have `rounded-none`.
 - **Loading State Rule:** During an in-flight submission, the button MUST remain enabled until click, show an inline spinning indicator, and **preserve its original label** (e.g., `<Spinner /> Submitting…`).
 - **Destructive Actions:** Actions that disqualify a cadet, reset a session, or revoke a campus pass MUST require explicit confirmation or provide an undo grace window.
 
@@ -91,11 +92,11 @@ All colors are strictly mapped to semantic functional roles. Ad-hoc hex codes in
 <button 
   type="submit"
   disabled={isPending}
-  className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-500 active:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+  className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black bg-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
 >
   {isPending ? (
     <>
-      <Loader2 className="w-4 h-4 animate-spin text-white" />
+      <Loader2 className="w-4 h-4 animate-spin text-black" />
       <span>Submitting…</span>
     </>
   ) : (
@@ -105,10 +106,8 @@ All colors are strictly mapped to semantic functional roles. Ad-hoc hex codes in
 ```
 
 ### 4.2 Cards & Surface Containers
-- **Nested Radii Formula:** Child corner radius must be strictly concentric to parent:
-  $$r_{\text{child}} = r_{\text{parent}} - \text{padding}$$
-  If parent has `rounded-xl` (12px) with `p-3` (12px), child inside must have `rounded-none` or `rounded-sm` (0–4px). Never put a rounded-2xl child inside a rounded-md parent.
-- **Border Treatment:** Layer crisp semi-transparent borders `border border-white/10` over dark surfaces to ensure sharp edge definition without muddy gradients.
+- **Zero Radius Standard:** Strictly `rounded-none` across all containers, cards, modals, and panels. No rounded corners.
+- **Border Treatment:** Layer crisp semi-transparent borders `border border-white/10` over deep black surfaces to ensure sharp edge definition without muddy gradients.
 
 ### 4.3 Forms & Inputs
 - **Mobile Input Font Size:** All `<input>` and `<textarea>` elements must have `font-size: 16px` (or `text-base` on mobile viewports) to prevent iOS Safari auto-zoom/pan on focus.

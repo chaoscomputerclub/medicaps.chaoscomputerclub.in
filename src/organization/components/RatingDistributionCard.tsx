@@ -70,7 +70,7 @@ export function RatingDistributionCard({
   const MAX_BAR_PX = 72;
 
   return (
-    <div className="flex flex-col justify-between h-full rounded-2xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
+    <div className="flex flex-col justify-between h-full rounded-none border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
       {/* Top Percentile Display */}
       <div>
         <span className="text-xs font-medium text-zinc-400 font-sans tracking-wide block">
@@ -113,7 +113,7 @@ export function RatingDistributionCard({
               >
                 {/* Tooltip */}
                 {isHovered && !isEmpty && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-white/10 text-[10px] font-mono text-zinc-200 rounded-md whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-white/10 text-[10px] font-mono text-zinc-200 rounded-none whitespace-nowrap z-20 pointer-events-none shadow-lg">
                     {bucket.min}–{bucket.min + 50}: <span className="tabular-nums font-bold">{count}</span>
                   </div>
                 )}
@@ -121,11 +121,11 @@ export function RatingDistributionCard({
                 <div
                   style={{ height: `${barHeightPx}px` }}
                   className={cn(
-                    "w-full rounded-t-[2px] transition-all duration-150",
+                    "w-full rounded-none transition-all duration-150",
                     isEmpty
                       ? "bg-zinc-800 opacity-40"
                       : isUserBucket
-                      ? "bg-orange-500 shadow-md shadow-orange-500/40 brightness-110"
+                      ? "bg-lime-400 shadow-md shadow-lime-400/40 brightness-110"
                       : isHovered
                       ? "bg-zinc-400"
                       : count === 0
@@ -145,7 +145,7 @@ export function RatingDistributionCard({
           <span className="text-[10px] font-mono text-zinc-400 uppercase block">
             Contest Rating
           </span>
-          <strong className="text-sm font-mono font-bold text-orange-400 block mt-0.5 tabular-nums">
+          <strong className="text-sm font-mono font-bold text-lime-400 block mt-0.5 tabular-nums">
             {(userRating ?? member?.rating)?.toLocaleString() ?? 1200}
           </strong>
         </div>

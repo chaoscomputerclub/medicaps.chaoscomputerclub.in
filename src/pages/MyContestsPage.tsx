@@ -50,7 +50,7 @@ export function MyContestsPage() {
       {/* Header with quick stats */}
       <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end">
         <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-orange-400 font-bold mb-1">Your competition record</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-lime-400 font-bold mb-1">Your competition record</p>
           <h1 className="text-3xl sm:text-4xl font-mono font-black text-white uppercase tracking-tight">My contests</h1>
           <p className="text-sm text-zinc-400 mt-1">
             Everything you entered, qualified for, or completed — in one place.
@@ -58,7 +58,7 @@ export function MyContestsPage() {
         </div>
 
         <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
-          <div className="flex flex-col border-l-2 border-orange-500 pl-3">
+          <div className="flex flex-col border-l-2 border-lime-400 pl-3">
             <strong className="font-mono tabular-nums text-2xl font-bold text-white">{data.length}</strong>
             <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOTAL ENTERED</span>
           </div>
@@ -75,30 +75,30 @@ export function MyContestsPage() {
 
       {/* Segmented Filter Controls using shadcn Tabs */}
       <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-6">
-        <TabsList className="h-auto flex-wrap gap-1 rounded-xl border border-white/10 bg-zinc-900/60 p-1.5 backdrop-blur-md">
-          <TabsTrigger value="all" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+        <TabsList className="h-auto flex-wrap gap-1 rounded-none border border-white/10 bg-zinc-900/60 p-1.5 backdrop-blur-md">
+          <TabsTrigger value="all" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
             All (<span className="tabular-nums">{data.length}</span>)
           </TabsTrigger>
-          <TabsTrigger value="registered" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+          <TabsTrigger value="registered" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
             Registered (<span className="tabular-nums">{registeredCount}</span>)
           </TabsTrigger>
-          <TabsTrigger value="live" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+          <TabsTrigger value="live" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
             Live Screening (<span className="tabular-nums">{liveCount}</span>)
           </TabsTrigger>
-          <TabsTrigger value="completed" className="rounded-lg font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-orange-500 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+          <TabsTrigger value="completed" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
             Completed (<span className="tabular-nums">{completedCount}</span>)
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
+      <section className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
         <div className="flex items-center justify-between border-b border-white/10 bg-zinc-950/40 p-4 sm:p-6">
           <SectionHeader
             kicker="Contest Ledger"
             title={`Showing ${filteredContests.length} ${filter === "all" ? "participations" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild className="rounded-xl font-mono text-xs text-zinc-300 border-white/10 bg-zinc-900/60 hover:border-white/20 hover:text-white active:scale-[0.98]">
+          <Button variant="outline" size="sm" asChild className="rounded-none font-mono text-xs text-zinc-300 border-white/10 bg-zinc-900/60 hover:border-white/20 hover:text-white active:scale-[0.98]">
             <Link to="/portal/contests">
               Browse All Contests
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -117,7 +117,7 @@ export function MyContestsPage() {
                 ? "You haven't registered for upcoming contests yet. Explore the contest calendar and claim your workstation seat."
                 : "Enter two-round campus contests to build your verified competitive record."}
             </p>
-            <Button asChild className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]">
+            <Button asChild className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-lime-400/20 active:scale-[0.98]">
               <Link to="/portal/contests">Explore Active Contests</Link>
             </Button>
           </div>
@@ -138,23 +138,23 @@ export function MyContestsPage() {
                   <div className="flex items-start gap-4">
                     <div className="shrink-0 mt-1">
                       {isQualified ? (
-                        <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shadow-sm">
+                        <div className="w-10 h-10 rounded-none bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shadow-sm">
                           <CheckCircle2 size={20} />
                         </div>
                       ) : isLive ? (
-                        <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-sm">
+                        <div className="w-10 h-10 rounded-none bg-amber-950/80 border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-sm">
                           <Radio size={20} className="animate-pulse" />
                         </div>
                       ) : isUpcoming ? (
-                        <div className="w-10 h-10 rounded-xl bg-amber-950/30 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm">
+                        <div className="w-10 h-10 rounded-none bg-amber-950/30 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm">
                           <Clock3 size={20} />
                         </div>
                       ) : isPending ? (
-                        <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-sm">
+                        <div className="w-10 h-10 rounded-none bg-cyan-950/40 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-sm">
                           <Clock3 size={20} />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-xl bg-zinc-800/60 border border-white/10 flex items-center justify-center text-zinc-400 shadow-sm">
+                        <div className="w-10 h-10 rounded-none bg-zinc-800/60 border border-white/10 flex items-center justify-center text-zinc-400 shadow-sm">
                           <MinusCircle size={20} />
                         </div>
                       )}
@@ -162,27 +162,27 @@ export function MyContestsPage() {
 
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-white/10">{c.season}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-none bg-zinc-800/80 text-zinc-300 border border-white/10">{c.season}</span>
                         {isQualified && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-500/40">
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-none border border-emerald-500/40">
                             <ShieldCheck size={11} />
                             Top 30 Qualified
                           </span>
                         )}
                         {isUpcoming && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-500/40">
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-none border border-amber-500/40">
                             Registered · Seat Confirmed
                           </span>
                         )}
                         {isLive && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-500/50">
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-none border border-amber-500/50">
                             <i className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-ping" />
                             Screening Active
                           </span>
                         )}
                       </div>
 
-                      <h2 className="text-base sm:text-lg font-bold text-white hover:text-orange-400 transition-colors">
+                      <h2 className="text-base sm:text-lg font-bold text-white hover:text-lime-400 transition-colors">
                         <Link to={`/portal/contests/${c.contest_slug}`}>
                           {c.contest_title}
                         </Link>
@@ -234,7 +234,7 @@ export function MyContestsPage() {
                       ) : isUpcoming ? (
                         <div>
                           <dt className="text-[10px] text-zinc-400 uppercase">Status</dt>
-                          <dd className="text-xs font-bold text-orange-400">
+                          <dd className="text-xs font-bold text-lime-400">
                             Standby
                           </dd>
                         </div>
@@ -243,7 +243,7 @@ export function MyContestsPage() {
                       {c.score !== null ? (
                         <div>
                           <dt className="text-[10px] text-zinc-400 uppercase">Score</dt>
-                          <dd className="text-sm sm:text-base font-extrabold text-orange-400 tabular-nums">
+                          <dd className="text-sm sm:text-base font-extrabold text-lime-400 tabular-nums">
                             {c.score}/100
                           </dd>
                         </div>
@@ -261,7 +261,7 @@ export function MyContestsPage() {
                       {isLive && !c.assessment_submitted && c.score === null ? (
                         <Button
                           asChild
-                          className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]"
+                          className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-lime-400/20 active:scale-[0.98]"
                         >
                           <Link to={`/assessments/${c.contest_slug}`}>
                             <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
@@ -272,7 +272,7 @@ export function MyContestsPage() {
                         <Button
                           variant="outline"
                           asChild
-                          className="rounded-xl border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
+                          className="rounded-none border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}`}>
                             View Brief
@@ -283,7 +283,7 @@ export function MyContestsPage() {
                         <Button
                           variant="outline"
                           asChild
-                          className="rounded-xl border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
+                          className="rounded-none border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}/results`}>
                             Scoreboard

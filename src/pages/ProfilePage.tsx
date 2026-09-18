@@ -52,9 +52,9 @@ const EMBLEM_MAP: Record<string, { icon: string; bg: string; border: string; tex
   },
   grandmaster: {
     icon: "🏆",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/40",
-    text: "text-orange-400",
+    bg: "bg-lime-400/10",
+    border: "border-lime-400/40",
+    text: "text-lime-400",
   },
   cipher: { icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
 };
@@ -134,7 +134,7 @@ export function ProfilePage() {
         <div className="flex gap-3 pt-2">
           <Button
             onClick={() => navigate("/portal/leaderboard")}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-mono uppercase text-xs rounded-xl shadow-md shadow-orange-500/20"
+            className="bg-lime-400 hover:bg-lime-300 text-black font-bold font-mono uppercase text-xs rounded-none shadow-md shadow-lime-400/20"
           >
             View Leaderboard
           </Button>
@@ -142,7 +142,7 @@ export function ProfilePage() {
             <Button
               onClick={() => navigate("/auth")}
               variant="outline"
-              className="border-white/10 text-white font-mono uppercase text-xs rounded-xl"
+              className="border-white/10 text-white font-mono uppercase text-xs rounded-none"
             >
               Sign In
             </Button>
@@ -249,21 +249,21 @@ export function ProfilePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Profile Header */}
-      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
+      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
         <div className="flex items-start gap-5">
-          <Avatar className="size-16 sm:size-20 rounded-2xl border border-white/10 bg-zinc-950 shrink-0 shadow-inner">
+          <Avatar className="size-16 sm:size-20 rounded-none border border-white/10 bg-zinc-950 shrink-0 shadow-inner">
             {m.avatar_url &&
             (m.avatar_url.startsWith("http") ||
               m.avatar_url.startsWith("/media/") ||
               m.avatar_url.startsWith("/")) ? (
-              <AvatarImage src={m.avatar_url} alt={m.full_name || m.handle} className="object-cover rounded-2xl" />
+              <AvatarImage src={m.avatar_url} alt={m.full_name || m.handle} className="object-cover rounded-none" />
             ) : null}
             <AvatarFallback
               className={cn(
-                "rounded-2xl font-mono text-xl font-bold flex items-center justify-center w-full h-full",
+                "rounded-none font-mono text-xl font-bold flex items-center justify-center w-full h-full",
                 activeEmblem
                   ? cn(activeEmblem.bg, activeEmblem.border, activeEmblem.text)
-                  : "bg-orange-500 text-white"
+                  : "bg-lime-400 text-black"
               )}
             >
               {activeEmblem ? activeEmblem.icon : initials}
@@ -271,7 +271,7 @@ export function ProfilePage() {
           </Avatar>
 
           <div className="space-y-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
+            <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
               Competitive Identity
             </span>
             <div className="flex items-center gap-3 flex-wrap">
@@ -285,7 +285,7 @@ export function ProfilePage() {
                   type="button"
                   id="profile-edit-btn"
                   onClick={() => dispatch(openEditProfileModal())}
-                  className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-orange-400 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500 hover:text-white rounded-lg cursor-pointer"
+                  className="h-auto inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs uppercase font-bold text-lime-400 bg-lime-400/10 border border-lime-400/30 hover:bg-lime-400 hover:text-black rounded-none cursor-pointer"
                 >
                   <Edit3 size={12} />
                   <span>Edit Profile</span>
@@ -298,10 +298,10 @@ export function ProfilePage() {
                     onClick={handleFollowToggle}
                     disabled={isPendingFollowAction}
                     className={cn(
-                      "h-auto inline-flex items-center gap-1.5 px-3.5 py-1 font-mono text-xs uppercase font-bold rounded-lg cursor-pointer transition-all",
+                      "h-auto inline-flex items-center gap-1.5 px-3.5 py-1 font-mono text-xs uppercase font-bold rounded-none cursor-pointer transition-all",
                       isFollowing
                         ? "bg-zinc-800 text-zinc-200 border border-white/10 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-800/60"
-                        : "bg-orange-500 text-white hover:bg-orange-600 shadow-md shadow-orange-500/20"
+                        : "bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-md shadow-lime-400/20"
                     )}
                   >
                     {isFollowing ? (
@@ -328,7 +328,7 @@ export function ProfilePage() {
                     type="button"
                     onClick={handleCopyLink}
                     variant="outline"
-                    className="h-auto inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs uppercase text-zinc-300 border border-white/10 hover:border-zinc-500 bg-zinc-800/60 rounded-lg cursor-pointer"
+                    className="h-auto inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs uppercase text-zinc-300 border border-white/10 hover:border-zinc-500 bg-zinc-800/60 rounded-none cursor-pointer"
                   >
                     {copied ? (
                       <>
@@ -353,7 +353,7 @@ export function ProfilePage() {
               <span>•</span>
               <span className="text-zinc-300">{m.batch}</span>
               <span>•</span>
-              <span className="text-orange-400 font-bold">@{m.handle}</span>
+              <span className="text-lime-400 font-bold">@{m.handle}</span>
               {m.is_core_member && (
                 <>
                   <span>•</span>
@@ -386,9 +386,9 @@ export function ProfilePage() {
                     })
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white border border-white/10 hover:border-orange-500/40 rounded-lg cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white border border-white/10 hover:border-lime-400/40 rounded-none cursor-pointer transition-colors"
               >
-                <Users size={12} className="text-orange-500" />
+                <Users size={12} className="text-lime-400" />
                 <strong className="text-white font-mono tabular-nums">{displayedFollowers}</strong> Followers
               </button>
               <button
@@ -405,9 +405,9 @@ export function ProfilePage() {
                     })
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white border border-white/10 hover:border-orange-500/40 rounded-lg cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono uppercase bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white border border-white/10 hover:border-lime-400/40 rounded-none cursor-pointer transition-colors"
               >
-                <UserCheck size={12} className="text-orange-500" />
+                <UserCheck size={12} className="text-lime-400" />
                 <strong className="text-white font-mono tabular-nums">{displayedFollowing}</strong> Following
               </button>
               {m.github_username && (
@@ -415,7 +415,7 @@ export function ProfilePage() {
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-300 hover:text-white bg-zinc-800/60 border border-white/10 hover:border-zinc-500 rounded-lg"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-300 hover:text-white bg-zinc-800/60 border border-white/10 hover:border-zinc-500 rounded-none"
                 >
                   <Github size={12} />
                   <span>{m.github_username}</span>
@@ -430,7 +430,7 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-zinc-800/60 border border-white/10 hover:border-cyan-500/40 rounded-lg"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-zinc-800/60 border border-white/10 hover:border-cyan-500/40 rounded-none"
                 >
                   <Linkedin size={12} />
                   <span>LinkedIn</span>
@@ -470,7 +470,7 @@ export function ProfilePage() {
 
       {/* Charts & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
+        <div className="lg:col-span-2 rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
           <SectionHeader kicker="Rating archive" title="Competitive trajectory" />
           <RatingChart data={history} />
         </div>
@@ -480,7 +480,7 @@ export function ProfilePage() {
       </section>
 
       {/* Offline Battle History */}
-      <section className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
+      <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
         <SectionHeader kicker="Permanent record" title="Offline battle history" />
         <div className="divide-y divide-white/5">
           {battles.length === 0 ? (
@@ -517,7 +517,7 @@ export function ProfilePage() {
 
       {/* Achievement Ledger & Proof */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
+        <div className="lg:col-span-2 rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
           <SectionHeader kicker="Milestones" title="Achievement ledger" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {achievements.length === 0 ? (
@@ -528,12 +528,12 @@ export function ProfilePage() {
               achievements.map((a: any) => (
                 <article
                   key={a.code || a.id || a.name || a.title}
-                  className={`p-4 rounded-xl border ${
-                    a.earned !== false ? "border-orange-500/30 bg-orange-500/5" : "border-white/5 bg-zinc-950/40 opacity-60"
+                  className={`p-4 rounded-none border ${
+                    a.earned !== false ? "border-lime-400/30 bg-lime-400/5" : "border-white/5 bg-zinc-950/40 opacity-60"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    {a.earned !== false ? <Award className="size-4 text-orange-400" /> : <LockKeyhole className="size-4 text-zinc-500" />}
+                    {a.earned !== false ? <Award className="size-4 text-lime-400" /> : <LockKeyhole className="size-4 text-zinc-500" />}
                     <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">{a.code || a.id || "ACH"}</span>
                   </div>
                   <h3 className="font-mono text-sm font-bold text-white uppercase">{a.name || a.title}</h3>
@@ -544,14 +544,14 @@ export function ProfilePage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
+        <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
           <SectionHeader kicker="Cryptographic result" title="Latest proof" />
           {proofs[0] ? (
             <>
               <ProofBadge proof={proofs[0]} />
               <Link
                 to={`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? "")}`}
-                className="inline-flex items-center gap-1.5 font-mono text-xs text-orange-400 hover:underline mt-4"
+                className="inline-flex items-center gap-1.5 font-mono text-xs text-lime-400 hover:underline mt-4"
               >
                 Open verification console <ExternalLink className="size-3.5" />
               </Link>
@@ -565,8 +565,8 @@ export function ProfilePage() {
       </section>
 
       {/* Trust Footer */}
-      <footer className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-zinc-900/40 text-zinc-400 font-mono text-xs backdrop-blur-sm">
-        <Zap className="size-4 text-orange-500 shrink-0" />
+      <footer className="flex items-center gap-3 p-4 rounded-none border border-white/10 bg-zinc-900/40 text-zinc-400 font-mono text-xs backdrop-blur-sm">
+        <Zap className="size-4 text-lime-400 shrink-0" />
         <p>
           Your profile only reflects attended, proctored sessions. Practice streaks and browser activity are intentionally excluded.
         </p>

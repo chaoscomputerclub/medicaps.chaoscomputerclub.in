@@ -24,7 +24,7 @@ export function RatingChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 w-full flex items-center justify-center text-zinc-500 font-mono text-xs border border-dashed border-white/10 rounded-2xl bg-zinc-900/30">
+      <div className="h-64 w-full flex items-center justify-center text-zinc-500 font-mono text-xs border border-dashed border-white/10 rounded-none bg-zinc-900/30">
         No rating history recorded yet.
       </div>
     );
@@ -40,8 +40,8 @@ export function RatingChart({
         <AreaChart data={data} margin={{ top: 18, right: 12, bottom: 2, left: -16 }}>
           <defs>
             <linearGradient id="ratingFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f97316" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+              <stop offset="0%" stopColor="#CCFF00" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="#CCFF00" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#27272a" vertical={false} />
@@ -61,9 +61,9 @@ export function RatingChart({
           />
           <Tooltip
             contentStyle={{
-              background: "#18181b",
+              background: "#080808",
               border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 8,
+              borderRadius: 0,
               fontFamily: "monospace",
               fontSize: 12,
               color: "#ffffff",
@@ -73,10 +73,10 @@ export function RatingChart({
           <Area
             type="monotone"
             dataKey="new_rating"
-            stroke="#f97316"
+            stroke="#CCFF00"
             strokeWidth={2}
             fill="url(#ratingFill)"
-            dot={{ r: 3, fill: "#09090b", stroke: "#f97316", strokeWidth: 2 }}
+            dot={{ r: 3, fill: "#000000", stroke: "#CCFF00", strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>

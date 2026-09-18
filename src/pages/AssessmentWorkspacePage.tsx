@@ -234,9 +234,9 @@ export function AssessmentWorkspacePage() {
     const isDisqualified = session.status === "disqualified";
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#080808] text-[#e0e0e0] font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-xl bg-[#0e0e0e] border border-[#1e1e1e] text-center space-y-6">
+        <div className="max-w-md w-full p-8 rounded-none bg-[#0e0e0e] border border-[#1e1e1e] text-center space-y-6">
           <div
-            className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto border ${
+            className={`w-16 h-16 rounded-none flex items-center justify-center mx-auto border ${
               isDisqualified
                 ? "bg-red-950/30 border-red-500/30 text-red-400"
                 : "bg-emerald-950/30 border-emerald-500/30 text-emerald-400"
@@ -257,7 +257,7 @@ export function AssessmentWorkspacePage() {
           </div>
 
           {!isDisqualified && (
-            <div className="rounded-lg bg-[#141414] border border-[#1e1e1e] p-4 space-y-1">
+            <div className="rounded-none bg-[#141414] border border-[#1e1e1e] p-4 space-y-1">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-[#666]">Score recorded</span>
                 <span className="text-emerald-400 font-bold">{session.total_score ?? 0} pts</span>
@@ -273,14 +273,14 @@ export function AssessmentWorkspacePage() {
             <button
               type="button"
               onClick={() => navigate(`/portal/contests/${contestSlug}/results`)}
-              className="w-full py-2 px-4 rounded-lg bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90 transition-colors"
+              className="w-full py-2 px-4 rounded-none bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90 transition-colors"
             >
               View Round 1 Ranking
             </button>
             <button
               type="button"
               onClick={() => navigate(`/portal/contests/${contestSlug}`)}
-              className="w-full py-2 px-4 rounded-lg border border-[#2a2a2a] text-[#aaa] font-mono text-xs hover:bg-[#161616] transition-colors"
+              className="w-full py-2 px-4 rounded-none border border-[#2a2a2a] text-[#aaa] font-mono text-xs hover:bg-[#161616] transition-colors"
             >
               Return to Contest
             </button>
@@ -294,12 +294,12 @@ export function AssessmentWorkspacePage() {
   if (assessment && !session) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-950 text-zinc-100 font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-2xl bg-zinc-900/80 border border-white/10 text-center space-y-6 backdrop-blur-md shadow-2xl">
-          <div className="size-14 rounded-2xl bg-zinc-800/60 border border-white/10 flex items-center justify-center mx-auto text-orange-500">
+        <div className="max-w-md w-full p-8 rounded-none bg-zinc-900/80 border border-white/10 text-center space-y-6 backdrop-blur-md shadow-2xl">
+          <div className="size-14 rounded-none bg-zinc-800/60 border border-white/10 flex items-center justify-center mx-auto text-lime-400">
             <Clock size={28} />
           </div>
           <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-orange-400 font-bold">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
               Round 1 Screening Gated
             </span>
             <h2 className="text-xl font-bold font-mono text-white uppercase">
@@ -309,7 +309,7 @@ export function AssessmentWorkspacePage() {
               The 2-hour proctored assessment window opens strictly prior to the contest final. Please wait in the lobby until the timer unlocks.
             </p>
           </div>
-          <div className="p-4 bg-zinc-950/80 rounded-xl border border-white/10">
+          <div className="p-4 bg-zinc-950/80 rounded-none border border-white/10">
             <span className="font-mono text-xs text-zinc-400 block uppercase">Opens In</span>
             <div className="font-mono text-2xl font-bold text-white mt-1 tabular-nums">
               {formatTimer(assessment.opens_in_seconds || 0)}
@@ -317,7 +317,7 @@ export function AssessmentWorkspacePage() {
           </div>
           <Button
             onClick={() => navigate(`/portal/contests/${contestSlug}`)}
-            className="w-full bg-orange-500 text-white font-mono font-bold text-xs uppercase rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/20"
+            className="w-full bg-lime-400 text-black font-mono font-bold text-xs uppercase rounded-none hover:bg-lime-300 shadow-lg shadow-lime-400/20"
           >
             Return to Contest Lobby
           </Button>
@@ -334,8 +334,8 @@ export function AssessmentWorkspacePage() {
 
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070707] text-[#e0e0e0] font-sans p-6">
-        <div className="max-w-md w-full p-6 rounded-lg bg-[#0e0e0e] border border-[#222] text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-[#161616] border border-[#282828] flex items-center justify-center mx-auto text-accent">
+        <div className="max-w-md w-full p-6 rounded-none bg-[#0e0e0e] border border-[#222] text-center space-y-4">
+          <div className="w-12 h-12 rounded-none bg-[#161616] border border-[#282828] flex items-center justify-center mx-auto text-accent">
             {isLifecycleErr ? <Lock size={24} className="text-amber-400" /> : <ShieldAlert size={24} />}
           </div>
           <h2 className="text-base font-semibold font-mono text-white">
@@ -828,8 +828,8 @@ export function AssessmentWorkspacePage() {
       {/* Anti-cheat telemetry warning dialog */}
       {antiCheatWarningOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full p-5 rounded-lg bg-[#141414] border border-amber-500/40 text-center space-y-3">
-            <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+          <div className="max-w-md w-full p-5 rounded-none bg-[#141414] border border-amber-500/40 text-center space-y-3">
+            <div className="w-10 h-10 rounded-none bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
               <ShieldAlert size={20} />
             </div>
             <h3 className="text-sm font-bold font-mono text-white">Proctored Session Warning</h3>

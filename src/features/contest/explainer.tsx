@@ -56,13 +56,13 @@ export function FirstContestExplainer() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : dismiss())}>
-      <DialogContent className="rounded-2xl border border-white/10 bg-zinc-950 text-white sm:max-w-lg p-6 shadow-2xl backdrop-blur-xl space-y-4">
+      <DialogContent className="rounded-none border border-white/10 bg-zinc-950 text-white sm:max-w-lg p-6 shadow-2xl backdrop-blur-xl space-y-4">
         <DialogHeader className="space-y-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-orange-400 font-bold">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
             How a CCC contest works · {step + 1} of {STEPS.length}
           </span>
           <DialogTitle className="flex items-center gap-2.5 text-lg font-bold uppercase tracking-tight text-white">
-            <Icon className="size-5 text-orange-400" />
+            <Icon className="size-5 text-lime-400" />
             {current.title}
           </DialogTitle>
           <DialogDescription className="text-sm leading-relaxed text-zinc-400">
@@ -76,8 +76,8 @@ export function FirstContestExplainer() {
               key={s.title}
               className={
                 index <= step
-                  ? "h-1 flex-1 rounded-full bg-orange-500"
-                  : "h-1 flex-1 rounded-full bg-zinc-800"
+                  ? "h-1 flex-1 rounded-none bg-lime-400"
+                  : "h-1 flex-1 rounded-none bg-zinc-800"
               }
             />
           ))}
@@ -87,13 +87,13 @@ export function FirstContestExplainer() {
           <Button
             variant="ghost"
             onClick={dismiss}
-            className="rounded-xl font-mono text-xs uppercase text-zinc-400 hover:text-white"
+            className="rounded-none font-mono text-xs uppercase text-zinc-400 hover:text-white"
           >
             Skip
           </Button>
           <Button
             onClick={() => (isLast ? dismiss() : setStep(step + 1))}
-            className="rounded-xl bg-orange-500 text-black hover:bg-orange-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-[0.98]"
+            className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-lime-400/20 active:scale-[0.98]"
           >
             {isLast ? (
               <>

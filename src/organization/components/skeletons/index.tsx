@@ -16,14 +16,14 @@ export { Skeleton };
 
 export function SkeletonText({ className, lines = 1 }: { className?: string; lines?: number }) {
   if (lines === 1) {
-    return <Skeleton className={cn("h-3 w-3/4 rounded-md", className)} />;
+    return <Skeleton className={cn("h-3 w-3/4 rounded-none", className)} />;
   }
   return (
     <div className="space-y-2 w-full">
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton
           key={i}
-          className={cn("h-3 rounded-md", i === lines - 1 ? "w-4/5" : "w-full", className)}
+          className={cn("h-3 rounded-none", i === lines - 1 ? "w-4/5" : "w-full", className)}
         />
       ))}
     </div>
@@ -59,7 +59,7 @@ export function RatingChartSkeleton() {
       <div className="flex-1 flex items-end gap-2 pt-6 pb-2 border-b border-white/10">
         {[30, 48, 42, 65, 58, 80, 72, 88, 75, 92, 85, 96].map((h, idx) => (
           <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-            <Skeleton className="w-full rounded-md" style={{ height: `${h}%` }} />
+            <Skeleton className="w-full rounded-none" style={{ height: `${h}%` }} />
             <Skeleton className="h-2 w-5 mt-1" />
           </div>
         ))}
@@ -107,7 +107,7 @@ export function CampusPassSkeleton() {
           </div>
         </div>
         <div className="pass-qr flex flex-col items-center justify-center p-3 border border-white/10 bg-black/40">
-          <Skeleton className="w-[110px] h-[110px] rounded-md" />
+          <Skeleton className="w-[110px] h-[110px] rounded-none" />
           <Skeleton className="h-2.5 w-20 mt-2" />
         </div>
       </div>
@@ -127,7 +127,7 @@ export function ProofBadgeSkeleton({ compact = false }: { compact?: boolean }) {
           <Skeleton className="h-3.5 w-28 mb-2" />
           <Skeleton className="h-5 w-48" />
         </div>
-        <Skeleton className="w-8 h-8 rounded-md flex-shrink-0" />
+        <Skeleton className="w-8 h-8 rounded-none flex-shrink-0" />
       </div>
       <dl className="proof-grid grid grid-cols-2 gap-3 py-2 border-y border-white/10">
         <div>
@@ -239,7 +239,7 @@ export function LeaderboardRowSkeleton({ count = 8 }: { count?: number }) {
           </td>
           <td className="p-4">
             <div className="flex items-center gap-3">
-              <Skeleton className="w-8 h-8 rounded-md flex-shrink-0" />
+              <Skeleton className="w-8 h-8 rounded-none flex-shrink-0" />
               <div className="flex flex-col gap-1.5">
                 <Skeleton className="h-3.5 w-28" />
                 <Skeleton className="h-2.5 w-20" />
@@ -257,7 +257,7 @@ export function LeaderboardRowSkeleton({ count = 8 }: { count?: number }) {
           </td>
           <td className="p-4">
             <div className="flex items-center gap-2">
-              <Skeleton className="w-16 h-1.5 rounded-md" />
+              <Skeleton className="w-16 h-1.5 rounded-none" />
               <Skeleton className="h-3 w-8" />
             </div>
           </td>
@@ -308,7 +308,7 @@ export function AchievementGridSkeleton() {
     <div className="achievement-grid grid grid-cols-2 sm:grid-cols-4 gap-4">
       {[1, 2, 3, 4].map((i) => (
         <article key={i} className="border border-white/10 bg-zinc-900/60 p-4 space-y-2">
-          <Skeleton className="w-6 h-6 mb-2 rounded-md" />
+          <Skeleton className="w-6 h-6 mb-2 rounded-none" />
           <Skeleton className="h-2.5 w-16 mb-2" />
           <Skeleton className="h-3.5 w-32 mb-1.5" />
           <Skeleton className="h-2.5 w-full mb-1" />
@@ -342,8 +342,8 @@ export function ContestRowSkeleton() {
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <Skeleton className="h-8 w-24 rounded-md" />
-        <Skeleton className="h-8 w-24 rounded-md" />
+        <Skeleton className="h-8 w-24 rounded-none" />
+        <Skeleton className="h-8 w-24 rounded-none" />
       </div>
     </article>
   );
@@ -425,7 +425,7 @@ export function ContestsHubSkeleton() {
       {/* Section 2: Screening Alert Banner */}
       <div className="border border-white/10 bg-neutral-900/30 p-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Skeleton className="w-8 h-8 rounded-md flex-shrink-0" />
+          <Skeleton className="w-8 h-8 rounded-none flex-shrink-0" />
           <div className="space-y-1.5">
             <Skeleton className="h-4 w-48" />
             <Skeleton className="h-3 w-80 max-w-full" />
@@ -485,7 +485,7 @@ export function ContestsHubSkeleton() {
                 <div key={i} className="flex items-center justify-between p-2.5 border border-white/10 bg-black/40">
                   <div className="flex items-center gap-3">
                     <Skeleton className="h-5 w-5" />
-                    <Skeleton className="w-7 h-7 rounded-md" />
+                    <Skeleton className="w-7 h-7 rounded-none" />
                     <div className="space-y-1">
                       <Skeleton className="h-3.5 w-24" />
                       <Skeleton className="h-2.5 w-16" />
@@ -557,7 +557,7 @@ export function MyContestsSkeleton() {
           <Skeleton className="h-3.5 w-80 max-w-full" />
         </div>
         <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
-          <div className="border-l-2 border-orange-500 pl-3 space-y-1">
+          <div className="border-l-2 border-lime-400 pl-3 space-y-1">
             <Skeleton className="h-6 w-8" />
             <Skeleton className="h-2 w-20" />
           </div>
@@ -594,7 +594,7 @@ export function MyContestsSkeleton() {
           {[1, 2, 3, 4].map((i) => (
             <article key={i} className="p-5 sm:p-6 flex flex-col lg:flex-row justify-between gap-5 lg:items-center">
               <div className="flex items-start gap-4">
-                <Skeleton className="w-10 h-10 rounded-md shrink-0" />
+                <Skeleton className="w-10 h-10 rounded-none shrink-0" />
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-4 w-16" />
@@ -640,7 +640,7 @@ export function ProblemArchiveSkeleton() {
           <Skeleton className="h-8 w-56" />
           <Skeleton className="h-3.5 w-96 max-w-full" />
         </div>
-        <Skeleton className="w-10 h-10 rounded-md flex-shrink-0" />
+        <Skeleton className="w-10 h-10 rounded-none flex-shrink-0" />
       </header>
 
       <section className="border border-white/10 bg-zinc-900/60 p-6 space-y-6">
@@ -653,7 +653,7 @@ export function ProblemArchiveSkeleton() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <article key={i} className="flex items-center justify-between p-4 border border-white/10 bg-neutral-900/40">
               <div className="flex items-center gap-4 flex-1">
-                <Skeleton className="w-8 h-8 rounded-md shrink-0" />
+                <Skeleton className="w-8 h-8 rounded-none shrink-0" />
                 <div className="space-y-1.5 flex-1">
                   <Skeleton className="h-2.5 w-32" />
                   <Skeleton className="h-4 w-48" />
@@ -662,7 +662,7 @@ export function ProblemArchiveSkeleton() {
               </div>
               <div className="flex items-center gap-4 shrink-0">
                 <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-none" />
               </div>
             </article>
           ))}
@@ -686,7 +686,7 @@ export function ProblemDetailSkeleton() {
       <Skeleton className="h-4 w-36" />
 
       <header className="border-b border-white/10 pb-6 flex items-start gap-5">
-        <Skeleton className="w-12 h-12 rounded-md shrink-0" />
+        <Skeleton className="w-12 h-12 rounded-none shrink-0" />
         <div className="space-y-2 flex-1">
           <Skeleton className="h-3 w-48" />
           <Skeleton className="h-8 w-64" />
@@ -696,7 +696,7 @@ export function ProblemDetailSkeleton() {
 
       {/* No submission banner */}
       <div className="border border-yellow-500/30 bg-yellow-950/20 p-4 flex items-start gap-3">
-        <Skeleton className="w-5 h-5 rounded-md shrink-0 mt-0.5" />
+        <Skeleton className="w-5 h-5 rounded-none shrink-0 mt-0.5" />
         <div className="space-y-1.5 flex-1">
           <Skeleton className="h-4 w-44" />
           <Skeleton className="h-3 w-full" />
@@ -724,7 +724,7 @@ export function ProblemDetailSkeleton() {
         </div>
 
         <div className="pt-4 border-t border-white/10 flex items-center gap-2">
-          <Skeleton className="w-4 h-4 rounded-md shrink-0" />
+          <Skeleton className="w-4 h-4 rounded-none shrink-0" />
           <Skeleton className="h-3 w-80" />
         </div>
       </article>
@@ -784,7 +784,7 @@ export function ContestDetailSkeleton() {
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <Skeleton className="w-8 h-8 rounded-md shrink-0" />
+                <Skeleton className="w-8 h-8 rounded-none shrink-0" />
                 <div className="space-y-1">
                   <Skeleton className="h-4 w-48" />
                   <Skeleton className="h-2.5 w-28" />
@@ -893,7 +893,7 @@ export function ContestFinalResultsSkeleton() {
       <section className="grid gap-4 sm:grid-cols-3">
         {[1, 2, 3].map((i) => (
           <div key={i} className="border border-white/10 bg-zinc-900/60 p-5 space-y-3">
-            <Skeleton className="w-6 h-6 rounded-md" />
+            <Skeleton className="w-6 h-6 rounded-none" />
             <Skeleton className="h-2.5 w-16" />
             <Skeleton className="h-5 w-36" />
             <Skeleton className="h-3 w-28" />
@@ -979,7 +979,7 @@ export function ContestOfflineSkeleton() {
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex gap-3 items-center">
-                <Skeleton className="w-5 h-5 rounded-md shrink-0" />
+                <Skeleton className="w-5 h-5 rounded-none shrink-0" />
                 <Skeleton className="h-3.5 w-full" />
               </div>
             ))}
@@ -1019,7 +1019,7 @@ export function ContestLobbySkeleton() {
           <Skeleton className="h-4 w-36" />
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-3 items-start">
-              <Skeleton className="w-4 h-4 rounded-md shrink-0 mt-0.5" />
+              <Skeleton className="w-4 h-4 rounded-none shrink-0 mt-0.5" />
               <Skeleton className="h-3 w-full" />
             </div>
           ))}
@@ -1027,7 +1027,7 @@ export function ContestLobbySkeleton() {
 
         <div className="border-t border-white/10 pt-4 space-y-4">
           <div className="flex items-center gap-3">
-            <Skeleton className="w-4 h-4 rounded-md shrink-0" />
+            <Skeleton className="w-4 h-4 rounded-none shrink-0" />
             <Skeleton className="h-3.5 w-80" />
           </div>
           <Skeleton className="h-10 w-full" />
@@ -1049,7 +1049,7 @@ export function VerifyProofSkeleton() {
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-3.5 w-96 max-w-full" />
         </div>
-        <Skeleton className="w-10 h-10 rounded-md flex-shrink-0" />
+        <Skeleton className="w-10 h-10 rounded-none flex-shrink-0" />
       </header>
 
       {/* Tabs */}
@@ -1085,7 +1085,7 @@ export function ProfileSkeleton() {
       {/* Profile Header */}
       <header className="border border-white/10 bg-zinc-900/60 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-5">
-          <Skeleton className="w-20 h-20 rounded-md shrink-0" />
+          <Skeleton className="w-20 h-20 rounded-none shrink-0" />
           <div className="space-y-2">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-8 w-56" />
@@ -1180,7 +1180,7 @@ export function SettingsSkeleton() {
       {/* Form Card */}
       <div className="border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6">
         <div className="flex items-center gap-5 border-b border-white/10 pb-6">
-          <Skeleton className="w-16 h-16 rounded-md shrink-0" />
+          <Skeleton className="w-16 h-16 rounded-none shrink-0" />
           <div className="space-y-2">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-8 w-36" />
@@ -1456,7 +1456,7 @@ export function AuthSkeleton() {
     <div className="auth-shell flex min-h-screen bg-zinc-950 animate-in fade-in duration-300">
       <div className="auth-brand hidden md:flex flex-1 p-12 flex-col justify-between border-r border-white/10">
         <div className="auth-brand-inner w-full space-y-4">
-          <Skeleton className="w-12 h-12 rounded-md" />
+          <Skeleton className="w-12 h-12 rounded-none" />
           <Skeleton className="h-3 w-28" />
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-12 w-full" />

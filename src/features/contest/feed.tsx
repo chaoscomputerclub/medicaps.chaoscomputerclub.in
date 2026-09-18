@@ -134,17 +134,17 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
         const Icon = event.icon;
         return (
           <article key={event.key} className="border-b border-white/10 pb-3 last:border-b-0">
-            <span className="font-mono text-[10px] uppercase text-orange-400 font-bold block tracking-wider mb-1">
+            <span className="font-mono text-[10px] uppercase text-lime-400 font-bold block tracking-wider mb-1">
               {event.kind}
             </span>
-            <h3 className="font-bold text-sm text-white hover:text-orange-400 transition-colors">
+            <h3 className="font-bold text-sm text-white hover:text-lime-400 transition-colors">
               <Link to={`/portal/contests/${event.slug}`}>
                 {event.title}
               </Link>
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">{event.body}</p>
             <time className="inline-flex items-center gap-1 font-mono text-[10px] text-zinc-500 mt-1">
-              <Icon className="size-3 text-orange-400" />
+              <Icon className="size-3 text-lime-400" />
               {formatWhen(new Date(event.at).toISOString())}
             </time>
           </article>

@@ -56,8 +56,8 @@ export function ContestFinalResultsPage() {
         <ArrowLeft className="size-3.5" /> Back to contest
       </Link>
 
-      <header className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl space-y-2">
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
+      <header className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl space-y-2">
+        <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
           Round 2 · Offline Campus Final
         </span>
         <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
@@ -71,7 +71,7 @@ export function ContestFinalResultsPage() {
       </header>
 
       {rows.length === 0 ? (
-        <Card className="rounded-2xl border-dashed border-white/10 bg-zinc-900/40">
+        <Card className="rounded-none border-dashed border-white/10 bg-zinc-900/40">
           <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
             <Trophy className="size-8 text-zinc-500" />
             <strong className="text-sm font-bold text-white">Results are not published yet</strong>
@@ -87,14 +87,14 @@ export function ContestFinalResultsPage() {
               <Card
                 key={row.handle}
                 className={cn(
-                  "rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl transition-all",
-                  index === 0 && "border-orange-500/50 shadow-orange-500/10",
+                  "rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl transition-all",
+                  index === 0 && "border-lime-400/50 shadow-lime-400/10",
                 )}
               >
                 <CardHeader className="gap-2">
                   <div className="flex items-center justify-between">
                     {index === 0 ? (
-                      <Trophy className="size-5 text-orange-400" />
+                      <Trophy className="size-5 text-lime-400" />
                     ) : index === 1 ? (
                       <Medal className="size-5 text-zinc-300" />
                     ) : (
@@ -108,7 +108,7 @@ export function ContestFinalResultsPage() {
                   <p className="font-mono text-xs text-zinc-400">
                     @{row.handle} · {row.department} · {row.batch}
                   </p>
-                  <p className="font-mono text-sm font-bold tabular-nums text-orange-400">
+                  <p className="font-mono text-sm font-bold tabular-nums text-lime-400">
                     {row.score} pts · {row.solved} solved
                   </p>
                 </CardHeader>
@@ -116,7 +116,7 @@ export function ContestFinalResultsPage() {
             ))}
           </section>
 
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl">
+          <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl">
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-white/10 bg-zinc-950/80 hover:bg-zinc-950/80">
@@ -154,12 +154,12 @@ export function ContestFinalResultsPage() {
       )}
 
       <div className="flex flex-wrap gap-3">
-        <Button asChild variant="outline" className="rounded-xl font-mono text-xs uppercase border-white/10">
+        <Button asChild variant="outline" className="rounded-none font-mono text-xs uppercase border-white/10">
           <Link to={`/portal/contests/${contestSlug}/results`}>
             Round 1 ranking
           </Link>
         </Button>
-        <Button asChild variant="ghost" className="rounded-xl font-mono text-xs uppercase text-zinc-400 hover:text-white">
+        <Button asChild variant="ghost" className="rounded-none font-mono text-xs uppercase text-zinc-400 hover:text-white">
           <Link to="/portal/my-contests">My contests</Link>
         </Button>
       </div>
@@ -175,7 +175,7 @@ function FinalRow({ row }: { row: FinalStandingRow }) {
         <div className="flex flex-col">
           <Link
             to={`/portal/profile/${row.handle}`}
-            className="text-sm font-semibold text-white hover:text-orange-400 hover:underline transition-colors w-fit"
+            className="text-sm font-semibold text-white hover:text-lime-400 hover:underline transition-colors w-fit"
           >
             {row.full_name}
           </Link>
@@ -189,7 +189,7 @@ function FinalRow({ row }: { row: FinalStandingRow }) {
       </TableCell>
       <TableCell className="font-mono text-xs text-zinc-400">{row.division}</TableCell>
       <TableCell className="text-right font-mono text-xs tabular-nums text-white">{row.solved}</TableCell>
-      <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-orange-400">
+      <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-lime-400">
         {row.score}
       </TableCell>
       <TableCell className="text-right font-mono text-xs tabular-nums text-zinc-400">
@@ -202,9 +202,9 @@ function FinalRow({ row }: { row: FinalStandingRow }) {
           <Badge
             variant="outline"
             className={cn(
-              "rounded-md font-mono text-[10px] uppercase tabular-nums",
+              "rounded-none font-mono text-[10px] uppercase tabular-nums",
               row.rating_delta >= 0
-                ? "border-orange-500/40 text-orange-400 bg-orange-500/10"
+                ? "border-lime-400/40 text-lime-400 bg-lime-400/10"
                 : "border-rose-500/40 text-rose-300 bg-rose-950/20",
             )}
           >

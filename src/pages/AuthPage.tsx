@@ -364,7 +364,7 @@ export function AuthPage() {
             )}
 
             <Button
-              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-400 cursor-pointer disabled:opacity-50 transition-colors"
+              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-lime-400 text-black font-bold hover:bg-lime-400 cursor-pointer disabled:opacity-50 transition-colors"
               disabled={pending || isInvalidDomain}
               type="submit"
             >
@@ -387,7 +387,7 @@ export function AuthPage() {
 
           <button
             type="button"
-            className="w-full h-11 px-4 font-sans text-xs sm:text-sm font-medium border border-white/10 bg-zinc-900/60 hover:bg-zinc-800/80 hover:border-zinc-500 text-zinc-200 hover:text-white transition-all flex items-center justify-center gap-2.5 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full h-11 px-4 font-sans text-xs sm:text-sm font-medium border border-white/10 bg-zinc-900/60 hover:bg-zinc-800/80 hover:border-zinc-500 text-zinc-200 hover:text-white transition-all flex items-center justify-center gap-2.5 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             onClick={handleGoogle}
             disabled={pending}
           >
@@ -426,7 +426,7 @@ export function AuthPage() {
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="size-11 rounded-xl border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-white"
+                      className="size-11 rounded-none border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
                     />
                   ))}
                 </InputOTPGroup>
@@ -438,7 +438,7 @@ export function AuthPage() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={pending}
-                className="hover:text-orange-400 transition-colors underline-offset-4 hover:underline cursor-pointer"
+                className="hover:text-lime-400 transition-colors underline-offset-4 hover:underline cursor-pointer"
               >
                 Resend code
               </button>
@@ -446,13 +446,13 @@ export function AuthPage() {
           </div>
 
           {devOtp && (
-            <div className="border border-dashed border-orange-500/40 bg-orange-500/10 px-3 py-2 text-center font-mono text-xs text-orange-400 rounded-xl">
+            <div className="border border-dashed border-lime-400/40 bg-lime-400/10 px-3 py-2 text-center font-mono text-xs text-lime-400 rounded-none">
               <span>[DEV OTP] {devOtp}</span>
             </div>
           )}
 
           {message && (
-            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-xl">
+            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-none">
               <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                 <span>[ AUTHENTICATION ERROR ]</span>
@@ -462,7 +462,7 @@ export function AuthPage() {
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-400 cursor-pointer disabled:opacity-50 transition-colors"
+            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-lime-400 text-black font-bold hover:bg-lime-400 cursor-pointer disabled:opacity-50 transition-colors"
             disabled={pending || otp.length < 6}
             type="submit"
           >
@@ -476,7 +476,7 @@ export function AuthPage() {
               dispatch(setOtp(""));
               dispatch(setMessage(null));
             }}
-            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-[0.625rem] tracking-[0.16em] text-zinc-400 uppercase transition-colors hover:text-orange-400 cursor-pointer pt-1"
+            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-[0.625rem] tracking-[0.16em] text-zinc-400 uppercase transition-colors hover:text-lime-400 cursor-pointer pt-1"
           >
             <ArrowLeft className="size-3" /> Use another email address
           </button>
@@ -505,7 +505,7 @@ export function AuthPage() {
               placeholder="Ada Lovelace"
               required
               autoFocus
-              className="font-mono text-sm h-10 rounded-xl"
+              className="font-mono text-sm h-10 rounded-none"
             />
           </div>
 
@@ -519,7 +519,7 @@ export function AuthPage() {
               </Label>
               <div className="flex items-center h-4">
                 {handleStatus === "checking" && (
-                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-orange-400/90 font-mono transition-opacity animate-pulse">
+                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-lime-400/90 font-mono transition-opacity animate-pulse">
                     <Loader2 className="spin size-3" /> checking...
                   </span>
                 )}
@@ -549,7 +549,7 @@ export function AuthPage() {
                 placeholder="adalovelace"
                 required
                 className={cn(
-                  "font-mono text-sm pl-8 h-10 rounded-xl",
+                  "font-mono text-sm pl-8 h-10 rounded-none",
                   handleStatus === "available" && "border-emerald-500/70 focus-visible:ring-emerald-500 text-emerald-200",
                   handleStatus === "taken" && "border-rose-500/70 focus-visible:ring-rose-500 text-rose-200",
                 )}
@@ -561,7 +561,7 @@ export function AuthPage() {
           </div>
 
           {message && (
-            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-xl">
+            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-none">
               <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
                 <span>[ REGISTRATION ERROR ]</span>
@@ -571,7 +571,7 @@ export function AuthPage() {
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-xl bg-orange-500 text-black font-bold hover:bg-orange-400 cursor-pointer disabled:opacity-50 transition-colors"
+            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-lime-400 text-black font-bold hover:bg-lime-400 cursor-pointer disabled:opacity-50 transition-colors"
             disabled={
               pending ||
               !name.trim() ||

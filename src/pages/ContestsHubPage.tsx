@@ -68,8 +68,8 @@ function CountdownDisplay({ days, hours, minutes, seconds, accentSec = false }: 
   return (
     <div className="grid grid-cols-4 gap-2">
       {[{ val: days, label: "Days" }, { val: hours, label: "Hrs" }, { val: minutes, label: "Min" }, { val: seconds, label: "Sec", accent: accentSec }].map(({ val, label, accent }) => (
-        <div key={label} className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-zinc-950/70 p-3 shadow-inner">
-          <span className={`font-mono text-2xl font-black tabular-nums leading-none tracking-tight ${accent ? "text-orange-500" : "text-white"}`}>
+        <div key={label} className="flex flex-col items-center justify-center rounded-none border border-white/10 bg-zinc-950/70 p-3 shadow-inner">
+          <span className={`font-mono text-2xl font-black tabular-nums leading-none tracking-tight ${accent ? "text-lime-400" : "text-white"}`}>
             {String(val).padStart(2, "0")}
           </span>
           <span className="mt-1 font-mono text-[9px] font-bold uppercase tracking-widest text-zinc-400">{label}</span>
@@ -263,16 +263,16 @@ export function ContestsHubPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
 
       {/* ─── HERO HEADER ─────────────────────────────── */}
-      <header className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-10 backdrop-blur-md shadow-2xl">
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-orange-500/5 blur-3xl" />
+      <header className="relative overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-10 backdrop-blur-md shadow-2xl">
+        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-lime-400/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-lime-400/5 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-widest text-orange-400">
-                <Flame className="size-3 text-orange-500" /> CCC ARENA · SEASON 2026
+              <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-widest text-lime-400">
+                <Flame className="size-3 text-lime-400" /> CCC ARENA · SEASON 2026
               </span>
-              <span className="hidden rounded-lg border border-white/10 bg-zinc-800/60 px-2.5 py-1 text-[11px] font-mono text-zinc-400 sm:inline-block">
+              <span className="hidden rounded-none border border-white/10 bg-zinc-800/60 px-2.5 py-1 text-[11px] font-mono text-zinc-400 sm:inline-block">
                 Air-Gapped Finals Enabled
               </span>
             </div>
@@ -285,7 +285,7 @@ export function ContestsHubPage() {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-zinc-950/60 backdrop-blur-sm lg:min-w-[320px]">
+          <div className="grid grid-cols-3 divide-x divide-white/10 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-sm lg:min-w-[320px]">
             {[
               { label: "Upcoming", value: upcomingContests.length },
               { label: "Past", value: pastContests.length },
@@ -303,13 +303,13 @@ export function ContestsHubPage() {
       {/* ─── UPCOMING CONTESTS ───────────────────────── */}
       <section className="space-y-5">
         <div className="flex items-center gap-2">
-          <div className="size-2 rounded-full bg-orange-500 animate-pulse" />
+          <div className="size-2 rounded-full bg-lime-400 animate-pulse" />
           <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">Upcoming Weekly Contest</h2>
         </div>
 
         {upcomingContests.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-zinc-900/40 py-16 text-center backdrop-blur-sm">
-            <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-zinc-800/60">
+          <div className="flex flex-col items-center gap-4 rounded-none border border-white/10 bg-zinc-900/40 py-16 text-center backdrop-blur-sm">
+            <div className="flex size-14 items-center justify-center rounded-none border border-white/10 bg-zinc-800/60">
               <Calendar className="size-6 text-zinc-400" />
             </div>
             <div className="space-y-1">
@@ -317,8 +317,8 @@ export function ContestsHubPage() {
               <p className="max-w-xs text-xs text-zinc-400">New contests are announced ahead of each round. Practice past problem sets in the meantime.</p>
             </div>
             <div className="flex gap-2">
-              <Button asChild variant="outline" size="sm" className="rounded-xl text-xs"><Link to="/portal/problems">Problem Archive</Link></Button>
-              <Button asChild variant="ghost" size="sm" className="rounded-xl text-xs"><Link to="/portal/leaderboard">Leaderboard</Link></Button>
+              <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to="/portal/problems">Problem Archive</Link></Button>
+              <Button asChild variant="ghost" size="sm" className="rounded-none text-xs"><Link to="/portal/leaderboard">Leaderboard</Link></Button>
             </div>
           </div>
         ) : (
@@ -326,13 +326,13 @@ export function ContestsHubPage() {
 
             {/* ── WEEKLY FEATURED CARD ── */}
             {upcomingWeekly && (
-              <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 transition-all duration-300 hover:border-orange-500/40 backdrop-blur-md shadow-xl">
-                <div className="h-0.5 w-full bg-gradient-to-r from-orange-500 via-orange-500/60 to-transparent" />
-                <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 translate-x-8 -translate-y-8 rounded-full bg-orange-500/10 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="group relative overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 transition-all duration-300 hover:border-lime-400/40 backdrop-blur-md shadow-xl">
+                <div className="h-0.5 w-full bg-gradient-to-r from-lime-400 via-lime-400/60 to-transparent" />
+                <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 translate-x-8 -translate-y-8 rounded-full bg-lime-400/10 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="flex flex-col gap-6 p-6 md:p-8">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <span className="rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-orange-400">
+                      <span className="rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-lime-400">
                         WEEKLY CONTEST
                       </span>
                       <span className="font-mono text-xs font-semibold text-zinc-400">#{upcomingWeekly.edition ?? "--"}</span>
@@ -342,14 +342,14 @@ export function ContestsHubPage() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xl md:text-2xl font-bold leading-tight text-white transition-colors group-hover:text-orange-400">{upcomingWeekly.title}</h3>
+                    <h3 className="text-xl md:text-2xl font-bold leading-tight text-white transition-colors group-hover:text-lime-400">{upcomingWeekly.title}</h3>
                     <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">
                       {upcomingWeekly.summary || "Sunday algorithmic showdown. 4 challenges covering graph traversal, greedy heuristics, and dynamic programming."}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-6 text-xs text-zinc-400 font-mono">
                     <span className="flex items-center gap-1.5 font-medium text-white">
-                      <Calendar className="size-4 text-orange-500" />
+                      <Calendar className="size-4 text-lime-400" />
                       {new Date(upcomingWeekly.starts_at).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                     </span>
                     <span className="flex items-center gap-1.5"><Clock className="size-3.5" /> 2 Hours assessment</span>
@@ -362,30 +362,30 @@ export function ContestsHubPage() {
                   <div className="flex flex-wrap items-center gap-3 pt-2">
                     {isWeeklySubmitted ? (
                       <>
-                        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-4 py-2 text-xs font-bold text-emerald-400">
+                        <div className="flex items-center gap-2 rounded-none border border-emerald-500/40 bg-emerald-950/30 px-4 py-2 text-xs font-bold text-emerald-400">
                           <CheckCircle2 className="size-4 text-emerald-400" />
                           <span>Assessment Completed {assessmentInfo?.score !== undefined && assessmentInfo?.score !== null ? `(${assessmentInfo.score} Pts)` : "· Submitted"}</span>
                         </div>
-                        <Button asChild variant="outline" className="rounded-xl border-emerald-500/40 bg-emerald-950/20 text-xs font-bold text-emerald-400 hover:bg-emerald-950/40 px-6 py-2.5">
+                        <Button asChild variant="outline" className="rounded-none border-emerald-500/40 bg-emerald-950/20 text-xs font-bold text-emerald-400 hover:bg-emerald-950/40 px-6 py-2.5">
                           <Link to={`/portal/contests/${upcomingWeekly.slug}`}><CheckCircle2 className="mr-1.5 size-4" /> View Status & Results</Link>
                         </Button>
-                        <Button asChild variant="outline" size="sm" className="rounded-xl text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
+                        <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
                       </>
                     ) : isWeeklyRegistered ? (
                       <>
                         <Button onClick={() => { setConfirmContestSlug(upcomingWeekly.slug); setConfirmContestTitle(upcomingWeekly.title); setAssessmentConfirmOpen(true); }}
-                          className="rounded-xl bg-orange-500 text-xs font-bold uppercase tracking-wider text-white hover:bg-orange-600 px-8 py-2.5 shadow-lg shadow-orange-500/20">
-                          <Play className="mr-1.5 size-4 fill-white" /> Enter Screening Assessment
+                          className="rounded-none bg-lime-400 text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-300 px-8 py-2.5 shadow-lg shadow-lime-400/20">
+                          <Play className="mr-1.5 size-4 fill-black" /> Enter Screening Assessment
                         </Button>
-                        <Button asChild variant="outline" size="sm" className="rounded-xl text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
+                        <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
                       </>
                     ) : (
                       <>
                         <Button onClick={() => handleRegister(upcomingWeekly.slug)} disabled={registeringSlug === upcomingWeekly.slug}
-                          className="rounded-xl bg-orange-500 text-xs font-bold uppercase tracking-wider text-white hover:bg-orange-600 px-8 py-2.5 shadow-lg shadow-orange-500/20">
+                          className="rounded-none bg-lime-400 text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-300 px-8 py-2.5 shadow-lg shadow-lime-400/20">
                           {registeringSlug === upcomingWeekly.slug ? "Registering..." : "Register for Weekly Contest"}
                         </Button>
-                        <Button asChild variant="outline" size="sm" className="rounded-xl text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
+                        <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
                       </>
                     )}
                   </div>
@@ -398,36 +398,36 @@ export function ContestsHubPage() {
               const isSubmitted = isContestAssessmentSubmitted(contest);
               const isReg = Boolean(contest.registered || myParticipations.some((p) => p.contest_slug === contest.slug));
               return (
-                <div key={contest.slug} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 p-6 transition-all duration-300 hover:border-orange-500/40 backdrop-blur-md">
-                  <div className="h-0.5 w-full bg-gradient-to-r from-orange-500/50 to-transparent" />
+                <div key={contest.slug} className="group relative overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 p-6 transition-all duration-300 hover:border-lime-400/40 backdrop-blur-md">
+                  <div className="h-0.5 w-full bg-gradient-to-r from-lime-400/50 to-transparent" />
                   <div className="flex flex-col gap-4 mt-2">
                     <div className="flex items-center justify-between">
-                      <span className="rounded-md border border-white/10 bg-zinc-800/60 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-400">{contest.cadence}</span>
+                      <span className="rounded-none border border-white/10 bg-zinc-800/60 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-400">{contest.cadence}</span>
                       <span className="flex items-center gap-1 font-mono text-xs tabular-nums text-zinc-400"><Users className="size-3.5" /> {contest.registered_count}</span>
                     </div>
                     <div>
-                      <h3 className="font-bold text-white transition-colors group-hover:text-orange-400">{contest.title}</h3>
+                      <h3 className="font-bold text-white transition-colors group-hover:text-lime-400">{contest.title}</h3>
                       <p className="mt-1 font-mono text-xs text-zinc-400">
                         {new Date(contest.starts_at).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       {isSubmitted ? (
-                        <Button asChild variant="outline" className="flex-1 rounded-xl border-emerald-500/40 text-emerald-400 text-xs font-bold">
+                        <Button asChild variant="outline" className="flex-1 rounded-none border-emerald-500/40 text-emerald-400 text-xs font-bold">
                           <Link to={`/portal/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Submitted</Link>
                         </Button>
                       ) : isReg ? (
                         <Button onClick={() => { setConfirmContestSlug(contest.slug); setConfirmContestTitle(contest.title); setAssessmentConfirmOpen(true); }}
-                          className="flex-1 rounded-xl bg-orange-500 text-xs font-bold uppercase text-white hover:bg-orange-600 shadow-md shadow-orange-500/20">
-                          <Play className="mr-1.5 size-4 fill-white" /> Take Assessment
+                          className="flex-1 rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-md shadow-lime-400/20">
+                          <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
-                          className="flex-1 rounded-xl text-xs font-bold uppercase">
+                          className="flex-1 rounded-none text-xs font-bold uppercase">
                           {registeringSlug === contest.slug ? "Registering..." : "Register Now"}
                         </Button>
                       )}
-                      <Button asChild variant="outline" size="sm" className="rounded-xl text-xs"><Link to={`/portal/contests/${contest.slug}`}>Details</Link></Button>
+                      <Button asChild variant="outline" size="sm" className="rounded-none text-xs"><Link to={`/portal/contests/${contest.slug}`}>Details</Link></Button>
                     </div>
                   </div>
                 </div>
@@ -439,19 +439,19 @@ export function ContestsHubPage() {
 
       {/* ─── PHASE 1 SCREENING BANNER ────────────────── */}
       {assessmentInfo && (
-        <section className="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-zinc-900/60 backdrop-blur-md shadow-xl">
-          <div className="h-0.5 w-full bg-orange-500" />
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl" />
+        <section className="relative overflow-hidden rounded-none border border-lime-400/30 bg-zinc-900/60 backdrop-blur-md shadow-xl">
+          <div className="h-0.5 w-full bg-lime-400" />
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-lime-400/10 blur-3xl" />
           <div className="relative grid gap-0 lg:grid-cols-[1fr_360px]">
             {/* Info side */}
             <div className="flex flex-col justify-center gap-5 p-6 lg:p-8">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest ${
+                <span className={`inline-flex items-center gap-1.5 rounded-none border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest ${
                   assessmentInfo.hasTaken
                     ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                    : "border-orange-500/30 bg-orange-500/10 text-orange-400"
+                    : "border-lime-400/30 bg-lime-400/10 text-lime-400"
                 }`}>
-                  {assessmentInfo.hasTaken ? <CheckCircle2 className="size-3 text-emerald-400" /> : <Flame className="size-3 text-orange-500" />}
+                  {assessmentInfo.hasTaken ? <CheckCircle2 className="size-3 text-emerald-400" /> : <Flame className="size-3 text-lime-400" />}
                   {assessmentInfo.hasTaken ? "Phase 1 · Screening Completed" : "Phase 1 · Online Screening"}
                 </span>
                 <span className="font-mono text-[11px] text-zinc-400">
@@ -478,9 +478,9 @@ export function ContestsHubPage() {
                   { label: "Proctoring", value: assessmentInfo.hasTaken ? "Verified" : "Automated" },
                   { label: "Lab Entry", value: assessmentInfo.isTop30 ? "QR Pass Ready" : "Pending Results", hi: assessmentInfo.isTop30 },
                 ].map(({ label, value, hi }) => (
-                  <div key={label} className="rounded-xl border border-white/10 bg-zinc-950/60 p-3">
+                  <div key={label} className="rounded-none border border-white/10 bg-zinc-950/60 p-3">
                     <span className="block font-mono text-[9px] font-semibold uppercase tracking-widest text-zinc-400">{label}</span>
-                    <strong className={`font-mono text-sm font-bold tabular-nums ${hi ? "text-orange-400" : "text-white"}`}>{value}</strong>
+                    <strong className={`font-mono text-sm font-bold tabular-nums ${hi ? "text-lime-400" : "text-white"}`}>{value}</strong>
                   </div>
                 ))}
               </div>
@@ -492,7 +492,7 @@ export function ContestsHubPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-white/10 pb-3">
                       <span className="text-xs text-zinc-400">Your Screening Score</span>
-                      <span className="font-mono text-2xl font-black tabular-nums text-orange-400">{assessmentInfo.score ?? 0} Pts</span>
+                      <span className="font-mono text-2xl font-black tabular-nums text-lime-400">{assessmentInfo.score ?? 0} Pts</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-zinc-400">Status</span>
@@ -512,7 +512,7 @@ export function ContestsHubPage() {
                       </div>
                     )}
                   </div>
-                  <Button asChild className="w-full rounded-xl text-xs font-bold uppercase bg-orange-500 text-white hover:bg-orange-600 shadow-md shadow-orange-500/20">
+                  <Button asChild className="w-full rounded-none text-xs font-bold uppercase bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-md shadow-lime-400/20">
                     <Link to={`/portal/contests/${assessmentInfo.contest.slug}${assessmentInfo.isTop30 ? "/qualified" : ""}`}>
                       {assessmentInfo.isTop30 ? <><QrCode className="mr-1.5 size-4" /> View Campus QR Pass</> : "View Contest Details & Results"}
                     </Link>
@@ -523,11 +523,11 @@ export function ContestsHubPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-emerald-400" />
                     <span className="text-xs font-bold text-emerald-400">Registration Active</span>
-                    <span className="ml-auto font-mono text-xs text-orange-400 font-bold">120 MIN</span>
+                    <span className="ml-auto font-mono text-xs text-lime-400 font-bold">120 MIN</span>
                   </div>
                   <Button onClick={() => { setConfirmContestSlug(assessmentInfo.contest.slug); setConfirmContestTitle(assessmentInfo.contest.title); setAssessmentConfirmOpen(true); }}
-                    className="w-full rounded-xl bg-orange-500 text-xs font-bold uppercase text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20">
-                    <Play className="mr-1.5 size-4 fill-white" /> Take Assessment Now
+                    className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
+                    <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
                   </Button>
                   <p className="text-center font-mono text-[10px] text-zinc-400">Full-screen Monaco IDE · Anti-cheat active</p>
                 </>
@@ -541,22 +541,22 @@ export function ContestsHubPage() {
                       {String(assessmentRemainingTimer.hours).padStart(2, "0")}:{String(assessmentRemainingTimer.minutes).padStart(2, "0")}:{String(assessmentRemainingTimer.seconds).padStart(2, "0")}
                     </span>
                   </div>
-                  <Button asChild className="w-full rounded-xl bg-orange-500 text-xs font-bold uppercase text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20">
-                    <Link to={`/assessments/${assessmentInfo.contest.slug}`}><Play className="mr-1.5 size-4 fill-white" /> Take Assessment</Link>
+                  <Button asChild className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
+                    <Link to={`/assessments/${assessmentInfo.contest.slug}`}><Play className="mr-1.5 size-4 fill-black" /> Take Assessment</Link>
                   </Button>
                 </>
               ) : assessmentInfo.isUpcoming ? (
                 <>
                   <div className="space-y-1">
                     <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Unlocks In</span>
-                    <div className="font-mono text-3xl font-extrabold tabular-nums text-orange-400">
+                    <div className="font-mono text-3xl font-extrabold tabular-nums text-lime-400">
                       {assessmentUnlockTimer.days > 0 ? `${assessmentUnlockTimer.days}d ` : ""}
                       {String(assessmentUnlockTimer.hours).padStart(2, "0")}:{String(assessmentUnlockTimer.minutes).padStart(2, "0")}:{String(assessmentUnlockTimer.seconds).padStart(2, "0")}
                     </div>
                     <p className="font-mono text-[11px] text-zinc-400">Opens: {assessmentInfo.openDateFormatted}</p>
                   </div>
                   <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
-                    className="w-full rounded-xl text-xs font-bold uppercase tracking-wider">
+                    className="w-full rounded-none text-xs font-bold uppercase tracking-wider">
                     <Sparkles className="mr-1.5 size-3.5" /> Register to Unlock
                   </Button>
                 </>
@@ -564,7 +564,7 @@ export function ContestsHubPage() {
                 <div className="space-y-3 text-center">
                   <p className="text-xs text-zinc-400">Register for an upcoming contest to enter the screening pipeline.</p>
                   <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
-                    className="w-full rounded-xl text-xs font-bold uppercase">
+                    className="w-full rounded-none text-xs font-bold uppercase">
                     {registeringSlug === assessmentInfo.contest.slug ? "Registering..." : "Register for Screening"}
                   </Button>
                 </div>
@@ -588,10 +588,10 @@ export function ContestsHubPage() {
               ].map(({ key, label, count }) => (
                 <button key={key} onClick={() => setSearchParams({ tab: key })}
                   className={`-mb-px flex items-center gap-2 border-b-2 px-5 pb-3 pt-1 text-xs font-bold uppercase tracking-wider transition-colors ${
-                    activeTab === key ? "border-orange-500 text-white" : "border-transparent text-zinc-400 hover:text-white"
+                    activeTab === key ? "border-lime-400 text-white" : "border-transparent text-zinc-400 hover:text-white"
                   }`}>
                   {label}
-                  <span className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] tabular-nums ${activeTab === key ? "bg-orange-500 text-white" : "bg-zinc-800 text-zinc-400"}`}>
+                  <span className={`rounded-none px-1.5 py-0.5 font-mono text-[10px] tabular-nums ${activeTab === key ? "bg-lime-400 text-black" : "bg-zinc-800 text-zinc-400"}`}>
                     {count}
                   </span>
                 </button>
@@ -605,9 +605,9 @@ export function ContestsHubPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
                 <Input placeholder="Search by title or edition number..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  className="rounded-xl border-white/10 bg-zinc-900/60 pl-9 text-xs text-white placeholder:text-zinc-500" />
+                  className="rounded-none border-white/10 bg-zinc-900/60 pl-9 text-xs text-white placeholder:text-zinc-500" />
               </div>
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 divide-y divide-white/5 backdrop-blur-md">
+              <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 divide-y divide-white/5 backdrop-blur-md">
                 {isLoading && pastContests.length === 0 ? (
                   [1, 2, 3].map((i) => (
                     <div key={i} className="flex items-center justify-between gap-4 p-5">
@@ -627,7 +627,7 @@ export function ContestsHubPage() {
                       className="group flex flex-col gap-4 p-5 transition-colors hover:bg-zinc-800/40 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="rounded border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-orange-400">
+                          <span className="rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-lime-400">
                             WEEKLY
                           </span>
                           <span className="font-mono text-xs text-zinc-400">#{contest.edition ?? "--"}</span>
@@ -636,7 +636,7 @@ export function ContestsHubPage() {
                             {new Date(contest.starts_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
                           </span>
                         </div>
-                        <h3 className="truncate font-bold text-white transition-colors group-hover:text-orange-400">
+                        <h3 className="truncate font-bold text-white transition-colors group-hover:text-lime-400">
                           <Link to={`/portal/contests/${contest.slug}`}>{contest.title}</Link>
                         </h3>
                         <div className="flex items-center gap-4 font-mono text-xs text-zinc-400">
@@ -646,8 +646,8 @@ export function ContestsHubPage() {
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center gap-2">
-                        <Button asChild size="sm" variant="outline" className="rounded-xl text-xs"><Link to={`/portal/contests/${contest.slug}`}>Overview</Link></Button>
-                        <Button asChild size="sm" variant="outline" className="rounded-xl text-xs"><Link to={`/portal/contests/${contest.slug}/final-results`}>Scoreboard</Link></Button>
+                        <Button asChild size="sm" variant="outline" className="rounded-none text-xs"><Link to={`/portal/contests/${contest.slug}`}>Overview</Link></Button>
+                        <Button asChild size="sm" variant="outline" className="rounded-none text-xs"><Link to={`/portal/contests/${contest.slug}/final-results`}>Scoreboard</Link></Button>
                       </div>
                     </article>
                   ))
@@ -658,7 +658,7 @@ export function ContestsHubPage() {
 
           {/* MY CONTESTS TAB */}
           {activeTab === "my-contests" && (
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 divide-y divide-white/5 backdrop-blur-md">
+            <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 divide-y divide-white/5 backdrop-blur-md">
               {isLoadingParticipations ? (
                 [1, 2, 3].map((i) => (
                   <div key={i} className="flex items-center justify-between gap-4 p-5">
@@ -673,7 +673,7 @@ export function ContestsHubPage() {
                   <p className="max-w-xs text-xs text-zinc-400">Register for an upcoming contest and earn your place on the university leaderboard.</p>
                   {upcomingContests.length > 0 && (
                     <Button onClick={() => handleRegister(upcomingContests[0].slug)} disabled={registeringSlug === upcomingContests[0].slug}
-                      className="mt-2 rounded-xl text-xs font-bold uppercase bg-orange-500 text-white hover:bg-orange-600">
+                      className="mt-2 rounded-none text-xs font-bold uppercase bg-lime-400 text-black hover:bg-lime-300 font-bold">
                       {registeringSlug === upcomingContests[0].slug ? "Registering..." : `Register for ${upcomingContests[0].title}`}
                     </Button>
                   )}
@@ -686,7 +686,7 @@ export function ContestsHubPage() {
                       <div className="flex items-center gap-2">
                         <span className={`rounded px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest ${
                           record.outcome === "qualified" ? "border border-emerald-500/40 bg-emerald-950/30 text-emerald-400"
-                            : record.status === "upcoming" ? "border border-orange-500/40 bg-orange-500/10 text-orange-400"
+                            : record.status === "upcoming" ? "border border-lime-400/40 bg-lime-400/10 text-lime-400"
                             : "border border-white/10 text-zinc-400"
                         }`}>{record.outcome === "qualified" ? "Top 30 ✓" : (record.outcome || record.status)}</span>
                         <span className="font-mono text-xs text-zinc-400">
@@ -696,17 +696,17 @@ export function ContestsHubPage() {
                       <h3 className="truncate font-bold text-white">{record.contest_title}</h3>
                       <div className="flex items-center gap-4 font-mono text-xs text-zinc-400">
                         {record.score !== null && <span>Score: <strong className="text-white tabular-nums">{record.score}</strong></span>}
-                        {record.rank !== null && <span>Rank: <strong className="text-orange-400 tabular-nums">#{record.rank}</strong> / {record.participants || 60}</span>}
+                        {record.rank !== null && <span>Rank: <strong className="text-lime-400 tabular-nums">#{record.rank}</strong> / {record.participants || 60}</span>}
                         <span className="font-bold text-emerald-400">+38 Rating</span>
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       {record.outcome === "qualified" ? (
-                        <Button asChild size="sm" className="rounded-xl text-xs font-bold bg-orange-500 text-white hover:bg-orange-600">
+                        <Button asChild size="sm" className="rounded-none text-xs font-bold bg-lime-400 text-black hover:bg-lime-300 font-bold">
                           <Link to={`/portal/contests/${record.contest_slug}/qualified`}><QrCode className="mr-1.5 size-3.5" /> Campus Pass</Link>
                         </Button>
                       ) : (
-                        <Button asChild size="sm" variant="outline" className="rounded-xl text-xs">
+                        <Button asChild size="sm" variant="outline" className="rounded-none text-xs">
                           <Link to={`/portal/contests/${record.contest_slug}`}>Details</Link>
                         </Button>
                       )}
@@ -721,13 +721,13 @@ export function ContestsHubPage() {
         {/* Right Sidebar */}
         <aside className="space-y-5">
           {/* Top Rankers */}
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl">
+          <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
               <div className="flex items-center gap-2">
-                <Trophy className="size-4 text-orange-500" />
+                <Trophy className="size-4 text-lime-400" />
                 <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">Top Rankers</h3>
               </div>
-              <Link to="/portal/leaderboard" className="flex items-center gap-1 font-mono text-[11px] font-semibold text-orange-400 hover:underline">
+              <Link to="/portal/leaderboard" className="flex items-center gap-1 font-mono text-[11px] font-semibold text-lime-400 hover:underline">
                 Full <ExternalLink className="size-3" />
               </Link>
             </div>
@@ -737,10 +737,10 @@ export function ContestsHubPage() {
               ) : leaders.slice(0, 7).map((leader, index) => {
                 const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : null;
                 return (
-                  <div key={leader.handle} className={`flex items-center justify-between px-4 py-3 transition-colors hover:bg-zinc-800/40 ${index === 0 ? "bg-orange-500/5" : ""}`}>
+                  <div key={leader.handle} className={`flex items-center justify-between px-4 py-3 transition-colors hover:bg-zinc-800/40 ${index === 0 ? "bg-lime-400/5" : ""}`}>
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-5 text-center font-mono text-xs">{medal || <span className="text-zinc-500">{index + 1}</span>}</div>
-                      <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 font-mono text-[10px] font-bold text-white">
+                      <div className="flex size-7 shrink-0 items-center justify-center rounded-none border border-white/10 bg-zinc-800 font-mono text-[10px] font-bold text-lime-400">
                         {leader.handle.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -748,22 +748,22 @@ export function ContestsHubPage() {
                         <p className="truncate font-mono text-[10px] text-zinc-400">{leader.department} · {leader.tier}</p>
                       </div>
                     </div>
-                    <span className="shrink-0 font-mono text-xs font-black tabular-nums text-orange-400">{leader.rating}</span>
+                    <span className="shrink-0 font-mono text-xs font-black tabular-nums text-lime-400">{leader.rating}</span>
                   </div>
                 );
               })}
             </div>
             <div className="border-t border-white/10 bg-zinc-950/50 p-3 text-center">
-              <Link to="/portal/leaderboard" className="flex items-center justify-center gap-1.5 text-xs font-bold text-white transition-colors hover:text-orange-400">
+              <Link to="/portal/leaderboard" className="flex items-center justify-center gap-1.5 text-xs font-bold text-white transition-colors hover:text-lime-400">
                 University Rankings <ArrowRight className="size-3.5" />
               </Link>
             </div>
           </div>
 
           {/* Lab Protocol */}
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-5 space-y-4 backdrop-blur-md shadow-xl">
+          <div className="rounded-none border border-white/10 bg-zinc-900/60 p-5 space-y-4 backdrop-blur-md shadow-xl">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="size-4 text-orange-500" />
+              <ShieldCheck className="size-4 text-lime-400" />
               <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">Lab Arena Protocol</h3>
             </div>
             <div className="space-y-3">
@@ -774,7 +774,7 @@ export function ContestsHubPage() {
                 { n: "04", title: "Strict Fair Play", desc: "No external hardware, devices, or unauthorized tabs." },
               ].map(({ n, title, desc }) => (
                 <div key={n} className="flex gap-3">
-                  <span className="mt-0.5 font-mono text-xs font-bold text-orange-500">{n}</span>
+                  <span className="mt-0.5 font-mono text-xs font-bold text-lime-400">{n}</span>
                   <div>
                     <strong className="block text-xs text-white">{title}</strong>
                     <span className="text-[11px] text-zinc-400">{desc}</span>

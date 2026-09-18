@@ -69,7 +69,7 @@ export function DashboardPage() {
       {/* Header Profile Summary */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-orange-500">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
             Member Operations Console
           </p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mt-1.5">
@@ -79,7 +79,7 @@ export function DashboardPage() {
             Your official competitive record is sealed inside verified Medi-Caps workstation laboratories.
           </p>
         </div>
-        <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-xl border border-white/8 bg-zinc-900/50 backdrop-blur-xs min-w-[200px]">
+        <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-xs min-w-[200px]">
           <TierBadge>{member?.tier || "1★ Explorer"}</TierBadge>
           <strong className="text-3xl md:text-4xl font-mono font-bold text-white tracking-tight tabular-nums">
             {member?.rating ?? 1200}
@@ -92,13 +92,13 @@ export function DashboardPage() {
 
       {/* Live Contest Command or Upcoming Briefing */}
       {live ? (
-        <section className="relative rounded-2xl border border-orange-500/30 bg-zinc-900/90 overflow-hidden shadow-lg shadow-orange-950/20">
-          <div className="absolute top-0 left-0 bottom-0 w-1 bg-orange-500" />
+        <section className="relative rounded-none border border-lime-400/30 bg-zinc-900/90 overflow-hidden shadow-lg shadow-black">
+          <div className="absolute top-0 left-0 bottom-0 w-1 bg-lime-400" />
           <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
             <div className="p-6 md:p-8 lg:col-span-2 space-y-4">
               <div className="flex items-center gap-3">
                 <StatusDot status="live" />
-                <span className="font-mono text-xs font-semibold text-orange-400 uppercase tracking-wider">
+                <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">
                   Active Championship · {live.season}
                 </span>
               </div>
@@ -106,7 +106,7 @@ export function DashboardPage() {
               <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">{live.summary}</p>
               <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-2">
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-orange-400" />
+                  <MapPin className="w-3.5 h-3.5 text-lime-400" />
                   {live.venue}
                 </span>
                 <span className="flex items-center gap-1.5">
@@ -115,7 +115,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="pt-2">
-                <Button asChild className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-6">
+                <Button asChild className="bg-lime-400 hover:bg-lime-300 text-black font-bold font-bold px-6">
                   <Link to={`/portal/contests/${live.slug}`}>
                     Enter Live Arena <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
@@ -130,7 +130,7 @@ export function DashboardPage() {
           </div>
         </section>
       ) : next ? (
-        <section className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <StatusDot status="upcoming" />
@@ -161,12 +161,12 @@ export function DashboardPage() {
 
       {/* Grid: Rating Analytics & Pass Card */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
+        <section className="lg:col-span-2 p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
           <SectionHeader
             kicker="Performance Trajectory"
             title="University Contest Rating"
             action={
-              <Link to="/portal/profile" className="text-xs font-mono font-medium text-orange-400 hover:text-orange-300">
+              <Link to="/portal/profile" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
                 Full Battle Log →
               </Link>
             }
@@ -174,12 +174,12 @@ export function DashboardPage() {
           <RatingChart data={history} />
         </section>
 
-        <section className="p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm flex flex-col justify-between">
+        <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm flex flex-col justify-between">
           <div>
             <SectionHeader kicker="Hardware Pass" title="Lab Workstation" />
-            <div className="p-5 rounded-xl border border-white/10 bg-zinc-950/80 font-mono space-y-4">
+            <div className="p-5 rounded-none border border-white/10 bg-zinc-950/80 font-mono space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-orange-500">CCC / MCU</span>
+                <span className="text-xs font-bold text-lime-400">CCC / MCU</span>
                 <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-slate-300 border border-white/8 uppercase">
                   {pass?.status?.toUpperCase() ?? "STANDBY"}
                 </span>
@@ -195,7 +195,7 @@ export function DashboardPage() {
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Pass Code</span>
-                  <strong className="text-xs text-orange-400 block mt-0.5 truncate">{pass?.pass_code ?? "CCC-PASS-0001"}</strong>
+                  <strong className="text-xs text-lime-400 block mt-0.5 truncate">{pass?.pass_code ?? "CCC-PASS-0001"}</strong>
                 </div>
               </div>
             </div>
@@ -209,12 +209,12 @@ export function DashboardPage() {
       </div>
 
       {/* Campus Scoreboard Radar */}
-      <section className="p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
+      <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
         <SectionHeader
           kicker="Division Radar"
           title="Verified Campus Scoreboard"
           action={
-            <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-orange-400 hover:text-orange-300">
+            <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
               University Rankings →
             </Link>
           }
@@ -223,12 +223,12 @@ export function DashboardPage() {
       </section>
 
       {/* Live Campus Activity Stream */}
-      <section className="p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
+      <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
         <SectionHeader
           kicker="Campus Network"
           title="Live Activity Stream"
           action={
-            <Link to="/portal/verify" className="text-xs font-mono font-medium text-orange-400 hover:text-orange-300">
+            <Link to="/portal/verify" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
               Verify Proof Log →
             </Link>
           }

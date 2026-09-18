@@ -53,13 +53,13 @@ export function ProblemDetailPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <Link
         to="/portal/problems"
-        className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-orange-400 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-lime-400 transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Problem archive
       </Link>
 
-      <header className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-start gap-5">
-        <span className="font-mono text-3xl font-black text-orange-400 border border-orange-500/40 rounded-xl px-4 py-2 bg-orange-500/10 shrink-0">
+      <header className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-start gap-5">
+        <span className="font-mono text-3xl font-black text-lime-400 border border-lime-400/40 rounded-none px-4 py-2 bg-lime-400/10 shrink-0">
           {problem.index}
         </span>
         <div className="min-w-0">
@@ -75,7 +75,7 @@ export function ProblemDetailPage() {
         </div>
       </header>
 
-      <div className="flex items-start gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-300">
+      <div className="flex items-start gap-4 p-4 rounded-none border border-amber-500/30 bg-amber-950/20 text-amber-300">
         <Ban className="size-5 shrink-0 mt-0.5" />
         <div>
           <strong className="font-mono text-sm block">No online submission surface</strong>
@@ -85,9 +85,9 @@ export function ProblemDetailPage() {
         </div>
       </div>
 
-      <article className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
+      <article className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
         <div>
-          <span className="inline-block rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-widest text-orange-400 mb-2">
+          <span className="inline-block rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-widest text-lime-400 mb-2">
             Official Editorial
           </span>
           <h2 className="text-xl font-mono font-bold text-white uppercase">
@@ -106,7 +106,7 @@ export function ProblemDetailPage() {
           <p className="text-xs text-zinc-400 leading-relaxed">
             Model the invariant before choosing a data structure. The intended solution maintains a monotonic decision boundary and proves every discarded state cannot improve the final answer.
           </p>
-          <pre className="rounded-xl p-4 bg-zinc-950 border border-white/10 font-mono text-xs text-orange-400 overflow-x-auto">
+          <pre className="rounded-none p-4 bg-zinc-950 border border-white/10 font-mono text-xs text-lime-400 overflow-x-auto">
             <code>{`complexity: O(n log n)\nspace: O(n)\nverdict source: sealed judge replay`}</code>
           </pre>
         </div>

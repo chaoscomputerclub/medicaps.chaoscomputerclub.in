@@ -243,10 +243,10 @@ export function ContestArenaPage() {
   if (!arenaData) {
     return (
       <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-zinc-950 p-4 text-white">
-        <div className="w-full max-w-lg space-y-6 rounded-2xl border border-amber-500/40 bg-zinc-900/80 p-8 shadow-2xl relative overflow-hidden text-center backdrop-blur-md">
+        <div className="w-full max-w-lg space-y-6 rounded-none border border-amber-500/40 bg-zinc-900/80 p-8 shadow-2xl relative overflow-hidden text-center backdrop-blur-md">
           <div className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-amber-500/10 blur-3xl" />
 
-          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-amber-500/40 bg-amber-500/10">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-none border border-amber-500/40 bg-amber-500/10">
             <ShieldCheck className="size-8 text-amber-400" />
           </div>
 
@@ -262,7 +262,7 @@ export function ContestArenaPage() {
             </p>
           </div>
 
-          <div className="space-y-2 rounded-xl border border-white/10 bg-zinc-950/60 p-4 text-left font-mono text-xs">
+          <div className="space-y-2 rounded-none border border-white/10 bg-zinc-950/60 p-4 text-left font-mono text-xs">
             <div className="flex items-center justify-between">
               <span className="text-zinc-400">Round 1 Screening:</span>
               <span className="font-bold text-emerald-400">✓ Top 30 Confirmed</span>
@@ -276,7 +276,7 @@ export function ContestArenaPage() {
           <div className="flex flex-col gap-3 pt-2">
             <Button
               asChild
-              className="rounded-xl bg-orange-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20"
+              className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20"
             >
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
                 <QrCode className="mr-2 size-4" /> View Your QR Campus Pass
@@ -286,14 +286,14 @@ export function ContestArenaPage() {
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
                 variant="outline"
-                className="w-full rounded-xl font-mono text-xs"
+                className="w-full rounded-none font-mono text-xs"
               >
                 <RotateCcw className="mr-1.5 size-3.5" /> Re-check Gate Status
               </Button>
               <Button
                 asChild
                 variant="ghost"
-                className="rounded-xl font-mono text-xs text-zinc-400"
+                className="rounded-none font-mono text-xs text-zinc-400"
               >
                 <Link to={`/portal/contests/${contestSlug}`}>
                   Exit to Lobby
@@ -317,7 +317,7 @@ export function ContestArenaPage() {
             asChild
             variant="ghost"
             size="sm"
-            className="h-8 px-2.5 text-zinc-400 hover:text-white rounded-lg font-mono text-xs uppercase"
+            className="h-8 px-2.5 text-zinc-400 hover:text-white rounded-none font-mono text-xs uppercase"
           >
             <Link to={`/portal/contests/${contestSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
@@ -333,7 +333,7 @@ export function ContestArenaPage() {
             </h1>
             <Badge
               variant="outline"
-              className="border-orange-500/40 bg-orange-500/10 text-orange-400 font-mono text-[10px] uppercase rounded-md tracking-wider"
+              className="border-lime-400/40 bg-lime-400/10 text-lime-400 font-mono text-[10px] uppercase rounded-none tracking-wider"
             >
               Live Final
             </Badge>
@@ -342,13 +342,13 @@ export function ContestArenaPage() {
 
         {/* Center: Chief Proctor & Workstation Indicator */}
         <div className="hidden lg:flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-800/60 border border-white/10 text-xs font-mono">
-            <ShieldCheck className="size-3.5 text-orange-500" />
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-none bg-zinc-800/60 border border-white/10 text-xs font-mono">
+            <ShieldCheck className="size-3.5 text-lime-400" />
             <span className="text-zinc-400">Proctors:</span>
             <span className="text-white font-medium">{arenaData?.chief_proctors?.length ? arenaData.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-800/60 border border-white/10 text-xs font-mono">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-none bg-zinc-800/60 border border-white/10 text-xs font-mono">
             <Cpu className="size-3.5 text-cyan-400" />
             <span className="text-zinc-400">Workstation:</span>
             <span className="text-white font-bold">{arenaData?.assigned_seat || "Lab-04-WS-07"}</span>
@@ -357,9 +357,9 @@ export function ContestArenaPage() {
 
         {/* Right: Countdown, Scoreboard & Fullscreen */}
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono text-xs font-bold tabular-nums">
-            <span className="size-1.5 rounded-full bg-orange-500 animate-pulse" />
-            <Clock className="size-3.5 text-orange-500" />
+          <div className="flex items-center gap-2 px-3 py-1 rounded-none bg-lime-400/10 border border-lime-400/30 text-lime-400 font-mono text-xs font-bold tabular-nums">
+            <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
+            <Clock className="size-3.5 text-lime-400" />
             <span className="tracking-wider">{formatTimer(remainingSeconds)}</span>
           </div>
 
@@ -367,7 +367,7 @@ export function ContestArenaPage() {
             asChild
             variant="outline"
             size="sm"
-            className="hidden sm:flex h-8 text-xs font-mono uppercase tracking-wider border-white/10 bg-zinc-800/60 text-white hover:bg-zinc-700/60 rounded-lg"
+            className="hidden sm:flex h-8 text-xs font-mono uppercase tracking-wider border-white/10 bg-zinc-800/60 text-white hover:bg-zinc-700/60 rounded-none"
           >
             <Link to={`/portal/contests/${contestSlug}/results`} target="_blank">
               <Trophy className="size-3.5 mr-1.5 text-amber-400" />
@@ -378,7 +378,7 @@ export function ContestArenaPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800/60"
+            className="size-8 text-zinc-400 hover:text-white rounded-none hover:bg-zinc-800/60"
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
@@ -401,9 +401,9 @@ export function ContestArenaPage() {
                   setActiveIndex(idx);
                   dispatch(clearArenaResults());
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition-colors border ${
+                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-medium rounded-none transition-colors border ${
                   isActive
-                    ? "bg-zinc-800 text-orange-400 border-orange-500/50 shadow-sm"
+                    ? "bg-zinc-800 text-lime-400 border-lime-400/50 shadow-sm"
                     : "text-zinc-400 hover:text-white hover:bg-zinc-800/50 border-transparent"
                 }`}
               >
@@ -411,7 +411,7 @@ export function ContestArenaPage() {
                 <span className="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase bg-zinc-900 text-zinc-400">
                   {prob.points}p
                 </span>
-                {isSolved && <BadgeCheck className="size-3.5 text-orange-400" />}
+                {isSolved && <BadgeCheck className="size-3.5 text-lime-400" />}
               </button>
             );
           })}
@@ -423,10 +423,10 @@ export function ContestArenaPage() {
             value={selectedLanguage}
             onValueChange={(val: any) => setSelectedLanguage(val)}
           >
-            <SelectTrigger className="h-7 w-[125px] text-xs font-mono uppercase bg-zinc-800 border-white/10 text-white rounded-lg focus:ring-0">
+            <SelectTrigger className="h-7 w-[125px] text-xs font-mono uppercase bg-zinc-800 border-white/10 text-white rounded-none focus:ring-0">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-white/10 text-white font-mono text-xs rounded-xl">
+            <SelectContent className="bg-zinc-900 border-white/10 text-white font-mono text-xs rounded-none">
               <SelectItem value="python">Python 3.12</SelectItem>
               <SelectItem value="cpp">C++ (GCC 14)</SelectItem>
               <SelectItem value="javascript">JavaScript</SelectItem>
@@ -436,7 +436,7 @@ export function ContestArenaPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-xs font-mono uppercase text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800"
+            className="h-7 px-2 text-xs font-mono uppercase text-zinc-400 hover:text-white rounded-none hover:bg-zinc-800"
             onClick={handleResetStarter}
             title="Reset starter template"
           >
@@ -460,7 +460,7 @@ export function ContestArenaPage() {
                 <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
                   <Badge
                     variant="outline"
-                    className={`font-mono text-[10px] uppercase rounded-md tracking-wider ${
+                    className={`font-mono text-[10px] uppercase rounded-none tracking-wider ${
                       activeProblem.difficulty === "EASY"
                         ? "border-emerald-500/40 text-emerald-400 bg-emerald-950/20"
                         : activeProblem.difficulty === "HARD"
@@ -473,7 +473,7 @@ export function ContestArenaPage() {
                   <span className="text-zinc-600">·</span>
                   <span className="text-zinc-400">{activeProblem.topic}</span>
                   <span className="text-zinc-600">·</span>
-                  <span className="text-orange-400 font-bold tabular-nums">{activeProblem.points} points</span>
+                  <span className="text-lime-400 font-bold tabular-nums">{activeProblem.points} points</span>
                 </div>
               </div>
 
@@ -488,7 +488,7 @@ export function ContestArenaPage() {
                   <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
                     Input Format
                   </h3>
-                  <div className="text-xs text-zinc-200 font-mono p-3 rounded-xl bg-zinc-900 border border-white/10 whitespace-pre-line">
+                  <div className="text-xs text-zinc-200 font-mono p-3 rounded-none bg-zinc-900 border border-white/10 whitespace-pre-line">
                     {activeProblem.input_format}
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export function ContestArenaPage() {
                   <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
                     Output Format
                   </h3>
-                  <div className="text-xs text-zinc-200 font-mono p-3 rounded-xl bg-zinc-900 border border-white/10 whitespace-pre-line">
+                  <div className="text-xs text-zinc-200 font-mono p-3 rounded-none bg-zinc-900 border border-white/10 whitespace-pre-line">
                     {activeProblem.output_format}
                   </div>
                 </div>
@@ -512,7 +512,7 @@ export function ContestArenaPage() {
                   <h3 className="text-[10px] font-bold uppercase tracking-widest font-mono text-zinc-400">
                     Constraints
                   </h3>
-                  <div className="text-xs text-amber-300 font-mono p-3 rounded-xl bg-amber-950/20 border border-amber-500/20 whitespace-pre-line">
+                  <div className="text-xs text-amber-300 font-mono p-3 rounded-none bg-amber-950/20 border border-amber-500/20 whitespace-pre-line">
                     {activeProblem.constraints}
                   </div>
                 </div>
@@ -525,7 +525,7 @@ export function ContestArenaPage() {
                 </h3>
                 {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 ? (
                   activeProblem.sample_testcases.map((tc, idx) => (
-                    <div key={idx} className="space-y-2.5 border border-white/10 rounded-xl p-3.5 bg-zinc-950/60">
+                    <div key={idx} className="space-y-2.5 border border-white/10 rounded-none p-3.5 bg-zinc-950/60">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
                           Sample #{idx + 1}
@@ -533,11 +533,11 @@ export function ContestArenaPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 text-[11px] font-mono uppercase tracking-wider text-zinc-400 hover:text-white rounded-lg border border-white/10 bg-zinc-900 hover:bg-zinc-800"
+                          className="h-6 text-[11px] font-mono uppercase tracking-wider text-zinc-400 hover:text-white rounded-none border border-white/10 bg-zinc-900 hover:bg-zinc-800"
                           onClick={() => copyToClipboard(tc.stdin, `tc_in_${idx}`)}
                         >
                           {copiedKey === `tc_in_${idx}` ? (
-                            <Check className="size-3 text-orange-500 mr-1" />
+                            <Check className="size-3 text-lime-400 mr-1" />
                           ) : (
                             <Copy className="size-3 mr-1" />
                           )}
@@ -549,7 +549,7 @@ export function ContestArenaPage() {
                         <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
                           Input
                         </span>
-                        <pre className="p-2.5 rounded-lg bg-zinc-900 border border-white/10 text-xs font-mono text-zinc-200 overflow-x-auto">
+                        <pre className="p-2.5 rounded-none bg-zinc-900 border border-white/10 text-xs font-mono text-zinc-200 overflow-x-auto">
                           {tc.stdin}
                         </pre>
                       </div>
@@ -558,7 +558,7 @@ export function ContestArenaPage() {
                         <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
                           Expected Output
                         </span>
-                        <pre className="p-2.5 rounded-lg bg-zinc-900 border border-white/10 text-xs font-mono text-orange-400 overflow-x-auto">
+                        <pre className="p-2.5 rounded-none bg-zinc-900 border border-white/10 text-xs font-mono text-lime-400 overflow-x-auto">
                           {tc.expected_output}
                         </pre>
                       </div>
@@ -614,9 +614,9 @@ export function ContestArenaPage() {
                 <button
                   type="button"
                   onClick={() => setActiveConsoleTab("testcases")}
-                  className={`px-3 py-1 text-xs font-mono uppercase tracking-wider font-medium rounded-t-lg transition-colors ${
+                  className={`px-3 py-1 text-xs font-mono uppercase tracking-wider font-medium rounded-none transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-zinc-800 text-orange-400 border-t-2 border-t-orange-500"
+                      ? "bg-zinc-800 text-lime-400 border-t-2 border-t-lime-400"
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
@@ -626,15 +626,15 @@ export function ContestArenaPage() {
                 <button
                   type="button"
                   onClick={() => setActiveConsoleTab("output")}
-                  className={`px-3 py-1 text-xs font-mono uppercase tracking-wider font-medium rounded-t-lg transition-colors ${
+                  className={`px-3 py-1 text-xs font-mono uppercase tracking-wider font-medium rounded-none transition-colors ${
                     activeConsoleTab === "output"
-                      ? "bg-zinc-800 text-orange-400 border-t-2 border-t-orange-500"
+                      ? "bg-zinc-800 text-lime-400 border-t-2 border-t-lime-400"
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
                   Console Output
                   {runResult || submitResult ? (
-                    <span className="size-1.5 rounded-full bg-orange-500 inline-block ml-1.5" />
+                    <span className="size-1.5 rounded-full bg-lime-400 inline-block ml-1.5" />
                   ) : null}
                 </button>
               </div>
@@ -646,9 +646,9 @@ export function ContestArenaPage() {
                       key={idx}
                       type="button"
                       onClick={() => setActiveTestcaseIndex(idx)}
-                      className={`px-2 py-0.5 rounded-md border text-xs font-mono ${
+                      className={`px-2 py-0.5 rounded-none border text-xs font-mono ${
                         activeTestcaseIndex === idx
-                          ? "bg-orange-500/10 text-orange-400 border-orange-500/50"
+                          ? "bg-lime-400/10 text-lime-400 border-lime-400/50"
                           : "text-zinc-400 hover:text-white border-white/10 bg-zinc-900"
                       }`}
                     >
@@ -658,7 +658,7 @@ export function ContestArenaPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTestcaseIndex(-1)}
-                    className={`px-2 py-0.5 rounded-md border text-xs font-mono ${
+                    className={`px-2 py-0.5 rounded-none border text-xs font-mono ${
                       activeTestcaseIndex === -1
                         ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/50"
                         : "text-zinc-400 hover:text-white border-white/10 bg-zinc-900"
@@ -683,7 +683,7 @@ export function ContestArenaPage() {
                         value={customStdin}
                         onChange={(e) => setCustomStdin(e.target.value)}
                         placeholder="Enter custom stdin test values..."
-                        className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded-lg text-xs font-mono text-white resize-none focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                        className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400"
                       />
                     </div>
                   ) : (
@@ -693,7 +693,7 @@ export function ContestArenaPage() {
                           <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
                             Standard Input
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white">
+                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs text-white">
                             {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
                           </pre>
                         </div>
@@ -701,7 +701,7 @@ export function ContestArenaPage() {
                           <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
                             Expected Output
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-orange-400">
+                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs text-lime-400">
                             {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
                           </pre>
                         </div>
@@ -716,7 +716,7 @@ export function ContestArenaPage() {
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-2">
                         {submitResult.verdict === "ACCEPTED" ? (
-                          <div className="flex items-center gap-1.5 text-orange-400 font-bold text-xs uppercase font-mono">
+                          <div className="flex items-center gap-1.5 text-lime-400 font-bold text-xs uppercase font-mono">
                             <CheckCircle2 className="size-4 text-emerald-400" /> Accepted
                           </div>
                         ) : (
@@ -729,7 +729,7 @@ export function ContestArenaPage() {
                           {submitResult.passed_testcases} / {submitResult.total_testcases} testcases passed
                         </span>
                         {submitResult.points_awarded > 0 && (
-                          <Badge className="bg-orange-500/15 text-orange-400 border border-orange-500/40 rounded-md font-mono text-[10px] tabular-nums">
+                          <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 rounded-none font-mono text-[10px] tabular-nums">
                             +{submitResult.points_awarded} pts
                           </Badge>
                         )}
@@ -757,7 +757,7 @@ export function ContestArenaPage() {
                           <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">
                             Stdout
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white overflow-x-auto">
+                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs text-white overflow-x-auto">
                             {runResult.stdout}
                           </pre>
                         </div>
@@ -767,7 +767,7 @@ export function ContestArenaPage() {
                           <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">
                             Stderr
                           </span>
-                          <pre className="p-2.5 bg-rose-950/20 border border-rose-500/30 rounded-lg text-xs text-rose-400 overflow-x-auto">
+                          <pre className="p-2.5 bg-rose-950/20 border border-rose-500/30 rounded-none text-xs text-rose-400 overflow-x-auto">
                             {runResult.stderr}
                           </pre>
                         </div>
@@ -777,7 +777,7 @@ export function ContestArenaPage() {
                           <span className="text-[10px] text-amber-400 uppercase tracking-wider font-mono">
                             Compiler Output
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-amber-500/30 rounded-lg text-xs text-amber-300 overflow-x-auto">
+                          <pre className="p-2.5 bg-zinc-950 border border-amber-500/30 rounded-none text-xs text-amber-300 overflow-x-auto">
                             {runResult.compile_output}
                           </pre>
                         </div>
@@ -805,7 +805,7 @@ export function ContestArenaPage() {
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleRunCode}
-                  className="font-mono text-xs uppercase tracking-wider rounded-lg border-white/10 bg-zinc-800/80 text-white hover:bg-zinc-700/80 disabled:opacity-30"
+                  className="font-mono text-xs uppercase tracking-wider rounded-none border-white/10 bg-zinc-800/80 text-white hover:bg-zinc-700/80 disabled:opacity-30"
                 >
                   <Play className="size-3.5 mr-1 text-cyan-400" />
                   {isRunningCode ? "Running…" : "Run Code"}
@@ -815,7 +815,7 @@ export function ContestArenaPage() {
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleSubmitCode}
-                  className="font-mono text-xs uppercase font-bold tracking-wider rounded-lg bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20 disabled:opacity-30"
+                  className="font-mono text-xs uppercase font-bold tracking-wider rounded-none bg-lime-400 hover:bg-lime-300 text-black font-bold shadow-lg shadow-lime-400/20 disabled:opacity-30"
                 >
                   <Send className="size-3.5 mr-1" />
                   {isSubmittingCode ? "Evaluating…" : "Submit Solution"}
@@ -833,14 +833,14 @@ export function ContestArenaPage() {
         >
           {/* Glow ring */}
           <div className="relative flex size-28 items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-orange-500/20 blur-2xl animate-pulse" />
-            <div className="flex size-24 items-center justify-center rounded-full border-2 border-orange-500/40 bg-zinc-900">
-              <Trophy className="size-10 text-orange-500" />
+            <div className="absolute inset-0 rounded-none bg-lime-400/20 blur-2xl animate-pulse" />
+            <div className="flex size-24 items-center justify-center rounded-none border-2 border-lime-400/40 bg-zinc-900">
+              <Trophy className="size-10 text-lime-400" />
             </div>
           </div>
 
           <div className="space-y-3 text-center">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-orange-500">Contest Concluded</p>
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-lime-400">Contest Concluded</p>
             <h2 className="text-4xl font-black uppercase tracking-tight text-white">
               Time's Up
             </h2>
@@ -854,12 +854,12 @@ export function ContestArenaPage() {
             <p className="font-mono text-xs text-zinc-400 uppercase tracking-widest">
               Redirecting to Final Results in
             </p>
-            <div className="flex size-16 items-center justify-center rounded-full border-2 border-orange-500 bg-orange-500/10">
-              <span className="text-2xl font-black text-orange-400 tabular-nums">{redirectCountdown}</span>
+            <div className="flex size-16 items-center justify-center rounded-none border-2 border-lime-400 bg-lime-400/10">
+              <span className="text-2xl font-black text-lime-400 tabular-nums">{redirectCountdown}</span>
             </div>
             <button
               onClick={() => navigate(`/portal/contests/${contestSlug}/final-results`)}
-              className="font-mono text-xs font-bold uppercase tracking-widest text-orange-400 border border-orange-500/40 bg-orange-500/10 px-6 py-2.5 rounded-xl hover:bg-orange-500/20 transition-colors"
+              className="font-mono text-xs font-bold uppercase tracking-widest text-lime-400 border border-lime-400/40 bg-lime-400/10 px-6 py-2.5 rounded-none hover:bg-lime-400/20 transition-colors"
             >
               View Final Results Now →
             </button>

@@ -106,10 +106,10 @@ export const MonacoEditor = memo(function MonacoEditor({
         colors: {
           "editor.background": "#09090b",
           "editor.foreground": "#eeede5",
-          "editorCursor.foreground": "#f97316",
+          "editorCursor.foreground": "#c8ff36",
           "editor.lineHighlightBackground": "#18181b",
           "editorLineNumber.foreground": "#52525b",
-          "editorLineNumber.activeForeground": "#f97316",
+          "editorLineNumber.activeForeground": "#c8ff36",
           "editor.selectionBackground": "#27272a",
           "editor.inactiveSelectionBackground": "#18181b",
           "editorGutter.background": "#09090b",

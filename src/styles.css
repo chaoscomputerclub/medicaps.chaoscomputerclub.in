@@ -2,59 +2,66 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-background: #09090b;
-  --color-foreground: #f8fafc;
-  --color-card: #121214;
-  --color-card-foreground: #f8fafc;
-  --color-popover: #18181b;
-  --color-popover-foreground: #f8fafc;
-  --color-primary: #f97316;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #18181b;
-  --color-secondary-foreground: #f8fafc;
-  --color-muted: #27272a;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #f97316;
-  --color-accent-foreground: #ffffff;
-  --color-destructive: #ef4444;
+  --color-background: #000000;
+  --color-foreground: #eaeaea;
+  --color-card: #080808;
+  --color-card-foreground: #eaeaea;
+  --color-popover: #080808;
+  --color-popover-foreground: #eaeaea;
+
+  --color-lime-300: #e6ff66;
+  --color-lime-400: #CCFF00;
+  --color-lime-500: #b3e600;
+  --color-lime-600: #99cc00;
+  --color-lime-950: #101c00;
+
+  --color-primary: #CCFF00;
+  --color-primary-foreground: #000000;
+  --color-secondary: #111111;
+  --color-secondary-foreground: #eaeaea;
+  --color-muted: #161616;
+  --color-muted-foreground: #888888;
+  --color-accent: #CCFF00;
+  --color-accent-foreground: #000000;
+  --color-destructive: #ff3344;
   --color-destructive-foreground: #ffffff;
   --color-border: rgba(255, 255, 255, 0.08);
-  --color-input: rgba(255, 255, 255, 0.16);
-  --color-ring: #f97316;
+  --color-input: rgba(255, 255, 255, 0.12);
+  --color-ring: #CCFF00;
 
-  --color-canvas: #09090b;
-  --color-surface: #0f0f11;
-  --color-surface-1: #0f0f11;
-  --color-surface-2: #18181b;
-  --color-surface-3: #27272a;
+  --color-canvas: #000000;
+  --color-surface: #080808;
+  --color-surface-1: #080808;
+  --color-surface-2: #111111;
+  --color-surface-3: #161616;
 
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 }
 
 :root {
   color-scheme: dark;
-  --background: #09090b;
-  --foreground: #f8fafc;
-  --bg: #09090b;
-  --surface: #0f0f11;
-  --surface-1: #0f0f11;
-  --surface-2: #18181b;
-  --surface-3: #27272a;
+  --background: #000000;
+  --foreground: #eaeaea;
+  --bg: #000000;
+  --surface: #080808;
+  --surface-1: #080808;
+  --surface-2: #111111;
+  --surface-3: #161616;
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
-  --muted: #94a3b8;
-  --accent: #f97316;
-  --accent-ink: #ffffff;
+  --muted: #888888;
+  --accent: #CCFF00;
+  --accent-ink: #000000;
   --warning: #f59e0b;
-  --danger: #ef4444;
-  --cyan: #06b6d4;
-  --radius: 6px;
+  --danger: #ff3344;
+  --cyan: #00e5ff;
+  --radius: 0px;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
   --font-code: "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
@@ -65,26 +72,32 @@
 }
 
 html {
-  background-color: #09090b;
-  color: #f8fafc;
+  background-color: #000000;
+  color: #ffffff;
   color-scheme: dark;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  background-color: #09090b;
-  color: #f8fafc;
+  background-color: #000000;
+  color: #ffffff;
   font-family: var(--font-sans);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global focus-visible rings per Vercel Web Interface Guidelines */
+/* Global focus-visible rings in Lime Acid */
 :focus-visible {
-  outline: 2px solid #f97316 !important;
+  outline: 2px solid #CCFF00 !important;
   outline-offset: 2px !important;
+}
+
+/* Selection in Lime Acid */
+::selection {
+  background-color: #CCFF00;
+  color: #000000;
 }
 
 /* Monospace & Tabular Figures */
@@ -106,20 +119,20 @@ textarea {
   touch-action: manipulation;
 }
 
-/* Custom Tactical Scrollbar */
+/* Custom Tactical Scrollbar - 0 radius */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #000000;
 }
 ::-webkit-scrollbar-thumb {
   background: #27272a;
-  border-radius: 3px;
+  border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #CCFF00;
 }
 
 /* High-level design bridges mapped via pure Tailwind @apply */
@@ -131,21 +144,21 @@ textarea {
     @apply flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6 mb-8;
   }
   .kicker {
-    @apply font-mono text-[10px] font-bold uppercase tracking-widest text-orange-500;
+    @apply font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400;
   }
   .panel {
-    @apply p-6 rounded-2xl border border-white/8 bg-zinc-900/50 backdrop-blur-sm;
+    @apply p-6 rounded-none border border-white/10 bg-zinc-950;
   }
   .section-heading {
     @apply flex items-end justify-between gap-4 border-b border-white/10 pb-4 mb-6;
   }
   .tier-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/30 text-orange-400;
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-none text-xs font-mono font-bold uppercase tracking-wider bg-lime-400/10 border border-lime-400/30 text-lime-400;
   }
   .mono-tag {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-zinc-800/80 border border-white/8 text-slate-300;
+    @apply inline-flex items-center px-2 py-0.5 rounded-none text-[11px] font-mono font-medium tracking-wide bg-zinc-900 border border-white/10 text-zinc-300;
   }
   .metric {
-    @apply p-4 rounded-xl border border-white/8 bg-zinc-900/60 backdrop-blur-sm;
+    @apply p-4 rounded-none border border-white/10 bg-zinc-950;
   }
 }

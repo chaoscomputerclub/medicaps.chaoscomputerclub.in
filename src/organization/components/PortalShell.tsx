@@ -77,7 +77,7 @@ export function PortalShell() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-slate-100 flex flex-col md:flex-row antialiased selection:bg-orange-500 selection:text-white">
+    <div className="min-h-screen bg-black text-slate-100 flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-40">
         <Link to="/portal" className="flex items-center gap-2.5">
@@ -137,23 +137,23 @@ export function PortalShell() {
                 key={item.to}
                 to={item.to}
                 onClick={() => dispatch(setSidebarOpen(false))}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors duration-150 ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-none text-xs font-mono uppercase tracking-wider transition-colors duration-150 ${
                   active
-                    ? "bg-orange-500/12 text-orange-400 border border-orange-500/25 font-bold shadow-xs"
+                    ? "bg-lime-400/12 text-lime-400 border border-lime-400/25 font-bold shadow-xs"
                     : "text-slate-400 hover:text-white hover:bg-zinc-900 border border-transparent font-medium"
                 }`}
               >
                 <item.icon className="w-4 h-4 shrink-0" />
                 <span className="flex-1">{item.label}</span>
-                {active && <ChevronRight className="w-3.5 h-3.5 text-orange-500" />}
+                {active && <ChevronRight className="w-3.5 h-3.5 text-lime-400" />}
               </Link>
             );
           })}
         </nav>
 
         {/* Offline Mission Banner */}
-        <div className="mt-auto mb-4 p-3.5 rounded-lg border border-white/8 bg-zinc-900/50 backdrop-blur-xs">
-          <span className="block font-mono text-[10px] font-bold text-orange-400 tracking-wider uppercase">
+        <div className="mt-auto mb-4 p-3.5 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-xs">
+          <span className="block font-mono text-[10px] font-bold text-lime-400 tracking-wider uppercase">
             Offline By Design
           </span>
           <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
@@ -164,11 +164,11 @@ export function PortalShell() {
         {/* User Card */}
         <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <Avatar className="w-8 h-8 rounded-md border border-white/15 bg-zinc-900 text-orange-400 shrink-0">
+            <Avatar className="w-8 h-8 rounded-none border border-white/15 bg-zinc-900 text-lime-400 shrink-0">
               {member?.avatar_url && (member.avatar_url.startsWith("http") || member.avatar_url.startsWith("/media/")) ? (
                 <AvatarImage src={member.avatar_url || undefined} alt={member.handle || "avatar"} className="object-cover" />
               ) : null}
-              <AvatarFallback className="rounded-md bg-orange-500/10 text-orange-400 font-mono font-bold text-xs">
+              <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-xs">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -183,7 +183,7 @@ export function PortalShell() {
             type="button"
             onClick={() => dispatch(logout())}
             aria-label="Sign out"
-            className="text-slate-400 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+            className="text-slate-400 hover:text-red-400 p-1.5 rounded-none hover:bg-zinc-900 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
           >
             <LogOut className="w-4 h-4" />
           </button>

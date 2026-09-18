@@ -62,7 +62,7 @@ const PRESET_EMBLEMS = [
   { id: "binary", label: "Binary", icon: "👾", bg: "bg-cyan-500/10", border: "border-cyan-500/40", text: "text-cyan-400" },
   { id: "quantum", label: "Quantum", icon: "⚛️", bg: "bg-purple-500/10", border: "border-purple-500/40", text: "text-purple-400" },
   { id: "matrix", label: "Matrix", icon: "💻", bg: "bg-emerald-500/10", border: "border-emerald-500/40", text: "text-emerald-400" },
-  { id: "grandmaster", label: "Grandmaster", icon: "🏆", bg: "bg-orange-500/10", border: "border-orange-500/40", text: "text-orange-400" },
+  { id: "grandmaster", label: "Grandmaster", icon: "🏆", bg: "bg-lime-400/10", border: "border-lime-400/40", text: "text-lime-400" },
   { id: "cipher", label: "Cipher", icon: "🛡️", bg: "bg-rose-500/10", border: "border-rose-500/40", text: "text-rose-400" },
 ];
 
@@ -198,9 +198,9 @@ export function SettingsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Page Header */}
-      <header className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-center justify-between">
+      <header className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex items-center justify-between">
         <div className="space-y-1">
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
+          <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
             Member Configuration & Security
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase">
@@ -215,9 +215,9 @@ export function SettingsPage() {
           <button
             type="button"
             className={cn(
-              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-xl transition-all cursor-pointer",
+              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-none transition-all cursor-pointer",
               activeTab === "profile"
-                ? "bg-orange-500 text-white border-orange-500 font-bold shadow-md shadow-orange-500/20"
+                ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
                 : "border-white/10 bg-zinc-900/60 text-zinc-400 hover:text-white hover:border-white/20"
             )}
             onClick={() => setActiveTab("profile")}
@@ -228,9 +228,9 @@ export function SettingsPage() {
           <button
             type="button"
             className={cn(
-              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-xl transition-all cursor-pointer",
+              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-none transition-all cursor-pointer",
               activeTab === "account"
-                ? "bg-orange-500 text-white border-orange-500 font-bold shadow-md shadow-orange-500/20"
+                ? "bg-lime-400 text-black border-lime-400 font-bold shadow-md shadow-lime-400/20"
                 : "border-white/10 bg-zinc-900/60 text-zinc-400 hover:text-white hover:border-white/20"
             )}
             onClick={() => setActiveTab("account")}
@@ -241,7 +241,7 @@ export function SettingsPage() {
           <button
             type="button"
             className={cn(
-              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-xl transition-all cursor-pointer",
+              "flex items-center gap-2.5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-left border rounded-none transition-all cursor-pointer",
               activeTab === "danger"
                 ? "bg-rose-950/80 text-rose-300 border-rose-500/60 font-bold shadow-md shadow-rose-950/40"
                 : "border-white/10 bg-zinc-900/60 text-rose-400 hover:border-rose-800/60 hover:bg-rose-950/20"
@@ -259,7 +259,7 @@ export function SettingsPage() {
           {activeTab === "profile" && (
             <div className="space-y-6">
               {/* Identity Parameters */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Competitive Identity</h3>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -274,7 +274,7 @@ export function SettingsPage() {
                       Full Name
                     </Label>
                     {saveStatus["full_name"] === "saving" && (
-                      <span className="font-mono text-[10px] text-orange-400 flex items-center gap-1">
+                      <span className="font-mono text-[10px] text-lime-400 flex items-center gap-1">
                         <Loader2 className="animate-spin size-3" /> saving...
                       </span>
                     )}
@@ -292,14 +292,14 @@ export function SettingsPage() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSaveField("full_name", fullName.trim());
                       }}
-                      className="font-mono text-sm bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
+                      className="font-mono text-sm bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
                       placeholder="Ada Lovelace"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
+                      className="font-mono text-xs uppercase border-white/10 rounded-none shrink-0"
                       disabled={saveStatus["full_name"] === "saving" || fullName.trim() === member?.full_name}
                       onClick={() => handleSaveField("full_name", fullName.trim())}
                     >
@@ -319,7 +319,7 @@ export function SettingsPage() {
                         <span className="text-zinc-500">current handle</span>
                       )}
                       {isHandleChanged && handleStatus === "checking" && (
-                        <span className="text-orange-400 flex items-center gap-1">
+                        <span className="text-lime-400 flex items-center gap-1">
                           <Loader2 className="animate-spin size-3" /> checking...
                         </span>
                       )}
@@ -355,7 +355,7 @@ export function SettingsPage() {
                           }
                         }}
                         className={cn(
-                          "font-mono text-sm pl-8 bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500",
+                          "font-mono text-sm pl-8 bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400",
                           isHandleChanged && handleStatus === "available" && "border-emerald-500/60",
                           isHandleChanged && handleStatus === "taken" && "border-rose-500/60 text-rose-200"
                         )}
@@ -366,7 +366,7 @@ export function SettingsPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
+                      className="font-mono text-xs uppercase border-white/10 rounded-none shrink-0"
                       disabled={
                         !isHandleChanged ||
                         handleInput.trim().length < 3 ||
@@ -395,14 +395,14 @@ export function SettingsPage() {
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
                     placeholder="Competitive programmer, CSE undergraduate..."
-                    className="font-mono text-xs resize-none bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
+                    className="font-mono text-xs resize-none bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
                   />
                   <div className="flex justify-end">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase border-white/10 rounded-xl"
+                      className="font-mono text-xs uppercase border-white/10 rounded-none"
                       disabled={saveStatus["bio"] === "saving" || bio.trim() === (member?.bio || "")}
                       onClick={() => handleSaveField("bio", bio.trim())}
                     >
@@ -413,7 +413,7 @@ export function SettingsPage() {
               </div>
 
               {/* Academic & Emblem */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Academic & Cyber Visuals</h3>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -431,10 +431,10 @@ export function SettingsPage() {
                         void handleSaveField("department", val);
                       }}
                     >
-                      <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl">
+                      <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none">
                         <SelectItem value="CSE">CSE (Computer Science & Engineering)</SelectItem>
                         <SelectItem value="IT">IT (Information Technology)</SelectItem>
                         <SelectItem value="AIDS">AIDS (AI & Data Science)</SelectItem>
@@ -453,10 +453,10 @@ export function SettingsPage() {
                         void handleSaveField("batch", val);
                       }}
                     >
-                      <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl">
+                      <SelectTrigger className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-none">
                         <SelectItem value="2022-26">2022–2026</SelectItem>
                         <SelectItem value="2023-27">2023–2027</SelectItem>
                         <SelectItem value="2024-28">2024–2028</SelectItem>
@@ -481,9 +481,9 @@ export function SettingsPage() {
                             void handleSaveField("avatar_url", emblem.id);
                           }}
                           className={cn(
-                            "flex flex-col items-center justify-center p-3 border rounded-xl transition-all cursor-pointer text-center",
+                            "flex flex-col items-center justify-center p-3 border rounded-none transition-all cursor-pointer text-center",
                             isSelected
-                              ? cn(emblem.border, emblem.bg, "ring-2 ring-orange-500")
+                              ? cn(emblem.border, emblem.bg, "ring-2 ring-lime-400")
                               : "border-white/10 bg-zinc-950 hover:border-zinc-500"
                           )}
                         >
@@ -512,7 +512,7 @@ export function SettingsPage() {
                         value={member?.prn || "—"}
                         readOnly
                         disabled
-                        className="font-mono text-xs bg-zinc-950/40 text-zinc-500 cursor-not-allowed border-white/10 rounded-xl mt-1"
+                        className="font-mono text-xs bg-zinc-950/40 text-zinc-500 cursor-not-allowed border-white/10 rounded-none mt-1"
                       />
                     </div>
                     <div>
@@ -523,7 +523,7 @@ export function SettingsPage() {
                         value={member?.email || ""}
                         readOnly
                         disabled
-                        className="font-mono text-xs bg-zinc-950/40 text-zinc-500 cursor-not-allowed border-white/10 rounded-xl mt-1"
+                        className="font-mono text-xs bg-zinc-950/40 text-zinc-500 cursor-not-allowed border-white/10 rounded-none mt-1"
                       />
                     </div>
                   </div>
@@ -531,7 +531,7 @@ export function SettingsPage() {
               </div>
 
               {/* Developer & Social Links */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-5 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Developer & Social Links</h3>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -554,13 +554,13 @@ export function SettingsPage() {
                           if (e.key === "Enter") handleSaveField("github_username", github.trim());
                         }}
                         placeholder="octocat"
-                        className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
+                        className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
+                        className="font-mono text-xs uppercase border-white/10 rounded-none shrink-0"
                         disabled={saveStatus["github_username"] === "saving" || github.trim() === (member?.github_username || "")}
                         onClick={() => handleSaveField("github_username", github.trim())}
                       >
@@ -583,13 +583,13 @@ export function SettingsPage() {
                           if (e.key === "Enter") handleSaveField("linkedin_url", linkedin.trim());
                         }}
                         placeholder="https://linkedin.com/in/username"
-                        className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-xl focus:border-orange-500"
+                        className="font-mono text-xs bg-zinc-950 border-white/10 text-white rounded-none focus:border-lime-400"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="font-mono text-xs uppercase border-white/10 rounded-xl shrink-0"
+                        className="font-mono text-xs uppercase border-white/10 rounded-none shrink-0"
                         disabled={saveStatus["linkedin_url"] === "saving" || linkedin.trim() === (member?.linkedin_url || "")}
                         onClick={() => handleSaveField("linkedin_url", linkedin.trim())}
                       >
@@ -606,7 +606,7 @@ export function SettingsPage() {
           {activeTab === "account" && (
             <div className="space-y-6">
               {/* Connected Accounts */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Connected Accounts</h3>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -617,7 +617,7 @@ export function SettingsPage() {
                 <div className="divide-y divide-white/5">
                   <div className="py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-lg bg-zinc-950 border border-white/10 flex items-center justify-center font-bold text-xs text-white">
+                      <div className="size-8 rounded-none bg-zinc-950 border border-white/10 flex items-center justify-center font-bold text-xs text-white">
                         G
                       </div>
                       <div>
@@ -625,7 +625,7 @@ export function SettingsPage() {
                         <span className="font-mono text-[10px] text-zinc-400">{member?.email}</span>
                       </div>
                     </div>
-                    <Badge variant="outline" className="font-mono text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-md">
+                    <Badge variant="outline" className="font-mono text-[10px] text-emerald-400 border-emerald-500/40 bg-emerald-950/20 rounded-none">
                       CONNECTED
                     </Badge>
                   </div>
@@ -633,7 +633,7 @@ export function SettingsPage() {
               </div>
 
               {/* Notification Preferences */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Notification Preferences</h3>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -677,7 +677,7 @@ export function SettingsPage() {
               </div>
 
               {/* Active Session */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
                 <div>
                   <h3 className="text-base font-mono font-bold text-white uppercase">Active Session & Security</h3>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -685,9 +685,9 @@ export function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-zinc-950 border border-white/10">
+                <div className="flex items-start justify-between gap-4 p-4 rounded-none bg-zinc-950 border border-white/10">
                   <div className="flex items-start gap-3">
-                    <Laptop className="size-5 text-orange-400 mt-0.5" />
+                    <Laptop className="size-5 text-lime-400 mt-0.5" />
                     <div>
                       <strong className="font-mono text-xs block text-white">
                         {typeof window !== "undefined" ? window.navigator.platform || "Workstation Session" : "Workstation Session"}
@@ -705,7 +705,7 @@ export function SettingsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="font-mono text-xs uppercase border-white/10 rounded-xl text-zinc-300 hover:text-white"
+                    className="font-mono text-xs uppercase border-white/10 rounded-none text-zinc-300 hover:text-white"
                     onClick={() => logout()}
                   >
                     <LogOut size={13} className="mr-1.5" /> Log Out
@@ -717,7 +717,7 @@ export function SettingsPage() {
 
           {/* TAB 3: DANGER ZONE */}
           {activeTab === "danger" && (
-            <div className="rounded-2xl border border-rose-500/40 bg-rose-950/10 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
+            <div className="rounded-none border border-rose-500/40 bg-rose-950/10 p-6 md:p-8 space-y-4 backdrop-blur-md shadow-xl">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="size-5 text-rose-500 shrink-0 mt-0.5" />
                 <div>
@@ -743,12 +743,12 @@ export function SettingsPage() {
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="destructive"
-                      className="font-mono text-xs uppercase tracking-wider rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-lg shadow-rose-950/50"
+                      className="font-mono text-xs uppercase tracking-wider rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-lg shadow-rose-950/50"
                     >
                       <Trash2 size={14} className="mr-1.5" /> Delete Account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="border-rose-500/50 bg-zinc-950 text-white rounded-2xl">
+                  <AlertDialogContent className="border-rose-500/50 bg-zinc-950 text-white rounded-none">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="font-mono uppercase text-rose-400 flex items-center gap-2">
                         <ShieldAlert className="size-5 text-rose-500" />
@@ -759,7 +759,7 @@ export function SettingsPage() {
                           This will permanently delete <strong className="text-white">@{member?.handle}</strong> and all associated records.
                         </p>
                         <p>
-                          To confirm, please type your handle <code className="text-orange-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-white/10">{member?.handle}</code> below:
+                          To confirm, please type your handle <code className="text-lime-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-white/10">{member?.handle}</code> below:
                         </p>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -769,21 +769,21 @@ export function SettingsPage() {
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
                         placeholder={member?.handle || "handle"}
-                        className="font-mono text-sm bg-zinc-900 border-rose-500/40 text-white rounded-xl focus-visible:ring-rose-500"
+                        className="font-mono text-sm bg-zinc-900 border-rose-500/40 text-white rounded-none focus-visible:ring-rose-500"
                       />
                     </div>
 
                     <AlertDialogFooter>
                       <AlertDialogCancel
                         onClick={() => setDeleteConfirmText("")}
-                        className="font-mono text-xs uppercase rounded-xl border-white/10"
+                        className="font-mono text-xs uppercase rounded-none border-white/10"
                       >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
                         disabled={deleteConfirmText.trim().toLowerCase() !== member?.handle?.toLowerCase() || isDeleting}
                         onClick={handleDeleteAccount}
-                        className="font-mono text-xs uppercase rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold disabled:opacity-50"
+                        className="font-mono text-xs uppercase rounded-none bg-rose-600 hover:bg-rose-700 text-white font-semibold disabled:opacity-50"
                       >
                         {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently Delete"}
                       </AlertDialogAction>

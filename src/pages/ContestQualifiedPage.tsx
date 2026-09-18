@@ -144,14 +144,14 @@ export function ContestQualifiedPage() {
           <div className="flex items-center gap-3">
             <CheckCircle2 className="size-5 text-emerald-400" />
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-orange-400 font-bold">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-lime-400 font-bold">
                 Round 2 · Air-Gapped Lab Final Pass
               </p>
               <h1 className="text-xl font-black text-white">
                 {rank ? `Rank #${rank}` : "Verified Top 30"} — Lab Pass Issued
               </h1>
             </div>
-            <span className="ml-auto rounded-md border border-orange-500/30 bg-orange-500/10 px-3 py-1 font-mono text-xs font-black text-orange-400 tabular-nums">
+            <span className="ml-auto rounded-none border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-black text-lime-400 tabular-nums">
               {score} pts
             </span>
           </div>
@@ -159,12 +159,12 @@ export function ContestQualifiedPage() {
           {pass ? (
             <div className="space-y-6">
               {/* QR code — full hero card */}
-              <div className="flex flex-col items-center gap-5 rounded-2xl border border-orange-500/30 bg-zinc-900/60 p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
-                <div className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-orange-500/10 blur-3xl" />
+              <div className="flex flex-col items-center gap-5 rounded-none border border-lime-400/30 bg-zinc-900/60 p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                <div className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-lime-400/10 blur-3xl" />
                 
                 {/* Header chip */}
                 <div className="flex items-center justify-between w-full border-b border-white/10 pb-3">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
                     Official Medi-Caps Gate Pass
                   </span>
                   <span className={`font-mono text-[10px] uppercase font-bold rounded border px-2 py-0.5 ${
@@ -177,7 +177,7 @@ export function ContestQualifiedPage() {
                 </div>
 
                 {/* White QR Code container */}
-                <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 shadow-xl">
+                <div className="flex flex-col items-center gap-3 rounded-none bg-white p-6 shadow-xl">
                   <QRCodeSVG
                     value={`CCC-PASS:${pass.pass_code}:${pass.seat || "LAB-04-PC01"}:QUALIFIED`}
                     size={220}
@@ -197,16 +197,16 @@ export function ContestQualifiedPage() {
                       { label: "Assigned Workstation", value: pass.seat || "LAB-04-PC01", hi: true },
                       { label: "Screening Rank", value: `#${rank} (${score} Pts)` },
                     ].map(({ label, value, hi }) => (
-                      <div key={label} className="rounded-xl border border-white/10 bg-zinc-950/60 p-3">
+                      <div key={label} className="rounded-none border border-white/10 bg-zinc-950/60 p-3">
                         <p className="text-[9px] uppercase tracking-widest text-zinc-400">{label}</p>
-                        <p className={`mt-0.5 text-xs font-bold ${hi ? "text-orange-400" : "text-white"}`}>{value}</p>
+                        <p className={`mt-0.5 text-xs font-bold ${hi ? "text-lime-400" : "text-white"}`}>{value}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Check-in time */}
-                  <div className="flex items-center gap-3 rounded-xl border border-orange-500/30 bg-orange-500/5 px-4 py-3">
-                    <Clock className="size-4 shrink-0 text-orange-400" />
+                  <div className="flex items-center gap-3 rounded-none border border-lime-400/30 bg-lime-400/5 px-4 py-3">
+                    <Clock className="size-4 shrink-0 text-lime-400" />
                     <div>
                       <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Gate Check-in Opens</p>
                       <p className="text-xs font-bold text-white">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</p>
@@ -215,19 +215,19 @@ export function ContestQualifiedPage() {
 
                   {/* Round 2 Countdown */}
                   {!finalCountdown.started && (finalCountdown.h > 0 || finalCountdown.m > 0 || finalCountdown.s > 0) && contest.status !== "live" && (
-                    <div className="rounded-xl border border-orange-500/40 bg-zinc-900 p-4">
-                      <p className="font-mono text-[10px] uppercase tracking-widest text-orange-400 mb-3 flex items-center gap-2">
-                        <span className="size-1.5 rounded-full bg-orange-500 animate-pulse" />
+                    <div className="rounded-none border border-lime-400/40 bg-zinc-900 p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-lime-400 mb-3 flex items-center gap-2">
+                        <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
                         Round 2 Final Starts In
                       </p>
-                      <div className="grid grid-cols-3 divide-x divide-white/10 rounded-lg border border-white/10">
+                      <div className="grid grid-cols-3 divide-x divide-white/10 rounded-none border border-white/10">
                         {[
                           { label: "Hours", value: finalCountdown.h },
                           { label: "Minutes", value: finalCountdown.m },
                           { label: "Seconds", value: finalCountdown.s },
                         ].map(({ label, value }) => (
                           <div key={label} className="flex flex-col items-center gap-1 py-3">
-                            <span className="text-2xl font-black font-mono text-orange-400 tabular-nums">
+                            <span className="text-2xl font-black font-mono text-lime-400 tabular-nums">
                               {String(value).padStart(2, "0")}
                             </span>
                             <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-400">{label}</span>
@@ -237,7 +237,7 @@ export function ContestQualifiedPage() {
                     </div>
                   )}
                   {finalCountdown.started && contest.status === "live" && (
-                    <div className="flex items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-950/20 px-4 py-3">
+                    <div className="flex items-center gap-3 rounded-none border border-emerald-500/40 bg-emerald-950/20 px-4 py-3">
                       <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
                       <p className="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider">Round 2 Final Is Live — Go to Arena</p>
                     </div>
@@ -246,7 +246,7 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Day of instructions */}
-              <div className="space-y-3 rounded-2xl border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md shadow-xl">
+              <div className="space-y-3 rounded-none border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md shadow-xl">
                 <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-white">Day-Of Lab Instructions</p>
                 <ul className="space-y-2">
                   {[
@@ -264,11 +264,11 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Venue */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-5 space-y-3 backdrop-blur-md shadow-xl">
+              <div className="rounded-none border border-white/10 bg-zinc-900/60 p-5 space-y-3 backdrop-blur-md shadow-xl">
                 <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-white">Venue & Hardware Environment</p>
                 <div className="space-y-2 font-mono">
                   <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 size-4 shrink-0 text-orange-400" />
+                    <MapPin className="mt-0.5 size-4 shrink-0 text-lime-400" />
                     <div>
                       <p className="text-xs font-bold text-white">{contest.venue}</p>
                       <p className="text-[11px] text-zinc-400">{formatWhen(contest.starts_at)}</p>
@@ -276,7 +276,7 @@ export function ContestQualifiedPage() {
                   </div>
                   {contest.environment && (
                     <div className="flex items-start gap-3">
-                      <Code2 className="mt-0.5 size-4 shrink-0 text-orange-400" />
+                      <Code2 className="mt-0.5 size-4 shrink-0 text-lime-400" />
                       <p className="text-[11px] text-zinc-400">{contest.environment}</p>
                     </div>
                   )}
@@ -286,20 +286,20 @@ export function ContestQualifiedPage() {
               {/* Primary CTA */}
               <div className="flex flex-col gap-2">
                 {pass.check_in_status === "checked_in" || pass.status === "checked_in" || isDevBypass ? (
-                  <Button asChild size="lg" className="rounded-xl bg-orange-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20">
+                  <Button asChild size="lg" className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
                     <Link to={`/portal/contests/${contestSlug}/arena`}>
-                      <Play className="mr-1.5 size-4 fill-white" /> Enter Live Contest Arena
+                      <Play className="mr-1.5 size-4 fill-black" /> Enter Live Contest Arena
                     </Link>
                   </Button>
                 ) : (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-950/20 p-3 text-xs font-mono text-amber-400">
+                    <div className="flex items-center gap-2 rounded-none border border-amber-500/40 bg-amber-950/20 p-3 text-xs font-mono text-amber-400">
                       <Lock className="size-4 shrink-0" />
                       <span>Physical Gate Lock: Present this QR code to the proctor at the lab entrance to check in.</span>
                     </div>
                   </div>
                 )}
-                <Button asChild variant="ghost" size="sm" className="rounded-xl font-mono text-xs text-zinc-400 hover:text-white">
+                <Button asChild variant="ghost" size="sm" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/portal/contests/${contestSlug}`}>
                     Contest Overview
                   </Link>
@@ -307,8 +307,8 @@ export function ContestQualifiedPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4 rounded-2xl border border-orange-500/20 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
-              <div className="flex size-16 items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/60 animate-pulse text-orange-500">
+            <div className="flex flex-col items-center gap-4 rounded-none border border-lime-400/20 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
+              <div className="flex size-16 items-center justify-center rounded-none border border-white/10 bg-zinc-950/60 animate-pulse text-lime-400">
                 <QrCode className="size-7" />
               </div>
               <div className="space-y-1">
@@ -317,7 +317,7 @@ export function ContestQualifiedPage() {
                   Your Top 30 seat is confirmed. Generating unique cryptographic pass code...
                 </p>
               </div>
-              <Button onClick={() => refreshData(true)} variant="outline" size="sm" className="rounded-xl font-mono text-xs border-white/10">
+              <Button onClick={() => refreshData(true)} variant="outline" size="sm" className="rounded-none font-mono text-xs border-white/10">
                 Refresh Pass
               </Button>
             </div>
@@ -336,8 +336,8 @@ export function ContestQualifiedPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-500/30 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
-            <div className="flex size-16 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-950/20 text-amber-400">
+          <div className="flex flex-col items-center gap-4 rounded-none border border-amber-500/30 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
+            <div className="flex size-16 items-center justify-center rounded-none border border-amber-500/30 bg-amber-950/20 text-amber-400">
               <Lock className="size-7" />
             </div>
             <div className="space-y-2 max-w-md">
@@ -347,12 +347,12 @@ export function ContestQualifiedPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <Button asChild className="rounded-xl bg-orange-500 text-xs font-bold uppercase text-white hover:bg-orange-600 px-6 py-2.5 shadow-md shadow-orange-500/20">
+              <Button asChild className="rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 px-6 py-2.5 shadow-md shadow-lime-400/20">
                 <Link to={`/assessments/${contestSlug}`}>
-                  <Play className="mr-1.5 size-4 fill-white" /> Take Assessment Now
+                  <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-xl font-mono text-xs border-white/10">
+              <Button asChild variant="outline" className="rounded-none font-mono text-xs border-white/10">
                 <Link to={`/portal/contests/${contestSlug}`}>Contest Lobby</Link>
               </Button>
             </div>
@@ -369,13 +369,13 @@ export function ContestQualifiedPage() {
               </p>
               <h1 className="text-xl font-black text-white">Did Not Qualify (Cutoff: Top 30)</h1>
             </div>
-            <span className="ml-auto rounded-md border border-white/10 bg-zinc-800/60 px-3 py-1 font-mono text-xs font-bold text-zinc-400 tabular-nums">
+            <span className="ml-auto rounded-none border border-white/10 bg-zinc-800/60 px-3 py-1 font-mono text-xs font-bold text-zinc-400 tabular-nums">
               {score} pts
             </span>
           </div>
 
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
-            <div className="flex size-16 items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/60 text-zinc-500">
+          <div className="flex flex-col items-center gap-4 rounded-none border border-white/10 bg-zinc-900/60 p-12 text-center backdrop-blur-md">
+            <div className="flex size-16 items-center justify-center rounded-none border border-white/10 bg-zinc-950/60 text-zinc-500">
               <Lock className="size-7" />
             </div>
             <div className="space-y-2 max-w-md">
@@ -385,12 +385,12 @@ export function ContestQualifiedPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <Button asChild variant="outline" className="rounded-xl font-mono text-xs border-white/10">
+              <Button asChild variant="outline" className="rounded-none font-mono text-xs border-white/10">
                 <Link to={`/portal/contests/${contestSlug}/results`}>
                   View Standings & Cutoff <ArrowRight className="ml-1.5 size-4" />
                 </Link>
               </Button>
-              <Button asChild variant="ghost" className="rounded-xl font-mono text-xs text-zinc-400 hover:text-white">
+              <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
                 <Link to="/portal/problems">Practice in Archive</Link>
               </Button>
             </div>

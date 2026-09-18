@@ -84,26 +84,26 @@ export function ContestResultsPage() {
       {myRow ? (
         <div
           className={cn(
-            "relative overflow-hidden rounded-2xl border bg-zinc-900/60 backdrop-blur-md transition-all shadow-xl",
-            isQualified ? "border-orange-500/40 shadow-orange-500/5" : "border-white/10"
+            "relative overflow-hidden rounded-none border bg-zinc-900/60 backdrop-blur-md transition-all shadow-xl",
+            isQualified ? "border-lime-400/40 shadow-lime-400/5" : "border-white/10"
           )}
         >
           {isQualified && (
-            <div className="h-1 w-full bg-gradient-to-r from-orange-500 to-amber-500" />
+            <div className="h-1 w-full bg-gradient-to-r from-lime-400 to-amber-500" />
           )}
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
               {/* Rank number */}
               <div
                 className={cn(
-                  "flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border text-center font-mono",
+                  "flex h-16 w-16 shrink-0 items-center justify-center rounded-none border text-center font-mono",
                   isQualified
-                    ? "border-orange-500/40 bg-orange-500/10 shadow-inner"
+                    ? "border-lime-400/40 bg-lime-400/10 shadow-inner"
                     : "border-white/10 bg-zinc-800/50"
                 )}
               >
                 <div>
-                  <div className={cn("text-2xl font-black leading-none font-mono tabular-nums", isQualified ? "text-orange-400" : "text-white")}>
+                  <div className={cn("text-2xl font-black leading-none font-mono tabular-nums", isQualified ? "text-lime-400" : "text-white")}>
                     #{myRow.rank}
                   </div>
                   <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-zinc-400">rank</div>
@@ -113,9 +113,9 @@ export function ContestResultsPage() {
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "rounded-md border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest",
+                      "rounded-none border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest",
                       isQualified
-                        ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
+                        ? "border-lime-400/40 bg-lime-400/10 text-lime-400"
                         : "border-amber-500/40 bg-amber-950/30 text-amber-400"
                     )}
                   >
@@ -133,13 +133,13 @@ export function ContestResultsPage() {
 
             {/* CTA based on result */}
             {isQualified ? (
-              <Button asChild className="rounded-xl bg-orange-500 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-orange-400 shrink-0 shadow-lg shadow-orange-500/20 active:scale-[0.98]">
+              <Button asChild className="rounded-none bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-400 shrink-0 shadow-lg shadow-lime-400/20 active:scale-[0.98]">
                 <Link to={`/portal/contests/${contestSlug}/qualified`}>
                   <QrCode className="mr-2 size-4" /> View Campus Pass
                 </Link>
               </Button>
             ) : (
-              <Button asChild variant="outline" className="rounded-xl border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white shrink-0 active:scale-[0.98]">
+              <Button asChild variant="outline" className="rounded-none border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white shrink-0 active:scale-[0.98]">
                 <Link to="/portal/leaderboard">University Leaderboard →</Link>
               </Button>
             )}
@@ -162,7 +162,7 @@ export function ContestResultsPage() {
 
       {/* ─── RANKING SEALED NOTICE ───────────────────────── */}
       {!ranking.released && (
-        <div className="flex items-start gap-4 rounded-2xl border border-amber-500/30 bg-amber-950/20 p-5 backdrop-blur-md">
+        <div className="flex items-start gap-4 rounded-none border border-amber-500/30 bg-amber-950/20 p-5 backdrop-blur-md">
           <Lock className="mt-0.5 size-5 shrink-0 text-amber-400" />
           <div className="space-y-1">
             <p className="font-mono text-xs font-bold uppercase tracking-wider text-white">
@@ -172,7 +172,7 @@ export function ContestResultsPage() {
               {ranking.message ?? "Results stay hidden while the assessment window is open — no candidate can pace against live rivals."}
             </p>
             {ranking.releases_at && (
-              <p className="font-mono text-xs text-orange-400">
+              <p className="font-mono text-xs text-lime-400">
                 Publishes {new Date(ranking.releases_at).toLocaleString("en-IN")}
               </p>
             )}
@@ -189,9 +189,9 @@ export function ContestResultsPage() {
               key={key}
               onClick={() => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("filter", key); return p; })}
               className={cn(
-                "rounded-lg px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-all",
+                "rounded-none px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-all",
                 filter === key
-                  ? "bg-orange-500 text-black font-bold shadow-md shadow-orange-500/20"
+                  ? "bg-lime-400 text-black font-bold shadow-md shadow-lime-400/20"
                   : "border border-white/10 bg-zinc-900/60 text-zinc-400 hover:border-white/20 hover:text-white"
               )}
             >
@@ -207,14 +207,14 @@ export function ContestResultsPage() {
             value={query}
             onChange={(e) => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("query", e.target.value); return p; })}
             placeholder="Search name or handle..."
-            className="rounded-xl border-white/10 bg-zinc-900/60 pl-9 font-mono text-xs text-white placeholder:text-zinc-500 focus-visible:border-orange-500/60"
+            className="rounded-none border-white/10 bg-zinc-900/60 pl-9 font-mono text-xs text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60"
           />
         </div>
 
         {/* Stats inline */}
         <div className="ml-auto flex items-center gap-4 text-xs text-zinc-400 font-mono">
           <span className="flex items-center gap-1.5">
-            <Trophy className="size-3.5 text-orange-400" />
+            <Trophy className="size-3.5 text-lime-400" />
             <span className="tabular-nums font-bold text-white">{ranking.total_participants}</span> participants
           </span>
           <span className="text-zinc-700">·</span>
@@ -223,7 +223,7 @@ export function ContestResultsPage() {
       </div>
 
       {/* ─── RANKINGS TABLE ──────────────────────────────── */}
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
+      <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-white/10 bg-zinc-950/40 hover:bg-transparent">
@@ -260,16 +260,16 @@ export function ContestResultsPage() {
       {/* ─── BOTTOM ACTIONS ──────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3">
         {isQualified && (
-          <Button asChild className="rounded-xl bg-orange-500 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-orange-400 shadow-md shadow-orange-500/20 active:scale-[0.98]">
+          <Button asChild className="rounded-none bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-400 shadow-md shadow-lime-400/20 active:scale-[0.98]">
             <Link to={`/portal/contests/${contestSlug}/qualified`}>
               <QrCode className="mr-2 size-4" /> View Campus Pass
             </Link>
           </Button>
         )}
-        <Button asChild variant="outline" className="rounded-xl border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white active:scale-[0.98]">
+        <Button asChild variant="outline" className="rounded-none border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white active:scale-[0.98]">
           <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
         </Button>
-        <Button asChild variant="ghost" className="rounded-xl font-mono text-xs text-zinc-400 hover:text-white active:scale-[0.98]">
+        <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white active:scale-[0.98]">
           <Link to="/portal/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>
@@ -286,13 +286,13 @@ function RankRow({
   return (
     <>
       {showCutLine && (
-        <TableRow className="border-y border-orange-500/30 bg-orange-500/10">
-          <TableCell colSpan={6} className="py-2.5 text-center font-mono text-[10px] uppercase tracking-widest text-orange-400 font-bold">
+        <TableRow className="border-y border-lime-400/30 bg-lime-400/10">
+          <TableCell colSpan={6} className="py-2.5 text-center font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
             ── Top {cutoff} qualification line ──
           </TableCell>
         </TableRow>
       )}
-      <TableRow className={cn("border-b border-white/5 transition-colors hover:bg-white/[0.02]", isMe && "bg-orange-500/10 hover:bg-orange-500/15")}>
+      <TableRow className={cn("border-b border-white/5 transition-colors hover:bg-white/[0.02]", isMe && "bg-lime-400/10 hover:bg-lime-400/15")}>
         <TableCell className="font-mono text-sm font-black text-white">
           <span className="inline-flex items-center gap-1.5 tabular-nums">
             {row.rank <= 3 && <Crown className="size-3.5 text-amber-400" />}
@@ -301,7 +301,7 @@ function RankRow({
         </TableCell>
         <TableCell>
           <div className="flex flex-col gap-0.5">
-            <Link to={`/portal/profile/${row.handle}`} className="text-sm font-semibold text-white transition-colors hover:text-orange-400">
+            <Link to={`/portal/profile/${row.handle}`} className="text-sm font-semibold text-white transition-colors hover:text-lime-400">
               {row.full_name}
             </Link>
             <Link to={`/portal/profile/${row.handle}`} className="font-mono text-[10px] text-zinc-400 transition-colors hover:text-zinc-200">
@@ -312,7 +312,7 @@ function RankRow({
         <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
           {row.department}
         </TableCell>
-        <TableCell className="text-right font-mono text-sm font-black tabular-nums text-orange-400">
+        <TableCell className="text-right font-mono text-sm font-black tabular-nums text-lime-400">
           {row.total_score}
         </TableCell>
         <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-400 sm:table-cell">
@@ -320,9 +320,9 @@ function RankRow({
         </TableCell>
         <TableCell className="text-right">
           <span className={cn(
-            "rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest font-semibold",
+            "rounded-none border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest font-semibold",
             qualified
-              ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
+              ? "border-lime-400/40 bg-lime-400/10 text-lime-400"
               : "border-white/10 bg-zinc-800/40 text-zinc-400"
           )}>
             {qualified ? "Qualified" : row.status === "in_progress" ? "In progress" : "Ranked"}

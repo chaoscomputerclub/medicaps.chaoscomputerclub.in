@@ -22,7 +22,7 @@ function Spark({ data }: { data: number[] }) {
     .map((v, i) => `${i * 18},${24 - ((v - min) / range) * 20}`)
     .join(" ");
   return (
-    <svg viewBox="0 0 90 28" className="h-7 w-[90px] stroke-orange-500 fill-none stroke-2" aria-hidden="true">
+    <svg viewBox="0 0 90 28" className="h-7 w-[90px] stroke-lime-400 fill-none stroke-2" aria-hidden="true">
       <polyline points={pts} />
     </svg>
   );
@@ -40,11 +40,11 @@ export function LeaderboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-orange-400">
-              <Trophy className="size-3 text-orange-500" /> Verified Elo Standings
+            <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
+              <Trophy className="size-3 text-lime-400" /> Verified Elo Standings
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
@@ -54,15 +54,15 @@ export function LeaderboardPage() {
             Unified rankings across CSE, IT, AIDS, and Cyber Security. Only verified contest performance impacts student Elo rating.
           </p>
         </div>
-        <div className="flex flex-col items-start md:items-end justify-center rounded-xl border border-white/10 bg-zinc-950/60 p-4 min-w-[200px] backdrop-blur-sm">
+        <div className="flex flex-col items-start md:items-end justify-center rounded-none border border-white/10 bg-zinc-950/60 p-4 min-w-[200px] backdrop-blur-sm">
           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-400">Rating Cycle</span>
           <strong className="font-mono text-lg font-black text-white">MONSOON '26</strong>
-          <small className="font-mono text-xs text-orange-400 tabular-nums">{data.length} active members</small>
+          <small className="font-mono text-xs text-lime-400 tabular-nums">{data.length} active members</small>
         </div>
       </header>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-md">
+      <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 shadow-xl backdrop-blur-md">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -104,7 +104,7 @@ export function LeaderboardPage() {
                       key={x.handle || x.id}
                       className={`border-b border-white/5 transition-colors ${
                         isYou
-                          ? "bg-orange-500/10 border-l-2 border-l-orange-500 hover:bg-orange-500/15"
+                          ? "bg-lime-400/10 border-l-2 border-l-lime-400 hover:bg-lime-400/15"
                           : "hover:bg-zinc-800/40"
                       }`}
                     >
@@ -133,7 +133,7 @@ export function LeaderboardPage() {
                         <div className="flex flex-col">
                           <Link
                             to={`/portal/profile/${x.handle}`}
-                            className="font-mono text-sm font-bold text-white hover:text-orange-400 hover:underline transition-colors w-fit"
+                            className="font-mono text-sm font-bold text-white hover:text-lime-400 hover:underline transition-colors w-fit"
                           >
                             @{x.handle}
                           </Link>
@@ -143,13 +143,13 @@ export function LeaderboardPage() {
                       <TableCell>
                         <Spark data={x.ratings ?? []} />
                       </TableCell>
-                      <TableCell className="font-mono font-black tabular-nums text-orange-400">{x.rating}</TableCell>
+                      <TableCell className="font-mono font-black tabular-nums text-lime-400">{x.rating}</TableCell>
                       <TableCell className="font-mono tabular-nums text-zinc-300">{x.peak_rating}</TableCell>
                       <TableCell className="pr-6">
                         <div className="flex items-center gap-3">
-                          <div className="h-2 w-20 overflow-hidden rounded-full bg-zinc-800">
+                          <div className="h-2 w-20 overflow-hidden rounded-none bg-zinc-800">
                             <div
-                              className="h-full rounded-full bg-orange-500 transition-all duration-300"
+                              className="h-full rounded-none bg-lime-400 transition-all duration-300"
                               style={{ width: `${attendancePct}%` }}
                             />
                           </div>
