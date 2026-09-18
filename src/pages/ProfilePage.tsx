@@ -14,9 +14,6 @@ import {
   LockKeyhole,
   Zap,
   Loader2,
-  Globe,
-  MapPin,
-  Building,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -408,29 +405,6 @@ export function ProfilePage() {
                   <Linkedin size={12} />
                   <span>LinkedIn</span>
                 </a>
-              )}
-              {profilePrefs?.url && (
-                <a
-                  href={profilePrefs.url.startsWith("http") ? profilePrefs.url : `https://${profilePrefs.url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-300 hover:text-white bg-zinc-800/60 border border-white/10 hover:border-zinc-500 rounded-none"
-                >
-                  <Globe size={12} />
-                  <span>{profilePrefs.url.replace(/^https?:\/\//, "")}</span>
-                </a>
-              )}
-              {profilePrefs?.location && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 bg-zinc-800/60 border border-white/10 rounded-none">
-                  <MapPin size={12} className="text-lime-400" />
-                  <span>{profilePrefs.location}</span>
-                </span>
-              )}
-              {profilePrefs?.company && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 bg-zinc-800/60 border border-white/10 rounded-none">
-                  <Building size={12} className="text-lime-400" />
-                  <span>{profilePrefs.company}</span>
-                </span>
               )}
             </div>
           </div>

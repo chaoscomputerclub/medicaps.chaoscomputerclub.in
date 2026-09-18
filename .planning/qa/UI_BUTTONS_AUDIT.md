@@ -1,7 +1,7 @@
 # 🛡️ UI Elements & Buttons Backend Connectivity Audit Report
 
-**Generated**: `2026-09-18T12:44:34.271Z`  
-**Total Audited Elements**: `268`  
+**Generated**: `2026-09-18T12:46:33.225Z`  
+**Total Audited Elements**: `267`  
 **Overall Functional Connectivity**: `100.0%`
 
 ## 📊 Classification Summary
@@ -10,7 +10,7 @@
 | :--- | :---: | :--- |
 | 🟢 **Live Backend Mutation** | `40` | Triggers API POST/PUT/DELETE, Redux Thunks, or database mutations |
 | 🟢 **Live Backend Query** | `6` | Triggers live backend SWR cache queries & data refetches |
-| 🔵 **Routing & Navigation** | `169` | Navigates between platform routes via React Router |
+| 🔵 **Routing & Navigation** | `168` | Navigates between platform routes via React Router |
 | 🟡 **Client UI State Toggle** | `39` | Controls modals, drawers, tab bars, clipboard copy, and UI toggles |
 | 🔒 **Conditional Lock / Gate** | `8` | Disabled status badges or qualification gates |
 | 🧱 **UI Primitive Wrappers** | `6` | Generic UI primitives forwarding props dynamically |

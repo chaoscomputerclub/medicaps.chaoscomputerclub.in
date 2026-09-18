@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-18T12:44:34.270Z",
-  "totalElements": 268,
-  "functionalCount": 268,
+  "timestamp": "2026-09-18T12:46:33.223Z",
+  "totalElements": 267,
+  "functionalCount": 267,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 40,
     "backendQueries": 6,
-    "routingNavigation": 169,
+    "routingNavigation": 168,
     "clientUiState": 39,
     "conditionalLocked": 8,
     "uiPrimitiveWrappers": 6,
@@ -2140,7 +2140,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 115,
+      "line": 112,
       "tag": "<Button>",
       "label": "View Leaderboard",
       "handler": "{() => navigate(\"/portal/leaderboard\")}",
@@ -2149,7 +2149,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 122,
+      "line": 119,
       "tag": "<Button>",
       "label": "Sign In",
       "handler": "{() => navigate(\"/auth\")}",
@@ -2158,7 +2158,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 264,
+      "line": 261,
       "tag": "<Button>",
       "label": "[#profile-edit-btn]",
       "handler": "asChild",
@@ -2167,7 +2167,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 269,
+      "line": 266,
       "tag": "<Link>",
       "label": "[to=/portal/settings]",
       "handler": "\"/portal/settings\"",
@@ -2176,7 +2176,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 277,
+      "line": 274,
       "tag": "<Button>",
       "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
@@ -2185,7 +2185,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 308,
+      "line": 305,
       "tag": "<Button>",
       "label": "{copied ? (                       <> ...",
       "handler": "{handleCopyLink}",
@@ -2194,7 +2194,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 348,
+      "line": 345,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2203,7 +2203,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 367,
+      "line": 364,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2212,7 +2212,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 387,
+      "line": 384,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2221,7 +2221,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 398,
+      "line": 395,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2230,16 +2230,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 413,
-      "tag": "<a>",
-      "label": "[href={profilePrefs.url.startsWith(ht...",
-      "handler": "{profilePrefs.url.startsWith(\"http\") ? profilePrefs.url : `https://${profilePref",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ProfilePage.tsx",
-      "line": 548,
+      "line": 522,
       "tag": "<Link>",
       "label": "Open verification console",
       "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",
