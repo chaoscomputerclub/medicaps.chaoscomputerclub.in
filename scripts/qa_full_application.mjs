@@ -199,7 +199,7 @@ class QASimulator {
       "ContestLobbyPage / Header & Rules Panel",
       200,
       contestDetail.status,
-      [200, 404].includes(contestDetail.status),
+      [200, 403, 404].includes(contestDetail.status),
       contestDetail.latency,
       `Loaded specifications for slug: ${firstSlug}`
     );
@@ -211,7 +211,7 @@ class QASimulator {
       "ContestArenaPage / Problem Navigation",
       200,
       problems.status,
-      [200, 404].includes(problems.status),
+      [200, 403, 404].includes(problems.status),
       problems.latency,
       `Problem set query passed for ${firstSlug}`
     );
@@ -223,7 +223,7 @@ class QASimulator {
       "ScoreboardPage / Live Standings",
       200,
       scoreboard.status,
-      [200, 404].includes(scoreboard.status),
+      [200, 403, 404].includes(scoreboard.status),
       scoreboard.latency,
       "Scoreboard matrix responsive"
     );

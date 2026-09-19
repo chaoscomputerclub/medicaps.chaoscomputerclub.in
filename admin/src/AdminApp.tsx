@@ -310,6 +310,7 @@ export function AdminApp() {
                   selectedContestSlug={selectedSlug}
                   proctorName={proctorName}
                   recentScans={recentScans}
+                  attendees={attendees}
                   onPassCheckedIn={() => loadAttendees(selectedSlug)}
                 />
               </TabsContent>
