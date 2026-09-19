@@ -104,7 +104,7 @@ export const registerContestThunk = createAsyncThunk(
   async (slug: string, { rejectWithValue }) => {
     try {
       const result = await contestApi.register(slug);
-      const reg = await contestApi.registrationStatus(slug);
+      const reg = await contestApi.registrationStatus(slug, true);
       return { result, registration: reg };
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to register for contest");
@@ -226,9 +226,15 @@ export const contestSlice = createSlice({
     // Register
     builder.addCase(registerContestThunk.fulfilled, (state, action) => {
       state.registration = action.payload.registration;
-      if (state.currentContest) {
+      const slug = action.meta.arg;
+      if (state.currentContest && state.currentContest.slug === slug) {
         state.currentContest.registered = true;
-        state.currentContest.registered_count += 1;
+        state.currentContest.registered_count = (action.payload.result as any)?.registered_count ?? (state.currentContest.registered_count + 1);
+      }
+      const contestInList = state.contests.find((c) => c.slug === slug);
+      if (contestInList) {
+        contestInList.registered = true;
+        contestInList.registered_count = (action.payload.result as any)?.registered_count ?? (contestInList.registered_count + 1);
       }
     });
 

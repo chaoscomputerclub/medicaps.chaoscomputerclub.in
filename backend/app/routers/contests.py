@@ -94,11 +94,25 @@ async def list_contests(
                 continue
         filtered_contests.append(c)
 
-    payload = [OfflineContestResponse.model_validate(c).model_dump() for c in filtered_contests]
+    registered_contest_ids = set()
+    if current_member:
+        user_regs = await db.execute(
+            select(ContestRegistration.contest_id).where(
+                ContestRegistration.member_id == current_member.id
+            )
+        )
+        registered_contest_ids = set(user_regs.scalars().all())
+
+    payload = []
+    for c in filtered_contests:
+        c_dict = OfflineContestResponse.model_validate(c).model_dump()
+        c_dict["registered"] = c.id in registered_contest_ids
+        payload.append(c_dict)
+
     await set_cache(cache_key, payload, ttl_seconds=30)
     response.headers["X-Cache"] = "MISS"
     response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=15"
-    return filtered_contests
+    return payload
 
 
 
@@ -298,11 +312,22 @@ async def get_contest_detail(
                 detail=f"Access restricted: {reason}",
             )
 
+    is_registered = False
+    if current_member:
+        reg_check = await db.execute(
+            select(ContestRegistration.id).where(
+                ContestRegistration.contest_id == contest.id,
+                ContestRegistration.member_id == current_member.id,
+            )
+        )
+        is_registered = reg_check.scalars().first() is not None
+
     payload = OfflineContestResponse.model_validate(contest).model_dump()
+    payload["registered"] = is_registered
     await set_cache(cache_key, payload, ttl_seconds=60)
     response.headers["X-Cache"] = "MISS"
     response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-    return contest
+    return payload
 
 
 @router.get("/{slug}/problems", response_model=List[ContestProblemResponse])

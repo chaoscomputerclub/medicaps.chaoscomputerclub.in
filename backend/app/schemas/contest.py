@@ -105,6 +105,7 @@ class ContestDetailResponse(BaseModel):
     cadence: Optional[str] = "weekly"
     edition: Optional[int] = None
     banner_url: Optional[str] = None
+    registered: bool = False
     problems: List[ContestProblemResponse] = []
     assessment: Optional[AssessmentSummaryResponse] = None
 

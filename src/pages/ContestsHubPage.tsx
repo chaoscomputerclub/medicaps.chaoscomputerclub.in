@@ -228,12 +228,16 @@ export function ContestsHubPage() {
       ["submitted", "qualified", "pending", "not_qualified"].includes(record?.outcome || "")
     );
     const isTop30 = record?.outcome === "qualified" || (record?.rank !== null && (record?.rank ?? 99) <= 30);
+    const isRegistered = Boolean(
+      contest.registered ||
+      myParticipations.some((p) => p.contest_slug === contest.slug)
+    );
     return {
       contest, contestStart, assessOpen, assessClose,
       isOpen: (now >= assessOpen && now <= assessClose) || isInProgress,
       isUpcoming: now < assessOpen && !isInProgress,
       isClosed: now > assessClose && !isInProgress,
-      hasTaken, isInProgress, isTop30,
+      hasTaken, isInProgress, isTop30, isRegistered,
       antiCheatViolations: (record as any)?.anti_cheat_violations || 1,
       maxViolations: (record as any)?.max_violations || 3,
       score: record?.score, rank: record?.rank,
@@ -617,18 +621,32 @@ export function ContestsHubPage() {
                     </div>
                     <p className="font-mono text-[11px] text-zinc-400">Opens: {assessmentInfo.openDateFormatted}</p>
                   </div>
-                  <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
-                    className="w-full rounded-none text-xs font-bold uppercase tracking-wider">
-                    <Sparkles className="mr-1.5 size-3.5" /> Register to Unlock
-                  </Button>
+                  {assessmentInfo.isRegistered ? (
+                    <div className="flex items-center justify-center gap-2 rounded-none border border-lime-400/30 bg-lime-400/10 px-4 py-2.5 text-xs font-mono font-bold text-lime-400 uppercase tracking-wider">
+                      <CheckCircle2 className="size-4 text-lime-400" />
+                      <span>Registered · Unlocks {assessmentInfo.openDateFormatted}</span>
+                    </div>
+                  ) : (
+                    <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
+                      className="w-full rounded-none text-xs font-bold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-lg shadow-lime-400/20">
+                      <Sparkles className="mr-1.5 size-3.5" /> Register to Unlock
+                    </Button>
+                  )}
                 </>
               ) : (
                 <div className="space-y-3 text-center">
                   <p className="text-xs text-zinc-400">Register for an upcoming contest to enter the screening pipeline.</p>
-                  <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
-                    className="w-full rounded-none text-xs font-bold uppercase">
-                    {registeringSlug === assessmentInfo.contest.slug ? "Registering..." : "Register for Screening"}
-                  </Button>
+                  {assessmentInfo.isRegistered ? (
+                    <div className="flex items-center justify-center gap-2 rounded-none border border-lime-400/30 bg-lime-400/10 px-4 py-2.5 text-xs font-mono font-bold text-lime-400 uppercase tracking-wider">
+                      <CheckCircle2 className="size-4 text-lime-400" />
+                      <span>Registered</span>
+                    </div>
+                  ) : (
+                    <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
+                      className="w-full rounded-none text-xs font-bold uppercase bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-lg shadow-lime-400/20">
+                      {registeringSlug === assessmentInfo.contest.slug ? "Registering..." : "Register for Screening"}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
