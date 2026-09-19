@@ -139,96 +139,116 @@ export function AdminApp() {
             isRefreshing={isLoadingContests || isLoadingAttendees}
           />
 
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
-            {/* ─── MINIMAL STATUS & CONTEST BAR ─────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <select
-                  id="admin-target-contest"
-                  value={selectedSlug}
-                  onChange={(e) => setSelectedSlug(e.target.value)}
-                  className="bg-zinc-950 border border-white/15 text-xs font-mono text-white px-3 py-1.5 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 cursor-pointer"
-                >
-                  {contests.map((c) => (
-                    <option key={c.slug} value={c.slug}>
-                      {c.title}
-                    </option>
-                  ))}
-                </select>
+          <main className="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+            {/* ─── TACTICAL CONTEST CONTEXT & TELEMETRY STRIP ───────────────── */}
+            <div className="admin-card p-3 border border-white/10 bg-[#09090d] flex flex-col md:flex-row md:items-center justify-between gap-4">
+              {/* Contest Selector & Edition Badge */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+                  ACTIVE CONTEST:
+                </span>
+                <div className="relative">
+                  <select
+                    id="admin-target-contest"
+                    value={selectedSlug}
+                    onChange={(e) => setSelectedSlug(e.target.value)}
+                    className="bg-black border border-white/20 text-xs font-mono text-white pl-3 pr-8 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 cursor-pointer appearance-none"
+                  >
+                    {contests.map((c) => (
+                      <option key={c.slug} value={c.slug}>
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="absolute right-2.5 top-2 pointer-events-none text-zinc-400 text-xs">▼</span>
+                </div>
 
                 <span
-                  className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-none border ${
+                  className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border ${
                     selectedContest?.status === "live"
-                      ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-400"
+                      ? "border-lime-400/50 bg-lime-400/10 text-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.2)]"
                       : "border-white/10 bg-zinc-900 text-zinc-400"
                   }`}
                 >
-                  {selectedContest?.status?.toUpperCase() || "UPCOMING"}
+                  {selectedContest?.status === "live" ? "● LIVE ARENA" : selectedContest?.status?.toUpperCase() || "UPCOMING"}
+                </span>
+
+                <span className="text-xs text-zinc-500 hidden sm:inline">
+                  Edition #{selectedContest?.edition ?? 1} · {selectedContest?.venue || "Lab 04"}
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
-                <span>
-                  Admitted:{" "}
-                  <span className="text-lime-400 font-bold tabular-nums">
+              {/* Real-time Turnstile Stats Pill */}
+              <div className="flex items-center gap-4 text-xs font-mono">
+                <div className="flex items-center gap-2 bg-black/60 border border-white/10 px-3 py-1">
+                  <span className="text-zinc-400 text-[11px]">ADMITTED:</span>
+                  <span className="text-lime-400 font-bold tabular-nums text-sm">
                     {checkedInCount}
-                  </span>{" "}
-                  / {attendees.length || totalSeats}
-                </span>
-                <span className="text-zinc-700">|</span>
-                <span>
-                  Scans:{" "}
-                  <span className="text-white font-bold tabular-nums">
+                  </span>
+                  <span className="text-zinc-600">/</span>
+                  <span className="text-zinc-300 tabular-nums">
+                    {attendees.length || totalSeats}
+                  </span>
+                  <div className="w-12 bg-zinc-800 h-1 ml-1 overflow-hidden">
+                    <div
+                      className="bg-lime-400 h-full"
+                      style={{ width: `${Math.min(100, Math.round((checkedInCount / (attendees.length || totalSeats || 1)) * 100))}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 bg-black/60 border border-white/10 px-3 py-1">
+                  <span className="text-zinc-400 text-[11px]">TOTAL SCANS:</span>
+                  <span className="text-white font-bold tabular-nums text-sm">
                     {recentScans.length}
                   </span>
-                </span>
+                </div>
               </div>
             </div>
 
             {/* ─── TACTICAL NAVIGATION TABS ───────────────────────── */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="bg-zinc-950 border border-white/10 p-1 rounded-none flex flex-wrap gap-1 h-auto">
+              <TabsList className="bg-[#09090d] border border-white/10 p-1 flex flex-wrap gap-1.5 h-auto">
                 <TabsTrigger
                   value="gate_scanner"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white py-2 px-4 flex items-center gap-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-lime-400 shadow-none data-[state=active]:shadow-[0_0_12px_rgba(204,255,0,0.25)]"
                 >
-                  <QrCode className="w-3.5 h-3.5" />
-                  Scanner
+                  <QrCode className="w-4 h-4" />
+                  Scanner Console
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="attendees"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white py-2 px-4 flex items-center gap-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-lime-400 shadow-none data-[state=active]:shadow-[0_0_12px_rgba(204,255,0,0.25)]"
                 >
-                  <Users className="w-3.5 h-3.5" />
+                  <Users className="w-4 h-4" />
                   Roster ({attendees.length})
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="operations"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white py-2 px-4 flex items-center gap-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-lime-400 shadow-none data-[state=active]:shadow-[0_0_12px_rgba(204,255,0,0.25)]"
                 >
-                  <Layers className="w-3.5 h-3.5" />
-                  Operations
+                  <Layers className="w-4 h-4" />
+                  Mission Control & Operations
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="contests"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white py-2 px-4 flex items-center gap-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-lime-400 shadow-none data-[state=active]:shadow-[0_0_12px_rgba(204,255,0,0.25)]"
                 >
-                  <Trophy className="w-3.5 h-3.5" />
+                  <Trophy className="w-4 h-4" />
                   Contest Manager
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="webhooks"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white py-2 px-4 flex items-center gap-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-lime-400 shadow-none data-[state=active]:shadow-[0_0_12px_rgba(204,255,0,0.25)]"
                 >
-                  <Radio className="w-3.5 h-3.5" />
-                  Webhooks ({eventsLog.length})
+                  <Radio className="w-4 h-4" />
+                  Live Webhooks ({eventsLog.length})
                 </TabsTrigger>
               </TabsList>
-
 
               {/* 1. Gate Scanner */}
               <TabsContent value="gate_scanner" className="focus-visible:outline-none">
@@ -258,6 +278,7 @@ export function AdminApp() {
                   contests={contests}
                   selectedContest={selectedContest}
                   onContestUpdated={loadContests}
+                  attendees={attendees}
                 />
               </TabsContent>
 

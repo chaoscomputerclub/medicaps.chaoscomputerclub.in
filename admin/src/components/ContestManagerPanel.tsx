@@ -401,45 +401,50 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
 
   return (
     <div className="space-y-4 font-mono">
-      {/* Master Top Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-zinc-950 border border-white/10 rounded-none">
-        <div className="flex items-center gap-2.5">
-          <Trophy className="size-5 text-lime-400" />
-          <div>
-            <h1 className="text-sm font-bold uppercase tracking-wider text-white">
-              Contest & Assessment Administration Workbench
+      {/* Top Controls Header */}
+      <div className="admin-card p-4 bg-[#09090d] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-lime-400/10 border border-lime-400/40 flex items-center justify-center text-lime-400">
+              <Trophy className="w-3.5 h-3.5" />
+            </div>
+            <h1 className="text-base font-bold uppercase tracking-wider text-white">
+              Contest Engineering Workbench
             </h1>
-            <p className="text-[10px] text-zinc-400">
-              CRUD Campus Contests · Manage Screening Assessment Rules · Set Dual Problem Sets
-            </p>
+            <span className="text-[10px] bg-zinc-900 text-zinc-400 border border-white/10 px-1.5 py-0.5 uppercase">
+              CRUD & ASSESSMENT AUTHORING
+            </span>
           </div>
+          <p className="text-xs text-zinc-400 mt-1">
+            Author tournament specifications, configure Phase 1 screening assessments, and curate dual problem suites with 1-click sync.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="h-9 rounded-none bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs font-bold uppercase tracking-wider px-4 focus-visible:ring-2 focus-visible:ring-lime-400"
+            className="h-9 rounded-none bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs font-extrabold uppercase tracking-wider px-4 shadow-[0_0_12px_rgba(204,255,0,0.25)] cursor-pointer"
           >
-            <Plus className="size-3.5 mr-1.5" /> Initialize New Contest
+            <Plus className="w-3.5 h-3.5 mr-1.5 stroke-[3]" /> Initialize New Contest
           </Button>
         </div>
       </div>
 
       {/* Split-Screen Workbench Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* LEFT RAIL: Contests Master List (4 Cols) */}
         <div className="lg:col-span-4 space-y-3">
-          <div className="p-3 bg-zinc-950 border border-white/10 rounded-none space-y-3">
+          <div className="admin-card p-3.5 bg-[#09090d] border border-white/10 space-y-3">
             {/* Search & Status Filters */}
             <div className="relative">
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search contests or slugs..."
-                className="bg-black border-white/15 text-xs text-white rounded-none h-8 pl-8 font-mono"
+                placeholder="Search by title or slug..."
+                className="bg-black border-white/15 text-xs text-white h-8 pl-8 font-mono focus-visible:ring-2 focus-visible:ring-lime-400"
               />
-              <Search className="size-3.5 text-zinc-500 absolute left-2.5 top-2.5 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-2.5 pointer-events-none" />
             </div>
 
             <div className="flex gap-1 border-b border-white/10 pb-2">
@@ -450,7 +455,7 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
                   onClick={() => setStatusFilter(st)}
                   className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider border transition-colors cursor-pointer ${
                     statusFilter === st
-                      ? "bg-lime-400 text-black border-lime-400"
+                      ? "bg-lime-400 text-black border-lime-400 font-extrabold"
                       : "bg-black text-zinc-400 border-white/10 hover:text-white"
                   }`}
                 >
@@ -474,11 +479,11 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
           {/* Cards List */}
           <div className="space-y-2 max-h-[750px] overflow-y-auto pr-1">
             {isLoading && contests.length === 0 ? (
-              <div className="p-8 text-center text-xs text-zinc-500 bg-zinc-950 border border-white/10">
+              <div className="p-8 text-center text-xs text-zinc-500 bg-[#09090d] border border-white/10">
                 Loading contests...
               </div>
             ) : filteredContests.length === 0 ? (
-              <div className="p-8 text-center text-xs text-zinc-500 bg-zinc-950 border border-white/10">
+              <div className="p-8 text-center text-xs text-zinc-500 bg-[#09090d] border border-white/10">
                 No matching contests found.
               </div>
             ) : (
@@ -490,8 +495,8 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
                     onClick={() => setSelectedSlug(c.slug)}
                     className={`p-3.5 border transition-all cursor-pointer rounded-none space-y-2 text-left ${
                       isSelected
-                        ? "bg-zinc-900 border-lime-400 shadow-[0_0_15px_rgba(204,255,0,0.1)]"
-                        : "bg-zinc-950 border-white/10 hover:border-white/30 hover:bg-zinc-900/60"
+                        ? "bg-zinc-900 border-lime-400 shadow-[0_0_15px_rgba(204,255,0,0.15)]"
+                        : "bg-[#09090d] border-white/10 hover:border-white/30 hover:bg-zinc-900/60"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -505,7 +510,7 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
                           </span>
                         </div>
                         <span className="text-[10px] text-zinc-500 block truncate font-mono">
-                          {c.slug}
+                          /{c.slug}
                         </span>
                       </div>
                       {getStatusBadge(c.status)}
@@ -513,11 +518,11 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
 
                     <div className="grid grid-cols-2 gap-1 text-[10px] text-zinc-400 pt-1 border-t border-white/5">
                       <div className="flex items-center gap-1 truncate">
-                        <Calendar className="size-3 text-zinc-500" />
+                        <Calendar className="w-3 h-3 text-zinc-500" />
                         <span>{new Date(c.starts_at).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-1 truncate">
-                        <Users className="size-3 text-zinc-500" />
+                        <Users className="w-3 h-3 text-zinc-500" />
                         <span className="tabular-nums">
                           {c.registered_count}/{c.seat_capacity} seats
                         </span>
@@ -525,12 +530,12 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] pt-1 text-zinc-400">
-                      <span className="text-zinc-500">
+                      <span className="text-zinc-400">
                         {c.problem_count} Arena Problem(s)
                       </span>
                       {c.has_assessment ? (
                         <span className="text-lime-400 font-bold flex items-center gap-1">
-                          <CheckCircle2 className="size-3" /> Screening Attached
+                          <CheckCircle2 className="w-3 h-3" /> Screening Attached
                         </span>
                       ) : (
                         <span className="text-zinc-600">No Assessment</span>
@@ -546,15 +551,15 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
         {/* RIGHT RAIL: Deep Contest & Assessment Workbench (8 Cols) */}
         <div className="lg:col-span-8 space-y-4">
           {isLoadingDetail ? (
-            <div className="p-12 text-center text-xs text-zinc-500 bg-zinc-950 border border-white/10">
+            <div className="p-12 text-center text-xs text-zinc-500 admin-card bg-[#09090d] border border-white/10">
               Loading contest dossier...
             </div>
           ) : !detail?.contest ? (
-            <div className="p-12 text-center text-xs text-zinc-500 bg-zinc-950 border border-white/10">
+            <div className="p-12 text-center text-xs text-zinc-500 admin-card bg-[#09090d] border border-white/10">
               Select a contest from the left panel to configure assessment and problem sets.
             </div>
           ) : (
-            <div className="bg-zinc-950 border border-white/10 rounded-none overflow-hidden space-y-4 p-5">
+            <div className="admin-card bg-[#09090d] border border-white/10 rounded-none overflow-hidden space-y-4 p-5">
               {/* Top Banner for Selected Contest */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <div>

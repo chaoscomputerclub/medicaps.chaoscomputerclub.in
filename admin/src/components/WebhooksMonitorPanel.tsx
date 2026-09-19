@@ -83,7 +83,7 @@ export function WebhooksMonitorPanel({ eventsLog }: WebhooksMonitorPanelProps) {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 font-mono">
       {/* Left: Webhook Registry */}
       <div className="lg:col-span-5 space-y-4">
-        <Card className="bg-zinc-950 border border-white/10 rounded-none">
+        <Card className="admin-card bg-[#09090d] border border-white/10 rounded-none">
           <CardHeader className="border-b border-white/10 py-2.5 px-4">
             <div className="flex items-center gap-2">
               <Radio className="w-3.5 h-3.5 text-lime-400" />
