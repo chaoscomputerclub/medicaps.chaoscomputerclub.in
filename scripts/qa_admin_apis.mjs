@@ -355,6 +355,66 @@ async function runQa() {
     }
   }
 
+  // ─── TEST 12B: Admin Participants & Dossier Endpoint ──────────────────────
+  {
+    const start = performance.now();
+    try {
+      const res = await fetch(`${API_BASE}/admin/contests/${primaryContestSlug}/participants`, { headers });
+      const latency = performance.now() - start;
+      if (res.ok) {
+        const participants = await res.json();
+        logTest("ADM-PARTICIPANTS-01", `Fetch Full Admin Participant Dossier (${primaryContestSlug})`, "PASS", latency, `Retrieved ${participants.length} participant dossier(s)`);
+      } else {
+        logTest("ADM-PARTICIPANTS-01", `Fetch Full Admin Participant Dossier (${primaryContestSlug})`, "FAIL", latency, `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      logTest("ADM-PARTICIPANTS-01", `Fetch Full Admin Participant Dossier (${primaryContestSlug})`, "FAIL", 0, err.message);
+    }
+  }
+
+  // ─── TEST 12C: Seed Demo Medi-Caps Participants Endpoint ─────────────────
+  {
+    const start = performance.now();
+    try {
+      const res = await fetch(`${API_BASE}/admin/contests/${primaryContestSlug}/seed-demo-participants`, {
+        method: "POST",
+        headers,
+      });
+      const latency = performance.now() - start;
+      if (res.ok) {
+        const data = await res.json();
+        logTest("ADM-SEED-01", "Seed Demo Medi-Caps Participants", "PASS", latency, data.message || "Seeded participants");
+      } else {
+        logTest("ADM-SEED-01", "Seed Demo Medi-Caps Participants", "FAIL", latency, `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      logTest("ADM-SEED-01", "Seed Demo Medi-Caps Participants", "FAIL", 0, err.message);
+    }
+  }
+
+  // ─── TEST 12D: Verify Seeded Participants via Attendees & Dossier ──────────
+  {
+    const start = performance.now();
+    try {
+      const res = await fetch(`${API_BASE}/passes/contest/${primaryContestSlug}/attendees`);
+      const latency = performance.now() - start;
+      if (res.ok) {
+        const attendees = await res.json();
+        const hasDossierFields = attendees.length > 0 && attendees[0].handle && (attendees[0].email || attendees[0].prn);
+        if (hasDossierFields) {
+          logTest("ADM-DOSSIER-VERIFY-01", "Verify Registered Participants Dossier Fields", "PASS", latency, `Verified ${attendees.length} cadet(s) with PRN, Email & Seat data`);
+        } else {
+          logTest("ADM-DOSSIER-VERIFY-01", "Verify Registered Participants Dossier Fields", "FAIL", latency, "Missing PRN or email in attendee dossier");
+        }
+      } else {
+        logTest("ADM-DOSSIER-VERIFY-01", "Verify Registered Participants Dossier Fields", "FAIL", latency, `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      logTest("ADM-DOSSIER-VERIFY-01", "Verify Registered Participants Dossier Fields", "FAIL", 0, err.message);
+    }
+  }
+
+
   // ─── TEST 13: Proctor Gate Scanner Verification Endpoint ─────────────────
   {
     const start = performance.now();

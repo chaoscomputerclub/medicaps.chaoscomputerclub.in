@@ -11,7 +11,15 @@ from sqlalchemy.orm import selectinload
 
 from app.core.db import get_db
 from app.middleware.auth import require_admin_or_core
-from app.models.db_models import MemberProfile, OfflineContest
+from app.models.db_models import (
+    MemberProfile,
+    OfflineContest,
+    ContestRegistration,
+    CampusPass,
+    now_utc,
+)
+from app.schemas.campus_pass import ContestAttendeeItem
+from app.services.pass_service import PassService
 from app.schemas.dynamic_contest import (
     DynamicContestCreateRequest,
     DynamicContestUpdateRequest,
@@ -251,3 +259,193 @@ async def launch_preset(
 ):
     """One-click endpoint to deploy a complete Weekly or Biweekly contest edition with 4 curated challenges."""
     return await DynamicContestService.launch_preset(payload, db)
+
+
+@router.get(
+    "/{slug}/participants",
+    summary="List all registered participants and dossier details for contest",
+    response_model=List[ContestAttendeeItem],
+)
+async def list_admin_contest_participants(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Retrieve full registered participant dossier, screening scores, and pass statuses."""
+    return await PassService.list_contest_attendees(slug, db)
+
+
+@router.post(
+    "/{slug}/participants/register",
+    summary="Manually register an enrolled cadet for contest",
+)
+async def admin_register_participant(
+    slug: str,
+    payload: Dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Admin endpoint to manually register a student by handle, PRN, or email."""
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    identifier = str(payload.get("identifier") or payload.get("handle") or "").strip()
+    clean_handle = identifier.lstrip("@").strip()
+    if not clean_handle:
+        raise HTTPException(status_code=400, detail="Student identifier (handle, PRN, or email) is required.")
+
+    m_stmt = select(MemberProfile).where(
+        (MemberProfile.handle.ilike(clean_handle)) |
+        (MemberProfile.prn.ilike(identifier)) |
+        (MemberProfile.email.ilike(identifier))
+    )
+    m_res = await db.execute(m_stmt)
+    member = m_res.scalars().first()
+    if not member:
+        raise HTTPException(status_code=404, detail=f"No student found with identifier '{identifier}'.")
+
+    # Check if already registered
+    r_stmt = select(ContestRegistration).where(
+        ContestRegistration.contest_id == contest.id,
+        ContestRegistration.member_id == member.id,
+    )
+    r_res = await db.execute(r_stmt)
+    reg = r_res.scalars().first()
+    if reg:
+        return {
+            "status": "already_registered",
+            "message": f"Cadet @{member.handle} ({member.full_name}) is already registered.",
+            "member_id": member.id,
+            "handle": member.handle,
+        }
+
+    new_reg = ContestRegistration(
+        contest_id=contest.id,
+        member_id=member.id,
+        status="confirmed",
+    )
+    db.add(new_reg)
+    contest.registered_count += 1
+    await db.commit()
+
+    return {
+        "status": "confirmed",
+        "message": f"Successfully registered @{member.handle} ({member.full_name}) for {contest.title}.",
+        "member_id": member.id,
+        "handle": member.handle,
+        "registered_count": contest.registered_count,
+    }
+
+
+@router.post(
+    "/{slug}/seed-demo-participants",
+    summary="Seed mock Medi-Caps participants for instant testing",
+)
+async def seed_demo_participants(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Seed 10 realistic Medi-Caps student participants with screening scores and PRNs."""
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    demo_cadets = [
+        {"handle": "santusht", "full_name": "Santusht Kotai", "prn": "EN23CS301927", "email": "en23cs301927@medicaps.ac.in", "dept": "CSE", "score": 98.5},
+        {"handle": "aarav_sharma", "full_name": "Aarav Sharma", "prn": "EN23CS301042", "email": "aarav.sharma@medicaps.ac.in", "dept": "CSE", "score": 94.0},
+        {"handle": "priya_patel", "full_name": "Priya Patel", "prn": "EN23IT301118", "email": "priya.patel@medicaps.ac.in", "dept": "IT", "score": 91.5},
+        {"handle": "rohan_verma", "full_name": "Rohan Verma", "prn": "EN23CS301205", "email": "rohan.verma@medicaps.ac.in", "dept": "Cyber Security", "score": 88.0},
+        {"handle": "ananya_singh", "full_name": "Ananya Singh", "prn": "EN24AI301012", "email": "ananya.singh@medicaps.ac.in", "dept": "AIDS", "score": 86.5},
+        {"handle": "vikram_aditya", "full_name": "Vikram Aditya", "prn": "EN22CS301088", "email": "vikram.aditya@medicaps.ac.in", "dept": "CSE", "score": 82.0},
+        {"handle": "sneha_reddy", "full_name": "Sneha Reddy", "prn": "EN23IT301064", "email": "sneha.reddy@medicaps.ac.in", "dept": "IT", "score": 79.5},
+        {"handle": "dev_malhotra", "full_name": "Dev Malhotra", "prn": "EN24CS301310", "email": "dev.malhotra@medicaps.ac.in", "dept": "CSE", "score": 76.0},
+        {"handle": "ishita_gupta", "full_name": "Ishita Gupta", "prn": "EN23CS301150", "email": "ishita.gupta@medicaps.ac.in", "dept": "Cyber Security", "score": 73.0},
+        {"handle": "kabir_joshi", "full_name": "Kabir Joshi", "prn": "EN24IT301099", "email": "kabir.joshi@medicaps.ac.in", "dept": "IT", "score": 69.5},
+    ]
+
+    added = 0
+    for idx, cadet_data in enumerate(demo_cadets, start=1):
+        m_stmt = select(MemberProfile).where(
+            (MemberProfile.handle == cadet_data["handle"]) | (MemberProfile.email == cadet_data["email"])
+        )
+        m_res = await db.execute(m_stmt)
+        member = m_res.scalars().first()
+        if not member:
+            member = MemberProfile(
+                handle=cadet_data["handle"],
+                full_name=cadet_data["full_name"],
+                email=cadet_data["email"],
+                prn=cadet_data["prn"],
+                department=cadet_data["dept"],
+                batch="2023-27",
+                rating=1200 + int(cadet_data["score"] * 5),
+                is_onboarded=True,
+            )
+            db.add(member)
+            await db.flush()
+
+        r_stmt = select(ContestRegistration).where(
+            ContestRegistration.contest_id == contest.id,
+            ContestRegistration.member_id == member.id,
+        )
+        r_res = await db.execute(r_stmt)
+        reg = r_res.scalars().first()
+        is_top30 = idx <= 5
+        seat_num = f"LAB-04-PC{idx:02d}" if is_top30 else None
+        pass_code = f"CCC-{contest.slug[:8].upper()}-{member.handle[:4].upper()}-{idx:02d}" if is_top30 else None
+
+        if not reg:
+            reg = ContestRegistration(
+                contest_id=contest.id,
+                member_id=member.id,
+                status="confirmed",
+                assessment_taken=True,
+                assessment_score=cadet_data["score"],
+                assessment_rank=idx,
+                is_top_30_qualified=is_top30,
+                seat_assigned=seat_num,
+                campus_pass_code=pass_code,
+            )
+            db.add(reg)
+            contest.registered_count += 1
+            added += 1
+        else:
+            reg.assessment_taken = True
+            reg.assessment_score = cadet_data["score"]
+            reg.assessment_rank = idx
+            reg.is_top_30_qualified = is_top30
+            reg.seat_assigned = seat_num
+            reg.campus_pass_code = pass_code
+
+        if is_top30:
+            p_stmt = select(CampusPass).where(
+                CampusPass.member_id == member.id,
+                CampusPass.contest_id == contest.id,
+            )
+            p_res = await db.execute(p_stmt)
+            c_pass = p_res.scalars().first()
+            if not c_pass:
+                c_pass = CampusPass(
+                    member_id=member.id,
+                    contest_id=contest.id,
+                    pass_code=pass_code,
+                    seat_number=seat_num,
+                    qr_data=f"CCC-PASS:{pass_code}:{member.id}:{seat_num}:QUALIFIED",
+                    check_in_status="issued" if idx > 2 else "checked_in",
+                    checked_in_at=now_utc() if idx <= 2 else None,
+                    checked_in_by="Proctor Station 1" if idx <= 2 else None,
+                )
+                db.add(c_pass)
+
+    await db.commit()
+    return {
+        "status": "success",
+        "message": f"Successfully initialized {len(demo_cadets)} Medi-Caps participants for {contest.title}.",
+        "added_count": added,
+        "total_registered": contest.registered_count,
+    }
+

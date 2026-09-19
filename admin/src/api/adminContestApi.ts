@@ -237,4 +237,22 @@ export const adminContestApi = {
       body: JSON.stringify({ direction }),
     });
   },
+
+  async getParticipants(slug: string): Promise<any[]> {
+    return adminFetch(`/admin/contests/${encodeURIComponent(slug)}/participants`);
+  },
+
+  async registerParticipant(slug: string, identifier: string): Promise<any> {
+    return adminFetch(`/admin/contests/${encodeURIComponent(slug)}/participants/register`, {
+      method: "POST",
+      body: JSON.stringify({ identifier }),
+    });
+  },
+
+  async seedDemoParticipants(slug: string): Promise<any> {
+    return adminFetch(`/admin/contests/${encodeURIComponent(slug)}/seed-demo-participants`, {
+      method: "POST",
+    });
+  },
 };
+

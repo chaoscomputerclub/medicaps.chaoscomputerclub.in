@@ -275,8 +275,11 @@ export function GateScannerPanel({
         const handleMatch =
           (a.handle || "").toUpperCase() === cleanUpper ||
           `@${(a.handle || "").toUpperCase()}` === cleanUpper;
+        const prnMatch =
+          (a.prn || a.enrollment_number || "").toUpperCase() === cleanUpper;
+        const emailMatch = (a.email || "").toUpperCase() === cleanUpper;
         const qrMatch = (a.qr_data || "").toUpperCase().includes(cleanUpper);
-        return passMatch || handleMatch || qrMatch;
+        return passMatch || handleMatch || prnMatch || emailMatch || qrMatch;
       });
 
       const candidateName = matched?.member_name || matched?.full_name || "Unregistered Candidate";
@@ -292,7 +295,7 @@ export function GateScannerPanel({
         candidateName,
         handle,
         department,
-        enrollmentNumber: matched?.enrollment_number,
+        enrollmentNumber: matched?.prn || matched?.enrollment_number,
         batch: matched?.batch || "2024-2028",
         checkInStatus,
         checkedInAt: matched?.checked_in_at,

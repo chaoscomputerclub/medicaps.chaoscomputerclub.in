@@ -56,15 +56,26 @@ class PassVerifyResponse(BaseModel):
 
 
 class ContestAttendeeItem(BaseModel):
-    """Single attendee row for the proctor check-in dashboard."""
-    rank: int
+    """Single attendee / registered participant row for the proctor check-in dashboard & admin dossier."""
+    model_config = ConfigDict(from_attributes=True)
+
+    rank: Optional[int] = None
     handle: str
     full_name: str
-    department: str
-    batch: str
-    seat_number: str
-    pass_code: str
-    check_in_status: str
+    department: Optional[str] = "CSE"
+    batch: Optional[str] = "2023-27"
+    seat_number: Optional[str] = "UNASSIGNED"
+    pass_code: Optional[str] = "—"
+    check_in_status: str = "registered"  # "checked_in", "issued", "registered", "pending"
     checked_in_at: Optional[datetime] = None
     checked_in_by: Optional[str] = None
-    screening_score: float
+    screening_score: Optional[float] = 0.0
+    email: Optional[str] = None
+    prn: Optional[str] = None
+    enrollment_number: Optional[str] = None
+    registered_at: Optional[datetime] = None
+    registration_status: Optional[str] = "confirmed"
+    assessment_taken: Optional[bool] = False
+    is_top_30_qualified: Optional[bool] = False
+    rating: Optional[int] = 1200
+

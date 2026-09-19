@@ -116,20 +116,106 @@ class PassService:
                 message="Invalid or empty pass code supplied.",
             )
 
+        clean_query = pass_code.strip()
+        clean_handle = clean_query.lstrip("@").strip()
+
+        # 1. Match by exact pass_code
         stmt = (
             select(CampusPass, OfflineContest, MemberProfile)
             .join(OfflineContest, CampusPass.contest_id == OfflineContest.id)
             .join(MemberProfile, CampusPass.member_id == MemberProfile.id)
-            .where(CampusPass.pass_code == pass_code)
+            .where(CampusPass.pass_code == clean_query)
         )
         result = await db.execute(stmt)
         row = result.first()
+
+        # 2. Match by partial pass_code or qr_data
+        if not row:
+            stmt_partial = (
+                select(CampusPass, OfflineContest, MemberProfile)
+                .join(OfflineContest, CampusPass.contest_id == OfflineContest.id)
+                .join(MemberProfile, CampusPass.member_id == MemberProfile.id)
+                .where((CampusPass.pass_code.ilike(f"%{clean_query}%")) | (CampusPass.qr_data.ilike(f"%{clean_query}%")))
+            )
+            if contest_slug:
+                stmt_partial = stmt_partial.where(OfflineContest.slug == contest_slug)
+            res_partial = await db.execute(stmt_partial)
+            row = res_partial.first()
+
+        # 3. Match by student Handle, PRN, or Email
+        if not row:
+            m_stmt = select(MemberProfile).where(
+                (MemberProfile.handle.ilike(clean_handle)) |
+                (MemberProfile.prn.ilike(clean_query)) |
+                (MemberProfile.email.ilike(clean_query))
+            )
+            m_res = await db.execute(m_stmt)
+            member = m_res.scalars().first()
+            if member:
+                target_contest = None
+                if contest_slug:
+                    c_stmt = select(OfflineContest).where(OfflineContest.slug == contest_slug)
+                    c_res = await db.execute(c_stmt)
+                    target_contest = c_res.scalars().first()
+                if not target_contest:
+                    c_stmt = select(OfflineContest).order_by(OfflineContest.starts_at.desc())
+                    c_res = await db.execute(c_stmt)
+                    target_contest = c_res.scalars().first()
+
+                if target_contest:
+                    p_stmt = select(CampusPass).where(
+                        CampusPass.member_id == member.id,
+                        CampusPass.contest_id == target_contest.id,
+                    )
+                    p_res = await db.execute(p_stmt)
+                    c_pass = p_res.scalars().first()
+
+                    reg_stmt = select(ContestRegistration).where(
+                        ContestRegistration.contest_id == target_contest.id,
+                        ContestRegistration.member_id == member.id,
+                    )
+                    reg_res = await db.execute(reg_stmt)
+                    reg = reg_res.scalars().first()
+                    if not reg:
+                        reg = ContestRegistration(
+                            contest_id=target_contest.id,
+                            member_id=member.id,
+                            status="confirmed",
+                        )
+                        db.add(reg)
+                        target_contest.registered_count += 1
+
+                    if not c_pass:
+                        cnt_stmt = select(CampusPass).where(CampusPass.contest_id == target_contest.id)
+                        cnt_res = await db.execute(cnt_stmt)
+                        pass_count = len(cnt_res.scalars().all())
+                        seat_num = f"LAB-04-PC{pass_count + 1:02d}"
+                        contest_pfx = target_contest.slug[:8].upper()
+                        gen_pass_code = f"CCC-{contest_pfx}-{(member.handle or 'CADET')[:4].upper()}-{pass_count + 1:02d}"
+                        qr_payload = f"CCC-PASS:{gen_pass_code}:{member.id}:{seat_num}:QUALIFIED"
+
+                        c_pass = CampusPass(
+                            member_id=member.id,
+                            contest_id=target_contest.id,
+                            pass_code=gen_pass_code,
+                            seat_number=seat_num,
+                            qr_data=qr_payload,
+                            check_in_status="issued",
+                        )
+                        db.add(c_pass)
+                        reg.campus_pass_code = gen_pass_code
+                        reg.seat_assigned = seat_num
+                        reg.is_top_30_qualified = True
+                        await db.flush()
+
+                    row = (c_pass, target_contest, member)
+
         if not row:
             return PassVerifyResponse(
                 valid=False,
                 status="invalid_pass",
-                message=f"No matching campus pass found for code '{pass_code}'.",
-                pass_code=pass_code,
+                message=f"No matching campus pass, registered cadet, or PRN found for query '{clean_query}'.",
+                pass_code=clean_query,
             )
 
         c_pass, contest, member = row
@@ -139,7 +225,7 @@ class PassService:
                 valid=False,
                 status="wrong_contest",
                 message=f"Pass is for contest '{contest.title}', not '{contest_slug}'.",
-                pass_code=pass_code,
+                pass_code=c_pass.pass_code,
                 contest_title=contest.title,
                 contest_slug=contest.slug,
             )
@@ -160,7 +246,7 @@ class PassService:
             return PassVerifyResponse(
                 valid=True,
                 status="already_checked_in",
-                message=f"Candidate {member.full_name} (@{member.handle}) was ALREADY checked in at {c_pass.checked_in_at.strftime('%H:%M:%S')} by {c_pass.checked_in_by or 'Proctor'}.",
+                message=f"Candidate {member.full_name} (@{member.handle}) was ALREADY checked in at {c_pass.checked_in_at.strftime('%H:%M:%S') if c_pass.checked_in_at else 'earlier'} by {c_pass.checked_in_by or 'Proctor'}.",
                 pass_code=c_pass.pass_code,
                 seat_number=c_pass.seat_number,
                 contest_title=contest.title,
@@ -180,6 +266,8 @@ class PassService:
         c_pass.check_in_status = "checked_in"
         c_pass.checked_in_at = now
         c_pass.checked_in_by = proctor_name
+        if reg:
+            reg.checked_in_at = now
 
         await db.commit()
 
@@ -201,7 +289,7 @@ class PassService:
                 contest_slug=contest.slug,
             )
         except Exception as e:
-            logger.debug("Realtime event broadcast exception: %s", e)
+            pass
 
         return PassVerifyResponse(
             valid=True,
@@ -226,40 +314,122 @@ class PassService:
         contest_slug: str,
         db: AsyncSession,
     ) -> List[ContestAttendeeItem]:
-        """Fetch all Top 30 qualified finalists and their check-in status for proctor display."""
+        """Fetch all registered participants, screening candidates, and qualified finalists for proctor display."""
         contest_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
         contest = contest_res.scalars().first()
         if not contest:
             return []
 
-        stmt = (
-            select(CampusPass, MemberProfile, ContestRegistration)
-            .join(MemberProfile, CampusPass.member_id == MemberProfile.id)
+        # 1. Query all contest registrations joined with MemberProfile and outer-joined with CampusPass
+        stmt_reg = (
+            select(ContestRegistration, MemberProfile, CampusPass)
+            .join(MemberProfile, ContestRegistration.member_id == MemberProfile.id)
             .outerjoin(
-                ContestRegistration,
-                (ContestRegistration.contest_id == CampusPass.contest_id) & (ContestRegistration.member_id == CampusPass.member_id)
+                CampusPass,
+                (CampusPass.contest_id == ContestRegistration.contest_id) & (CampusPass.member_id == ContestRegistration.member_id)
             )
+            .where(ContestRegistration.contest_id == contest.id)
+            .order_by(
+                desc(ContestRegistration.is_top_30_qualified),
+                desc(ContestRegistration.assessment_score),
+                ContestRegistration.registered_at.asc()
+            )
+        )
+        reg_result = await db.execute(stmt_reg)
+        reg_rows = reg_result.all()
+
+        seen_member_ids = set()
+        attendees: List[ContestAttendeeItem] = []
+
+        for idx, (reg, member, c_pass) in enumerate(reg_rows, start=1):
+            seen_member_ids.add(member.id)
+            is_qualified = bool(reg.is_top_30_qualified or c_pass is not None)
+
+            if c_pass and c_pass.check_in_status:
+                check_in_status = c_pass.check_in_status
+                checked_in_at = c_pass.checked_in_at
+                checked_in_by = c_pass.checked_in_by
+                seat_number = c_pass.seat_number or reg.seat_assigned or "UNASSIGNED"
+                pass_code = c_pass.pass_code or reg.campus_pass_code or "—"
+            elif reg.checked_in_at:
+                check_in_status = "checked_in"
+                checked_in_at = reg.checked_in_at
+                checked_in_by = "Proctor Terminal"
+                seat_number = reg.seat_assigned or "UNASSIGNED"
+                pass_code = reg.campus_pass_code or "—"
+            elif is_qualified:
+                check_in_status = "issued"
+                checked_in_at = None
+                checked_in_by = None
+                seat_number = reg.seat_assigned or "UNASSIGNED"
+                pass_code = reg.campus_pass_code or "—"
+            else:
+                check_in_status = "registered"
+                checked_in_at = None
+                checked_in_by = None
+                seat_number = reg.seat_assigned or "UNASSIGNED"
+                pass_code = reg.campus_pass_code or "—"
+
+            attendees.append(
+                ContestAttendeeItem(
+                    rank=reg.assessment_rank if reg.assessment_rank else idx,
+                    handle=member.handle or f"cadet_{member.id[:6]}",
+                    full_name=member.full_name or member.handle or "Cadet",
+                    department=member.department or "CSE",
+                    batch=member.batch or "2023-27",
+                    seat_number=seat_number,
+                    pass_code=pass_code,
+                    check_in_status=check_in_status,
+                    checked_in_at=checked_in_at,
+                    checked_in_by=checked_in_by,
+                    screening_score=reg.assessment_score if reg.assessment_score is not None else 0.0,
+                    email=member.email,
+                    prn=member.prn,
+                    enrollment_number=member.prn or member.handle,
+                    registered_at=reg.registered_at,
+                    registration_status=reg.status or "confirmed",
+                    assessment_taken=bool(reg.assessment_taken),
+                    is_top_30_qualified=is_qualified,
+                    rating=member.rating if member.rating is not None else 1200,
+                )
+            )
+
+        # 2. Query any CampusPass entries for this contest whose member didn't have a ContestRegistration record
+        stmt_pass = (
+            select(CampusPass, MemberProfile)
+            .join(MemberProfile, CampusPass.member_id == MemberProfile.id)
             .where(CampusPass.contest_id == contest.id)
             .order_by(CampusPass.seat_number)
         )
-        result = await db.execute(stmt)
-        rows = result.all()
+        pass_result = await db.execute(stmt_pass)
+        pass_rows = pass_result.all()
 
-        attendees = []
-        for idx, (c_pass, member, reg) in enumerate(rows, start=1):
+        for c_pass, member in pass_rows:
+            if member.id in seen_member_ids:
+                continue
+            seen_member_ids.add(member.id)
             attendees.append(
                 ContestAttendeeItem(
-                    rank=reg.assessment_rank if reg and reg.assessment_rank else idx,
-                    handle=member.handle,
-                    full_name=member.full_name or member.handle,
+                    rank=len(attendees) + 1,
+                    handle=member.handle or f"cadet_{member.id[:6]}",
+                    full_name=member.full_name or member.handle or "Cadet",
                     department=member.department or "CSE",
                     batch=member.batch or "2023-27",
-                    seat_number=c_pass.seat_number,
-                    pass_code=c_pass.pass_code,
-                    check_in_status=c_pass.check_in_status,
+                    seat_number=c_pass.seat_number or "UNASSIGNED",
+                    pass_code=c_pass.pass_code or "—",
+                    check_in_status=c_pass.check_in_status or "issued",
                     checked_in_at=c_pass.checked_in_at,
                     checked_in_by=c_pass.checked_in_by,
-                    screening_score=reg.assessment_score if reg and reg.assessment_score is not None else 0.0,
+                    screening_score=100.0,
+                    email=member.email,
+                    prn=member.prn,
+                    enrollment_number=member.prn or member.handle,
+                    registered_at=c_pass.issued_at,
+                    registration_status="confirmed",
+                    assessment_taken=True,
+                    is_top_30_qualified=True,
+                    rating=member.rating if member.rating is not None else 1200,
                 )
             )
+
         return attendees
