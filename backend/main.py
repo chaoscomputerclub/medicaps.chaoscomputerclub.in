@@ -46,11 +46,6 @@ async def lifespan(app: FastAPI):
     # ── Clean shutdown ────────────────────────────────────────────────────────
     for task in bg_tasks:
         task.cancel()
-        try:
-            import asyncio
-            await asyncio.wait_for(asyncio.shield(task), timeout=5)
-        except Exception:
-            pass
     print(f"🛑 Shutting down {settings.PROJECT_NAME}...")
 
 
