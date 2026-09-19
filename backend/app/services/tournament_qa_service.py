@@ -239,9 +239,9 @@ class TournamentQAService:
                 | (MemberProfile.prn == prn)
             )
             c_res = await db.execute(c_stmt)
-            existing_cadet = c_res.scalars().first()
+            existing_cadets_found = c_res.scalars().all()
 
-            if not existing_cadet:
+            if not existing_cadets_found:
                 cadet = MemberProfile(
                     handle=handle,
                     full_name=full_name,
@@ -259,14 +259,28 @@ class TournamentQAService:
                 db.add(cadet)
                 await db.flush()
             else:
-                cadet = existing_cadet
-                cadet.handle = handle
-                cadet.full_name = full_name
-                cadet.email = email
-                cadet.prn = prn
-                cadet.department = dept
+                cadet = existing_cadets_found[0]
+                # Delete duplicates that match by different unique columns
+                for dup_c in existing_cadets_found[1:]:
+                    await db.execute(delete(RatingHistory).where(RatingHistory.member_id == dup_c.id))
+                    await db.execute(delete(CampusPass).where(CampusPass.member_id == dup_c.id))
+                    await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == dup_c.id))
+                    await db.execute(delete(ScoreboardEntry).where(ScoreboardEntry.member_id == dup_c.id))
+                    await db.delete(dup_c)
+                await db.flush()
+                # Only update fields if they changed (avoids spurious UPDATE with same PRN)
+                if cadet.handle != handle or cadet.email != email or cadet.prn != prn:
+                    cadet.handle = handle
+                    cadet.full_name = full_name
+                    cadet.email = email
+                    cadet.prn = prn
+                    cadet.department = dept
+                    cadet.batch = batch
+                    cadet.is_onboarded = True
+                    await db.flush()
 
             cadets.append(cadet)
+
 
         logger.info("✓ [TOURNAMENT SIM] 110 cadet profiles confirmed and ready.")
 
