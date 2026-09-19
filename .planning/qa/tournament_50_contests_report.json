@@ -1,6 +1,6 @@
 {
-  "total": 570,
-  "passed": 570,
+  "total": 572,
+  "passed": 572,
   "failed": 0,
   "testCases": [
     {
@@ -8,7 +8,7 @@
       "name": "API Health — operational",
       "passed": true,
       "details": "status=\"operational\" version=\"1.0.0\"",
-      "latency": 606.7
+      "latency": 1205.8
     },
     {
       "id": "P0-T02",
@@ -28,8 +28,8 @@
       "id": "P1-T01",
       "name": "Tournament simulation — HTTP 200",
       "passed": true,
-      "details": "50 contests, 110 cadets, 1500 finalists in 5650ms",
-      "latency": 5650.3
+      "details": "50 contests, 110 cadets, 1500 finalists in 5110ms",
+      "latency": 5110
     },
     {
       "id": "P1-T02",
@@ -70,14 +70,14 @@
       "id": "P1-T07",
       "name": "Santusht is Grandmaster+ (rating ≥2000)",
       "passed": true,
-      "details": "Rating: 3099 (Grandmaster)",
+      "details": "Rating: 3122 (Grandmaster)",
       "latency": 0.1
     },
     {
       "id": "P1-T08",
       "name": "Santusht has podium finishes (≥5)",
       "passed": true,
-      "details": "36 podiums",
+      "details": "34 podiums",
       "latency": 0.1
     },
     {
@@ -99,7 +99,7 @@
       "name": "50 arena contests in catalogue",
       "passed": true,
       "details": "Found 50/50",
-      "latency": 671.5
+      "latency": 717.1
     },
     {
       "id": "P2-T02",
@@ -141,14 +141,14 @@
       "name": "#1 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 480.3
+      "latency": 404.1
     },
     {
       "id": "C01-T03",
       "name": "#1 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 384.5
+      "latency": 409
     },
     {
       "id": "C01-T04",
@@ -169,7 +169,7 @@
       "name": "#1 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 380.4
+      "latency": 405.5
     },
     {
       "id": "C01-T07",
@@ -182,21 +182,21 @@
       "id": "C01-T08",
       "name": "#1 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"harsh_029\"",
-      "latency": 365.1
+      "details": "rank#1=\"santusht\" rank#30=\"shruti_020\"",
+      "latency": 369.9
     },
     {
       "id": "C01-T09",
       "name": "#1 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=45",
+      "details": "Rank #1, solved=4, Δ=52",
       "latency": 0
     },
     {
       "id": "C01-T10",
       "name": "#1 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=45",
+      "details": "Min Δ=-14 Max Δ=52",
       "latency": 0
     },
     {
@@ -211,14 +211,14 @@
       "name": "#2 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 356.3
+      "latency": 445.1
     },
     {
       "id": "C02-T03",
       "name": "#2 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 388.9
+      "latency": 410
     },
     {
       "id": "C02-T04",
@@ -239,7 +239,7 @@
       "name": "#2 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 469.4
+      "latency": 374.9
     },
     {
       "id": "C02-T07",
@@ -252,21 +252,21 @@
       "id": "C02-T08",
       "name": "#2 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"harsh_029\"",
-      "latency": 357.5
+      "details": "rank#1=\"santusht\" rank#30=\"siddharth_025\"",
+      "latency": 366.8
     },
     {
       "id": "C02-T09",
       "name": "#2 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=22",
+      "details": "Rank #1, solved=3, Δ=56",
       "latency": 0
     },
     {
       "id": "C02-T10",
       "name": "#2 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=47",
+      "details": "Min Δ=-16 Max Δ=56",
       "latency": 0
     },
     {
@@ -281,14 +281,14 @@
       "name": "#3 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.9
+      "latency": 380.1
     },
     {
       "id": "C03-T03",
       "name": "#3 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 382.6
+      "latency": 409.1
     },
     {
       "id": "C03-T04",
@@ -309,7 +309,7 @@
       "name": "#3 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 459.6
+      "latency": 407.3
     },
     {
       "id": "C03-T07",
@@ -322,21 +322,21 @@
       "id": "C03-T08",
       "name": "#3 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"varun_021\"",
-      "latency": 367.2
+      "details": "rank#1=\"rohan_004\" rank#30=\"siddharth_025\"",
+      "latency": 407.3
     },
     {
       "id": "C03-T09",
       "name": "#3 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=52",
+      "details": "Rank #2, solved=4, Δ=33",
       "latency": 0
     },
     {
       "id": "C03-T10",
       "name": "#3 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=52",
+      "details": "Min Δ=-15 Max Δ=60",
       "latency": 0
     },
     {
@@ -351,14 +351,14 @@
       "name": "#4 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 353.5
+      "latency": 408.7
     },
     {
       "id": "C04-T03",
       "name": "#4 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 377.1
+      "latency": 409.9
     },
     {
       "id": "C04-T04",
@@ -379,7 +379,7 @@
       "name": "#4 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 470.9
+      "latency": 406.4
     },
     {
       "id": "C04-T07",
@@ -392,21 +392,21 @@
       "id": "C04-T08",
       "name": "#4 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"riya_016\"",
-      "latency": 365.9
+      "details": "rank#1=\"ananya_005\" rank#30=\"shreya_036\"",
+      "latency": 407.4
     },
     {
       "id": "C04-T09",
       "name": "#4 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=30",
+      "details": "Rank #7, solved=3, Δ=19",
       "latency": 0
     },
     {
       "id": "C04-T10",
       "name": "#4 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=45",
+      "details": "Min Δ=-16 Max Δ=52",
       "latency": 0
     },
     {
@@ -421,14 +421,14 @@
       "name": "#5 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 359
+      "latency": 414.6
     },
     {
       "id": "C05-T03",
       "name": "#5 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 374.4
+      "latency": 506.9
     },
     {
       "id": "C05-T04",
@@ -449,7 +449,7 @@
       "name": "#5 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 464.2
+      "latency": 510.7
     },
     {
       "id": "C05-T07",
@@ -462,21 +462,21 @@
       "id": "C05-T08",
       "name": "#5 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"nikhil_019\"",
-      "latency": 359.6
+      "details": "rank#1=\"priya_003\" rank#30=\"swati_028\"",
+      "latency": 510.2
     },
     {
       "id": "C05-T09",
       "name": "#5 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #5, solved=3, Δ=22",
+      "details": "Rank #4, solved=3, Δ=27",
       "latency": 0
     },
     {
       "id": "C05-T10",
       "name": "#5 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=49",
+      "details": "Min Δ=-16 Max Δ=58",
       "latency": 0
     },
     {
@@ -491,14 +491,14 @@
       "name": "#6 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 355
+      "latency": 510.7
     },
     {
       "id": "C06-T03",
       "name": "#6 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 379.2
+      "latency": 686.1
     },
     {
       "id": "C06-T04",
@@ -519,7 +519,7 @@
       "name": "#6 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375.4
+      "latency": 440
     },
     {
       "id": "C06-T07",
@@ -532,14 +532,14 @@
       "id": "C06-T08",
       "name": "#6 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"priya_003\" rank#30=\"deepika_030\"",
-      "latency": 357.5
+      "details": "rank#1=\"santusht\" rank#30=\"tara_032\"",
+      "latency": 406.3
     },
     {
       "id": "C06-T09",
       "name": "#6 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=4, Δ=32",
+      "details": "Rank #1, solved=4, Δ=60",
       "latency": 0
     },
     {
@@ -561,14 +561,14 @@
       "name": "#7 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.2
+      "latency": 405.6
     },
     {
       "id": "C07-T03",
       "name": "#7 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 430.5
+      "latency": 384
     },
     {
       "id": "C07-T04",
@@ -589,7 +589,7 @@
       "name": "#7 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375.8
+      "latency": 377.4
     },
     {
       "id": "C07-T07",
@@ -602,21 +602,21 @@
       "id": "C07-T08",
       "name": "#7 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"swati_028\"",
-      "latency": 358
+      "details": "rank#1=\"priya_003\" rank#30=\"neha_022\"",
+      "latency": 363.6
     },
     {
       "id": "C07-T09",
       "name": "#7 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #6, solved=3, Δ=18",
+      "details": "Rank #6, solved=3, Δ=27",
       "latency": 0
     },
     {
       "id": "C07-T10",
       "name": "#7 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=56",
+      "details": "Min Δ=-15 Max Δ=53",
       "latency": 0
     },
     {
@@ -631,14 +631,14 @@
       "name": "#8 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 355.1
+      "latency": 360.4
     },
     {
       "id": "C08-T03",
       "name": "#8 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 378.5
+      "latency": 376.3
     },
     {
       "id": "C08-T04",
@@ -659,7 +659,7 @@
       "name": "#8 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375.3
+      "latency": 381.1
     },
     {
       "id": "C08-T07",
@@ -672,21 +672,21 @@
       "id": "C08-T08",
       "name": "#8 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"harsh_029\"",
-      "latency": 360.5
+      "details": "rank#1=\"ananya_005\" rank#30=\"bhavna_034\"",
+      "latency": 373.9
     },
     {
       "id": "C08-T09",
       "name": "#8 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=31",
+      "details": "Rank #3, solved=3, Δ=43",
       "latency": 0
     },
     {
       "id": "C08-T10",
       "name": "#8 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-13 Max Δ=55",
+      "details": "Min Δ=-15 Max Δ=53",
       "latency": 0
     },
     {
@@ -701,14 +701,14 @@
       "name": "#9 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 408.3
+      "latency": 359.2
     },
     {
       "id": "C09-T03",
       "name": "#9 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 377.1
+      "latency": 375.6
     },
     {
       "id": "C09-T04",
@@ -729,7 +729,7 @@
       "name": "#9 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 374.6
+      "latency": 426.7
     },
     {
       "id": "C09-T07",
@@ -742,21 +742,21 @@
       "id": "C09-T08",
       "name": "#9 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"rahul_031\"",
-      "latency": 360.5
+      "details": "rank#1=\"santusht\" rank#30=\"nikhil_019\"",
+      "latency": 364.5
     },
     {
       "id": "C09-T09",
       "name": "#9 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=45",
+      "details": "Rank #1, solved=4, Δ=54",
       "latency": 0
     },
     {
       "id": "C09-T10",
       "name": "#9 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=45",
+      "details": "Min Δ=-15 Max Δ=54",
       "latency": 0
     },
     {
@@ -771,14 +771,14 @@
       "name": "#10 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.9
+      "latency": 359.8
     },
     {
       "id": "C10-T03",
       "name": "#10 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 375.6
+      "latency": 402.6
     },
     {
       "id": "C10-T04",
@@ -799,7 +799,7 @@
       "name": "#10 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 379.2
+      "latency": 380
     },
     {
       "id": "C10-T07",
@@ -812,21 +812,21 @@
       "id": "C10-T08",
       "name": "#10 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"kavya_024\"",
-      "latency": 361.9
+      "details": "rank#1=\"santusht\" rank#30=\"aman_023\"",
+      "latency": 434.6
     },
     {
       "id": "C10-T09",
       "name": "#10 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=52",
+      "details": "Rank #1, solved=4, Δ=54",
       "latency": 0
     },
     {
       "id": "C10-T10",
       "name": "#10 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=52",
+      "details": "Min Δ=-16 Max Δ=54",
       "latency": 0
     },
     {
@@ -841,14 +841,14 @@
       "name": "#11 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 354.8
+      "latency": 363.2
     },
     {
       "id": "C11-T03",
       "name": "#11 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 392.8
+      "latency": 454.1
     },
     {
       "id": "C11-T04",
@@ -869,7 +869,7 @@
       "name": "#11 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 393.3
+      "latency": 408.8
     },
     {
       "id": "C11-T07",
@@ -882,21 +882,21 @@
       "id": "C11-T08",
       "name": "#11 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ishita_007\" rank#30=\"karan_035\"",
-      "latency": 364.5
+      "details": "rank#1=\"priya_003\" rank#30=\"simran_026\"",
+      "latency": 410.1
     },
     {
       "id": "C11-T09",
       "name": "#11 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=31",
+      "details": "Rank #5, solved=3, Δ=19",
       "latency": 0
     },
     {
       "id": "C11-T10",
       "name": "#11 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=57",
+      "details": "Min Δ=-15 Max Δ=52",
       "latency": 0
     },
     {
@@ -911,14 +911,14 @@
       "name": "#12 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 352.9
+      "latency": 407.4
     },
     {
       "id": "C12-T03",
       "name": "#12 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 384.5
+      "latency": 381.1
     },
     {
       "id": "C12-T04",
@@ -939,7 +939,7 @@
       "name": "#12 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 560.6
+      "latency": 382
     },
     {
       "id": "C12-T07",
@@ -952,21 +952,21 @@
       "id": "C12-T08",
       "name": "#12 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"tara_032\"",
-      "latency": 426.6
+      "details": "rank#1=\"santusht\" rank#30=\"neha_022\"",
+      "latency": 364.2
     },
     {
       "id": "C12-T09",
       "name": "#12 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=57",
+      "details": "Rank #1, solved=4, Δ=58",
       "latency": 0
     },
     {
       "id": "C12-T10",
       "name": "#12 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=57",
+      "details": "Min Δ=-16 Max Δ=58",
       "latency": 0
     },
     {
@@ -981,14 +981,14 @@
       "name": "#13 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 354.9
+      "latency": 360.5
     },
     {
       "id": "C13-T03",
       "name": "#13 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 379.2
+      "latency": 382.4
     },
     {
       "id": "C13-T04",
@@ -1009,7 +1009,7 @@
       "name": "#13 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 376.9
+      "latency": 381.2
     },
     {
       "id": "C13-T07",
@@ -1022,21 +1022,21 @@
       "id": "C13-T08",
       "name": "#13 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"neha_022\"",
-      "latency": 364.3
+      "details": "rank#1=\"kabir_008\" rank#30=\"deepika_030\"",
+      "latency": 362.4
     },
     {
       "id": "C13-T09",
       "name": "#13 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=33",
+      "details": "Rank #6, solved=3, Δ=20",
       "latency": 0
     },
     {
       "id": "C13-T10",
       "name": "#13 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=55",
+      "details": "Min Δ=-16 Max Δ=53",
       "latency": 0
     },
     {
@@ -1051,14 +1051,14 @@
       "name": "#14 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 441.6
+      "latency": 360.2
     },
     {
       "id": "C14-T03",
       "name": "#14 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 378.4
+      "latency": 398.5
     },
     {
       "id": "C14-T04",
@@ -1079,7 +1079,7 @@
       "name": "#14 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 372.2
+      "latency": 377.2
     },
     {
       "id": "C14-T07",
@@ -1092,21 +1092,21 @@
       "id": "C14-T08",
       "name": "#14 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"harsh_029\"",
-      "latency": 355.1
+      "details": "rank#1=\"rohan_004\" rank#30=\"pooja_018\"",
+      "latency": 365.7
     },
     {
       "id": "C14-T09",
       "name": "#14 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=37",
+      "details": "Rank #2, solved=3, Δ=30",
       "latency": 0
     },
     {
       "id": "C14-T10",
       "name": "#14 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=51",
+      "details": "Min Δ=-16 Max Δ=49",
       "latency": 0
     },
     {
@@ -1121,14 +1121,14 @@
       "name": "#15 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 350.8
+      "latency": 367.5
     },
     {
       "id": "C15-T03",
       "name": "#15 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376.8
+      "latency": 386.1
     },
     {
       "id": "C15-T04",
@@ -1149,7 +1149,7 @@
       "name": "#15 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 508.7
+      "latency": 379.9
     },
     {
       "id": "C15-T07",
@@ -1162,21 +1162,21 @@
       "id": "C15-T08",
       "name": "#15 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"swati_028\"",
-      "latency": 442.9
+      "details": "rank#1=\"santusht\" rank#30=\"pooja_018\"",
+      "latency": 360.8
     },
     {
       "id": "C15-T09",
       "name": "#15 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=4, Δ=41",
+      "details": "Rank #1, solved=4, Δ=47",
       "latency": 0
     },
     {
       "id": "C15-T10",
       "name": "#15 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=48",
+      "details": "Min Δ=-16 Max Δ=47",
       "latency": 0
     },
     {
@@ -1191,14 +1191,14 @@
       "name": "#16 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 356.8
+      "latency": 419.3
     },
     {
       "id": "C16-T03",
       "name": "#16 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376.3
+      "latency": 411.2
     },
     {
       "id": "C16-T04",
@@ -1219,7 +1219,7 @@
       "name": "#16 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375.5
+      "latency": 407.5
     },
     {
       "id": "C16-T07",
@@ -1232,21 +1232,21 @@
       "id": "C16-T08",
       "name": "#16 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"deepika_030\"",
-      "latency": 368.8
+      "details": "rank#1=\"rohan_004\" rank#30=\"kunal_015\"",
+      "latency": 405.6
     },
     {
       "id": "C16-T09",
       "name": "#16 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=3, Δ=57",
+      "details": "Rank #2, solved=3, Δ=36",
       "latency": 0
     },
     {
       "id": "C16-T10",
       "name": "#16 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=57",
+      "details": "Min Δ=-15 Max Δ=59",
       "latency": 0
     },
     {
@@ -1261,14 +1261,14 @@
       "name": "#17 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 437.2
+      "latency": 409.2
     },
     {
       "id": "C17-T03",
       "name": "#17 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 486.2
+      "latency": 381
     },
     {
       "id": "C17-T04",
@@ -1289,7 +1289,7 @@
       "name": "#17 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 376.2
+      "latency": 434.6
     },
     {
       "id": "C17-T07",
@@ -1302,21 +1302,21 @@
       "id": "C17-T08",
       "name": "#17 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"priya_003\" rank#30=\"gaurav_027\"",
-      "latency": 359.6
+      "details": "rank#1=\"dev_006\" rank#30=\"tanvi_012\"",
+      "latency": 409.3
     },
     {
       "id": "C17-T09",
       "name": "#17 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #5, solved=3, Δ=23",
+      "details": "Rank #4, solved=3, Δ=25",
       "latency": 0
     },
     {
       "id": "C17-T10",
       "name": "#17 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=53",
+      "details": "Min Δ=-15 Max Δ=56",
       "latency": 0
     },
     {
@@ -1331,14 +1331,14 @@
       "name": "#18 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 360
+      "latency": 359.4
     },
     {
       "id": "C18-T03",
       "name": "#18 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376.3
+      "latency": 513.7
     },
     {
       "id": "C18-T04",
@@ -1359,7 +1359,7 @@
       "name": "#18 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 394.4
+      "latency": 375.8
     },
     {
       "id": "C18-T07",
@@ -1372,21 +1372,21 @@
       "id": "C18-T08",
       "name": "#18 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"simran_026\"",
-      "latency": 397.6
+      "details": "rank#1=\"santusht\" rank#30=\"tara_032\"",
+      "latency": 365.3
     },
     {
       "id": "C18-T09",
       "name": "#18 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=57",
+      "details": "Rank #1, solved=4, Δ=58",
       "latency": 0
     },
     {
       "id": "C18-T10",
       "name": "#18 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=57",
+      "details": "Min Δ=-16 Max Δ=58",
       "latency": 0
     },
     {
@@ -1401,14 +1401,14 @@
       "name": "#19 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 355
+      "latency": 357
     },
     {
       "id": "C19-T03",
       "name": "#19 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 369.1
+      "latency": 479.2
     },
     {
       "id": "C19-T04",
@@ -1429,7 +1429,7 @@
       "name": "#19 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375.6
+      "latency": 511.5
     },
     {
       "id": "C19-T07",
@@ -1442,21 +1442,21 @@
       "id": "C19-T08",
       "name": "#19 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"dev_006\" rank#30=\"deepika_030\"",
-      "latency": 360.9
+      "details": "rank#1=\"aarav_002\" rank#30=\"siddharth_025\"",
+      "latency": 404.8
     },
     {
       "id": "C19-T09",
       "name": "#19 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=20",
+      "details": "Rank #4, solved=3, Δ=18",
       "latency": 0
     },
     {
       "id": "C19-T10",
       "name": "#19 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=60",
+      "details": "Min Δ=-14 Max Δ=51",
       "latency": 0
     },
     {
@@ -1471,14 +1471,14 @@
       "name": "#20 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 367
+      "latency": 408.5
     },
     {
       "id": "C20-T03",
       "name": "#20 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 379.2
+      "latency": 411.5
     },
     {
       "id": "C20-T04",
@@ -1499,7 +1499,7 @@
       "name": "#20 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 404.2
+      "latency": 405.5
     },
     {
       "id": "C20-T07",
@@ -1512,21 +1512,21 @@
       "id": "C20-T08",
       "name": "#20 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"harsh_029\"",
-      "latency": 360.8
+      "details": "rank#1=\"priya_003\" rank#30=\"siddharth_025\"",
+      "latency": 409.3
     },
     {
       "id": "C20-T09",
       "name": "#20 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=3, Δ=40",
+      "details": "Rank #4, solved=3, Δ=26",
       "latency": 0
     },
     {
       "id": "C20-T10",
       "name": "#20 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-14 Max Δ=54",
+      "details": "Min Δ=-14 Max Δ=48",
       "latency": 0
     },
     {
@@ -1541,14 +1541,14 @@
       "name": "#21 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 359.7
+      "latency": 407.6
     },
     {
       "id": "C21-T03",
       "name": "#21 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 377.1
+      "latency": 716.2
     },
     {
       "id": "C21-T04",
@@ -1569,7 +1569,7 @@
       "name": "#21 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 373.3
+      "latency": 407.9
     },
     {
       "id": "C21-T07",
@@ -1582,21 +1582,21 @@
       "id": "C21-T08",
       "name": "#21 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"tara_032\"",
-      "latency": 362
+      "details": "rank#1=\"aarav_002\" rank#30=\"deepika_030\"",
+      "latency": 364.5
     },
     {
       "id": "C21-T09",
       "name": "#21 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=52",
+      "details": "Rank #2, solved=4, Δ=33",
       "latency": 0
     },
     {
       "id": "C21-T10",
       "name": "#21 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-14 Max Δ=52",
+      "details": "Min Δ=-16 Max Δ=52",
       "latency": 0
     },
     {
@@ -1611,14 +1611,14 @@
       "name": "#22 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 356.9
+      "latency": 410.7
     },
     {
       "id": "C22-T03",
       "name": "#22 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 424.8
+      "latency": 381.3
     },
     {
       "id": "C22-T04",
@@ -1639,7 +1639,7 @@
       "name": "#22 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 377.6
+      "latency": 477.4
     },
     {
       "id": "C22-T07",
@@ -1652,21 +1652,21 @@
       "id": "C22-T08",
       "name": "#22 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"nikhil_019\"",
-      "latency": 361
+      "details": "rank#1=\"aarav_002\" rank#30=\"karan_035\"",
+      "latency": 407
     },
     {
       "id": "C22-T09",
       "name": "#22 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=3, Δ=33",
+      "details": "Rank #4, solved=3, Δ=21",
       "latency": 0
     },
     {
       "id": "C22-T10",
       "name": "#22 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=56",
+      "details": "Min Δ=-16 Max Δ=55",
       "latency": 0
     },
     {
@@ -1681,14 +1681,14 @@
       "name": "#23 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 354.8
+      "latency": 407.3
     },
     {
       "id": "C23-T03",
       "name": "#23 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 375.5
+      "latency": 410.2
     },
     {
       "id": "C23-T04",
@@ -1709,7 +1709,7 @@
       "name": "#23 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 371.3
+      "latency": 379.1
     },
     {
       "id": "C23-T07",
@@ -1722,21 +1722,21 @@
       "id": "C23-T08",
       "name": "#23 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"kabir_008\" rank#30=\"meera_011\"",
-      "latency": 361.4
+      "details": "rank#1=\"aarav_002\" rank#30=\"harsh_029\"",
+      "latency": 366.9
     },
     {
       "id": "C23-T09",
       "name": "#23 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #5, solved=3, Δ=26",
+      "details": "Rank #6, solved=3, Δ=28",
       "latency": 0
     },
     {
       "id": "C23-T10",
       "name": "#23 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=45",
+      "details": "Min Δ=-16 Max Δ=50",
       "latency": 0
     },
     {
@@ -1751,14 +1751,14 @@
       "name": "#24 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 408.8
+      "latency": 375.1
     },
     {
       "id": "C24-T03",
       "name": "#24 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 526.4
+      "latency": 410.8
     },
     {
       "id": "C24-T04",
@@ -1779,7 +1779,7 @@
       "name": "#24 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375
+      "latency": 408.2
     },
     {
       "id": "C24-T07",
@@ -1792,21 +1792,21 @@
       "id": "C24-T08",
       "name": "#24 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"shreya_036\"",
-      "latency": 361.4
+      "details": "rank#1=\"santusht\" rank#30=\"kavya_024\"",
+      "latency": 365.3
     },
     {
       "id": "C24-T09",
       "name": "#24 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=58",
+      "details": "Rank #1, solved=4, Δ=59",
       "latency": 0
     },
     {
       "id": "C24-T10",
       "name": "#24 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=58",
+      "details": "Min Δ=-16 Max Δ=59",
       "latency": 0
     },
     {
@@ -1821,14 +1821,14 @@
       "name": "#25 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 353.5
+      "latency": 450.7
     },
     {
       "id": "C25-T03",
       "name": "#25 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376
+      "latency": 409.2
     },
     {
       "id": "C25-T04",
@@ -1849,7 +1849,7 @@
       "name": "#25 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 374
+      "latency": 408.8
     },
     {
       "id": "C25-T07",
@@ -1862,21 +1862,21 @@
       "id": "C25-T08",
       "name": "#25 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"ayush_033\"",
-      "latency": 359.3
+      "details": "rank#1=\"santusht\" rank#30=\"neha_022\"",
+      "latency": 369.6
     },
     {
       "id": "C25-T09",
       "name": "#25 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=60",
+      "details": "Rank #1, solved=4, Δ=54",
       "latency": 0
     },
     {
       "id": "C25-T10",
       "name": "#25 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=60",
+      "details": "Min Δ=-16 Max Δ=54",
       "latency": 0
     },
     {
@@ -1891,14 +1891,14 @@
       "name": "#26 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 411.7
+      "latency": 446.2
     },
     {
       "id": "C26-T03",
       "name": "#26 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 375.6
+      "latency": 411.8
     },
     {
       "id": "C26-T04",
@@ -1919,7 +1919,7 @@
       "name": "#26 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 375.2
+      "latency": 404.2
     },
     {
       "id": "C26-T07",
@@ -1932,21 +1932,21 @@
       "id": "C26-T08",
       "name": "#26 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"neha_022\"",
-      "latency": 359
+      "details": "rank#1=\"ananya_005\" rank#30=\"gaurav_027\"",
+      "latency": 408.1
     },
     {
       "id": "C26-T09",
       "name": "#26 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=3, Δ=38",
+      "details": "Rank #2, solved=3, Δ=37",
       "latency": 0
     },
     {
       "id": "C26-T10",
       "name": "#26 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=47",
+      "details": "Min Δ=-15 Max Δ=59",
       "latency": 0
     },
     {
@@ -1961,14 +1961,14 @@
       "name": "#27 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 354.1
+      "latency": 409.1
     },
     {
       "id": "C27-T03",
       "name": "#27 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 370.9
+      "latency": 408.7
     },
     {
       "id": "C27-T04",
@@ -1989,7 +1989,7 @@
       "name": "#27 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 373
+      "latency": 408.1
     },
     {
       "id": "C27-T07",
@@ -2002,21 +2002,21 @@
       "id": "C27-T08",
       "name": "#27 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"neha_022\"",
-      "latency": 406.5
+      "details": "rank#1=\"santusht\" rank#30=\"karan_035\"",
+      "latency": 405.1
     },
     {
       "id": "C27-T09",
       "name": "#27 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=52",
+      "details": "Rank #1, solved=4, Δ=56",
       "latency": 0
     },
     {
       "id": "C27-T10",
       "name": "#27 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=52",
+      "details": "Min Δ=-16 Max Δ=56",
       "latency": 0
     },
     {
@@ -2031,14 +2031,14 @@
       "name": "#28 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.7
+      "latency": 409.3
     },
     {
       "id": "C28-T03",
       "name": "#28 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376.9
+      "latency": 407.4
     },
     {
       "id": "C28-T04",
@@ -2059,7 +2059,7 @@
       "name": "#28 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 372.2
+      "latency": 408.8
     },
     {
       "id": "C28-T07",
@@ -2072,21 +2072,21 @@
       "id": "C28-T08",
       "name": "#28 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"priya_003\" rank#30=\"siddharth_025\"",
-      "latency": 367.1
+      "details": "rank#1=\"aarav_002\" rank#30=\"tara_032\"",
+      "latency": 409.2
     },
     {
       "id": "C28-T09",
       "name": "#28 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=23",
+      "details": "Rank #4, solved=3, Δ=22",
       "latency": 0
     },
     {
       "id": "C28-T10",
       "name": "#28 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=53",
+      "details": "Min Δ=-16 Max Δ=59",
       "latency": 0
     },
     {
@@ -2101,14 +2101,14 @@
       "name": "#29 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 355.7
+      "latency": 407.9
     },
     {
       "id": "C29-T03",
       "name": "#29 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376.8
+      "latency": 615.5
     },
     {
       "id": "C29-T04",
@@ -2129,7 +2129,7 @@
       "name": "#29 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 407
+      "latency": 409.1
     },
     {
       "id": "C29-T07",
@@ -2142,21 +2142,21 @@
       "id": "C29-T08",
       "name": "#29 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"priya_003\" rank#30=\"swati_028\"",
-      "latency": 358.1
+      "details": "rank#1=\"priya_003\" rank#30=\"kavya_024\"",
+      "latency": 404.7
     },
     {
       "id": "C29-T09",
       "name": "#29 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=23",
+      "details": "Rank #6, solved=3, Δ=25",
       "latency": 0
     },
     {
       "id": "C29-T10",
       "name": "#29 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=49",
+      "details": "Min Δ=-13 Max Δ=54",
       "latency": 0
     },
     {
@@ -2171,14 +2171,14 @@
       "name": "#30 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.8
+      "latency": 409.7
     },
     {
       "id": "C30-T03",
       "name": "#30 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 467.3
+      "latency": 387.9
     },
     {
       "id": "C30-T04",
@@ -2199,7 +2199,7 @@
       "name": "#30 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 383.9
+      "latency": 378.5
     },
     {
       "id": "C30-T07",
@@ -2212,21 +2212,21 @@
       "id": "C30-T08",
       "name": "#30 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"tara_032\"",
-      "latency": 356.1
+      "details": "rank#1=\"santusht\" rank#30=\"shreya_036\"",
+      "latency": 362.9
     },
     {
       "id": "C30-T09",
       "name": "#30 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=51",
+      "details": "Rank #1, solved=4, Δ=54",
       "latency": 0
     },
     {
       "id": "C30-T10",
       "name": "#30 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=51",
+      "details": "Min Δ=-15 Max Δ=54",
       "latency": 0
     },
     {
@@ -2241,14 +2241,14 @@
       "name": "#31 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.9
+      "latency": 403.9
     },
     {
       "id": "C31-T03",
       "name": "#31 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 376.6
+      "latency": 384.7
     },
     {
       "id": "C31-T04",
@@ -2269,7 +2269,7 @@
       "name": "#31 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 377
+      "latency": 431.5
     },
     {
       "id": "C31-T07",
@@ -2282,21 +2282,21 @@
       "id": "C31-T08",
       "name": "#31 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"rahul_031\"",
-      "latency": 358
+      "details": "rank#1=\"rohan_004\" rank#30=\"nikhil_019\"",
+      "latency": 615.3
     },
     {
       "id": "C31-T09",
       "name": "#31 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=21",
+      "details": "Rank #4, solved=3, Δ=19",
       "latency": 0
     },
     {
       "id": "C31-T10",
       "name": "#31 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-13 Max Δ=51",
+      "details": "Min Δ=-15 Max Δ=58",
       "latency": 0
     },
     {
@@ -2311,14 +2311,14 @@
       "name": "#32 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 355.1
+      "latency": 396.2
     },
     {
       "id": "C32-T03",
       "name": "#32 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 431.5
+      "latency": 458.1
     },
     {
       "id": "C32-T04",
@@ -2339,7 +2339,7 @@
       "name": "#32 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 374.7
+      "latency": 475.5
     },
     {
       "id": "C32-T07",
@@ -2352,21 +2352,21 @@
       "id": "C32-T08",
       "name": "#32 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"harsh_029\"",
-      "latency": 355.8
+      "details": "rank#1=\"ananya_005\" rank#30=\"nikhil_019\"",
+      "latency": 452
     },
     {
       "id": "C32-T09",
       "name": "#32 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=3, Δ=42",
+      "details": "Rank #3, solved=3, Δ=37",
       "latency": 0
     },
     {
       "id": "C32-T10",
       "name": "#32 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=49",
+      "details": "Min Δ=-14 Max Δ=45",
       "latency": 0
     },
     {
@@ -2381,14 +2381,14 @@
       "name": "#33 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 355.4
+      "latency": 462.4
     },
     {
       "id": "C33-T03",
       "name": "#33 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 481.4
+      "latency": 512.8
     },
     {
       "id": "C33-T04",
@@ -2409,7 +2409,7 @@
       "name": "#33 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 372
+      "latency": 435.2
     },
     {
       "id": "C33-T07",
@@ -2422,21 +2422,21 @@
       "id": "C33-T08",
       "name": "#33 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"rahul_031\"",
-      "latency": 358.6
+      "details": "rank#1=\"santusht\" rank#30=\"simran_026\"",
+      "latency": 365.1
     },
     {
       "id": "C33-T09",
       "name": "#33 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=60",
+      "details": "Rank #1, solved=4, Δ=45",
       "latency": 0
     },
     {
       "id": "C33-T10",
       "name": "#33 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=60",
+      "details": "Min Δ=-14 Max Δ=45",
       "latency": 0
     },
     {
@@ -2451,14 +2451,14 @@
       "name": "#34 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 353
+      "latency": 400.4
     },
     {
       "id": "C34-T03",
       "name": "#34 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 378.4
+      "latency": 420.4
     },
     {
       "id": "C34-T04",
@@ -2479,7 +2479,7 @@
       "name": "#34 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 379.9
+      "latency": 377.6
     },
     {
       "id": "C34-T07",
@@ -2492,21 +2492,21 @@
       "id": "C34-T08",
       "name": "#34 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"aditya_017\"",
-      "latency": 357.7
+      "details": "rank#1=\"sneha_009\" rank#30=\"simran_026\"",
+      "latency": 365.6
     },
     {
       "id": "C34-T09",
       "name": "#34 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=39",
+      "details": "Rank #2, solved=3, Δ=34",
       "latency": 0
     },
     {
       "id": "C34-T10",
       "name": "#34 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-13 Max Δ=50",
+      "details": "Min Δ=-15 Max Δ=47",
       "latency": 0
     },
     {
@@ -2521,14 +2521,14 @@
       "name": "#35 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 415
+      "latency": 361.6
     },
     {
       "id": "C35-T03",
       "name": "#35 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 552.1
+      "latency": 375.5
     },
     {
       "id": "C35-T04",
@@ -2549,7 +2549,7 @@
       "name": "#35 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 374.6
+      "latency": 379.7
     },
     {
       "id": "C35-T07",
@@ -2562,21 +2562,21 @@
       "id": "C35-T08",
       "name": "#35 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"swati_028\"",
-      "latency": 357.9
+      "details": "rank#1=\"ishita_007\" rank#30=\"deepika_030\"",
+      "latency": 363.5
     },
     {
       "id": "C35-T09",
       "name": "#35 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #6, solved=3, Δ=25",
+      "details": "Rank #2, solved=3, Δ=36",
       "latency": 0
     },
     {
       "id": "C35-T10",
       "name": "#35 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=47",
+      "details": "Min Δ=-15 Max Δ=60",
       "latency": 0
     },
     {
@@ -2591,14 +2591,14 @@
       "name": "#36 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 352.8
+      "latency": 442.7
     },
     {
       "id": "C36-T03",
       "name": "#36 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 550.2
+      "latency": 382.9
     },
     {
       "id": "C36-T04",
@@ -2619,7 +2619,7 @@
       "name": "#36 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 522.4
+      "latency": 380.1
     },
     {
       "id": "C36-T07",
@@ -2633,20 +2633,20 @@
       "name": "#36 Scoreboard — 30 ranked entries",
       "passed": true,
       "details": "rank#1=\"santusht\" rank#30=\"kavya_024\"",
-      "latency": 426.1
+      "latency": 361.2
     },
     {
       "id": "C36-T09",
       "name": "#36 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=55",
+      "details": "Rank #1, solved=4, Δ=52",
       "latency": 0
     },
     {
       "id": "C36-T10",
       "name": "#36 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=55",
+      "details": "Min Δ=-16 Max Δ=52",
       "latency": 0
     },
     {
@@ -2661,14 +2661,14 @@
       "name": "#37 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 352.1
+      "latency": 360.7
     },
     {
       "id": "C37-T03",
       "name": "#37 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 373.2
+      "latency": 455
     },
     {
       "id": "C37-T04",
@@ -2689,7 +2689,7 @@
       "name": "#37 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 377.5
+      "latency": 407.2
     },
     {
       "id": "C37-T07",
@@ -2702,21 +2702,21 @@
       "id": "C37-T08",
       "name": "#37 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"rohan_004\" rank#30=\"gaurav_027\"",
-      "latency": 358.8
+      "details": "rank#1=\"aarav_002\" rank#30=\"varun_021\"",
+      "latency": 408.5
     },
     {
       "id": "C37-T09",
       "name": "#37 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=31",
+      "details": "Rank #4, solved=3, Δ=24",
       "latency": 0
     },
     {
       "id": "C37-T10",
       "name": "#37 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=47",
+      "details": "Min Δ=-16 Max Δ=57",
       "latency": 0
     },
     {
@@ -2731,14 +2731,14 @@
       "name": "#38 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 363.2
+      "latency": 407.7
     },
     {
       "id": "C38-T03",
       "name": "#38 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 369.9
+      "latency": 387.1
     },
     {
       "id": "C38-T04",
@@ -2759,7 +2759,7 @@
       "name": "#38 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 430
+      "latency": 402.8
     },
     {
       "id": "C38-T07",
@@ -2772,21 +2772,21 @@
       "id": "C38-T08",
       "name": "#38 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"pooja_018\"",
-      "latency": 404.5
+      "details": "rank#1=\"aarav_002\" rank#30=\"harsh_029\"",
+      "latency": 437
     },
     {
       "id": "C38-T09",
       "name": "#38 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=22",
+      "details": "Rank #3, solved=3, Δ=44",
       "latency": 0
     },
     {
       "id": "C38-T10",
       "name": "#38 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=58",
+      "details": "Min Δ=-15 Max Δ=45",
       "latency": 0
     },
     {
@@ -2801,14 +2801,14 @@
       "name": "#39 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 358.9
+      "latency": 410
     },
     {
       "id": "C39-T03",
       "name": "#39 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 387.1
+      "latency": 381.9
     },
     {
       "id": "C39-T04",
@@ -2829,7 +2829,7 @@
       "name": "#39 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 411.1
+      "latency": 435.4
     },
     {
       "id": "C39-T07",
@@ -2842,21 +2842,21 @@
       "id": "C39-T08",
       "name": "#39 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"swati_028\"",
-      "latency": 359.5
+      "details": "rank#1=\"santusht\" rank#30=\"varun_021\"",
+      "latency": 408.4
     },
     {
       "id": "C39-T09",
       "name": "#39 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=57",
+      "details": "Rank #1, solved=4, Δ=55",
       "latency": 0
     },
     {
       "id": "C39-T10",
       "name": "#39 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=57",
+      "details": "Min Δ=-16 Max Δ=55",
       "latency": 0
     },
     {
@@ -2871,14 +2871,14 @@
       "name": "#40 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 356.4
+      "latency": 361.4
     },
     {
       "id": "C40-T03",
       "name": "#40 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 469
+      "latency": 404.6
     },
     {
       "id": "C40-T04",
@@ -2899,7 +2899,7 @@
       "name": "#40 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 416.8
+      "latency": 374.6
     },
     {
       "id": "C40-T07",
@@ -2912,21 +2912,21 @@
       "id": "C40-T08",
       "name": "#40 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"kavya_024\"",
-      "latency": 358.3
+      "details": "rank#1=\"rohan_004\" rank#30=\"aman_023\"",
+      "latency": 391.2
     },
     {
       "id": "C40-T09",
       "name": "#40 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #4, solved=3, Δ=18",
+      "details": "Rank #2, solved=3, Δ=43",
       "latency": 0
     },
     {
       "id": "C40-T10",
       "name": "#40 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=54",
+      "details": "Min Δ=-16 Max Δ=52",
       "latency": 0
     },
     {
@@ -2941,14 +2941,14 @@
       "name": "#41 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 373
+      "latency": 358.6
     },
     {
       "id": "C41-T03",
       "name": "#41 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 377.7
+      "latency": 374.7
     },
     {
       "id": "C41-T04",
@@ -2969,7 +2969,7 @@
       "name": "#41 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 426.6
+      "latency": 388
     },
     {
       "id": "C41-T07",
@@ -2982,21 +2982,21 @@
       "id": "C41-T08",
       "name": "#41 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"aarav_002\" rank#30=\"bhavna_034\"",
-      "latency": 359.2
+      "details": "rank#1=\"ananya_005\" rank#30=\"shruti_020\"",
+      "latency": 364.9
     },
     {
       "id": "C41-T09",
       "name": "#41 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=44",
+      "details": "Rank #2, solved=3, Δ=44",
       "latency": 0
     },
     {
       "id": "C41-T10",
       "name": "#41 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=56",
+      "details": "Min Δ=-16 Max Δ=46",
       "latency": 0
     },
     {
@@ -3011,14 +3011,14 @@
       "name": "#42 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 356.8
+      "latency": 358.5
     },
     {
       "id": "C42-T03",
       "name": "#42 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 372.8
+      "latency": 379.1
     },
     {
       "id": "C42-T04",
@@ -3039,7 +3039,7 @@
       "name": "#42 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 378.2
+      "latency": 380
     },
     {
       "id": "C42-T07",
@@ -3052,21 +3052,21 @@
       "id": "C42-T08",
       "name": "#42 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"aman_023\"",
-      "latency": 634.6
+      "details": "rank#1=\"santusht\" rank#30=\"shruti_020\"",
+      "latency": 361.3
     },
     {
       "id": "C42-T09",
       "name": "#42 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=4, Δ=31",
+      "details": "Rank #1, solved=4, Δ=50",
       "latency": 0
     },
     {
       "id": "C42-T10",
       "name": "#42 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-13 Max Δ=52",
+      "details": "Min Δ=-13 Max Δ=50",
       "latency": 0
     },
     {
@@ -3081,14 +3081,14 @@
       "name": "#43 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 353.1
+      "latency": 358.2
     },
     {
       "id": "C43-T03",
       "name": "#43 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 369.4
+      "latency": 379.7
     },
     {
       "id": "C43-T04",
@@ -3109,7 +3109,7 @@
       "name": "#43 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 373.4
+      "latency": 380.3
     },
     {
       "id": "C43-T07",
@@ -3122,21 +3122,21 @@
       "id": "C43-T08",
       "name": "#43 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"ananya_005\" rank#30=\"bhavna_034\"",
-      "latency": 358.7
+      "details": "rank#1=\"priya_003\" rank#30=\"swati_028\"",
+      "latency": 361.8
     },
     {
       "id": "C43-T09",
       "name": "#43 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #7, solved=3, Δ=27",
+      "details": "Rank #8, solved=3, Δ=20",
       "latency": 0
     },
     {
       "id": "C43-T10",
       "name": "#43 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-14 Max Δ=47",
+      "details": "Min Δ=-9 Max Δ=54",
       "latency": 0
     },
     {
@@ -3151,14 +3151,14 @@
       "name": "#44 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 354.4
+      "latency": 363.3
     },
     {
       "id": "C44-T03",
       "name": "#44 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 377.2
+      "latency": 386.9
     },
     {
       "id": "C44-T04",
@@ -3179,7 +3179,7 @@
       "name": "#44 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 511.1
+      "latency": 380
     },
     {
       "id": "C44-T07",
@@ -3192,21 +3192,21 @@
       "id": "C44-T08",
       "name": "#44 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"dev_006\" rank#30=\"deepika_030\"",
-      "latency": 427.2
+      "details": "rank#1=\"priya_003\" rank#30=\"deepika_030\"",
+      "latency": 367.5
     },
     {
       "id": "C44-T09",
       "name": "#44 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=31",
+      "details": "Rank #2, solved=3, Δ=34",
       "latency": 0
     },
     {
       "id": "C44-T10",
       "name": "#44 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-13 Max Δ=45",
+      "details": "Min Δ=-14 Max Δ=49",
       "latency": 0
     },
     {
@@ -3221,14 +3221,14 @@
       "name": "#45 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 353.7
+      "latency": 361.7
     },
     {
       "id": "C45-T03",
       "name": "#45 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 384.8
+      "latency": 384.1
     },
     {
       "id": "C45-T04",
@@ -3249,7 +3249,7 @@
       "name": "#45 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 373.9
+      "latency": 378.5
     },
     {
       "id": "C45-T07",
@@ -3262,21 +3262,21 @@
       "id": "C45-T08",
       "name": "#45 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"kunal_015\"",
-      "latency": 356.2
+      "details": "rank#1=\"priya_003\" rank#30=\"ayush_033\"",
+      "latency": 368.9
     },
     {
       "id": "C45-T09",
       "name": "#45 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #1, solved=4, Δ=51",
+      "details": "Rank #2, solved=4, Δ=33",
       "latency": 0
     },
     {
       "id": "C45-T10",
       "name": "#45 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=51",
+      "details": "Min Δ=-15 Max Δ=51",
       "latency": 0
     },
     {
@@ -3291,14 +3291,14 @@
       "name": "#46 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 352.6
+      "latency": 362
     },
     {
       "id": "C46-T03",
       "name": "#46 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 382.2
+      "latency": 416.5
     },
     {
       "id": "C46-T04",
@@ -3319,7 +3319,7 @@
       "name": "#46 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 411.6
+      "latency": 766.7
     },
     {
       "id": "C46-T07",
@@ -3332,21 +3332,21 @@
       "id": "C46-T08",
       "name": "#46 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"dev_006\" rank#30=\"ayush_033\"",
-      "latency": 359.8
+      "details": "rank#1=\"ananya_005\" rank#30=\"gaurav_027\"",
+      "latency": 509.5
     },
     {
       "id": "C46-T09",
       "name": "#46 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=31",
+      "details": "Rank #4, solved=3, Δ=19",
       "latency": 0
     },
     {
       "id": "C46-T10",
       "name": "#46 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-15 Max Δ=48",
+      "details": "Min Δ=-16 Max Δ=59",
       "latency": 0
     },
     {
@@ -3361,14 +3361,14 @@
       "name": "#47 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 357.1
+      "latency": 421.1
     },
     {
       "id": "C47-T03",
       "name": "#47 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 374.4
+      "latency": 381.7
     },
     {
       "id": "C47-T04",
@@ -3389,7 +3389,7 @@
       "name": "#47 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 373.9
+      "latency": 381.2
     },
     {
       "id": "C47-T07",
@@ -3402,21 +3402,21 @@
       "id": "C47-T08",
       "name": "#47 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"priya_003\" rank#30=\"bhavna_034\"",
-      "latency": 357.9
+      "details": "rank#1=\"priya_003\" rank#30=\"simran_026\"",
+      "latency": 363.4
     },
     {
       "id": "C47-T09",
       "name": "#47 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #5, solved=3, Δ=23",
+      "details": "Rank #2, solved=3, Δ=40",
       "latency": 0
     },
     {
       "id": "C47-T10",
       "name": "#47 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=60",
+      "details": "Min Δ=-14 Max Δ=54",
       "latency": 0
     },
     {
@@ -3431,14 +3431,14 @@
       "name": "#48 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 356.3
+      "latency": 393.7
     },
     {
       "id": "C48-T03",
       "name": "#48 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 434.4
+      "latency": 376.2
     },
     {
       "id": "C48-T04",
@@ -3459,7 +3459,7 @@
       "name": "#48 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 372.5
+      "latency": 442.2
     },
     {
       "id": "C48-T07",
@@ -3472,8 +3472,8 @@
       "id": "C48-T08",
       "name": "#48 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"santusht\" rank#30=\"riya_016\"",
-      "latency": 357.2
+      "details": "rank#1=\"santusht\" rank#30=\"simran_026\"",
+      "latency": 407.7
     },
     {
       "id": "C48-T09",
@@ -3501,14 +3501,14 @@
       "name": "#49 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 359.4
+      "latency": 407.9
     },
     {
       "id": "C49-T03",
       "name": "#49 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 375.8
+      "latency": 379.5
     },
     {
       "id": "C49-T04",
@@ -3529,7 +3529,7 @@
       "name": "#49 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 374.6
+      "latency": 375.9
     },
     {
       "id": "C49-T07",
@@ -3542,21 +3542,21 @@
       "id": "C49-T08",
       "name": "#49 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"dev_006\" rank#30=\"shruti_020\"",
-      "latency": 359.2
+      "details": "rank#1=\"ananya_005\" rank#30=\"aman_023\"",
+      "latency": 471.1
     },
     {
       "id": "C49-T09",
       "name": "#49 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #3, solved=3, Δ=40",
+      "details": "Rank #3, solved=3, Δ=36",
       "latency": 0
     },
     {
       "id": "C49-T10",
       "name": "#49 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=56",
+      "details": "Min Δ=-16 Max Δ=53",
       "latency": 0
     },
     {
@@ -3571,14 +3571,14 @@
       "name": "#50 4 Arena Problems (A-D)",
       "passed": true,
       "details": "A(100pts) B(250pts) C(500pts) D(1000pts)",
-      "latency": 417.4
+      "latency": 366.7
     },
     {
       "id": "C50-T03",
       "name": "#50 110 Cadet Registrations",
       "passed": true,
       "details": "110 cadets",
-      "latency": 642.3
+      "latency": 381.7
     },
     {
       "id": "C50-T04",
@@ -3599,7 +3599,7 @@
       "name": "#50 30 QR Passes — LAB-04-PC seats",
       "passed": true,
       "details": "30/30 qualified with LAB-04 seats",
-      "latency": 406.2
+      "latency": 384.6
     },
     {
       "id": "C50-T07",
@@ -3612,29 +3612,29 @@
       "id": "C50-T08",
       "name": "#50 Scoreboard — 30 ranked entries",
       "passed": true,
-      "details": "rank#1=\"priya_003\" rank#30=\"siddharth_025\"",
-      "latency": 357.5
+      "details": "rank#1=\"santusht\" rank#30=\"aman_023\"",
+      "latency": 364.9
     },
     {
       "id": "C50-T09",
       "name": "#50 Santusht in Top-30",
       "passed": true,
-      "details": "Rank #2, solved=4, Δ=30",
+      "details": "Rank #1, solved=4, Δ=46",
       "latency": 0
     },
     {
       "id": "C50-T10",
       "name": "#50 Elo Deltas — all 30 entries",
       "passed": true,
-      "details": "Min Δ=-16 Max Δ=49",
+      "details": "Min Δ=-15 Max Δ=46",
       "latency": 0
     },
     {
       "id": "P4-T01",
       "name": "Profile endpoint responds",
       "passed": true,
-      "details": "handle=\"santusht\" rating=3099",
-      "latency": 426.2
+      "details": "handle=\"santusht\" rating=3122",
+      "latency": 395.1
     },
     {
       "id": "P4-T02",
@@ -3647,14 +3647,14 @@
       "id": "P4-T03",
       "name": "Rating ≥2000 (Grandmaster)",
       "passed": true,
-      "details": "Current=3099 Peak=3099",
+      "details": "Current=3122 Peak=3122",
       "latency": 0.1
     },
     {
       "id": "P4-T04",
       "name": "Peak ≥ Current rating",
       "passed": true,
-      "details": "Peak=3099 ≥ 3099",
+      "details": "Peak=3122 ≥ 3122",
       "latency": 0.1
     },
     {
@@ -3675,7 +3675,7 @@
       "id": "P4-T07",
       "name": "Podium badge present",
       "passed": true,
-      "details": "Badges: 5★ Grandmaster, Top 5% Elite, Contest Veteran, 36x Podium Finisher, CCC Core Organizer",
+      "details": "Badges: 5★ Grandmaster, Top 5% Elite, Contest Veteran, 34x Podium Finisher, CCC Core Organizer",
       "latency": 0.1
     },
     {
@@ -3732,13 +3732,13 @@
       "name": "Leaderboard ≥110 cadets",
       "passed": true,
       "details": "119 ranked",
-      "latency": 414.9
+      "latency": 412.7
     },
     {
       "id": "P5-T02",
       "name": "Rank #1 rating ≥2000",
       "passed": true,
-      "details": "#1: santusht (3099)",
+      "details": "#1: santusht (3122)",
       "latency": 0.1
     },
     {
@@ -3767,7 +3767,7 @@
       "name": "≥150 Trust Proofs (top-3 × 50 contests)",
       "passed": true,
       "details": "150 certs",
-      "latency": 377.7
+      "latency": 446.3
     },
     {
       "id": "P6-T02",
@@ -3780,7 +3780,7 @@
       "id": "P6-T03",
       "name": "Santusht has proof certificates",
       "passed": true,
-      "details": "cert_id=\"PROOF-50-SANT-02\"",
+      "details": "cert_id=\"PROOF-50-SANT-01\"",
       "latency": 0.1
     },
     {
@@ -3802,14 +3802,14 @@
       "name": "Admin contest list — ≥50 contests",
       "passed": true,
       "details": "51",
-      "latency": 388.8
+      "latency": 391.4
     },
     {
       "id": "P7-T02",
       "name": "Admin 110 cadets for contest #1",
       "passed": true,
       "details": "110",
-      "latency": 376.8
+      "latency": 425.1
     },
     {
       "id": "P7-T03",
@@ -3851,34 +3851,34 @@
       "name": "Admin GET /{slug}/problems — 4 problems",
       "passed": true,
       "details": "A B C D ✓",
-      "latency": 354.2
+      "latency": 361.2
     },
     {
       "id": "P7-T09",
       "name": "Gate /passes/verify — rejects invalid pass (valid=false)",
       "passed": true,
       "details": "Pass rejected correctly (HTTP 200, valid=false) ✓",
-      "latency": 365.7
+      "latency": 407.5
     },
     {
       "id": "P7-T10",
       "name": "Assessment endpoint responds (any non-network-error)",
       "passed": true,
       "details": "HTTP 401",
-      "latency": 352.6
+      "latency": 409.7
     },
     {
       "id": "P8-T01",
       "name": "send-otp — HTTP 200",
       "passed": true,
       "details": "HTTP 200",
-      "latency": 1705.9
+      "latency": 1740.2
     },
     {
       "id": "P8-T02",
       "name": "send-otp — dev_otp fallback (SMTP relay down)",
       "passed": true,
-      "details": "dev_otp=\"304352\"",
+      "details": "dev_otp=\"266608\"",
       "latency": 0.1
     },
     {
@@ -3893,7 +3893,7 @@
       "name": "verify-otp — JWT issued",
       "passed": true,
       "details": "JWT: eyJhbGciOiJSUzI1NiIs...",
-      "latency": 1566.6
+      "latency": 1083.2
     },
     {
       "id": "P8-T05",
@@ -3907,21 +3907,21 @@
       "name": "/auth/me — authenticated member",
       "passed": true,
       "details": "HTTP 200 id=3141c916-a110-4f62-a304-c876c88decd2",
-      "latency": 520.8
+      "latency": 359.5
     },
     {
       "id": "P8-T07",
       "name": "Contest list — public (no auth)",
       "passed": true,
       "details": "HTTP 200",
-      "latency": 913.3
+      "latency": 663.6
     },
     {
       "id": "P8-T08",
       "name": "Cadet profile \"aarav_002\" — public access",
       "passed": true,
-      "details": "handle=\"aarav_002\" rating=2920",
-      "latency": 569.2
+      "details": "handle=\"aarav_002\" rating=2713",
+      "latency": 378.8
     },
     {
       "id": "P8-T09",
@@ -3935,35 +3935,35 @@
       "name": "Leaderboard limit=10 respected",
       "passed": true,
       "details": "Got 10 rows ✓",
-      "latency": 812.8
+      "latency": 399
     },
     {
       "id": "P8-T11",
       "name": "send-otp idempotent (re-send)",
       "passed": true,
       "details": "HTTP 200",
-      "latency": 1697.2
+      "latency": 1569.6
     },
     {
       "id": "P8-T12",
       "name": "/social/my-following-ids — 401 without auth",
       "passed": true,
       "details": "HTTP 401 ✓",
-      "latency": 516.8
+      "latency": 330.8
     },
     {
       "id": "P9-T01",
       "name": "Assessment GET /assessment/ccc-arena-contest-01",
       "passed": true,
       "details": "HTTP 200 ✓",
-      "latency": 539
+      "latency": 340.7
     },
     {
       "id": "P9-T02",
       "name": "Assessment leaderboard — HTTP 200",
       "passed": true,
       "details": "HTTP 200",
-      "latency": 495.4
+      "latency": 353.3
     },
     {
       "id": "P9-T03",
@@ -3973,11 +3973,25 @@
       "latency": 0.1
     },
     {
+      "id": "P9-T04",
+      "name": "CodeBox live sandbox — Python 3 execution",
+      "passed": true,
+      "details": "Executed in 23.0ms | stdout verified",
+      "latency": 585.3
+    },
+    {
+      "id": "P9-T05",
+      "name": "CodeBox live sandbox — C++ GCC execution",
+      "passed": true,
+      "details": "Compiled & run in 5.0ms | stdout verified",
+      "latency": 1170.9
+    },
+    {
       "id": "P10-T01",
       "name": "/feed/announcements endpoint",
       "passed": true,
       "details": "HTTP 200",
-      "latency": 803.2
+      "latency": 341.5
     },
     {
       "id": "P10-T02",
@@ -3991,8 +4005,8 @@
       "name": "/social/my-following-ids with auth",
       "passed": true,
       "details": "HTTP 200",
-      "latency": 1170.2
+      "latency": 1213.7
     }
   ],
-  "timestamp": "2026-09-19T16:53:44.348Z"
+  "timestamp": "2026-09-19T17:12:51.839Z"
 }

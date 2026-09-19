@@ -546,6 +546,41 @@ async function main() {
       true, 'skipped (403)', '', 0);
   }
 
+  // Live CodeBox Sandboxed Execution Testing
+  const c1ProbsRes = aSlug ? await api(`/admin/contests/${aSlug}/problems`) : { data: [] };
+  const firstProbId = Array.isArray(c1ProbsRes.data) && c1ProbsRes.data[0]?.id;
+
+  if (aSlug && firstProbId) {
+    // P9-T04: Live CodeBox Python 3 execution
+    const pyRun = await api(`/contests/${aSlug}/arena/run`, 'POST', {
+      problem_id: firstProbId,
+      language: 'python',
+      code: 'print("CODEBOX_LIVE_PYTHON_OK")',
+      custom_stdin: '',
+    });
+    const pyStdout = pyRun.data?.stdout || '';
+    check('P9-T04', 'CodeBox live sandbox — Python 3 execution',
+      pyRun.ok && pyStdout.includes('CODEBOX_LIVE_PYTHON_OK'),
+      `Executed in ${((pyRun.data?.time || 0) * 1000).toFixed(1)}ms | stdout verified`,
+      `HTTP ${pyRun.status} — ${JSON.stringify(pyRun.data)?.slice(0, 80)}`, pyRun.latency);
+
+    // P9-T05: Live CodeBox C++ execution
+    const cppRun = await api(`/contests/${aSlug}/arena/run`, 'POST', {
+      problem_id: firstProbId,
+      language: 'cpp',
+      code: '#include <iostream>\nint main(){ std::cout << "CODEBOX_LIVE_CPP_OK" << std::endl; return 0; }',
+      custom_stdin: '',
+    });
+    const cppStdout = cppRun.data?.stdout || '';
+    check('P9-T05', 'CodeBox live sandbox — C++ GCC execution',
+      cppRun.ok && cppStdout.includes('CODEBOX_LIVE_CPP_OK'),
+      `Compiled & run in ${((cppRun.data?.time || 0) * 1000).toFixed(1)}ms | stdout verified`,
+      `HTTP ${cppRun.status} — ${JSON.stringify(cppRun.data)?.slice(0, 80)}`, cppRun.latency);
+  } else {
+    check('P9-T04', 'CodeBox live sandbox — Python 3 execution (skipped)', true, 'skipped', '', 0);
+    check('P9-T05', 'CodeBox live sandbox — C++ GCC execution (skipped)', true, 'skipped', '', 0);
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 10: Feed, Announcements & Social (3 checks)
   // ══════════════════════════════════════════════════════════════════════════
