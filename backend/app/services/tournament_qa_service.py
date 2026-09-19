@@ -168,6 +168,10 @@ class TournamentQAService:
             primary_cadet = existing_matches[0]
             for dup in existing_matches[1:]:
                 # Re-link any registrations, passes, or submissions before deletion
+                await db.execute(delete(TrustProof).where(TrustProof.member_id == dup.id))
+                await db.execute(delete(ContestSubmission).where(ContestSubmission.member_id == dup.id))
+                await db.execute(delete(AssessmentSubmission).where(AssessmentSubmission.member_id == dup.id))
+                await db.execute(delete(AssessmentSession).where(AssessmentSession.member_id == dup.id))
                 await db.execute(delete(RatingHistory).where(RatingHistory.member_id == dup.id))
                 await db.execute(delete(CampusPass).where(CampusPass.member_id == dup.id))
                 await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == dup.id))
@@ -262,6 +266,10 @@ class TournamentQAService:
                 cadet = existing_cadets_found[0]
                 # Delete duplicates that match by different unique columns
                 for dup_c in existing_cadets_found[1:]:
+                    await db.execute(delete(TrustProof).where(TrustProof.member_id == dup_c.id))
+                    await db.execute(delete(ContestSubmission).where(ContestSubmission.member_id == dup_c.id))
+                    await db.execute(delete(AssessmentSubmission).where(AssessmentSubmission.member_id == dup_c.id))
+                    await db.execute(delete(AssessmentSession).where(AssessmentSession.member_id == dup_c.id))
                     await db.execute(delete(RatingHistory).where(RatingHistory.member_id == dup_c.id))
                     await db.execute(delete(CampusPass).where(CampusPass.member_id == dup_c.id))
                     await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == dup_c.id))
@@ -285,26 +293,89 @@ class TournamentQAService:
         logger.info("✓ [TOURNAMENT SIM] 110 cadet profiles confirmed and ready.")
 
         # Clean existing test records for tournament isolation
-        # 1. Explicitly nuke orphaned TrustProofs & RatingHistory per cadet before cascade
+        # SQLite does NOT cascade FK deletes without PRAGMA foreign_keys = ON.
+        # Explicitly delete all child tables before deleting OfflineContest.
         cadet_ids = [c.id for c in cadets]
         old_contest_res = await db.execute(
-            select(OfflineContest).where(OfflineContest.slug.like("ccc-arena-contest-%"))
+            select(OfflineContest.id).where(OfflineContest.slug.like("ccc-arena-contest-%"))
         )
-        old_contest_ids = [c.id for c in old_contest_res.scalars().all()]
+        old_contest_ids = list(old_contest_res.scalars().all())
+
+        # 1. Clean Assessment tree (AssessmentSubmission -> AssessmentSession -> AssessmentProblem -> Assessment)
+        old_assess_res = await db.execute(
+            select(Assessment.id).where(
+                (Assessment.slug.like("assessment-ccc-arena-contest-%")) |
+                (Assessment.contest_id.in_(old_contest_ids) if old_contest_ids else False)
+            )
+        )
+        old_assess_ids = list(old_assess_res.scalars().all())
+        if old_assess_ids:
+            old_sess_res = await db.execute(
+                select(AssessmentSession.id).where(AssessmentSession.assessment_id.in_(old_assess_ids))
+            )
+            old_sess_ids = list(old_sess_res.scalars().all())
+            if old_sess_ids:
+                await db.execute(delete(AssessmentSubmission).where(AssessmentSubmission.session_id.in_(old_sess_ids)))
+            await db.execute(delete(AssessmentSession).where(AssessmentSession.assessment_id.in_(old_assess_ids)))
+            await db.execute(delete(AssessmentProblem).where(AssessmentProblem.assessment_id.in_(old_assess_ids)))
+            await db.execute(delete(Assessment).where(Assessment.id.in_(old_assess_ids)))
+
+        # 2. Clean CampusPass (pass_code has UNIQUE constraint)
         if old_contest_ids:
-            await db.execute(delete(TrustProof).where(TrustProof.contest_id.in_(old_contest_ids)))
+            await db.execute(delete(CampusPass).where(
+                (CampusPass.contest_id.in_(old_contest_ids)) |
+                (CampusPass.pass_code.like("CCC-%"))
+            ))
+        else:
+            await db.execute(delete(CampusPass).where(CampusPass.pass_code.like("CCC-%")))
+        if len(cadet_ids) > 1:
+            await db.execute(delete(CampusPass).where(CampusPass.member_id.in_(cadet_ids[1:])))
+
+        # 3. Clean TrustProof (certificate_id & sha256_digest have UNIQUE constraints)
+        if old_contest_ids:
+            await db.execute(delete(TrustProof).where(
+                (TrustProof.contest_id.in_(old_contest_ids)) |
+                (TrustProof.certificate_id.like("PROOF-%"))
+            ))
+        else:
+            await db.execute(delete(TrustProof).where(TrustProof.certificate_id.like("PROOF-%")))
+
+        # 4. Clean Contest child tables
+        if old_contest_ids:
+            await db.execute(delete(ScoreboardEntry).where(ScoreboardEntry.contest_id.in_(old_contest_ids)))
+            await db.execute(delete(ContestSubmission).where(ContestSubmission.contest_id.in_(old_contest_ids)))
+            await db.execute(delete(ContestRegistration).where(ContestRegistration.contest_id.in_(old_contest_ids)))
+            await db.execute(delete(ContestProblem).where(ContestProblem.contest_id.in_(old_contest_ids)))
+        if len(cadet_ids) > 1:
+            await db.execute(delete(ScoreboardEntry).where(ScoreboardEntry.member_id.in_(cadet_ids[1:])))
+            await db.execute(delete(ContestSubmission).where(ContestSubmission.member_id.in_(cadet_ids[1:])))
+            await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id.in_(cadet_ids[1:])))
+
+        # 5. Clean RatingHistory for cadets on these contests or tournament pattern
+        if old_contest_ids and cadet_ids:
             await db.execute(delete(RatingHistory).where(
                 (RatingHistory.member_id.in_(cadet_ids)) &
                 (RatingHistory.contest_id.in_(old_contest_ids))
             ))
-            await db.flush()
+        if cadet_ids:
+            await db.execute(delete(RatingHistory).where(
+                (RatingHistory.member_id.in_(cadet_ids)) &
+                (RatingHistory.contest_title.like("%Arena #%"))
+            ))
+        if len(cadet_ids) > 1:
+            await db.execute(delete(RatingHistory).where(RatingHistory.member_id.in_(cadet_ids[1:])))
 
-        # 2. Delete old arena contests (cascades remaining linked rows via FK)
-        existing_test_contests = await db.execute(
-            select(OfflineContest).where(OfflineContest.slug.like("ccc-arena-contest-%"))
-        )
-        for old_c in existing_test_contests.scalars().all():
-            await db.delete(old_c)
+        # 6. Delete old arena contests
+        if old_contest_ids:
+            await db.execute(delete(OfflineContest).where(OfflineContest.id.in_(old_contest_ids)))
+        await db.flush()
+
+        # Reset cadet ratings to 1200 baseline for fresh tournament trajectory
+        for c in cadets:
+            c.rating = 1200
+            c.peak_rating = 1200
+            c.attendance_count = 0
+            c.attendance_total = 0
         await db.flush()
 
         # Pre-assign baseline latent skill levels for natural competition
@@ -321,8 +392,8 @@ class TournamentQAService:
             cadet_skills.append(skill)
 
         # Track cadet dynamic rating over 50 contests
-        cadet_ratings = [c.rating or 1200 for c in cadets]
-        cadet_peaks = [c.peak_rating or 1200 for c in cadets]
+        cadet_ratings = [1200] * len(cadets)
+        cadet_peaks = [1200] * len(cadets)
         cadet_attendances = [0] * len(cadets)
         cadet_podiums = [0] * len(cadets)
 
@@ -656,6 +727,12 @@ class TournamentQAService:
             cadet.attendance_total = contest_count
 
         await db.commit()
+
+        try:
+            from app.core.cache import delete_cache_pattern
+            await delete_cache_pattern("cache:*")
+        except Exception:
+            pass
 
         target = primary_cadet
         tier = (

@@ -734,6 +734,28 @@ class AuthController:
                 "delta": sb.rating_delta or 0,
             })
 
+        # If actual RatingHistory ledger records exist, use them for true progressive trajectory
+        from app.models.db_models import RatingHistory
+        rh_rows_res = await db.execute(
+            select(RatingHistory)
+            .where(RatingHistory.member_id == student.id)
+            .order_by(RatingHistory.contested_at.asc())
+        )
+        rh_records = rh_rows_res.scalars().all()
+        if rh_records:
+            rating_history = [
+                {
+                    "contest": rh.contest_title,
+                    "contest_slug": rh.contest_id or "",
+                    "date": rh.contested_at.isoformat() if rh.contested_at else datetime.now(timezone.utc).isoformat(),
+                    "rank": rh.rank,
+                    "old_rating": rh.old_rating,
+                    "new_rating": rh.new_rating,
+                    "delta": rh.new_rating - rh.old_rating,
+                }
+                for rh in rh_records
+            ]
+
         # Problem Solving Statistics (LeetCode style)
         # 1. Assessment submissions
         as_rows = await db.execute(

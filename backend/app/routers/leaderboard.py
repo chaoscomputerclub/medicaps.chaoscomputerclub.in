@@ -22,14 +22,16 @@ async def get_university_leaderboard(
     department: Optional[str] = Query(None, description="Filter: CSE, IT, AIDS, Cyber Security"),
     batch: Optional[str] = Query(None, description="Filter: 2022-26, 2023-27, 2024-28"),
     tier: Optional[str] = Query(None, description="Filter: 5_star, 4_star, 3_star, 2_star, 1_star"),
+    limit: Optional[int] = Query(None, ge=1, le=500, description="Max rows to return"),
+    offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Fetch official Medi-Caps University rating standings with star division brackets.
-    Supports granular departmental and batch filters.
+    Supports granular departmental and batch filters, and limit/offset pagination.
     Protected by 60s Redis Cache-Aside with conditional HTTP headers.
     """
-    cache_key = f"cache:leaderboard:{department or 'all'}:{batch or 'all'}:{tier or 'all'}"
+    cache_key = f"cache:leaderboard:{department or 'all'}:{batch or 'all'}:{tier or 'all'}:{limit or 'all'}:{offset or 0}"
     cached = await get_cache(cache_key)
     if cached is not None:
         response.headers["X-Cache"] = "HIT"
@@ -117,6 +119,11 @@ async def get_university_leaderboard(
             )
         )
         current_rank += 1
+
+    if offset:
+        rows = rows[offset:]
+    if limit is not None:
+        rows = rows[:limit]
 
     rows_data = [r.model_dump() for r in rows]
     await set_cache(cache_key, rows_data, ttl_seconds=60)

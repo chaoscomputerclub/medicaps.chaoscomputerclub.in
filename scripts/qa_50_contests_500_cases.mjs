@@ -479,11 +479,9 @@ async function main() {
     pubContests.ok, `HTTP ${pubContests.status}`, `HTTP ${pubContests.status}`, pubContests.latency);
 
   // T8: Public profile by handle (cadet with confirmed registration)
-  const sampleHandle = arenaContests[0] ? 'cadet_001' : null;
-  const pubProf = sampleHandle
-    ? await api(`/auth/profile/${sampleHandle}`)
-    : { ok: false, status: 0, data: null };
-  check('P8-T08', `Cadet profile "cadet_001" — public access`,
+  const sampleHandle = 'aarav_002';
+  const pubProf = await api(`/auth/profile/${sampleHandle}`);
+  check('P8-T08', `Cadet profile "${sampleHandle}" — public access`,
     pubProf.ok && Boolean(pubProf.data?.member),
     `handle="${pubProf.data?.member?.handle}" rating=${pubProf.data?.member?.rating}`,
     `HTTP ${pubProf.status} ${JSON.stringify(pubProf.data).slice(0, 60)}`, pubProf.latency);
