@@ -71,7 +71,7 @@ export function SocialDrawer() {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (
-      s.handle.toLowerCase().includes(q) ||
+      (s.handle || "").toLowerCase().includes(q) ||
       (s.full_name && s.full_name.toLowerCase().includes(q)) ||
       (s.department && s.department.toLowerCase().includes(q))
     );

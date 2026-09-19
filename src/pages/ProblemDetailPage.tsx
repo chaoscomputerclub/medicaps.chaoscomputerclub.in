@@ -21,7 +21,11 @@ export function ProblemDetailPage() {
     const contest = portalData.contests?.find((c: any) => c.slug === slug);
     const problem =
       contest?.status === "finished"
-        ? contest.problems?.find((p: any) => p.index.toLowerCase() === index?.toLowerCase())
+        ? contest.problems?.find((p: any) => {
+            const pIdx = (p.problem_index || p.index || "").toLowerCase();
+            const targetIdx = (index || "").toLowerCase();
+            return pIdx && pIdx === targetIdx;
+          })
         : undefined;
 
     if (contest && problem) {

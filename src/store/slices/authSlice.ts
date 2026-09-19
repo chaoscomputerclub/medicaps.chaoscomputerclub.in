@@ -366,8 +366,16 @@ export const authSlice = createSlice({
         state.step = "onboarding";
       }
     });
-    builder.addCase(fetchCurrentUserThunk.rejected, (state) => {
-      if (!getToken()) {
+    builder.addCase(fetchCurrentUserThunk.rejected, (state, action) => {
+      const isAuthError =
+        !getToken() ||
+        (typeof action.payload === "string" &&
+          (action.payload.toLowerCase().includes("session expired") ||
+            action.payload.toLowerCase().includes("authentication required") ||
+            action.payload.toLowerCase().includes("401") ||
+            action.payload.toLowerCase().includes("invalid token")));
+
+      if (isAuthError) {
         state.member = null;
         state.token = null;
         state.isAuthenticated = false;

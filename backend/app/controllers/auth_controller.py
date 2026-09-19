@@ -634,9 +634,12 @@ class AuthController:
         )
 
         clean_target = handle_or_id.lstrip("@").strip()
+        handle_aliases = {"santush01": "santusht"}
+        target_handle = handle_aliases.get(clean_target.lower(), clean_target.lower())
         # Find target member
         stmt = select(MemberProfile).where(
             or_(
+                func.lower(MemberProfile.handle) == target_handle,
                 func.lower(MemberProfile.handle) == clean_target.lower(),
                 MemberProfile.id == clean_target,
             )

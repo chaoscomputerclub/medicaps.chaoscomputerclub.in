@@ -56,8 +56,11 @@ export function ProfilePage() {
   // Determine if viewing own profile or another student's profile
   const isViewingSelf =
     !handle ||
-    handle.toLowerCase() === "me" ||
-    (currentMember?.handle && handle.toLowerCase() === currentMember.handle.toLowerCase());
+    (handle && handle.toLowerCase() === "me") ||
+    Boolean(
+      currentMember?.handle &&
+        (handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase()
+    );
 
   const {
     data: ownProfileData,
@@ -180,7 +183,7 @@ export function ProfilePage() {
     return <ProfileSkeleton />;
   }
 
-  const m = profileData?.member;
+  const m = profileData?.member || (isViewingSelf && isAuthenticated() ? currentMember : null);
   if (!m) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-4">
@@ -218,7 +221,6 @@ export function ProfilePage() {
   const proofs = profileData?.proofs || [];
   const achievements = profileData?.achievements || [];
 
-
   const enrollmentNo =
     m.prn && m.prn !== "N/A" && m.prn !== "—"
       ? m.prn
@@ -230,7 +232,11 @@ export function ProfilePage() {
     Boolean(m.is_self) ||
     isViewingSelf ||
     Boolean(currentMember?.id && m.id && currentMember.id === m.id) ||
-    Boolean(currentMember?.handle && m.handle && currentMember.handle.toLowerCase() === m.handle.toLowerCase());
+    Boolean(
+      currentMember?.handle &&
+        m.handle &&
+        currentMember.handle.toLowerCase() === m.handle.toLowerCase()
+    );
 
   const formattedFromStore = formatFullName(currentMember?.full_name);
   const formattedFromProfile = formatFullName(m.full_name);
@@ -259,7 +265,7 @@ export function ProfilePage() {
   const isNameDefaultEnrollment = Boolean(
     isSelfUser &&
     (!formattedFullName ||
-      m.handle?.toLowerCase() === enrollmentNo.toLowerCase())
+      (m.handle || "").toLowerCase() === (enrollmentNo || "").toLowerCase())
   );
 
   const isFollowedInStore =

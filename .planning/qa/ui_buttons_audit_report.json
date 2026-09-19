@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-19T16:41:51.057Z",
+  "timestamp": "2026-09-19T16:51:08.256Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -1618,7 +1618,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 77,
+      "line": 78,
       "tag": "<Link>",
       "label": "{contest?.title ?? Back to contest}",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1627,7 +1627,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 137,
+      "line": 138,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1636,7 +1636,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 138,
+      "line": 139,
       "tag": "<Link>",
       "label": "View Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
@@ -1645,7 +1645,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 143,
+      "line": 144,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1654,7 +1654,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 144,
+      "line": 145,
       "tag": "<Link>",
       "label": "University Leaderboard →",
       "handler": "\"/portal/leaderboard\"",
@@ -1663,7 +1663,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 196,
+      "line": 197,
       "tag": "<button>",
       "label": "{key}",
       "handler": "{() => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set(\"f",
@@ -1672,7 +1672,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 271,
+      "line": 272,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1681,7 +1681,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 272,
+      "line": 273,
       "tag": "<Link>",
       "label": "View Campus Pass",
       "handler": "{`/portal/contests/${contestSlug}/qualified`}",
@@ -1690,7 +1690,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 277,
+      "line": 278,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1699,7 +1699,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 278,
+      "line": 279,
       "tag": "<Link>",
       "label": "Back to Contest",
       "handler": "{`/portal/contests/${contestSlug}`}",
@@ -1708,7 +1708,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 280,
+      "line": 281,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1717,7 +1717,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 281,
+      "line": 282,
       "tag": "<Link>",
       "label": "University Leaderboard →",
       "handler": "\"/portal/leaderboard\"",
@@ -1726,7 +1726,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 312,
+      "line": 313,
       "tag": "<Link>",
       "label": "{row.full_name}",
       "handler": "{`/portal/profile/${row.handle}`}",
@@ -1735,7 +1735,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 315,
+      "line": 316,
       "tag": "<Link>",
       "label": "@ {row.handle}",
       "handler": "{`/portal/profile/${row.handle}`}",
@@ -2383,16 +2383,16 @@
     },
     {
       "file": "src/pages/ProblemArchivePage.tsx",
-      "line": 77,
+      "line": 80,
       "tag": "<Link>",
       "label": "[to={/portal/problems/${c.slug}--${p...",
-      "handler": "{`/portal/problems/${c.slug}--${p.index.toLowerCase()}`}",
+      "handler": "{`/portal/problems/${c.slug}--${pSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ProblemDetailPage.tsx",
-      "line": 40,
+      "line": 44,
       "tag": "<Link>",
       "label": "Back to problem archive",
       "handler": "\"/portal/problems\"",
@@ -2401,7 +2401,7 @@
     },
     {
       "file": "src/pages/ProblemDetailPage.tsx",
-      "line": 55,
+      "line": 59,
       "tag": "<Link>",
       "label": "Problem archive",
       "handler": "\"/portal/problems\"",
@@ -2410,7 +2410,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 196,
+      "line": 199,
       "tag": "<Button>",
       "label": "View Leaderboard",
       "handler": "{() => navigate(\"/portal/leaderboard\")}",
@@ -2419,7 +2419,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 203,
+      "line": 206,
       "tag": "<Button>",
       "label": "Sign In",
       "handler": "{() => navigate(\"/auth\")}",
@@ -2428,7 +2428,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 359,
+      "line": 365,
       "tag": "<button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2437,7 +2437,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 417,
+      "line": 423,
       "tag": "<Button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2446,7 +2446,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 432,
+      "line": 438,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleAvatarRemove}",
@@ -2455,7 +2455,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 444,
+      "line": 450,
       "tag": "<Button>",
       "label": "[#profile-edit-btn]",
       "handler": "asChild",
@@ -2464,7 +2464,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 449,
+      "line": 455,
       "tag": "<Link>",
       "label": "[to=/portal/settings]",
       "handler": "\"/portal/settings\"",
@@ -2473,7 +2473,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 458,
+      "line": 464,
       "tag": "<Button>",
       "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
@@ -2482,7 +2482,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 489,
+      "line": 495,
       "tag": "<Button>",
       "label": "{copied ? (                       <> ...",
       "handler": "{handleCopyLink}",
@@ -2491,7 +2491,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 530,
+      "line": 536,
       "tag": "<Link>",
       "label": "Update to your real name in Settings →",
       "handler": "\"/portal/settings\"",
@@ -2500,7 +2500,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 538,
+      "line": 544,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2509,7 +2509,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 557,
+      "line": 563,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2518,7 +2518,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 577,
+      "line": 583,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2527,7 +2527,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 588,
+      "line": 594,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2536,7 +2536,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 715,
+      "line": 721,
       "tag": "<Link>",
       "label": "Open verification console",
       "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",

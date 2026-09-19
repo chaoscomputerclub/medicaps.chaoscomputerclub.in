@@ -56,10 +56,11 @@ export function ContestResultsPage() {
   const isQualified = myRow ? myRow.rank <= ranking.cutoff : false;
 
   const rows = ranking.rows.filter((row) => {
+    const q = (query || "").toLowerCase();
     const matchesQuery =
-      !query ||
-      row.handle.toLowerCase().includes(query.toLowerCase()) ||
-      row.full_name.toLowerCase().includes(query.toLowerCase());
+      !q ||
+      (row.handle || "").toLowerCase().includes(q) ||
+      (row.full_name || "").toLowerCase().includes(q);
     const matchesFilter =
       filter === "all" ||
       (filter === "qualified" && row.rank <= ranking.cutoff) ||

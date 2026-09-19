@@ -49,40 +49,44 @@ export function ProblemArchivePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {complete.flatMap((c) =>
-              (c.problems || []).map((p: any) => (
-                <article
-                  key={`${c.slug}-${p.index}`}
-                  className="flex items-center justify-between p-5 rounded-none border border-white/10 bg-zinc-950/60 hover:border-lime-400/40 transition-all duration-200 group shadow-sm"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span className="font-mono text-lg font-black text-lime-400 w-8 text-center shrink-0">
-                      {p.index}
-                    </span>
-                    <div className="min-w-0">
-                      <small className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block truncate">
-                        {c.title}
-                      </small>
-                      <h2 className="text-base font-bold text-white group-hover:text-lime-400 transition-colors truncate">
-                        {p.title}
-                      </h2>
-                      <p className="font-mono text-xs text-zinc-400">
-                        {p.topic} · <span className="tabular-nums">{p.solved_count}</span> verified solves
-                      </p>
+              (c.problems || []).map((p: any) => {
+                const pIndex = p.problem_index || p.index || "—";
+                const pSlug = (pIndex === "—" ? "" : pIndex).toLowerCase();
+                return (
+                  <article
+                    key={`${c.slug}-${pIndex}-${p.id || ""}`}
+                    className="flex items-center justify-between p-5 rounded-none border border-white/10 bg-zinc-950/60 hover:border-lime-400/40 transition-all duration-200 group shadow-sm"
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      <span className="font-mono text-lg font-black text-lime-400 w-8 text-center shrink-0">
+                        {pIndex}
+                      </span>
+                      <div className="min-w-0">
+                        <small className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block truncate">
+                          {c.title}
+                        </small>
+                        <h2 className="text-base font-bold text-white group-hover:text-lime-400 transition-colors truncate">
+                          {p.title}
+                        </h2>
+                        <p className="font-mono text-xs text-zinc-400">
+                          {p.topic} · <span className="tabular-nums">{p.solved_count ?? 0}</span> verified solves
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0 pl-3">
-                    <strong className="font-mono text-sm tabular-nums text-zinc-300">
-                      {p.points} pts
-                    </strong>
-                    <Link
-                      to={`/portal/problems/${c.slug}--${p.index.toLowerCase()}`}
-                      className="p-2.5 rounded-none bg-zinc-800 hover:bg-lime-400 text-black transition-colors flex items-center justify-center"
-                    >
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  </div>
-                </article>
-              ))
+                    <div className="flex items-center gap-4 shrink-0 pl-3">
+                      <strong className="font-mono text-sm tabular-nums text-zinc-300">
+                        {p.points ?? 0} pts
+                      </strong>
+                      <Link
+                        to={`/portal/problems/${c.slug}--${pSlug}`}
+                        className="p-2.5 rounded-none bg-zinc-800 hover:bg-lime-400 text-black transition-colors flex items-center justify-center"
+                      >
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })
             )}
           </div>
         )}

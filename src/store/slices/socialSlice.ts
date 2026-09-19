@@ -303,7 +303,7 @@ export const socialSlice = createSlice({
       const item = state.studentsList.find(
         (s) =>
           (targetId && s.id === targetId) ||
-          (targetHandle && s.handle.toLowerCase() === targetHandle.toLowerCase())
+          (targetHandle && (s.handle || "").toLowerCase() === (targetHandle || "").toLowerCase())
       );
       if (item) {
         item.is_following = !isCurrentlyFollowing;
@@ -314,7 +314,7 @@ export const socialSlice = createSlice({
       state.actionPendingId = null;
       const { targetId, targetHandle, isFollowing, followersCount } = action.payload;
 
-      const cleanHandle = targetHandle.replace(/^@+/, "").trim();
+      const cleanHandle = (targetHandle || "").replace(/^@+/, "").trim();
       const cleanId = (targetId || "").trim();
 
       if (isFollowing) {
@@ -329,7 +329,7 @@ export const socialSlice = createSlice({
 
       // Update in active modal list
       const item = state.studentsList.find(
-        (s) => (cleanId && s.id === cleanId) || (cleanHandle && s.handle.toLowerCase() === cleanHandle.toLowerCase())
+        (s) => (cleanId && s.id === cleanId) || (cleanHandle && (s.handle || "").toLowerCase() === cleanHandle.toLowerCase())
       );
       if (item) {
         item.is_following = isFollowing;
@@ -338,7 +338,7 @@ export const socialSlice = createSlice({
       // If drawer is currently focused on this student, update followers count
       if (
         state.drawerTargetHandle &&
-        (state.drawerTargetHandle.toLowerCase() === cleanHandle.toLowerCase() ||
+        ((state.drawerTargetHandle || "").toLowerCase() === cleanHandle.toLowerCase() ||
           (cleanId && state.drawerTargetId === cleanId))
       ) {
         state.followersCount = followersCount;
@@ -377,7 +377,7 @@ export const socialSlice = createSlice({
       const item = state.studentsList.find(
         (s) =>
           (targetId && s.id === targetId) ||
-          (targetHandle && s.handle.toLowerCase() === targetHandle.toLowerCase())
+          (targetHandle && (s.handle || "").toLowerCase() === (targetHandle || "").toLowerCase())
       );
       if (item) {
         item.is_following = !item.is_following;

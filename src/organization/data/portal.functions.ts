@@ -4,7 +4,7 @@
  * in-flight request deduplication, and immediate synchronous state returns.
  */
 
-import { getApiBase, getToken } from "@/lib/auth";
+import { getApiBase, getToken, clearToken } from "@/lib/auth";
 import { swrFetch, invalidateSwrCache } from "@/lib/cache/swrCache";
 import type {
   AnnouncementFeedItem,
@@ -40,10 +40,20 @@ export async function getPublicPortalData(force = false) {
             .catch(() => [])
         : [];
 
-      const problems: any[] = (apiContests || []).flatMap((c: any) =>
+      const normalizedContests = (apiContests || []).map((c: any) => ({
+        ...c,
+        problems: (c.problems || []).map((p: any) => ({
+          ...p,
+          index: p.problem_index ?? p.index ?? "—",
+          problem_index: p.problem_index ?? p.index ?? "—",
+        })),
+      }));
+
+      const problems: any[] = normalizedContests.flatMap((c: any) =>
         (c.problems || []).map((p: any) => ({
           contest_id: c.id,
-          problem_index: p.problem_index ?? p.index,
+          problem_index: p.problem_index,
+          index: p.problem_index,
           title: p.title,
           topic: p.topic,
           points: p.points,
@@ -54,7 +64,7 @@ export async function getPublicPortalData(force = false) {
       );
 
       return {
-        contests: (apiContests || []) as any[],
+        contests: normalizedContests,
         problems: problems || [],
         standings: (standings || []) as any[],
         announcements: (apiAnnouncements || []) as AnnouncementFeedItem[],
@@ -100,6 +110,20 @@ export async function getMemberProfileData(force = false) {
             Authorization: `Bearer ${token}`,
           },
         });
+        if (res.status === 401) {
+          clearToken();
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+          }
+          return {
+            member: null,
+            ratingHistory: [],
+            recentBattles: [],
+            campusPass: null,
+            proofs: [],
+            achievements: [],
+          };
+        }
         if (res.ok) {
           const data = await res.json();
           return {

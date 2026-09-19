@@ -36,11 +36,14 @@ export function ScoreboardMatrix({
             <th className="p-3 w-12 text-center">#</th>
             <th className="p-3">Contestant</th>
             {!compact && <th className="p-3">Dept.</th>}
-            {safeProblems.map((p) => (
-              <th key={p.index} title={p.title} className="p-3 text-center w-16">
-                {p.index}
-              </th>
-            ))}
+            {safeProblems.map((p, idx) => {
+              const label = (p as any).problem_index || p.index || String.fromCharCode(65 + idx);
+              return (
+                <th key={(p as any).id || label} title={p.title} className="p-3 text-center w-16">
+                  {label}
+                </th>
+              );
+            })}
             <th className="p-3 text-center w-16">Solved</th>
             <th className="p-3 text-right w-24">Penalty</th>
             <th className="p-3 text-right w-16">Δ</th>
@@ -80,8 +83,9 @@ export function ScoreboardMatrix({
               )}
               {safeProblems.map((p, i) => {
                 const cell = row.problems?.[i];
+                const key = (p as any).id || (p as any).problem_index || p.index || i;
                 return (
-                  <td key={p.index} className="p-2 text-center">
+                  <td key={key} className="p-2 text-center">
                     <span
                       className={cn(
                         "inline-flex items-center justify-center min-w-[3rem] px-1.5 py-0.5 text-[11px] font-mono tabular-nums",
