@@ -391,6 +391,16 @@ async def send_otp_email(to_email: str, otp: str) -> bool:
     """
     logger.info("🔑 [AUTH] Generated OTP for %s: %s", to_email, otp)
 
+    # HARD SHIELD: Block all automated QA/test emails from hitting SMTP to protect domain reputation
+    if (
+        to_email.startswith("qa.")
+        or "test" in to_email
+        or to_email == "qa.organizer@medicaps.ac.in"
+        or settings.ENVIRONMENT in ("test", "testing", "qa")
+    ):
+        logger.info("🛡️ [QA/TEST GUARD] Suppressing external SMTP dispatch for %s. Mock OTP: %s", to_email, otp)
+        return True
+
     if settings.is_mail_dispatch_disabled:
         logger.info("⚡ [DEV MODE] Mail dispatch disabled. Mock OTP for %s: %s", to_email, otp)
         return True

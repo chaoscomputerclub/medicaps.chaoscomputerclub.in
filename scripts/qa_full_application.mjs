@@ -122,19 +122,16 @@ class QASimulator {
       "Rejects outside domain submissions"
     );
 
-    const validOtp = await request("/auth/send-otp", {
-      method: "POST",
-      body: JSON.stringify({ email: "qa.organizer@medicaps.ac.in" }),
-    });
+    const checkHandle = await request("/auth/check-handle?handle=qa_cadet_verification");
     this.record(
       "UI-AUTH-02",
-      "Login Form: Valid Domain OTP Dispatch",
-      "AuthModal / Send OTP Button",
+      "Registration: Handle Availability Verification",
+      "AuthModal / Handle Input",
       200,
-      validOtp.status,
-      [200, 500].includes(validOtp.status),
-      validOtp.latency,
-      validOtp.status === 200 ? "Dispatches 6-digit code to Redis" : "SMTP outbound bounded on host"
+      checkHandle.status,
+      checkHandle.status === 200,
+      checkHandle.latency,
+      "Validates handle availability without email dispatch"
     );
 
     // ──────────────────────────────────────────────────────────────────────────

@@ -121,6 +121,7 @@ export function GateScannerPanel({
   attendees = [],
 }: GateScannerPanelProps) {
   // Scanner hardware state
+  const [isScannerOpen, setIsScannerOpen] = useState(true);
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [cameras, setCameras] = useState<any[]>([]);
   const [activeCameraId, setActiveCameraId] = useState<string | null>(null);
@@ -196,6 +197,23 @@ export function GateScannerPanel({
       // Ignore stop errors
     }
   }, []);
+
+  // Proctor Privacy Shutter: Open / Close Camera Hardware
+  const handleToggleScanner = async () => {
+    if (isScannerOpen) {
+      await stopCamera();
+      setIsScannerOpen(false);
+      toast.info("Camera scanner closed for privacy.");
+    } else {
+      setIsScannerOpen(true);
+      if (activeCameraId) {
+        startCamera(activeCameraId);
+      } else {
+        startCamera({ facingMode: "environment" });
+      }
+      toast.success("Camera scanner opened.");
+    }
+  };
 
   // Fetch available cameras on mount and auto-start
   useEffect(() => {
@@ -467,7 +485,31 @@ export function GateScannerPanel({
               </div>
 
               <div className="flex items-center gap-2">
-                {cameras.length > 1 && (
+                {/* Privacy Shutter: Open / Close Scanner Button */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleToggleScanner}
+                  className={`h-7 px-2.5 font-mono text-xs uppercase font-bold rounded-none cursor-pointer ${
+                    isScannerOpen
+                      ? "border-amber-500/40 bg-zinc-900 text-amber-300 hover:text-white hover:bg-zinc-800"
+                      : "bg-lime-400 hover:bg-lime-300 text-black border-lime-400 font-extrabold"
+                  }`}
+                >
+                  {isScannerOpen ? (
+                    <>
+                      <CameraOff className="w-3 h-3 mr-1 text-amber-400" />
+                      Close Scanner
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-3 h-3 mr-1" />
+                      Open Scanner
+                    </>
+                  )}
+                </Button>
+
+                {isScannerOpen && cameras.length > 1 && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -510,20 +552,47 @@ export function GateScannerPanel({
                 className="w-full aspect-square bg-black flex items-center justify-center overflow-hidden"
               />
 
-              {/* Minimal Focus Corners */}
-              <div className="absolute inset-0 pointer-events-none p-3 flex flex-col justify-between">
-                <div className="flex justify-between">
-                  <span className="w-3 h-3 border-t-2 border-l-2 border-lime-400" />
-                  <span className="w-3 h-3 border-t-2 border-r-2 border-lime-400" />
+              {/* Minimal Focus Corners (when scanner open) */}
+              {isScannerOpen && (
+                <div className="absolute inset-0 pointer-events-none p-3 flex flex-col justify-between">
+                  <div className="flex justify-between">
+                    <span className="w-3 h-3 border-t-2 border-l-2 border-lime-400" />
+                    <span className="w-3 h-3 border-t-2 border-r-2 border-lime-400" />
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="w-3 h-3 border-b-2 border-l-2 border-lime-400" />
+                    <span className="w-3 h-3 border-b-2 border-r-2 border-lime-400" />
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="w-3 h-3 border-b-2 border-l-2 border-lime-400" />
-                  <span className="w-3 h-3 border-b-2 border-r-2 border-lime-400" />
+              )}
+
+              {/* Privacy Shutter Closed State */}
+              {!isScannerOpen && (
+                <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center text-center p-6 space-y-3 z-10 font-mono">
+                  <div className="w-12 h-12 border border-white/10 bg-black flex items-center justify-center text-zinc-400">
+                    <CameraOff className="w-6 h-6 text-zinc-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase text-white tracking-wider">
+                      Scanner Closed (Privacy Mode)
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1 max-w-[240px]">
+                      Camera hardware stream is disconnected.
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={handleToggleScanner}
+                    className="h-8 px-3.5 bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-bold rounded-none cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5 mr-1" />
+                    Open Scanner
+                  </Button>
                 </div>
-              </div>
+              )}
 
               {/* Camera Error / Fallback State Overlay */}
-              {cameraError && (
+              {isScannerOpen && cameraError && (
                 <div className="absolute inset-0 bg-black/95 p-6 flex flex-col items-center justify-center text-center space-y-3">
                   <CameraOff className="w-8 h-8 text-rose-400" />
                   <div className="text-white font-bold text-xs uppercase">
