@@ -132,8 +132,8 @@ export function AttendeesPanel({
   return (
     <div className="space-y-4 font-mono">
       {/* Main Roster Card */}
-      <Card className="admin-card bg-[#09090d] border border-white/10 rounded-none">
-        <CardHeader className="border-b border-white/10 py-3 px-4">
+      <Card className="bg-[#111111] border border-white/[0.08] rounded-none">
+        <CardHeader className="border-b border-white/[0.08] py-3 px-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Filter Pills */}
             <div className="flex items-center gap-1.5 flex-wrap">

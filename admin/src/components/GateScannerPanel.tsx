@@ -442,7 +442,7 @@ export function GateScannerPanel({
 
       {/* ─── 1. TOP GATE TELEMETRY STRIP ───────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="admin-card p-3.5 space-y-1 bg-[#09090d]">
+        <div className="border border-white/[0.08] p-3.5 space-y-1 bg-[#111111]">
           <div className="text-[10px] text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             <Users className="w-3 h-3 text-lime-400" />
             ADMITTED FINALISTS
@@ -459,7 +459,7 @@ export function GateScannerPanel({
           </div>
         </div>
 
-        <div className="admin-card p-3.5 space-y-1 bg-[#09090d]">
+        <div className="border border-white/[0.08] p-3.5 space-y-1 bg-[#111111]">
           <div className="text-[10px] text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             <Monitor className="w-3 h-3 text-cyan-400" />
             REMAINING TERMINALS
@@ -471,7 +471,7 @@ export function GateScannerPanel({
           <p className="text-[10px] text-zinc-500 truncate">Lab 04 Air-Gapped WS-01…30</p>
         </div>
 
-        <div className="admin-card p-3.5 space-y-1 bg-[#09090d]">
+        <div className="border border-white/[0.08] p-3.5 space-y-1 bg-[#111111]">
           <div className="text-[10px] text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             <Zap className="w-3 h-3 text-amber-400" />
             THROUGHPUT RATE
@@ -486,7 +486,7 @@ export function GateScannerPanel({
           <p className="text-[10px] text-zinc-500 truncate">Zero latency optical match</p>
         </div>
 
-        <div className="admin-card p-3.5 space-y-1 bg-[#09090d]">
+        <div className="border border-white/[0.08] p-3.5 space-y-1 bg-[#111111]">
           <div className="text-[10px] text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             <ShieldCheck className="w-3 h-3 text-lime-400" />
             GATE SENSOR STATUS
@@ -510,7 +510,7 @@ export function GateScannerPanel({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 7-Cols: Optical Targeting Console */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="admin-card p-5 border border-white/10 bg-[#09090d] space-y-4">
+          <div className="border border-white/[0.08] p-5 bg-[#111111] space-y-4">
             {/* Header & Controls Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
@@ -610,7 +610,7 @@ export function GateScannerPanel({
                   </div>
 
                   {/* Animated Laser Beam */}
-                  <div className="laser-beam" />
+                  <div className="absolute left-0 right-0 h-[1.5px] bg-[#ccff00] shadow-[0_0_10px_1px_#ccff00] animate-pulse pointer-events-none" />
 
                   {/* Telemetry Tag */}
                   <div className="absolute bottom-2 left-3 text-[10px] text-lime-400 bg-black/80 border border-lime-400/30 px-2 py-0.5 tracking-wider">
@@ -621,7 +621,7 @@ export function GateScannerPanel({
 
               {/* Privacy Shutter Closed State */}
               {!isScannerOpen && (
-                <div className="absolute inset-0 bg-[#09090d] flex flex-col items-center justify-center text-center p-6 space-y-3 z-10">
+                <div className="absolute inset-0 bg-[#111111] flex flex-col items-center justify-center text-center p-6 space-y-3 z-10">
                   <div className="w-14 h-14 bg-black border border-white/10 flex items-center justify-center">
                     <CameraOff className="w-7 h-7 text-amber-400" />
                   </div>
@@ -730,7 +730,7 @@ export function GateScannerPanel({
         {/* Right 5-Cols: Workstation Floor Matrix & Recent Scans */}
         <div className="lg:col-span-5 space-y-4">
           {/* Interactive Air-Gapped Workstation Grid (Lab 04) */}
-          <div className="admin-card p-4 border border-white/10 bg-[#09090d] space-y-3">
+          <div className="border border-white/[0.08] p-4 bg-[#111111] space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
                 <Monitor className="w-3.5 h-3.5 text-lime-400" />
@@ -804,7 +804,7 @@ export function GateScannerPanel({
           </div>
 
           {/* Recent Scans Feed */}
-          <div className="admin-card p-4 border border-white/10 bg-[#09090d] space-y-3">
+          <div className="border border-white/[0.08] p-4 bg-[#111111] space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
                 <UserCheck className="w-3.5 h-3.5 text-lime-400" />

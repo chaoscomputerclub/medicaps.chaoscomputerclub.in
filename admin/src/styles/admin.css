@@ -1,114 +1,50 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-:root {
-  --admin-bg: #050507;
-  --admin-surface-1: #09090d;
-  --admin-surface-2: #101016;
-  --admin-surface-3: #171720;
-  --admin-surface-hover: #1f1f2b;
-  --admin-border: rgba(255, 255, 255, 0.08);
-  --admin-border-strong: rgba(255, 255, 255, 0.16);
-  --admin-accent: #CCFF00;
-  --admin-accent-glow: rgba(204, 255, 0, 0.18);
-  --admin-cyan: #00e5ff;
-  --admin-emerald: #10b981;
-  --admin-amber: #f59e0b;
-  --admin-red: #ff3344;
-}
+@layer theme {
+  :root, :host {
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
 
-html, body {
-  background-color: #050507;
-  color: #f4f4f5;
-  font-family: ui-monospace, SFMono-Regular, "Geist Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  margin: 0;
-  padding: 0;
-  color-scheme: dark;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Brutalist Zero-Radius Standard across ALL admin surfaces */
-*, *::before, *::after {
-  border-radius: 0 !important;
-}
-
-/* Tabular numerals for telemetry and clocks */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Sophisticated Cybernetic Cockpit Background */
-.admin-grid-bg {
-  background-color: #050507;
-  background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(204, 255, 0, 0.06), transparent 70%),
-    radial-gradient(ellipse 60% 40% at 85% 10%, rgba(0, 229, 255, 0.03), transparent 60%),
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
-  background-position: center top, center top, 0 0, 0 0;
-}
-
-/* Card Surface with Top Rim Light & Ambient Shadow */
-.admin-card {
-  background: #09090d;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.7);
-  position: relative;
-}
-
-.admin-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
-  pointer-events: none;
-}
-
-/* Laser scan line animation */
-@keyframes laser-sweep {
-  0% {
-    top: 0%;
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    top: 100%;
-    opacity: 0.8;
+    --color-background: #0a0a0a;
+    --color-foreground: #eaeaea;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-strong: rgba(255, 255, 255, 0.16);
+    --color-accent: #ccff00;
+    --color-accent-foreground: #000000;
+    --color-muted-foreground: #8e8e93;
+    --color-surface: #111111;
+    --color-surface-strong: #161616;
+    --color-index: #71717a;
   }
 }
 
-.laser-beam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #CCFF00;
-  box-shadow: 0 0 14px 2px #CCFF00, 0 0 4px #ffffff;
-  animation: laser-sweep 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
-  pointer-events: none;
-}
+@layer base {
+  *, *::before, *::after {
+    border-radius: 0 !important;
+  }
 
-/* Tactical terminal scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
+  html {
+    color-scheme: dark;
+    background-color: #0a0a0a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-::-webkit-scrollbar-track {
-  background: #09090d;
-}
+  body {
+    background-color: #0a0a0a;
+    color: #eaeaea;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: #27272a;
-}
+  ::selection {
+    background-color: #ccff00;
+    color: #000000;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #CCFF00;
+  :focus-visible {
+    outline: 1px solid #ccff00;
+    outline-offset: 3px;
+  }
 }

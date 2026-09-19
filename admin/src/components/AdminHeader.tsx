@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LogOut, RefreshCw, Shield, Wifi, WifiOff, Terminal, Clock } from "lucide-react";
+import { LogOut, RefreshCw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminHeaderProps {
@@ -38,86 +38,81 @@ export function AdminHeader({
   }, []);
 
   return (
-    <header className="border-b border-white/10 bg-[#09090d]/90 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between font-mono">
-        {/* Left: Brand & Status Telemetry */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-lime-400/10 border border-lime-400/40 flex items-center justify-center text-lime-400 shadow-[0_0_12px_rgba(204,255,0,0.15)]">
-              <Shield className="w-4 h-4 text-lime-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold text-sm tracking-wider">
-                  CCC <span className="text-lime-400">//</span> COMMAND CENTER
-                </span>
-                <span className="text-[10px] px-1.5 py-0.5 bg-zinc-900 border border-white/10 text-zinc-400 uppercase tracking-widest hidden sm:inline-block">
-                  v2.6.4 PROCTOR
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center gap-2 pl-3 border-l border-white/10">
-            <span
-              className={`w-2 h-2 ${
-                isStreamConnected ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" : "bg-amber-400 animate-ping"
-              }`}
+    <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[#0a0a0a]/90 backdrop-blur-md">
+      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 md:px-8 h-20 flex items-center justify-between">
+        {/* Left: Official CCC Branding matching chaoscomputerclub.in */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          <a
+            href="#top"
+            className="group flex items-center gap-3 font-mono text-[#eaeaea] hover:text-[#ccff00] transition-colors select-none shrink-0"
+          >
+            <img
+              src="/logo.png"
+              alt="Chaos Computer Club Logo"
+              width="44"
+              height="44"
+              className="h-10 w-10 sm:h-11 sm:w-11 object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.18)]"
             />
-            <span className="text-[11px] text-zinc-400 flex items-center gap-1.5">
-              {isStreamConnected ? (
-                <>
-                  <Wifi className="w-3 h-3 text-emerald-400" />
-                  <span className="text-zinc-300 font-semibold">AIR-GAP LAN LINK ACTIVE</span>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="w-3 h-3 text-amber-400" />
-                  <span className="text-amber-400">RECONNECTING SSE STREAM...</span>
-                </>
-              )}
+            <div className="flex flex-col font-mono text-[0.62rem] sm:text-[0.68rem] font-bold tracking-[0.2em] uppercase leading-[1.12] text-[#eaeaea] group-hover:text-[#ccff00] transition-colors">
+              <span>CHAOS</span>
+              <span>COMPUTER</span>
+              <span>CLUB</span>
+            </div>
+          </a>
+
+          {/* Subtitle / Chapter & Console Badge */}
+          <div className="hidden sm:flex flex-col border-l border-white/[0.08] pl-4">
+            <span className="font-mono text-[0.65rem] tracking-[0.16em] uppercase font-bold text-white">
+              Medi-Caps Command Center
+            </span>
+            <span className="font-mono text-[0.55rem] tracking-[0.2em] text-[#8e8e93] uppercase">
+              EST. 2026 // AIR-GAP SECURE LAN
             </span>
           </div>
         </div>
 
-        {/* Center: Realtime Clock */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-black/60 border border-white/10 text-xs">
-          <Clock className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-zinc-400 text-[10px] uppercase tracking-wider">OFFICIAL TOURNAMENT CLOCK:</span>
-          <span className="text-white font-bold tabular-nums text-xs">{timeStr || "LOADING..."}</span>
+        {/* Center: Live Tournament Telemetry Clock */}
+        <div className="hidden lg:flex items-center gap-2.5 px-3.5 py-1.5 bg-[#111111] border border-white/[0.08] font-mono text-xs">
+          <Clock className="w-3.5 h-3.5 text-[#00e5ff]" />
+          <span className="text-[0.6rem] tracking-[0.2em] text-[#8e8e93] uppercase">
+            SYNCED TOURNAMENT CLOCK:
+          </span>
+          <span className="text-white font-bold tabular-nums text-xs tracking-wider">
+            {timeStr || "LOADING…"}
+          </span>
+          <span className="w-1.5 h-1.5 bg-[#10b981] ml-1 animate-pulse" />
         </div>
 
-        {/* Right: Proctor Session & Actions */}
+        {/* Right: Proctor Identity & Actions */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-zinc-950 border border-white/10">
-            <Terminal className="w-3 h-3 text-lime-400" />
-            <span className="text-xs text-zinc-300 truncate max-w-[180px]">
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#111111] border border-white/[0.08] font-mono">
+            <span className="w-1.5 h-1.5 bg-[#ccff00]" />
+            <span className="text-[0.65rem] tracking-[0.14em] uppercase text-[#eaeaea] font-medium truncate max-w-[160px]">
               {proctorName}
             </span>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            type="button"
             onClick={onRefreshAll}
             disabled={isRefreshing}
-            className="h-8 border-white/10 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white font-mono text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
+            className="inline-flex items-center justify-center rounded-none border border-white/[0.08] bg-[#111111] hover:bg-[#161616] hover:border-white/20 text-[#eaeaea] font-mono text-[0.62rem] tracking-[0.16em] uppercase font-medium transition-colors cursor-pointer select-none h-9 px-3.5 gap-1.5 focus-visible:outline-none"
+            title="Synchronize real-time state with server"
           >
             <RefreshCw
-              className={`w-3.5 h-3.5 mr-1.5 ${isRefreshing ? "animate-spin text-lime-400" : "text-zinc-400"}`}
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-[#ccff00]" : "text-[#8e8e93]"}`}
             />
-            <span>Sync</span>
-          </Button>
+            <span className="hidden sm:inline">Sync</span>
+          </button>
 
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            type="button"
             onClick={onLogout}
-            className="h-8 border-rose-500/30 bg-zinc-900/80 text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 font-mono text-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400"
+            className="inline-flex h-9 items-center justify-center border border-rose-500/30 bg-[#111111] hover:bg-rose-500/10 hover:border-rose-500/60 px-3.5 font-mono text-[0.62rem] tracking-[0.16em] uppercase text-rose-300 font-semibold transition-colors cursor-pointer select-none"
           >
-            <LogOut className="w-3.5 h-3.5 mr-1" />
+            <LogOut className="w-3.5 h-3.5 mr-1.5 text-rose-400" />
             <span>Exit</span>
-          </Button>
+          </button>
         </div>
       </div>
     </header>

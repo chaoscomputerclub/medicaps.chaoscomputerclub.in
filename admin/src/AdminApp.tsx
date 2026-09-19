@@ -122,7 +122,7 @@ export function AdminApp() {
   const occupancyPercentage = Math.round((checkedInCount / (totalSeats || 60)) * 100);
 
   return (
-    <div className="min-h-screen bg-black text-slate-100 font-mono admin-grid-bg">
+    <div className="min-h-screen bg-[#0a0a0a] text-[#eaeaea] font-mono">
       <Toaster position="top-right" richColors theme="dark" />
 
       {/* Proctor Authentication Guard */}
@@ -141,7 +141,7 @@ export function AdminApp() {
 
           <main className="flex-1 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
             {/* ─── TACTICAL CONTEST CONTEXT & TELEMETRY STRIP ───────────────── */}
-            <div className="admin-card p-3 border border-white/10 bg-[#09090d] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-3 border border-white/[0.08] bg-[#111111] flex flex-col md:flex-row md:items-center justify-between gap-4">
               {/* Contest Selector & Edition Badge */}
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
@@ -208,7 +208,7 @@ export function AdminApp() {
 
             {/* ─── TACTICAL NAVIGATION TABS ───────────────────────── */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="bg-[#09090d] border border-white/10 p-1 flex flex-wrap gap-1.5 h-auto">
+              <TabsList className="bg-[#111111] border border-white/[0.08] p-1 flex flex-wrap gap-1.5 h-auto">
                 <TabsTrigger
                   value="gate_scanner"
                   className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white py-2 px-4 flex items-center gap-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-lime-400 shadow-none data-[state=active]:shadow-[0_0_12px_rgba(204,255,0,0.25)]"

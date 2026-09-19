@@ -154,7 +154,7 @@ export function ContestOperationsPanel({
   return (
     <div className="space-y-6 font-mono">
       {/* ─── 1. MISSION CONTROL HERO DISPLAY ─────────────────────────────────── */}
-      <div className="admin-card p-6 border border-white/10 bg-[#09090d]">
+      <div className="p-6 border border-white/[0.08] bg-[#111111]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* Contest & Clock Summary */}
           <div className="lg:col-span-7 space-y-4">
@@ -324,8 +324,8 @@ export function ContestOperationsPanel({
       {/* ─── 2. FOUR HIGH-DENSITY COCKPIT TELEMETRY CARDS ───────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Workstation & Turnstile Seating */}
-        <div className="admin-card p-4 space-y-3 bg-[#09090d]">
-          <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2">
+        <div className="p-4 space-y-3 border border-white/[0.08] bg-[#111111]">
+          <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-2">
             <span className="text-zinc-400 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-lime-400" />
               TURNSTILE SEATING
@@ -353,8 +353,8 @@ export function ContestOperationsPanel({
         </div>
 
         {/* Card 2: Phase 1 Qualification Engine */}
-        <div className="admin-card p-4 space-y-3 bg-[#09090d]">
-          <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2">
+        <div className="p-4 space-y-3 border border-white/[0.08] bg-[#111111]">
+          <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-2">
             <span className="text-zinc-400 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-amber-400" />
               TOP 30 ROSTER
@@ -379,8 +379,8 @@ export function ContestOperationsPanel({
         </div>
 
         {/* Card 3: CodeBox Judge Engine Telemetry */}
-        <div className="admin-card p-4 space-y-3 bg-[#09090d]">
-          <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2">
+        <div className="p-4 space-y-3 border border-white/[0.08] bg-[#111111]">
+          <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-2">
             <span className="text-zinc-400 flex items-center gap-1.5">
               <Cpu className="w-3.5 h-3.5 text-cyan-400" />
               CODEBOX JUDGE
@@ -409,8 +409,8 @@ export function ContestOperationsPanel({
         </div>
 
         {/* Card 4: Anti-Cheat & Security */}
-        <div className="admin-card p-4 space-y-3 bg-[#09090d]">
-          <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2">
+        <div className="p-4 space-y-3 border border-white/[0.08] bg-[#111111]">
+          <div className="flex items-center justify-between text-xs border-b border-white/[0.08] pb-2">
             <span className="text-zinc-400 flex items-center gap-1.5">
               <ShieldAlert className="w-3.5 h-3.5 text-lime-400" />
               AIR-GAP SECURITY
@@ -439,7 +439,88 @@ export function ContestOperationsPanel({
       {/* ─── 3. TOURNAMENT PROGRESSION PIPELINE & AUDIT LOG ────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Tournament Progression Stepper (6 Cols) */}
-        <div className="lg:col-span-6 admin-card p-5 space-y-4 bg-[#09090d]">
+        <div className="lg:col-span-6 p-5 space-y-4 border border-white/[0.08] bg-[#111111]">
+          <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+            <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <Layers className="w-4 h-4 text-lime-400" />
+              Tournament Progression Lifecycle
+            </span>
+            <span className="text-[10px] text-zinc-400 font-mono">STEP-BY-STEP EXECUTION</span>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              {
+                step: 1,
+                title: "Phase 1: Online Screening Round",
+                desc: "Remote automated proctoring challenge in browser arena.",
+                status: selectedContest?.has_assessment ? "COMPLETED" : "NOT ATTACHED",
+                isDone: true,
+              },
+              {
+                step: 2,
+                title: "Phase 2: Finalist Qualification",
+                desc: "Top 30 scoring cadets promoted and issued workstation passes.",
+                status: attendees.length > 0 ? "QUALIFIED" : "PENDING",
+                isDone: attendees.length > 0,
+              },
+              {
+                step: 3,
+                title: "Phase 3: Turnstile Check-In & Seating",
+                desc: "Optical camera verification at Lab 04 security gate.",
+                status: checkedInCount > 0 ? `${checkedInCount}/30 SEATED` : "WAITING",
+                isDone: checkedInCount > 0,
+              },
+              {
+                step: 4,
+                title: "Phase 4: Air-Gapped Tournament Final",
+                desc: "Live 90-minute on-premise competitive programming final.",
+                status: status === "live" ? "IN PROGRESS" : status === "finished" ? "CONCLUDED" : "STANDBY",
+                isDone: status === "finished",
+              },
+              {
+                step: 5,
+                title: "Phase 5: Scoreboard Freeze & Awards",
+                desc: "Audit testcase integrity and publish official champion rankings.",
+                status: status === "finished" ? "READY" : "LOCKED",
+                isDone: false,
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="flex items-start gap-3 p-3 bg-black/60 border border-white/5 hover:border-white/15 transition-colors"
+              >
+                <div
+                  className={`w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 ${
+                    item.isDone
+                      ? "bg-lime-400 text-black shadow-[0_0_8px_rgba(204,255,0,0.4)]"
+                      : "bg-zinc-800 text-zinc-400 border border-white/10"
+                  }`}
+                >
+                  {item.step}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-zinc-200 truncate">{item.title}</span>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 border ${
+                        item.isDone
+                          ? "bg-lime-400/10 border-lime-400/40 text-lime-400"
+                          : "bg-zinc-900 border-white/10 text-zinc-500"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Real-time Operational Audit Stream (6 Cols) */}
+        <div className="lg:col-span-6 p-5 space-y-4 border border-white/[0.08] bg-[#111111]">
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <Layers className="w-4 h-4 text-lime-400" />
@@ -520,7 +601,7 @@ export function ContestOperationsPanel({
         </div>
 
         {/* Right: Real-time Operational Audit Stream (6 Cols) */}
-        <div className="lg:col-span-6 admin-card p-5 space-y-4 bg-[#09090d]">
+        <div className="lg:col-span-6 border border-white/[0.08] p-5 space-y-4 bg-[#111111]">
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <Terminal className="w-4 h-4 text-cyan-400" />

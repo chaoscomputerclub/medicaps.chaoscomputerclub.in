@@ -402,7 +402,7 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
   return (
     <div className="space-y-4 font-mono">
       {/* Top Controls Header */}
-      <div className="admin-card p-4 bg-[#09090d] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 bg-[#111111] border border-white/[0.08] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-lime-400/10 border border-lime-400/40 flex items-center justify-center text-lime-400">
@@ -435,7 +435,7 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* LEFT RAIL: Contests Master List (4 Cols) */}
         <div className="lg:col-span-4 space-y-3">
-          <div className="admin-card p-3.5 bg-[#09090d] border border-white/10 space-y-3">
+          <div className="p-3.5 bg-[#111111] border border-white/[0.08] space-y-3">
             {/* Search & Status Filters */}
             <div className="relative">
               <Input
@@ -479,11 +479,11 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
           {/* Cards List */}
           <div className="space-y-2 max-h-[750px] overflow-y-auto pr-1">
             {isLoading && contests.length === 0 ? (
-              <div className="p-8 text-center text-xs text-zinc-500 bg-[#09090d] border border-white/10">
+              <div className="p-8 text-center text-xs text-zinc-500 bg-[#111111] border border-white/[0.08]">
                 Loading contests...
               </div>
             ) : filteredContests.length === 0 ? (
-              <div className="p-8 text-center text-xs text-zinc-500 bg-[#09090d] border border-white/10">
+              <div className="p-8 text-center text-xs text-zinc-500 bg-[#111111] border border-white/[0.08]">
                 No matching contests found.
               </div>
             ) : (
@@ -496,7 +496,7 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
                     className={`p-3.5 border transition-all cursor-pointer rounded-none space-y-2 text-left ${
                       isSelected
                         ? "bg-zinc-900 border-lime-400 shadow-[0_0_15px_rgba(204,255,0,0.15)]"
-                        : "bg-[#09090d] border-white/10 hover:border-white/30 hover:bg-zinc-900/60"
+                        : "bg-[#111111] border-white/[0.08] hover:border-white/30 hover:bg-zinc-900/60"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -551,15 +551,15 @@ export function ContestManagerPanel({ onContestListChanged }: ContestManagerPane
         {/* RIGHT RAIL: Deep Contest & Assessment Workbench (8 Cols) */}
         <div className="lg:col-span-8 space-y-4">
           {isLoadingDetail ? (
-            <div className="p-12 text-center text-xs text-zinc-500 admin-card bg-[#09090d] border border-white/10">
+            <div className="p-12 text-center text-xs text-zinc-500 bg-[#111111] border border-white/[0.08]">
               Loading contest dossier...
             </div>
           ) : !detail?.contest ? (
-            <div className="p-12 text-center text-xs text-zinc-500 admin-card bg-[#09090d] border border-white/10">
+            <div className="p-12 text-center text-xs text-zinc-500 bg-[#111111] border border-white/[0.08]">
               Select a contest from the left panel to configure assessment and problem sets.
             </div>
           ) : (
-            <div className="admin-card bg-[#09090d] border border-white/10 rounded-none overflow-hidden space-y-4 p-5">
+            <div className="bg-[#111111] border border-white/[0.08] rounded-none overflow-hidden space-y-4 p-5">
               {/* Top Banner for Selected Contest */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <div>
