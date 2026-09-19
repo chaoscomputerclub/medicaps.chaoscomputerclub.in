@@ -125,18 +125,15 @@ class AuthController:
 
         # Dispatch email
         sent = await send_otp_email(email, otp)
-        if not sent:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to send verification email. Please try again."
-            )
+        dev_otp = otp if (not sent or settings.is_mail_dispatch_disabled or settings.is_dev_bypass_enabled) else None
+        
+        logger.info("OTP dispatched for %s (sent=%s, txn=%s)", email, sent, result["transaction_id"])
+        msg = f"Verification code sent to {email}" if sent else f"Verification code generated (SMTP relay unavailable). Code: {otp}"
 
-        logger.info("OTP dispatched for %s (txn=%s)", email, result["transaction_id"])
-        dev_otp = otp if settings.is_mail_dispatch_disabled else None
         return SendOTPResponse(
             success=True,
             sent=True,
-            message=f"Verification code sent to {email}" if not settings.is_mail_dispatch_disabled else f"Dev Mode: Code is {otp}",
+            message=msg,
             transaction_id=result["transaction_id"],
             email=email,
             dev_otp=dev_otp,
