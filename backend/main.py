@@ -6,10 +6,13 @@ Inspired by Desktop/sharexpress/interleet and Desktop/sharexpress/cloud.sharexpr
 """
 
 import os
+import logging
 from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
@@ -72,6 +75,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logging.getLogger("uvicorn.error").exception(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    origin = request.headers.get("origin")
+    allow_origin = origin if origin and ("localhost" in origin or "127.0.0.1" in origin or "chaoscomputerclub.in" in origin) else "*"
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+        headers={
+            "Access-Control-Allow-Origin": allow_origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
+
 
 # ── Production Healthcheck ────────────────────────────────────────────────────
 @app.get("/api/health", tags=["System"])

@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "CCC Medi-Caps Arena API"
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
 
     # Host & Port
     HOST: str = os.getenv("HOST", "0.0.0.0")
