@@ -149,3 +149,29 @@ class PresetContestLaunchRequest(BaseModel):
 class ContestStatusChangeRequest(BaseModel):
     status: str = Field(..., description="Target status: upcoming, live, finished")
     auto_qualify_top_30: bool = Field(True, description="Auto-qualify Top 30 candidates when transitioning to live")
+
+
+class AssessmentUpdateRequest(BaseModel):
+    title: Optional[str] = Field(None, max_length=120)
+    summary: Optional[str] = None
+    duration_minutes: Optional[int] = Field(None, ge=15, le=360)
+    starts_at: Optional[datetime] = None
+    ends_at: Optional[datetime] = None
+    max_violations: Optional[int] = Field(None, ge=1, le=10)
+    is_active: Optional[bool] = None
+
+
+class ProblemSaveRequest(ProblemCreateSchema):
+    target: Optional[str] = Field("both", description="Target problem collection: 'contest', 'assessment', or 'both'")
+
+
+class ProblemSyncRequest(BaseModel):
+    direction: str = Field(..., description="'contest_to_assessment' or 'assessment_to_contest'")
+
+
+class ContestAdminDetailResponse(BaseModel):
+    contest: Dict[str, Any]
+    assessment: Optional[Dict[str, Any]] = None
+    contest_problems: List[Dict[str, Any]] = Field(default_factory=list)
+    assessment_problems: List[Dict[str, Any]] = Field(default_factory=list)
+

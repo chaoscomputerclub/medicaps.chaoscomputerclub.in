@@ -40,6 +40,9 @@ from app.schemas.dynamic_contest import (
     ContestCloneRequest,
     PresetContestLaunchRequest,
     ContestStatusChangeRequest,
+    AssessmentUpdateRequest,
+    ProblemSaveRequest,
+    ProblemSyncRequest,
 )
 from app.core.cache import delete_cache_pattern
 from app.services.assessment_service import AssessmentService
@@ -343,12 +346,194 @@ class DynamicContestService:
         }
 
     @staticmethod
+    async def get_admin_contest_detail(contest_slug: str, db: AsyncSession) -> Dict[str, Any]:
+        """Fetch complete administrative dossier: contest metadata, assessment config, and both problem suites."""
+        c_res = await db.execute(
+            select(OfflineContest)
+            .options(
+                selectinload(OfflineContest.assessment),
+                selectinload(OfflineContest.problems),
+            )
+            .where(OfflineContest.slug == contest_slug)
+        )
+        contest = c_res.scalars().first()
+        if not contest:
+            raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
+
+        # Contest Problems sorted by index
+        cp_res = await db.execute(
+            select(ContestProblem)
+            .where(ContestProblem.contest_id == contest.id)
+            .order_by(ContestProblem.problem_index.asc())
+        )
+        contest_problems = cp_res.scalars().all()
+
+        # Assessment & Assessment Problems
+        assessment_dict = None
+        assessment_problems_list = []
+        if contest.assessment:
+            a = contest.assessment
+            assessment_dict = {
+                "id": a.id,
+                "slug": a.slug,
+                "title": a.title,
+                "summary": a.summary,
+                "duration_minutes": a.duration_minutes,
+                "starts_at": a.starts_at.isoformat() if a.starts_at else None,
+                "ends_at": a.ends_at.isoformat() if a.ends_at else None,
+                "is_active": a.is_active,
+                "max_violations": a.max_violations,
+                "created_at": a.created_at.isoformat() if a.created_at else None,
+            }
+            ap_res = await db.execute(
+                select(AssessmentProblem)
+                .where(AssessmentProblem.assessment_id == a.id)
+                .order_by(AssessmentProblem.problem_index.asc())
+            )
+            assessment_problems = ap_res.scalars().all()
+            for ap in assessment_problems:
+                assessment_problems_list.append({
+                    "id": ap.id,
+                    "assessment_id": ap.assessment_id,
+                    "problem_index": ap.problem_index,
+                    "title": ap.title,
+                    "difficulty": ap.difficulty,
+                    "points": ap.points,
+                    "description": ap.description,
+                    "input_format": ap.input_format,
+                    "output_format": ap.output_format,
+                    "constraints": ap.constraints,
+                    "time_limit": ap.time_limit,
+                    "memory_limit": ap.memory_limit,
+                    "starter_codes": ap.starter_codes or {},
+                    "sample_testcases": ap.sample_testcases or [],
+                    "hidden_testcases": ap.hidden_testcases or [],
+                })
+
+        cp_list = []
+        for cp in contest_problems:
+            cp_list.append({
+                "id": cp.id,
+                "contest_id": cp.contest_id,
+                "problem_index": cp.problem_index,
+                "title": cp.title,
+                "topic": cp.topic,
+                "points": cp.points,
+                "difficulty": cp.difficulty or "MEDIUM",
+                "description": cp.description,
+                "input_format": cp.input_format,
+                "output_format": cp.output_format,
+                "constraints": cp.constraints,
+                "time_limit": cp.time_limit,
+                "memory_limit": cp.memory_limit,
+                "starter_codes": cp.starter_codes or {},
+                "sample_testcases": cp.sample_testcases or [],
+                "hidden_testcases": cp.hidden_testcases or [],
+                "solved_count": cp.solved_count,
+            })
+
+        contest_dict = {
+            "id": contest.id,
+            "slug": contest.slug,
+            "title": contest.title,
+            "season": contest.season,
+            "status": contest.status,
+            "division": contest.division,
+            "cadence": contest.cadence,
+            "edition": contest.edition,
+            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+            "check_in_opens_at": contest.check_in_opens_at.isoformat() if contest.check_in_opens_at else None,
+            "venue": contest.venue,
+            "seat_capacity": contest.seat_capacity,
+            "registered_count": contest.registered_count,
+            "problem_count": len(cp_list),
+            "environment": contest.environment,
+            "chief_proctors": contest.chief_proctors or [],
+            "prize_pool": contest.prize_pool,
+            "sponsor": contest.sponsor,
+            "summary": contest.summary,
+            "rules": contest.rules or [],
+            "banner_url": contest.banner_url,
+            "created_at": contest.created_at.isoformat() if contest.created_at else None,
+        }
+
+        return {
+            "contest": contest_dict,
+            "assessment": assessment_dict,
+            "contest_problems": cp_list,
+            "assessment_problems": assessment_problems_list,
+        }
+
+    @staticmethod
+    async def update_assessment(
+        contest_slug: str,
+        payload: AssessmentUpdateRequest,
+        db: AsyncSession,
+    ) -> Dict[str, Any]:
+        """Update or initialize Phase 1 screening assessment linked to a contest."""
+        c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
+        contest = c_res.scalars().first()
+        if not contest:
+            raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
+
+        a_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
+        assessment = a_res.scalars().first()
+
+        now = now_utc()
+        if not assessment:
+            starts_at = payload.starts_at or (contest.starts_at - timedelta(hours=24))
+            ends_at = payload.ends_at or contest.starts_at
+            assessment = Assessment(
+                contest_id=contest.id,
+                slug=f"{contest.slug}-assessment",
+                title=payload.title or f"{contest.title} — Online Screening Round",
+                summary=payload.summary or f"Phase 1 online qualification round for {contest.title}.",
+                duration_minutes=payload.duration_minutes or 90,
+                starts_at=starts_at,
+                ends_at=ends_at,
+                max_violations=payload.max_violations if payload.max_violations is not None else 3,
+                is_active=payload.is_active if payload.is_active is not None else True,
+                created_at=now,
+            )
+            db.add(assessment)
+        else:
+            if payload.title is not None:
+                assessment.title = payload.title
+            if payload.summary is not None:
+                assessment.summary = payload.summary
+            if payload.duration_minutes is not None:
+                assessment.duration_minutes = payload.duration_minutes
+            if payload.starts_at is not None:
+                assessment.starts_at = payload.starts_at
+            if payload.ends_at is not None:
+                assessment.ends_at = payload.ends_at
+            if payload.max_violations is not None:
+                assessment.max_violations = payload.max_violations
+            if payload.is_active is not None:
+                assessment.is_active = payload.is_active
+
+        await db.commit()
+        await delete_cache_pattern("cache:*")
+
+        return {
+            "success": True,
+            "message": "Screening assessment updated successfully.",
+            "assessment_id": assessment.id,
+            "slug": assessment.slug,
+            "title": assessment.title,
+            "duration_minutes": assessment.duration_minutes,
+            "is_active": assessment.is_active,
+        }
+
+    @staticmethod
     async def add_or_update_problem(
         contest_slug: str,
         problem_data: ProblemCreateSchema,
         db: AsyncSession,
+        target: str = "both",
     ) -> Dict[str, Any]:
-        """Add a new problem or replace an existing problem by index (A, B, C, D) in both arena & assessment."""
+        """Add a new problem or replace an existing problem by index (A-F) in arena, assessment, or both."""
         c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
         contest = c_res.scalars().first()
         if not contest:
@@ -362,51 +547,73 @@ class DynamicContestService:
         hidden_tcs = [tc.model_dump() for tc in problem_data.hidden_testcases]
         starter_codes = problem_data.starter_codes if problem_data.starter_codes else DynamicContestService._default_starter_codes(problem_data.title)
 
-        # 1. Update/Create ContestProblem
-        cp_res = await db.execute(
-            select(ContestProblem).where(
-                ContestProblem.contest_id == contest.id,
-                ContestProblem.problem_index == idx,
-            )
-        )
-        cp = cp_res.scalars().first()
-        if cp:
-            cp.title = problem_data.title
-            cp.topic = problem_data.topic or "Algorithms"
-            cp.points = problem_data.points
-            cp.difficulty = problem_data.difficulty
-            cp.description = problem_data.description
-            cp.input_format = problem_data.input_format
-            cp.output_format = problem_data.output_format
-            cp.constraints = problem_data.constraints
-            cp.time_limit = problem_data.time_limit
-            cp.memory_limit = problem_data.memory_limit
-            cp.starter_codes = starter_codes
-            cp.sample_testcases = sample_tcs
-            cp.hidden_testcases = hidden_tcs
-        else:
-            cp = ContestProblem(
-                contest_id=contest.id,
-                problem_index=idx,
-                title=problem_data.title,
-                topic=problem_data.topic or "Algorithms",
-                points=problem_data.points,
-                solved_count=0,
-                difficulty=problem_data.difficulty,
-                description=problem_data.description,
-                input_format=problem_data.input_format,
-                output_format=problem_data.output_format,
-                constraints=problem_data.constraints,
-                time_limit=problem_data.time_limit,
-                memory_limit=problem_data.memory_limit,
-                starter_codes=starter_codes,
-                sample_testcases=sample_tcs,
-                hidden_testcases=hidden_tcs,
-            )
-            db.add(cp)
+        norm_target = (target or "both").strip().lower()
 
-        # 2. Update/Create AssessmentProblem
-        if assessment:
+        # 1. Update/Create ContestProblem (if target is 'both' or 'contest')
+        if norm_target in ("both", "contest"):
+            cp_res = await db.execute(
+                select(ContestProblem).where(
+                    ContestProblem.contest_id == contest.id,
+                    ContestProblem.problem_index == idx,
+                )
+            )
+            cp = cp_res.scalars().first()
+            if cp:
+                cp.title = problem_data.title
+                cp.topic = problem_data.topic or "Algorithms"
+                cp.points = problem_data.points
+                cp.difficulty = problem_data.difficulty
+                cp.description = problem_data.description
+                cp.input_format = problem_data.input_format
+                cp.output_format = problem_data.output_format
+                cp.constraints = problem_data.constraints
+                cp.time_limit = problem_data.time_limit
+                cp.memory_limit = problem_data.memory_limit
+                cp.starter_codes = starter_codes
+                cp.sample_testcases = sample_tcs
+                cp.hidden_testcases = hidden_tcs
+            else:
+                cp = ContestProblem(
+                    contest_id=contest.id,
+                    problem_index=idx,
+                    title=problem_data.title,
+                    topic=problem_data.topic or "Algorithms",
+                    points=problem_data.points,
+                    solved_count=0,
+                    difficulty=problem_data.difficulty,
+                    description=problem_data.description,
+                    input_format=problem_data.input_format,
+                    output_format=problem_data.output_format,
+                    constraints=problem_data.constraints,
+                    time_limit=problem_data.time_limit,
+                    memory_limit=problem_data.memory_limit,
+                    starter_codes=starter_codes,
+                    sample_testcases=sample_tcs,
+                    hidden_testcases=hidden_tcs,
+                )
+                db.add(cp)
+
+        # 2. Update/Create AssessmentProblem (if target is 'both' or 'assessment')
+        if norm_target in ("both", "assessment"):
+            if not assessment:
+                # Automatically create assessment if not yet initialized
+                starts_at = contest.starts_at - timedelta(hours=24)
+                ends_at = contest.starts_at
+                assessment = Assessment(
+                    contest_id=contest.id,
+                    slug=f"{contest.slug}-assessment",
+                    title=f"{contest.title} — Online Screening Round",
+                    summary=f"Phase 1 online qualification round for {contest.title}.",
+                    duration_minutes=90,
+                    starts_at=starts_at,
+                    ends_at=ends_at,
+                    max_violations=3,
+                    is_active=True,
+                    created_at=now_utc(),
+                )
+                db.add(assessment)
+                await db.flush()
+
             ap_res = await db.execute(
                 select(AssessmentProblem).where(
                     AssessmentProblem.assessment_id == assessment.id,
@@ -449,7 +656,7 @@ class DynamicContestService:
 
         await db.flush()
 
-        # Recount total problems
+        # Recount total problems in contest arena
         count_res = await db.execute(select(ContestProblem).where(ContestProblem.contest_id == contest.id))
         contest.problem_count = len(count_res.scalars().all())
 
@@ -462,8 +669,9 @@ class DynamicContestService:
 
         return {
             "success": True,
-            "message": f"Problem '{idx}' ({problem_data.title}) updated successfully for {contest_slug}.",
+            "message": f"Problem '{idx}' ({problem_data.title}) updated successfully for {contest_slug} (target: {norm_target}).",
             "problem_index": idx,
+            "target": norm_target,
             "problem_count": contest.problem_count,
         }
 
@@ -472,32 +680,37 @@ class DynamicContestService:
         contest_slug: str,
         problem_index: str,
         db: AsyncSession,
+        target: str = "both",
     ) -> Dict[str, Any]:
-        """Delete a specific problem index from both arena and assessment."""
+        """Delete a specific problem index from arena, assessment, or both."""
         idx = problem_index.strip().upper()
         c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
         contest = c_res.scalars().first()
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
 
-        # Delete ContestProblem
-        await db.execute(
-            delete(ContestProblem).where(
-                ContestProblem.contest_id == contest.id,
-                ContestProblem.problem_index == idx,
-            )
-        )
+        norm_target = (target or "both").strip().lower()
 
-        # Delete AssessmentProblem
-        a_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
-        assessment = a_res.scalars().first()
-        if assessment:
+        # Delete ContestProblem
+        if norm_target in ("both", "contest"):
             await db.execute(
-                delete(AssessmentProblem).where(
-                    AssessmentProblem.assessment_id == assessment.id,
-                    AssessmentProblem.problem_index == idx,
+                delete(ContestProblem).where(
+                    ContestProblem.contest_id == contest.id,
+                    ContestProblem.problem_index == idx,
                 )
             )
+
+        # Delete AssessmentProblem
+        if norm_target in ("both", "assessment"):
+            a_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
+            assessment = a_res.scalars().first()
+            if assessment:
+                await db.execute(
+                    delete(AssessmentProblem).where(
+                        AssessmentProblem.assessment_id == assessment.id,
+                        AssessmentProblem.problem_index == idx,
+                    )
+                )
 
         await db.flush()
 
@@ -514,8 +727,147 @@ class DynamicContestService:
 
         return {
             "success": True,
-            "message": f"Problem '{idx}' removed from '{contest_slug}'.",
+            "message": f"Problem '{idx}' removed from '{contest_slug}' (target: {norm_target}).",
+            "target": norm_target,
             "remaining_problem_count": contest.problem_count,
+        }
+
+    @staticmethod
+    async def sync_problems(
+        contest_slug: str,
+        direction: str,
+        db: AsyncSession,
+    ) -> Dict[str, Any]:
+        """Sync questions between Contest Arena and Screening Assessment."""
+        c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
+        contest = c_res.scalars().first()
+        if not contest:
+            raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
+
+        a_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
+        assessment = a_res.scalars().first()
+        if not assessment:
+            # Create assessment automatically if missing
+            starts_at = contest.starts_at - timedelta(hours=24)
+            ends_at = contest.starts_at
+            assessment = Assessment(
+                contest_id=contest.id,
+                slug=f"{contest.slug}-assessment",
+                title=f"{contest.title} — Online Screening Round",
+                summary=f"Phase 1 online qualification round for {contest.title}.",
+                duration_minutes=90,
+                starts_at=starts_at,
+                ends_at=ends_at,
+                max_violations=3,
+                is_active=True,
+                created_at=now_utc(),
+            )
+            db.add(assessment)
+            await db.flush()
+
+        direction = (direction or "contest_to_assessment").strip().lower()
+
+        if direction == "contest_to_assessment":
+            cps_res = await db.execute(select(ContestProblem).where(ContestProblem.contest_id == contest.id))
+            cps = cps_res.scalars().all()
+            for cp in cps:
+                ap_res = await db.execute(
+                    select(AssessmentProblem).where(
+                        AssessmentProblem.assessment_id == assessment.id,
+                        AssessmentProblem.problem_index == cp.problem_index,
+                    )
+                )
+                ap = ap_res.scalars().first()
+                if ap:
+                    ap.title = cp.title
+                    ap.difficulty = cp.difficulty or "MEDIUM"
+                    ap.points = cp.points
+                    ap.description = cp.description or ""
+                    ap.input_format = cp.input_format
+                    ap.output_format = cp.output_format
+                    ap.constraints = cp.constraints
+                    ap.time_limit = cp.time_limit
+                    ap.memory_limit = cp.memory_limit
+                    ap.starter_codes = cp.starter_codes or {}
+                    ap.sample_testcases = cp.sample_testcases or []
+                    ap.hidden_testcases = cp.hidden_testcases or []
+                else:
+                    ap = AssessmentProblem(
+                        assessment_id=assessment.id,
+                        problem_index=cp.problem_index,
+                        title=cp.title,
+                        difficulty=cp.difficulty or "MEDIUM",
+                        description=cp.description or "",
+                        input_format=cp.input_format,
+                        output_format=cp.output_format,
+                        constraints=cp.constraints,
+                        points=cp.points,
+                        time_limit=cp.time_limit,
+                        memory_limit=cp.memory_limit,
+                        starter_codes=cp.starter_codes or {},
+                        sample_testcases=cp.sample_testcases or [],
+                        hidden_testcases=cp.hidden_testcases or [],
+                        created_at=now_utc(),
+                    )
+                    db.add(ap)
+
+        elif direction == "assessment_to_contest":
+            aps_res = await db.execute(select(AssessmentProblem).where(AssessmentProblem.assessment_id == assessment.id))
+            aps = aps_res.scalars().all()
+            for ap in aps:
+                cp_res = await db.execute(
+                    select(ContestProblem).where(
+                        ContestProblem.contest_id == contest.id,
+                        ContestProblem.problem_index == ap.problem_index,
+                    )
+                )
+                cp = cp_res.scalars().first()
+                if cp:
+                    cp.title = ap.title
+                    cp.difficulty = ap.difficulty
+                    cp.points = ap.points
+                    cp.description = ap.description
+                    cp.input_format = ap.input_format
+                    cp.output_format = ap.output_format
+                    cp.constraints = ap.constraints
+                    cp.time_limit = ap.time_limit
+                    cp.memory_limit = ap.memory_limit
+                    cp.starter_codes = ap.starter_codes or {}
+                    cp.sample_testcases = ap.sample_testcases or []
+                    cp.hidden_testcases = ap.hidden_testcases or []
+                else:
+                    cp = ContestProblem(
+                        contest_id=contest.id,
+                        problem_index=ap.problem_index,
+                        title=ap.title,
+                        topic="Algorithms",
+                        points=ap.points,
+                        solved_count=0,
+                        difficulty=ap.difficulty,
+                        description=ap.description,
+                        input_format=ap.input_format,
+                        output_format=ap.output_format,
+                        constraints=ap.constraints,
+                        time_limit=ap.time_limit,
+                        memory_limit=ap.memory_limit,
+                        starter_codes=ap.starter_codes or {},
+                        sample_testcases=ap.sample_testcases or [],
+                        hidden_testcases=ap.hidden_testcases or [],
+                    )
+                    db.add(cp)
+
+            await db.flush()
+            count_res = await db.execute(select(ContestProblem).where(ContestProblem.contest_id == contest.id))
+            contest.problem_count = len(count_res.scalars().all())
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid sync direction '{direction}'.")
+
+        await db.commit()
+        await delete_cache_pattern("cache:*")
+
+        return {
+            "success": True,
+            "message": f"Problems synchronized successfully ({direction}).",
         }
 
     @staticmethod

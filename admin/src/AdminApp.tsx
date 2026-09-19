@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Toaster, toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { QrCode, Users, Layers, Radio, ShieldAlert, Monitor, CheckCircle2, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { QrCode, Users, Layers, Radio, ShieldAlert, Monitor, CheckCircle2, AlertTriangle, ArrowUpRight, Trophy } from "lucide-react";
 import { AdminHeader } from "@admin/components/AdminHeader";
 import { GateScannerPanel } from "@admin/components/GateScannerPanel";
 import { AttendeesPanel } from "@admin/components/AttendeesPanel";
 import { ContestOperationsPanel } from "@admin/components/ContestOperationsPanel";
+import { ContestManagerPanel } from "@admin/components/ContestManagerPanel";
 import { WebhooksMonitorPanel } from "@admin/components/WebhooksMonitorPanel";
 import { AdminLoginModal } from "@admin/components/AdminLoginModal";
 import { useRealtimeEvents } from "@/lib/realtime";
@@ -212,6 +213,14 @@ export function AdminApp() {
                 </TabsTrigger>
 
                 <TabsTrigger
+                  value="contests"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                >
+                  <Trophy className="w-3.5 h-3.5" />
+                  Contest Manager
+                </TabsTrigger>
+
+                <TabsTrigger
                   value="webhooks"
                   className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
                 >
@@ -252,7 +261,12 @@ export function AdminApp() {
                 />
               </TabsContent>
 
-              {/* 4. Webhooks & Event Monitor */}
+              {/* 4. Full Contest CRUD & Assessment/Question Manager */}
+              <TabsContent value="contests" className="focus-visible:outline-none">
+                <ContestManagerPanel onContestListChanged={loadContests} />
+              </TabsContent>
+
+              {/* 5. Webhooks & Event Monitor */}
               <TabsContent value="webhooks" className="focus-visible:outline-none">
                 <WebhooksMonitorPanel eventsLog={eventsLog} />
               </TabsContent>
