@@ -176,22 +176,43 @@ class PassService:
                     )
                     reg_res = await db.execute(reg_stmt)
                     reg = reg_res.scalars().first()
-                    if not reg:
-                        reg = ContestRegistration(
-                            contest_id=target_contest.id,
-                            member_id=member.id,
-                            status="confirmed",
-                        )
-                        db.add(reg)
-                        target_contest.registered_count += 1
 
-                    if not c_pass:
+                    # Air-Gap Security Gate Rule:
+                    # 1. Candidate took assessment and scored outside Top 30 -> STRICT DENIAL
+                    if reg and (reg.is_top_30_qualified is False or (reg.assessment_rank and reg.assessment_rank > 30)):
+                        return PassVerifyResponse(
+                            valid=False,
+                            status="not_qualified",
+                            message=f"Access Denied: Candidate {member.full_name} (@{member.handle}) scored rank #{reg.assessment_rank or 31} ({reg.assessment_score or 0} pts), which is below the Top 30 finalist cutoff. Physical lab access is restricted strictly to Top 30 finalists.",
+                            handle=member.handle,
+                            candidate_name=member.full_name or member.handle,
+                            department=member.department or "CSE",
+                            qualification_rank=reg.assessment_rank,
+                            screening_score=reg.assessment_score,
+                            contest_title=target_contest.title,
+                            contest_slug=target_contest.slug,
+                        )
+
+                    # 2. Candidate is not registered for this contest -> STRICT DENIAL
+                    if not reg:
+                        return PassVerifyResponse(
+                            valid=False,
+                            status="unregistered",
+                            message=f"Access Denied: Candidate {member.full_name} (@{member.handle}) is not registered for contest '{target_contest.title}'.",
+                            handle=member.handle,
+                            candidate_name=member.full_name or member.handle,
+                            department=member.department or "CSE",
+                            contest_title=target_contest.title,
+                            contest_slug=target_contest.slug,
+                        )
+
+                    if not c_pass and reg.is_top_30_qualified:
                         cnt_stmt = select(CampusPass).where(CampusPass.contest_id == target_contest.id)
                         cnt_res = await db.execute(cnt_stmt)
                         pass_count = len(cnt_res.scalars().all())
-                        seat_num = f"LAB-04-PC{pass_count + 1:02d}"
+                        seat_num = reg.seat_assigned or f"LAB-04-PC{pass_count + 1:02d}"
                         contest_pfx = target_contest.slug[:8].upper()
-                        gen_pass_code = f"CCC-{contest_pfx}-{(member.handle or 'CADET')[:4].upper()}-{pass_count + 1:02d}"
+                        gen_pass_code = reg.campus_pass_code or f"CCC-{contest_pfx}-{(member.handle or 'CADET')[:4].upper()}-{pass_count + 1:02d}"
                         qr_payload = f"CCC-PASS:{gen_pass_code}:{member.id}:{seat_num}:QUALIFIED"
 
                         c_pass = CampusPass(
@@ -205,10 +226,10 @@ class PassService:
                         db.add(c_pass)
                         reg.campus_pass_code = gen_pass_code
                         reg.seat_assigned = seat_num
-                        reg.is_top_30_qualified = True
                         await db.flush()
 
-                    row = (c_pass, target_contest, member)
+                    if c_pass:
+                        row = (c_pass, target_contest, member)
 
         if not row:
             return PassVerifyResponse(

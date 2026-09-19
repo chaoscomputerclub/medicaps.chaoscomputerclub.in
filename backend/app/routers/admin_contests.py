@@ -5,7 +5,7 @@ Endpoints for creating, updating, cloning, configuring, and publishing campus co
 
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -16,10 +16,13 @@ from app.models.db_models import (
     OfflineContest,
     ContestRegistration,
     CampusPass,
+    Assessment,
+    AssessmentSession,
     now_utc,
 )
 from app.schemas.campus_pass import ContestAttendeeItem
 from app.services.pass_service import PassService
+from app.services.assessment_service import AssessmentService
 from app.schemas.dynamic_contest import (
     DynamicContestCreateRequest,
     DynamicContestUpdateRequest,
@@ -448,4 +451,174 @@ async def seed_demo_participants(
         "added_count": added,
         "total_registered": contest.registered_count,
     }
+
+
+@router.post(
+    "/{slug}/simulate-100-cadets",
+    summary="Production deep dive simulation: 100 cadets, Phase 1 screening, Top 30 QR issuance, and 70 eliminated",
+)
+async def simulate_100_cadets(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """
+    Automated deep dive simulation:
+    1. Generates 100 realistic Medi-Caps student users with Indian names, PRNs, emails, and ratings.
+    2. Registers all 100 for the contest.
+    3. Completes Phase 1 screening assessment for all 100 cadets with deterministic score & penalty distributions.
+    4. Evaluates Top 30 finalists: exactly 30 receive is_top_30_qualified=True and CampusPass records with seats LAB-04-PC01 to LAB-04-PC30.
+    5. The remaining 70 cadets are marked is_top_30_qualified=False with ZERO passes.
+    """
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+    # 1. Purge previous registrations & passes for this contest to ensure clean state
+    await db.execute(delete(CampusPass).where(CampusPass.contest_id == contest.id))
+    await db.execute(delete(ContestRegistration).where(ContestRegistration.contest_id == contest.id))
+
+    assessment, _ = await AssessmentService.get_or_create_assessment_for_contest(contest.slug, db)
+    await db.execute(delete(AssessmentSession).where(AssessmentSession.assessment_id == assessment.id))
+    contest.registered_count = 0
+    await db.commit()
+
+    FIRST_NAMES = [
+        "Aarav", "Priya", "Rohan", "Ananya", "Vikram", "Sneha", "Dev", "Ishita", "Kabir", "Riya",
+        "Aditya", "Tanvi", "Siddharth", "Meera", "Aryan", "Diya", "Yash", "Pooja", "Varun", "Shreya",
+        "Aman", "Neha", "Karan", "Natasha", "Arjun", "Kriti", "Rahul", "Simran", "Nikhil", "Avani",
+        "Gaurav", "Swati", "Rajat", "Alia", "Manish", "Divya", "Tarun", "Bhavna", "Kunal", "Payal",
+        "Sameer", "Tara", "Harsh", "Sakshi", "Abhishek", "Ritika", "Pranav", "Kavya", "Mohit", "Deepika"
+    ]
+    LAST_NAMES = [
+        "Sharma", "Patel", "Verma", "Singh", "Aditya", "Reddy", "Malhotra", "Gupta", "Joshi", "Sen",
+        "Rao", "Bhat", "Nair", "Iyer", "Kapoor", "Mehta", "Kulkarni", "Hegde", "Dhawan", "Ghoshal"
+    ]
+
+    all_members = []
+    for i in range(1, 101):
+        dept = "CSE" if i <= 40 else "IT" if i <= 65 else "Cyber Security" if i <= 85 else "AIDS"
+        code_pfx = "CS" if i <= 40 else "IT" if i <= 65 else "CY" if i <= 85 else "AI"
+        prn = f"EN23{code_pfx}301{i:03d}"
+        first_name = FIRST_NAMES[(i - 1) % len(FIRST_NAMES)]
+        last_name = LAST_NAMES[((i - 1) * 3) % len(LAST_NAMES)]
+        full_name = f"{first_name} {last_name}"
+        handle = f"{first_name.lower()}_{i:03d}"
+        email = f"{first_name.lower()}.{i:03d}@medicaps.ac.in"
+
+        if i <= 10:
+            score = round(99.5 - (i - 1) * 0.75, 1)
+        elif i <= 30:
+            score = round(91.0 - (i - 11) * 0.95, 1)
+        elif i <= 70:
+            score = round(71.0 - (i - 31) * 0.75, 1)
+        else:
+            score = round(40.0 - (i - 71) * 1.0, 1)
+
+        penalty = 600 + i * 95
+
+        m_res = await db.execute(select(MemberProfile).where(MemberProfile.handle == handle))
+        member = m_res.scalars().first()
+        if not member:
+            member = MemberProfile(
+                handle=handle,
+                full_name=full_name,
+                email=email,
+                prn=prn,
+                department=dept,
+                batch="2023-27" if i % 2 == 0 else "2024-28",
+                rating=1200 + int(score * 6),
+                is_onboarded=True,
+            )
+            db.add(member)
+            await db.flush()
+        else:
+            member.full_name = full_name
+            member.email = email
+            member.prn = prn
+            member.department = dept
+
+        all_members.append((member, score, penalty))
+
+        reg = ContestRegistration(
+            contest_id=contest.id,
+            member_id=member.id,
+            status="confirmed",
+            registered_at=now_utc(),
+            assessment_taken=True,
+            assessment_score=score,
+        )
+        db.add(reg)
+
+        session = AssessmentSession(
+            assessment_id=assessment.id,
+            member_id=member.id,
+            handle=member.handle,
+            full_name=member.full_name,
+            department=dept,
+            batch=member.batch or "2023-27",
+            started_at=now_utc(),
+            submitted_at=now_utc(),
+            status="submitted",
+            total_score=score,
+            total_penalty_seconds=penalty,
+            anti_cheat_violations=0,
+            is_top_30_qualified=False,
+        )
+        db.add(session)
+
+    contest.registered_count = 100
+    await db.commit()
+
+    qual_res = await AssessmentService.evaluate_and_qualify_top_30(contest.slug, db)
+
+    top_passes_res = await db.execute(
+        select(CampusPass).where(CampusPass.contest_id == contest.id).order_by(CampusPass.seat_number.asc())
+    )
+    passes = top_passes_res.scalars().all()
+
+    return {
+        "status": "success",
+        "contest_slug": contest.slug,
+        "contest_title": contest.title,
+        "total_cadets_registered": 100,
+        "total_assessments_submitted": 100,
+        "top_30_qualified_count": len(passes),
+        "eliminated_unqualified_count": 100 - len(passes),
+        "qualifier_rank_1": {
+            "handle": all_members[0][0].handle,
+            "name": all_members[0][0].full_name,
+            "prn": all_members[0][0].prn,
+            "score": all_members[0][1],
+            "seat_number": "LAB-04-PC01",
+            "pass_code": passes[0].pass_code if passes else None,
+            "qr_data": passes[0].qr_data if passes else None,
+        },
+        "cutoff_rank_30": {
+            "handle": all_members[29][0].handle,
+            "name": all_members[29][0].full_name,
+            "prn": all_members[29][0].prn,
+            "score": all_members[29][1],
+            "seat_number": "LAB-04-PC30",
+            "pass_code": passes[29].pass_code if len(passes) >= 30 else None,
+        },
+        "eliminated_rank_31": {
+            "handle": all_members[30][0].handle,
+            "name": all_members[30][0].full_name,
+            "prn": all_members[30][0].prn,
+            "score": all_members[30][1],
+            "is_top_30_qualified": False,
+            "has_pass": False,
+        },
+        "last_cadet_rank_100": {
+            "handle": all_members[99][0].handle,
+            "name": all_members[99][0].full_name,
+            "prn": all_members[99][0].prn,
+            "score": all_members[99][1],
+            "is_top_30_qualified": False,
+            "has_pass": False,
+        },
+    }
+
 

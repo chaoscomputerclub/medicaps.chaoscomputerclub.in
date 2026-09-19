@@ -9,6 +9,9 @@ export default defineConfig({
     port: 8081,
     host: true,
   },
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-router-dom", "react-redux", "@reduxjs/toolkit"],
+  },
   define: {
     "process.env": {},
   },

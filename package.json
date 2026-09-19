@@ -4,8 +4,8 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 8081",
-    "dev:admin": "vite dev --config vite.admin.config.ts --port 8082",
+    "dev": "vite dev --port 8081 --force",
+    "dev:admin": "vite dev --config vite.admin.config.ts --port 8082 --force",
     "build": "vite build",
     "build:admin": "vite build --config vite.admin.config.ts",
     "build:dev": "vite build --mode development",
