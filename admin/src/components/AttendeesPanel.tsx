@@ -1,5 +1,17 @@
 import { useState, useMemo } from "react";
-import { Users, Search, CheckCircle2, Clock, MapPin, UserCheck, Download, Zap, RefreshCw } from "lucide-react";
+import {
+  Users,
+  Search,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Download,
+  Zap,
+  RefreshCw,
+  MonitorCheck,
+  UserCheck,
+  ShieldAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +43,8 @@ export function AttendeesPanel({
     const total = attendees.length;
     const checkedIn = attendees.filter((a) => a.check_in_status === "checked_in").length;
     const pending = total - checkedIn;
-    return { total, checkedIn, pending };
+    const rate = total > 0 ? Math.round((checkedIn / total) * 100) : 0;
+    return { total, checkedIn, pending, rate };
   }, [attendees]);
 
   const filteredAttendees = useMemo(() => {
@@ -63,7 +76,11 @@ export function AttendeesPanel({
         selectedContestSlug
       );
       if (res.valid) {
-        toast.success(`Manually admitted ${attendee.member_name || attendee.handle} to seat ${res.seat_number || attendee.seat_number}`);
+        toast.success(
+          `Manually admitted ${attendee.member_name || attendee.handle} to workstation ${
+            res.seat_number || attendee.seat_number
+          }`
+        );
         onRefresh();
       } else {
         toast.error(`Check-in failed: ${res.reason || "Invalid pass"}`);
@@ -80,21 +97,32 @@ export function AttendeesPanel({
       toast.error("No attendees to export.");
       return;
     }
-    const headers = ["Seat Number", "Pass Code", "Name", "Handle", "Department", "Status", "Checked In At"];
+    const headers = [
+      "Seat Number",
+      "Pass Code",
+      "Full Name",
+      "Handle",
+      "Enrollment Number",
+      "Department",
+      "Status",
+      "Checked In At",
+    ];
     const rows = attendees.map((a) => [
       a.seat_number || "N/A",
       a.pass_code || "N/A",
       `"${a.member_name || a.full_name || ""}"`,
       a.handle || "",
+      a.enrollment_number || "N/A",
       a.department || "CSE",
       a.check_in_status || "issued",
       a.checked_in_at || "N/A",
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `ccc_${selectedContestSlug}_attendees.csv`);
+    link.setAttribute("download", `ccc_${selectedContestSlug}_attendee_roster.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -102,48 +130,93 @@ export function AttendeesPanel({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 bg-[#0c0c0c] border border-white/10 rounded-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs text-zinc-400 uppercase">Total Qualified Cadets</span>
-            <Users className="w-4 h-4 text-zinc-500" />
+    <div className="space-y-6 font-mono">
+      {/* Metrics Row - Tactical Bento Counters */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        {/* Total Finalists */}
+        <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-zinc-400">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
+              (01 // ROSTER CAPACITY)
+            </span>
+            <Users className="w-4 h-4 text-zinc-400" />
           </div>
-          <div className="text-2xl font-mono font-bold text-white mt-1">{stats.total}</div>
-          <span className="text-[11px] font-mono text-zinc-500">Allocated physical seats</span>
+          <div className="text-3xl font-extrabold text-white tracking-tight tabular-nums">
+            {stats.total}
+          </div>
+          <div className="text-[11px] text-zinc-400">
+            Physical workstations configured
+          </div>
         </div>
 
-        <div className="p-4 bg-[#0c0c0c] border border-emerald-500/30 rounded-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs text-emerald-400 uppercase">Checked In / Admitted</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        {/* Admitted Cadets */}
+        <div className="p-4 bg-zinc-950 border border-lime-400/30 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-lime-400">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-lime-400">
+              (02 // ADMITTED CADETS)
+            </span>
+            <CheckCircle2 className="w-4 h-4 text-lime-400" />
           </div>
-          <div className="text-2xl font-mono font-bold text-emerald-400 mt-1">{stats.checkedIn}</div>
-          <span className="text-[11px] font-mono text-emerald-500/70">
-            {stats.total > 0 ? `${Math.round((stats.checkedIn / stats.total) * 100)}% attendance` : "0% attendance"}
-          </span>
+          <div className="text-3xl font-extrabold text-lime-400 tracking-tight tabular-nums">
+            {stats.checkedIn}
+          </div>
+          <div className="text-[11px] text-lime-400/80">
+            Verified gate pass clearances
+          </div>
         </div>
 
-        <div className="p-4 bg-[#0c0c0c] border border-amber-500/30 rounded-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs text-amber-400 uppercase">Pending Gate Entry</span>
+        {/* Pending Scan */}
+        <div className="p-4 bg-zinc-950 border border-amber-400/30 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-amber-400">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400">
+              (03 // AWAITING ENTRY)
+            </span>
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-2xl font-mono font-bold text-amber-400 mt-1">{stats.pending}</div>
-          <span className="text-[11px] font-mono text-amber-500/70">Awaiting QR scan at gate</span>
+          <div className="text-3xl font-extrabold text-amber-400 tracking-tight tabular-nums">
+            {stats.pending}
+          </div>
+          <div className="text-[11px] text-amber-400/80">
+            Not yet scanned at gate kiosk
+          </div>
+        </div>
+
+        {/* Lab Attendance Rate */}
+        <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-zinc-400">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
+              (04 // OCCUPANCY RATE)
+            </span>
+            <MonitorCheck className="w-4 h-4 text-cyan-400" />
+          </div>
+          <div className="text-3xl font-extrabold text-cyan-400 tracking-tight tabular-nums">
+            {stats.rate}%
+          </div>
+          <div className="w-full bg-zinc-900 h-1.5 rounded-none overflow-hidden mt-1">
+            <div
+              className="bg-lime-400 h-full transition-all duration-300 rounded-none"
+              style={{ width: `${stats.rate}%` }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Roster Table Card */}
-      <Card className="bg-[#0c0c0c] border-white/10 rounded-sm">
+      {/* Main Roster Card */}
+      <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl">
         <CardHeader className="border-b border-white/10 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-red-400" />
-              <CardTitle className="font-mono text-sm tracking-wide uppercase text-white font-bold">
-                Workstation Allocation & Attendee Roster
-              </CardTitle>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-none bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div>
+                <CardTitle className="font-mono text-sm tracking-wide uppercase text-white font-bold">
+                  Workstation Allocation & Attendee Roster
+                </CardTitle>
+                <p className="text-[11px] text-zinc-400">
+                  Air-gapped lab seat manifests and cryptographic admission logs
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -151,9 +224,9 @@ export function AttendeesPanel({
                 variant="outline"
                 size="sm"
                 onClick={handleExportCsv}
-                className="h-8 border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 font-mono text-xs"
+                className="h-8 border-white/15 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs uppercase font-bold tracking-wider rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
               >
-                <Download className="w-3.5 h-3.5 mr-1.5" />
+                <Download className="w-3.5 h-3.5 mr-1.5 text-lime-400" />
                 Export CSV
               </Button>
               <Button
@@ -161,32 +234,39 @@ export function AttendeesPanel({
                 size="sm"
                 onClick={onRefresh}
                 disabled={isLoading}
-                className="h-8 border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 font-mono text-xs"
+                className="h-8 border-white/15 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs uppercase font-bold tracking-wider rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
               >
-                <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-3.5 h-3.5 mr-1.5 text-lime-400 ${
+                    isLoading ? "animate-spin" : ""
+                  }`}
+                />
                 Refresh
               </Button>
             </div>
           </div>
 
           {/* Search & Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3">
-            <div className="relative w-full sm:w-80">
-              <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search name, handle, seat or pass..."
-                className="pl-9 bg-black border-zinc-800 text-xs font-mono text-white placeholder:text-zinc-600 rounded-none h-9"
+                placeholder="Search cadet, handle, seat or pass code..."
+                className="pl-9 bg-black border-white/15 text-base sm:text-xs font-mono text-white placeholder:text-zinc-600 rounded-none h-10 focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:border-lime-400"
               />
             </div>
 
-            <div className="flex items-center gap-1 w-full sm:w-auto bg-zinc-900 p-1 rounded-sm border border-zinc-800">
+            {/* Brutalist Segmented Filter Tabs */}
+            <div className="flex items-center bg-black p-1 border border-white/15 rounded-none">
               <button
                 type="button"
                 onClick={() => setFilter("all")}
-                className={`px-3 py-1 text-xs font-mono rounded-none ${
-                  filter === "all" ? "bg-red-600 text-white font-bold" : "text-zinc-400 hover:text-white"
+                className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors ${
+                  filter === "all"
+                    ? "bg-lime-400 text-black shadow-sm"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                 }`}
               >
                 All ({stats.total})
@@ -194,17 +274,21 @@ export function AttendeesPanel({
               <button
                 type="button"
                 onClick={() => setFilter("checked_in")}
-                className={`px-3 py-1 text-xs font-mono rounded-none ${
-                  filter === "checked_in" ? "bg-emerald-600 text-white font-bold" : "text-zinc-400 hover:text-white"
+                className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors ${
+                  filter === "checked_in"
+                    ? "bg-lime-400 text-black shadow-sm"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                 }`}
               >
-                Checked In ({stats.checkedIn})
+                Admitted ({stats.checkedIn})
               </button>
               <button
                 type="button"
                 onClick={() => setFilter("issued")}
-                className={`px-3 py-1 text-xs font-mono rounded-none ${
-                  filter === "issued" ? "bg-amber-600 text-white font-bold" : "text-zinc-400 hover:text-white"
+                className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors ${
+                  filter === "issued"
+                    ? "bg-lime-400 text-black shadow-sm"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                 }`}
               >
                 Pending ({stats.pending})
@@ -215,75 +299,133 @@ export function AttendeesPanel({
 
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-zinc-950/60 font-mono text-xs border-b border-zinc-800">
-              <TableRow className="border-zinc-800 hover:bg-transparent">
-                <TableHead className="text-zinc-400 font-mono">Workstation Seat</TableHead>
-                <TableHead className="text-zinc-400 font-mono">Cadet</TableHead>
-                <TableHead className="text-zinc-400 font-mono">Pass Code</TableHead>
-                <TableHead className="text-zinc-400 font-mono">Gate Status</TableHead>
-                <TableHead className="text-zinc-400 font-mono text-right">Action</TableHead>
+            <TableHeader className="bg-black font-mono text-xs border-b border-white/10">
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="text-zinc-400 font-mono uppercase tracking-wider text-[11px]">
+                  Workstation
+                </TableHead>
+                <TableHead className="text-zinc-400 font-mono uppercase tracking-wider text-[11px]">
+                  Cadet Dossier
+                </TableHead>
+                <TableHead className="text-zinc-400 font-mono uppercase tracking-wider text-[11px]">
+                  Pass Code
+                </TableHead>
+                <TableHead className="text-zinc-400 font-mono uppercase tracking-wider text-[11px]">
+                  Gate Clearance
+                </TableHead>
+                <TableHead className="text-zinc-400 font-mono uppercase tracking-wider text-[11px] text-right">
+                  Proctor Action
+                </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="font-mono text-xs">
+            <TableBody className="font-mono text-xs divide-y divide-white/5">
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-zinc-500 font-mono">
-                    Loading attendee roster...
+                  <TableCell colSpan={5} className="text-center py-16 text-zinc-400 font-mono">
+                    <div className="flex items-center justify-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-lime-400" />
+                      <span>Reading encrypted cadet manifests...</span>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : filteredAttendees.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-zinc-500 font-mono">
-                    No attendees match the criteria.
+                  <TableCell colSpan={5} className="text-center py-16 text-zinc-400 font-mono">
+                    No cadets matched the active filter criteria.
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredAttendees.map((a, idx) => {
                   const isCheckedIn = a.check_in_status === "checked_in";
                   return (
-                    <TableRow key={a.id || a.pass_code || idx} className="border-zinc-800 hover:bg-zinc-900/40">
-                      <TableCell className="font-bold text-white">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className={`w-3.5 h-3.5 ${isCheckedIn ? "text-emerald-400" : "text-zinc-600"}`} />
-                          <span className={isCheckedIn ? "text-emerald-300" : "text-zinc-300"}>
+                    <TableRow
+                      key={a.id || a.pass_code || idx}
+                      className="border-white/5 hover:bg-zinc-900/50 transition-colors"
+                    >
+                      {/* Workstation Seat */}
+                      <TableCell className="font-bold py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`px-2 py-1 text-xs font-mono font-extrabold tracking-wider border rounded-none ${
+                              isCheckedIn
+                                ? "bg-lime-400/10 border-lime-400/30 text-lime-400"
+                                : "bg-zinc-900/80 border-white/10 text-zinc-400"
+                            }`}
+                          >
                             {a.seat_number || "UNASSIGNED"}
-                          </span>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-white font-medium">{a.member_name || a.full_name || a.handle}</div>
-                        <div className="text-zinc-500 text-[11px]">@{a.handle} · {a.department || "CSE"}</div>
+
+                      {/* Cadet Identity */}
+                      <TableCell className="py-3.5">
+                        <div className="text-white font-bold tracking-wide">
+                          {a.member_name || a.full_name || a.handle}
+                        </div>
+                        <div className="text-zinc-400 text-[11px] flex items-center gap-2 mt-0.5">
+                          <span className="text-lime-400/80">@{a.handle}</span>
+                          <span>•</span>
+                          <span>{a.department || "CSE"}</span>
+                          {a.enrollment_number && (
+                            <>
+                              <span>•</span>
+                              <span className="text-zinc-400">{a.enrollment_number}</span>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-zinc-400 text-[11px] font-mono">
-                        {a.pass_code}
+
+                      {/* Pass Code */}
+                      <TableCell className="text-zinc-400 text-[11px] font-mono py-3.5">
+                        <span className="px-2 py-0.5 bg-black border border-white/10 text-zinc-300 select-all">
+                          {a.pass_code || "—"}
+                        </span>
                       </TableCell>
-                      <TableCell>
+
+                      {/* Gate Status Badge */}
+                      <TableCell className="py-3.5">
                         {isCheckedIn ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[10px] font-mono">
-                            CHECKED IN
+                          <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/30 text-[10px] font-mono font-bold uppercase rounded-none tracking-wider px-2 py-0.5">
+                            ADMITTED
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-zinc-900 text-amber-400 border-amber-500/30 text-[10px] font-mono">
+                          <Badge
+                            variant="outline"
+                            className="bg-amber-400/10 text-amber-400 border-amber-400/30 text-[10px] font-mono font-bold uppercase rounded-none tracking-wider px-2 py-0.5"
+                          >
                             AWAITING SCAN
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+
+                      {/* Proctor Action / Timestamp */}
+                      <TableCell className="text-right py-3.5">
                         {!isCheckedIn ? (
                           <Button
                             size="sm"
                             variant="outline"
                             disabled={checkingInId === (a.pass_code || a.id)}
                             onClick={() => handleManualCheckIn(a)}
-                            className="h-7 text-[11px] font-mono bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:bg-red-600 hover:border-red-600 rounded-none"
+                            className="h-8 text-xs font-mono font-bold uppercase tracking-wider bg-zinc-900 border-white/15 text-zinc-300 hover:text-black hover:bg-lime-400 hover:border-lime-400 rounded-none cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
                           >
-                            <Zap className="w-3 h-3 mr-1 text-amber-400" />
+                            <Zap className="w-3.5 h-3.5 mr-1 text-amber-400" />
                             Admit
                           </Button>
                         ) : (
-                          <span className="text-[11px] text-zinc-500 font-mono">
-                            {a.checked_in_at ? new Date(a.checked_in_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Admitted"}
-                          </span>
+                          <div className="flex flex-col items-end">
+                            <span className="text-[11px] text-lime-400 font-mono font-bold tabular-nums">
+                              {a.checked_in_at
+                                ? new Date(a.checked_in_at).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                  })
+                                : "Admitted"}
+                            </span>
+                            <span className="text-[10px] text-zinc-400 font-mono uppercase">
+                              Verified IST
+                            </span>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>

@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Radio, Plus, Send, CheckCircle2, ShieldCheck, Terminal, Layers, ArrowUpRight } from "lucide-react";
+import {
+  Radio,
+  Plus,
+  Send,
+  CheckCircle2,
+  ShieldCheck,
+  Terminal,
+  Layers,
+  ArrowUpRight,
+  Activity,
+  Globe,
+  Code2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -53,26 +65,42 @@ export function WebhooksMonitorPanel({ eventsLog }: WebhooksMonitorPanelProps) {
     }
   };
 
+  const getEventBadgeColor = (eventType: string) => {
+    const ev = (eventType || "").toLowerCase();
+    if (ev.includes("pass") || ev.includes("gate") || ev.includes("check")) {
+      return "text-lime-400 bg-lime-400/10 border-lime-400/30";
+    }
+    if (ev.includes("contest") || ev.includes("status")) {
+      return "text-cyan-400 bg-cyan-400/10 border-cyan-400/30";
+    }
+    if (ev.includes("top30") || ev.includes("qualif")) {
+      return "text-amber-400 bg-amber-400/10 border-amber-400/30";
+    }
+    return "text-zinc-300 bg-zinc-900 border-white/10";
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-mono">
       {/* Left: Webhook Registry & Documentation */}
       <div className="lg:col-span-5 space-y-6">
-        <Card className="bg-[#0c0c0c] border-white/10 rounded-sm">
+        <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl">
           <CardHeader className="border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
-              <Radio className="w-4 h-4 text-cyan-400" />
-              <CardTitle className="font-mono text-xs uppercase text-white font-bold">
-                Register Outbound Webhook Listener
+              <div className="w-6 h-6 rounded-none bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
+                <Radio className="w-3.5 h-3.5" />
+              </div>
+              <CardTitle className="font-mono text-xs uppercase text-white font-bold tracking-wider">
+                Outbound Webhook Dispatcher
               </CardTitle>
             </div>
-            <CardDescription className="text-[11px] text-zinc-500 font-mono">
-              The platform will POST JSON payloads to registered endpoints on every state transition.
+            <CardDescription className="text-[11px] text-zinc-400 font-mono">
+              The CCC server broadcasts real-time JSON payloads to registered endpoints.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4 space-y-4">
             <form onSubmit={handleRegisterWebhook} className="space-y-3">
               <div>
-                <label className="block text-[11px] uppercase text-zinc-400 mb-1.5">
+                <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-1.5">
                   External Listener URL:
                 </label>
                 <div className="flex gap-2">
@@ -80,13 +108,13 @@ export function WebhooksMonitorPanel({ eventsLog }: WebhooksMonitorPanelProps) {
                     type="url"
                     value={webhookUrl}
                     onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://your-server.edu/api/gate-events"
-                    className="h-9 bg-black border-zinc-800 text-xs font-mono text-white placeholder:text-zinc-600 rounded-none"
+                    placeholder="https://lab-screen.medicaps.ac.in/api/events"
+                    className="h-10 bg-black border-white/15 text-base sm:text-xs font-mono text-white placeholder:text-zinc-600 rounded-none focus-visible:ring-2 focus-visible:ring-lime-400"
                   />
                   <Button
                     type="submit"
                     disabled={isRegistering || !webhookUrl.trim()}
-                    className="h-9 bg-cyan-600 hover:bg-cyan-500 text-black font-mono text-xs uppercase font-bold rounded-none px-3"
+                    className="h-10 bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-extrabold tracking-wider rounded-none px-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
                   >
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     Register
@@ -96,57 +124,109 @@ export function WebhooksMonitorPanel({ eventsLog }: WebhooksMonitorPanelProps) {
             </form>
 
             <div className="pt-2">
-              <span className="text-[11px] text-zinc-400 block mb-2 uppercase">Registered Webhook Sinks:</span>
+              <span className="text-[10px] text-zinc-400 block mb-2 uppercase font-bold tracking-widest">
+                Active Webhook Sinks ({registeredList.length})
+              </span>
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {registeredList.map((url, i) => (
-                  <div key={i} className="p-2 bg-zinc-900/60 border border-zinc-800 rounded-sm flex items-center justify-between text-[11px] text-zinc-300">
-                    <span className="truncate pr-2">{url}</span>
-                    <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[9px] font-mono flex-shrink-0">
-                      ACTIVE
+                  <div
+                    key={i}
+                    className="p-2 bg-black border border-white/10 rounded-none flex items-center justify-between text-[11px] text-zinc-300 hover:border-lime-400/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 truncate pr-2">
+                      <Globe className="w-3.5 h-3.5 text-lime-400 shrink-0" />
+                      <span className="truncate font-mono">{url}</span>
+                    </div>
+                    <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/30 text-[9px] font-mono font-bold uppercase rounded-none tracking-wider flex-shrink-0">
+                      ONLINE
                     </Badge>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-sm text-[11px] text-zinc-400 space-y-1">
-              <span className="text-white font-bold block">OpenAPI 3.1.0 Webhook Events:</span>
-              <div>• <code className="text-red-400">pass-checked-in</code>: Gate pass validation</div>
-              <div>• <code className="text-cyan-400">contest-status-changed</code>: Lifecycle change</div>
-              <div>• <code className="text-amber-400">top30-qualified</code>: Finalist selection</div>
-              <div>• <code className="text-emerald-400">submission-evaluated</code>: CodeBox execution</div>
+            <div className="p-3 bg-black border border-white/10 rounded-none text-[11px] text-zinc-400 space-y-2">
+              <div className="flex items-center gap-1.5 text-white font-bold uppercase text-[10px] tracking-wider">
+                <Code2 className="w-3.5 h-3.5 text-lime-400" />
+                <span>OpenAPI 3.1.0 Event Catalog</span>
+              </div>
+              <div className="space-y-1 text-[11px]">
+                <div className="flex items-center gap-2">
+                  <code className="text-lime-400 bg-zinc-900 px-1 py-0.5 border border-lime-400/20">
+                    pass_checked_in
+                  </code>
+                  <span className="text-zinc-400">— Gate barcode scan & seat admit</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-cyan-400 bg-zinc-900 px-1 py-0.5 border border-cyan-400/20">
+                    contest_status_changed
+                  </code>
+                  <span className="text-zinc-400">— Live arena phase transitions</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-amber-400 bg-zinc-900 px-1 py-0.5 border border-amber-400/20">
+                    top30_qualified
+                  </code>
+                  <span className="text-zinc-400">— Screening evaluation & pass generation</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Right: Live Realtime Event Stream Stream Log */}
+      {/* Right: Live Real-Time Event Stream Log */}
       <div className="lg:col-span-7 space-y-6">
-        <Card className="bg-[#0c0c0c] border-white/10 rounded-sm">
+        <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl">
           <CardHeader className="border-b border-white/10 pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-emerald-400" />
-                <CardTitle className="font-mono text-xs uppercase text-white font-bold">
-                  Real-Time Event Stream Log ({eventsLog.length})
+                <div className="w-6 h-6 rounded-none bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
+                  <Terminal className="w-3.5 h-3.5" />
+                </div>
+                <CardTitle className="font-mono text-xs uppercase text-white font-bold tracking-wider">
+                  Real-Time Event Stream Waterfall ({eventsLog.length})
                 </CardTitle>
               </div>
-              <span className="text-[10px] text-zinc-500">Live SSE Activity</span>
+              <div className="flex items-center gap-2 text-[10px] text-lime-400">
+                <span className="w-2 h-2 rounded-none bg-lime-400 animate-pulse" />
+                <span className="font-bold tracking-wider uppercase">SSE Listening</span>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4 max-h-[480px] overflow-y-auto space-y-2">
+          <CardContent className="pt-4 max-h-[520px] overflow-y-auto space-y-2">
             {eventsLog.length === 0 ? (
-              <div className="py-16 text-center text-xs text-zinc-600">
-                Awaiting real-time webhook & SSE broadcast events...
+              <div className="py-20 text-center text-xs text-zinc-600 space-y-2 font-mono">
+                <Activity className="w-6 h-6 mx-auto text-zinc-700 animate-pulse" />
+                <p>Awaiting real-time webhook & SSE broadcast events...</p>
+                <p className="text-[10px] text-zinc-700">
+                  Trigger gate check-ins or contest lifecycle switches to view live telemetry.
+                </p>
               </div>
             ) : (
               eventsLog.map((ev, idx) => (
-                <div key={idx} className="p-3 bg-black/60 border border-zinc-800 rounded-sm font-mono text-xs space-y-1">
+                <div
+                  key={idx}
+                  className="p-3 bg-black border border-white/10 rounded-none font-mono text-xs space-y-2 hover:border-lime-400/40 transition-colors"
+                >
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-red-400 font-bold uppercase">{ev.event}</span>
-                    <span className="text-zinc-500">{new Date(ev.timestamp).toLocaleTimeString()}</span>
+                    <span
+                      className={`px-2 py-0.5 font-bold uppercase tracking-wider text-[10px] border rounded-none ${getEventBadgeColor(
+                        ev.event
+                      )}`}
+                    >
+                      {ev.event}
+                    </span>
+                    <span className="text-zinc-500 tabular-nums">
+                      {new Date(ev.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })}{" "}
+                      IST
+                    </span>
                   </div>
-                  <pre className="text-[11px] text-zinc-300 bg-zinc-950 p-2 rounded border border-zinc-900 overflow-x-auto">
+                  <pre className="text-[11px] text-zinc-300 bg-zinc-950 p-2.5 rounded-none border border-white/5 overflow-x-auto leading-relaxed">
                     {JSON.stringify(ev.data, null, 2)}
                   </pre>
                 </div>
