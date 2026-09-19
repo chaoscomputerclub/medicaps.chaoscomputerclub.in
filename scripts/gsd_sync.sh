@@ -95,7 +95,7 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
   # 2. Ensure official contest state is initialized with canonical schedule
   echo '→ Updating official contest schedule in production DB...'
   cd ${REMOTE_API_DIR}
-  venv/bin/python scripts/launch_official_contests.py --force || true
+  venv/bin/python scripts/launch_official_contests.py || true
 
   # 3. Restart FastAPI backend systemd service
   systemctl restart ccc-medicaps-api.service

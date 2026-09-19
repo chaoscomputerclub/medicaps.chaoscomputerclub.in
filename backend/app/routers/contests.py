@@ -55,9 +55,8 @@ async def list_contests(
 ):
     """
     List offline campus contests.
-    STRICT SECURITY RULE: Contests in LIVE status are strictly filtered out
-    unless the requesting member is authenticated and eligible (Top 30 qualifier,
-    registered finalist, or core team proctor).
+    Publicly lists all campus contests (upcoming, live, and finished) with division metadata.
+    Live finals problem statements and code execution remain strictly protected by gate verification.
     Protected by 30s Redis Cache-Aside.
     """
     # Only cache unauthenticated / general public view
@@ -88,10 +87,6 @@ async def list_contests(
         # Exclude legacy dev screening rounds from being listed as standalone contests
         if c.slug in ("dev-assessment-round", "dev-offline-final"):
             continue
-        if c.status == "live" and not c.slug.startswith("dev-"):
-            is_eligible, _ = await is_member_eligible_for_live_contest(current_member, c, db, require_checked_in=False)
-            if not is_eligible:
-                continue
         filtered_contests.append(c)
 
     registered_contest_ids = set()
@@ -303,14 +298,6 @@ async def get_contest_detail(
     contest = result.scalars().first()
     if not contest:
         raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    if contest.status == "live":
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=False)
-        if not is_eligible:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Access restricted: {reason}",
-            )
 
     is_registered = False
     if current_member:

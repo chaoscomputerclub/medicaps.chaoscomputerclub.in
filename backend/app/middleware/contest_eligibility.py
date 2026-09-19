@@ -31,28 +31,29 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
-        # Only inspect API routes targeting specific contest resources
-        # e.g. /api/contests/{slug}, /api/assessment/{slug}, /api/scoreboards/{slug}
+        # Only inspect API routes targeting restricted live contest resources:
+        # e.g., /api/contests/{slug}/problems, /api/contests/{slug}/arena, /api/contests/{slug}/submit, /api/contests/{slug}/run
+        # e.g., /api/assessment/{slug} (proctored assessment workspace)
         slug: Optional[str] = None
+        require_checked_in = False
 
         if path.startswith("/api/contests/"):
             parts = path[len("/api/contests/"):].strip("/").split("/")
-            first_segment = parts[0] if parts else None
-            # Exclude non-slug sub-routes
-            if first_segment and first_segment not in ["my"]:
-                slug = first_segment
+            # Only intercept if targeting a specific slug AND a restricted action
+            if len(parts) >= 2:
+                potential_slug = parts[0]
+                action = parts[1]
+                if action in ["problems", "arena", "submit", "run"] and potential_slug not in ["my"]:
+                    slug = potential_slug
+                    require_checked_in = True
         elif path.startswith("/api/assessment/"):
             parts = path[len("/api/assessment/"):].strip("/").split("/")
             first_segment = parts[0] if parts else None
             if first_segment and first_segment not in ["run", "submit", "telemetry"]:
                 slug = first_segment
-        elif path.startswith("/api/scoreboards/"):
-            parts = path[len("/api/scoreboards/"):].strip("/").split("/")
-            first_segment = parts[0] if parts else None
-            if first_segment:
-                slug = first_segment
+                require_checked_in = False
 
-        # If this request is targeting a specific slug, check if that contest is LIVE
+        # If this request is targeting a restricted action on a specific slug, check if that contest is LIVE
         if slug:
             try:
                 async with AsyncSessionLocal() as db:
@@ -70,7 +71,7 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
                             return JSONResponse(
                                 status_code=403,
                                 content={
-                                    "detail": "Access restricted: Live contest is strictly restricted to Top 30 qualified cadets. Please sign in with an eligible account.",
+                                    "detail": "Access restricted: Live contest arena is strictly restricted to Top 30 qualified cadets. Please sign in with an eligible account.",
                                     "contest_slug": slug,
                                     "contest_status": "live",
                                     "is_eligible": False,
@@ -91,11 +92,8 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
 
                         member_id = payload.get("sub")
                         m_res = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
-                        require_checked_in = (
-                            "/arena" in path
-                            or path.endswith("/problems")
-                            or path.startswith("/api/assessment/")
-                        )
+                        member = m_res.scalars().first()
+
                         is_eligible, reason = await is_member_eligible_for_live_contest(
                             member, contest, db, require_checked_in=require_checked_in
                         )
