@@ -455,123 +455,27 @@ export function GateScannerPanel({
       />
 
       {/* Left: Camera Optical Scanner Viewfinder */}
-      <div className="lg:col-span-7 space-y-6">
-        <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl overflow-hidden">
-          <CardHeader className="border-b border-white/10 pb-3">
+      <div className="lg:col-span-7 space-y-4">
+        <Card className="bg-zinc-950 border border-white/10 rounded-none overflow-hidden">
+          <CardHeader className="border-b border-white/10 py-2.5 px-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
-                  <Camera className="w-4 h-4" />
-                </div>
-                <div>
-                  <CardTitle className="font-mono text-sm uppercase tracking-wide text-white font-extrabold">
-                    Live Gate Optical Scanner
-                  </CardTitle>
-                  <p className="text-[11px] text-zinc-400">
-                    Real-time video feed decoder · Instant candidate credential review
-                  </p>
-                </div>
-              </div>
-
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  title={soundEnabled ? "Mute audio cues" : "Unmute audio cues"}
-                  className="p-1.5 bg-black border border-white/10 text-zinc-400 hover:text-white hover:border-lime-400/40 rounded-none cursor-pointer transition-colors"
-                >
-                  {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-lime-400" /> : <VolumeX className="w-3.5 h-3.5" />}
-                </button>
-
-                <Badge
-                  variant="outline"
-                  className="font-mono text-[10px] uppercase bg-lime-400/10 border-lime-400/30 text-lime-400 font-bold px-2 py-0.5 rounded-none tracking-widest"
-                >
-                  <span className="w-1.5 h-1.5 bg-lime-400 animate-ping inline-block mr-1.5" />
-                  SENSOR ACTIVE
-                </Badge>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-4 space-y-4">
-            {/* Viewfinder Frame with Cyber HUD Overlays */}
-            <div className="relative w-full max-w-[420px] mx-auto bg-black border-2 border-white/15 overflow-hidden">
-              {/* HTML5 QR Code Mount Element */}
-              <div
-                id="ccc-gate-qr-reader"
-                className="w-full aspect-square bg-black flex items-center justify-center overflow-hidden"
-              />
-
-              {/* Viewfinder Cyber Corner Brackets */}
-              <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <span className="w-4 h-4 border-t-2 border-l-2 border-lime-400" />
-                  <div className="bg-black/80 px-2 py-0.5 border border-white/10 text-[9px] text-lime-400 font-bold tracking-widest">
-                    [10 FPS · AUTO-DETECT]
-                  </div>
-                  <span className="w-4 h-4 border-t-2 border-r-2 border-lime-400" />
-                </div>
-
-                {/* Animated Horizontal Scan Laser Beam */}
-                {isCameraActive && !isScanningPaused && (
-                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-lime-400 to-transparent shadow-[0_0_12px_#CCFF00] animate-pulse" />
-                )}
-
-                <div className="flex justify-between items-end">
-                  <span className="w-4 h-4 border-b-2 border-l-2 border-lime-400" />
-                  <div className="bg-black/80 px-2 py-0.5 border border-white/10 text-[9px] text-zinc-400 font-mono">
-                    POINT AT CANDIDATE QR
-                  </div>
-                  <span className="w-4 h-4 border-b-2 border-r-2 border-lime-400" />
-                </div>
+                <Camera className="w-4 h-4 text-lime-400" />
+                <CardTitle className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                  Camera QR Scanner
+                </CardTitle>
               </div>
 
-              {/* Camera Error / Fallback State Overlay */}
-              {cameraError && (
-                <div className="absolute inset-0 bg-black/95 p-6 flex flex-col items-center justify-center text-center space-y-3">
-                  <CameraOff className="w-10 h-10 text-rose-400 animate-pulse" />
-                  <div className="text-white font-bold text-xs uppercase">
-                    Optical Sensor Restricted
-                  </div>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed max-w-xs">
-                    {cameraError}
-                  </p>
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      onClick={() => startCamera()}
-                      className="bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-bold rounded-none"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                      Retry Camera
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-white/15 text-zinc-300 hover:text-white font-mono text-xs rounded-none"
-                    >
-                      <Upload className="w-3.5 h-3.5 mr-1.5" />
-                      Upload QR
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Action Control Strip */}
-            <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10">
               <div className="flex items-center gap-2">
                 {cameras.length > 1 && (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={handleSwitchCamera}
-                    className="h-8 border-white/15 bg-zinc-900/80 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs font-mono rounded-none"
+                    className="h-7 px-2 border-white/10 bg-zinc-900 text-zinc-300 hover:text-white text-xs font-mono rounded-none"
                   >
-                    <SwitchCamera className="w-3.5 h-3.5 mr-1 text-lime-400" />
-                    Flip Camera
+                    <SwitchCamera className="w-3 h-3 mr-1 text-lime-400" />
+                    Flip
                   </Button>
                 )}
 
@@ -579,72 +483,116 @@ export function GateScannerPanel({
                   size="sm"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-8 border-white/15 bg-zinc-900/80 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs font-mono rounded-none"
+                  className="h-7 px-2 border-white/10 bg-zinc-900 text-zinc-300 hover:text-white text-xs font-mono rounded-none"
                 >
-                  <Upload className="w-3.5 h-3.5 mr-1 text-cyan-400" />
-                  Upload Image
+                  <Upload className="w-3 h-3 mr-1" />
+                  Upload
                 </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  title={soundEnabled ? "Mute audio" : "Unmute audio"}
+                  className="p-1.5 bg-black border border-white/10 text-zinc-400 hover:text-white rounded-none cursor-pointer transition-colors"
+                >
+                  {soundEnabled ? <Volume2 className="w-3 h-3 text-lime-400" /> : <VolumeX className="w-3 h-3" />}
+                </button>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-4 space-y-3">
+            {/* Viewfinder Frame */}
+            <div className="relative w-full max-w-[360px] mx-auto bg-black border border-white/15 overflow-hidden">
+              {/* HTML5 QR Code Mount Element */}
+              <div
+                id="ccc-gate-qr-reader"
+                className="w-full aspect-square bg-black flex items-center justify-center overflow-hidden"
+              />
+
+              {/* Minimal Focus Corners */}
+              <div className="absolute inset-0 pointer-events-none p-3 flex flex-col justify-between">
+                <div className="flex justify-between">
+                  <span className="w-3 h-3 border-t-2 border-l-2 border-lime-400" />
+                  <span className="w-3 h-3 border-t-2 border-r-2 border-lime-400" />
+                </div>
+                <div className="flex justify-between">
+                  <span className="w-3 h-3 border-b-2 border-l-2 border-lime-400" />
+                  <span className="w-3 h-3 border-b-2 border-r-2 border-lime-400" />
+                </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowManualInput(!showManualInput)}
-                className="text-xs font-mono text-zinc-400 hover:text-lime-400 transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <Keyboard className="w-3.5 h-3.5" />
-                <span>{showManualInput ? "Hide Code Entry" : "Type Pass Code"}</span>
-              </button>
+              {/* Camera Error / Fallback State Overlay */}
+              {cameraError && (
+                <div className="absolute inset-0 bg-black/95 p-6 flex flex-col items-center justify-center text-center space-y-3">
+                  <CameraOff className="w-8 h-8 text-rose-400" />
+                  <div className="text-white font-bold text-xs uppercase">
+                    Camera Inactive
+                  </div>
+                  <p className="text-[11px] text-zinc-400 max-w-xs">
+                    {cameraError}
+                  </p>
+                  <div className="flex gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      onClick={() => startCamera()}
+                      className="bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-bold rounded-none h-8"
+                    >
+                      <RefreshCw className="w-3 h-3 mr-1" />
+                      Retry
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-white/15 text-zinc-300 hover:text-white font-mono text-xs rounded-none h-8"
+                    >
+                      <Upload className="w-3 h-3 mr-1" />
+                      Upload QR
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Collapsible Manual Code Input Barcode Gun Fallback */}
-            {showManualInput && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (manualCode.trim()) {
-                    handleQrDetected(manualCode.trim());
-                    setManualCode("");
-                  }
-                }}
-                className="p-3 bg-black border border-white/10 rounded-none space-y-2"
-              >
-                <label className="block text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
-                  Manual Laser Gun / Code Entry:
-                </label>
-                <div className="flex gap-2">
+            {/* Manual Code Fallback */}
+            <div className="pt-1">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setShowManualInput(!showManualInput)}
+                  className="text-xs font-mono text-zinc-400 hover:text-lime-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Keyboard className="w-3 h-3" />
+                  <span>{showManualInput ? "Hide manual entry" : "Enter code manually"}</span>
+                </button>
+              </div>
+
+              {showManualInput && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (manualCode.trim()) {
+                      handleQrDetected(manualCode.trim());
+                      setManualCode("");
+                    }
+                  }}
+                  className="mt-2 flex gap-2"
+                >
                   <Input
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
-                    placeholder="e.g. CCC-PASS-TOP30-01 or student handle"
-                    className="h-9 bg-zinc-950 border-white/15 text-xs font-mono text-white rounded-none focus-visible:ring-2 focus-visible:ring-lime-400"
+                    placeholder="Pass code or @handle"
+                    className="h-8 bg-black border-white/15 text-xs font-mono text-white rounded-none focus-visible:ring-2 focus-visible:ring-lime-400"
                   />
                   <Button
                     type="submit"
-                    className="h-9 bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-extrabold rounded-none px-3"
+                    className="h-8 bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-bold rounded-none px-3"
                   >
-                    Review Pass
+                    Check
                   </Button>
-                </div>
-              </form>
-            )}
-
-            {/* Quick Test Barcodes for Rapid Proctor Verification */}
-            <div className="p-3 bg-black border border-white/10 space-y-2">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider block">
-                Quick Simulation Targets:
-              </span>
-              <div className="flex items-center gap-2 flex-wrap">
-                {["CCC-PASS-TOP30-01", "CCC-PASS-TOP30-02", "CCC-PASS-INVALID"].map((sample) => (
-                  <button
-                    key={sample}
-                    type="button"
-                    onClick={() => handleQrDetected(sample)}
-                    className="text-[10px] font-mono text-zinc-400 hover:text-lime-400 border border-white/10 hover:border-lime-400/40 px-2 py-1 rounded-none bg-zinc-950 cursor-pointer transition-colors"
-                  >
-                    Simulate {sample}
-                  </button>
-                ))}
-              </div>
+                </form>
+              )}
             </div>
 
             {/* Last Processed Result Banner */}
@@ -678,57 +626,50 @@ export function GateScannerPanel({
       </div>
 
       {/* Right: Live Stream of Recent Admittances */}
-      <div className="lg:col-span-5 space-y-6">
-        <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl">
-          <CardHeader className="border-b border-white/10 pb-4">
+      <div className="lg:col-span-5 space-y-4">
+        <Card className="bg-zinc-950 border border-white/10 rounded-none">
+          <CardHeader className="border-b border-white/10 py-2.5 px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-lime-400" />
-                <CardTitle className="font-mono text-xs uppercase tracking-wider text-white font-extrabold">
-                  Live Gate Event Stream
+                <CardTitle className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                  Recent Scans
                 </CardTitle>
               </div>
               <span className="text-[10px] font-mono text-zinc-400 tabular-nums">
-                {recentScans.length} events
+                {recentScans.length}
               </span>
             </div>
           </CardHeader>
 
-          <CardContent className="pt-4">
+          <CardContent className="p-3">
             {recentScans.length === 0 ? (
-              <div className="text-center py-16 text-zinc-500 space-y-2 font-mono">
-                <QrCode className="w-8 h-8 mx-auto text-zinc-700 animate-pulse" />
-                <p className="text-xs">Awaiting optical scans at turnstile...</p>
-                <p className="text-[10px] text-zinc-600">
-                  When candidates scan, an inspection dialog will prompt for approval.
-                </p>
+              <div className="text-center py-12 text-zinc-500 space-y-1 font-mono">
+                <QrCode className="w-6 h-6 mx-auto text-zinc-600" />
+                <p className="text-xs">Awaiting gate scans</p>
               </div>
             ) : (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1 font-mono">
+              <div className="space-y-1.5 max-h-[460px] overflow-y-auto pr-1 font-mono">
                 {recentScans.map((scan, idx) => (
                   <div
                     key={scan.pass_code || scan.id || idx}
-                    className="p-3 bg-black border border-white/10 rounded-none flex items-center justify-between gap-3 text-xs hover:border-lime-400/30 transition-colors"
+                    className="p-2.5 bg-black border border-white/10 rounded-none flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="space-y-0.5 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-white truncate">
                           {scan.candidate_name || scan.handle || "Cadet"}
                         </span>
-                        <span className="text-[10px] text-lime-400">@{scan.handle || "cadet"}</span>
+                        <span className="text-[10px] text-zinc-400">@{scan.handle || "cadet"}</span>
                       </div>
-                      <div className="text-[10px] text-zinc-400 flex items-center gap-2">
-                        <span>Code: {scan.pass_code}</span>
-                        <span>·</span>
-                        <span className="tabular-nums">
-                          {scan.checked_in_at
-                            ? new Date(scan.checked_in_at).toLocaleTimeString("en-IN", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                              })
-                            : "Just now"}
-                        </span>
+                      <div className="text-[10px] text-zinc-500 tabular-nums">
+                        {scan.checked_in_at
+                          ? new Date(scan.checked_in_at).toLocaleTimeString("en-IN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            })
+                          : "Just now"}
                       </div>
                     </div>
 
@@ -745,168 +686,78 @@ export function GateScannerPanel({
         </Card>
       </div>
 
-      {/* ========================================================================= */}
-      {/* CLEARANCE REVIEW MODAL: APPROVE OR REJECT                                 */}
-      {/* ========================================================================= */}
+      {/* ─── CLEARANCE REVIEW MODAL: APPROVE OR REJECT ─────────────── */}
       {pendingCadet && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-150 font-mono">
-          <div className="w-full max-w-lg bg-zinc-950 border-2 border-lime-400 p-6 sm:p-7 rounded-none shadow-2xl space-y-6 relative">
-            {/* Corner Crosshairs */}
-            <span className="absolute -top-1.5 -left-1.5 text-lime-400 font-mono text-sm leading-none select-none">
-              +
-            </span>
-            <span className="absolute -top-1.5 -right-1.5 text-lime-400 font-mono text-sm leading-none select-none">
-              +
-            </span>
-            <span className="absolute -bottom-1.5 -left-1.5 text-lime-400 font-mono text-sm leading-none select-none">
-              +
-            </span>
-            <span className="absolute -bottom-1.5 -right-1.5 text-lime-400 font-mono text-sm leading-none select-none">
-              +
-            </span>
-
-            {/* Modal Header */}
-            <div className="border-b border-white/10 pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-lime-400/10 border border-lime-400/40 flex items-center justify-center text-lime-400">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                      (01 // GATE CLEARANCE REVIEW)
-                    </h3>
-                    <p className="text-[11px] text-zinc-400">
-                      Cryptographic pass detected · Proctor verification required
-                    </p>
-                  </div>
-                </div>
-
-                <Badge
-                  variant="outline"
-                  className="bg-zinc-900 border-white/15 text-zinc-300 text-[10px] uppercase font-mono px-2 py-0.5 rounded-none"
-                >
-                  TURNSTILE 01
-                </Badge>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 font-mono">
+          <div className="w-full max-w-md bg-zinc-950 border border-white/20 p-5 rounded-none shadow-2xl space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <span className="text-xs uppercase font-bold text-white tracking-wider">
+                Gate Clearance Review
+              </span>
+              <span className="text-[10px] text-zinc-400 font-mono">
+                {pendingCadet.passCode}
+              </span>
             </div>
 
-            {/* Workstation Seat Assignment Spotlight */}
-            <div className="p-4 bg-black border border-lime-400/40 rounded-none flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-lime-400 block">
-                  PHYSICAL LAB WORKSTATION
-                </span>
-                <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            {/* Candidate & Seat Info */}
+            <div className="p-3.5 bg-black border border-white/10 flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] uppercase text-zinc-500 font-bold block">Assigned Seat</span>
+                <div className="text-2xl font-extrabold text-lime-400 tabular-nums">
                   {pendingCadet.seatNumber}
                 </div>
-                <div className="text-[11px] text-zinc-400">
-                  Lab 04 Air-Gapped Terminal
-                </div>
               </div>
-
-              <div className="text-right">
-                <div className="w-12 h-12 rounded-none bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400 ml-auto">
-                  <MapPin className="w-6 h-6" />
+              <div className="text-right min-w-0">
+                <div className="text-sm font-bold text-white truncate">
+                  {pendingCadet.candidateName}
                 </div>
-              </div>
-            </div>
-
-            {/* Candidate Dossier Card */}
-            <div className="p-4 bg-zinc-900/60 border border-white/10 rounded-none space-y-3 text-xs">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-white font-bold text-base">
-                    {pendingCadet.candidateName}
-                  </div>
-                  <div className="text-lime-400 text-xs mt-0.5 flex items-center gap-2">
-                    <span>@{pendingCadet.handle}</span>
-                    <span className="text-zinc-500">•</span>
-                    <span className="text-zinc-300">{pendingCadet.department}</span>
-                  </div>
-                </div>
-
-                {pendingCadet.rank && (
-                  <Badge className="bg-zinc-950 border-white/20 text-zinc-200 text-[11px] font-mono rounded-none">
-                    Rank #{pendingCadet.rank}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase">
-                    Pass Code:
-                  </span>
-                  <span className="text-white font-bold select-all">
-                    {pendingCadet.passCode}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase">
-                    Enrollment No:
-                  </span>
-                  <span className="text-white font-bold">
-                    {pendingCadet.enrollmentNumber || "EN23CS301927"}
-                  </span>
+                <div className="text-xs text-zinc-400">
+                  @{pendingCadet.handle} · {pendingCadet.department}
                 </div>
               </div>
             </div>
 
             {/* Warning if already checked in */}
             {pendingCadet.checkInStatus === "checked_in" && (
-              <div className="p-3 bg-amber-950/40 border border-amber-500/50 rounded-none flex items-start gap-2.5 text-xs text-amber-300">
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-bold uppercase tracking-wide">
-                    Warning: Pass Previously Admitted
-                  </div>
-                  <p className="text-[11px] text-amber-200/80 mt-0.5">
-                    This credential was already scanned{" "}
-                    {pendingCadet.checkedInAt
-                      ? `at ${new Date(pendingCadet.checkedInAt).toLocaleTimeString()}`
-                      : ""}{" "}
-                    {pendingCadet.checkedInBy ? `by ${pendingCadet.checkedInBy}` : ""}.
-                    Approving will re-authorize admittance.
-                  </p>
-                </div>
+              <div className="p-2.5 bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>
+                  Already checked in{pendingCadet.checkedInAt ? ` at ${new Date(pendingCadet.checkedInAt).toLocaleTimeString()}` : ""}.
+                </span>
               </div>
             )}
 
             {/* Action Buttons: APPROVE or REJECT */}
-            <div className="space-y-2 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* APPROVE BUTTON */}
+            <div className="space-y-2 pt-1">
+              <div className="grid grid-cols-2 gap-3">
                 <Button
                   onClick={handleApprove}
                   disabled={isActionPending}
-                  className="w-full bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-black tracking-wider h-12 rounded-none shadow-lg shadow-lime-400/20 cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400 flex items-center justify-center gap-1.5"
+                  className="w-full bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-bold tracking-wider h-11 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400 flex items-center justify-center gap-1.5"
                 >
                   {isActionPending ? (
-                    <RefreshCw className="w-4 h-4 animate-spin mr-1" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4 mr-1" />
+                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                   )}
-                  APPROVE (ADMIT)
+                  Approve
                 </Button>
 
-                {/* REJECT BUTTON */}
                 <Button
                   variant="outline"
                   onClick={handleReject}
                   disabled={isActionPending}
-                  className="w-full border-rose-500/60 bg-zinc-900 text-rose-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-mono text-xs uppercase font-extrabold tracking-wider h-12 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500 flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full border-rose-500/40 bg-zinc-900 text-rose-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-mono text-xs uppercase font-bold tracking-wider h-11 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500 flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <XCircle className="w-4 h-4 mr-1" />
-                  REJECT (DENY)
+                  <XCircle className="w-3.5 h-3.5 mr-1" />
+                  Reject
                 </Button>
               </div>
 
-              {/* Keyboard Shortcuts Hint */}
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 px-1 pt-1">
-                <span>[Enter] or [A] to Approve</span>
-                <span>[Esc] or [R] to Reject</span>
+              <div className="flex items-center justify-between text-[10px] text-zinc-500 px-1">
+                <span>[Enter] or [A] Approve</span>
+                <span>[Esc] or [R] Reject</span>
               </div>
             </div>
           </div>

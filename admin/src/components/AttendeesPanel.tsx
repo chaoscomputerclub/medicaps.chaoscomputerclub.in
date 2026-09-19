@@ -130,143 +130,20 @@ export function AttendeesPanel({
   };
 
   return (
-    <div className="space-y-6 font-mono">
-      {/* Metrics Row - Tactical Bento Counters */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        {/* Total Finalists */}
-        <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
-              (01 // ROSTER CAPACITY)
-            </span>
-            <Users className="w-4 h-4 text-zinc-400" />
-          </div>
-          <div className="text-3xl font-extrabold text-white tracking-tight tabular-nums">
-            {stats.total}
-          </div>
-          <div className="text-[11px] text-zinc-400">
-            Physical workstations configured
-          </div>
-        </div>
-
-        {/* Admitted Cadets */}
-        <div className="p-4 bg-zinc-950 border border-lime-400/30 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-lime-400">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-lime-400">
-              (02 // ADMITTED CADETS)
-            </span>
-            <CheckCircle2 className="w-4 h-4 text-lime-400" />
-          </div>
-          <div className="text-3xl font-extrabold text-lime-400 tracking-tight tabular-nums">
-            {stats.checkedIn}
-          </div>
-          <div className="text-[11px] text-lime-400/80">
-            Verified gate pass clearances
-          </div>
-        </div>
-
-        {/* Pending Scan */}
-        <div className="p-4 bg-zinc-950 border border-amber-400/30 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-amber-400">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400">
-              (03 // AWAITING ENTRY)
-            </span>
-            <Clock className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-3xl font-extrabold text-amber-400 tracking-tight tabular-nums">
-            {stats.pending}
-          </div>
-          <div className="text-[11px] text-amber-400/80">
-            Not yet scanned at gate kiosk
-          </div>
-        </div>
-
-        {/* Lab Attendance Rate */}
-        <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
-              (04 // OCCUPANCY RATE)
-            </span>
-            <MonitorCheck className="w-4 h-4 text-cyan-400" />
-          </div>
-          <div className="text-3xl font-extrabold text-cyan-400 tracking-tight tabular-nums">
-            {stats.rate}%
-          </div>
-          <div className="w-full bg-zinc-900 h-1.5 rounded-none overflow-hidden mt-1">
-            <div
-              className="bg-lime-400 h-full transition-all duration-300 rounded-none"
-              style={{ width: `${stats.rate}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
+    <div className="space-y-4 font-mono">
       {/* Main Roster Card */}
-      <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl">
-        <CardHeader className="border-b border-white/10 pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-none bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
-                <MapPin className="w-4 h-4" />
-              </div>
-              <div>
-                <CardTitle className="font-mono text-sm tracking-wide uppercase text-white font-bold">
-                  Workstation Allocation & Attendee Roster
-                </CardTitle>
-                <p className="text-[11px] text-zinc-400">
-                  Air-gapped lab seat manifests and cryptographic admission logs
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportCsv}
-                className="h-8 border-white/15 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs uppercase font-bold tracking-wider rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
-              >
-                <Download className="w-3.5 h-3.5 mr-1.5 text-lime-400" />
-                Export CSV
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRefresh}
-                disabled={isLoading}
-                className="h-8 border-white/15 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs uppercase font-bold tracking-wider rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
-              >
-                <RefreshCw
-                  className={`w-3.5 h-3.5 mr-1.5 text-lime-400 ${
-                    isLoading ? "animate-spin" : ""
-                  }`}
-                />
-                Refresh
-              </Button>
-            </div>
-          </div>
-
-          {/* Search & Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search cadet, handle, seat or pass code..."
-                className="pl-9 bg-black border-white/15 text-base sm:text-xs font-mono text-white placeholder:text-zinc-600 rounded-none h-10 focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:border-lime-400"
-              />
-            </div>
-
-            {/* Brutalist Segmented Filter Tabs */}
-            <div className="flex items-center bg-black p-1 border border-white/15 rounded-none">
+      <Card className="bg-zinc-950 border border-white/10 rounded-none">
+        <CardHeader className="border-b border-white/10 py-3 px-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
                 onClick={() => setFilter("all")}
-                className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors ${
+                className={`px-2.5 py-1 text-xs font-mono font-bold uppercase rounded-none cursor-pointer transition-colors ${
                   filter === "all"
-                    ? "bg-lime-400 text-black shadow-sm"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+                    ? "bg-lime-400 text-black"
+                    : "text-zinc-400 hover:text-white bg-zinc-900 border border-white/10"
                 }`}
               >
                 All ({stats.total})
@@ -274,10 +151,10 @@ export function AttendeesPanel({
               <button
                 type="button"
                 onClick={() => setFilter("checked_in")}
-                className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors ${
+                className={`px-2.5 py-1 text-xs font-mono font-bold uppercase rounded-none cursor-pointer transition-colors ${
                   filter === "checked_in"
-                    ? "bg-lime-400 text-black shadow-sm"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+                    ? "bg-lime-400 text-black"
+                    : "text-zinc-400 hover:text-white bg-zinc-900 border border-white/10"
                 }`}
               >
                 Admitted ({stats.checkedIn})
@@ -285,14 +162,52 @@ export function AttendeesPanel({
               <button
                 type="button"
                 onClick={() => setFilter("issued")}
-                className={`px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors ${
+                className={`px-2.5 py-1 text-xs font-mono font-bold uppercase rounded-none cursor-pointer transition-colors ${
                   filter === "issued"
-                    ? "bg-lime-400 text-black shadow-sm"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+                    ? "bg-lime-400 text-black"
+                    : "text-zinc-400 hover:text-white bg-zinc-900 border border-white/10"
                 }`}
               >
                 Pending ({stats.pending})
               </button>
+            </div>
+
+            {/* Search & Actions */}
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search cadets..."
+                  className="pl-8 bg-black border-white/15 text-xs font-mono text-white rounded-none h-8 w-44 sm:w-60 focus-visible:ring-2 focus-visible:ring-lime-400"
+                />
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCsv}
+                className="h-8 px-2.5 border-white/15 bg-zinc-900 text-zinc-300 hover:text-white font-mono text-xs rounded-none"
+              >
+                <Download className="w-3.5 h-3.5 sm:mr-1 text-lime-400" />
+                <span className="hidden sm:inline">CSV</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="h-8 px-2.5 border-white/15 bg-zinc-900 text-zinc-300 hover:text-white font-mono text-xs rounded-none"
+              >
+                <RefreshCw
+                  className={`w-3.5 h-3.5 sm:mr-1 text-lime-400 ${
+                    isLoading ? "animate-spin" : ""
+                  }`}
+                />
+                <span className="hidden sm:inline">Sync</span>
+              </Button>
             </div>
           </div>
         </CardHeader>

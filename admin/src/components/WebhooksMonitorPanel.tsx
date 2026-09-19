@@ -80,44 +80,38 @@ export function WebhooksMonitorPanel({ eventsLog }: WebhooksMonitorPanelProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-mono">
-      {/* Left: Webhook Registry & Documentation */}
-      <div className="lg:col-span-5 space-y-6">
-        <Card className="bg-zinc-950 border border-white/10 rounded-none shadow-2xl">
-          <CardHeader className="border-b border-white/10 pb-3">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 font-mono">
+      {/* Left: Webhook Registry */}
+      <div className="lg:col-span-5 space-y-4">
+        <Card className="bg-zinc-950 border border-white/10 rounded-none">
+          <CardHeader className="border-b border-white/10 py-2.5 px-4">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-none bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
-                <Radio className="w-3.5 h-3.5" />
-              </div>
+              <Radio className="w-3.5 h-3.5 text-lime-400" />
               <CardTitle className="font-mono text-xs uppercase text-white font-bold tracking-wider">
-                Outbound Webhook Dispatcher
+                Outbound Webhooks
               </CardTitle>
             </div>
-            <CardDescription className="text-[11px] text-zinc-400 font-mono">
-              The CCC server broadcasts real-time JSON payloads to registered endpoints.
-            </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4 space-y-4">
-            <form onSubmit={handleRegisterWebhook} className="space-y-3">
+          <CardContent className="p-4 space-y-3">
+            <form onSubmit={handleRegisterWebhook} className="space-y-2">
               <div>
-                <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-1.5">
-                  External Listener URL:
+                <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-1">
+                  Listener URL:
                 </label>
                 <div className="flex gap-2">
                   <Input
                     type="url"
                     value={webhookUrl}
                     onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://lab-screen.medicaps.ac.in/api/events"
-                    className="h-10 bg-black border-white/15 text-base sm:text-xs font-mono text-white placeholder:text-zinc-600 rounded-none focus-visible:ring-2 focus-visible:ring-lime-400"
+                    placeholder="https://example.com/webhook"
+                    className="h-8 bg-black border-white/15 text-xs font-mono text-white placeholder:text-zinc-600 rounded-none focus-visible:ring-2 focus-visible:ring-lime-400"
                   />
                   <Button
                     type="submit"
                     disabled={isRegistering || !webhookUrl.trim()}
-                    className="h-10 bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-extrabold tracking-wider rounded-none px-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
+                    className="h-8 bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs uppercase font-bold tracking-wider rounded-none px-3 cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
                   >
-                    <Plus className="w-3.5 h-3.5 mr-1" />
-                    Register
+                    Add
                   </Button>
                 </div>
               </div>

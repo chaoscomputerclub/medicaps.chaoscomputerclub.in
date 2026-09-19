@@ -139,170 +139,87 @@ export function AdminApp() {
           />
 
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
-            {/* ─── COCKPIT TELEMETRY BENTO GRID ──────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Card 1: Target Contest Status */}
-              <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
-                    Active Tournament
-                  </span>
-                  <span className={`inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-none border ${
-                    selectedContest?.status === "live"
-                      ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-400 animate-pulse"
-                      : "border-lime-400/40 bg-lime-400/10 text-lime-400"
-                  }`}>
-                    {selectedContest?.status?.toUpperCase() || "UPCOMING"}
-                  </span>
-                </div>
-                <h2 className="text-sm font-bold text-white truncate" title={selectedContest?.title}>
-                  {selectedContest?.title || "Weekly Contest 1"}
-                </h2>
-                <p className="text-[11px] text-zinc-400 truncate">
-                  {selectedContest?.venue || "Main Computing Lab 04"}
-                </p>
-              </div>
-
-              {/* Card 2: Workstation Lab Occupancy */}
-              <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
-                    Lab Workstations
-                  </span>
-                  <span className="text-xs font-bold text-lime-400 tabular-nums">
-                    {occupancyPercentage}% Occupied
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-white tabular-nums">
-                    {checkedInCount}
-                  </span>
-                  <span className="text-xs text-zinc-400 tabular-nums">
-                    / {totalSeats} seats allocated
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <div className="w-full h-1.5 bg-zinc-900 overflow-hidden">
-                  <div
-                    className="h-full bg-lime-400 transition-all duration-300"
-                    style={{ width: `${Math.min(100, occupancyPercentage)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Card 3: Gate Scans Verified */}
-              <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
-                    Gate Throughput
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-zinc-400">
-                    Turnstile 01
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-white tabular-nums">
-                    {recentScans.length}
-                  </span>
-                  <span className="text-xs text-zinc-400">
-                    scans this session
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-400 truncate">
-                  {recentScans[0]
-                    ? `Latest: ${recentScans[0]?.candidate_name || recentScans[0]?.handle || "Cadet"}`
-                    : "Ready for scan gun input"}
-                </p>
-              </div>
-
-              {/* Card 4: Hardware Air-Gap Mode */}
-              <div className="p-4 bg-zinc-950 border border-white/10 rounded-none space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">
-                    Air-Gap Security
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase text-emerald-400 border border-emerald-500/40 bg-emerald-950/30 px-1.5 py-0.5">
-                    <CheckCircle2 className="w-2.5 h-2.5" /> SECURED
-                  </span>
-                </div>
-                <div className="text-sm font-bold text-white">
-                  Physical Lab Finals
-                </div>
-                <p className="text-[11px] text-zinc-400">
-                  Zero remote testcase access. Verified on-premise.
-                </p>
-              </div>
-            </div>
-
-            {/* ─── CONTEST SWITCHER & CONTROLS ─────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-950 border border-white/10 p-3.5 rounded-none">
+            {/* ─── MINIMAL STATUS & CONTEST BAR ─────────────────────── */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <label htmlFor="admin-target-contest" className="text-xs text-zinc-400 uppercase font-bold tracking-wider shrink-0">
-                  Target Contest:
-                </label>
                 <select
                   id="admin-target-contest"
                   value={selectedSlug}
                   onChange={(e) => setSelectedSlug(e.target.value)}
-                  className="bg-black border border-white/15 text-xs font-mono text-white px-3 py-1.5 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:border-lime-400 cursor-pointer"
+                  className="bg-zinc-950 border border-white/15 text-xs font-mono text-white px-3 py-1.5 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 cursor-pointer"
                 >
                   {contests.map((c) => (
                     <option key={c.slug} value={c.slug}>
-                      {c.title} ({c.status.toUpperCase()})
+                      {c.title}
                     </option>
                   ))}
                 </select>
+
+                <span
+                  className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-none border ${
+                    selectedContest?.status === "live"
+                      ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-400"
+                      : "border-white/10 bg-zinc-900 text-zinc-400"
+                  }`}
+                >
+                  {selectedContest?.status?.toUpperCase() || "UPCOMING"}
+                </span>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-zinc-400">
-                <span className="text-zinc-500 uppercase text-[10px]">Workstation Allocation:</span>
-                <span className="text-lime-400 font-bold tabular-nums">
-                  {checkedInCount} / {attendees.length || totalSeats} Finalists Checked In
+              <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
+                <span>
+                  Admitted:{" "}
+                  <span className="text-lime-400 font-bold tabular-nums">
+                    {checkedInCount}
+                  </span>{" "}
+                  / {attendees.length || totalSeats}
+                </span>
+                <span className="text-zinc-700">|</span>
+                <span>
+                  Scans:{" "}
+                  <span className="text-white font-bold tabular-nums">
+                    {recentScans.length}
+                  </span>
                 </span>
               </div>
             </div>
 
             {/* ─── TACTICAL NAVIGATION TABS ───────────────────────── */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="bg-zinc-950 border border-white/10 p-1 rounded-none flex flex-wrap gap-1 h-auto">
                 <TabsTrigger
                   value="gate_scanner"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-2 px-4 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
                 >
                   <QrCode className="w-3.5 h-3.5" />
-                  Gate QR Scanner
+                  Scanner
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="attendees"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-2 px-4 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
                 >
                   <Users className="w-3.5 h-3.5" />
-                  Workstation Roster
-                  <span className="ml-1 px-1.5 py-0.2 text-[10px] font-mono tabular-nums border border-current">
-                    {attendees.length}
-                  </span>
+                  Roster ({attendees.length})
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="operations"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-2 px-4 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
                 >
                   <Layers className="w-3.5 h-3.5" />
-                  Contest Operations
+                  Operations
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="webhooks"
-                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-2 px-4 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
+                  className="font-mono text-xs uppercase font-bold tracking-wider data-[state=active]:bg-lime-400 data-[state=active]:text-black text-zinc-400 hover:text-white rounded-none py-1.5 px-3 flex items-center gap-2 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400"
                 >
                   <Radio className="w-3.5 h-3.5" />
-                  Webhooks & Streams
-                  <span className="ml-1 px-1.5 py-0.2 text-[10px] font-mono tabular-nums border border-current">
-                    {eventsLog.length}
-                  </span>
+                  Webhooks ({eventsLog.length})
                 </TabsTrigger>
               </TabsList>
+
 
               {/* 1. Gate Scanner */}
               <TabsContent value="gate_scanner" className="focus-visible:outline-none">
