@@ -499,13 +499,12 @@ async def simulate_100_cadets(
     all_members = []
     for i in range(1, 101):
         dept = "CSE" if i <= 40 else "IT" if i <= 65 else "Cyber Security" if i <= 85 else "AIDS"
-        code_pfx = "CS" if i <= 40 else "IT" if i <= 65 else "CY" if i <= 85 else "AI"
-        prn = f"EN23{code_pfx}301{i:03d}"
+        prn = f"EN23SIM{i:04d}"
         first_name = FIRST_NAMES[(i - 1) % len(FIRST_NAMES)]
         last_name = LAST_NAMES[((i - 1) * 3) % len(LAST_NAMES)]
         full_name = f"{first_name} {last_name}"
-        handle = f"{first_name.lower()}_{i:03d}"
-        email = f"{first_name.lower()}.{i:03d}@medicaps.ac.in"
+        handle = f"cadet_{i:03d}"
+        email = f"cadet_{i:03d}@medicaps.ac.in"
 
         if i <= 10:
             score = round(99.5 - (i - 1) * 0.75, 1)
@@ -518,7 +517,11 @@ async def simulate_100_cadets(
 
         penalty = 600 + i * 95
 
-        m_res = await db.execute(select(MemberProfile).where(MemberProfile.handle == handle))
+        m_res = await db.execute(
+            select(MemberProfile).where(
+                (MemberProfile.prn == prn) | (MemberProfile.handle == handle) | (MemberProfile.email == email)
+            )
+        )
         member = m_res.scalars().first()
         if not member:
             member = MemberProfile(
@@ -534,10 +537,12 @@ async def simulate_100_cadets(
             db.add(member)
             await db.flush()
         else:
+            member.handle = handle
             member.full_name = full_name
             member.email = email
             member.prn = prn
             member.department = dept
+            member.rating = 1200 + int(score * 6)
 
         all_members.append((member, score, penalty))
 

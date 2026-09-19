@@ -226,7 +226,7 @@ async function runDeepDive() {
   {
     const start = performance.now();
     try {
-      const nonQualifierPrn = simData?.eliminated_rank_31?.prn || "EN23CY301035";
+      const nonQualifierPrn = simData?.eliminated_rank_31?.prn || "EN23SIM0031";
       const res = await fetch(`${API_BASE}/passes/verify`, {
         method: "POST",
         headers,
