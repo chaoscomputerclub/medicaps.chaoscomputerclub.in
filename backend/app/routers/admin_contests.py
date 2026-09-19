@@ -164,6 +164,30 @@ async def update_contest_assessment(
     return await DynamicContestService.update_assessment(slug, payload, db)
 
 
+@router.get(
+    "/{slug}/problems",
+    summary="List all arena problems for a contest (admin view, no eligibility gate)",
+)
+async def list_admin_contest_problems(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Return all ContestProblem records for a contest, bypassing live-contest eligibility check."""
+    from app.models.db_models import ContestProblem
+    from app.schemas.contest import ContestProblemResponse
+    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+    contest = c_res.scalars().first()
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+    res = await db.execute(
+        select(ContestProblem)
+        .where(ContestProblem.contest_id == contest.id)
+        .order_by(ContestProblem.problem_index.asc())
+    )
+    return res.scalars().all()
+
+
 @router.post(
     "/{slug}/problems",
     summary="Add or update a problem challenge in contest and/or assessment",

@@ -285,6 +285,21 @@ class TournamentQAService:
         logger.info("✓ [TOURNAMENT SIM] 110 cadet profiles confirmed and ready.")
 
         # Clean existing test records for tournament isolation
+        # 1. Explicitly nuke orphaned TrustProofs & RatingHistory per cadet before cascade
+        cadet_ids = [c.id for c in cadets]
+        old_contest_res = await db.execute(
+            select(OfflineContest).where(OfflineContest.slug.like("ccc-arena-contest-%"))
+        )
+        old_contest_ids = [c.id for c in old_contest_res.scalars().all()]
+        if old_contest_ids:
+            await db.execute(delete(TrustProof).where(TrustProof.contest_id.in_(old_contest_ids)))
+            await db.execute(delete(RatingHistory).where(
+                (RatingHistory.member_id.in_(cadet_ids)) &
+                (RatingHistory.contest_id.in_(old_contest_ids))
+            ))
+            await db.flush()
+
+        # 2. Delete old arena contests (cascades remaining linked rows via FK)
         existing_test_contests = await db.execute(
             select(OfflineContest).where(OfflineContest.slug.like("ccc-arena-contest-%"))
         )

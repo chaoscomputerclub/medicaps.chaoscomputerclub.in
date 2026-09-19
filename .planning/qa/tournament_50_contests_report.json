@@ -1,0 +1,3991 @@
+{
+  "total": 569,
+  "passed": 454,
+  "failed": 115,
+  "testCases": [
+    {
+      "id": "P0-T01",
+      "name": "API Health — operational",
+      "passed": true,
+      "details": "status=\"operational\" version=\"1.0.0\"",
+      "latency": 1120.1
+    },
+    {
+      "id": "P0-T02",
+      "name": "Redis connectivity",
+      "passed": true,
+      "details": "Redis OK",
+      "latency": 0.1
+    },
+    {
+      "id": "P0-T03",
+      "name": "Judge engine active",
+      "passed": true,
+      "details": "provider=\"codebox\"",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T01",
+      "name": "Tournament simulation — HTTP 200",
+      "passed": true,
+      "details": "50 contests, 110 cadets, 1500 finalists in 5663ms",
+      "latency": 5663.5
+    },
+    {
+      "id": "P1-T02",
+      "name": "50 Contests created",
+      "passed": true,
+      "details": "Created exactly 50 arena contests",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T03",
+      "name": "110 Cadets enrolled",
+      "passed": true,
+      "details": "110 unique Medi-Caps cadets seeded",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T04",
+      "name": "5,500 Screening evaluations",
+      "passed": true,
+      "details": "110 cadets × 50 contests all screened",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T05",
+      "name": "1,500 Top-30 finalist slots",
+      "passed": true,
+      "details": "30 finalists × 50 contests",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T06",
+      "name": "200 Arena problems generated",
+      "passed": true,
+      "details": "4 problems × 50 contests",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T07",
+      "name": "Target cadet Santusht is Grandmaster+",
+      "passed": true,
+      "details": "Rating: 3120 (Grandmaster)",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T08",
+      "name": "Santusht has podium finishes",
+      "passed": true,
+      "details": "35 podium finishes",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T09",
+      "name": "Santusht attended 50 contests",
+      "passed": true,
+      "details": "Attended all 50",
+      "latency": 0.1
+    },
+    {
+      "id": "P1-T10",
+      "name": "Contest sample present in response",
+      "passed": true,
+      "details": "First contest: \"CCC Contest #01: Genesis Arena & Algorithmic Foundations\"",
+      "latency": 0.1
+    },
+    {
+      "id": "P2-T01",
+      "name": "50 arena contests in catalogue",
+      "passed": true,
+      "details": "Found 50/50",
+      "latency": 967.7
+    },
+    {
+      "id": "P2-T02",
+      "name": "Contest list is an array",
+      "passed": true,
+      "details": "51 total contests",
+      "latency": 0.1
+    },
+    {
+      "id": "P2-T03",
+      "name": "Contest #1 metadata correct",
+      "passed": true,
+      "details": "capacity=30, registered=110",
+      "latency": 0.1
+    },
+    {
+      "id": "P2-T04",
+      "name": "Contest venue is Lab 04",
+      "passed": true,
+      "details": "Medi-Caps University Central Computing Lab (Lab 04)",
+      "latency": 0.1
+    },
+    {
+      "id": "P2-T05",
+      "name": "Contest status=finished",
+      "passed": true,
+      "details": "All 50 marked finished",
+      "latency": 0.1
+    },
+    {
+      "id": "C01-T01",
+      "name": "#1 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-01\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C01-T02",
+      "name": "#1 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 559.9
+    },
+    {
+      "id": "C01-T03",
+      "name": "#1 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 514
+    },
+    {
+      "id": "C01-T04",
+      "name": "#1 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C01-T05",
+      "name": "#1 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C01-T06",
+      "name": "#1 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 510.1
+    },
+    {
+      "id": "C01-T07",
+      "name": "#1 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C01-T08",
+      "name": "#1 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"simran_026\"",
+      "latency": 502.7
+    },
+    {
+      "id": "C01-T09",
+      "name": "#1 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 4 solved, delta 33",
+      "latency": 0
+    },
+    {
+      "id": "C01-T10",
+      "name": "#1 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=47",
+      "latency": 0
+    },
+    {
+      "id": "C02-T01",
+      "name": "#2 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-02\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C02-T02",
+      "name": "#2 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 334.3
+    },
+    {
+      "id": "C02-T03",
+      "name": "#2 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 383.4
+    },
+    {
+      "id": "C02-T04",
+      "name": "#2 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C02-T05",
+      "name": "#2 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C02-T06",
+      "name": "#2 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 351.3
+    },
+    {
+      "id": "C02-T07",
+      "name": "#2 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C02-T08",
+      "name": "#2 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"siddharth_025\"",
+      "latency": 347.8
+    },
+    {
+      "id": "C02-T09",
+      "name": "#2 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #4, 3 solved, delta 22",
+      "latency": 0
+    },
+    {
+      "id": "C02-T10",
+      "name": "#2 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=46",
+      "latency": 0
+    },
+    {
+      "id": "C03-T01",
+      "name": "#3 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-03\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C03-T02",
+      "name": "#3 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 338.2
+    },
+    {
+      "id": "C03-T03",
+      "name": "#3 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 360.7
+    },
+    {
+      "id": "C03-T04",
+      "name": "#3 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C03-T05",
+      "name": "#3 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C03-T06",
+      "name": "#3 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 360
+    },
+    {
+      "id": "C03-T07",
+      "name": "#3 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C03-T08",
+      "name": "#3 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"priya_003\" rank#30=\"swati_028\"",
+      "latency": 546.2
+    },
+    {
+      "id": "C03-T09",
+      "name": "#3 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 4 solved, delta 36",
+      "latency": 0
+    },
+    {
+      "id": "C03-T10",
+      "name": "#3 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=46",
+      "latency": 0
+    },
+    {
+      "id": "C04-T01",
+      "name": "#4 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-04\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C04-T02",
+      "name": "#4 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 488.8
+    },
+    {
+      "id": "C04-T03",
+      "name": "#4 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 525.2
+    },
+    {
+      "id": "C04-T04",
+      "name": "#4 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C04-T05",
+      "name": "#4 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C04-T06",
+      "name": "#4 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 625
+    },
+    {
+      "id": "C04-T07",
+      "name": "#4 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C04-T08",
+      "name": "#4 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"harsh_029\"",
+      "latency": 420.1
+    },
+    {
+      "id": "C04-T09",
+      "name": "#4 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 37",
+      "latency": 0
+    },
+    {
+      "id": "C04-T10",
+      "name": "#4 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=53",
+      "latency": 0
+    },
+    {
+      "id": "C05-T01",
+      "name": "#5 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-05\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C05-T02",
+      "name": "#5 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 332.9
+    },
+    {
+      "id": "C05-T03",
+      "name": "#5 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 354.6
+    },
+    {
+      "id": "C05-T04",
+      "name": "#5 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C05-T05",
+      "name": "#5 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C05-T06",
+      "name": "#5 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 359.8
+    },
+    {
+      "id": "C05-T07",
+      "name": "#5 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C05-T08",
+      "name": "#5 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"simran_026\"",
+      "latency": 345.7
+    },
+    {
+      "id": "C05-T09",
+      "name": "#5 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #6, 3 solved, delta 22",
+      "latency": 0
+    },
+    {
+      "id": "C05-T10",
+      "name": "#5 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=53",
+      "latency": 0
+    },
+    {
+      "id": "C06-T01",
+      "name": "#6 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-06\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C06-T02",
+      "name": "#6 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 330.7
+    },
+    {
+      "id": "C06-T03",
+      "name": "#6 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 368.4
+    },
+    {
+      "id": "C06-T04",
+      "name": "#6 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C06-T05",
+      "name": "#6 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C06-T06",
+      "name": "#6 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 552
+    },
+    {
+      "id": "C06-T07",
+      "name": "#6 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C06-T08",
+      "name": "#6 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"bhavna_034\"",
+      "latency": 493.3
+    },
+    {
+      "id": "C06-T09",
+      "name": "#6 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 4 solved, delta 37",
+      "latency": 0
+    },
+    {
+      "id": "C06-T10",
+      "name": "#6 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=46",
+      "latency": 0
+    },
+    {
+      "id": "C07-T01",
+      "name": "#7 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-07\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C07-T02",
+      "name": "#7 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 330
+    },
+    {
+      "id": "C07-T03",
+      "name": "#7 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 359.3
+    },
+    {
+      "id": "C07-T04",
+      "name": "#7 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C07-T05",
+      "name": "#7 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C07-T06",
+      "name": "#7 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 358.6
+    },
+    {
+      "id": "C07-T07",
+      "name": "#7 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C07-T08",
+      "name": "#7 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"bhavna_034\"",
+      "latency": 602.6
+    },
+    {
+      "id": "C07-T09",
+      "name": "#7 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #4, 3 solved, delta 24",
+      "latency": 0
+    },
+    {
+      "id": "C07-T10",
+      "name": "#7 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=54",
+      "latency": 0
+    },
+    {
+      "id": "C08-T01",
+      "name": "#8 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-08\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C08-T02",
+      "name": "#8 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 511.7
+    },
+    {
+      "id": "C08-T03",
+      "name": "#8 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 456.2
+    },
+    {
+      "id": "C08-T04",
+      "name": "#8 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C08-T05",
+      "name": "#8 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C08-T06",
+      "name": "#8 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 521.9
+    },
+    {
+      "id": "C08-T07",
+      "name": "#8 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C08-T08",
+      "name": "#8 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"deepika_030\"",
+      "latency": 522.7
+    },
+    {
+      "id": "C08-T09",
+      "name": "#8 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #5, 3 solved, delta 25",
+      "latency": 0
+    },
+    {
+      "id": "C08-T10",
+      "name": "#8 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=49",
+      "latency": 0
+    },
+    {
+      "id": "C09-T01",
+      "name": "#9 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-09\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C09-T02",
+      "name": "#9 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 345.4
+    },
+    {
+      "id": "C09-T03",
+      "name": "#9 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 373.4
+    },
+    {
+      "id": "C09-T04",
+      "name": "#9 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C09-T05",
+      "name": "#9 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C09-T06",
+      "name": "#9 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 383
+    },
+    {
+      "id": "C09-T07",
+      "name": "#9 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C09-T08",
+      "name": "#9 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"kavya_024\"",
+      "latency": 524.2
+    },
+    {
+      "id": "C09-T09",
+      "name": "#9 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 60",
+      "latency": 0
+    },
+    {
+      "id": "C09-T10",
+      "name": "#9 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-13 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C10-T01",
+      "name": "#10 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-10\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C10-T02",
+      "name": "#10 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 466.8
+    },
+    {
+      "id": "C10-T03",
+      "name": "#10 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 367.4
+    },
+    {
+      "id": "C10-T04",
+      "name": "#10 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C10-T05",
+      "name": "#10 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C10-T06",
+      "name": "#10 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 358.1
+    },
+    {
+      "id": "C10-T07",
+      "name": "#10 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C10-T08",
+      "name": "#10 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"rahul_031\"",
+      "latency": 344.7
+    },
+    {
+      "id": "C10-T09",
+      "name": "#10 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 52",
+      "latency": 0
+    },
+    {
+      "id": "C10-T10",
+      "name": "#10 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=52",
+      "latency": 0
+    },
+    {
+      "id": "C11-T01",
+      "name": "#11 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-11\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C11-T02",
+      "name": "#11 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 345.5
+    },
+    {
+      "id": "C11-T03",
+      "name": "#11 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 361.2
+    },
+    {
+      "id": "C11-T04",
+      "name": "#11 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C11-T05",
+      "name": "#11 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C11-T06",
+      "name": "#11 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 361.5
+    },
+    {
+      "id": "C11-T07",
+      "name": "#11 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C11-T08",
+      "name": "#11 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"dev_006\" rank#30=\"varun_021\"",
+      "latency": 501.1
+    },
+    {
+      "id": "C11-T09",
+      "name": "#11 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 33",
+      "latency": 0
+    },
+    {
+      "id": "C11-T10",
+      "name": "#11 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=53",
+      "latency": 0
+    },
+    {
+      "id": "C12-T01",
+      "name": "#12 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-12\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C12-T02",
+      "name": "#12 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 330.6
+    },
+    {
+      "id": "C12-T03",
+      "name": "#12 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 365.1
+    },
+    {
+      "id": "C12-T04",
+      "name": "#12 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C12-T05",
+      "name": "#12 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C12-T06",
+      "name": "#12 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 356.6
+    },
+    {
+      "id": "C12-T07",
+      "name": "#12 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C12-T08",
+      "name": "#12 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"aman_023\"",
+      "latency": 582.2
+    },
+    {
+      "id": "C12-T09",
+      "name": "#12 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 48",
+      "latency": 0
+    },
+    {
+      "id": "C12-T10",
+      "name": "#12 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-14 Max Δ=48",
+      "latency": 0
+    },
+    {
+      "id": "C13-T01",
+      "name": "#13 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-13\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C13-T02",
+      "name": "#13 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 435.2
+    },
+    {
+      "id": "C13-T03",
+      "name": "#13 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 362.4
+    },
+    {
+      "id": "C13-T04",
+      "name": "#13 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C13-T05",
+      "name": "#13 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C13-T06",
+      "name": "#13 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 362.8
+    },
+    {
+      "id": "C13-T07",
+      "name": "#13 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C13-T08",
+      "name": "#13 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"nikhil_019\"",
+      "latency": 355.9
+    },
+    {
+      "id": "C13-T09",
+      "name": "#13 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #5, 3 solved, delta 18",
+      "latency": 0
+    },
+    {
+      "id": "C13-T10",
+      "name": "#13 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=45",
+      "latency": 0
+    },
+    {
+      "id": "C14-T01",
+      "name": "#14 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-14\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C14-T02",
+      "name": "#14 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 490.3
+    },
+    {
+      "id": "C14-T03",
+      "name": "#14 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 524.2
+    },
+    {
+      "id": "C14-T04",
+      "name": "#14 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C14-T05",
+      "name": "#14 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C14-T06",
+      "name": "#14 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 358
+    },
+    {
+      "id": "C14-T07",
+      "name": "#14 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C14-T08",
+      "name": "#14 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"varun_021\"",
+      "latency": 345.3
+    },
+    {
+      "id": "C14-T09",
+      "name": "#14 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 37",
+      "latency": 0
+    },
+    {
+      "id": "C14-T10",
+      "name": "#14 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-12 Max Δ=47",
+      "latency": 0
+    },
+    {
+      "id": "C15-T01",
+      "name": "#15 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-15\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C15-T02",
+      "name": "#15 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 343
+    },
+    {
+      "id": "C15-T03",
+      "name": "#15 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 617.6
+    },
+    {
+      "id": "C15-T04",
+      "name": "#15 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C15-T05",
+      "name": "#15 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C15-T06",
+      "name": "#15 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 428.1
+    },
+    {
+      "id": "C15-T07",
+      "name": "#15 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C15-T08",
+      "name": "#15 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"shruti_020\"",
+      "latency": 593.3
+    },
+    {
+      "id": "C15-T09",
+      "name": "#15 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 58",
+      "latency": 0
+    },
+    {
+      "id": "C15-T10",
+      "name": "#15 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=58",
+      "latency": 0
+    },
+    {
+      "id": "C16-T01",
+      "name": "#16 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-16\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C16-T02",
+      "name": "#16 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 454.5
+    },
+    {
+      "id": "C16-T03",
+      "name": "#16 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 358
+    },
+    {
+      "id": "C16-T04",
+      "name": "#16 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C16-T05",
+      "name": "#16 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C16-T06",
+      "name": "#16 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 359.4
+    },
+    {
+      "id": "C16-T07",
+      "name": "#16 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C16-T08",
+      "name": "#16 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"priya_003\" rank#30=\"harsh_029\"",
+      "latency": 345.1
+    },
+    {
+      "id": "C16-T09",
+      "name": "#16 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #6, 3 solved, delta 20",
+      "latency": 0
+    },
+    {
+      "id": "C16-T10",
+      "name": "#16 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=55",
+      "latency": 0
+    },
+    {
+      "id": "C17-T01",
+      "name": "#17 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-17\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C17-T02",
+      "name": "#17 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 527
+    },
+    {
+      "id": "C17-T03",
+      "name": "#17 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 505.7
+    },
+    {
+      "id": "C17-T04",
+      "name": "#17 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C17-T05",
+      "name": "#17 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C17-T06",
+      "name": "#17 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 622.3
+    },
+    {
+      "id": "C17-T07",
+      "name": "#17 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C17-T08",
+      "name": "#17 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"harsh_029\"",
+      "latency": 423.4
+    },
+    {
+      "id": "C17-T09",
+      "name": "#17 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 33",
+      "latency": 0
+    },
+    {
+      "id": "C17-T10",
+      "name": "#17 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=50",
+      "latency": 0
+    },
+    {
+      "id": "C18-T01",
+      "name": "#18 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-18\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C18-T02",
+      "name": "#18 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 332.1
+    },
+    {
+      "id": "C18-T03",
+      "name": "#18 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 352.5
+    },
+    {
+      "id": "C18-T04",
+      "name": "#18 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C18-T05",
+      "name": "#18 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C18-T06",
+      "name": "#18 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 379.5
+    },
+    {
+      "id": "C18-T07",
+      "name": "#18 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C18-T08",
+      "name": "#18 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"harsh_029\"",
+      "latency": 551.5
+    },
+    {
+      "id": "C18-T09",
+      "name": "#18 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 4 solved, delta 35",
+      "latency": 0
+    },
+    {
+      "id": "C18-T10",
+      "name": "#18 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=56",
+      "latency": 0
+    },
+    {
+      "id": "C19-T01",
+      "name": "#19 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-19\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C19-T02",
+      "name": "#19 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 473.1
+    },
+    {
+      "id": "C19-T03",
+      "name": "#19 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 362.8
+    },
+    {
+      "id": "C19-T04",
+      "name": "#19 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C19-T05",
+      "name": "#19 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C19-T06",
+      "name": "#19 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 358.7
+    },
+    {
+      "id": "C19-T07",
+      "name": "#19 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C19-T08",
+      "name": "#19 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"harsh_029\"",
+      "latency": 343.2
+    },
+    {
+      "id": "C19-T09",
+      "name": "#19 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #7, 3 solved, delta 20",
+      "latency": 0
+    },
+    {
+      "id": "C19-T10",
+      "name": "#19 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C20-T01",
+      "name": "#20 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-20\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C20-T02",
+      "name": "#20 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 606.9
+    },
+    {
+      "id": "C20-T03",
+      "name": "#20 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 423.2
+    },
+    {
+      "id": "C20-T04",
+      "name": "#20 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C20-T05",
+      "name": "#20 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C20-T06",
+      "name": "#20 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 360.6
+    },
+    {
+      "id": "C20-T07",
+      "name": "#20 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C20-T08",
+      "name": "#20 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"swati_028\"",
+      "latency": 342.4
+    },
+    {
+      "id": "C20-T09",
+      "name": "#20 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #8, 3 solved, delta 21",
+      "latency": 0
+    },
+    {
+      "id": "C20-T10",
+      "name": "#20 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=58",
+      "latency": 0
+    },
+    {
+      "id": "C21-T01",
+      "name": "#21 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-21\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C21-T02",
+      "name": "#21 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 340.5
+    },
+    {
+      "id": "C21-T03",
+      "name": "#21 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 372.7
+    },
+    {
+      "id": "C21-T04",
+      "name": "#21 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C21-T05",
+      "name": "#21 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C21-T06",
+      "name": "#21 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 502.7
+    },
+    {
+      "id": "C21-T07",
+      "name": "#21 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C21-T08",
+      "name": "#21 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"harsh_029\"",
+      "latency": 341.3
+    },
+    {
+      "id": "C21-T09",
+      "name": "#21 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 54",
+      "latency": 0
+    },
+    {
+      "id": "C21-T10",
+      "name": "#21 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=54",
+      "latency": 0
+    },
+    {
+      "id": "C22-T01",
+      "name": "#22 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-22\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C22-T02",
+      "name": "#22 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 352.9
+    },
+    {
+      "id": "C22-T03",
+      "name": "#22 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 357.5
+    },
+    {
+      "id": "C22-T04",
+      "name": "#22 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C22-T05",
+      "name": "#22 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C22-T06",
+      "name": "#22 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 357.8
+    },
+    {
+      "id": "C22-T07",
+      "name": "#22 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C22-T08",
+      "name": "#22 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"diya_014\" rank#30=\"nikhil_019\"",
+      "latency": 340.2
+    },
+    {
+      "id": "C22-T09",
+      "name": "#22 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 41",
+      "latency": 0
+    },
+    {
+      "id": "C22-T10",
+      "name": "#22 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=55",
+      "latency": 0
+    },
+    {
+      "id": "C23-T01",
+      "name": "#23 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-23\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C23-T02",
+      "name": "#23 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 337.2
+    },
+    {
+      "id": "C23-T03",
+      "name": "#23 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 365.9
+    },
+    {
+      "id": "C23-T04",
+      "name": "#23 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C23-T05",
+      "name": "#23 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C23-T06",
+      "name": "#23 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 364.9
+    },
+    {
+      "id": "C23-T07",
+      "name": "#23 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C23-T08",
+      "name": "#23 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"sneha_009\" rank#30=\"rahul_031\"",
+      "latency": 491.4
+    },
+    {
+      "id": "C23-T09",
+      "name": "#23 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #7, 3 solved, delta 23",
+      "latency": 0
+    },
+    {
+      "id": "C23-T10",
+      "name": "#23 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=46",
+      "latency": 0
+    },
+    {
+      "id": "C24-T01",
+      "name": "#24 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-24\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C24-T02",
+      "name": "#24 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 335.8
+    },
+    {
+      "id": "C24-T03",
+      "name": "#24 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 376.5
+    },
+    {
+      "id": "C24-T04",
+      "name": "#24 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C24-T05",
+      "name": "#24 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C24-T06",
+      "name": "#24 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 356.1
+    },
+    {
+      "id": "C24-T07",
+      "name": "#24 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C24-T08",
+      "name": "#24 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"aman_023\"",
+      "latency": 344.7
+    },
+    {
+      "id": "C24-T09",
+      "name": "#24 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 58",
+      "latency": 0
+    },
+    {
+      "id": "C24-T10",
+      "name": "#24 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-11 Max Δ=58",
+      "latency": 0
+    },
+    {
+      "id": "C25-T01",
+      "name": "#25 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-25\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C25-T02",
+      "name": "#25 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 335.9
+    },
+    {
+      "id": "C25-T03",
+      "name": "#25 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 359.4
+    },
+    {
+      "id": "C25-T04",
+      "name": "#25 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C25-T05",
+      "name": "#25 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C25-T06",
+      "name": "#25 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 505.6
+    },
+    {
+      "id": "C25-T07",
+      "name": "#25 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C25-T08",
+      "name": "#25 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"rahul_031\"",
+      "latency": 346.2
+    },
+    {
+      "id": "C25-T09",
+      "name": "#25 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 50",
+      "latency": 0
+    },
+    {
+      "id": "C25-T10",
+      "name": "#25 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=50",
+      "latency": 0
+    },
+    {
+      "id": "C26-T01",
+      "name": "#26 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-26\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C26-T02",
+      "name": "#26 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 340.3
+    },
+    {
+      "id": "C26-T03",
+      "name": "#26 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 376.5
+    },
+    {
+      "id": "C26-T04",
+      "name": "#26 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C26-T05",
+      "name": "#26 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C26-T06",
+      "name": "#26 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 504.2
+    },
+    {
+      "id": "C26-T07",
+      "name": "#26 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C26-T08",
+      "name": "#26 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"shruti_020\"",
+      "latency": 342
+    },
+    {
+      "id": "C26-T09",
+      "name": "#26 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 30",
+      "latency": 0
+    },
+    {
+      "id": "C26-T10",
+      "name": "#26 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-14 Max Δ=56",
+      "latency": 0
+    },
+    {
+      "id": "C27-T01",
+      "name": "#27 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-27\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C27-T02",
+      "name": "#27 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 338.2
+    },
+    {
+      "id": "C27-T03",
+      "name": "#27 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 364.2
+    },
+    {
+      "id": "C27-T04",
+      "name": "#27 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C27-T05",
+      "name": "#27 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C27-T06",
+      "name": "#27 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 358
+    },
+    {
+      "id": "C27-T07",
+      "name": "#27 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C27-T08",
+      "name": "#27 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"neha_022\"",
+      "latency": 339.2
+    },
+    {
+      "id": "C27-T09",
+      "name": "#27 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 45",
+      "latency": 0
+    },
+    {
+      "id": "C27-T10",
+      "name": "#27 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=45",
+      "latency": 0
+    },
+    {
+      "id": "C28-T01",
+      "name": "#28 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-28\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C28-T02",
+      "name": "#28 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 346.7
+    },
+    {
+      "id": "C28-T03",
+      "name": "#28 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 536
+    },
+    {
+      "id": "C28-T04",
+      "name": "#28 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C28-T05",
+      "name": "#28 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C28-T06",
+      "name": "#28 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 511.4
+    },
+    {
+      "id": "C28-T07",
+      "name": "#28 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C28-T08",
+      "name": "#28 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"aditya_017\"",
+      "latency": 612.5
+    },
+    {
+      "id": "C28-T09",
+      "name": "#28 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 39",
+      "latency": 0
+    },
+    {
+      "id": "C28-T10",
+      "name": "#28 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-13 Max Δ=50",
+      "latency": 0
+    },
+    {
+      "id": "C29-T01",
+      "name": "#29 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-29\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C29-T02",
+      "name": "#29 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 509.4
+    },
+    {
+      "id": "C29-T03",
+      "name": "#29 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 511.4
+    },
+    {
+      "id": "C29-T04",
+      "name": "#29 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C29-T05",
+      "name": "#29 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C29-T06",
+      "name": "#29 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 510.4
+    },
+    {
+      "id": "C29-T07",
+      "name": "#29 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C29-T08",
+      "name": "#29 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"gaurav_027\"",
+      "latency": 521.5
+    },
+    {
+      "id": "C29-T09",
+      "name": "#29 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #6, 3 solved, delta 24",
+      "latency": 0
+    },
+    {
+      "id": "C29-T10",
+      "name": "#29 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-11 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C30-T01",
+      "name": "#30 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-30\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C30-T02",
+      "name": "#30 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 499.9
+    },
+    {
+      "id": "C30-T03",
+      "name": "#30 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 494.8
+    },
+    {
+      "id": "C30-T04",
+      "name": "#30 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C30-T05",
+      "name": "#30 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C30-T06",
+      "name": "#30 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 522.1
+    },
+    {
+      "id": "C30-T07",
+      "name": "#30 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C30-T08",
+      "name": "#30 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"nikhil_019\"",
+      "latency": 616.9
+    },
+    {
+      "id": "C30-T09",
+      "name": "#30 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 56",
+      "latency": 0
+    },
+    {
+      "id": "C30-T10",
+      "name": "#30 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=56",
+      "latency": 0
+    },
+    {
+      "id": "C31-T01",
+      "name": "#31 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-31\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C31-T02",
+      "name": "#31 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 511.8
+    },
+    {
+      "id": "C31-T03",
+      "name": "#31 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 513.2
+    },
+    {
+      "id": "C31-T04",
+      "name": "#31 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C31-T05",
+      "name": "#31 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C31-T06",
+      "name": "#31 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 459.3
+    },
+    {
+      "id": "C31-T07",
+      "name": "#31 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C31-T08",
+      "name": "#31 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"priya_003\" rank#30=\"varun_021\"",
+      "latency": 341.3
+    },
+    {
+      "id": "C31-T09",
+      "name": "#31 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 3 solved, delta 44",
+      "latency": 0
+    },
+    {
+      "id": "C31-T10",
+      "name": "#31 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-14 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C32-T01",
+      "name": "#32 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-32\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C32-T02",
+      "name": "#32 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 338.5
+    },
+    {
+      "id": "C32-T03",
+      "name": "#32 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 357.3
+    },
+    {
+      "id": "C32-T04",
+      "name": "#32 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C32-T05",
+      "name": "#32 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C32-T06",
+      "name": "#32 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 544.8
+    },
+    {
+      "id": "C32-T07",
+      "name": "#32 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C32-T08",
+      "name": "#32 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"aditya_017\"",
+      "latency": 509.8
+    },
+    {
+      "id": "C32-T09",
+      "name": "#32 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 3 solved, delta 48",
+      "latency": 0
+    },
+    {
+      "id": "C32-T10",
+      "name": "#32 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=48",
+      "latency": 0
+    },
+    {
+      "id": "C33-T01",
+      "name": "#33 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-33\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C33-T02",
+      "name": "#33 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 513.4
+    },
+    {
+      "id": "C33-T03",
+      "name": "#33 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 612
+    },
+    {
+      "id": "C33-T04",
+      "name": "#33 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C33-T05",
+      "name": "#33 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C33-T06",
+      "name": "#33 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 509
+    },
+    {
+      "id": "C33-T07",
+      "name": "#33 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C33-T08",
+      "name": "#33 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"harsh_029\"",
+      "latency": 509.4
+    },
+    {
+      "id": "C33-T09",
+      "name": "#33 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 50",
+      "latency": 0
+    },
+    {
+      "id": "C33-T10",
+      "name": "#33 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=50",
+      "latency": 0
+    },
+    {
+      "id": "C34-T01",
+      "name": "#34 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-34\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C34-T02",
+      "name": "#34 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 509.9
+    },
+    {
+      "id": "C34-T03",
+      "name": "#34 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 475.1
+    },
+    {
+      "id": "C34-T04",
+      "name": "#34 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C34-T05",
+      "name": "#34 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C34-T06",
+      "name": "#34 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 355.9
+    },
+    {
+      "id": "C34-T07",
+      "name": "#34 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C34-T08",
+      "name": "#34 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"deepika_030\"",
+      "latency": 341.4
+    },
+    {
+      "id": "C34-T09",
+      "name": "#34 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 41",
+      "latency": 0
+    },
+    {
+      "id": "C34-T10",
+      "name": "#34 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-14 Max Δ=50",
+      "latency": 0
+    },
+    {
+      "id": "C35-T01",
+      "name": "#35 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-35\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C35-T02",
+      "name": "#35 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 347.6
+    },
+    {
+      "id": "C35-T03",
+      "name": "#35 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 526.2
+    },
+    {
+      "id": "C35-T04",
+      "name": "#35 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C35-T05",
+      "name": "#35 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C35-T06",
+      "name": "#35 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 612.1
+    },
+    {
+      "id": "C35-T07",
+      "name": "#35 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C35-T08",
+      "name": "#35 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"siddharth_025\"",
+      "latency": 511
+    },
+    {
+      "id": "C35-T09",
+      "name": "#35 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #5, 3 solved, delta 28",
+      "latency": 0
+    },
+    {
+      "id": "C35-T10",
+      "name": "#35 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=57",
+      "latency": 0
+    },
+    {
+      "id": "C36-T01",
+      "name": "#36 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-36\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C36-T02",
+      "name": "#36 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 512.6
+    },
+    {
+      "id": "C36-T03",
+      "name": "#36 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 511.4
+    },
+    {
+      "id": "C36-T04",
+      "name": "#36 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C36-T05",
+      "name": "#36 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C36-T06",
+      "name": "#36 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 510.4
+    },
+    {
+      "id": "C36-T07",
+      "name": "#36 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C36-T08",
+      "name": "#36 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"varun_021\"",
+      "latency": 515.6
+    },
+    {
+      "id": "C36-T09",
+      "name": "#36 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 57",
+      "latency": 0
+    },
+    {
+      "id": "C36-T10",
+      "name": "#36 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=57",
+      "latency": 0
+    },
+    {
+      "id": "C37-T01",
+      "name": "#37 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-37\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C37-T02",
+      "name": "#37 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 505.3
+    },
+    {
+      "id": "C37-T03",
+      "name": "#37 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 513.1
+    },
+    {
+      "id": "C37-T04",
+      "name": "#37 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C37-T05",
+      "name": "#37 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C37-T06",
+      "name": "#37 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 518.9
+    },
+    {
+      "id": "C37-T07",
+      "name": "#37 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C37-T08",
+      "name": "#37 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"simran_026\"",
+      "latency": 603
+    },
+    {
+      "id": "C37-T09",
+      "name": "#37 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 3 solved, delta 38",
+      "latency": 0
+    },
+    {
+      "id": "C37-T10",
+      "name": "#37 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=52",
+      "latency": 0
+    },
+    {
+      "id": "C38-T01",
+      "name": "#38 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-38\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C38-T02",
+      "name": "#38 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 511
+    },
+    {
+      "id": "C38-T03",
+      "name": "#38 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 453.7
+    },
+    {
+      "id": "C38-T04",
+      "name": "#38 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C38-T05",
+      "name": "#38 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C38-T06",
+      "name": "#38 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 567.2
+    },
+    {
+      "id": "C38-T07",
+      "name": "#38 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C38-T08",
+      "name": "#38 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"priya_003\" rank#30=\"deepika_030\"",
+      "latency": 509.8
+    },
+    {
+      "id": "C38-T09",
+      "name": "#38 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 38",
+      "latency": 0
+    },
+    {
+      "id": "C38-T10",
+      "name": "#38 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=57",
+      "latency": 0
+    },
+    {
+      "id": "C39-T01",
+      "name": "#39 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-39\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C39-T02",
+      "name": "#39 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 488.9
+    },
+    {
+      "id": "C39-T03",
+      "name": "#39 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 355
+    },
+    {
+      "id": "C39-T04",
+      "name": "#39 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C39-T05",
+      "name": "#39 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C39-T06",
+      "name": "#39 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 360.2
+    },
+    {
+      "id": "C39-T07",
+      "name": "#39 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C39-T08",
+      "name": "#39 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"swati_028\"",
+      "latency": 343.2
+    },
+    {
+      "id": "C39-T09",
+      "name": "#39 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 4 solved, delta 41",
+      "latency": 0
+    },
+    {
+      "id": "C39-T10",
+      "name": "#39 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-12 Max Δ=50",
+      "latency": 0
+    },
+    {
+      "id": "C40-T01",
+      "name": "#40 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-40\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C40-T02",
+      "name": "#40 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 598.3
+    },
+    {
+      "id": "C40-T03",
+      "name": "#40 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 439.7
+    },
+    {
+      "id": "C40-T04",
+      "name": "#40 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C40-T05",
+      "name": "#40 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C40-T06",
+      "name": "#40 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 517.8
+    },
+    {
+      "id": "C40-T07",
+      "name": "#40 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C40-T08",
+      "name": "#40 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"swati_028\"",
+      "latency": 369.5
+    },
+    {
+      "id": "C40-T09",
+      "name": "#40 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 42",
+      "latency": 0
+    },
+    {
+      "id": "C40-T10",
+      "name": "#40 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C41-T01",
+      "name": "#41 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-41\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C41-T02",
+      "name": "#41 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 509.3
+    },
+    {
+      "id": "C41-T03",
+      "name": "#41 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 359.9
+    },
+    {
+      "id": "C41-T04",
+      "name": "#41 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C41-T05",
+      "name": "#41 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C41-T06",
+      "name": "#41 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 359.5
+    },
+    {
+      "id": "C41-T07",
+      "name": "#41 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C41-T08",
+      "name": "#41 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"siddharth_025\"",
+      "latency": 492.1
+    },
+    {
+      "id": "C41-T09",
+      "name": "#41 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #9, 3 solved, delta 16",
+      "latency": 0
+    },
+    {
+      "id": "C41-T10",
+      "name": "#41 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-14 Max Δ=58",
+      "latency": 0
+    },
+    {
+      "id": "C42-T01",
+      "name": "#42 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-42\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C42-T02",
+      "name": "#42 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 524.5
+    },
+    {
+      "id": "C42-T03",
+      "name": "#42 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 614.6
+    },
+    {
+      "id": "C42-T04",
+      "name": "#42 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C42-T05",
+      "name": "#42 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C42-T06",
+      "name": "#42 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 509.8
+    },
+    {
+      "id": "C42-T07",
+      "name": "#42 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C42-T08",
+      "name": "#42 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"kavya_024\"",
+      "latency": 446.6
+    },
+    {
+      "id": "C42-T09",
+      "name": "#42 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 60",
+      "latency": 0
+    },
+    {
+      "id": "C42-T10",
+      "name": "#42 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C43-T01",
+      "name": "#43 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-43\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C43-T02",
+      "name": "#43 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 370.7
+    },
+    {
+      "id": "C43-T03",
+      "name": "#43 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 676
+    },
+    {
+      "id": "C43-T04",
+      "name": "#43 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C43-T05",
+      "name": "#43 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C43-T06",
+      "name": "#43 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 550.4
+    },
+    {
+      "id": "C43-T07",
+      "name": "#43 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C43-T08",
+      "name": "#43 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"rohan_004\" rank#30=\"kavya_024\"",
+      "latency": 493.2
+    },
+    {
+      "id": "C43-T09",
+      "name": "#43 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #4, 3 solved, delta 18",
+      "latency": 0
+    },
+    {
+      "id": "C43-T10",
+      "name": "#43 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-13 Max Δ=58",
+      "latency": 0
+    },
+    {
+      "id": "C44-T01",
+      "name": "#44 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-44\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C44-T02",
+      "name": "#44 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 528.5
+    },
+    {
+      "id": "C44-T03",
+      "name": "#44 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 614.1
+    },
+    {
+      "id": "C44-T04",
+      "name": "#44 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C44-T05",
+      "name": "#44 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C44-T06",
+      "name": "#44 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 511
+    },
+    {
+      "id": "C44-T07",
+      "name": "#44 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C44-T08",
+      "name": "#44 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"priya_003\" rank#30=\"riya_016\"",
+      "latency": 439.5
+    },
+    {
+      "id": "C44-T09",
+      "name": "#44 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #2, 3 solved, delta 43",
+      "latency": 0
+    },
+    {
+      "id": "C44-T10",
+      "name": "#44 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=45",
+      "latency": 0
+    },
+    {
+      "id": "C45-T01",
+      "name": "#45 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-45\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C45-T02",
+      "name": "#45 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 335.5
+    },
+    {
+      "id": "C45-T03",
+      "name": "#45 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 365.7
+    },
+    {
+      "id": "C45-T04",
+      "name": "#45 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C45-T05",
+      "name": "#45 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C45-T06",
+      "name": "#45 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 364.1
+    },
+    {
+      "id": "C45-T07",
+      "name": "#45 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C45-T08",
+      "name": "#45 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"aman_023\"",
+      "latency": 343.1
+    },
+    {
+      "id": "C45-T09",
+      "name": "#45 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 57",
+      "latency": 0
+    },
+    {
+      "id": "C45-T10",
+      "name": "#45 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=57",
+      "latency": 0
+    },
+    {
+      "id": "C46-T01",
+      "name": "#46 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-46\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C46-T02",
+      "name": "#46 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 337.1
+    },
+    {
+      "id": "C46-T03",
+      "name": "#46 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 359.4
+    },
+    {
+      "id": "C46-T04",
+      "name": "#46 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C46-T05",
+      "name": "#46 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C46-T06",
+      "name": "#46 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 520.7
+    },
+    {
+      "id": "C46-T07",
+      "name": "#46 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C46-T08",
+      "name": "#46 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"priya_003\" rank#30=\"diya_014\"",
+      "latency": 344.5
+    },
+    {
+      "id": "C46-T09",
+      "name": "#46 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #3, 3 solved, delta 44",
+      "latency": 0
+    },
+    {
+      "id": "C46-T10",
+      "name": "#46 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=55",
+      "latency": 0
+    },
+    {
+      "id": "C47-T01",
+      "name": "#47 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-47\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C47-T02",
+      "name": "#47 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 333.8
+    },
+    {
+      "id": "C47-T03",
+      "name": "#47 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 360.7
+    },
+    {
+      "id": "C47-T04",
+      "name": "#47 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C47-T05",
+      "name": "#47 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C47-T06",
+      "name": "#47 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 367.4
+    },
+    {
+      "id": "C47-T07",
+      "name": "#47 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C47-T08",
+      "name": "#47 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"aarav_002\" rank#30=\"shreya_036\"",
+      "latency": 340.7
+    },
+    {
+      "id": "C47-T09",
+      "name": "#47 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #5, 3 solved, delta 26",
+      "latency": 0
+    },
+    {
+      "id": "C47-T10",
+      "name": "#47 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C48-T01",
+      "name": "#48 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-48\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C48-T02",
+      "name": "#48 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 336.3
+    },
+    {
+      "id": "C48-T03",
+      "name": "#48 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 353.5
+    },
+    {
+      "id": "C48-T04",
+      "name": "#48 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C48-T05",
+      "name": "#48 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C48-T06",
+      "name": "#48 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 364.5
+    },
+    {
+      "id": "C48-T07",
+      "name": "#48 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C48-T08",
+      "name": "#48 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"shreya_036\"",
+      "latency": 344.4
+    },
+    {
+      "id": "C48-T09",
+      "name": "#48 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 60",
+      "latency": 0
+    },
+    {
+      "id": "C48-T10",
+      "name": "#48 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=60",
+      "latency": 0
+    },
+    {
+      "id": "C49-T01",
+      "name": "#49 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-49\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C49-T02",
+      "name": "#49 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 337.8
+    },
+    {
+      "id": "C49-T03",
+      "name": "#49 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 356.4
+    },
+    {
+      "id": "C49-T04",
+      "name": "#49 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C49-T05",
+      "name": "#49 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C49-T06",
+      "name": "#49 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 355.7
+    },
+    {
+      "id": "C49-T07",
+      "name": "#49 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C49-T08",
+      "name": "#49 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"ananya_005\" rank#30=\"swati_028\"",
+      "latency": 347.7
+    },
+    {
+      "id": "C49-T09",
+      "name": "#49 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #5, 3 solved, delta 22",
+      "latency": 0
+    },
+    {
+      "id": "C49-T10",
+      "name": "#49 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-15 Max Δ=59",
+      "latency": 0
+    },
+    {
+      "id": "C50-T01",
+      "name": "#50 Metadata: slug, capacity=30, registered=110",
+      "passed": true,
+      "details": "\"ccc-arena-contest-50\" ✓",
+      "latency": 0
+    },
+    {
+      "id": "C50-T02",
+      "name": "#50 4 Arena Problems (A-D)",
+      "passed": false,
+      "details": "Found 0 problems (HTTP 405)",
+      "latency": 333.2
+    },
+    {
+      "id": "C50-T03",
+      "name": "#50 110 Cadet Registrations",
+      "passed": true,
+      "details": "110 cadets registered",
+      "latency": 355.8
+    },
+    {
+      "id": "C50-T04",
+      "name": "#50 All 110 Screened",
+      "passed": true,
+      "details": "110/110 took assessment",
+      "latency": 0
+    },
+    {
+      "id": "C50-T05",
+      "name": "#50 Strict Top-30 Cutoff",
+      "passed": true,
+      "details": "30 qualified / 80 eliminated",
+      "latency": 0
+    },
+    {
+      "id": "C50-T06",
+      "name": "#50 30 QR Passes — LAB-04-PC seats",
+      "passed": false,
+      "details": "passes=110, seat0=\"LAB-04-PC01\"",
+      "latency": 597.7
+    },
+    {
+      "id": "C50-T07",
+      "name": "#50 All 30 Turnstile-Admitted",
+      "passed": true,
+      "details": "All 30 admitted by Chief Proctor",
+      "latency": 0
+    },
+    {
+      "id": "C50-T08",
+      "name": "#50 Scoreboard 30-entry ranking",
+      "passed": true,
+      "details": "rank#1=\"santusht\" rank#30=\"swati_028\"",
+      "latency": 507.8
+    },
+    {
+      "id": "C50-T09",
+      "name": "#50 Santusht in Top-30",
+      "passed": true,
+      "details": "Rank #1, 4 solved, delta 56",
+      "latency": 0
+    },
+    {
+      "id": "C50-T10",
+      "name": "#50 Elo Deltas — all 30 entries",
+      "passed": true,
+      "details": "Min Δ=-16 Max Δ=56",
+      "latency": 0
+    },
+    {
+      "id": "P4-T01",
+      "name": "Profile endpoint returns member",
+      "passed": true,
+      "details": "handle=\"santusht\" rating=3120",
+      "latency": 512.6
+    },
+    {
+      "id": "P4-T02",
+      "name": "50-point Rating Graph data",
+      "passed": true,
+      "details": "50 rating entries",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T03",
+      "name": "Rating climbed from 1200 to Grandmaster",
+      "passed": true,
+      "details": "Current=3120, Peak=3120",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T04",
+      "name": "Peak rating tracked correctly",
+      "passed": true,
+      "details": "Peak=3120 ≥ Current=3120",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T05",
+      "name": "University rank is top-3",
+      "passed": true,
+      "details": "Rank #3",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T06",
+      "name": "Attendance 50/50",
+      "passed": true,
+      "details": "50/51 contests attended",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T07",
+      "name": "Podium finishes badge present",
+      "passed": true,
+      "details": "Badges: 5★ Grandmaster, Top 5% Elite, Contest Veteran, 35x Podium Finisher, CCC Core Organizer",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T08",
+      "name": "Contest Veteran badge (5+ contests)",
+      "passed": true,
+      "details": "Veteran badge present",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T09",
+      "name": "Elite/Grandmaster badge (rating ≥2000)",
+      "passed": true,
+      "details": "Elite badge present",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T10",
+      "name": "Problem solving stats populated",
+      "passed": true,
+      "details": "50 solved (E:22 M:20 H:8)",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T11",
+      "name": "Recent battles history",
+      "passed": true,
+      "details": "50 recent battles",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T12",
+      "name": "Core member flag set",
+      "passed": true,
+      "details": "is_core_member=true (Admin / QA)",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T13",
+      "name": "Rating graph delta sign integrity",
+      "passed": true,
+      "details": "All deltas are numbers",
+      "latency": 0.1
+    },
+    {
+      "id": "P4-T14",
+      "name": "Submission calendar populated",
+      "passed": true,
+      "details": "50 calendar days",
+      "latency": 0.1
+    },
+    {
+      "id": "P5-T01",
+      "name": "Leaderboard has ≥110 cadets",
+      "passed": true,
+      "details": "118 ranked",
+      "latency": 536
+    },
+    {
+      "id": "P5-T02",
+      "name": "Rank #1 is highest-rated",
+      "passed": true,
+      "details": "#1: aarav_002 (3531 Elo)",
+      "latency": 0.1
+    },
+    {
+      "id": "P5-T03",
+      "name": "Santusht in top 3",
+      "passed": false,
+      "details": "Santusht not in top 3",
+      "latency": 0.1
+    },
+    {
+      "id": "P5-T04",
+      "name": "No duplicate ranks",
+      "passed": true,
+      "details": "All ranks unique",
+      "latency": 0.1
+    },
+    {
+      "id": "P5-T05",
+      "name": "Monotonic rank ordering",
+      "passed": true,
+      "details": "Ranks ascending",
+      "latency": 0.1
+    },
+    {
+      "id": "P6-T01",
+      "name": "≥150 Trust Proofs (3 podiums × 50 contests)",
+      "passed": false,
+      "details": "Only 50",
+      "latency": 482.5
+    },
+    {
+      "id": "P6-T02",
+      "name": "Proofs have SHA-256 digests",
+      "passed": true,
+      "details": "All digests 64-char SHA-256",
+      "latency": 0.1
+    },
+    {
+      "id": "P6-T03",
+      "name": "Santusht has proof certificates",
+      "passed": true,
+      "details": "Santusht cert: PROOF-50-SANT-01",
+      "latency": 0.1
+    },
+    {
+      "id": "P6-T04",
+      "name": "Proof status=verified",
+      "passed": true,
+      "details": "All verified",
+      "latency": 0.1
+    },
+    {
+      "id": "P6-T05",
+      "name": "Proof contains proctor stamp",
+      "passed": true,
+      "details": "Dr. Kailash Chandra — Chief Proctor",
+      "latency": 0.1
+    },
+    {
+      "id": "P7-T01",
+      "name": "Admin contest list — 50+ contests",
+      "passed": true,
+      "details": "51 contests in admin view",
+      "latency": 512.6
+    },
+    {
+      "id": "P7-T02",
+      "name": "Admin participants — 110 cadets for contest #1",
+      "passed": true,
+      "details": "110 cadets",
+      "latency": 503.6
+    },
+    {
+      "id": "P7-T03",
+      "name": "Admin participants have assessment_score",
+      "passed": false,
+      "details": "assessment_score missing in participants",
+      "latency": 0.1
+    },
+    {
+      "id": "P7-T04",
+      "name": "30 qualified — all have campus_pass_code",
+      "passed": false,
+      "details": "Only 30 qualified, codes=false",
+      "latency": 0.1
+    },
+    {
+      "id": "P7-T05",
+      "name": "Qualified cadets have LAB-04 seats",
+      "passed": false,
+      "details": "30 missing",
+      "latency": 0.1
+    },
+    {
+      "id": "P7-T06",
+      "name": "Admin POST /contests — requires auth (401/403)",
+      "passed": false,
+      "details": "Allowed unauthenticated creation! HTTP 422",
+      "latency": 618.6
+    },
+    {
+      "id": "P7-T07",
+      "name": "Admin simulate-tournament — rejects bad JWT",
+      "passed": true,
+      "details": "HTTP 401",
+      "latency": 0.1
+    },
+    {
+      "id": "P7-T08",
+      "name": "Admin problems endpoint — 4 problems",
+      "passed": false,
+      "details": "Found 0",
+      "latency": 512.5
+    },
+    {
+      "id": "P7-T09",
+      "name": "Assessment endpoint responds",
+      "passed": true,
+      "details": "HTTP 401",
+      "latency": 511.2
+    },
+    {
+      "id": "P7-T10",
+      "name": "Gate scanner — rejects invalid pass code (400/404)",
+      "passed": false,
+      "details": "Unexpectedly accepted: HTTP 405",
+      "latency": 512
+    },
+    {
+      "id": "P8-T01",
+      "name": "send-otp — 200 even with SMTP relay down",
+      "passed": true,
+      "details": "HTTP 200 sent=true",
+      "latency": 2142.6
+    },
+    {
+      "id": "P8-T02",
+      "name": "send-otp — dev_otp fallback present (SMTP relay down)",
+      "passed": true,
+      "details": "dev_otp=\"767467\"",
+      "latency": 0.1
+    },
+    {
+      "id": "P8-T03",
+      "name": "CORS header present on send-otp",
+      "passed": true,
+      "details": "Access-Control-Allow-Origin: http://localhost:8081",
+      "latency": 0.1
+    },
+    {
+      "id": "P8-T04",
+      "name": "verify-otp — full OTP flow",
+      "passed": true,
+      "details": "JWT issued: eyJhbGciOiJSUzI1NiIs...",
+      "latency": 1246.3
+    },
+    {
+      "id": "P8-T05",
+      "name": "JWT — token_type=bearer",
+      "passed": true,
+      "details": "token_type=bearer",
+      "latency": 0.1
+    },
+    {
+      "id": "P8-T06",
+      "name": "/auth/me — returns authenticated member",
+      "passed": false,
+      "details": "HTTP 200",
+      "latency": 0
+    },
+    {
+      "id": "P8-T07",
+      "name": "Contest list — public access (no auth)",
+      "passed": true,
+      "details": "HTTP 200, 51 contests",
+      "latency": 730.5
+    },
+    {
+      "id": "P8-T08",
+      "name": "Cadet profile — public access (no auth)",
+      "passed": false,
+      "details": "HTTP 404",
+      "latency": 366.3
+    },
+    {
+      "id": "P8-T09",
+      "name": "Cadet profile — email hidden for non-self",
+      "passed": true,
+      "details": "email not exposed",
+      "latency": 0.1
+    },
+    {
+      "id": "P8-T10",
+      "name": "Leaderboard pagination works",
+      "passed": false,
+      "details": "rows1=118 rows2=118",
+      "latency": 519.2
+    },
+    {
+      "id": "P8-T11",
+      "name": "send-otp — idempotent on re-send (200 again)",
+      "passed": true,
+      "details": "second send: HTTP 200",
+      "latency": 1788.2
+    },
+    {
+      "id": "P8-T12",
+      "name": "/social/my-following-ids — responds (public or 401)",
+      "passed": true,
+      "details": "HTTP 401",
+      "latency": 394.1
+    },
+    {
+      "id": "P9-T01",
+      "name": "Assessment list endpoint",
+      "passed": false,
+      "details": "HTTP 401",
+      "latency": 961.7
+    },
+    {
+      "id": "P9-T02",
+      "name": "50 assessments created (one per contest)",
+      "passed": false,
+      "details": "Only 0",
+      "latency": 0.1
+    },
+    {
+      "id": "P10-T01",
+      "name": "Feed endpoint responds",
+      "passed": false,
+      "details": "Error: undefined",
+      "latency": 888.9
+    },
+    {
+      "id": "P10-T02",
+      "name": "/events endpoint responds",
+      "passed": false,
+      "details": "HTTP 404",
+      "latency": 1047
+    },
+    {
+      "id": "P10-T03",
+      "name": "Social endpoint responds",
+      "passed": true,
+      "details": "HTTP 401",
+      "latency": 358
+    }
+  ],
+  "timestamp": "2026-09-19T15:56:33.624Z"
+}
