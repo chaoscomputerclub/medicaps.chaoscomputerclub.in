@@ -153,17 +153,39 @@ class TournamentQAService:
         # ── 1. Initialize / Ensure 110 Cadet Profiles ──────────────────────────
         cadets: List[MemberProfile] = []
 
-        # Find or create primary cadet
+        # Find or create primary cadet (safely handle any legacy duplicate records)
         prim_stmt = select(MemberProfile).where(
             (MemberProfile.handle == primary_handle)
             | (MemberProfile.email == primary_email)
             | (MemberProfile.prn == primary_prn)
             | (MemberProfile.handle == "en23cs301927")
+            | (MemberProfile.email == "en23cs301927@medicaps.ac.in")
         )
         prim_res = await db.execute(prim_stmt)
-        primary_cadet = prim_res.scalars().first()
+        existing_matches = prim_res.scalars().all()
 
-        if not primary_cadet:
+        if existing_matches:
+            primary_cadet = existing_matches[0]
+            for dup in existing_matches[1:]:
+                # Re-link any registrations, passes, or submissions before deletion
+                await db.execute(delete(RatingHistory).where(RatingHistory.member_id == dup.id))
+                await db.execute(delete(CampusPass).where(CampusPass.member_id == dup.id))
+                await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == dup.id))
+                await db.execute(delete(ScoreboardEntry).where(ScoreboardEntry.member_id == dup.id))
+                await db.delete(dup)
+            await db.flush()
+
+            primary_cadet.handle = primary_handle
+            primary_cadet.full_name = primary_name
+            primary_cadet.email = primary_email
+            primary_cadet.prn = primary_prn
+            primary_cadet.department = "CSE"
+            primary_cadet.batch = "2023-27"
+            primary_cadet.is_core_member = True
+            primary_cadet.is_onboarded = True
+            primary_cadet.bio = "Medi-Caps Competitive Programmer & Cyber Security Specialist"
+            await db.flush()
+        else:
             primary_cadet = MemberProfile(
                 handle=primary_handle,
                 full_name=primary_name,
@@ -181,13 +203,6 @@ class TournamentQAService:
             )
             db.add(primary_cadet)
             await db.flush()
-        else:
-            primary_cadet.handle = primary_handle
-            primary_cadet.full_name = primary_name
-            primary_cadet.email = primary_email
-            primary_cadet.prn = primary_prn
-            primary_cadet.department = "CSE"
-            primary_cadet.batch = "2023-27"
             primary_cadet.is_core_member = True
             primary_cadet.is_onboarded = True
             if not primary_cadet.bio:
