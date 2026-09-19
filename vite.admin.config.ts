@@ -5,6 +5,7 @@ import path from "path";
 
 export default defineConfig({
   root: path.resolve(__dirname, "admin"),
+  base: "./",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
