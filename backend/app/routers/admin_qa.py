@@ -82,3 +82,49 @@ async def get_latest_qa_markdown(
     
     md_content = ProductionQAService.generate_markdown_report(_LATEST_QA_REPORT)
     return {"audit_id": _LATEST_QA_REPORT.audit_id, "markdown": md_content}
+
+
+class TournamentSimulationRequest(BaseModel):
+    cadet_count: int = 110
+    contest_count: int = 50
+    primary_handle: str = "santusht"
+    primary_email: str = "santusht.en23@medicaps.ac.in"
+    primary_name: str = "Santusht Kotai"
+    primary_prn: str = "EN23CS301927"
+
+
+@router.post(
+    "/simulate-tournament",
+    summary="Simulate full 50-contest, 110-cadet tournament lifecycle with real trends and rating history",
+)
+async def simulate_tournament(
+    payload: Optional[TournamentSimulationRequest] = None,
+    current_admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """
+    Executes an end-to-end 50-contest simulation with 110 real cadets:
+    - Phase 1 Online Screening Assessments
+    - Top 30 Finalist Selection
+    - QR Pass & Workstation Seat Allocation
+    - Live Arena Submissions & Scoreboard Placements
+    - Historical Elo Rating Trajectories (Rating Graph)
+    - Full Badges & Achievements
+    """
+    from app.core.db import AsyncSessionLocal
+    from app.services.tournament_qa_service import TournamentQAService
+
+    req = payload or TournamentSimulationRequest()
+    logger.info("⚡ [QA ADMIN] Executing 50-contest tournament simulation...")
+
+    async with AsyncSessionLocal() as db:
+        result = await TournamentQAService.simulate_50_contests(
+            db=db,
+            cadet_count=req.cadet_count,
+            contest_count=req.contest_count,
+            primary_handle=req.primary_handle,
+            primary_email=req.primary_email,
+            primary_name=req.primary_name,
+            primary_prn=req.primary_prn,
+        )
+    return result
+
