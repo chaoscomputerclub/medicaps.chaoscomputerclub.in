@@ -759,7 +759,24 @@ export function ContestsHubPage() {
                       <div className="flex items-center gap-4 font-mono text-xs text-zinc-400">
                         {record.score !== null && <span>Score: <strong className="text-white tabular-nums">{record.score}</strong></span>}
                         {record.rank !== null && <span>Rank: <strong className="text-lime-400 tabular-nums">#{record.rank}</strong> / {record.participants || 60}</span>}
-                        <span className="font-bold text-emerald-400">+38 Rating</span>
+                        {record.rating_delta !== null && record.rating_delta !== undefined && (
+                          <span
+                            className={`font-bold tabular-nums ${
+                              record.rating_delta > 0
+                                ? "text-emerald-400"
+                                : record.rating_delta < 0
+                                ? "text-rose-400"
+                                : "text-zinc-400"
+                            }`}
+                          >
+                            {record.rating_delta > 0 ? `+${record.rating_delta}` : record.rating_delta} Rating
+                          </span>
+                        )}
+                        {record.score === null && record.rank === null && record.rating_delta == null && (
+                          <span className="text-zinc-400 font-mono text-xs">
+                            {record.status === "upcoming" ? "Registered · Preliminary round pending" : "Results pending verification"}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">

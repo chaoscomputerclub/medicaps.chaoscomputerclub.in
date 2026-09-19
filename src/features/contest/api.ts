@@ -424,6 +424,7 @@ export const contestApi = {
           venue: item["venue"] ?? null,
           score: item["score"] ?? null,
           rank: item["rank"] ?? null,
+          rating_delta: item["rating_delta"] ?? null,
           participants: Number(item["participants"] ?? 0),
           outcome: (item["outcome"] ?? "registered") as ParticipationRecord["outcome"],
           assessment_submitted: Boolean(

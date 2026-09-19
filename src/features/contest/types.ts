@@ -128,6 +128,7 @@ export type ParticipationRecord = {
   venue: string | null;
   score: number | null;
   rank: number | null;
+  rating_delta?: number | null;
   participants: number;
   outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending" | "submitted";
   assessment_submitted?: boolean;

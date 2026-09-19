@@ -178,6 +178,7 @@ async def get_my_participated_contests(
 
         score = sb.score if sb else (round(sess.total_score) if (sess and sess.total_score is not None) else (round(reg.assessment_score) if (reg and reg.assessment_score is not None and reg.assessment_taken) else None))
         rank = sb.rank if sb else None
+        rating_delta = sb.rating_delta if (sb and sb.rating_delta is not None) else None
 
         results.append({
             "contest_id": contest.id,
@@ -191,6 +192,7 @@ async def get_my_participated_contests(
             "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
             "score": score,
             "rank": rank,
+            "rating_delta": rating_delta,
             "participants": contest.registered_count,
             "outcome": outcome,
             "assessment_submitted": assessment_submitted,
@@ -220,6 +222,7 @@ async def get_my_participated_contests(
                     "ends_at": contest_row.ends_at.isoformat() if contest_row.ends_at else None,
                     "score": score,
                     "rank": None,
+                    "rating_delta": None,
                     "participants": contest_row.registered_count,
                     "outcome": outcome,
                     "assessment_submitted": is_sess_submitted,
@@ -246,6 +249,7 @@ async def get_my_participated_contests(
                     "ends_at": contest_row.ends_at.isoformat() if contest_row.ends_at else None,
                     "score": sb.score,
                     "rank": sb.rank,
+                    "rating_delta": sb.rating_delta if (sb and sb.rating_delta is not None) else None,
                     "participants": contest_row.registered_count,
                     "outcome": "qualified" if sb.rank <= 30 else "not_qualified",
                     "assessment_submitted": True,
