@@ -51,6 +51,7 @@ async function runQa() {
 
   const testSlug = `qa-test-${Date.now()}`;
   let createdContestSlug = null;
+  let primaryContestSlug = "weekly-contest-2";
 
   // ─── TEST 1: Proctor Key Auth Validation ──────────────────────────────────
   {
@@ -79,7 +80,10 @@ async function runQa() {
       const latency = performance.now() - start;
       if (res.ok) {
         const list = await res.json();
-        logTest("ADM-LIST-01", "List Contests with Admin Metrics", "PASS", latency, `Found ${list.length} contest(s)`);
+        if (Array.isArray(list) && list.length > 0) {
+          primaryContestSlug = list[0].slug;
+        }
+        logTest("ADM-LIST-01", "List Contests with Admin Metrics", "PASS", latency, `Found ${list.length} contest(s), active: '${primaryContestSlug}'`);
       } else {
         logTest("ADM-LIST-01", "List Contests with Admin Metrics", "FAIL", latency, `HTTP ${res.status}`);
       }
@@ -88,22 +92,22 @@ async function runQa() {
     }
   }
 
-  // ─── TEST 3: Get Contest Admin Detail (Weekly Contest 1) ─────────────────
+  // ─── TEST 3: Get Contest Admin Detail ─────────────────────────────────────
   {
     const start = performance.now();
     try {
-      const res = await fetch(`${API_BASE}/admin/contests/weekly-contest-1`, { headers });
+      const res = await fetch(`${API_BASE}/admin/contests/${primaryContestSlug}`, { headers });
       const latency = performance.now() - start;
       if (res.ok) {
         const detail = await res.json();
         const hasContest = Boolean(detail.contest);
         const probCount = detail.contest_problems?.length || 0;
-        logTest("ADM-DET-01", "Fetch Admin Contest Dossier (weekly-contest-1)", "PASS", latency, `Contest '${detail.contest?.title}', ${probCount} arena problems`);
+        logTest("ADM-DET-01", `Fetch Admin Contest Dossier (${primaryContestSlug})`, "PASS", latency, `Contest '${detail.contest?.title}', ${probCount} arena problems`);
       } else {
-        logTest("ADM-DET-01", "Fetch Admin Contest Dossier (weekly-contest-1)", "FAIL", latency, `HTTP ${res.status}`);
+        logTest("ADM-DET-01", `Fetch Admin Contest Dossier (${primaryContestSlug})`, "FAIL", latency, `HTTP ${res.status}`);
       }
     } catch (err) {
-      logTest("ADM-DET-01", "Fetch Admin Contest Dossier (weekly-contest-1)", "FAIL", 0, err.message);
+      logTest("ADM-DET-01", `Fetch Admin Contest Dossier (${primaryContestSlug})`, "FAIL", 0, err.message);
     }
   }
 
@@ -338,16 +342,16 @@ async function runQa() {
   {
     const start = performance.now();
     try {
-      const res = await fetch(`${API_BASE}/passes/contest/weekly-contest-1/attendees`);
+      const res = await fetch(`${API_BASE}/passes/contest/${primaryContestSlug}/attendees`);
       const latency = performance.now() - start;
       if (res.ok) {
         const attendees = await res.json();
-        logTest("ADM-ROSTER-01", "Fetch Contest Attendee Roster (Proctor Table)", "PASS", latency, `Received ${attendees.length} candidate record(s)`);
+        logTest("ADM-ROSTER-01", `Fetch Contest Attendee Roster (${primaryContestSlug})`, "PASS", latency, `Received ${attendees.length} candidate record(s)`);
       } else {
-        logTest("ADM-ROSTER-01", "Fetch Contest Attendee Roster (Proctor Table)", "FAIL", latency, `HTTP ${res.status}`);
+        logTest("ADM-ROSTER-01", `Fetch Contest Attendee Roster (${primaryContestSlug})`, "FAIL", latency, `HTTP ${res.status}`);
       }
     } catch (err) {
-      logTest("ADM-ROSTER-01", "Fetch Contest Attendee Roster (Proctor Table)", "FAIL", 0, err.message);
+      logTest("ADM-ROSTER-01", `Fetch Contest Attendee Roster (${primaryContestSlug})`, "FAIL", 0, err.message);
     }
   }
 
@@ -360,7 +364,7 @@ async function runQa() {
         headers,
         body: JSON.stringify({
           pass_code_or_qr: "NON_EXISTENT_QR_CODE",
-          contest_slug: "weekly-contest-1",
+          contest_slug: primaryContestSlug,
         }),
       });
       const latency = performance.now() - start;
@@ -390,7 +394,7 @@ async function runQa() {
         body: JSON.stringify({
           pass_code_or_qr: "MOCK-PASS-INVALID-123",
           proctor_name: "Automated QA Gate Scanner",
-          contest_slug: "weekly-contest-1",
+          contest_slug: primaryContestSlug,
         }),
       });
       const latency = performance.now() - start;
@@ -418,7 +422,7 @@ async function runQa() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          slug: "weekly-contest-1",
+          slug: primaryContestSlug,
           action: "reset_timer",
           timer_minutes: 90,
         }),
@@ -464,7 +468,7 @@ async function runQa() {
   {
     const start = performance.now();
     try {
-      const res = await fetch(`${API_BASE}/assessment/weekly-contest-1/qualify-top30`, {
+      const res = await fetch(`${API_BASE}/assessment/${primaryContestSlug}/qualify-top30`, {
         method: "POST",
         headers,
       });
@@ -487,7 +491,7 @@ async function runQa() {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`${API_BASE}/events/contest/weekly-contest-1/stream`, {
+      const res = await fetch(`${API_BASE}/events/contest/${primaryContestSlug}/stream`, {
         signal: controller.signal,
         headers: { Accept: "text/event-stream" },
       });

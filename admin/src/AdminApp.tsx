@@ -23,7 +23,7 @@ export function AdminApp() {
 
   const [activeTab, setActiveTab] = useState<string>("gate_scanner");
   const [contests, setContests] = useState<any[]>([]);
-  const [selectedSlug, setSelectedSlug] = useState<string>("weekly-contest-1");
+  const [selectedSlug, setSelectedSlug] = useState<string>("");
   const [isLoadingContests, setIsLoadingContests] = useState(false);
 
   const [attendees, setAttendees] = useState<any[]>([]);
