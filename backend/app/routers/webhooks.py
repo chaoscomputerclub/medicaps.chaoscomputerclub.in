@@ -211,7 +211,7 @@ async def webhook_contest_event(
 
     elif payload.action == "reset_timer":
         from datetime import datetime, timezone, timedelta
-        from app.core.redis import delete_cache_pattern
+        from app.core.cache import delete_cache_pattern
         new_ends = datetime.now(timezone.utc) + timedelta(minutes=payload.timer_minutes or 90)
         contest.ends_at = new_ends
         await db.commit()

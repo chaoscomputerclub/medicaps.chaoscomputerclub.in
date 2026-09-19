@@ -83,7 +83,7 @@ export function AttendeesPanel({
         );
         onRefresh();
       } else {
-        toast.error(`Check-in failed: ${res.reason || "Invalid pass"}`);
+        toast.error(`Check-in failed: ${res.message || res.reason || "Invalid pass credentials"}`);
       }
     } catch (err: any) {
       toast.error(err.message || "Manual check-in error.");

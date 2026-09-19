@@ -37,6 +37,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
+  const proctorKey = typeof localStorage !== "undefined" ? localStorage.getItem("ccc_proctor_key") : null;
+  if (proctorKey) {
+    headers["X-Proctor-Key"] = proctorKey;
+    headers["X-Admin-Key"] = proctorKey;
+  }
+
   let response: Response;
   try {
     response = await fetch(`${getApiBase()}${path}`, { ...init, headers });

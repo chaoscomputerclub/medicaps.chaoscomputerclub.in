@@ -93,16 +93,21 @@ export function AdminApp() {
     }
   });
 
-  const handleAuthenticated = (name: string) => {
+  const handleAuthenticated = (name: string, key?: string) => {
     setProctorName(name);
     setIsAuthenticated(true);
     localStorage.setItem("ccc_proctor_auth", "true");
     localStorage.setItem("ccc_proctor_name", name);
+    if (key) {
+      localStorage.setItem("ccc_proctor_key", key);
+    }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("ccc_proctor_auth");
+    localStorage.removeItem("ccc_proctor_name");
+    localStorage.removeItem("ccc_proctor_key");
     toast.info("Proctor session exited.");
   };
 

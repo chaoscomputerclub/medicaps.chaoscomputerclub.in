@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface AdminLoginModalProps {
-  onAuthenticated: (proctorName: string) => void;
+  onAuthenticated: (proctorName: string, proctorKey?: string) => void;
 }
 
 export function AdminLoginModal({ onAuthenticated }: AdminLoginModalProps) {
@@ -22,7 +22,7 @@ export function AdminLoginModal({ onAuthenticated }: AdminLoginModalProps) {
 
     if (validPins.includes(cleanPin) || isLocal || cleanPin.length >= 4) {
       toast.success("Security clearance verified. Welcome to Proctor Command.");
-      onAuthenticated(proctorName);
+      onAuthenticated(proctorName, cleanPin);
     } else {
       toast.error("Invalid Proctor Security Key. Access denied.");
     }

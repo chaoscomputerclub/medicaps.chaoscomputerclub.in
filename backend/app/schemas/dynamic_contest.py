@@ -35,6 +35,18 @@ class ProblemCreateSchema(BaseModel):
     sample_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Visible sample testcases with optional explanations")
     hidden_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Hidden evaluation testcases for official grading")
 
+    @field_validator("time_limit", mode="before")
+    @classmethod
+    def validate_time_limit(cls, v: Any) -> float:
+        try:
+            val = float(v)
+            if val > 10.0:
+                # Proctor or client supplied milliseconds (e.g. 1000 or 2000 ms) -> normalize to seconds
+                val = val / 1000.0
+            return max(0.1, min(10.0, val))
+        except (ValueError, TypeError):
+            return 2.0
+
     @field_validator("problem_index")
     @classmethod
     def validate_index(cls, v: str) -> str:

@@ -352,11 +352,12 @@ export function GateScannerPanel({
         onPassCheckedIn?.(res);
       } else {
         if (soundEnabled) playRejectBuzz();
-        toast.error(`Check-in rejected: ${res.reason || "Invalid pass credentials"}`);
+        const reasonText = res.message || res.reason || "Invalid pass credentials";
+        toast.error(`Check-in rejected: ${reasonText}`);
         setLastProcessed({
           valid: false,
           candidate_name: pendingCadet.candidateName,
-          reason: res.reason || "Validation rejected",
+          reason: reasonText,
           time: new Date().toLocaleTimeString(),
         });
       }
