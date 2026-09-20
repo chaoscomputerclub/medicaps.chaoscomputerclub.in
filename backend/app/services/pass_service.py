@@ -334,6 +334,8 @@ class PassService:
     async def list_contest_attendees(
         contest_slug: str,
         db: AsyncSession,
+        limit: Optional[int] = None,
+        offset: Optional[int] = 0,
     ) -> List[ContestAttendeeItem]:
         """Fetch all registered participants, screening candidates, and qualified finalists for proctor display."""
         contest_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
@@ -356,13 +358,22 @@ class PassService:
                 ContestRegistration.registered_at.asc()
             )
         )
+
+        start_idx = 1
+        if limit is not None:
+            from app.lib.pagination import normalize_pagination
+            safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=200, max_limit=1000)
+            stmt_reg = stmt_reg.limit(safe_limit).offset(safe_offset)
+            start_idx = safe_offset + 1
+
         reg_result = await db.execute(stmt_reg)
         reg_rows = reg_result.all()
 
         seen_member_ids = set()
         attendees: List[ContestAttendeeItem] = []
 
-        for idx, (reg, member, c_pass) in enumerate(reg_rows, start=1):
+        for idx, (reg, member, c_pass) in enumerate(reg_rows, start=start_idx):
+
             seen_member_ids.add(member.id)
             is_qualified = bool(reg.is_top_30_qualified or c_pass is not None)
 

@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-09-20T10:04:54.994Z",
-  "totalElements": 303,
-  "functionalCount": 303,
+  "timestamp": "2026-09-20T10:21:51.324Z",
+  "totalElements": 306,
+  "functionalCount": 306,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 35,
     "backendQueries": 6,
     "routingNavigation": 206,
-    "clientUiState": 36,
-    "conditionalLocked": 14,
+    "clientUiState": 37,
+    "conditionalLocked": 16,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
   },
@@ -16,7 +16,7 @@
   "elements": [
     {
       "file": "src/AppRoutes.tsx",
-      "line": 27,
+      "line": 35,
       "tag": "<Navigate>",
       "label": "[to={/portal/profile/${handle ? enco...",
       "handler": "{`/portal/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 32,
+      "line": 40,
       "tag": "<Navigate>",
       "label": "[to={/assessments/${contestSlug ? en...",
       "handler": "{`/assessments/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}`}",
@@ -34,7 +34,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 39,
+      "line": 48,
       "tag": "<Navigate>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -43,7 +43,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 94,
+      "line": 103,
       "tag": "<Navigate>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -2275,12 +2275,39 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 133,
+      "line": 170,
       "tag": "<Link>",
       "label": "@ {x.handle}",
       "handler": "{`/portal/profile/${x.handle}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/LeaderboardPage.tsx",
+      "line": 226,
+      "tag": "<button>",
+      "label": "{size}",
+      "handler": "{() => handlePageSizeChange(size)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/LeaderboardPage.tsx",
+      "line": 243,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{handlePrevPage}",
+      "category": "CONDITIONALLY_LOCKED",
+      "description": "Disabled conditional gate / status lock"
+    },
+    {
+      "file": "src/pages/LeaderboardPage.tsx",
+      "line": 256,
+      "tag": "<button>",
+      "label": "= totalPages - 1}\n                ari...",
+      "handler": "{handleNextPage}",
+      "category": "CONDITIONALLY_LOCKED",
+      "description": "Disabled conditional gate / status lock"
     },
     {
       "file": "src/pages/MyContestsPage.tsx",

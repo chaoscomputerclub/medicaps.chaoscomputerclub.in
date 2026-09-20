@@ -4,7 +4,7 @@ controllers/pass_controller.py — Campus Pass & Gate Entry Orchestration Contro
 """
 
 from typing import List, Optional
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -67,8 +67,22 @@ class PassController:
     async def list_contest_attendees(
         contest_slug: str,
         db: AsyncSession,
+        limit: Optional[int] = None,
+        offset: Optional[int] = 0,
+        response: Optional[Response] = None,
     ) -> List[ContestAttendeeItem]:
-        return await PassService.list_contest_attendees(contest_slug, db)
+        results = await PassService.list_contest_attendees(
+            contest_slug=contest_slug,
+            db=db,
+            limit=limit,
+            offset=offset,
+        )
+        if response and limit is not None:
+            from app.lib.pagination import normalize_pagination, inject_pagination_headers
+            safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=200, max_limit=1000)
+            inject_pagination_headers(response, len(results), safe_limit, safe_offset)
+        return results
+
 
     @staticmethod
     async def get_pass_by_code(

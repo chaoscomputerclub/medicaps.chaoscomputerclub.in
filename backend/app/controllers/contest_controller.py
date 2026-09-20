@@ -19,6 +19,8 @@ from app.engine.enums import ComparisonMode, Language
 from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
 from app.lib.cache_keys import contest_list_cache_key, TTL_CONTESTS_LIST
+from app.lib.pagination import normalize_pagination, inject_pagination_headers, slice_page
+
 from app.models.db_models import (
     Assessment,
     AssessmentProblem,
@@ -76,6 +78,8 @@ class ContestController:
         division: Optional[str],
         db: AsyncSession,
         current_member: Optional[MemberProfile],
+        limit: Optional[int] = None,
+        offset: Optional[int] = 0,
     ) -> List[Dict[str, Any]]:
         member_key = current_member.id if current_member else "anon"
         cache_key = contest_list_cache_key(status, division, member_key)
@@ -83,6 +87,10 @@ class ContestController:
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
             response.headers["Cache-Control"] = f"public, max-age={TTL_CONTESTS_LIST}, stale-while-revalidate=15"
+            if limit is not None:
+                safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
+                inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
+                return slice_page(cached, safe_limit, safe_offset)
             return cached
 
         stmt = select(OfflineContest).options(
@@ -119,7 +127,14 @@ class ContestController:
         await set_cache(cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = f"public, max-age={TTL_CONTESTS_LIST}, stale-while-revalidate=15"
+
+        if limit is not None:
+            safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
+            inject_pagination_headers(response, len(payload), safe_limit, safe_offset)
+            return slice_page(payload, safe_limit, safe_offset)
+
         return payload
+
 
     @staticmethod
     async def get_my_participated_contests(

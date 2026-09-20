@@ -12,6 +12,7 @@ from app.core.cache import get_cache, set_cache
 from app.models.db_models import OfflineContest, ScoreboardEntry
 from app.models.schemas import ScoreboardEntryResponse
 from app.lib.cache_keys import scoreboard_cache_key, TTL_SCOREBOARD
+from app.lib.pagination import normalize_pagination, inject_pagination_headers, slice_page
 
 
 class ScoreboardController:
@@ -24,12 +25,18 @@ class ScoreboardController:
         division: Optional[str],
         department: Optional[str],
         db: AsyncSession,
+        limit: Optional[int] = None,
+        offset: Optional[int] = 0,
     ) -> List[ScoreboardEntryResponse]:
         cache_key = scoreboard_cache_key(slug, division, department)
         cached = await get_cache(cache_key)
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
             response.headers["Cache-Control"] = f"public, max-age={TTL_SCOREBOARD}, stale-while-revalidate=10"
+            if limit is not None:
+                safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=500)
+                inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
+                return slice_page(cached, safe_limit, safe_offset)
             return cached
 
         c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
@@ -52,4 +59,11 @@ class ScoreboardController:
         await set_cache(cache_key, payload, ttl_seconds=TTL_SCOREBOARD)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = f"public, max-age={TTL_SCOREBOARD}, stale-while-revalidate=10"
+
+        if limit is not None:
+            safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=500)
+            inject_pagination_headers(response, len(payload), safe_limit, safe_offset)
+            return slice_page(payload, safe_limit, safe_offset)
+
         return records
+

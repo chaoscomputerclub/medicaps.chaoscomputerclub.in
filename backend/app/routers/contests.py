@@ -42,6 +42,8 @@ async def list_contests(
     response: Response,
     status: Optional[str] = Query(None, description="Filter by: live, upcoming, finished"),
     division: Optional[str] = Query(None, description="Filter by: division_1, division_2, division_3, open"),
+    limit: Optional[int] = Query(None, ge=1, le=100, description="Max contests to return"),
+    offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
@@ -56,7 +58,10 @@ async def list_contests(
         division=division,
         db=db,
         current_member=current_member,
+        limit=limit,
+        offset=offset,
     )
+
 
 
 @router.get("/my/participated", summary="List all contests the current member has registered for or participated in")

@@ -5,7 +5,7 @@ Delegates to app.controllers.social_controller.SocialController
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -64,18 +64,39 @@ async def get_my_following_ids(
 @router.get("/{target}/followers", response_model=FollowListResponse)
 async def get_student_followers(
     target: str,
+    response: Response,
+    limit: int = Query(50, ge=1, le=200, description="Max students to return"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     authorization: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get list of students following target member."""
-    return await SocialController.get_student_followers(target=target, authorization=authorization, db=db)
+    """Get paginated list of students following target member."""
+    return await SocialController.get_student_followers(
+        target=target,
+        authorization=authorization,
+        limit=limit,
+        offset=offset,
+        db=db,
+        response=response,
+    )
 
 
 @router.get("/{target}/following", response_model=FollowListResponse)
 async def get_student_following(
     target: str,
+    response: Response,
+    limit: int = Query(50, ge=1, le=200, description="Max students to return"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     authorization: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get list of students that target member is following."""
-    return await SocialController.get_student_following(target=target, authorization=authorization, db=db)
+    """Get paginated list of students that target member is following."""
+    return await SocialController.get_student_following(
+        target=target,
+        authorization=authorization,
+        limit=limit,
+        offset=offset,
+        db=db,
+        response=response,
+    )
+

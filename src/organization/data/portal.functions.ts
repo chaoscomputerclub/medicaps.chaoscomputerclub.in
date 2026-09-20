@@ -161,12 +161,28 @@ export async function getMemberProfileData(force = false) {
  * Real-time university leaderboard with star division brackets.
  * Cached with SWR so switching to /leaderboard renders instantly (0ms).
  */
-export async function getUniversityLeaderboardData(force = false) {
+export async function getUniversityLeaderboardData(
+  force = false,
+  limit?: number,
+  offset?: number,
+  department?: string,
+  batch?: string,
+  tier?: string
+) {
+  const queryParams = new URLSearchParams();
+  if (limit !== undefined) queryParams.set("limit", String(limit));
+  if (offset !== undefined) queryParams.set("offset", String(offset));
+  if (department) queryParams.set("department", department);
+  if (batch) queryParams.set("batch", batch);
+  if (tier) queryParams.set("tier", tier);
+  const qs = queryParams.toString();
+  const cacheKey = `leaderboard:university${qs ? `:${qs}` : ""}`;
+
   return swrFetch(
-    "leaderboard:university",
+    cacheKey,
     async () => {
       const backendUrl = getApiBase();
-      const res = await fetch(`${backendUrl}/leaderboard`).catch(() => null);
+      const res = await fetch(`${backendUrl}/leaderboard${qs ? `?${qs}` : ""}`).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         return (data || []) as LeaderboardEntry[];
@@ -181,6 +197,7 @@ export async function getUniversityLeaderboardData(force = false) {
     }
   );
 }
+
 
 export type RatingBucket = { min: number; max: number; count: number };
 export type RatingDistribution = { total: number; buckets: RatingBucket[] };

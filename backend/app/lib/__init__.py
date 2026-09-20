@@ -24,7 +24,8 @@ from app.lib.crypto import (
     format_certificate_id,
 )
 from app.lib.otp import generate_otp, hash_otp
-from app.lib.pagination import normalize_pagination, slice_page
+from app.lib.pagination import inject_pagination_headers, normalize_pagination, slice_page
+from app.lib.chunking import chunk_list, chunked_in_query, gather_with_concurrency
 from app.lib.qr import build_campus_pass_qr, parse_campus_pass_qr
 from app.lib.validators import (
     is_valid_medicaps_email,
@@ -53,9 +54,14 @@ __all__ = [
     "hash_otp",
     "normalize_pagination",
     "slice_page",
+    "inject_pagination_headers",
+    "chunk_list",
+    "chunked_in_query",
+    "gather_with_concurrency",
     "build_campus_pass_qr",
     "parse_campus_pass_qr",
     "is_valid_medicaps_email",
     "is_valid_handle",
     "is_valid_prn",
 ]
+

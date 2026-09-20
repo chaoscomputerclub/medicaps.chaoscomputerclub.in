@@ -5,13 +5,14 @@ controllers/verify_controller.py — Trust-of-Proof Verification Orchestration C
 
 from typing import List
 from fastapi import HTTPException, Response
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import get_cache, set_cache
 from app.models.db_models import TrustProof
 from app.models.schemas import TrustProofResponse, VerifyRequest, VerifyResponse
 from app.lib.cache_keys import proofs_list_cache_key, TTL_PROOFS
+from app.lib.pagination import normalize_pagination, inject_pagination_headers
 
 
 class VerifyController:
@@ -22,23 +23,32 @@ class VerifyController:
         response: Response,
         limit: int,
         db: AsyncSession,
+        offset: int = 0,
     ) -> List[TrustProofResponse]:
-        cache_key = proofs_list_cache_key(limit)
+        safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=500)
+        cache_key = f"{proofs_list_cache_key(safe_limit)}:off_{safe_offset}"
         cached = await get_cache(cache_key)
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
             response.headers["Cache-Control"] = f"public, max-age={TTL_PROOFS}, stale-while-revalidate=60"
+            if isinstance(cached, dict) and "items" in cached:
+                inject_pagination_headers(response, cached.get("total", len(cached["items"])), safe_limit, safe_offset)
+                return cached["items"]
             return cached
 
-        stmt = select(TrustProof).order_by(TrustProof.issued_at.desc()).limit(limit)
+        total_count = await db.scalar(select(func.count(TrustProof.id))) or 0
+        stmt = select(TrustProof).order_by(TrustProof.issued_at.desc()).limit(safe_limit).offset(safe_offset)
         res = await db.execute(stmt)
         records = res.scalars().all()
 
+        inject_pagination_headers(response, total_count, safe_limit, safe_offset)
+
         payload = [TrustProofResponse.model_validate(r).model_dump() for r in records]
-        await set_cache(cache_key, payload, ttl_seconds=TTL_PROOFS)
+        await set_cache(cache_key, {"items": payload, "total": total_count}, ttl_seconds=TTL_PROOFS)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = f"public, max-age={TTL_PROOFS}, stale-while-revalidate=60"
         return records
+
 
     @staticmethod
     async def verify_by_certificate(

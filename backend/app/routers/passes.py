@@ -5,8 +5,9 @@ Delegates to app.controllers.pass_controller.PassController
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from app.core.db import get_db
 from app.models.db_models import MemberProfile
@@ -58,10 +59,20 @@ async def verify_proctor_gate_pass(
 @router.get("/contest/{contest_slug}/attendees", response_model=List[ContestAttendeeItem])
 async def list_contest_attendees(
     contest_slug: str,
+    response: Response,
+    limit: Optional[int] = Query(None, ge=1, le=1000, description="Max attendees to return"),
+    offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieve live attendee list with seat numbers and check-in statuses for proctor view."""
-    return await PassController.list_contest_attendees(contest_slug=contest_slug, db=db)
+    return await PassController.list_contest_attendees(
+        contest_slug=contest_slug,
+        db=db,
+        limit=limit,
+        offset=offset,
+        response=response,
+    )
+
 
 
 @router.get("/{pass_code}", response_model=CampusPassResponse)

@@ -21,6 +21,8 @@ async def get_contest_scoreboard(
     response: Response,
     division: Optional[str] = Query(None, description="Filter by division: division_1, division_2, division_3, or all"),
     department: Optional[str] = Query(None, description="Filter by department: CSE, IT, AIDS, Cyber Security"),
+    limit: Optional[int] = Query(None, ge=1, le=500, description="Max entries to return"),
+    offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -34,4 +36,7 @@ async def get_contest_scoreboard(
         division=division,
         department=department,
         db=db,
+        limit=limit,
+        offset=offset,
     )
+

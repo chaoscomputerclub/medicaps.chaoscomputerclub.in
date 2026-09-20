@@ -1,10 +1,12 @@
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
-import { ChevronDown, ChevronUp, Minus, Trophy } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import { LeaderboardRowSkeleton } from "@/organization/components/skeletons";
 import { PageHeader } from "@/organization/components/ui";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useChunkedList } from "@/hooks/useChunkedList";
 import {
   Table,
   TableHeader,
@@ -30,6 +32,9 @@ function Spark({ data }: { data: number[] }) {
 }
 
 export function LeaderboardPage() {
+  const [pageSize, setPageSize] = useState<number>(25);
+  const [pageIndex, setPageIndex] = useState<number>(0);
+
   const { data: rawData, loading } = useSwrData(
     "leaderboard:university",
     getUniversityLeaderboardData,
@@ -37,6 +42,38 @@ export function LeaderboardPage() {
   );
   const data = rawData || [];
   const currentMemberId = useAppSelector((s) => s.auth.member?.id);
+
+  const totalCount = data.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // Current paginated window
+  const pagedSlice = useMemo(() => {
+    const start = pageIndex * pageSize;
+    return data.slice(start, start + pageSize);
+  }, [data, pageIndex, pageSize]);
+
+  // Progressive frame chunking to prevent layout thrashing
+  const { visibleItems, isChunking } = useChunkedList(pagedSlice, {
+    initialChunkSize: 25,
+    chunkSize: 25,
+    delayMs: 16,
+  });
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageIndex(0);
+  };
+
+  const handlePrevPage = () => {
+    setPageIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setPageIndex((prev) => Math.min(totalPages - 1, prev + 1));
+  };
+
+  const startRecord = totalCount > 0 ? pageIndex * pageSize + 1 : 0;
+  const endRecord = Math.min((pageIndex + 1) * pageSize, totalCount);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -55,7 +92,7 @@ export function LeaderboardPage() {
           <div className="flex flex-col items-start md:items-end justify-center rounded-none border border-white/10 bg-zinc-950/60 p-4 min-w-[200px] backdrop-blur-sm">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-400">Rating Cycle</span>
             <strong className="font-mono text-lg font-black text-white">MONSOON '26</strong>
-            <small className="font-mono text-xs text-lime-400 tabular-nums">{data.length} active members</small>
+            <small className="font-mono text-xs text-lime-400 tabular-nums">{totalCount} active members</small>
           </div>
         }
       />
@@ -76,8 +113,8 @@ export function LeaderboardPage() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <LeaderboardRowSkeleton count={8} />
-              ) : data.length === 0 ? (
+                <LeaderboardRowSkeleton count={Math.min(pageSize, 8)} />
+              ) : visibleItems.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -87,7 +124,7 @@ export function LeaderboardPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                data.map((x) => {
+                visibleItems.map((x) => {
                   const change =
                     (x.previous_rank ?? x.university_rank) - x.university_rank;
                   const isYou = x.id === currentMemberId;
@@ -163,6 +200,69 @@ export function LeaderboardPage() {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Tactical Pagination & Slicing Controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 bg-zinc-950/80 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs text-zinc-400">
+              Showing <strong className="font-bold tabular-nums text-white">{startRecord}–{endRecord}</strong> of{" "}
+              <strong className="font-bold tabular-nums text-white">{totalCount}</strong> cadets
+            </span>
+            {isChunking && (
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] text-lime-400/80 uppercase">
+                <span className="size-1.5 animate-pulse rounded-full bg-lime-400" />
+                chunking…
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs text-zinc-400">Chunk Size:</span>
+              <div className="flex items-center border border-white/10 bg-zinc-900">
+                {[25, 50, 100].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handlePageSizeChange(size)}
+                    className={`px-2.5 py-1 font-mono text-xs font-bold transition-colors ${
+                      pageSize === size
+                        ? "bg-lime-400 text-black font-black"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Next / Previous Controls */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handlePrevPage}
+                disabled={pageIndex === 0}
+                aria-label="Previous page"
+                className="flex size-8 items-center justify-center border border-white/10 bg-zinc-900 text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+
+              <span className="px-3 font-mono text-xs font-bold tabular-nums text-zinc-300">
+                {pageIndex + 1} / {totalPages}
+              </span>
+
+              <button
+                onClick={handleNextPage}
+                disabled={pageIndex >= totalPages - 1}
+                aria-label="Next page"
+                className="flex size-8 items-center justify-center border border-white/10 bg-zinc-900 text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

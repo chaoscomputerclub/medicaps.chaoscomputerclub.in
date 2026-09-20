@@ -4,7 +4,7 @@ Delegates to app.controllers.admin_contest_controller.AdminContestController
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -29,11 +29,20 @@ router = APIRouter(prefix="/admin/contests", tags=["Admin Contest Management"])
 
 @router.get("", summary="List all contests for admin management")
 async def list_admin_contests(
+    response: Response,
+    limit: Optional[int] = Query(None, ge=1, le=500, description="Max contests to return"),
+    offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """List all campus contests with administrative overview metrics."""
-    return await AdminContestController.list_admin_contests(db=db)
+    return await AdminContestController.list_admin_contests(
+        db=db,
+        limit=limit,
+        offset=offset,
+        response=response,
+    )
+
 
 
 @router.get("/{slug}", summary="Fetch complete admin dossier for a contest", response_model=ContestAdminDetailResponse)

@@ -4,7 +4,7 @@ controllers/social_controller.py — Student Social Graph & Follow Network Orche
 """
 
 from typing import Optional, Set
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Response, status
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,8 @@ from app.schemas.social import (
     FollowingIdsResponse,
 )
 from app.services.rating_service import get_rating_tier
+from app.lib.pagination import normalize_pagination, inject_pagination_headers
+
 
 
 class SocialController:
@@ -248,9 +250,13 @@ class SocialController:
         cls,
         target: str,
         authorization: Optional[str],
+        limit: int,
+        offset: int,
         db: AsyncSession,
+        response: Optional[Response] = None,
     ) -> FollowListResponse:
         target_member = await cls.resolve_member(target, db)
+        safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=200)
 
         current_member_id: Optional[str] = None
         my_following_set: Set[str] = set()
@@ -270,21 +276,27 @@ class SocialController:
             except Exception:
                 pass
 
-        stmt = (
-            select(MemberProfile)
-            .join(StudentFollow, StudentFollow.follower_id == MemberProfile.id)
-            .where(StudentFollow.following_id == target_member.id)
-            .order_by(StudentFollow.created_at.desc())
-        )
-        res = await db.execute(stmt)
-        followers = res.scalars().all()
-
-        followers_count = len(followers)
+        followers_count = await db.scalar(
+            select(func.count(StudentFollow.id)).where(
+                StudentFollow.following_id == target_member.id
+            )
+        ) or 0
         following_count = await db.scalar(
             select(func.count(StudentFollow.id)).where(
                 StudentFollow.follower_id == target_member.id
             )
         ) or 0
+
+        stmt = (
+            select(MemberProfile)
+            .join(StudentFollow, StudentFollow.follower_id == MemberProfile.id)
+            .where(StudentFollow.following_id == target_member.id)
+            .order_by(StudentFollow.created_at.desc())
+            .limit(safe_limit)
+            .offset(safe_offset)
+        )
+        res = await db.execute(stmt)
+        followers = res.scalars().all()
 
         students = []
         for m in followers:
@@ -305,6 +317,9 @@ class SocialController:
                 )
             )
 
+        if response:
+            inject_pagination_headers(response, followers_count, safe_limit, safe_offset)
+
         return FollowListResponse(
             count=len(students),
             followers_count=followers_count,
@@ -317,9 +332,13 @@ class SocialController:
         cls,
         target: str,
         authorization: Optional[str],
+        limit: int,
+        offset: int,
         db: AsyncSession,
+        response: Optional[Response] = None,
     ) -> FollowListResponse:
         target_member = await cls.resolve_member(target, db)
+        safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=200)
 
         current_member_id: Optional[str] = None
         my_following_set: Set[str] = set()
@@ -339,21 +358,27 @@ class SocialController:
             except Exception:
                 pass
 
-        stmt = (
-            select(MemberProfile)
-            .join(StudentFollow, StudentFollow.following_id == MemberProfile.id)
-            .where(StudentFollow.follower_id == target_member.id)
-            .order_by(StudentFollow.created_at.desc())
-        )
-        res = await db.execute(stmt)
-        following = res.scalars().all()
-
-        following_count = len(following)
+        following_count = await db.scalar(
+            select(func.count(StudentFollow.id)).where(
+                StudentFollow.follower_id == target_member.id
+            )
+        ) or 0
         followers_count = await db.scalar(
             select(func.count(StudentFollow.id)).where(
                 StudentFollow.following_id == target_member.id
             )
         ) or 0
+
+        stmt = (
+            select(MemberProfile)
+            .join(StudentFollow, StudentFollow.following_id == MemberProfile.id)
+            .where(StudentFollow.follower_id == target_member.id)
+            .order_by(StudentFollow.created_at.desc())
+            .limit(safe_limit)
+            .offset(safe_offset)
+        )
+        res = await db.execute(stmt)
+        following = res.scalars().all()
 
         students = []
         for m in following:
@@ -374,9 +399,13 @@ class SocialController:
                 )
             )
 
+        if response:
+            inject_pagination_headers(response, following_count, safe_limit, safe_offset)
+
         return FollowListResponse(
             count=len(students),
             followers_count=followers_count,
             following_count=following_count,
             students=students,
         )
+

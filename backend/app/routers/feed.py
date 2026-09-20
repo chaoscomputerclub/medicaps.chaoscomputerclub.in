@@ -19,7 +19,8 @@ router = APIRouter(prefix="/feed", tags=["Campus Feed & Announcements"])
 async def list_announcements(
     response: Response,
     kind: Optional[str] = Query(None, description="Filter by kind: contest_release, editorial, podium, system"),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=100, description="Max bulletins to return"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieve official campus bulletins, editorials, and verified podium releases. Protected by 120s Redis Cache."""
@@ -27,5 +28,7 @@ async def list_announcements(
         response=response,
         kind=kind,
         limit=limit,
+        offset=offset,
         db=db,
     )
+

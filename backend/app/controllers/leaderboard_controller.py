@@ -13,6 +13,9 @@ from app.models.db_models import MemberProfile, RatingHistory
 from app.models.schemas import LeaderboardRow
 from app.services.rating_service import get_rating_tier
 from app.lib.cache_keys import leaderboard_cache_key, TTL_LEADERBOARD
+from app.lib.pagination import normalize_pagination, inject_pagination_headers
+from app.lib.chunking import chunked_in_query
+
 
 
 class LeaderboardController:
@@ -28,37 +31,75 @@ class LeaderboardController:
         offset: Optional[int],
         db: AsyncSession,
     ) -> List[LeaderboardRow]:
-        cache_key = leaderboard_cache_key(department, batch, tier, limit, offset)
+        safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=500)
+        cache_key = leaderboard_cache_key(department, batch, tier, safe_limit, safe_offset)
         cached = await get_cache(cache_key)
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
             response.headers["Cache-Control"] = f"public, max-age={TTL_LEADERBOARD}, stale-while-revalidate=30"
+            if isinstance(cached, dict) and "items" in cached:
+                inject_pagination_headers(response, cached.get("total", len(cached["items"])), safe_limit, safe_offset)
+                return cached["items"]
+            elif isinstance(cached, list):
+                inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
+                return cached
             return cached
 
         stmt = select(MemberProfile)
+        count_stmt = select(func.count(MemberProfile.id))
+
         if department:
             stmt = stmt.where(MemberProfile.department == department)
+            count_stmt = count_stmt.where(MemberProfile.department == department)
         if batch:
             stmt = stmt.where(MemberProfile.batch == batch)
+            count_stmt = count_stmt.where(MemberProfile.batch == batch)
 
-        stmt = stmt.order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc())
+        if tier:
+            if tier == "5_star":
+                stmt = stmt.where(MemberProfile.rating >= 2000)
+                count_stmt = count_stmt.where(MemberProfile.rating >= 2000)
+            elif tier == "4_star":
+                stmt = stmt.where((MemberProfile.rating >= 1800) & (MemberProfile.rating < 2000))
+                count_stmt = count_stmt.where((MemberProfile.rating >= 1800) & (MemberProfile.rating < 2000))
+            elif tier == "3_star":
+                stmt = stmt.where((MemberProfile.rating >= 1600) & (MemberProfile.rating < 1800))
+                count_stmt = count_stmt.where((MemberProfile.rating >= 1600) & (MemberProfile.rating < 1800))
+            elif tier == "2_star":
+                stmt = stmt.where((MemberProfile.rating >= 1400) & (MemberProfile.rating < 1600))
+                count_stmt = count_stmt.where((MemberProfile.rating >= 1400) & (MemberProfile.rating < 1600))
+            elif tier == "1_star":
+                stmt = stmt.where(MemberProfile.rating < 1400)
+                count_stmt = count_stmt.where(MemberProfile.rating < 1400)
+
+        total_count = await db.scalar(count_stmt) or 0
+
+        stmt = (
+            stmt.order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc())
+            .limit(safe_limit)
+            .offset(safe_offset)
+        )
         result = await db.execute(stmt)
         members = result.scalars().all()
 
-        histories_res = await db.execute(
-            select(RatingHistory).order_by(RatingHistory.contested_at.desc())
-        )
-        all_histories = histories_res.scalars().all()
+        page_member_ids = [m.id for m in members]
         history_by_member: Dict[str, List[int]] = {}
-        for h in all_histories:
-            history_by_member.setdefault(h.member_id, []).append(h.new_rating - h.old_rating)
+        if page_member_ids:
+            histories = await chunked_in_query(
+                session=db,
+                model=RatingHistory,
+                column=RatingHistory.member_id,
+                values=page_member_ids,
+                chunk_size=100,
+                order_by_col=RatingHistory.contested_at.desc(),
+            )
+            for h in histories:
+                history_by_member.setdefault(h.member_id, []).append(h.new_rating - h.old_rating)
 
         rows = []
-        current_rank = 1
-        for m in members:
+        for idx, m in enumerate(members):
+            current_rank = safe_offset + idx + 1
             member_tier = get_rating_tier(m.rating)
-            if tier and member_tier != tier:
-                continue
 
             attendance_count = m.attendance_count if m.attendance_count is not None else 0
             attendance_total = m.attendance_total if m.attendance_total is not None else 0
@@ -107,15 +148,11 @@ class LeaderboardController:
                     recent_deltas=recent_deltas,
                 )
             )
-            current_rank += 1
 
-        if offset:
-            rows = rows[offset:]
-        if limit is not None:
-            rows = rows[:limit]
+        inject_pagination_headers(response, total_count, safe_limit, safe_offset)
 
         rows_data = [r.model_dump() for r in rows]
-        await set_cache(cache_key, rows_data, ttl_seconds=TTL_LEADERBOARD)
+        await set_cache(cache_key, {"items": rows_data, "total": total_count}, ttl_seconds=TTL_LEADERBOARD)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = f"public, max-age={TTL_LEADERBOARD}, stale-while-revalidate=30"
         return rows

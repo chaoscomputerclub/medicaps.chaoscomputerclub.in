@@ -23,7 +23,9 @@ load_dotenv(BASE_DIR / ".env")
 from app.engine.enums import ComparisonMode, ExecutionStatus, Language, Verdict
 from app.engine.judge import JudgeEngine
 from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
+from app.lib.chunking import gather_with_concurrency
 from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
+
 
 logger = logging.getLogger("ccc.judge.codebox")
 
@@ -343,9 +345,10 @@ class CodeboxProvider(JudgeProvider):
                 )
                 for tc in testcases
             ]
-            results: list[TestCaseResult] = await asyncio.gather(*tasks)
+            results: list[TestCaseResult] = await gather_with_concurrency(8, *tasks)
 
         passed_count = sum(1 for r in results if r.passed)
+
         total_count = len(results)
         max_time = max((r.wall_time_ms for r in results), default=0.0)
         max_mem = max((r.peak_memory_mb for r in results), default=0.0)

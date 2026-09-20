@@ -4,8 +4,8 @@ controllers/admin_contest_controller.py — Admin Contest & Operations Orchestra
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import HTTPException, status
-from sqlalchemy import delete, select
+from fastapi import HTTPException, Response, status
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -33,13 +33,19 @@ from app.schemas.dynamic_contest import (
 from app.services.dynamic_contest_service import DynamicContestService
 from app.services.pass_service import PassService
 from app.services.assessment_service import AssessmentService
+from app.lib.pagination import normalize_pagination, inject_pagination_headers
 
 
 class AdminContestController:
     """Orchestrator for proctor/admin contest lifecycle, problem sets, and attendee rosters."""
 
     @staticmethod
-    async def list_admin_contests(db: AsyncSession) -> List[Dict[str, Any]]:
+    async def list_admin_contests(
+        db: AsyncSession,
+        limit: Optional[int] = None,
+        offset: Optional[int] = 0,
+        response: Optional[Response] = None,
+    ) -> List[Dict[str, Any]]:
         stmt = (
             select(OfflineContest)
             .options(
@@ -48,8 +54,17 @@ class AdminContestController:
             )
             .order_by(OfflineContest.starts_at.desc())
         )
+
+        if limit is not None:
+            total_count = await db.scalar(select(func.count(OfflineContest.id))) or 0
+            safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=100, max_limit=500)
+            stmt = stmt.limit(safe_limit).offset(safe_offset)
+            if response:
+                inject_pagination_headers(response, total_count, safe_limit, safe_offset)
+
         result = await db.execute(stmt)
         contests = result.scalars().all()
+
 
         payload = []
         for c in contests:

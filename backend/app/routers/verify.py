@@ -19,10 +19,12 @@ router = APIRouter(prefix="/verify", tags=["Trust of Proof Verification"])
 async def list_proofs(
     response: Response,
     limit: int = Query(200, ge=1, le=500, description="Max proofs to return"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
 ):
     """Fetch live cryptographic trust proofs from database. Protected by 120s Redis Cache."""
-    return await VerifyController.list_proofs(response=response, limit=limit, db=db)
+    return await VerifyController.list_proofs(response=response, limit=limit, offset=offset, db=db)
+
 
 
 @router.get("/cert/{certificate_id}", response_model=TrustProofResponse)
