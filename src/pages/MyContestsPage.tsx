@@ -261,10 +261,10 @@ export function MyContestsPage() {
                           asChild
                           className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-lime-400/20 active:scale-[0.98]"
                         >
-                          <a href={`/assessments/${c.contest_slug}`} target="_blank" rel="noopener noreferrer">
+                          <Link to={`/portal/contests/${c.contest_slug}/lobby`}>
                             <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
                             Assessment
-                          </a>
+                          </Link>
                         </Button>
                       ) : isUpcoming && !c.assessment_submitted ? (
                         <Button

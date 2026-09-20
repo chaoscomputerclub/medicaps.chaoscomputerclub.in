@@ -608,7 +608,7 @@ export function ContestsHubPage() {
                     </span>
                   </div>
                   <Button asChild className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
-                    <a href={`/assessments/${assessmentInfo.contest.slug}`} target="_blank" rel="noopener noreferrer"><Play className="mr-1.5 size-4 fill-black" /> Take Assessment</a>
+                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}/lobby`}><Play className="mr-1.5 size-4 fill-black" /> Take Assessment</Link>
                   </Button>
                 </>
               ) : assessmentInfo.isUpcoming ? (

@@ -249,6 +249,36 @@ export function ContestLobbyPage() {
             ))}
           </div>
 
+          {/* Rules & Regulations Section */}
+          <div className="space-y-4 rounded-none border border-white/10 bg-zinc-950/80 p-5 font-mono text-xs">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-lime-400 flex items-center gap-2">
+                <Shield className="size-4" /> Assessment Regulations & Integrity Code
+              </span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest">
+                CCC PROCTOR PROTOCOL v2.0
+              </span>
+            </div>
+            <ul className="space-y-2.5 text-zinc-300">
+              <li className="flex items-start gap-2.5">
+                <span className="text-lime-400 font-bold shrink-0">01.</span>
+                <span><strong>Single Continuous Attempt:</strong> The {ASSESSMENT_DURATION_MINUTES}-minute timer starts immediately on launch and cannot be paused or reset. Auto-submits on expiration.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-lime-400 font-bold shrink-0">02.</span>
+                <span><strong>Proctored Full-Screen Guard:</strong> Leaving fullscreen, switching browser tabs, or blurring the workspace logs a telemetry violation. 3 violations result in disqualification.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-lime-400 font-bold shrink-0">03.</span>
+                <span><strong>CodeBox Execution Engine:</strong> Submissions are compiled in isolated sandbox environments with strict 2.0s execution and 256MB memory boundaries.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="text-lime-400 font-bold shrink-0">04.</span>
+                <span><strong>Advancement Criterion:</strong> Only the top {FINALIST_SEATS} verified candidates on the leaderboard qualify for the Round 2 physical campus finals.</span>
+              </li>
+            </ul>
+          </div>
+
           {/* Dev bypass notice */}
           {isDevBypass && (
             <div className="rounded-none border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 font-mono text-xs text-emerald-400">

@@ -197,9 +197,9 @@ export function ContestOverviewPage() {
             asChild
             className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-md shadow-lime-400/20"
           >
-            <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
+            <Link to={`/portal/contests/${contestSlug}/lobby`}>
               <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
-            </a>
+            </Link>
           </Button>
           {(phase === "final_live" || isDevBypass) && (
             <Button asChild className="rounded-none bg-cyan-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
@@ -331,9 +331,9 @@ export function ContestOverviewPage() {
         size="lg"
         className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20"
       >
-        <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
+        <Link to={`/portal/contests/${contestSlug}/lobby`}>
           <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
-        </a>
+        </Link>
       </Button>
     );
   };
