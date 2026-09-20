@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-20T10:21:51.324Z",
+  "timestamp": "2026-09-20T16:50:53.077Z",
   "totalElements": 306,
   "functionalCount": 306,
   "connectivityRate": "100.0%",
@@ -16,7 +16,7 @@
   "elements": [
     {
       "file": "src/AppRoutes.tsx",
-      "line": 35,
+      "line": 30,
       "tag": "<Navigate>",
       "label": "[to={/portal/profile/${handle ? enco...",
       "handler": "{`/portal/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 40,
+      "line": 35,
       "tag": "<Navigate>",
       "label": "[to={/assessments/${contestSlug ? en...",
       "handler": "{`/assessments/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}`}",
@@ -34,7 +34,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 48,
+      "line": 43,
       "tag": "<Navigate>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -43,7 +43,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 103,
+      "line": 98,
       "tag": "<Navigate>",
       "label": "[to=/portal]",
       "handler": "\"/portal\"",
@@ -52,7 +52,7 @@
     },
     {
       "file": "src/components/ErrorBoundary.tsx",
-      "line": 96,
+      "line": 117,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{this.handleReset}",
@@ -61,7 +61,7 @@
     },
     {
       "file": "src/components/ErrorBoundary.tsx",
-      "line": 105,
+      "line": 126,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                  window.location.href = \"/portal\";\n                }}",
@@ -70,7 +70,7 @@
     },
     {
       "file": "src/components/ErrorBoundary.tsx",
-      "line": 117,
+      "line": 138,
       "tag": "<Button>",
       "label": "{this.state.copied ? (               ...",
       "handler": "{this.handleCopyDiagnostic}",

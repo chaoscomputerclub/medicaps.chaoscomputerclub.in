@@ -29,6 +29,21 @@ export class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
     console.error("[CCC Boundary Caught Error]:", error, errorInfo);
+
+    // Auto-recover from stale dynamic chunk imports (e.g. following dev rebuild or production deployment)
+    const isChunkError =
+      error.message?.includes("Failed to fetch dynamically imported module") ||
+      error.message?.includes("Importing a module script failed") ||
+      error.name === "ChunkLoadError";
+
+    if (isChunkError) {
+      const lastAutoReload = sessionStorage.getItem("ccc_last_chunk_autoreload");
+      const now = Date.now();
+      if (!lastAutoReload || now - parseInt(lastAutoReload, 10) > 10000) {
+        sessionStorage.setItem("ccc_last_chunk_autoreload", String(now));
+        window.location.reload();
+      }
+    }
   }
 
   private handleReset = () => {
@@ -53,6 +68,11 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
 
   public render() {
     if (this.state.hasError) {
+      const isChunkError =
+        this.state.error?.message?.includes("Failed to fetch dynamically imported module") ||
+        this.state.error?.message?.includes("Importing a module script failed") ||
+        this.state.error?.name === "ChunkLoadError";
+
       return (
         <div className="min-h-[400px] flex items-center justify-center p-6 bg-zinc-950 text-white font-mono selection:bg-lime-400 selection:text-black">
           <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-2xl rounded-none relative">
@@ -63,17 +83,18 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold tracking-widest text-rose-400 block">
-                    RUNTIME SECURITY TRAP • ERROR BOUNDARY
+                    {isChunkError ? "APPLICATION UPDATE • STALE CHUNK" : "RUNTIME SECURITY TRAP • ERROR BOUNDARY"}
                   </span>
                   <h2 className="text-lg sm:text-xl font-bold font-mono uppercase text-white tracking-tight">
-                    {this.props.fallbackTitle || "Execution Circuit Interrupted"}
+                    {isChunkError ? "Module Updated — Sync Required" : (this.props.fallbackTitle || "Execution Circuit Interrupted")}
                   </h2>
                 </div>
               </div>
               <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-white/10 px-2.5 py-1 rounded-none">
-                500-CLI-CRASH
+                {isChunkError ? "CHUNK-REFRESH" : "500-CLI-CRASH"}
               </span>
             </div>
+
 
             <div className="space-y-2">
               <p className="text-xs text-zinc-300 font-mono leading-relaxed">

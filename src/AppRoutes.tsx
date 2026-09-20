@@ -3,32 +3,27 @@ import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 import { TacticalRouteFallback } from "@/components/TacticalRouteFallback";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
-// Helper for type-safe named exports with React.lazy
-const lazyNamed = <T extends Record<string, any>, K extends keyof T>(
-  importer: () => Promise<T>,
-  name: K
-) => React.lazy(() => importer().then((mod) => ({ default: mod[name] })));
-
-// Dynamic Route Code-Splitting Chunks (Eliminates monolithic initial payload)
-const AuthPage = lazyNamed(() => import("@/pages/AuthPage"), "AuthPage");
-const DashboardPage = lazyNamed(() => import("@/pages/DashboardPage"), "DashboardPage");
-const ContestsHubPage = lazyNamed(() => import("@/pages/ContestsHubPage"), "ContestsHubPage");
-const ContestOverviewPage = lazyNamed(() => import("@/pages/ContestOverviewPage"), "ContestOverviewPage");
-const ContestLobbyPage = lazyNamed(() => import("@/pages/ContestLobbyPage"), "ContestLobbyPage");
-const ContestArenaPage = lazyNamed(() => import("@/pages/ContestArenaPage"), "ContestArenaPage");
-const ContestOfflinePage = lazyNamed(() => import("@/pages/ContestOfflinePage"), "ContestOfflinePage");
-const ContestQualifiedPage = lazyNamed(() => import("@/pages/ContestQualifiedPage"), "ContestQualifiedPage");
-const ContestResultsPage = lazyNamed(() => import("@/pages/ContestResultsPage"), "ContestResultsPage");
-const ContestFinalResultsPage = lazyNamed(() => import("@/pages/ContestFinalResultsPage"), "ContestFinalResultsPage");
-const AssessmentWorkspacePage = lazyNamed(() => import("@/pages/AssessmentWorkspacePage"), "AssessmentWorkspacePage");
-const MyContestsPage = lazyNamed(() => import("@/pages/MyContestsPage"), "MyContestsPage");
-const LeaderboardPage = lazyNamed(() => import("@/pages/LeaderboardPage"), "LeaderboardPage");
-const ProblemArchivePage = lazyNamed(() => import("@/pages/ProblemArchivePage"), "ProblemArchivePage");
-const ProblemDetailPage = lazyNamed(() => import("@/pages/ProblemDetailPage"), "ProblemDetailPage");
-const VerifyProofPage = lazyNamed(() => import("@/pages/VerifyProofPage"), "VerifyProofPage");
-const ProfilePage = lazyNamed(() => import("@/pages/ProfilePage"), "ProfilePage");
-const SettingsPage = lazyNamed(() => import("@/pages/SettingsPage"), "SettingsPage");
+// Dynamic Route Code-Splitting Chunks with Automated Retry & Invalidation Recovery
+const AuthPage = lazyWithRetry(() => import("./pages/AuthPage"), "AuthPage");
+const DashboardPage = lazyWithRetry(() => import("./pages/DashboardPage"), "DashboardPage");
+const ContestsHubPage = lazyWithRetry(() => import("./pages/ContestsHubPage"), "ContestsHubPage");
+const ContestOverviewPage = lazyWithRetry(() => import("./pages/ContestOverviewPage"), "ContestOverviewPage");
+const ContestLobbyPage = lazyWithRetry(() => import("./pages/ContestLobbyPage"), "ContestLobbyPage");
+const ContestArenaPage = lazyWithRetry(() => import("./pages/ContestArenaPage"), "ContestArenaPage");
+const ContestOfflinePage = lazyWithRetry(() => import("./pages/ContestOfflinePage"), "ContestOfflinePage");
+const ContestQualifiedPage = lazyWithRetry(() => import("./pages/ContestQualifiedPage"), "ContestQualifiedPage");
+const ContestResultsPage = lazyWithRetry(() => import("./pages/ContestResultsPage"), "ContestResultsPage");
+const ContestFinalResultsPage = lazyWithRetry(() => import("./pages/ContestFinalResultsPage"), "ContestFinalResultsPage");
+const AssessmentWorkspacePage = lazyWithRetry(() => import("./pages/AssessmentWorkspacePage"), "AssessmentWorkspacePage");
+const MyContestsPage = lazyWithRetry(() => import("./pages/MyContestsPage"), "MyContestsPage");
+const LeaderboardPage = lazyWithRetry(() => import("./pages/LeaderboardPage"), "LeaderboardPage");
+const ProblemArchivePage = lazyWithRetry(() => import("./pages/ProblemArchivePage"), "ProblemArchivePage");
+const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDetailPage"), "ProblemDetailPage");
+const VerifyProofPage = lazyWithRetry(() => import("./pages/VerifyProofPage"), "VerifyProofPage");
+const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
+const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
 
 function ProfileHandleRedirect() {
   const { handle } = useParams<{ handle: string }>();
