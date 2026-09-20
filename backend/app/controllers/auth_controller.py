@@ -204,7 +204,10 @@ class AuthController:
         return AuthTokenResponse(
             access_token=token,
             token_type="bearer",
-            is_new_user=is_new or not member.is_onboarded,
+            # is_new_user is strictly True only when the DB row was just created
+            # (first-ever login). Existing members who haven't finished onboarding
+            # are NOT new users — the frontend reads member.is_onboarded directly.
+            is_new_user=is_new,
             member=_to_member_public(member),
         )
 

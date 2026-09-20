@@ -362,9 +362,11 @@ export const authSlice = createSlice({
       setStoredMember(cleanMember);
       if (cleanMember.full_name) state.name = cleanMember.full_name;
       if (cleanMember.handle) state.handle = cleanMember.handle;
-      if (!action.payload.is_onboarded) {
-        state.step = "onboarding";
-      }
+      // NOTE: intentionally do NOT redirect to onboarding here.
+      // fetchCurrentUserThunk runs on every page load/refresh for authenticated users.
+      // Pushing step="onboarding" here would interrupt any page they are already on.
+      // The onboarding redirect is handled exclusively in verifyOtpThunk.fulfilled
+      // (during the OTP authentication flow) and in AuthGuard when appropriate.
     });
     builder.addCase(fetchCurrentUserThunk.rejected, (state, action) => {
       const isAuthError =

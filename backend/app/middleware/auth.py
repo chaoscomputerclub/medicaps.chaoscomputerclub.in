@@ -16,8 +16,6 @@ from app.core.db import get_db
 from app.core.security import decode_access_token
 from app.models.db_models import MemberProfile
 
-import uuid
-import re
 
 logger = logging.getLogger(__name__)
 
@@ -57,28 +55,17 @@ async def get_current_member(
         result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
         member = result.scalars().first()
 
-    # Self-heal member profile from cryptographically valid JWT if missing in db
-    if not member and email:
-        clean_email = email.strip().lower()
-        fallback_handle = clean_email.split("@")[0]
-        enrollment_id = fallback_handle.upper()
-        is_enrollment = bool(re.match(r"^[a-z]{2}\d{2}[a-z]{2}\d+", fallback_handle, re.I))
-        member = MemberProfile(
-            id=member_id or str(uuid.uuid4()),
-            email=clean_email,
-            handle=fallback_handle,
-            full_name=None if is_enrollment else fallback_handle,
-            prn=enrollment_id if is_enrollment else None,
-            rating=1200,
-            peak_rating=1200,
-            is_onboarded=not is_enrollment,
-        )
-        db.add(member)
-        await db.commit()
-        await db.refresh(member)
-        logger.info("Auto-restored session member record for %s from valid JWT", clean_email)
-
+    # Self-heal is intentionally removed.
+    # Auto-creating member records here caused duplicate ghost accounts whenever
+    # the JWT's `sub` UUID did not match an existing DB row (e.g. after a DB
+    # migration, reset, or UUID collision). Members are ONLY created via
+    # verify_otp — any token pointing at a non-existent member must re-auth.
     if not member:
+        logger.warning(
+            "JWT resolved to no DB member (sub=%s, email=%s) — forcing re-auth.",
+            member_id,
+            email,
+        )
         raise _UNAUTHORIZED
 
     return member
