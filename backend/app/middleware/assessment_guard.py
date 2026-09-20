@@ -50,29 +50,54 @@ async def require_active_assessment_session(
         )
     )
     session = s_result.scalars().first()
-    if not session:
+    from app.core.security import is_privileged_test_member
+    is_test_user = is_privileged_test_member(current_member)
+
+    if not session and is_test_user:
+        session = AssessmentSession(
+            assessment_id=assessment.id,
+            member_id=current_member.id,
+            handle=current_member.handle or f"tester_{current_member.id[:6]}",
+            full_name=current_member.full_name or "Privileged Tester",
+            department=current_member.department or "CSE",
+            batch=current_member.batch or "2023-27",
+            started_at=now_utc(),
+            status="in_progress",
+        )
+        db.add(session)
+        await db.commit()
+        await db.refresh(session)
+    elif not session:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No active assessment session found. You must register and start the screening assessment first.",
         )
 
-    if session.status == "submitted":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Assessment has already been submitted and finalized. Reattempts and code executions are not permitted.",
-        )
+    if is_test_user and session.status in ("submitted", "disqualified"):
+        session.status = "in_progress"
+        session.started_at = now_utc()
+        session.submitted_at = None
+        session.anti_cheat_violations = 0
+        await db.commit()
 
-    if session.status == "disqualified":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Assessment session was disqualified due to anti-cheat policy violations. Reattempts are not permitted.",
-        )
+    if not is_test_user:
+        if session.status == "submitted":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Assessment has already been submitted and finalized. Reattempts and code executions are not permitted.",
+            )
 
-    if session.status != "in_progress":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Assessment session is in '{session.status}' state and is not currently active.",
-        )
+        if session.status == "disqualified":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Assessment session was disqualified due to anti-cheat policy violations. Reattempts are not permitted.",
+            )
+
+        if session.status != "in_progress":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Assessment session is in '{session.status}' state and is not currently active.",
+            )
 
     # Check 120-minute timer expiration
     started_at = session.started_at
@@ -82,23 +107,29 @@ async def require_active_assessment_session(
     expires_at = started_at + timedelta(minutes=duration_min)
 
     if now_utc() > expires_at:
-        session.status = "submitted"
-        session.submitted_at = expires_at
-        if contest:
-            reg_res = await db.execute(
-                select(ContestRegistration).where(
-                    ContestRegistration.contest_id == contest.id,
-                    ContestRegistration.member_id == current_member.id,
+        if is_test_user:
+            session.started_at = now_utc()
+            session.status = "in_progress"
+            session.submitted_at = None
+            await db.commit()
+        else:
+            session.status = "submitted"
+            session.submitted_at = expires_at
+            if contest:
+                reg_res = await db.execute(
+                    select(ContestRegistration).where(
+                        ContestRegistration.contest_id == contest.id,
+                        ContestRegistration.member_id == current_member.id,
+                    )
                 )
+                reg = reg_res.scalars().first()
+                if reg:
+                    reg.assessment_taken = True
+                    reg.assessment_score = session.total_score
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Assessment duration has expired. Your submission has been finalized.",
             )
-            reg = reg_res.scalars().first()
-            if reg:
-                reg.assessment_taken = True
-                reg.assessment_score = session.total_score
-        await db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Assessment duration has expired. Your submission has been finalized.",
-        )
 
     return session, assessment, contest

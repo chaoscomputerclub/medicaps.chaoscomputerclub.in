@@ -490,8 +490,10 @@ class ContestController:
         if contest and contest.starts_at:
             assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
 
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
         is_dev_contest = slug.startswith("dev-")
-        is_dev_bypass = bool(settings.is_dev_bypass_enabled or is_dev_contest)
+        is_dev_bypass = bool(settings.is_dev_bypass_enabled or is_dev_contest or is_test_user)
 
         can_take_assessment = (
             contest_status == "upcoming"
@@ -502,18 +504,18 @@ class ContestController:
         )
         can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
 
-        if is_dev_contest:
+        if is_test_user or is_dev_contest:
             is_registered = True
             is_top_30_qualified = True
             is_checked_in = True
             can_enter_live_contest = True
-            can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
+            can_take_assessment = True
             assessment_window_open = True
+            is_dev_bypass = True
+            eligibility_message = "⚡ TEST MODE ACTIVE: Full assessment & contest arena access unlocked for your account."
         elif is_dev_bypass:
             is_registered = True
             can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
-
-        if is_dev_bypass:
             eligibility_message = "⚡ DEV BYPASS ACTIVE: Unrestricted development testing mode enabled."
         elif can_resume_assessment:
             mins_left = remaining_seconds // 60
@@ -751,14 +753,17 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        if contest.status == "live" and not slug.startswith("dev-"):
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
+
+        if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
             is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
 
         assigned_seat = "Lab-04-WS-07"
         pass_code = None
-        check_in_status = "issued"
+        check_in_status = "checked_in" if is_test_user else "issued"
 
         if current_member:
             pass_res = await db.execute(
@@ -771,7 +776,7 @@ class ContestController:
             if pass_obj:
                 assigned_seat = pass_obj.seat_number
                 pass_code = pass_obj.pass_code
-                check_in_status = pass_obj.check_in_status
+                check_in_status = "checked_in" if is_test_user else pass_obj.check_in_status
 
         problems = sorted(contest.problems, key=lambda p: p.problem_index)
 
@@ -802,6 +807,13 @@ class ContestController:
                 "sample_testcases": getattr(p, "sample_testcases", None) or [],
             })
 
+        now_dt = datetime.now(timezone.utc)
+        arena_ends_at = contest.ends_at
+        if is_test_user:
+            # For test users, ensure ends_at is at least 2 hours in future so the arena clock gives them full testing time
+            if not arena_ends_at or (arena_ends_at.tzinfo is None and arena_ends_at.replace(tzinfo=timezone.utc) <= now_dt) or (arena_ends_at.tzinfo is not None and arena_ends_at <= now_dt):
+                arena_ends_at = now_dt + timedelta(hours=2)
+
         return {
             "contest_id": contest.id,
             "slug": contest.slug,
@@ -809,7 +821,7 @@ class ContestController:
             "season": contest.season,
             "status": contest.status,
             "starts_at": contest.starts_at.isoformat() if contest.starts_at else "",
-            "ends_at": contest.ends_at.isoformat() if contest.ends_at else "",
+            "ends_at": arena_ends_at.isoformat() if arena_ends_at else "",
             "venue": contest.venue,
             "environment": contest.environment,
             "chief_proctors": contest.chief_proctors if contest.chief_proctors else ["Chief Proctor", "CCC Operations Desk"],
@@ -833,7 +845,10 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        if contest.status == "live" and not slug.startswith("dev-"):
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
+
+        if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
             is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
@@ -907,7 +922,10 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        if contest.status == "live" and not slug.startswith("dev-"):
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
+
+        if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
             is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")

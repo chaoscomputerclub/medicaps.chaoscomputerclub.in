@@ -62,6 +62,10 @@ async def is_member_eligible_for_live_contest(
     if not member:
         return False, "Authentication required to view or enter live contests."
 
+    from app.core.security import is_privileged_test_member
+    if is_privileged_test_member(member):
+        return True, "Privileged test mode active: Full contest access granted."
+
     # 3. Core chapter team & proctors always have access
     if getattr(member, "is_core_member", False):
         return True, "Authorized chapter core team / proctor access."

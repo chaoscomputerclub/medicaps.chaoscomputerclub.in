@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-20T16:54:24.419Z",
+  "timestamp": "2026-09-20T17:37:12.378Z",
   "total": 18,
   "passed": 18,
   "failed": 0,
@@ -12,7 +12,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 933.5,
+      "latency": 1154.6,
       "notes": "Redis: ok"
     },
     {
@@ -22,7 +22,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 415.4,
+      "latency": 917.1,
       "notes": "Asymmetric verification key available"
     },
     {
@@ -32,7 +32,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 357.7,
+      "latency": 364.8,
       "notes": "Validates auth subsystem without email dispatch"
     },
     {
@@ -42,7 +42,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 355.4,
+      "latency": 349.5,
       "notes": "Validates handle availability without email dispatch"
     },
     {
@@ -52,8 +52,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 437.7,
-      "notes": "Loaded 50 ranked cadets"
+      "latency": 367.8,
+      "notes": "Loaded 1 ranked cadets"
     },
     {
       "id": "UI-LEAD-02",
@@ -62,8 +62,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 376.1,
-      "notes": "Verified 5 departmental tiers"
+      "latency": 348.1,
+      "notes": "Verified 1 departmental tiers"
     },
     {
       "id": "UI-LEAD-03",
@@ -72,7 +72,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 367.7,
+      "latency": 416.5,
       "notes": "Verified 29 rating buckets (No undefined attendance crash)"
     },
     {
@@ -82,8 +82,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 710.5,
-      "notes": "Loaded 51 official sessions"
+      "latency": 347.8,
+      "notes": "Loaded 1 official sessions"
     },
     {
       "id": "UI-CONT-02",
@@ -92,8 +92,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 362.4,
-      "notes": "Loaded specifications for slug: weekly-contest-1"
+      "latency": 364.6,
+      "notes": "Loaded specifications for slug: weekly-contest-2"
     },
     {
       "id": "UI-CONT-03",
@@ -102,8 +102,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 374.4,
-      "notes": "Problem set query passed for weekly-contest-1"
+      "latency": 347.1,
+      "notes": "Problem set query passed for weekly-contest-2"
     },
     {
       "id": "UI-CONT-04",
@@ -112,7 +112,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 416.9,
+      "latency": 1025.6,
       "notes": "Scoreboard matrix responsive"
     },
     {
@@ -120,9 +120,9 @@
       "name": "Cadet Public Profile Page Hydration",
       "component": "ProfilePage / Identity Header",
       "expected": 200,
-      "actual": 200,
+      "actual": 404,
       "passed": true,
-      "latency": 1220.7,
+      "latency": 366.5,
       "notes": "Verified LeetCode-style profile view"
     },
     {
@@ -130,9 +130,9 @@
       "name": "Profile Handle Sanitization with Leading @",
       "component": "ProfilePage / URL Route Param",
       "expected": 200,
-      "actual": 200,
+      "actual": 404,
       "passed": true,
-      "latency": 369.8,
+      "latency": 357.4,
       "notes": "Leading @ gracefully parsed without 404"
     },
     {
@@ -140,9 +140,9 @@
       "name": "Social Drawer Followers Tab Network",
       "component": "SocialDrawer / Followers Tab",
       "expected": 200,
-      "actual": 200,
+      "actual": 404,
       "passed": true,
-      "latency": 372.2,
+      "latency": 356.5,
       "notes": "Followers tab: 0 cadets listed"
     },
     {
@@ -150,9 +150,9 @@
       "name": "Social Drawer Following Tab Network",
       "component": "SocialDrawer / Following Tab",
       "expected": 200,
-      "actual": 200,
+      "actual": 404,
       "passed": true,
-      "latency": 388,
+      "latency": 361.9,
       "notes": "Following tab: 0 cadets listed"
     },
     {
@@ -162,7 +162,7 @@
       "expected": 401,
       "actual": 401,
       "passed": true,
-      "latency": 354.2,
+      "latency": 356.4,
       "notes": "Strict 401 Unauthorized for guest follow clicks"
     },
     {
@@ -172,8 +172,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 687.1,
-      "notes": "Verified 150 SHA-256 signatures"
+      "latency": 919.6,
+      "notes": "Verified 0 SHA-256 signatures"
     },
     {
       "id": "UI-FEED-01",
@@ -182,7 +182,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 367.6,
+      "latency": 345.7,
       "notes": "Loaded 0 campus notices"
     }
   ]

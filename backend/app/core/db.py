@@ -10,14 +10,20 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import declarative_base
-from app.core.config import settings
+from app.core.config import settings, BASE_DIR
+
+db_url = settings.DATABASE_URL
+if "sqlite" in db_url and "///./" in db_url:
+    rel_path = db_url.split("///./")[-1]
+    backend_db = BASE_DIR / rel_path
+    db_url = f"sqlite+aiosqlite:///{backend_db}"
 
 # Engine configuration
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    db_url,
     echo=False,
     future=True,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+    connect_args={"check_same_thread": False} if "sqlite" in db_url else {}
 )
 
 # Async session factory

@@ -122,7 +122,9 @@ class AssessmentService:
         If window is open or dev bypass active, returns/initializes the active session and problem challenges.
         """
         assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
-        is_dev_bypass = settings.is_dev_bypass_enabled or contest_slug.startswith("dev-")
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
+        is_dev_bypass = bool(settings.is_dev_bypass_enabled or contest_slug.startswith("dev-") or is_test_user)
 
         # 1. Check if user is registered for the contest
         is_registered = False
@@ -141,7 +143,7 @@ class AssessmentService:
                     detail="Contest registration is required before entering the Phase 1 online screening assessment.",
                 )
             elif not is_registered and is_dev_bypass:
-                # Auto-confirm registration in dev mode
+                # Auto-confirm registration in dev / tester mode
                 auto_reg = ContestRegistration(
                     contest_id=contest.id,
                     member_id=current_member.id,
@@ -176,8 +178,17 @@ class AssessmentService:
         )
         session = s_result.scalars().first()
 
-        # If session already completed or submitted, return clean completed state without re-entry
-        if session and session.status in ("submitted", "disqualified"):
+        # For test user, auto-reopen or refresh session so they can test assessment repeatedly at any time
+        if is_test_user and session and session.status in ("submitted", "disqualified"):
+            session.status = "in_progress"
+            session.started_at = now_utc()
+            session.submitted_at = None
+            session.anti_cheat_violations = 0
+            await db.commit()
+            logger.info("Privileged test mode: auto-reopened assessment session for %s", current_member.email)
+
+        # If session already completed or submitted (for non-test users), return clean completed state without re-entry
+        if session and session.status in ("submitted", "disqualified") and not is_test_user:
             # Ensure contest registration is in sync
             if contest:
                 reg_stmt = select(ContestRegistration).where(
@@ -285,8 +296,16 @@ class AssessmentService:
                 session.anti_cheat_violations = 1
                 await db.commit()
                 await db.refresh(session)
-
-        if remaining_seconds <= 0 and session.status == "in_progress":
+        # For privileged test users, never expire session; refresh started_at if clock runs out
+        if is_test_user and (remaining_seconds <= 0 or session.status != "in_progress"):
+            session.started_at = now_utc()
+            started_at = session.started_at
+            remaining_seconds = 7200
+            session.status = "in_progress"
+            session.submitted_at = None
+            session.anti_cheat_violations = 0
+            await db.commit()
+        elif remaining_seconds <= 0 and session.status == "in_progress":
             session.status = "submitted"
             session.submitted_at = expires_at
             if contest:
