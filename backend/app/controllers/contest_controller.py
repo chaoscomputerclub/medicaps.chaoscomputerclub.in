@@ -831,6 +831,7 @@ class ContestController:
             "is_proctored": True,
             "is_faculty_proctored": True,
             "problems": arena_problems,
+            "server_time": now_dt.isoformat(),
         }
 
     @staticmethod
