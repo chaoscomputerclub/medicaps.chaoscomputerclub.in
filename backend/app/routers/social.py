@@ -1,42 +1,24 @@
-from app.core.cache import get_cache, set_cache, delete_cache, delete_cache_pattern
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
-Social Router: Student Following & Followers Network
+routers/social.py — Thin HTTP Router for Student Following & Followers Network
+Delegates to app.controllers.social_controller.SocialController
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Header
-from sqlalchemy import func, select, and_
+from typing import Optional
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
-from app.models.db_models import MemberProfile, StudentFollow
+from app.models.db_models import MemberProfile
 from app.schemas.social import (
     FollowResponse,
     FollowListResponse,
-    StudentSummary,
     FollowingIdsResponse,
 )
 from app.middleware.auth import get_current_member
-from app.services.rating_service import get_rating_tier
+from app.controllers.social_controller import SocialController
 
 router = APIRouter(prefix="/social", tags=["Social Network & Following"])
-
-
-async def resolve_member(target: str, db: AsyncSession) -> MemberProfile:
-    """Resolve a member by handle (case-insensitive) or UUID."""
-    clean_target = target.lstrip("@").strip()
-    stmt = select(MemberProfile).where(
-        (func.lower(MemberProfile.handle) == clean_target.lower()) | (MemberProfile.id == clean_target)
-    )
-    res = await db.execute(stmt)
-    member = res.scalars().first()
-    if not member:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student '{clean_target}' not found.",
-        )
-    return member
 
 
 @router.post("/follow/{target}", response_model=FollowResponse)
@@ -46,64 +28,7 @@ async def follow_student(
     db: AsyncSession = Depends(get_db),
 ):
     """Follow another student by handle or UUID."""
-    target_member = await resolve_member(target, db)
-
-    if target_member.id == current_member.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot follow yourself.",
-        )
-
-    # Check existing relationship
-    stmt = select(StudentFollow).where(
-        and_(
-            StudentFollow.follower_id == current_member.id,
-            StudentFollow.following_id == target_member.id,
-        )
-    )
-    existing = (await db.execute(stmt)).scalars().first()
-
-    if not existing:
-        follow_record = StudentFollow(
-            follower_id=current_member.id,
-            following_id=target_member.id,
-        )
-        db.add(follow_record)
-        await db.commit()
-
-        # Invalidate social & profile caches across ID and handle patterns
-        await delete_cache(f"cache:profile:{target_member.id}")
-        await delete_cache(f"cache:profile:{current_member.id}")
-        await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
-        await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
-        if target_member.handle:
-            await delete_cache_pattern(f"cache:student:profile:{target_member.handle.lower()}*")
-        if current_member.handle:
-            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}*")
-        await delete_cache(f"cache:social:my_following:{current_member.id}")
-        await delete_cache_pattern("cache:social:*")
-
-    # Recalculate target's followers count and current user's following count directly from DB
-    followers_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.following_id == target_member.id
-        )
-    ) or 0
-    following_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.follower_id == current_member.id
-        )
-    ) or 0
-
-    return FollowResponse(
-        success=True,
-        is_following=True,
-        followers_count=followers_count,
-        following_count=following_count,
-        target_id=str(target_member.id),
-        target_handle=target_member.handle or "—",
-        message=f"You are now following @{target_member.handle or 'student'}.",
-    )
+    return await SocialController.follow_student(target=target, current_member=current_member, db=db)
 
 
 @router.post("/toggle/{target}", response_model=FollowResponse)
@@ -113,69 +38,7 @@ async def toggle_follow_student(
     db: AsyncSession = Depends(get_db),
 ):
     """Atomically toggle follow/unfollow status for a target student."""
-    target_member = await resolve_member(target, db)
-
-    if target_member.id == current_member.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot follow yourself.",
-        )
-
-    stmt = select(StudentFollow).where(
-        and_(
-            StudentFollow.follower_id == current_member.id,
-            StudentFollow.following_id == target_member.id,
-        )
-    )
-    existing = (await db.execute(stmt)).scalars().first()
-
-    if existing:
-        await db.delete(existing)
-        await db.commit()
-        is_now_following = False
-        msg = f"Unfollowed @{target_member.handle or 'student'}."
-    else:
-        follow_record = StudentFollow(
-            follower_id=current_member.id,
-            following_id=target_member.id,
-        )
-        db.add(follow_record)
-        await db.commit()
-        is_now_following = True
-        msg = f"You are now following @{target_member.handle or 'student'}."
-
-    # Invalidate social & profile caches across ID and handle patterns
-    await delete_cache(f"cache:profile:{target_member.id}")
-    await delete_cache(f"cache:profile:{current_member.id}")
-    await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
-    await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
-    if target_member.handle:
-        await delete_cache_pattern(f"cache:student:profile:{target_member.handle.lower()}*")
-    if current_member.handle:
-        await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}*")
-    await delete_cache(f"cache:social:my_following:{current_member.id}")
-    await delete_cache_pattern("cache:social:*")
-
-    followers_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.following_id == target_member.id
-        )
-    ) or 0
-    following_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.follower_id == current_member.id
-        )
-    ) or 0
-
-    return FollowResponse(
-        success=True,
-        is_following=is_now_following,
-        followers_count=followers_count,
-        following_count=following_count,
-        target_id=str(target_member.id),
-        target_handle=target_member.handle or "—",
-        message=msg,
-    )
+    return await SocialController.toggle_follow_student(target=target, current_member=current_member, db=db)
 
 
 @router.delete("/follow/{target}", response_model=FollowResponse)
@@ -186,52 +49,7 @@ async def unfollow_student(
     db: AsyncSession = Depends(get_db),
 ):
     """Unfollow a student by handle or UUID."""
-    target_member = await resolve_member(target, db)
-
-    stmt = select(StudentFollow).where(
-        and_(
-            StudentFollow.follower_id == current_member.id,
-            StudentFollow.following_id == target_member.id,
-        )
-    )
-    existing = (await db.execute(stmt)).scalars().first()
-
-    if existing:
-        await db.delete(existing)
-        await db.commit()
-
-        # Invalidate social & profile caches across ID and handle patterns
-        await delete_cache(f"cache:profile:{target_member.id}")
-        await delete_cache(f"cache:profile:{current_member.id}")
-        await delete_cache_pattern(f"cache:student:profile:{target_member.id}*")
-        await delete_cache_pattern(f"cache:student:profile:{current_member.id}*")
-        if target_member.handle:
-            await delete_cache_pattern(f"cache:student:profile:{target_member.handle.lower()}*")
-        if current_member.handle:
-            await delete_cache_pattern(f"cache:student:profile:{current_member.handle.lower()}*")
-        await delete_cache(f"cache:social:my_following:{current_member.id}")
-        await delete_cache_pattern("cache:social:*")
-
-    followers_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.following_id == target_member.id
-        )
-    ) or 0
-    following_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.follower_id == current_member.id
-        )
-    ) or 0
-
-    return FollowResponse(
-        success=True,
-        is_following=False,
-        followers_count=followers_count,
-        following_count=following_count,
-        target_id=str(target_member.id),
-        target_handle=target_member.handle or "—",
-        message=f"Unfollowed @{target_member.handle or 'student'}.",
-    )
+    return await SocialController.unfollow_student(target=target, current_member=current_member, db=db)
 
 
 @router.get("/my-following-ids", response_model=FollowingIdsResponse)
@@ -240,18 +58,7 @@ async def get_my_following_ids(
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieve IDs of all students currently followed by the authenticated user with Redis caching."""
-    cache_key = f"cache:social:my_following:{current_member.id}"
-    cached = await get_cache(cache_key)
-    if cached is not None:
-        return FollowingIdsResponse(following_ids=cached)
-
-    stmt = select(StudentFollow.following_id).where(
-        StudentFollow.follower_id == current_member.id
-    )
-    res = await db.execute(stmt)
-    following_ids = [str(fid) for fid in res.scalars().all()]
-    await set_cache(cache_key, following_ids, ttl_seconds=60)
-    return FollowingIdsResponse(following_ids=following_ids)
+    return await SocialController.get_my_following_ids(current_member=current_member, db=db)
 
 
 @router.get("/{target}/followers", response_model=FollowListResponse)
@@ -261,70 +68,7 @@ async def get_student_followers(
     db: AsyncSession = Depends(get_db),
 ):
     """Get list of students following target member."""
-    target_member = await resolve_member(target, db)
-
-    # Optional current member check
-    current_member_id: Optional[str] = None
-    my_following_set = set()
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization[7:].strip()
-        try:
-            from app.core.security import decode_jwt
-            payload = decode_jwt(token)
-            if payload and "sub" in payload:
-                current_member_id = payload["sub"]
-                # Get set of IDs current member follows
-                fid_res = await db.execute(
-                    select(StudentFollow.following_id).where(
-                        StudentFollow.follower_id == current_member_id
-                    )
-                )
-                my_following_set = set(fid_res.scalars().all())
-        except Exception:
-            pass
-
-    # Query followers
-    stmt = (
-        select(MemberProfile)
-        .join(StudentFollow, StudentFollow.follower_id == MemberProfile.id)
-        .where(StudentFollow.following_id == target_member.id)
-        .order_by(StudentFollow.created_at.desc())
-    )
-    res = await db.execute(stmt)
-    followers = res.scalars().all()
-
-    followers_count = len(followers)
-    following_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.follower_id == target_member.id
-        )
-    ) or 0
-
-    students = []
-    for m in followers:
-        tier_str = get_rating_tier(m.rating)
-        students.append(
-            StudentSummary(
-                id=m.id,
-                handle=m.handle or "—",
-                full_name=m.full_name or m.email,
-                department=m.department or "CSE",
-                batch=m.batch or "2023-27",
-                rating=m.rating,
-                peak_rating=m.peak_rating,
-                tier=tier_str,
-                is_following=m.id in my_following_set,
-                is_self=(m.id == current_member_id),
-                avatar_url=m.avatar_url,
-            )
-        )
-
-    return FollowListResponse(
-        count=len(students),
-        followers_count=followers_count,
-        following_count=following_count,
-        students=students,
-    )
+    return await SocialController.get_student_followers(target=target, authorization=authorization, db=db)
 
 
 @router.get("/{target}/following", response_model=FollowListResponse)
@@ -334,65 +78,4 @@ async def get_student_following(
     db: AsyncSession = Depends(get_db),
 ):
     """Get list of students that target member is following."""
-    target_member = await resolve_member(target, db)
-
-    current_member_id: Optional[str] = None
-    my_following_set = set()
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization[7:].strip()
-        try:
-            from app.core.security import decode_jwt
-            payload = decode_jwt(token)
-            if payload and "sub" in payload:
-                current_member_id = payload["sub"]
-                fid_res = await db.execute(
-                    select(StudentFollow.following_id).where(
-                        StudentFollow.follower_id == current_member_id
-                    )
-                )
-                my_following_set = set(fid_res.scalars().all())
-        except Exception:
-            pass
-
-    # Query following
-    stmt = (
-        select(MemberProfile)
-        .join(StudentFollow, StudentFollow.following_id == MemberProfile.id)
-        .where(StudentFollow.follower_id == target_member.id)
-        .order_by(StudentFollow.created_at.desc())
-    )
-    res = await db.execute(stmt)
-    following = res.scalars().all()
-
-    following_count = len(following)
-    followers_count = await db.scalar(
-        select(func.count(StudentFollow.id)).where(
-            StudentFollow.following_id == target_member.id
-        )
-    ) or 0
-
-    students = []
-    for m in following:
-        tier_str = get_rating_tier(m.rating)
-        students.append(
-            StudentSummary(
-                id=m.id,
-                handle=m.handle or "—",
-                full_name=m.full_name or m.email,
-                department=m.department or "CSE",
-                batch=m.batch or "2023-27",
-                rating=m.rating,
-                peak_rating=m.peak_rating,
-                tier=tier_str,
-                is_following=m.id in my_following_set,
-                is_self=(m.id == current_member_id),
-                avatar_url=m.avatar_url,
-            )
-        )
-
-    return FollowListResponse(
-        count=len(students),
-        followers_count=followers_count,
-        following_count=following_count,
-        students=students,
-    )
+    return await SocialController.get_student_following(target=target, authorization=authorization, db=db)

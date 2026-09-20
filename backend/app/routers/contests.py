@@ -1,46 +1,38 @@
-import uuid
-from app.services.contest_eligibility_service import is_member_eligible_for_live_contest
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
-Offline Contests & On-Premise Event Management Router
+routers/contests.py — Thin HTTP Router for Offline Contests & Arena Management
+Delegates to app.controllers.contest_controller.ContestController
 """
 
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from pydantic import BaseModel
-from sqlalchemy import select, desc
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+
 from app.core.db import get_db
-from app.core.cache import get_cache, set_cache, delete_cache_pattern
-from app.models.db_models import (
-    ContestProblem,
-    MemberProfile,
-    OfflineContest,
-    ContestRegistration,
-    Assessment,
-    CampusPass,
-    now_utc,
-    AssessmentSession,
-    ContestSubmission,
-    ScoreboardEntry,
+from app.models.db_models import MemberProfile
+from app.models.schemas import (
+    ContestArenaResponse,
+    ContestProblemResponse,
+    OfflineContestResponse,
 )
-from app.models.schemas import ContestProblemResponse, OfflineContestResponse, ContestArenaResponse, ContestArenaProblemResponse
-from app.middleware.auth import get_current_member, get_current_member_optional
-from app.engine.enums import Language, Verdict, ComparisonMode
-from app.engine.providers.factory import get_judge_provider
-from app.engine.schemas import TestCaseSchema
-
-class ArenaRunRequest(BaseModel):
-    problem_id: str
-    language: Language
-    code: str
-    custom_stdin: Optional[str] = None
-
-class ArenaSubmitRequest(BaseModel):
-    problem_id: str
-    language: Language
-    code: str
+from app.middleware.auth import (
+    get_current_member,
+    get_current_member_optional,
+    require_admin_or_core,
+)
+from app.schemas.dynamic_contest import (
+    ContestCloneRequest,
+    ContestStatusChangeRequest,
+    DynamicContestCreateRequest,
+    DynamicContestUpdateRequest,
+    PresetContestLaunchRequest,
+    ProblemCreateSchema,
+)
+from app.controllers.contest_controller import (
+    ArenaRunRequest,
+    ArenaSubmitRequest,
+    ContestController,
+)
 
 router = APIRouter(prefix="/contests", tags=["Offline Contests"])
 
@@ -56,59 +48,15 @@ async def list_contests(
     """
     List offline campus contests.
     Publicly lists all campus contests (upcoming, live, and finished) with division metadata.
-    Live finals problem statements and code execution remain strictly protected by gate verification.
     Protected by 30s Redis Cache-Aside.
     """
-    # Only cache unauthenticated / general public view
-    member_key = current_member.id if current_member else "anon"
-    cache_key = f"cache:contests:list:{status or 'all'}:{division or 'all'}:{member_key}"
-    cached = await get_cache(cache_key)
-    if cached is not None:
-        response.headers["X-Cache"] = "HIT"
-        response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=15"
-        return cached
-
-    stmt = select(OfflineContest).options(
-        selectinload(OfflineContest.problems),
-        selectinload(OfflineContest.assessment),
+    return await ContestController.list_contests(
+        response=response,
+        status=status,
+        division=division,
+        db=db,
+        current_member=current_member,
     )
-
-    if status:
-        stmt = stmt.where(OfflineContest.status == status)
-    if division:
-        stmt = stmt.where(OfflineContest.division == division)
-
-    stmt = stmt.order_by(OfflineContest.starts_at.desc())
-    result = await db.execute(stmt)
-    all_contests = result.scalars().all()
-
-    filtered_contests = []
-    for c in all_contests:
-        # Exclude legacy dev screening rounds from being listed as standalone contests
-        if c.slug in ("dev-assessment-round", "dev-offline-final"):
-            continue
-        filtered_contests.append(c)
-
-    registered_contest_ids = set()
-    if current_member:
-        user_regs = await db.execute(
-            select(ContestRegistration.contest_id).where(
-                ContestRegistration.member_id == current_member.id
-            )
-        )
-        registered_contest_ids = set(user_regs.scalars().all())
-
-    payload = []
-    for c in filtered_contests:
-        c_dict = OfflineContestResponse.model_validate(c).model_dump()
-        c_dict["registered"] = c.id in registered_contest_ids
-        payload.append(c_dict)
-
-    await set_cache(cache_key, payload, ttl_seconds=30)
-    response.headers["X-Cache"] = "MISS"
-    response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=15"
-    return payload
-
 
 
 @router.get("/my/participated", summary="List all contests the current member has registered for or participated in")
@@ -122,152 +70,11 @@ async def get_my_participated_contests(
     including upcoming registered contests, active online screening attempts,
     and verified on-campus scoreboard finishes.
     """
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    from app.models.db_models import ContestRegistration, OfflineContest, AssessmentSession, Assessment, ScoreboardEntry
-
-    # 1. Fetch all contest registrations for this cadet
-    reg_query = (
-        select(ContestRegistration, OfflineContest)
-        .join(OfflineContest, ContestRegistration.contest_id == OfflineContest.id)
-        .where(ContestRegistration.member_id == current_member.id)
-        .order_by(ContestRegistration.registered_at.desc())
+    return await ContestController.get_my_participated_contests(
+        response=response,
+        current_member=current_member,
+        db=db,
     )
-    reg_res = await db.execute(reg_query)
-    registrations = reg_res.all()
-
-    # 2. Fetch all scoreboard entries (on-campus finishes)
-    sb_query = (
-        select(ScoreboardEntry, OfflineContest)
-        .join(OfflineContest, ScoreboardEntry.contest_id == OfflineContest.id)
-        .where(ScoreboardEntry.member_id == current_member.id)
-    )
-    sb_res = await db.execute(sb_query)
-    scoreboards = {row[1].id: row[0] for row in sb_res.all()}
-
-    # 3. Fetch all assessment sessions (online screening attempts)
-    sess_query = (
-        select(AssessmentSession, Assessment)
-        .join(Assessment, AssessmentSession.assessment_id == Assessment.id)
-        .where(AssessmentSession.member_id == current_member.id)
-    )
-    sess_res = await db.execute(sess_query)
-    sessions_by_contest_id = {}
-    sessions_by_slug = {}
-    for sess, assess in sess_res.all():
-        if assess.contest_id:
-            sessions_by_contest_id[assess.contest_id] = (sess, assess)
-        if assess.slug:
-            sessions_by_slug[assess.slug] = (sess, assess)
-
-    results = []
-    seen_contest_ids = set()
-
-    for reg, contest in registrations:
-        seen_contest_ids.add(contest.id)
-        sb = scoreboards.get(contest.id)
-        sess_pair = sessions_by_contest_id.get(contest.id) or sessions_by_slug.get(contest.slug)
-        sess = sess_pair[0] if sess_pair else None
-
-        # Determine outcome and status
-        is_sess_submitted = (sess and sess.status in ["submitted", "completed", "expired"]) or bool(reg and reg.assessment_taken)
-        assessment_submitted = is_sess_submitted
-
-        if is_sess_submitted:
-            outcome = "qualified" if (sess and sess.is_top_30_qualified) else ("submitted" if contest.status == "upcoming" else "pending")
-        elif contest.status == "upcoming":
-            outcome = "registered"
-        elif contest.status == "live":
-            outcome = "live"
-        elif sb:
-            outcome = "qualified" if sb.rank <= 30 else "not_qualified"
-        else:
-            outcome = "registered"
-
-        score = sb.score if sb else (round(sess.total_score) if (sess and sess.total_score is not None) else (round(reg.assessment_score) if (reg and reg.assessment_score is not None and reg.assessment_taken) else None))
-        rank = sb.rank if sb else None
-        rating_delta = sb.rating_delta if (sb and sb.rating_delta is not None) else None
-
-        results.append({
-            "contest_id": contest.id,
-            "contest_slug": contest.slug,
-            "contest_title": contest.title,
-            "season": contest.season,
-            "status": contest.status,
-            "venue": contest.venue,
-            "participated_at": reg.registered_at.isoformat(),
-            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
-            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
-            "score": score,
-            "rank": rank,
-            "rating_delta": rating_delta,
-            "participants": contest.registered_count,
-            "outcome": outcome,
-            "assessment_submitted": assessment_submitted,
-            "assessment_status": sess.status if sess else ("submitted" if (reg and reg.assessment_taken) else None),
-            "assessment_score": score,
-            "offline_result": f"Certificate CCC-{contest.slug.upper()}" if (sb and sb.rank <= 30) else None,
-        })
-
-    # Also add any assessment sessions that exist without explicit prior contest registration
-    for contest_id, (sess, assess) in sessions_by_contest_id.items():
-        if contest_id not in seen_contest_ids:
-            contest_row = await db.get(OfflineContest, contest_id)
-            if contest_row:
-                seen_contest_ids.add(contest_id)
-                is_sess_submitted = sess.status in ["submitted", "completed", "expired"]
-                outcome = "qualified" if sess.is_top_30_qualified else ("submitted" if contest_row.status == "upcoming" else "pending")
-                score = round(sess.total_score) if sess.total_score is not None else None
-                results.append({
-                    "contest_id": contest_row.id,
-                    "contest_slug": contest_row.slug,
-                    "contest_title": contest_row.title,
-                    "season": contest_row.season,
-                    "status": contest_row.status,
-                    "venue": contest_row.venue,
-                    "participated_at": sess.started_at.isoformat() if sess.started_at else contest_row.starts_at.isoformat(),
-                    "starts_at": contest_row.starts_at.isoformat() if contest_row.starts_at else None,
-                    "ends_at": contest_row.ends_at.isoformat() if contest_row.ends_at else None,
-                    "score": score,
-                    "rank": None,
-                    "rating_delta": None,
-                    "participants": contest_row.registered_count,
-                    "outcome": outcome,
-                    "assessment_submitted": is_sess_submitted,
-                    "assessment_status": sess.status,
-                    "assessment_score": score,
-                    "offline_result": None,
-                })
-
-    # Also add any scoreboard entries if not already in registrations
-    for contest_id, sb in scoreboards.items():
-        if contest_id not in seen_contest_ids:
-            contest_row = await db.get(OfflineContest, contest_id)
-            if contest_row:
-                seen_contest_ids.add(contest_id)
-                results.append({
-                    "contest_id": contest_row.id,
-                    "contest_slug": contest_row.slug,
-                    "contest_title": contest_row.title,
-                    "season": contest_row.season,
-                    "status": contest_row.status,
-                    "venue": contest_row.venue,
-                    "participated_at": contest_row.starts_at.isoformat() if contest_row.starts_at else None,
-                    "starts_at": contest_row.starts_at.isoformat() if contest_row.starts_at else None,
-                    "ends_at": contest_row.ends_at.isoformat() if contest_row.ends_at else None,
-                    "score": sb.score,
-                    "rank": sb.rank,
-                    "rating_delta": sb.rating_delta if (sb and sb.rating_delta is not None) else None,
-                    "participants": contest_row.registered_count,
-                    "outcome": "qualified" if sb.rank <= 30 else "not_qualified",
-                    "assessment_submitted": True,
-                    "assessment_status": "submitted",
-                    "assessment_score": sb.score,
-                    "offline_result": f"Certificate CCC-{contest_row.slug.upper()}",
-                })
-
-    return results
 
 
 @router.get("/{slug}", response_model=OfflineContestResponse)
@@ -278,43 +85,12 @@ async def get_contest_detail(
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
     """Fetch complete specifications, venue, rules, and proctor details for an offline contest. Protected by 60s Redis Cache."""
-    member_key = current_member.id if current_member else "anon"
-    cache_key = f"cache:contest:detail:{slug}:{member_key}"
-    cached = await get_cache(cache_key)
-    if cached is not None:
-        response.headers["X-Cache"] = "HIT"
-        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-        return cached
-
-    stmt = (
-        select(OfflineContest)
-        .options(
-            selectinload(OfflineContest.problems),
-            selectinload(OfflineContest.assessment),
-        )
-        .where(OfflineContest.slug == slug)
+    return await ContestController.get_contest_detail(
+        slug=slug,
+        response=response,
+        db=db,
+        current_member=current_member,
     )
-    result = await db.execute(stmt)
-    contest = result.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    is_registered = False
-    if current_member:
-        reg_check = await db.execute(
-            select(ContestRegistration.id).where(
-                ContestRegistration.contest_id == contest.id,
-                ContestRegistration.member_id == current_member.id,
-            )
-        )
-        is_registered = reg_check.scalars().first() is not None
-
-    payload = OfflineContestResponse.model_validate(contest).model_dump()
-    payload["registered"] = is_registered
-    await set_cache(cache_key, payload, ttl_seconds=60)
-    response.headers["X-Cache"] = "MISS"
-    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-    return payload
 
 
 @router.get("/{slug}/problems", response_model=List[ContestProblemResponse])
@@ -325,34 +101,12 @@ async def get_contest_problems(
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
     """Fetch problem set papers (A-F), first-solve times, and editorial summaries. Protected by 60s Redis Cache."""
-    cache_key = f"cache:contest:problems:{slug}"
-    cached = await get_cache(cache_key)
-    if cached is not None:
-        response.headers["X-Cache"] = "HIT"
-        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-        return cached
-
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    if contest.status == "live":
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
-        if not is_eligible:
-            raise HTTPException(status_code=403, detail=f"Access restricted: {reason}")
-
-    res = await db.execute(
-        select(ContestProblem)
-        .where(ContestProblem.contest_id == contest.id)
-        .order_by(ContestProblem.problem_index.asc())
+    return await ContestController.get_contest_problems(
+        slug=slug,
+        response=response,
+        db=db,
+        current_member=current_member,
     )
-    records = res.scalars().all()
-    payload = [ContestProblemResponse.model_validate(p).model_dump() for p in records]
-    await set_cache(cache_key, payload, ttl_seconds=60)
-    response.headers["X-Cache"] = "MISS"
-    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-    return records
 
 
 @router.get("/{slug}/registration-status")
@@ -363,216 +117,12 @@ async def get_registration_status(
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
     """Check candidate registration, screening assessment ranking, and Top 30 live final eligibility."""
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    contest_status = contest.status  # "upcoming", "live", "finished"
-
-    if not current_member:
-        return {
-            "registered": False,
-            "contest_slug": slug,
-            "contest_status": contest_status,
-            "status": None,
-            "registered_at": None,
-            "assessment_taken": False,
-            "assessment_score": 0.0,
-            "assessment_rank": None,
-            "assessment_status": None,
-            "is_top_30_qualified": False,
-            "can_take_assessment": False,
-            "can_enter_live_contest": False,
-            "eligibility_message": "Sign in to register or check your contest standing.",
-        }
-
-    reg_res = await db.execute(
-        select(ContestRegistration).where(
-            ContestRegistration.contest_id == contest.id,
-            ContestRegistration.member_id == current_member.id,
-        )
+    return await ContestController.get_registration_status(
+        slug=slug,
+        response=response,
+        db=db,
+        current_member=current_member,
     )
-    reg = reg_res.scalars().first()
-    is_registered = reg is not None
-
-    # Check candidate screening assessment session & rank
-    assessment_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
-    assessment = assessment_res.scalars().first()
-    if not assessment and contest.status == "live":
-        assess_season_res = await db.execute(
-            select(Assessment).where(
-                (Assessment.slug == "medicaps-offline-open-2026") | (Assessment.is_active == True)
-            )
-        )
-        assessment = assess_season_res.scalars().first()
-
-    from datetime import timedelta, timezone
-
-    assessment_taken = False
-    assessment_score = 0.0
-    assessment_rank = None
-    assessment_session_status = None
-    is_top_30_qualified = False
-    can_resume_assessment = False
-    anti_cheat_violations = 0
-    max_violations = 3
-    remaining_seconds = 0
-
-    if assessment:
-        max_violations = assessment.max_violations
-        s_res = await db.execute(
-            select(AssessmentSession).where(
-                AssessmentSession.assessment_id == assessment.id,
-                AssessmentSession.member_id == current_member.id,
-            )
-        )
-        my_session = s_res.scalars().first()
-        if my_session:
-            assessment_score = my_session.total_score
-            assessment_session_status = my_session.status
-            anti_cheat_violations = my_session.anti_cheat_violations
-
-            started_at = my_session.started_at
-            if started_at.tzinfo is None:
-                started_at = started_at.replace(tzinfo=timezone.utc)
-            duration = (assessment.duration_minutes or 45)
-            expires_at = started_at + timedelta(minutes=duration)
-            is_session_expired = (now_utc() >= expires_at)
-
-            if my_session.status in ("submitted", "disqualified") or is_session_expired:
-                assessment_taken = True
-                can_resume_assessment = False
-                remaining_seconds = 0
-            else:
-                # Active in-progress session that candidate can resume
-                assessment_taken = False
-                can_resume_assessment = True
-                remaining_seconds = max(0, int((expires_at - now_utc()).total_seconds()))
-
-            # Calculate candidate rank in screening leaderboard
-            all_sessions_res = await db.execute(
-                select(AssessmentSession)
-                .where(
-                    AssessmentSession.assessment_id == assessment.id,
-                    AssessmentSession.status.in_(["in_progress", "submitted"]),
-                )
-                .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
-            )
-            all_sessions = all_sessions_res.scalars().all()
-            for rank_num, s in enumerate(all_sessions, start=1):
-                if s.member_id == current_member.id:
-                    assessment_rank = rank_num
-                    break
-
-            is_top_30_qualified = (
-                my_session.is_top_30_qualified or
-                (assessment_rank is not None and assessment_rank <= 30)
-            )
-
-    # Check candidate CampusPass check-in status
-    pass_res = await db.execute(
-        select(CampusPass).where(
-            CampusPass.contest_id == contest.id,
-            CampusPass.member_id == current_member.id,
-        )
-    )
-    pass_obj = pass_res.scalars().first()
-    check_in_status = pass_obj.check_in_status if pass_obj else "not_issued"
-    is_checked_in = (check_in_status == "checked_in")
-
-    # Assessment can only be started if not yet taken AND the lifecycle window is open
-    from app.services.contest_lifecycle_service import assessment_available
-    assessment_window_open = False
-    if contest and contest.starts_at:
-        assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
-
-    from app.core.config import settings
-    is_dev_contest = slug.startswith("dev-")
-    is_dev_bypass = bool(settings.is_dev_bypass_enabled or is_dev_contest)
-
-    can_take_assessment = (
-        contest_status == "upcoming"
-        and is_registered
-        and not assessment_taken
-        and assessment_window_open
-        and assessment_session_status not in ("submitted", "disqualified")
-    )
-    can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
-
-    # Dev Contest overrides for frictionless testing (ONLY for dev- prefixed sandbox contests)
-    if is_dev_contest:
-        is_registered = True
-        is_top_30_qualified = True
-        is_checked_in = True
-        can_enter_live_contest = True
-        # STRICT: If assessment was already submitted, disqualified, or taken, reattempts are forbidden
-        can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
-        assessment_window_open = True
-    elif is_dev_bypass:
-        is_registered = True
-        can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
-
-    # Contextual eligibility explanation
-    if is_dev_bypass:
-        eligibility_message = "⚡ DEV BYPASS ACTIVE: Unrestricted development testing mode enabled."
-    elif can_resume_assessment:
-        mins_left = remaining_seconds // 60
-        eligibility_message = f"⚠️ Assessment in progress ({mins_left}m remaining, Warning {anti_cheat_violations} of {max_violations}). Click 'Resume Contest' to continue."
-    elif contest_status == "upcoming":
-        if not is_registered:
-            eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
-        elif assessment_taken:
-            eligibility_message = f"Screening submitted. Score: {assessment_score} pts (Current Rank: #{assessment_rank or chr(0x2014)}). Top 30 cadets will advance when the contest goes LIVE."
-        elif not assessment_window_open:
-            from app.services.contest_lifecycle_service import assessment_window
-            if contest and contest.starts_at:
-                window = assessment_window(contest.starts_at)
-                from app.services.contest_lifecycle_service import utcnow
-                if utcnow() < window.opens_at:
-                    eligibility_message = f"Assessment window opens at {window.opens_at.strftime('%d %b %Y, %H:%M UTC')}. You can enter once it unlocks."
-                else:
-                    eligibility_message = "The Round 1 assessment window has closed."
-            else:
-                eligibility_message = "Assessment window is not yet open."
-        else:
-            eligibility_message = "Registration confirmed. Round 1 window is open — start your assessment now."
-    elif contest_status == "live":
-        if is_top_30_qualified:
-            if is_checked_in or is_dev_bypass:
-                eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Gate check-in verified. Enter the Live Contest Lab."
-            else:
-                eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Physical QR proctor scan required at lab entrance before entering arena."
-        else:
-            eligibility_message = "🔒 Live Final is restricted strictly to Top 30 assessment qualifiers. You are currently not eligible."
-    else:
-        eligibility_message = "This contest has officially concluded."
-
-    return {
-        "registered": is_registered,
-        "contest_slug": slug,
-        "contest_status": contest_status,
-        "status": reg.status if reg else None,
-        "registered_at": reg.registered_at.isoformat() if reg else None,
-        "assessment_taken": assessment_taken,
-        "assessment_score": assessment_score,
-        "assessment_rank": assessment_rank,
-        "assessment_status": assessment_session_status,
-        "can_resume_assessment": can_resume_assessment,
-        "anti_cheat_violations": anti_cheat_violations,
-        "max_violations": max_violations,
-        "remaining_seconds": remaining_seconds,
-        "is_top_30_qualified": is_top_30_qualified,
-        "is_checked_in": is_checked_in,
-        "check_in_status": check_in_status,
-        "can_take_assessment": can_take_assessment,
-        "can_enter_live_contest": can_enter_live_contest,
-        "eligibility_message": eligibility_message,
-        "is_dev_bypass": is_dev_bypass,
-    }
 
 
 @router.post("/{slug}/register")
@@ -582,56 +132,11 @@ async def register_for_contest(
     current_member: MemberProfile = Depends(get_current_member),
 ):
     """Reserve physical workstation seat and unlock Phase 1 Online Assessment for the contest."""
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    if contest.status != "upcoming":
-        raise HTTPException(
-            status_code=400,
-            detail="Registration and Phase 1 screening are only open for UPCOMING contests. Live contests are restricted strictly to pre-qualified Top 30 finalists.",
-        )
-
-    # Check if candidate is already registered
-    existing_reg = await db.execute(
-        select(ContestRegistration).where(
-            ContestRegistration.contest_id == contest.id,
-            ContestRegistration.member_id == current_member.id,
-        )
+    return await ContestController.register_for_contest(
+        slug=slug,
+        current_member=current_member,
+        db=db,
     )
-    if existing_reg.scalars().first():
-        return {
-            "status": "already_registered",
-            "registered": True,
-            "message": f"You are already registered for {contest.title}. Proceed to the assessment studio.",
-            "venue": contest.venue,
-            "registered_count": contest.registered_count,
-            "capacity": contest.seat_capacity,
-        }
-
-    if contest.registered_count >= contest.seat_capacity:
-        raise HTTPException(status_code=400, detail="All lab workstation seats are filled for this contest.")
-
-    # Create ContestRegistration record in DB
-    new_reg = ContestRegistration(
-        contest_id=contest.id,
-        member_id=current_member.id,
-        status="confirmed",
-    )
-    db.add(new_reg)
-    contest.registered_count += 1
-    await db.commit()
-    await delete_cache_pattern("cache:contest*")
-
-    return {
-        "status": "confirmed",
-        "registered": True,
-        "message": f"Registration confirmed for {contest.title}. Workstation seat reserved and assessment round unlocked.",
-        "venue": contest.venue,
-        "registered_count": contest.registered_count,
-        "capacity": contest.seat_capacity,
-    }
 
 
 @router.post("/{slug}/check-in")
@@ -642,65 +147,12 @@ async def check_in_contest(
     db: AsyncSession = Depends(get_db),
 ):
     """Verify physical on-premise attendance at the lab gate check-in."""
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    assigned_seat = "Lab-04-WS-07"
-    effective_code = pass_code or f"CCC-PASS-{uuid.uuid4().hex[:6].upper()}"
-
-    if current_member:
-        pass_res = await db.execute(
-            select(CampusPass).where(
-                CampusPass.contest_id == contest.id,
-                CampusPass.member_id == current_member.id,
-            )
-        )
-        pass_obj = pass_res.scalars().first()
-        if not pass_obj:
-            pass_obj = CampusPass(
-                contest_id=contest.id,
-                member_id=current_member.id,
-                pass_code=effective_code,
-                seat_number=assigned_seat,
-                qr_data=f"ccc://medicaps/contest/{contest.slug}/cadet/{current_member.handle}",
-                check_in_status="checked_in",
-                issued_at=now_utc(),
-            )
-            db.add(pass_obj)
-        else:
-            pass_obj.check_in_status = "checked_in"
-            assigned_seat = pass_obj.seat_number
-        await db.commit()
-        await delete_cache_pattern("cache:contest*")
-
-        try:
-            from app.services.event_broadcaster import broadcast_event
-            await broadcast_event(
-                event_type="pass_checked_in",
-                data={
-                    "member_id": current_member.id,
-                    "handle": current_member.handle,
-                    "candidate_name": current_member.full_name or current_member.handle,
-                    "pass_code": effective_code,
-                    "seat_number": assigned_seat,
-                    "status": "checked_in",
-                    "checked_in_at": now_utc().isoformat(),
-                },
-                contest_slug=contest.slug,
-            )
-        except Exception as e:
-            logger.debug("Broadcast error: %s", e)
-
-    return {
-        "success": True,
-        "status": "checked_in",
-        "message": f"Physical presence verified. Workstation assigned: {assigned_seat}",
-        "contest": contest.title,
-        "seat": assigned_seat,
-        "pass_code": effective_code,
-    }
+    return await ContestController.check_in_contest(
+        slug=slug,
+        pass_code=pass_code,
+        current_member=current_member,
+        db=db,
+    )
 
 
 @router.post("/{slug}/reset-timer")
@@ -710,47 +162,7 @@ async def reset_contest_timer(
     db: AsyncSession = Depends(get_db),
 ):
     """Reset contest and assessment starts_at to N seconds in the future for demo countdown."""
-    from datetime import datetime, timezone, timedelta
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    now = datetime.now(timezone.utc)
-    new_starts = now + timedelta(hours=24, seconds=seconds)
-    contest.starts_at = new_starts
-    contest.status = "upcoming"
-
-    # Also update Assessment starts_at
-    a_res = await db.execute(select(Assessment).where((Assessment.contest_id == contest.id) | (Assessment.slug == slug)))
-    assessment = a_res.scalars().first()
-    if assessment:
-        assessment.starts_at = now + timedelta(seconds=seconds)
-        assessment.ends_at = new_starts
-        assessment.is_active = True
-
-    await db.commit()
-    await delete_cache_pattern("cache:contest*")
-
-    try:
-        from app.services.event_broadcaster import broadcast_event
-        await broadcast_event(
-            event_type="contest_timer_reset",
-            data={
-                "contest_slug": slug,
-                "starts_at": new_starts.isoformat(),
-                "countdown_seconds": seconds,
-            },
-            contest_slug=slug,
-        )
-    except Exception as e:
-        logger.debug("Broadcast error: %s", e)
-    return {
-        "status": "timer_reset",
-        "slug": slug,
-        "countdown_seconds": seconds,
-        "starts_at": new_starts.isoformat(),
-    }
+    return await ContestController.reset_contest_timer(slug=slug, seconds=seconds, db=db)
 
 
 @router.get("/{slug}/arena", response_model=ContestArenaResponse)
@@ -760,86 +172,11 @@ async def get_contest_arena_data(
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
     """Retrieve full arena workspace data, assigned workstation seat, chief proctors, and problem statements."""
-    c_res = await db.execute(
-        select(OfflineContest)
-        .options(selectinload(OfflineContest.problems))
-        .where(OfflineContest.slug == slug)
+    return await ContestController.get_contest_arena_data(
+        slug=slug,
+        db=db,
+        current_member=current_member,
     )
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    if contest.status == "live" and not slug.startswith("dev-"):
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
-        if not is_eligible:
-            raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
-
-    # Check candidate CampusPass for assigned workstation seat
-    assigned_seat = "Lab-04-WS-07"
-    pass_code = None
-    check_in_status = "issued"
-
-    if current_member:
-        pass_res = await db.execute(
-            select(CampusPass).where(
-                CampusPass.contest_id == contest.id,
-                CampusPass.member_id == current_member.id,
-            )
-        )
-        pass_obj = pass_res.scalars().first()
-        if pass_obj:
-            assigned_seat = pass_obj.seat_number
-            pass_code = pass_obj.pass_code
-            check_in_status = pass_obj.check_in_status
-
-    # Sort problems by problem_index
-    problems = sorted(contest.problems, key=lambda p: p.problem_index)
-
-    fallback_descriptions = {
-        "A": "At Medi-Caps University, campus pass numbers are issued as alphanumeric strings. Two passes are considered a 'mirror pair' if one string is the exact reverse of the other (e.g. 'AB' and 'BA'). Given a list of N pass strings, determine the total count of valid unordered mirror pairs (i < j where passes[i] is the reverse of passes[j]).",
-        "B": "The Medi-Caps lab router has M megabits of total bandwidth to distribute among K competing lab processes. Process i requires at least min_i bandwidth and can consume at most max_i bandwidth, yielding utility = allocated_bandwidth * priority_i. Find the maximum total utility achievable such that the sum of allocated bandwidth does not exceed M and every process receives at least its minimum requirement. If the total minimum requirements exceed M, output -1.",
-        "C": "An air-gapped lab network consists of N workstations numbered 1 to N and M bidirectional communication channels. Each channel connects workstation u and v with latency L (in milliseconds). Workstation 1 needs to transmit an encrypted cryptographic key to workstation N. To avoid packet interception, you may deploy at most K quantum booster repeaters at chosen intermediate workstations along the path. A repeater reduces the latency of its adjacent outgoing channel by half (floor division). Find the minimum total transmission latency from workstation 1 to workstation N."
-    }
-
-    arena_problems = []
-    for p in problems:
-        desc = getattr(p, "description", None) or fallback_descriptions.get(p.problem_index, f"Problem {p.problem_index}: {p.title}")
-        arena_problems.append({
-            "id": p.id,
-            "contest_id": p.contest_id,
-            "problem_index": p.problem_index,
-            "title": p.title,
-            "topic": p.topic,
-            "points": p.points,
-            "difficulty": getattr(p, "difficulty", None) or "MEDIUM",
-            "description": desc,
-            "input_format": getattr(p, "input_format", None) or "Standard competitive programming input format.",
-            "output_format": getattr(p, "output_format", None) or "Standard output format.",
-            "constraints": getattr(p, "constraints", None) or "Time Limit: 2.0s · Memory: 256MB",
-            "time_limit": getattr(p, "time_limit", 2.0) or 2.0,
-            "memory_limit": getattr(p, "memory_limit", 256) or 256,
-            "starter_codes": getattr(p, "starter_codes", None) or {},
-            "sample_testcases": getattr(p, "sample_testcases", None) or [],
-        })
-
-    return {
-        "contest_id": contest.id,
-        "slug": contest.slug,
-        "title": contest.title,
-        "season": contest.season,
-        "status": contest.status,
-        "starts_at": contest.starts_at.isoformat() if contest.starts_at else "",
-        "ends_at": contest.ends_at.isoformat() if contest.ends_at else "",
-        "venue": contest.venue,
-        "environment": contest.environment,
-        "chief_proctors": contest.chief_proctors if contest.chief_proctors else ["Chief Proctor", "CCC Operations Desk"],
-        "assigned_seat": assigned_seat,
-        "pass_code": pass_code,
-        "check_in_status": check_in_status,
-        "is_proctored": True,
-        "is_faculty_proctored": True,
-        "problems": arena_problems,
-    }
 
 
 @router.post("/{slug}/arena/run")
@@ -850,72 +187,12 @@ async def run_contest_arena_code(
     db: AsyncSession = Depends(get_db),
 ):
     """Run code against sample test cases or custom stdin in the live contest arena."""
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    if contest.status == "live" and not slug.startswith("dev-"):
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
-        if not is_eligible:
-            raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
-
-    p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
-    problem = p_res.scalars().first()
-    if not problem:
-        raise HTTPException(status_code=404, detail="Contest problem not found.")
-
-    if payload.custom_stdin is not None:
-        tcs = [TestCaseSchema(id="custom", stdin=payload.custom_stdin, expected_output="")]
-    else:
-        sample_list = getattr(problem, "sample_testcases", None) or []
-        tcs = [
-            TestCaseSchema(
-                id=f"sample_{i+1}",
-                name=f"Sample Test {i+1}",
-                stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
-                expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
-            )
-            for i, s in enumerate(sample_list)
-        ]
-        if not tcs:
-            tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
-
-    provider = get_judge_provider()
-    exec_result = await provider.execute_batch(
-        language=payload.language,
-        code=payload.code,
-        testcases=tcs,
-        time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
-        memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
-        comparison_mode=ComparisonMode.TRIMMED,
+    return await ContestController.run_arena_code(
+        slug=slug,
+        payload=payload,
+        current_member=current_member,
+        db=db,
     )
-
-    return {
-        "success": exec_result.success,
-        "verdict": exec_result.verdict,
-        "stdout": exec_result.stdout,
-        "stderr": exec_result.stderr,
-        "compile_output": exec_result.compile_output,
-        "time": exec_result.time,
-        "memory": exec_result.memory,
-        "passed_testcases": exec_result.passed_testcases,
-        "total_testcases": exec_result.total_testcases,
-        "score": exec_result.score,
-        "testcase_results": [
-            {
-                "testcase_id": tr.testcase_id,
-                "name": tr.name,
-                "passed": tr.passed,
-                "verdict": tr.verdict,
-                "stdout": tr.stdout,
-                "expected_output": tr.expected_output,
-                "stderr": tr.stderr,
-                "wall_time_ms": tr.wall_time_ms,
-            }
-            for tr in exec_result.testcase_results
-        ],
-    }
 
 
 @router.post("/{slug}/arena/submit")
@@ -926,195 +203,37 @@ async def submit_contest_arena_code(
     db: AsyncSession = Depends(get_db),
 ):
     """Submit solution in live contest arena against full judge test suite & update live scoreboard."""
-    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-    contest = c_res.scalars().first()
-    if not contest:
-        raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
-
-    if contest.status == "live" and not slug.startswith("dev-"):
-        is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
-        if not is_eligible:
-            raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
-
-    p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
-    problem = p_res.scalars().first()
-    if not problem:
-        raise HTTPException(status_code=404, detail="Contest problem not found.")
-
-    samples = getattr(problem, "sample_testcases", None) or []
-    hidden = getattr(problem, "hidden_testcases", None) or []
-    all_raw = samples + hidden
-
-    all_tcs: list[TestCaseSchema] = []
-    for i, s in enumerate(all_raw):
-        all_tcs.append(
-            TestCaseSchema(
-                id=f"tc_{i+1}",
-                name=f"Test {i+1}",
-                stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
-                expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
-                hidden=(i >= len(samples)),
-                weight=1.0,
-            )
-        )
-    if not all_tcs:
-        all_tcs = [TestCaseSchema(id="tc_1", name="Test 1", stdin="", expected_output="")]
-
-    provider = get_judge_provider()
-    exec_result = await provider.execute_batch(
-        language=payload.language,
-        code=payload.code,
-        testcases=all_tcs,
-        time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
-        memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
-        comparison_mode=ComparisonMode.TRIMMED,
+    return await ContestController.submit_arena_code(
+        slug=slug,
+        payload=payload,
+        current_member=current_member,
+        db=db,
     )
 
-    is_accepted = exec_result.passed_testcases == exec_result.total_testcases
-    verdict_str = "ACCEPTED" if is_accepted else (exec_result.verdict or "WRONG_ANSWER")
-    points_awarded = problem.points if is_accepted else int(problem.points * (exec_result.passed_testcases / max(1, exec_result.total_testcases)))
 
-    # Record contest submission
-    sub = ContestSubmission(
-        contest_id=contest.id,
-        problem_id=problem.id,
-        member_id=current_member.id,
-        handle=current_member.handle or f"cadet_{current_member.id[:6]}",
-        language=str(payload.language),
-        code=payload.code,
-        verdict=verdict_str,
-        passed_testcases=exec_result.passed_testcases,
-        total_testcases=exec_result.total_testcases,
-        execution_time=exec_result.time or 0.0,
-        memory_used=exec_result.memory or 0,
-        points_awarded=points_awarded,
-        submitted_at=now_utc(),
-    )
-    db.add(sub)
+# ─── Dynamic Contest Management Endpoints ────────────────────────────────────
 
-    # If accepted, update problem solved_count
-    if is_accepted:
-        problem.solved_count += 1
-
-    # Update or create ScoreboardEntry
-    sb_res = await db.execute(
-        select(ScoreboardEntry).where(
-            ScoreboardEntry.contest_id == contest.id,
-            ScoreboardEntry.member_id == current_member.id,
-        )
-    )
-    sb_entry = sb_res.scalars().first()
-    if not sb_entry:
-        sb_entry = ScoreboardEntry(
-            contest_id=contest.id,
-            member_id=current_member.id,
-            rank=999,
-            handle=current_member.handle or f"cadet_{current_member.id[:6]}",
-            full_name=current_member.full_name or "Cadet",
-            department=current_member.department or "CSE",
-            batch=current_member.batch or "2023-27",
-            division="open",
-            score=points_awarded,
-            solved=1 if is_accepted else 0,
-            penalty_seconds=120,
-            telemetry=[{"problem_index": problem.problem_index, "status": "solved" if is_accepted else "failed", "attempts": 1, "is_first_ac": False}],
-        )
-        db.add(sb_entry)
-    else:
-        if is_accepted:
-            sb_entry.score += points_awarded
-            sb_entry.solved += 1
-
-    await db.commit()
-    await delete_cache_pattern("cache:scoreboard*")
-    await delete_cache_pattern("cache:contest*")
-
-    try:
-        from app.services.event_broadcaster import broadcast_event
-        await broadcast_event(
-            event_type="submission_evaluated",
-            data={
-                "contest_slug": slug,
-                "problem_index": problem.problem_index,
-                "problem_id": problem.id,
-                "handle": current_member.handle,
-                "verdict": verdict_str,
-                "is_accepted": is_accepted,
-                "points_awarded": points_awarded,
-                "passed_testcases": exec_result.passed_testcases,
-                "total_testcases": exec_result.total_testcases,
-            },
-            contest_slug=slug,
-        )
-    except Exception as e:
-        logger.debug("Broadcast error: %s", e)
-
-    return {
-        "submission_id": sub.id,
-        "success": exec_result.success,
-        "verdict": verdict_str,
-        "passed_testcases": exec_result.passed_testcases,
-        "total_testcases": exec_result.total_testcases,
-        "points_awarded": points_awarded,
-        "execution_time": exec_result.time,
-        "memory": exec_result.memory,
-        "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({exec_result.passed_testcases}/{exec_result.total_testcases} testcases passed)",
-    }
-
-
-# ─── Dynamic Contest Creation & Admin Endpoints ──────────────────────────────
-
-from app.middleware.auth import require_admin_or_core
-from app.schemas.dynamic_contest import (
-    DynamicContestCreateRequest,
-    DynamicContestUpdateRequest,
-    ProblemCreateSchema,
-    ContestCloneRequest,
-    PresetContestLaunchRequest,
-    ContestStatusChangeRequest,
-)
-from app.services.dynamic_contest_service import DynamicContestService
-
-
-@router.post(
-    "/dynamic",
-    summary="Dynamically create contest, screening assessment, and problems",
-    status_code=201,
-)
+@router.post("/dynamic", summary="Dynamically create contest, screening assessment, and problems", status_code=201)
 async def create_dynamic_contest_endpoint(
     payload: DynamicContestCreateRequest,
     db: AsyncSession = Depends(get_db),
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
-    """
-    Create a complete campus contest dynamically via API.
-    Atomically generates:
-    - Contest entity
-    - Phase 1 Online Screening Assessment
-    - Full mirrored problem challenge suite (Arena & Assessment)
-    - Multi-language starter codes and sample/hidden test cases
-    """
-    return await DynamicContestService.create_contest(payload, db, creator=admin)
+    """Create a complete campus contest dynamically via API."""
+    return await ContestController.create_dynamic_contest(payload=payload, db=db, admin=admin)
 
 
-@router.post(
-    "/preset/launch",
-    summary="One-click launch for Weekly or Biweekly contest presets",
-    status_code=201,
-)
+@router.post("/preset/launch", summary="One-click launch for Weekly or Biweekly contest presets", status_code=201)
 async def launch_preset_endpoint(
     payload: PresetContestLaunchRequest,
     db: AsyncSession = Depends(get_db),
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """One-click API to deploy a complete Weekly or Biweekly contest edition with 4 curated challenges."""
-    return await DynamicContestService.launch_preset(payload, db)
+    return await ContestController.launch_preset(payload=payload, db=db)
 
 
-@router.put(
-    "/{slug}",
-    summary="Update contest specifications dynamically",
-)
+@router.put("/{slug}", summary="Update contest specifications dynamically")
 async def update_contest_endpoint(
     slug: str,
     payload: DynamicContestUpdateRequest,
@@ -1122,26 +241,20 @@ async def update_contest_endpoint(
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """Dynamically update contest details, schedule, venue, rules, or capacity."""
-    return await DynamicContestService.update_contest(slug, payload, db)
+    return await ContestController.update_contest(slug=slug, payload=payload, db=db)
 
 
-@router.delete(
-    "/{slug}",
-    summary="Delete contest permanently",
-)
+@router.delete("/{slug}", summary="Delete contest permanently")
 async def delete_contest_endpoint(
     slug: str,
     db: AsyncSession = Depends(get_db),
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """Cascade delete a contest, its problems, submissions, screening rounds, and passes."""
-    return await DynamicContestService.delete_contest(slug, db)
+    return await ContestController.delete_contest(slug=slug, db=db)
 
 
-@router.post(
-    "/{slug}/problems",
-    summary="Add or update a problem challenge in the contest",
-)
+@router.post("/{slug}/problems", summary="Add or update a problem challenge in the contest")
 async def add_or_update_problem_endpoint(
     slug: str,
     payload: ProblemCreateSchema,
@@ -1149,13 +262,10 @@ async def add_or_update_problem_endpoint(
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """Add a new problem or replace an existing problem by index (A-F) in both arena and assessment."""
-    return await DynamicContestService.add_or_update_problem(slug, payload, db)
+    return await ContestController.add_or_update_problem(slug=slug, payload=payload, db=db)
 
 
-@router.delete(
-    "/{slug}/problems/{problem_index}",
-    summary="Delete a problem challenge from the contest",
-)
+@router.delete("/{slug}/problems/{problem_index}", summary="Delete a problem challenge from the contest")
 async def delete_problem_endpoint(
     slug: str,
     problem_index: str,
@@ -1163,14 +273,10 @@ async def delete_problem_endpoint(
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """Delete a problem by its index letter (A, B, C, etc.) from arena and assessment."""
-    return await DynamicContestService.delete_problem(slug, problem_index, db)
+    return await ContestController.delete_problem(slug=slug, problem_index=problem_index, db=db)
 
 
-@router.post(
-    "/{slug}/clone",
-    summary="Clone contest into a new edition",
-    status_code=201,
-)
+@router.post("/{slug}/clone", summary="Clone contest into a new edition", status_code=201)
 async def clone_contest_endpoint(
     slug: str,
     payload: ContestCloneRequest,
@@ -1178,13 +284,10 @@ async def clone_contest_endpoint(
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """Clone an existing contest's problem set and configuration into a newly scheduled contest."""
-    return await DynamicContestService.clone_contest(slug, payload, db)
+    return await ContestController.clone_contest(slug=slug, payload=payload, db=db)
 
 
-@router.patch(
-    "/{slug}/status",
-    summary="Transition contest lifecycle status",
-)
+@router.patch("/{slug}/status", summary="Transition contest lifecycle status")
 async def change_contest_status_endpoint(
     slug: str,
     payload: ContestStatusChangeRequest,
@@ -1192,10 +295,4 @@ async def change_contest_status_endpoint(
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
     """Transition contest status: upcoming -> live -> finished."""
-    return await DynamicContestService.change_contest_status(
-        slug,
-        payload.status,
-        db,
-        auto_qualify_top_30=payload.auto_qualify_top_30,
-    )
-
+    return await ContestController.change_contest_status(slug=slug, payload=payload, db=db)
