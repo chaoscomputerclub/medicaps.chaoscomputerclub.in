@@ -203,6 +203,7 @@ export type ArenaRunResult = {
     verdict: string;
     stdout: string;
     expected_output: string;
+    stdin?: string;
     stderr: string;
     wall_time_ms: number;
   }>;
@@ -218,4 +219,16 @@ export type ArenaSubmitResult = {
   execution_time?: number;
   memory?: number;
   message: string;
+  testcase_results?: Array<{
+    testcase_id: string;
+    name: string;
+    passed: boolean;
+    verdict: string;
+    is_hidden: boolean;
+    stdout: string;
+    expected_output: string;
+    input: string;
+    stderr: string;
+    wall_time_ms: number;
+  }>;
 };

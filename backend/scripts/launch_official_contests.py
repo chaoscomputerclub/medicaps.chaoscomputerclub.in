@@ -3,8 +3,8 @@ Chaos Computer Club India — Medi-Caps Chapter Backend
 Script: launch_official_contests.py
 Launches 1 Official Weekly Contest and 1 Official Biweekly Contest with:
 - Rich problem sets (A, B, C, D)
-- Phase 1 Online Screening Assessments
-- Complete starter codes & multi-category testcases (Samples + Hidden)
+- LeetCode-style function/class Solution starter codes (Python, C++, JS, Java)
+- Clean parameter-based database test cases (Sample + Hidden)
 - Cache invalidation and clean DB transaction
 """
 
@@ -30,6 +30,141 @@ from app.models.db_models import (
 from app.core.cache import delete_cache_pattern
 from app.services.seed_service import purge_all_contest_data
 from app.services.contest_schedule_service import get_next_wednesday_schedule
+
+
+OFFICIAL_WEEKLY_PROBLEMS = [
+    {
+        "index": "A",
+        "title": "Campus Pass String Validator",
+        "difficulty": "EASY",
+        "points": 100,
+        "topic": "String Manipulation & Hashing",
+        "description": "At Medi-Caps University, campus pass numbers are issued as alphanumeric strings. Two passes are considered a 'mirror pair' if one string is the exact reverse of the other (e.g., 'AB' and 'BA'). Given an array of pass strings, determine the total count of valid unordered mirror pairs (i < j where passes[i] is the reverse of passes[j]).",
+        "input_format": "passes = [\"string_1\", \"string_2\", ...]",
+        "output_format": "Return an integer representing the total count of valid mirror pairs.",
+        "constraints": "1 <= passes.length <= 100,000\n1 <= passes[i].length <= 20\npasses[i] consists of alphanumeric characters.",
+        "time_limit": 2.0,
+        "memory_limit": 256,
+        "starter_codes": {
+            "python": "class Solution:\n    def countMirrorPairs(self, passes: list[str]) -> int:\n        # Write your solution here\n        pass\n",
+            "cpp": "#include <vector>\n#include <string>\n#include <unordered_map>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int countMirrorPairs(vector<string>& passes) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "javascript": "/**\n * @param {string[]} passes\n * @return {number}\n */\nvar countMirrorPairs = function(passes) {\n    // Write your solution here\n};\n",
+            "java": "class Solution {\n    public int countMirrorPairs(String[] passes) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+        },
+        "sample_testcases": [
+            {
+                "stdin": "passes = [\"AB\", \"BA\", \"CD\", \"DC\"]",
+                "expected_output": "2",
+                "explanation": "Valid mirror pairs are ('AB', 'BA') and ('CD', 'DC')."
+            },
+            {
+                "stdin": "passes = [\"ABC\", \"CBA\", \"ABC\"]",
+                "expected_output": "2",
+                "explanation": "Passes 0 and 1 are mirrors ('ABC', 'CBA'), and passes 1 and 2 are mirrors ('CBA', 'ABC')."
+            }
+        ],
+        "hidden_testcases": [
+            {"stdin": "passes = [\"HELLO\"]", "expected_output": "0", "weight": 1.0},
+            {"stdin": "passes = [\"AA\", \"AA\", \"AA\", \"BB\", \"BB\", \"CC\"]", "expected_output": "4", "weight": 2.0},
+            {"stdin": "passes = [\"XYZ\", \"ZYX\", \"XYZ\", \"ZYX\"]", "expected_output": "4", "weight": 2.0}
+        ]
+    },
+    {
+        "index": "B",
+        "title": "Medi-Caps Lab Router Bandwidth Allocation",
+        "difficulty": "MEDIUM",
+        "points": 200,
+        "topic": "Greedy & Priority Queue",
+        "description": "The Medi-Caps lab router has M megabits of total bandwidth to distribute among K competing lab processes. Process i requires at least min_i bandwidth and can consume at most max_i bandwidth, yielding utility = allocated_bandwidth * priority_i. Find the maximum total utility achievable such that the sum of allocated bandwidth does not exceed M and every process receives at least its minimum requirement. If the total minimum requirements exceed M, return -1.",
+        "input_format": "k = <integer>\nm = <integer>\nprocesses = [[min_i, max_i, priority_i], ...]",
+        "output_format": "Return the maximum total utility achievable, or -1 if impossible.",
+        "constraints": "1 <= k <= 10^5\n1 <= m <= 10^9\n0 <= min_i <= max_i <= 10^5\n1 <= priority_i <= 1000",
+        "time_limit": 2.0,
+        "memory_limit": 256,
+        "starter_codes": {
+            "python": "class Solution:\n    def maxBandwidthUtility(self, k: int, m: int, processes: list[list[int]]) -> int:\n        # Write your solution here\n        pass\n",
+            "cpp": "#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxBandwidthUtility(int k, int m, vector<vector<int>>& processes) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "javascript": "/**\n * @param {number} k\n * @param {number} m\n * @param {number[][]} processes\n * @return {number}\n */\nvar maxBandwidthUtility = function(k, m, processes) {\n    // Write your solution here\n};\n",
+            "java": "class Solution {\n    public int maxBandwidthUtility(int k, int m, int[][] processes) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+        },
+        "sample_testcases": [
+            {
+                "stdin": "k = 3\nm = 12\nprocesses = [[2, 5, 3], [1, 4, 5], [3, 3, 3]]",
+                "expected_output": "44",
+                "explanation": "Min sum is 2+1+3=6 <= 12. Remaining 6 bandwidth is allocated greedily by priority: process 2 (prio 5) gets 4 with utility 20, process 1 (prio 3) gets 5 with utility 15, process 3 (prio 3) gets 3 with utility 9 => total = 20 + 15 + 9 = 44."
+            },
+            {
+                "stdin": "k = 2\nm = 5\nprocesses = [[3, 6, 10], [4, 8, 10]]",
+                "expected_output": "-1",
+                "explanation": "Min bandwidth 3+4=7 exceeds total available m=5, so return -1."
+            }
+        ],
+        "hidden_testcases": [
+            {"stdin": "k = 1\nm = 100\nprocesses = [[10, 50, 10]]", "expected_output": "500", "weight": 1.0},
+            {"stdin": "k = 3\nm = 20\nprocesses = [[5, 10, 4], [5, 10, 8], [5, 10, 2]]", "expected_output": "110", "weight": 2.0}
+        ]
+    },
+    {
+        "index": "C",
+        "title": "Air-Gapped Quantum Key Distribution",
+        "difficulty": "MEDIUM",
+        "points": 300,
+        "topic": "Graph Dijkstra & Dynamic Programming",
+        "description": "An air-gapped lab network consists of N workstations numbered 1 to N and M bidirectional communication channels. Each channel connects workstation u and v with latency L (in milliseconds). Workstation 1 needs to transmit an encrypted cryptographic key to workstation N. You may deploy at most K quantum booster repeaters at intermediate workstations. A repeater reduces the latency of its adjacent outgoing channel by half (floor division). Find the minimum total transmission latency from workstation 1 to workstation N.",
+        "input_format": "n = <integer>\nm = <integer>\nk = <integer>\nchannels = [[u, v, latency], ...]",
+        "output_format": "Return the minimum total transmission latency from workstation 1 to n.",
+        "constraints": "2 <= n <= 1000\n1 <= m <= 10^4\n0 <= k <= 10\n1 <= latency <= 10^6",
+        "time_limit": 2.0,
+        "memory_limit": 256,
+        "starter_codes": {
+            "python": "class Solution:\n    def minTransmissionLatency(self, n: int, m: int, k: int, channels: list[list[int]]) -> int:\n        # Write your solution here\n        pass\n",
+            "cpp": "#include <vector>\n#include <queue>\n#include <tuple>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int minTransmissionLatency(int n, int m, int k, vector<vector<int>>& channels) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "javascript": "/**\n * @param {number} n\n * @param {number} m\n * @param {number} k\n * @param {number[][]} channels\n * @return {number}\n */\nvar minTransmissionLatency = function(n, m, k, channels) {\n    // Write your solution here\n};\n",
+            "java": "class Solution {\n    public int minTransmissionLatency(int n, int m, int k, int[][] channels) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+        },
+        "sample_testcases": [
+            {
+                "stdin": "n = 4\nm = 4\nk = 1\nchannels = [[1, 2, 10], [2, 4, 10], [1, 3, 20], [3, 4, 5]]",
+                "expected_output": "15",
+                "explanation": "Path 1 -> 2 -> 4 has latency 10 + 10 = 20. With 1 booster on edge (1,2), latency becomes 5 + 10 = 15. Path 1 -> 3 -> 4 with booster on (1,3) gives 10 + 5 = 15."
+            }
+        ],
+        "hidden_testcases": [
+            {"stdin": "n = 3\nm = 2\nk = 0\nchannels = [[1, 2, 100], [2, 3, 200]]", "expected_output": "300", "weight": 1.0},
+            {"stdin": "n = 3\nm = 2\nk = 1\nchannels = [[1, 2, 100], [2, 3, 200]]", "expected_output": "200", "weight": 2.0}
+        ]
+    },
+    {
+        "index": "D",
+        "title": "Subnet Packet Collision Minimizer",
+        "difficulty": "HARD",
+        "points": 400,
+        "topic": "Dynamic Programming & Bitmask",
+        "description": "Given N network packets each with a start time, duration, and priority score, schedule a subset of non-overlapping packets to maximize the total priority score while adhering to subnet channel capacity constraints.",
+        "input_format": "packets = [[start_time, end_time, priority], ...]",
+        "output_format": "Return the maximum possible sum of priority scores.",
+        "constraints": "1 <= packets.length <= 10^5\n1 <= start_time < end_time <= 10^9\n1 <= priority <= 10^6",
+        "time_limit": 2.0,
+        "memory_limit": 256,
+        "starter_codes": {
+            "python": "class Solution:\n    def maxPacketPriority(self, packets: list[list[int]]) -> int:\n        # Write your solution here\n        pass\n",
+            "cpp": "#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxPacketPriority(vector<vector<int>>& packets) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "javascript": "/**\n * @param {number[][]} packets\n * @return {number}\n */\nvar maxPacketPriority = function(packets) {\n    // Write your solution here\n};\n",
+            "java": "class Solution {\n    public int maxPacketPriority(int[][] packets) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+        },
+        "sample_testcases": [
+            {
+                "stdin": "packets = [[1, 3, 50], [2, 4, 10], [3, 5, 40]]",
+                "expected_output": "90",
+                "explanation": "Select intervals [1,3] (score 50) and [3,5] (score 40) => total 90."
+            }
+        ],
+        "hidden_testcases": [
+            {"stdin": "packets = [[1, 2, 5], [2, 3, 5], [3, 4, 5], [1, 4, 20]]", "expected_output": "20", "weight": 1.0},
+            {"stdin": "packets = [[1, 10, 100], [2, 5, 200]]", "expected_output": "200", "weight": 2.0}
+        ]
+    }
+]
 
 
 async def launch_contests(force: bool = False):
@@ -81,8 +216,41 @@ async def launch_contests(force: bool = False):
                 existing_assess.title = "Weekly Contest 1 — Live Algorithmic Arena"
                 existing_assess.summary = "Official weekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 90 minutes."
 
+            # Synchronize LeetCode starter codes and test cases into existing problems
+            for p_data in OFFICIAL_WEEKLY_PROBLEMS:
+                if existing_assess:
+                    ap_res = await db.execute(
+                        select(AssessmentProblem).where(
+                            AssessmentProblem.assessment_id == existing_assess.id,
+                            AssessmentProblem.problem_index == p_data["index"]
+                        )
+                    )
+                    ap = ap_res.scalars().first()
+                    if ap:
+                        ap.starter_codes = p_data["starter_codes"]
+                        ap.sample_testcases = p_data["sample_testcases"]
+                        ap.hidden_testcases = p_data["hidden_testcases"]
+                        ap.input_format = p_data["input_format"]
+                        ap.output_format = p_data["output_format"]
+                        ap.constraints = p_data["constraints"]
+
+                cp_res = await db.execute(
+                    select(ContestProblem).where(
+                        ContestProblem.contest_id == existing_contest.id,
+                        ContestProblem.problem_index == p_data["index"]
+                    )
+                )
+                cp = cp_res.scalars().first()
+                if cp:
+                    cp.starter_codes = p_data["starter_codes"]
+                    cp.sample_testcases = p_data["sample_testcases"]
+                    cp.hidden_testcases = p_data["hidden_testcases"]
+                    cp.input_format = p_data["input_format"]
+                    cp.output_format = p_data["output_format"]
+                    cp.constraints = p_data["constraints"]
+
             await db.commit()
-            print("  ✓ Updated contest content and rules to clean LeetCode open format.")
+            print("  ✓ Updated contest content, starter codes, and LeetCode test cases in DB.")
             try:
                 await delete_cache_pattern("cache:*")
                 print("  ✓ Redis cache invalidated.")
@@ -159,141 +327,7 @@ async def launch_contests(force: bool = False):
         await db.flush()
 
         # Weekly 1 Assessment Problems (4 problems)
-        weekly_assessment_problems_data = [
-            {
-                "index": "A",
-                "title": "Campus Pass String Validator",
-                "difficulty": "EASY",
-                "points": 100,
-                "topic": "String Manipulation & Hashing",
-                "description": "At Medi-Caps University, campus pass numbers are issued as alphanumeric strings. Two passes are considered a 'mirror pair' if one string is the exact reverse of the other (e.g., 'AB' and 'BA'). Given a list of N pass strings, determine the total count of valid unordered mirror pairs (i < j where passes[i] is the reverse of passes[j]).",
-                "input_format": "The first line contains an integer N (1 <= N <= 10^5).\nThe following N lines (or space-separated tokens) each contain a non-empty alphanumeric pass string of length <= 20.",
-                "output_format": "Print a single integer representing the total number of valid mirror pairs.",
-                "constraints": "1 <= N <= 100,000\n1 <= length of each string <= 20\nCharacters are alphanumeric.",
-                "time_limit": 2.0,
-                "memory_limit": 256,
-                "starter_codes": {
-                    "python": "import sys\n\ndef main():\n    input_data = sys.stdin.read().split()\n    if not input_data:\n        return\n    n = int(input_data[0])\n    passes = input_data[1:n+1]\n    # TODO: Calculate valid mirror pairs\n    pass\n\nif __name__ == '__main__':\n    main()\n",
-                    "cpp": "#include <iostream>\n#include <vector>\n#include <string>\n#include <unordered_map>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    int n;\n    if (!(cin >> n)) return 0;\n    // TODO: Calculate valid mirror pairs\n    return 0;\n}\n",
-                    "javascript": "const fs = require('fs');\n\nfunction main() {\n    const input = fs.readFileSync(0, 'utf-8').trim().split(/\\s+/);\n    if (!input || !input[0]) return;\n    const n = parseInt(input[0], 10);\n    const passes = input.slice(1, n + 1);\n    // TODO: Calculate valid mirror pairs\n}\n\nmain();\n",
-                    "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt();\n        // TODO: Calculate valid mirror pairs\n    }\n}\n"
-                },
-                "sample_testcases": [
-                    {
-                        "stdin": "4\nAB\nBA\nCD\nDC",
-                        "expected_output": "2",
-                        "explanation": "Pairs are ('AB', 'BA') and ('CD', 'DC')."
-                    },
-                    {
-                        "stdin": "3\nABC\nCBA\nABC",
-                        "expected_output": "2",
-                        "explanation": "Passes 0 and 1 are mirrors ('ABC', 'CBA'), passes 1 and 2 are mirrors ('CBA', 'ABC')."
-                    }
-                ],
-                "hidden_testcases": [
-                    {"stdin": "1\nHELLO", "expected_output": "0", "weight": 1.0},
-                    {"stdin": "6\nAA\nAA\nAA\nBB\nBB\nCC", "expected_output": "4", "weight": 2.0},
-                    {"stdin": "4\nXYZ\nZYX\nXYZ\nZYX", "expected_output": "4", "weight": 2.0}
-                ]
-            },
-            {
-                "index": "B",
-                "title": "Medi-Caps Lab Router Bandwidth Allocation",
-                "difficulty": "MEDIUM",
-                "points": 200,
-                "topic": "Greedy & Priority Queue",
-                "description": "The Medi-Caps lab router has M megabits of total bandwidth to distribute among K competing lab processes. Process i requires at least min_i bandwidth and can consume at most max_i bandwidth, yielding utility = allocated_bandwidth * priority_i. Find the maximum total utility achievable such that the sum of allocated bandwidth does not exceed M and every process receives at least its minimum requirement. If the total minimum requirements exceed M, output -1.",
-                "input_format": "First line: Two integers K and M.\nNext K lines: Three space-separated integers for process i: min_i, max_i, priority_i.",
-                "output_format": "Output the maximum total utility achievable, or -1 if impossible.",
-                "constraints": "1 <= K <= 10^5\n1 <= M <= 10^9\n0 <= min_i <= max_i <= 10^5\n1 <= priority_i <= 1000",
-                "time_limit": 2.0,
-                "memory_limit": 256,
-                "starter_codes": {
-                    "python": "import sys\n\ndef main():\n    lines = sys.stdin.read().splitlines()\n    if not lines:\n        return\n    # TODO: Solve Bandwidth Allocation\n\nif __name__ == '__main__':\n    main()\n",
-                    "cpp": "#include <iostream>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    // TODO: Solve Bandwidth Allocation\n    return 0;\n}\n",
-                    "javascript": "const fs = require('fs');\n\nfunction main() {\n    const lines = fs.readFileSync(0, 'utf-8').trim().split('\\n');\n    if (!lines.length || !lines[0]) return;\n    // TODO: Solve Bandwidth Allocation\n}\n\nmain();\n",
-                    "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // TODO: Solve Bandwidth Allocation\n    }\n}\n"
-                },
-                "sample_testcases": [
-                    {
-                        "stdin": "3 10\n2 5 3\n1 4 5\n3 3 2",
-                        "expected_output": "44",
-                        "explanation": "Min sum is 2+1+3 = 6 <= 10. Remaining 4 bandwidth is allocated to process 2 (highest priority 5) giving 1+3=4 bandwidth with utility 4*5=20, process 1 gets 2+1=3 bandwidth with utility 3*3=9, process 3 gets 3 with utility 3*2=6 => total = 20 + 15 + 6 = 44."
-                    },
-                    {
-                        "stdin": "2 5\n3 6 10\n4 8 10",
-                        "expected_output": "-1",
-                        "explanation": "Min bandwidth 3+4=7 exceeds total available M=5, so output -1."
-                    }
-                ],
-                "hidden_testcases": [
-                    {"stdin": "1 100\n10 50 10", "expected_output": "500", "weight": 1.0},
-                    {"stdin": "3 20\n5 10 4\n5 10 8\n5 10 2", "expected_output": "130", "weight": 2.0}
-                ]
-            },
-            {
-                "index": "C",
-                "title": "Air-Gapped Quantum Key Distribution",
-                "difficulty": "MEDIUM",
-                "points": 300,
-                "topic": "Graph Dijkstra & Dynamic Programming",
-                "description": "An air-gapped lab network consists of N workstations numbered 1 to N and M bidirectional communication channels. Each channel connects workstation u and v with latency L (in milliseconds). Workstation 1 needs to transmit an encrypted cryptographic key to workstation N. You may deploy at most K quantum booster repeaters at intermediate workstations. A repeater reduces the latency of its adjacent outgoing channel by half (floor division). Find the minimum total transmission latency from workstation 1 to workstation N.",
-                "input_format": "First line: N, M, K\nNext M lines: u, v, L",
-                "output_format": "Print the minimum latency from workstation 1 to N.",
-                "constraints": "2 <= N <= 1000\n1 <= M <= 10^4\n0 <= K <= 10\n1 <= L <= 10^6",
-                "time_limit": 2.0,
-                "memory_limit": 256,
-                "starter_codes": {
-                    "python": "import sys, heapq\n\ndef main():\n    lines = sys.stdin.read().splitlines()\n    if not lines:\n        return\n    # TODO: Multi-state Dijkstra\n\nif __name__ == '__main__':\n    main()\n",
-                    "cpp": "#include <iostream>\n#include <vector>\n#include <queue>\n#include <tuple>\n\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    // TODO: Multi-state Dijkstra\n    return 0;\n}\n",
-                    "javascript": "const fs = require('fs');\n\nfunction main() {\n    const lines = fs.readFileSync(0, 'utf-8').trim().split('\\n');\n    // TODO: Multi-state Dijkstra\n}\n\nmain();\n",
-                    "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // TODO: Multi-state Dijkstra\n    }\n}\n"
-                },
-                "sample_testcases": [
-                    {
-                        "stdin": "4 4 1\n1 2 10\n2 4 10\n1 3 20\n3 4 5",
-                        "expected_output": "15",
-                        "explanation": "Path 1 -> 2 -> 4 has latency 10 + 10 = 20. With 1 booster on edge (1,2), latency becomes 5 + 10 = 15. Path 1 -> 3 -> 4 with booster on (1,3) gives 10 + 5 = 15."
-                    }
-                ],
-                "hidden_testcases": [
-                    {"stdin": "3 2 0\n1 2 100\n2 3 200", "expected_output": "300", "weight": 1.0},
-                    {"stdin": "3 2 1\n1 2 100\n2 3 200", "expected_output": "200", "weight": 2.0}
-                ]
-            },
-            {
-                "index": "D",
-                "title": "Subnet Packet Collision Minimizer",
-                "difficulty": "HARD",
-                "points": 400,
-                "topic": "Dynamic Programming & Bitmask",
-                "description": "Given N network packets each with a start time, duration, and priority score, schedule a subset of non-overlapping packets to maximize the total priority score while adhering to subnet channel capacity constraints.",
-                "input_format": "First line: N\nNext N lines: start_time, end_time, priority",
-                "output_format": "Print the maximum possible sum of priority scores.",
-                "constraints": "1 <= N <= 10^5\n1 <= start_time < end_time <= 10^9\n1 <= priority <= 10^6",
-                "time_limit": 2.0,
-                "memory_limit": 256,
-                "starter_codes": {
-                    "python": "import sys, bisect\n\ndef main():\n    lines = sys.stdin.read().splitlines()\n    if not lines:\n        return\n    # TODO: Weighted Interval Scheduling with Binary Search & DP\n\nif __name__ == '__main__':\n    main()\n",
-                    "cpp": "#include <iostream>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    // TODO: Weighted Interval Scheduling\n    return 0;\n}\n",
-                    "javascript": "const fs = require('fs');\n\nfunction main() {\n    // TODO: Weighted Interval Scheduling\n}\n\nmain();\n",
-                    "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // TODO: Weighted Interval Scheduling\n    }\n}\n"
-                },
-                "sample_testcases": [
-                    {
-                        "stdin": "3\n1 3 50\n2 4 10\n3 5 40",
-                        "expected_output": "90",
-                        "explanation": "Select intervals [1,3] (score 50) and [3,5] (score 40) => total 90."
-                    }
-                ],
-                "hidden_testcases": [
-                    {"stdin": "4\n1 2 5\n2 3 5\n3 4 5\n1 4 20", "expected_output": "20", "weight": 1.0},
-                    {"stdin": "2\n1 10 100\n2 5 200", "expected_output": "200", "weight": 2.0}
-                ]
-            }
-        ]
-
-        for p_data in weekly_assessment_problems_data:
+        for p_data in OFFICIAL_WEEKLY_PROBLEMS:
             ap = AssessmentProblem(
                 assessment_id=weekly_assessment.id,
                 problem_index=p_data["index"],
@@ -334,7 +368,7 @@ async def launch_contests(force: bool = False):
             )
             db.add(cp)
 
-        print("  ✓ Weekly Contest 1 and 4 problem challenges created.")
+        print("  ✓ Weekly Contest 1 and 4 LeetCode-style problem challenges created.")
 
         await db.commit()
 

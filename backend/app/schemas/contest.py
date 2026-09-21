@@ -157,6 +157,7 @@ class ArenaRunRequest(BaseModel):
     problem_id: str
     language: str
     code: str
+    custom_stdin: Optional[str] = None
 
 
 class ArenaSubmitRequest(BaseModel):

@@ -7,6 +7,8 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import {
+  AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   BadgeCheck,
   Check,
@@ -18,6 +20,7 @@ import {
   Cpu,
   GripHorizontal,
   GripVertical,
+  Lock,
   Maximize2,
   Minimize2,
   Play,
@@ -107,6 +110,9 @@ export function ContestArenaPage() {
   const [customStdin, setCustomStdin] = useState("");
   const [activeConsoleTab, setActiveConsoleTab] = useState<"testcases" | "output">("testcases");
   const [activeTestcaseIndex, setActiveTestcaseIndex] = useState(0);
+  const [activeRunCaseIndex, setActiveRunCaseIndex] = useState(0);
+  const [activeSubmitCaseIndex, setActiveSubmitCaseIndex] = useState(0);
+  const [lastAction, setLastAction] = useState<"run" | "submit" | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(() => {
@@ -313,10 +319,10 @@ export function ContestArenaPage() {
       : null) ??
     activeProblem?.starter_codes?.[selectedLanguage] ??
     (selectedLanguage === "python"
-      ? "# Write your solution here\nimport sys\n\ndef main():\n    pass\n\nif __name__ == '__main__':\n    main()\n"
+      ? "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n"
       : selectedLanguage === "cpp"
-        ? "#include <iostream>\nusing namespace std;\n\nint main() {\n    return 0;\n}\n"
-        : "const fs = require('fs');\n// Write your solution here\n");
+        ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
+        : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n");
 
   const handleCodeChange = (newCode: string) => {
     setCodeMap((prev) => ({ ...prev, [problemKey]: newCode }));
@@ -331,10 +337,10 @@ export function ContestArenaPage() {
     const defaultStarter =
       activeProblem?.starter_codes?.[selectedLanguage] ||
       (selectedLanguage === "python"
-        ? "# Write your solution here\nimport sys\n\ndef main():\n    pass\n\nif __name__ == '__main__':\n    main()\n"
+        ? "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n"
         : selectedLanguage === "cpp"
-          ? "#include <iostream>\nusing namespace std;\n\nint main() {\n    return 0;\n}\n"
-          : "const fs = require('fs');\n// Write your solution here\n");
+          ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
+          : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n");
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
     if (problemStorageKey && typeof window !== "undefined") {
       try {
@@ -354,6 +360,8 @@ export function ContestArenaPage() {
     if (!activeProblem) return;
     setIsDrawerCollapsed(false);
     setActiveConsoleTab("output");
+    setLastAction("run");
+    setActiveRunCaseIndex(0);
     const result = await dispatch(
       runArenaCodeThunk({
         slug: contestSlug,
@@ -367,7 +375,7 @@ export function ContestArenaPage() {
     );
     if (runArenaCodeThunk.fulfilled.match(result)) {
       if (result.payload.verdict === "ACCEPTED") {
-        toast.success("Sample testcase passed!");
+        toast.success("All sample testcases passed!");
       } else {
         toast.error(`Execution: ${result.payload.verdict}`);
       }
@@ -380,6 +388,8 @@ export function ContestArenaPage() {
     if (!activeProblem) return;
     setIsDrawerCollapsed(false);
     setActiveConsoleTab("output");
+    setLastAction("submit");
+    setActiveSubmitCaseIndex(0);
     const result = await dispatch(
       submitArenaCodeThunk({
         slug: contestSlug,
@@ -827,13 +837,13 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("testcases");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
+                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
                       ? "bg-zinc-900 text-white font-semibold"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
-                  Testcases
+                  Testcase
                 </button>
                 <button
                   type="button"
@@ -841,24 +851,24 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("output");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
                       ? "bg-zinc-900 text-white font-semibold"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
-                  <span>Output</span>
+                  <span>Test Result</span>
                   {submitResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-red-400"
+                        submitResult.verdict === "ACCEPTED" ? "bg-lime-400 shadow-[0_0_6px_#a3e635]" : "bg-red-400"
                       }`}
                     />
                   )}
-                  {runResult && (
+                  {!submitResult && runResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        runResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-amber-400"
+                        runResult.verdict === "ACCEPTED" ? "bg-lime-400 shadow-[0_0_6px_#a3e635]" : "bg-amber-400"
                       }`}
                     />
                   )}
@@ -883,127 +893,349 @@ export function ContestArenaPage() {
               <div className="flex-1 overflow-y-auto p-3 font-mono text-xs">
                 {activeConsoleTab === "testcases" ? (
                   <div className="space-y-3">
-                    <div className="flex items-center gap-1.5">
+                    {/* Testcase Case Selector */}
+                    <div className="flex items-center gap-1.5 border-b border-white/5 pb-2">
                       {activeProblem?.sample_testcases?.map((_, i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => setActiveTestcaseIndex(i)}
-                          className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+                          className={`px-3 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                             activeTestcaseIndex === i
-                              ? "bg-zinc-800 text-white font-semibold"
-                              : "text-zinc-500 hover:text-white bg-zinc-950"
+                              ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                              : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
                           }`}
                         >
-                          Case {i + 1}
+                          <span>Case {i + 1}</span>
                         </button>
                       ))}
                       <button
                         type="button"
                         onClick={() => setActiveTestcaseIndex(-1)}
-                        className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+                        className={`px-3 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                           activeTestcaseIndex === -1
-                            ? "bg-zinc-800 text-white font-semibold"
-                            : "text-zinc-500 hover:text-white bg-zinc-950"
+                            ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                            : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
                         }`}
                       >
-                        Custom Stdin
+                        <span>+ Custom</span>
                       </button>
                     </div>
 
+                    {/* Active Testcase View */}
                     {activeTestcaseIndex === -1 ? (
-                      <div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                          <span>Custom Function Arguments</span>
+                          <span className="text-[10px] text-zinc-500">e.g. passes = ["AB", "BA"] or pure JSON values</span>
+                        </div>
                         <textarea
                           value={customStdin}
                           onChange={(e) => setCustomStdin(e.target.value)}
-                          placeholder="Enter custom stdin test values..."
-                          className="w-full h-20 p-2 bg-black border border-white/8 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400/60"
+                          placeholder={activeProblem?.sample_testcases?.[0]?.stdin || 'passes = ["AB", "BA"]'}
+                          className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400/60"
                         />
                       </div>
                     ) : (
                       activeProblem?.sample_testcases?.[activeTestcaseIndex] && (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           <div>
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                              Stdin
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
+                              Input
                             </span>
-                            <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white">
+                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-lime-400 selection:text-black">
                               {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
                             </pre>
                           </div>
                           <div>
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
                               Expected Output
                             </span>
-                            <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-lime-400">
+                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-lime-400 overflow-x-auto selection:bg-lime-400 selection:text-black">
                               {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
                             </pre>
                           </div>
+                          {activeProblem.sample_testcases[activeTestcaseIndex].explanation && (
+                            <div className="text-[11px] font-sans text-zinc-400 italic">
+                              Note: {activeProblem.sample_testcases[activeTestcaseIndex].explanation}
+                            </div>
+                          )}
                         </div>
                       )
                     )}
                   </div>
                 ) : (
-                  /* Output Tab */
+                  /* Output / Test Result Tab */
                   <div className="space-y-3">
-                    {submitResult ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          {submitResult.verdict === "ACCEPTED" ? (
-                            <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs uppercase font-sans">
-                              <CheckCircle2 className="size-4" /> Accepted
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5 text-red-400 font-bold text-xs uppercase font-sans">
-                              <XCircle className="size-4" /> {submitResult.verdict}
-                            </div>
-                          )}
-                          <span className="text-zinc-600">·</span>
-                          <span className="text-zinc-300 font-sans text-xs">
-                            {submitResult.passed_testcases} / {submitResult.total_testcases} passed
-                          </span>
-                          {submitResult.points_awarded > 0 && (
-                            <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">
-                              +{submitResult.points_awarded} pts
-                            </Badge>
-                          )}
+                    {lastAction === "submit" && submitResult ? (
+                      /* Comprehensive Submission Report */
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 pb-3">
+                          <div className="flex items-center gap-3">
+                            {submitResult.verdict === "ACCEPTED" ? (
+                              <div className="flex items-center gap-2 text-lime-400 font-bold text-sm uppercase font-mono">
+                                <CheckCircle2 className="size-5 text-lime-400" />
+                                <span>Accepted</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 text-rose-400 font-bold text-sm uppercase font-mono">
+                                <XCircle className="size-5 text-rose-400" />
+                                <span>{submitResult.verdict}</span>
+                              </div>
+                            )}
+                            <span className="text-zinc-600">·</span>
+                            <span className="text-zinc-300 font-mono text-xs tabular-nums">
+                              {submitResult.passed_testcases} / {submitResult.total_testcases} testcases passed
+                            </span>
+                            {submitResult.points_awarded > 0 && (
+                              <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 text-[11px] font-mono font-bold">
+                                +{submitResult.points_awarded} pts
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-3 text-xs font-mono text-zinc-400">
+                            {submitResult.execution_time !== undefined && (
+                              <span>Runtime: {Math.round(submitResult.execution_time * 1000)}ms</span>
+                            )}
+                            {submitResult.memory !== undefined && submitResult.memory > 0 && (
+                              <span>Memory: {submitResult.memory}MB</span>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-xs text-zinc-400 font-sans">{submitResult.message}</p>
-                      </div>
-                    ) : runResult ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 font-sans">
-                          <span
-                            className={`font-semibold uppercase text-xs ${
-                              runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-amber-400"
+
+                        {/* Progress Bar */}
+                        <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-500 rounded-full ${
+                              submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-rose-500"
                             }`}
-                          >
-                            Verdict: {runResult.verdict}
-                          </span>
-                          {runResult.time !== undefined && (
-                            <span className="text-zinc-500 text-xs tabular-nums">
-                              ({Math.round(runResult.time * 1000)}ms)
-                            </span>
-                          )}
+                            style={{
+                              width: `${Math.round(
+                                (submitResult.passed_testcases / Math.max(1, submitResult.total_testcases)) * 100
+                              )}%`,
+                            }}
+                          />
                         </div>
-                        {runResult.stdout && (
-                          <div>
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
-                              Stdout
-                            </span>
-                            <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
-                              {runResult.stdout}
-                            </pre>
+
+                        {/* Submission Testcases Breakdown */}
+                        {submitResult.testcase_results && submitResult.testcase_results.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {submitResult.testcase_results.map((tc, idx) => (
+                                <button
+                                  key={tc.testcase_id || idx}
+                                  type="button"
+                                  onClick={() => setActiveSubmitCaseIndex(idx)}
+                                  className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                    activeSubmitCaseIndex === idx
+                                      ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                                      : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
+                                  }`}
+                                >
+                                  <span
+                                    className={`size-1.5 rounded-full ${
+                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
+                                    }`}
+                                  />
+                                  <span>{tc.name || `Case ${idx + 1}`}</span>
+                                </button>
+                              ))}
+                            </div>
+
+                            {submitResult.testcase_results[activeSubmitCaseIndex] && (() => {
+                              const curTc = submitResult.testcase_results[activeSubmitCaseIndex];
+                              if (curTc.is_hidden) {
+                                return (
+                                  <div className="p-3 bg-zinc-950 border border-white/10 rounded space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <Lock className="size-4 text-zinc-500" />
+                                      <span className="font-semibold text-xs text-white">Hidden Evaluation Testcase</span>
+                                      {curTc.passed ? (
+                                        <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">Passed</Badge>
+                                      ) : (
+                                        <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px]">Failed</Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                                      {curTc.passed
+                                        ? "Your solution passed this hidden verification case."
+                                        : "Your solution produced an incorrect result or runtime error on this hidden edge case. Proprietary inputs are masked to preserve contest integrity."}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="space-y-2.5">
+                                  <div>
+                                    <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                      Input
+                                    </span>
+                                    <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                      {curTc.input}
+                                    </pre>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                        Output
+                                      </span>
+                                      <pre
+                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
+                                          curTc.passed ? "border-lime-400/30 text-lime-400" : "border-rose-500/30 text-rose-400"
+                                        }`}
+                                      >
+                                        {curTc.stdout || "(empty)"}
+                                      </pre>
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                        Expected
+                                      </span>
+                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
+                                        {curTc.expected_output}
+                                      </pre>
+                                    </div>
+                                  </div>
+                                  {curTc.stderr && (
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                        Stderr
+                                      </span>
+                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
+                                        {curTc.stderr}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
-                        {runResult.stderr && (
-                          <div>
-                            <span className="text-[10px] text-red-400 uppercase tracking-wider font-mono">
-                              Stderr
+                      </div>
+                    ) : runResult ? (
+                      /* Run Result Inspection */
+                      <div className="space-y-3">
+                        {/* Verdict Header */}
+                        <div className="flex items-center justify-between border-b border-white/8 pb-2.5">
+                          <div className="flex items-center gap-3">
+                            {runResult.verdict === "ACCEPTED" ? (
+                              <div className="flex items-center gap-1.5 text-lime-400 font-bold text-xs font-mono uppercase">
+                                <CheckCircle2 className="size-4 text-lime-400" />
+                                <span>Accepted</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs font-mono uppercase">
+                                <AlertCircle className="size-4 text-rose-400" />
+                                <span>{runResult.verdict}</span>
+                              </div>
+                            )}
+                            {runResult.passed_testcases !== undefined && runResult.total_testcases !== undefined && (
+                              <span className="text-zinc-400 font-mono text-xs tabular-nums">
+                                {runResult.passed_testcases} / {runResult.total_testcases} sample cases passed
+                              </span>
+                            )}
+                          </div>
+                          {runResult.time !== undefined && (
+                            <span className="text-zinc-500 text-xs font-mono tabular-nums">
+                              Runtime: {Math.round(runResult.time * 1000)}ms
                             </span>
-                            <pre className="p-2 bg-black border border-red-500/20 rounded text-xs text-red-400 overflow-x-auto">
-                              {runResult.stderr}
-                            </pre>
+                          )}
+                        </div>
+
+                        {/* Testcase Sub-tabs */}
+                        {runResult.testcase_results && runResult.testcase_results.length > 0 ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-1.5">
+                              {runResult.testcase_results.map((tc, idx) => (
+                                <button
+                                  key={tc.testcase_id || idx}
+                                  type="button"
+                                  onClick={() => setActiveRunCaseIndex(idx)}
+                                  className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                    activeRunCaseIndex === idx
+                                      ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                                      : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
+                                  }`}
+                                >
+                                  <span
+                                    className={`size-1.5 rounded-full ${
+                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
+                                    }`}
+                                  />
+                                  <span>Case {idx + 1}</span>
+                                </button>
+                              ))}
+                            </div>
+
+                            {runResult.testcase_results[activeRunCaseIndex] && (() => {
+                              const curTc = runResult.testcase_results[activeRunCaseIndex];
+                              return (
+                                <div className="space-y-2.5">
+                                  {curTc.stdin && (
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                        Input
+                                      </span>
+                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                        {curTc.stdin}
+                                      </pre>
+                                    </div>
+                                  )}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                        Output
+                                      </span>
+                                      <pre
+                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
+                                          curTc.passed ? "border-lime-400/30 text-lime-400" : "border-rose-500/30 text-rose-400"
+                                        }`}
+                                      >
+                                        {curTc.stdout || "(empty)"}
+                                      </pre>
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                        Expected
+                                      </span>
+                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
+                                        {curTc.expected_output}
+                                      </pre>
+                                    </div>
+                                  </div>
+                                  {curTc.stderr && (
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                        Stderr
+                                      </span>
+                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
+                                        {curTc.stderr}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {runResult.stdout && (
+                              <div>
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Stdout</span>
+                                <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
+                                  {runResult.stdout}
+                                </pre>
+                              </div>
+                            )}
+                            {runResult.stderr && (
+                              <div>
+                                <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">Stderr</span>
+                                <pre className="p-2 bg-black border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
+                                  {runResult.stderr}
+                                </pre>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

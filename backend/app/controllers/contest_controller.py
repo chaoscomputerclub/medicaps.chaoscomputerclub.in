@@ -903,10 +903,17 @@ class ContestController:
             if not tcs:
                 tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
 
+        from app.engine.harness import prepare_solution_code
+        exec_code = prepare_solution_code(
+            code=payload.code,
+            language=payload.language,
+            problem_index=problem.problem_index,
+        )
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=payload.language,
-            code=payload.code,
+            code=exec_code,
             testcases=tcs,
             time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
             memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
@@ -932,10 +939,11 @@ class ContestController:
                     "verdict": tr.verdict,
                     "stdout": tr.stdout,
                     "expected_output": tr.expected_output,
+                    "stdin": (tcs[i].stdin if i < len(tcs) else ""),
                     "stderr": tr.stderr,
                     "wall_time_ms": tr.wall_time_ms,
                 }
-                for tr in exec_result.testcase_results
+                for i, tr in enumerate(exec_result.testcase_results)
             ],
         }
 
@@ -985,10 +993,17 @@ class ContestController:
         if not all_tcs:
             all_tcs = [TestCaseSchema(id="tc_1", name="Test 1", stdin="", expected_output="")]
 
+        from app.engine.harness import prepare_solution_code
+        exec_code = prepare_solution_code(
+            code=payload.code,
+            language=payload.language,
+            problem_index=problem.problem_index,
+        )
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=payload.language,
-            code=payload.code,
+            code=exec_code,
             testcases=all_tcs,
             time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
             memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
@@ -1070,6 +1085,23 @@ class ContestController:
         except Exception as e:
             logger.debug("Broadcast error: %s", e)
 
+        submit_tc_results = []
+        for i, tr in enumerate(exec_result.testcase_results):
+            tc = all_tcs[i] if i < len(all_tcs) else None
+            is_hidden = tc.hidden if tc else (i >= len(samples))
+            submit_tc_results.append({
+                "testcase_id": tr.testcase_id,
+                "name": f"Hidden Testcase {i - len(samples) + 1}" if is_hidden else tr.name,
+                "passed": tr.passed,
+                "verdict": tr.verdict,
+                "is_hidden": is_hidden,
+                "stdout": tr.stdout if not is_hidden else ("[Hidden output]" if not tr.passed else ""),
+                "expected_output": tr.expected_output if not is_hidden else "[Hidden]",
+                "input": tc.stdin if (tc and not is_hidden) else "[Hidden]",
+                "stderr": tr.stderr,
+                "wall_time_ms": tr.wall_time_ms,
+            })
+
         return {
             "submission_id": sub.id,
             "success": exec_result.success,
@@ -1080,6 +1112,7 @@ class ContestController:
             "execution_time": exec_result.time,
             "memory": exec_result.memory,
             "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({exec_result.passed_testcases}/{exec_result.total_testcases} testcases passed)",
+            "testcase_results": submit_tc_results,
         }
 
     # Dynamic Contest endpoints mapped to DynamicContestService
