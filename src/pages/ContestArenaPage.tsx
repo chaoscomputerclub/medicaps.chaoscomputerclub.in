@@ -21,6 +21,7 @@ import {
   GripHorizontal,
   GripVertical,
   Lock,
+  LogIn,
   Maximize2,
   Minimize2,
   Play,
@@ -53,6 +54,7 @@ import {
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { slugifyProblem } from "@/lib/utils";
+import { getToken } from "@/lib/auth";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -92,8 +94,9 @@ export function ContestArenaPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena } =
+  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error } =
     useAppSelector((state) => state.contest);
+  const member = useAppSelector((state) => state.auth.member);
 
   useEffect(() => {
     if (contestSlug) {
@@ -496,70 +499,243 @@ export function ContestArenaPage() {
     }
   };
 
-  if (isLoadingArena && !arenaData) {
+  if (isLoadingArena || (!arenaData && !error)) {
     return <AssessmentStudioSkeleton />;
   }
 
   if (!arenaData) {
-    return (
-      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-        <div className="w-full max-w-lg space-y-6 rounded-lg border border-amber-500/30 bg-black p-8 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
-            <ShieldCheck className="size-7" />
-          </div>
+    const errLower = (error || "").toLowerCase();
+    const isUnauthenticated =
+      (!member && !getToken()) ||
+      errLower.includes("authentication") ||
+      errLower.includes("unauthorized") ||
+      errLower.includes("sign in") ||
+      errLower.includes("401");
 
-          <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
-              Physical Gate Check-in Required
-            </span>
-            <h1 className="text-xl font-semibold tracking-tight text-white">
-              Proctor Verification Required
-            </h1>
-            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              Round 2 Live Final is strictly an on-premise event at Medi-Caps Computing Complex. Access is unlocked once your digital Campus Pass is scanned by a proctor.
-            </p>
-          </div>
+    const isUpcoming =
+      errLower.includes("not started") ||
+      errLower.includes("upcoming") ||
+      errLower.includes("opens at");
 
-          <div className="space-y-2 rounded-md border border-white/8 bg-zinc-950 p-4 text-left font-mono text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-500">Round 1 Screening:</span>
-              <span className="font-semibold text-lime-400">Top 30 Qualified</span>
+    const isNotFound =
+      errLower.includes("not found") ||
+      errLower.includes("404");
+
+    const isProctorGate =
+      errLower.includes("physical gate") ||
+      errLower.includes("proctor scan") ||
+      errLower.includes("campus pass");
+
+    if (isUnauthenticated) {
+      return (
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-white/10 bg-zinc-950 p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400">
+              <Lock className="size-7" />
             </div>
-            <div className="flex items-center justify-between border-t border-white/6 pt-2">
-              <span className="text-zinc-500">Lab Gate Check-in:</span>
-              <span className="font-semibold text-amber-400">Awaiting Proctor Scan</span>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-semibold">
+                Contest Authentication Required
+              </span>
+              <h1 className="text-xl font-semibold tracking-tight text-white">
+                Sign In to Enter Arena
+              </h1>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                You must be signed in with your Medi-Caps account to enter the contest workspace, run test cases, and submit solutions.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2.5 pt-2">
+              <Button
+                asChild
+                className="rounded-md bg-lime-400 text-black font-mono text-xs font-semibold hover:bg-lime-300 transition-colors cursor-pointer"
+              >
+                <Link to={`/auth?redirect=${encodeURIComponent(`/contests/${contestSlug}/arena`)}`}>
+                  <LogIn className="size-3.5 mr-1.5" />
+                  <span>Sign In to Continue</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="rounded-md font-mono text-xs text-zinc-400 hover:bg-white/5 hover:text-white"
+              >
+                <Link to={`/contests/${contestSlug}`}>
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Return to Contest Overview</span>
+                </Link>
+              </Button>
             </div>
           </div>
+        </div>
+      );
+    }
 
-          <div className="flex flex-col gap-2 pt-2">
-            <Button
-              asChild
-              className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
-            >
-              <Link to={`/contests/${contestSlug}/qualified`}>
-                <QrCode className="size-3.5" />
-                <span>View Finalist Pass</span>
-              </Link>
-            </Button>
-            <div className="flex gap-2">
+    if (isUpcoming) {
+      return (
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-amber-500/30 bg-zinc-950 p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <Clock className="size-7" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
+                Contest Scheduled
+              </span>
+              <h1 className="text-xl font-semibold tracking-tight text-white">
+                Arena Has Not Started Yet
+              </h1>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                The competition arena and problem statements unlock automatically when the scheduled contest countdown reaches zero.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2.5 pt-2">
+              <Button
+                asChild
+                className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer"
+              >
+                <Link to={`/contests/${contestSlug}/lobby`}>
+                  <Clock className="size-3.5 mr-1.5" />
+                  <span>Go to Contest Waiting Lobby</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                className="rounded-md font-mono text-xs text-zinc-400 hover:bg-white/5 hover:text-white"
+              >
+                <Link to={`/contests/${contestSlug}`}>
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Contest Overview</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isNotFound) {
+      return (
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-red-500/30 bg-zinc-950 p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+              <AlertTriangle className="size-7" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-semibold">
+                404 Not Found
+              </span>
+              <h1 className="text-xl font-semibold tracking-tight text-white">
+                Contest Not Found
+              </h1>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                We could not find a contest matching &quot;{contestSlug}&quot;. It may have concluded or the URL may be incorrect.
+              </p>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                asChild
+                className="w-full rounded-md bg-lime-400 text-black font-mono text-xs font-semibold hover:bg-lime-300 transition-colors cursor-pointer"
+              >
+                <Link to="/contests">
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Explore All Contests</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isProctorGate) {
+      return (
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+          <div className="w-full max-w-lg space-y-6 rounded-lg border border-amber-500/30 bg-zinc-950 p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <ShieldCheck className="size-7" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
+                Proctor Verification Required
+              </span>
+              <h1 className="text-xl font-semibold tracking-tight text-white">
+                On-Premise Check-in Required
+              </h1>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                {error || "Physical gate check-in required. Your campus pass must be scanned by a lab proctor before entering the live arena."}
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
                 variant="outline"
-                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
               >
-                <RotateCcw className="size-3" />
+                <RotateCcw className="size-3 mr-1.5" />
                 <span>Re-check Status</span>
               </Button>
               <Button
                 asChild
                 variant="ghost"
-                className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black"
+                className="w-full rounded-md font-mono text-xs text-zinc-500 hover:bg-white/5 hover:text-white"
               >
                 <Link to={`/contests/${contestSlug}`}>
-                  Exit Lobby
+                  Exit to Overview
                 </Link>
               </Button>
             </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Generic fallback error
+    return (
+      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+        <div className="w-full max-w-md space-y-6 rounded-lg border border-white/10 bg-zinc-950 p-8 text-center shadow-2xl">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-white/10 bg-zinc-900 text-zinc-400">
+            <AlertCircle className="size-7" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
+              Arena Access Notice
+            </span>
+            <h1 className="text-xl font-semibold tracking-tight text-white">
+              Unable to Access Arena
+            </h1>
+            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              {error || "An unexpected error occurred while loading the contest workspace."}
+            </p>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button
+              onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
+              variant="outline"
+              className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            >
+              <RotateCcw className="size-3 mr-1.5" />
+              <span>Retry Connection</span>
+            </Button>
+            <Button
+              asChild
+              variant="ghost"
+              className="w-full rounded-md font-mono text-xs text-zinc-400 hover:bg-white/5 hover:text-white"
+            >
+              <Link to={`/contests/${contestSlug}`}>
+                Back to Contest
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

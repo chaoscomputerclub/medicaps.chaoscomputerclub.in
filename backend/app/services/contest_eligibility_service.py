@@ -148,11 +148,11 @@ async def is_member_eligible_for_live_contest(
         is_qualified = True
 
     if not is_qualified:
-        return False, "Access restricted: Live Final is strictly restricted to Top 30 qualified cadets."
+        return False, "Access restricted: Live contest is restricted to registered/qualified participants."
 
     # 5. If checked-in status is not required (e.g., viewing pass or contest info), allow
     if not require_checked_in:
-        return True, qualify_reason or "Qualified for Round 2 Live Final."
+        return True, qualify_reason or "Qualified for live contest arena."
 
     # 6. STRICT PHYSICAL PROCTORING GATE: Require CampusPass.check_in_status == "checked_in"
     if not c_pass:

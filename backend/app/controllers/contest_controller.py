@@ -780,12 +780,21 @@ class ContestController:
         from app.core.security import is_privileged_test_member
         is_test_user = is_privileged_test_member(current_member)
 
-        if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
-            is_eligible, reason = await is_member_eligible_for_live_contest(
-                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
-            )
-            if not is_eligible:
-                raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
+        if not current_member and not is_test_user:
+            raise HTTPException(status_code=401, detail="Authentication required to enter contest arena.")
+
+        if not is_test_user and not slug.startswith("dev-"):
+            if contest.status == "upcoming":
+                raise HTTPException(
+                    status_code=403,
+                    detail="Contest has not started yet. The arena unlocks at the scheduled start time.",
+                )
+            if contest.status == "live":
+                is_eligible, reason = await is_member_eligible_for_live_contest(
+                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+                )
+                if not is_eligible:
+                    raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
 
         assigned_seat = "Lab-04-WS-07"
         pass_code = None
@@ -875,12 +884,21 @@ class ContestController:
         from app.core.security import is_privileged_test_member
         is_test_user = is_privileged_test_member(current_member)
 
-        if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
-            is_eligible, reason = await is_member_eligible_for_live_contest(
-                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
-            )
-            if not is_eligible:
-                raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
+        if not current_member and not is_test_user:
+            raise HTTPException(status_code=401, detail="Authentication required to execute code in contest arena.")
+
+        if not is_test_user and not slug.startswith("dev-"):
+            if contest.status == "upcoming":
+                raise HTTPException(
+                    status_code=403,
+                    detail="Contest has not started yet. Code execution unlocks at start time.",
+                )
+            if contest.status == "live":
+                is_eligible, reason = await is_member_eligible_for_live_contest(
+                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+                )
+                if not is_eligible:
+                    raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
 
         p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
         problem = p_res.scalars().first()
@@ -963,12 +981,21 @@ class ContestController:
         from app.core.security import is_privileged_test_member
         is_test_user = is_privileged_test_member(current_member)
 
-        if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
-            is_eligible, reason = await is_member_eligible_for_live_contest(
-                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
-            )
-            if not is_eligible:
-                raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
+        if not current_member and not is_test_user:
+            raise HTTPException(status_code=401, detail="Authentication required to submit code in contest arena.")
+
+        if not is_test_user and not slug.startswith("dev-"):
+            if contest.status == "upcoming":
+                raise HTTPException(
+                    status_code=403,
+                    detail="Contest has not started yet. Submissions unlock at start time.",
+                )
+            if contest.status == "live":
+                is_eligible, reason = await is_member_eligible_for_live_contest(
+                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+                )
+                if not is_eligible:
+                    raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
 
         p_res = await db.execute(select(ContestProblem).where(ContestProblem.id == payload.problem_id))
         problem = p_res.scalars().first()
