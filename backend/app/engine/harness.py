@@ -713,8 +713,323 @@ int main(void) {{
 
 
 # ---------------------------------------------------------------------------
-# Java driver (fully dynamic via Java Reflection — works for ANY method name)
+# Java driver (direct method dispatch — zero reflection, CodeBox sandbox compliant)
 # ---------------------------------------------------------------------------
+
+def _extract_java_method_info(code: str, fn_name: Optional[str] = None) -> Tuple[str, str, List[Dict]]:
+    """
+    Extract (fn_name, return_type, params) from Java code or starter code.
+    Returns: (fn_name, ret_type, [{'type': '...', 'name': '...'}, ...])
+    """
+    if fn_name:
+        pattern = rf'(?:public\s+)?([A-Za-z0-9_<>\[\],\s]+?)\s+{re.escape(fn_name)}\s*\(([^)]*)\)'
+        m = re.search(pattern, code)
+    else:
+        pattern = r'(?:public\s+)?([A-Za-z0-9_<>\[\],\s]+?)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)'
+        m = None
+        for cand in re.finditer(pattern, code):
+            name = cand.group(2).strip()
+            if name not in {'main', 'Solution', 'if', 'while', 'for', 'switch'}:
+                m = cand
+                fn_name = name
+                break
+
+    if not m:
+        return (fn_name or 'solve', 'Object', [])
+
+    if fn_name and m.lastindex == 2:
+        ret_type = m.group(1).strip()
+        raw_params = m.group(2).strip()
+    else:
+        ret_type = m.group(1).strip()
+        raw_params = m.group(3).strip()
+
+    ret_type = re.sub(r'\b(public|protected|private|static|final)\b', '', ret_type).strip()
+
+    params = []
+    if raw_params:
+        depth = 0
+        current = ''
+        for ch in raw_params:
+            if ch in '<([':
+                depth += 1
+            elif ch in '>)]':
+                depth -= 1
+            if ch == ',' and depth == 0:
+                params.append(current.strip())
+                current = ''
+            else:
+                current += ch
+        if current.strip():
+            params.append(current.strip())
+
+    parsed_params = []
+    for p in params:
+        p = p.strip()
+        parts = p.rsplit(None, 1)
+        if len(parts) == 2:
+            parsed_params.append({'type': parts[0].strip(), 'name': parts[1].strip()})
+        elif len(parts) == 1:
+            parsed_params.append({'type': parts[0].strip(), 'name': f'arg{len(parsed_params)}'})
+
+    return (fn_name or 'solve', ret_type, parsed_params)
+
+
+def _java_param_expr(ptype: str, var_name: str, full_input_var: str) -> str:
+    p = ptype.strip()
+    if p in ('int', 'Integer'):
+        return f'_ccc_to_int({var_name})'
+    elif p in ('long', 'Long'):
+        return f'_ccc_to_long({var_name})'
+    elif p in ('double', 'Double', 'float', 'Float'):
+        return f'_ccc_to_double({var_name})'
+    elif p in ('boolean', 'Boolean'):
+        return f'_ccc_to_boolean({var_name})'
+    elif p == 'String':
+        return f'_ccc_to_string({var_name}, {full_input_var})'
+    elif p in ('char[]', 'Character[]'):
+        return f'_ccc_to_char_array({var_name})'
+    elif p in ('int[]', 'Integer[]'):
+        return f'_ccc_to_int_array({var_name})'
+    elif p in ('long[]', 'Long[]'):
+        return f'_ccc_to_long_array({var_name})'
+    elif p in ('int[][]', 'Integer[][]'):
+        return f'_ccc_to_int_2d_array({var_name}, {full_input_var})'
+    elif p == 'String[]':
+        return f'_ccc_to_string_array({var_name}, {full_input_var})'
+    elif 'List<List<Integer>>' in p or 'List<int[]>' in p:
+        return f'_ccc_to_int_2d_list({var_name}, {full_input_var})'
+    elif 'List<Integer>' in p:
+        return f'_ccc_to_int_list({var_name})'
+    elif 'List<String>' in p:
+        return f'_ccc_to_string_list({var_name}, {full_input_var})'
+    else:
+        return f'_ccc_to_int({var_name})'
+
+
+def _build_java_driver(fn_name: str, ret_type: str, params: List[Dict]) -> str:
+    call_args = []
+    extract_lines = []
+    for i, p in enumerate(params):
+        var_name = f'_v{i}'
+        extract_lines.append(f'            String {var_name} = _vals.size() > {i} ? _vals.get({i}) : "";')
+        expr = _java_param_expr(p['type'], var_name, '_full_input')
+        call_args.append(expr)
+
+    arg_list = ', '.join(call_args)
+    if ret_type == 'void':
+        invoc = f'            _sol.{fn_name}({arg_list});\n'
+        if params:
+            invoc += f'            _ccc_print({call_args[0]});\n'
+    else:
+        invoc = f'            _ccc_print(_sol.{fn_name}({arg_list}));\n'
+
+    return r'''
+public class Main {
+    public static void main(String[] args) {
+        try {
+            java.util.Scanner sc = new java.util.Scanner(System.in);
+            StringBuilder sb = new StringBuilder();
+            while (sc.hasNextLine()) sb.append(sc.nextLine()).append("\n");
+            String _full_input = sb.toString().trim();
+
+            Solution _sol = new Solution();
+            java.util.List<String> _vals = _ccc_extract_vals(_full_input);
+''' + '\n'.join(extract_lines) + '\n' + invoc + r'''
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+
+    static java.util.List<String> _ccc_extract_vals(String input) {
+        String[] lines = input.split("\n");
+        java.util.List<String> vals = new java.util.ArrayList<>();
+        for (String l : lines) {
+            l = l.trim();
+            if (l.contains("=") && !l.startsWith("[") && !l.startsWith("{")) {
+                vals.add(l.substring(l.indexOf('=') + 1).trim());
+            } else if (!l.isEmpty()) {
+                vals.add(l);
+            }
+        }
+        return vals;
+    }
+
+    static int _ccc_to_int(String raw) {
+        if (raw == null || raw.isEmpty()) return 0;
+        try {
+            return Integer.parseInt(raw.replaceAll("[^0-9\\-]", "").trim());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    static long _ccc_to_long(String raw) {
+        if (raw == null || raw.isEmpty()) return 0L;
+        try {
+            return Long.parseLong(raw.replaceAll("[^0-9\\-]", "").trim());
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    static double _ccc_to_double(String raw) {
+        if (raw == null || raw.isEmpty()) return 0.0;
+        try {
+            return Double.parseDouble(raw.trim());
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    static boolean _ccc_to_boolean(String raw) {
+        return raw != null && raw.trim().equalsIgnoreCase("true");
+    }
+
+    static String _ccc_to_string(String raw, String fullInput) {
+        if (raw == null) return "";
+        raw = raw.trim();
+        if (raw.startsWith("\"") && raw.endsWith("\"") && raw.length() >= 2) {
+            return raw.substring(1, raw.length() - 1);
+        }
+        return raw;
+    }
+
+    static char[] _ccc_to_char_array(String raw) {
+        if (raw == null) return new char[0];
+        return raw.replaceAll("[\\[\\],\\s\"']", "").toCharArray();
+    }
+
+    static int[] _ccc_to_int_array(String raw) {
+        if (raw == null || raw.isEmpty()) return new int[0];
+        String cleaned = raw.replaceAll("[\\[\\]]", "").trim();
+        if (cleaned.isEmpty()) return new int[0];
+        String[] parts = cleaned.split("[,\\s]+");
+        java.util.List<Integer> list = new java.util.ArrayList<>();
+        for (String p : parts) {
+            p = p.trim();
+            if (!p.isEmpty()) {
+                try { list.add(Integer.parseInt(p)); } catch (Exception ignored) {}
+            }
+        }
+        int[] res = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) res[i] = list.get(i);
+        return res;
+    }
+
+    static long[] _ccc_to_long_array(String raw) {
+        if (raw == null || raw.isEmpty()) return new long[0];
+        String cleaned = raw.replaceAll("[\\[\\]]", "").trim();
+        if (cleaned.isEmpty()) return new long[0];
+        String[] parts = cleaned.split("[,\\s]+");
+        java.util.List<Long> list = new java.util.ArrayList<>();
+        for (String p : parts) {
+            p = p.trim();
+            if (!p.isEmpty()) {
+                try { list.add(Long.parseLong(p)); } catch (Exception ignored) {}
+            }
+        }
+        long[] res = new long[list.size()];
+        for (int i = 0; i < list.size(); i++) res[i] = list.get(i);
+        return res;
+    }
+
+    static String[] _ccc_to_string_array(String raw, String fullInput) {
+        String src = (raw != null && raw.contains("[")) ? raw : fullInput;
+        java.util.List<String> items = new java.util.ArrayList<>();
+        int qi = 0;
+        while ((qi = src.indexOf('"', qi)) != -1) {
+            int qe = src.indexOf('"', qi + 1);
+            if (qe == -1) break;
+            items.add(src.substring(qi + 1, qe));
+            qi = qe + 1;
+        }
+        if (items.isEmpty()) {
+            String cleaned = src.replaceAll("[\\[\\]]", "").trim();
+            if (!cleaned.isEmpty()) {
+                for (String t : cleaned.split("[,\\s]+")) {
+                    if (!t.trim().isEmpty()) items.add(t.trim());
+                }
+            }
+        }
+        return items.toArray(new String[0]);
+    }
+
+    static int[][] _ccc_to_int_2d_array(String raw, String fullInput) {
+        String src = (raw != null && raw.contains("[[")) ? raw : fullInput;
+        int lb = src.indexOf("[[");
+        if (lb == -1) return new int[0][0];
+        int rb = src.lastIndexOf("]]");
+        if (rb == -1 || rb <= lb) return new int[0][0];
+        String sub = src.substring(lb + 2, rb).trim();
+        if (sub.isEmpty()) return new int[0][0];
+        String[] rows = sub.split("\\]\\s*,\\s*\\[");
+        java.util.List<int[]> list = new java.util.ArrayList<>();
+        for (String r : rows) {
+            r = r.replaceAll("[\\[\\]]", "").trim();
+            if (r.isEmpty()) {
+                list.add(new int[0]);
+                continue;
+            }
+            String[] parts = r.split("[,\\s]+");
+            java.util.List<Integer> rowNums = new java.util.ArrayList<>();
+            for (String p : parts) {
+                p = p.trim();
+                if (!p.isEmpty()) {
+                    try { rowNums.add(Integer.parseInt(p)); } catch (Exception ignored) {}
+                }
+            }
+            int[] rowArr = new int[rowNums.size()];
+            for (int i = 0; i < rowNums.size(); i++) rowArr[i] = rowNums.get(i);
+            list.add(rowArr);
+        }
+        return list.toArray(new int[0][0]);
+    }
+
+    static java.util.List<Integer> _ccc_to_int_list(String raw) {
+        int[] arr = _ccc_to_int_array(raw);
+        java.util.List<Integer> list = new java.util.ArrayList<>(arr.length);
+        for (int v : arr) list.add(v);
+        return list;
+    }
+
+    static java.util.List<String> _ccc_to_string_list(String raw, String fullInput) {
+        String[] arr = _ccc_to_string_array(raw, fullInput);
+        return new java.util.ArrayList<>(java.util.Arrays.asList(arr));
+    }
+
+    static java.util.List<java.util.List<Integer>> _ccc_to_int_2d_list(String raw, String fullInput) {
+        int[][] arr2d = _ccc_to_int_2d_array(raw, fullInput);
+        java.util.List<java.util.List<Integer>> res = new java.util.ArrayList<>(arr2d.length);
+        for (int[] row : arr2d) {
+            java.util.List<Integer> r = new java.util.ArrayList<>(row.length);
+            for (int v : row) r.add(v);
+            res.add(r);
+        }
+        return res;
+    }
+
+    static void _ccc_print(Object obj) {
+        if (obj == null) {
+            System.out.println("null");
+        } else if (obj instanceof int[]) {
+            System.out.println(java.util.Arrays.toString((int[]) obj));
+        } else if (obj instanceof long[]) {
+            System.out.println(java.util.Arrays.toString((long[]) obj));
+        } else if (obj instanceof double[]) {
+            System.out.println(java.util.Arrays.toString((double[]) obj));
+        } else if (obj instanceof boolean[]) {
+            System.out.println(java.util.Arrays.toString((boolean[]) obj));
+        } else if (obj instanceof Object[]) {
+            System.out.println(java.util.Arrays.deepToString((Object[]) obj));
+        } else {
+            System.out.println(obj);
+        }
+    }
+}
+'''
+
 
 def _prepare_java_solution(
     code: str,
@@ -732,129 +1047,13 @@ def _prepare_java_solution(
 
     if not fn_name and starter_codes:
         fn_name = extract_function_name(starter_codes, "java")
-    if not fn_name:
-        m = re.search(r"public\s+\S+\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", clean_code)
-        if m and m.group(1) not in {"main", "Solution"}:
-            fn_name = m.group(1)
 
-    if not fn_name:
-        fn_name = "solve"
+    java_starter = (starter_codes or {}).get("java", clean_code)
+    fn_name, ret_type, params = _extract_java_method_info(java_starter, fn_name)
 
-    # Build a universal reflection-based Main that calls any method named fn_name
-    driver = f"""
-import java.lang.reflect.*;
+    # Fallback scan in candidate code if starter didn't yield params
+    if not params:
+        fn_name, ret_type, params = _extract_java_method_info(clean_code, fn_name)
 
-public class Main {{
-    public static void main(String[] args) {{
-        try {{
-            java.util.Scanner sc = new java.util.Scanner(System.in);
-            StringBuilder sb = new StringBuilder();
-            while (sc.hasNextLine()) sb.append(sc.nextLine()).append('\\n');
-            String _input = sb.toString().trim();
-
-            Solution _sol = new Solution();
-            Method[] _methods = _sol.getClass().getDeclaredMethods();
-            Method _target = null;
-            for (Method _m : _methods) {{
-                if (_m.getName().equals("{fn_name}")) {{ _target = _m; break; }}
-            }}
-            if (_target == null) {{
-                System.err.println("Judge Error: Method '{fn_name}' not found in Solution class. Check your function name.");
-                System.exit(1);
-            }}
-            _target.setAccessible(true);
-
-            Class<?>[] _ptypes = _target.getParameterTypes();
-            Object[] _pvals = _ccc_parse_args(_input, _ptypes);
-            Object _res = _target.invoke(_sol, _pvals);
-
-            if (_res == null) System.out.println("null");
-            else if (_res instanceof int[]) System.out.println(java.util.Arrays.toString((int[])_res));
-            else if (_res instanceof long[]) System.out.println(java.util.Arrays.toString((long[])_res));
-            else if (_res instanceof Object[]) System.out.println(java.util.Arrays.deepToString((Object[])_res));
-            else System.out.println(_res);
-
-        }} catch (Exception _e) {{
-            _e.printStackTrace(System.err);
-            System.exit(1);
-        }}
-    }}
-
-    static Object[] _ccc_parse_args(String input, Class<?>[] ptypes) {{
-        String[] lines = input.split("\\n");
-        java.util.List<String> vals = new java.util.ArrayList<>();
-        for (String l : lines) {{
-            l = l.trim();
-            if (l.contains("=") && !l.startsWith("[") && !l.startsWith("{{")) {{
-                vals.add(l.substring(l.indexOf('=') + 1).trim());
-            }} else if (!l.isEmpty()) {{
-                vals.add(l);
-            }}
-        }}
-        Object[] result = new Object[ptypes.length];
-        for (int i = 0; i < ptypes.length; i++) {{
-            String raw = i < vals.size() ? vals.get(i) : "";
-            result[i] = _ccc_convert(raw, ptypes[i], input);
-        }}
-        return result;
-    }}
-
-    static Object _ccc_convert(String raw, Class<?> type, String fullInput) {{
-        raw = raw.trim();
-        if (type == int.class || type == Integer.class) {{
-            try {{ return Integer.parseInt(raw.replaceAll("[^\\\\d\\\\-]", "").trim()); }} catch (Exception e) {{ return 0; }}
-        }} else if (type == long.class || type == Long.class) {{
-            try {{ return Long.parseLong(raw.replaceAll("[^\\\\d\\\\-]", "").trim()); }} catch (Exception e) {{ return 0L; }}
-        }} else if (type == String.class) {{
-            if (raw.startsWith("\\"") && raw.endsWith("\\"")) return raw.substring(1, raw.length() - 1);
-            return raw;
-        }} else if (type == String[].class) {{
-            java.util.List<String> items = new java.util.ArrayList<>();
-            int qi = 0;
-            while ((qi = fullInput.indexOf('"', qi)) != -1) {{
-                int qe = fullInput.indexOf('"', qi + 1);
-                if (qe == -1) break;
-                items.add(fullInput.substring(qi + 1, qe));
-                qi = qe + 1;
-            }}
-            return items.toArray(new String[0]);
-        }} else if (type == int[].class || type == Integer[].class) {{
-            java.util.List<Integer> nums = new java.util.ArrayList<>();
-            for (String t : raw.replaceAll("[\\\\[\\\\]]", "").split(",")) {{
-                try {{ nums.add(Integer.parseInt(t.trim())); }} catch (Exception e) {{}}
-            }}
-            return nums.stream().mapToInt(Integer::intValue).toArray();
-        }} else if (type == int[][].class) {{
-            java.util.List<int[]> rows = new java.util.ArrayList<>();
-            int lb = fullInput.indexOf("[[");
-            if (lb != -1) {{
-                int rb = fullInput.lastIndexOf("]]");
-                if (rb != -1) {{
-                    String sub = fullInput.substring(lb + 2, rb);
-                    for (String row : sub.split("\\\\]\\\\s*,\\\\s*\\\\[")) {{
-                        String[] parts = row.split(",");
-                        int[] r = new int[parts.length];
-                        for (int j = 0; j < parts.length; j++) {{
-                            try {{ r[j] = Integer.parseInt(parts[j].trim()); }} catch (Exception e) {{}}
-                        }}
-                        rows.add(r);
-                    }}
-                }}
-            }}
-            return rows.toArray(new int[0][0]);
-        }} else if (type == java.util.List.class) {{
-            java.util.List<String> items = new java.util.ArrayList<>();
-            int qi = 0;
-            while ((qi = fullInput.indexOf('"', qi)) != -1) {{
-                int qe = fullInput.indexOf('"', qi + 1);
-                if (qe == -1) break;
-                items.add(fullInput.substring(qi + 1, qe));
-                qi = qe + 1;
-            }}
-            return items;
-        }}
-        return raw;
-    }}
-}}
-"""
+    driver = _build_java_driver(fn_name, ret_type, params)
     return clean_code + "\n" + driver
