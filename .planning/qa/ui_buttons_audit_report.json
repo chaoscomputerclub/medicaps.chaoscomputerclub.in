@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T21:36:19.365Z",
+  "timestamp": "2026-09-21T21:39:08.057Z",
   "totalElements": 294,
   "functionalCount": 294,
   "connectivityRate": "100.0%",
@@ -818,7 +818,7 @@
     {
       "file": "src/pages/ContestArenaPage.tsx",
       "line": 916,
-      "tag": "<button>",
+      "tag": "<Button>",
       "label": "setShowExitModal(true)}\n            c...",
       "handler": "{() => setShowExitModal(true)}",
       "category": "ROUTING_NAVIGATION",
@@ -826,17 +826,17 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 937,
-      "tag": "<button>",
-      "label": "button",
+      "line": 943,
+      "tag": "<Button>",
+      "label": "Button",
       "handler": "{handlePrevProblem}",
       "category": "CONDITIONALLY_LOCKED",
       "description": "Disabled conditional gate / status lock"
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 946,
-      "tag": "<button>",
+      "line": 954,
+      "tag": "<Button>",
       "label": "= problems.length - 1}\n              ...",
       "handler": "{handleNextProblem}",
       "category": "CONDITIONALLY_LOCKED",
@@ -844,7 +844,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 957,
+      "line": 967,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -853,7 +853,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 963,
+      "line": 973,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -862,7 +862,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 976,
+      "line": 986,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRunCode}",
@@ -871,7 +871,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 989,
+      "line": 999,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmitCode}",
@@ -880,7 +880,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1007,
+      "line": 1017,
       "tag": "<button>",
       "label": "button",
       "handler": "\"button\"",
@@ -889,7 +889,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1018,
+      "line": 1028,
       "tag": "<DropdownMenuItem>",
       "label": "Default Split Layout",
       "handler": "{() => setIsFocusMode(false)}",
@@ -898,7 +898,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1024,
+      "line": 1034,
       "tag": "<DropdownMenuItem>",
       "label": "🧘 Focus Mode (Full Editor)",
       "handler": "{() => setIsFocusMode(true)}",
@@ -907,7 +907,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1031,
+      "line": 1041,
       "tag": "<DropdownMenuItem>",
       "label": "Reset Pane Split (50/50)",
       "handler": "{handleResetWidth}",
@@ -916,8 +916,8 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1038,
-      "tag": "<button>",
+      "line": 1048,
+      "tag": "<Button>",
       "label": "setShowSettingsModal(true)}\n         ...",
       "handler": "{() => setShowSettingsModal(true)}",
       "category": "CLIENT_UI_STATE",
@@ -925,7 +925,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1076,
+      "line": 1089,
       "tag": "<Link>",
       "label": "{isSolved && <CheckCircle2 className=...",
       "handler": "{() => dispatch(clearArenaResults())}",
@@ -934,7 +934,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1106,
+      "line": 1125,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveProblemTab(\"description\")}",
@@ -943,7 +943,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1118,
+      "line": 1137,
       "tag": "<button>",
       "label": "{submissionHistory.length > 0 && (   ...",
       "handler": "{() => setActiveProblemTab(\"submissions\")}",
@@ -952,7 +952,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1200,
+      "line": 1223,
       "tag": "<button>",
       "label": "{copiedKey === tc_in_${i} ? (      ...",
       "handler": "{() => copyToClipboard(st.stdin, `tc_in_${i}`)}",
@@ -961,17 +961,17 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1368,
-      "tag": "<button>",
-      "label": "button",
+      "line": 1397,
+      "tag": "<Button>",
+      "label": "Button",
       "handler": "{handleResetStarter}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1379,
-      "tag": "<button>",
+      "line": 1409,
+      "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 className=...",
       "handler": "{toggleFullscreen}",
       "category": "CLIENT_UI_STATE",
@@ -979,7 +979,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1460,
+      "line": 1491,
       "tag": "<button>",
       "label": "Testcase",
       "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
@@ -988,7 +988,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1474,
+      "line": 1505,
       "tag": "<button>",
       "label": "{submitResult && (                   ...",
       "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
@@ -997,7 +997,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1509,
+      "line": 1540,
       "tag": "<button>",
       "label": "setIsDrawerCollapsed(true)}\n         ...",
       "handler": "{() => setIsDrawerCollapsed(true)}",
@@ -1006,7 +1006,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1529,
+      "line": 1560,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(i)}",
@@ -1015,7 +1015,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1542,
+      "line": 1573,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -1024,7 +1024,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1662,
+      "line": 1693,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveSubmitCaseIndex(idx)}",
@@ -1033,7 +1033,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1793,
+      "line": 1824,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveRunCaseIndex(idx)}",
@@ -1042,7 +1042,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1901,
+      "line": 1932,
       "tag": "<button>",
       "label": "{isDrawerCollapsed ? (               ...",
       "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
@@ -1051,7 +1051,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1923,
+      "line": 1954,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRunCode}",
@@ -1060,7 +1060,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1935,
+      "line": 1966,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmitCode}",
@@ -1069,7 +1069,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1965,
+      "line": 1996,
       "tag": "<button>",
       "label": "Code Editor",
       "handler": "{() => setActiveSettingsTab(\"editor\")}",
@@ -1078,7 +1078,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1976,
+      "line": 2007,
       "tag": "<button>",
       "label": "Shortcuts",
       "handler": "{() => setActiveSettingsTab(\"shortcuts\")}",
@@ -1087,7 +1087,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1987,
+      "line": 2018,
       "tag": "<button>",
       "label": "Contest Clock",
       "handler": "{() => setActiveSettingsTab(\"timer\")}",
@@ -1096,7 +1096,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2011,
+      "line": 2042,
       "tag": "<button>",
       "label": "{size}",
       "handler": "{() => {\n                          setEditorFontSize(size);\n                    ",
@@ -1105,7 +1105,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2038,
+      "line": 2069,
       "tag": "<button>",
       "label": "{editorWordWrap ? Enabled : Disabl...",
       "handler": "{() => {\n                      const next = !editorWordWrap;\n                   ",
@@ -1114,7 +1114,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2065,
+      "line": 2096,
       "tag": "<button>",
       "label": "{spaces} Spaces",
       "handler": "{() => {\n                          setEditorTabSize(spaces);\n                   ",
@@ -1123,7 +1123,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2131,
+      "line": 2162,
       "tag": "<Button>",
       "label": "Done",
       "handler": "{() => setShowSettingsModal(false)}",
@@ -1132,7 +1132,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2181,
+      "line": 2212,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
@@ -1141,7 +1141,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2230,
+      "line": 2261,
       "tag": "<Button>",
       "label": "Continue Solving",
       "handler": "{() => setShowExitModal(false)}",
@@ -1150,7 +1150,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2238,
+      "line": 2269,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                setShowExitModal(false);\n                navigate(`/con",

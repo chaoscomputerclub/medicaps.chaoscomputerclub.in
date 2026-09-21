@@ -908,57 +908,67 @@ export function ContestArenaPage() {
   const title = arenaData?.title || "Live Final Arena";
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-[#0a0a0c] text-white select-none overflow-hidden font-sans">
-      {/* Top Navigation Bar — LeetCode Weekly Contest Paradigm */}
-      <header className="h-12 shrink-0 px-3 bg-[#0d0d0f] border-b border-white/8 flex items-center justify-between gap-2 z-30">
+    <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
+      {/* Top Navigation Bar — LeetCode Weekly Contest Architecture in Strix AI Dark Theme */}
+      <header className="h-12 shrink-0 px-3 bg-black border-b border-white/8 flex items-center justify-between gap-2 z-30">
         {/* Left: Exit, Separator, Title, Question Nav Chevrons, Standings */}
         <div className="flex items-center gap-2 min-w-0">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => setShowExitModal(true)}
-            className="flex items-center justify-center size-7 rounded text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            className="h-7 px-2 text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center transition-colors shrink-0"
             title="Exit to contest overview"
           >
-            <ChevronLeft className="size-4" />
-          </button>
+            <ChevronLeft className="size-4 mr-0.5" />
+            <span>Exit</span>
+          </Button>
 
-          <div className="h-4 w-px bg-white/10 shrink-0" />
+          <div className="h-3.5 w-px bg-white/10 shrink-0" />
 
           <div className="flex items-center gap-2 min-w-0">
+            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 hidden sm:inline">
+              Live Arena
+            </span>
             <span className="font-semibold text-xs text-white truncate max-w-[140px] sm:max-w-[200px] md:max-w-[320px]">
               {title}
             </span>
-            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
+            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden md:inline">
               Live
             </span>
           </div>
 
           <div className="flex items-center gap-0.5 ml-1">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={handlePrevProblem}
               disabled={resolvedIndex <= 0}
-              className="flex items-center justify-center size-6 rounded text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
+              className="size-7 p-0 rounded-md border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer shrink-0"
               title="Previous question (⌥←)"
             >
               <ChevronLeft className="size-3.5" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={handleNextProblem}
               disabled={resolvedIndex >= problems.length - 1}
-              className="flex items-center justify-center size-6 rounded text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
+              className="size-7 p-0 rounded-md border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer shrink-0"
               title="Next question (⌥→)"
             >
               <ChevronRight className="size-3.5" />
-            </button>
+            </Button>
           </div>
 
           <Button
             asChild
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="size-7 p-0 text-zinc-400 hover:text-white hover:bg-white/5 rounded transition-colors ml-0.5"
+            className="size-7 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md border-white/10 bg-black transition-colors ml-0.5 shrink-0"
           >
             <Link
               to={`/contests/${contestSlug}/results`}
@@ -966,7 +976,7 @@ export function ContestArenaPage() {
               rel="noopener noreferrer"
               title="Live Standings & Ranking"
             >
-              <BarChart2 className="size-4" />
+              <BarChart2 className="size-3.5" />
             </Link>
           </Button>
         </div>
@@ -979,9 +989,9 @@ export function ContestArenaPage() {
             size="sm"
             disabled={isRunningCode || isSubmittingCode || isContestOver}
             onClick={handleRunCode}
-            className="h-7 px-3 text-xs font-mono font-medium rounded-md bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 hover:text-white border-white/10 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="h-7 px-3 text-xs font-mono font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors flex items-center gap-1.5"
           >
-            <Play className="size-3 fill-current text-zinc-300" />
+            <Play className="size-3 fill-current" />
             <span>{isRunningCode ? "Running…" : "Run"}</span>
             <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
           </Button>
@@ -991,11 +1001,11 @@ export function ContestArenaPage() {
             size="sm"
             disabled={isRunningCode || isSubmittingCode || isContestOver}
             onClick={handleSubmitCode}
-            className="h-7 px-3.5 text-xs font-mono font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white border-none shadow-[0_0_12px_rgba(16,185,129,0.3)] transition-colors cursor-pointer flex items-center gap-1.5"
+            className="h-7 px-3.5 text-xs font-mono font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)] flex items-center gap-1.5"
           >
             <Send className="size-3 fill-current" />
             <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
-            <span className="hidden md:inline text-[10px] text-emerald-200 font-mono">⌘⏎</span>
+            <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">⌘⏎</span>
           </Button>
         </div>
 
@@ -1006,15 +1016,15 @@ export function ContestArenaPage() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white hover:bg-white/5 h-7 px-2 rounded transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-black border border-white/10 hover:border-white/20 transition-colors cursor-pointer h-7"
                 title="Adjust Workspace Layout"
               >
-                <Layout className="size-3.5" />
+                <Layout className="size-3.5 text-lime-400" />
                 <span className="hidden sm:inline">{isFocusMode ? "Focus" : "Default"}</span>
                 <ChevronDown className="size-3 text-zinc-500" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#18181b] border-white/10 text-white text-xs font-mono">
+            <DropdownMenuContent align="end" className="bg-zinc-950 border-white/10 text-white text-xs font-mono">
               <DropdownMenuItem
                 onClick={() => setIsFocusMode(false)}
                 className={`cursor-pointer ${!isFocusMode ? "text-lime-400 font-semibold" : "text-zinc-300"}`}
@@ -1035,25 +1045,28 @@ export function ContestArenaPage() {
           </DropdownMenu>
 
           {/* Settings Gear Modal Trigger */}
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => setShowSettingsModal(true)}
-            className="flex items-center justify-center size-7 rounded text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            className="size-7 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md border-white/10 bg-black transition-colors cursor-pointer shrink-0"
             title="Preferences & Keyboard Shortcuts"
           >
             <Settings className="size-3.5" />
-          </button>
+          </Button>
 
           {/* Timer Badge */}
-          <div className="flex items-center gap-1 text-xs font-mono font-medium text-amber-400/90 bg-amber-400/10 px-2 py-1 rounded border border-amber-400/20 tabular-nums">
-            <Clock className="size-3 text-amber-400" />
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold tabular-nums shrink-0">
+            <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
+            <Clock className="size-3 text-lime-400" />
             <span>{formatTimer(remainingSeconds)}</span>
           </div>
 
           {/* User Profile Avatar */}
-          <div className="flex items-center gap-1.5 pl-1">
+          <div className="flex items-center gap-1.5 pl-0.5">
             <div
-              className="size-7 rounded-full bg-gradient-to-tr from-lime-400 to-emerald-500 text-black font-mono font-bold text-xs flex items-center justify-center shadow-sm"
+              className="size-7 rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center shadow-sm"
               title={member?.name || member?.handle || "Competitor"}
             >
               {member?.name
@@ -1066,8 +1079,8 @@ export function ContestArenaPage() {
         </div>
       </header>
 
-      {/* Problem Tabs Subheader — Question Switcher */}
-      <div className="h-8 shrink-0 px-3 bg-[#111114] border-b border-white/8 flex items-center gap-1 overflow-x-auto">
+      {/* Problem Tabs Subheader — Question Switcher in Strix AI Dark Theme */}
+      <div className="h-8 shrink-0 px-3 bg-black border-b border-white/8 flex items-center gap-1 overflow-x-auto">
         {problems.map((prob, idx) => {
           const pSlug = slugifyProblem(prob.title, prob.problem_index);
           const isActive = idx === resolvedIndex;
@@ -1077,17 +1090,23 @@ export function ContestArenaPage() {
               key={prob.id}
               to={`/contests/${contestSlug}/problems/${pSlug}`}
               onClick={() => dispatch(clearArenaResults())}
-              className={`group flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer shrink-0 ${
+              className={`group flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer shrink-0 border ${
                 isActive
-                  ? "bg-[#1f1f24] text-white font-medium border border-white/10 shadow-sm"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
+                  ? "bg-zinc-900 text-white border-lime-400 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
+                  : "text-zinc-400 hover:text-black hover:bg-lime-400 hover:border-lime-400 border-white/6 bg-black"
               }`}
             >
               <span>
                 Q{prob.problem_index}. {prob.title}
               </span>
-              <span className="text-[10px] text-zinc-500 tabular-nums">({prob.points} pt)</span>
-              {isSolved && <CheckCircle2 className="size-3 text-emerald-400 shrink-0" />}
+              <span
+                className={`text-[10px] font-mono uppercase tabular-nums transition-colors ${
+                  isActive ? "text-zinc-400" : "text-zinc-500 group-hover:text-black/75"
+                }`}
+              >
+                ({prob.points}p)
+              </span>
+              {isSolved && <CheckCircle2 className="size-3 text-lime-400 group-hover:text-black shrink-0 transition-colors" />}
             </Link>
           );
         })}
@@ -1099,35 +1118,35 @@ export function ContestArenaPage() {
         {!isFocusMode && (
           <div
             style={{ width: `${leftWidthPercent}%` }}
-            className="flex flex-col bg-[#09090b] border-r border-white/8 shrink-0 min-w-[280px] max-w-[calc(100%-300px)] h-full overflow-hidden"
+            className="flex flex-col bg-black border-r border-white/8 shrink-0 min-w-[280px] max-w-[calc(100%-300px)] h-full overflow-hidden"
           >
             {/* Panel Tabs Header */}
-            <div className="h-9 shrink-0 px-3 border-b border-white/8 bg-[#0e0e11] flex items-center gap-1">
+            <div className="h-9 shrink-0 px-3 border-b border-white/8 bg-black flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setActiveProblemTab("description")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium rounded transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-colors cursor-pointer border ${
                   activeProblemTab === "description"
-                    ? "bg-[#1c1c20] text-white"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    ? "bg-zinc-900 text-white border-lime-400/40 font-semibold"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
                 }`}
               >
-                <FileText className="size-3.5 text-blue-400" />
+                <FileText className="size-3.5 text-lime-400" />
                 <span>Description</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveProblemTab("submissions")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium rounded transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-colors cursor-pointer border ${
                   activeProblemTab === "submissions"
-                    ? "bg-[#1c1c20] text-white"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    ? "bg-zinc-900 text-white border-lime-400/40 font-semibold"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
                 }`}
               >
                 <RotateCcw className="size-3.5 text-zinc-400" />
                 <span>Submissions</span>
                 {submissionHistory.length > 0 && (
-                  <span className="size-4 rounded-full bg-white/10 text-[10px] font-mono flex items-center justify-center text-zinc-300">
+                  <span className="size-4 rounded-full bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px] font-mono flex items-center justify-center">
                     {submissionHistory.length}
                   </span>
                 )}
@@ -1135,44 +1154,46 @@ export function ContestArenaPage() {
             </div>
 
             {/* Panel Body */}
-            <div className="flex-1 overflow-y-auto p-5 text-sm font-sans space-y-6 text-zinc-200">
+            <div className="flex-1 overflow-y-auto p-5 space-y-6 text-zinc-200">
               {activeProblemTab === "description" ? (
                 activeProblem ? (
                   <>
                     {/* Problem Title & Badges */}
-                    <div className="space-y-3">
-                      <h1 className="text-xl font-bold text-white tracking-tight">
-                        Q{activeProblem.problem_index}. {activeProblem.title}
-                      </h1>
+                    <div className="space-y-2 border-b border-white/8 pb-4">
                       <div className="flex items-center gap-2">
                         {/* Difficulty Badge */}
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`px-2 py-0.5 rounded font-mono text-[10px] uppercase font-semibold border ${
                             activeProblem.difficulty === "HARD" || activeProblem.points > 5
-                              ? "bg-rose-500/15 text-rose-400"
+                              ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
                               : activeProblem.difficulty === "MEDIUM" || activeProblem.points > 3
-                              ? "bg-amber-500/15 text-amber-400"
-                              : "bg-emerald-500/15 text-emerald-400"
+                              ? "bg-amber-400/10 text-amber-400 border-amber-400/30"
+                              : "bg-lime-400/10 text-lime-400 border-lime-400/30"
                           }`}
                         >
                           {activeProblem.difficulty ||
                             (activeProblem.points > 5 ? "Hard" : activeProblem.points > 3 ? "Medium" : "Easy")}
                         </span>
-                        <span className="text-xs text-zinc-400 font-mono">
-                          {activeProblem.points} pt.
+                        <span className="text-xs text-zinc-400 font-mono tabular-nums">
+                          {activeProblem.points} Points
                         </span>
                       </div>
+                      <h1 className="text-base font-semibold tracking-tight text-white font-sans">
+                        Q{activeProblem.problem_index}. {activeProblem.title}
+                      </h1>
                     </div>
 
                     {/* Problem Description */}
-                    <div className="text-xs leading-relaxed text-zinc-300 whitespace-pre-line font-sans">
+                    <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
                       {activeProblem.description}
                     </div>
 
                     {activeProblem.input_format && (
                       <div className="space-y-1.5">
-                        <span className="font-semibold text-xs text-white block">Input Format</span>
-                        <div className="bg-[#121214] border border-white/8 rounded-lg p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Input Format
+                        </span>
+                        <div className="bg-zinc-950 border border-white/8 rounded-md p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
                           {activeProblem.input_format}
                         </div>
                       </div>
@@ -1180,8 +1201,10 @@ export function ContestArenaPage() {
 
                     {activeProblem.output_format && (
                       <div className="space-y-1.5">
-                        <span className="font-semibold text-xs text-white block">Output Format</span>
-                        <div className="bg-[#121214] border border-white/8 rounded-lg p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Output Format
+                        </span>
+                        <div className="bg-zinc-950 border border-white/8 rounded-md p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
                           {activeProblem.output_format}
                         </div>
                       </div>
@@ -1189,40 +1212,44 @@ export function ContestArenaPage() {
 
                     {/* Examples Section */}
                     {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 && (
-                      <div className="space-y-4">
+                      <div className="space-y-3 pt-1">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Sample Testcases
+                        </span>
                         {activeProblem.sample_testcases.map((st, i) => (
-                          <div key={i} className="space-y-2">
-                            <span className="font-semibold text-xs text-white">Example {i + 1}:</span>
-                            <div className="bg-[#121214] border border-white/8 rounded-lg p-3.5 space-y-2 font-mono text-xs">
-                              <div>
-                                <div className="flex items-center justify-between text-zinc-400 pb-1">
-                                  <span className="text-[11px] font-sans text-zinc-400 font-semibold">Input:</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
-                                    className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer"
-                                  >
-                                    {copiedKey === `tc_in_${i}` ? (
-                                      <Check className="size-3 text-emerald-400" />
-                                    ) : (
-                                      <Copy className="size-3" />
-                                    )}
-                                    <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
-                                  </button>
-                                </div>
-                                <pre className="text-zinc-200 whitespace-pre-wrap">{st.stdin}</pre>
-                              </div>
-                              <div>
-                                <span className="text-[11px] font-sans text-zinc-400 font-semibold block pb-1">Output:</span>
-                                <pre className="text-zinc-200 whitespace-pre-wrap">{st.expected_output}</pre>
-                              </div>
-                              {st.explanation && (
-                                <div>
-                                  <span className="text-[11px] font-sans text-zinc-400 font-semibold block pb-1">Explanation:</span>
-                                  <p className="font-sans text-xs text-zinc-300 leading-relaxed">{st.explanation}</p>
-                                </div>
-                              )}
+                          <div key={i} className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono">
+                            <div className="flex items-center justify-between text-zinc-400 font-semibold">
+                              <span>Example {i + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
+                                className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer"
+                              >
+                                {copiedKey === `tc_in_${i}` ? (
+                                  <Check className="size-3 text-lime-400" />
+                                ) : (
+                                  <Copy className="size-3" />
+                                )}
+                                <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
+                              </button>
                             </div>
+                            <div className="space-y-1">
+                              <span className="text-[10px] text-zinc-500">Input</span>
+                              <pre className="p-2 rounded bg-black border border-white/6 text-zinc-200 overflow-x-auto whitespace-pre-wrap">
+                                {st.stdin}
+                              </pre>
+                            </div>
+                            <div className="space-y-1">
+                              <span className="text-[10px] text-zinc-500">Expected Output</span>
+                              <pre className="p-2 rounded bg-black border border-white/6 text-lime-400 overflow-x-auto whitespace-pre-wrap">
+                                {st.expected_output}
+                              </pre>
+                            </div>
+                            {st.explanation && (
+                              <div className="text-[11px] text-zinc-400 italic pt-1">
+                                Note: {st.explanation}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1230,23 +1257,25 @@ export function ContestArenaPage() {
 
                     {/* Constraints Section */}
                     {activeProblem.constraints && (
-                      <div className="space-y-2 pt-2">
-                        <span className="font-semibold text-xs text-white block">Constraints:</span>
-                        <div className="bg-[#121214] border border-white/8 rounded-lg p-3 font-mono text-xs text-zinc-300 whitespace-pre-line leading-relaxed">
+                      <div className="space-y-1.5 pt-1">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Constraints
+                        </span>
+                        <pre className="text-xs font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap">
                           {activeProblem.constraints}
-                        </div>
+                        </pre>
                       </div>
                     )}
 
                     {/* Acceptance Statistics Footer */}
-                    <div className="border-t border-white/8 pt-4 pb-2 text-xs font-sans text-zinc-400 space-y-1.5">
+                    <div className="border-t border-white/8 pt-3 text-xs font-mono text-zinc-400 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span>Users Accepted</span>
-                        <span className="font-mono text-zinc-200 tabular-nums">24,826 / 26.9K (92.3%)</span>
+                        <span>Users Accepted:</span>
+                        <span className="text-zinc-200 tabular-nums">24,826 / 26.9K (92.3%)</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span>Total Accepted</span>
-                        <span className="font-mono text-zinc-200 tabular-nums">27,201 / 47.1K (57.7%)</span>
+                        <span>Total Accepted:</span>
+                        <span className="text-zinc-200 tabular-nums">27,201 / 47.1K (57.7%)</span>
                       </div>
                     </div>
                   </>
@@ -1255,13 +1284,13 @@ export function ContestArenaPage() {
                 )
               ) : (
                 /* Submissions History Tab */
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white">Your Submissions</h3>
-                    <span className="text-xs font-mono text-zinc-500">{submissionHistory.length} total</span>
+                <div className="space-y-4 font-mono">
+                  <div className="flex items-center justify-between border-b border-white/8 pb-3">
+                    <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Submissions History</h3>
+                    <span className="text-xs text-zinc-500">{submissionHistory.length} attempts</span>
                   </div>
                   {submissionHistory.length === 0 ? (
-                    <div className="p-8 text-center border border-dashed border-white/10 rounded-lg text-zinc-500 font-mono text-xs space-y-1">
+                    <div className="p-8 text-center border border-dashed border-white/10 rounded-md text-zinc-500 text-xs space-y-1">
                       <p>No submissions for this question yet.</p>
                       <p className="text-[11px] text-zinc-600">Click &quot;Submit&quot; to test all cases and record an official attempt.</p>
                     </div>
@@ -1270,12 +1299,12 @@ export function ContestArenaPage() {
                       {submissionHistory.map((sub, idx) => (
                         <div
                           key={sub.id || idx}
-                          className="p-3 bg-[#121214] border border-white/8 rounded-lg flex items-center justify-between text-xs font-mono"
+                          className="p-3 bg-zinc-950 border border-white/8 rounded-md flex items-center justify-between text-xs"
                         >
                           <div className="flex items-center gap-2.5">
                             <span
                               className={`font-semibold ${
-                                sub.verdict === "ACCEPTED" ? "text-emerald-400" : "text-rose-400"
+                                sub.verdict === "ACCEPTED" ? "text-lime-400" : "text-rose-400"
                               }`}
                             >
                               {sub.verdict === "ACCEPTED" ? "Accepted" : sub.verdict}
@@ -1283,7 +1312,7 @@ export function ContestArenaPage() {
                             <span className="text-zinc-600">·</span>
                             <span className="text-zinc-400">{sub.language}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-zinc-400">
+                          <div className="flex items-center gap-3 text-zinc-400 tabular-nums">
                             {sub.time && <span>{Math.round(sub.time * 1000)} ms</span>}
                             {sub.memory && <span>{sub.memory} MB</span>}
                             <span className="text-zinc-500">{sub.timestamp}</span>
@@ -1298,7 +1327,7 @@ export function ContestArenaPage() {
           </div>
         )}
 
-        {/* Draggable Width Adjuster */}
+        {/* Draggable Width Adjuster in Strix AI Dark Theme */}
         {!isFocusMode && (
           <div
             role="separator"
@@ -1337,10 +1366,10 @@ export function ContestArenaPage() {
           className="flex-1 flex flex-col bg-black min-w-0 h-full overflow-hidden relative"
         >
           {/* Top: Editor Toolbar Header */}
-          <div className="h-9 shrink-0 px-3 bg-[#0f0f12] border-b border-white/8 flex items-center justify-between gap-2">
+          <div className="h-9 shrink-0 px-3 bg-black border-b border-white/8 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans font-medium text-emerald-400 bg-emerald-500/10 rounded">
-                <Code2 className="size-3.5" />
+              <span className="flex items-center gap-1.5 px-2 py-0.5 text-xs font-mono font-semibold text-lime-400 bg-lime-400/10 border border-lime-400/30 rounded">
+                <Code2 className="size-3" />
                 <span>Code</span>
               </span>
             </div>
@@ -1351,10 +1380,10 @@ export function ContestArenaPage() {
                 value={selectedLanguage}
                 onValueChange={(val: any) => setSelectedLanguage(val)}
               >
-                <SelectTrigger className="h-6 w-[125px] text-xs font-mono bg-[#18181b] border-white/15 text-zinc-200 hover:border-lime-400/60 rounded focus:ring-1 focus:ring-lime-400">
+                <SelectTrigger className="h-6 w-[120px] text-xs font-mono bg-black border-white/15 text-zinc-200 hover:border-lime-400/60 rounded focus:ring-1 focus:ring-lime-400">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#18181b] border-white/15 text-white font-mono text-xs rounded-md">
+                <SelectContent className="bg-black border-white/15 text-white font-mono text-xs rounded-md">
                   <SelectItem value="python">Python 3</SelectItem>
                   <SelectItem value="cpp">C++</SelectItem>
                   <SelectItem value="c">C</SelectItem>
@@ -1365,25 +1394,27 @@ export function ContestArenaPage() {
               </Select>
 
               {/* Reset to Starter */}
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleResetStarter}
-                className="flex items-center gap-1 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded hover:bg-white/5 transition-colors cursor-pointer"
-                title="Reset to official template"
+                className="h-6 px-2 text-xs font-mono border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded transition-colors cursor-pointer"
+                title="Reset to official starter code"
               >
-                <RotateCcw className="size-3" />
-                <span className="hidden sm:inline">Reset</span>
-              </button>
+                <RotateCcw className="size-2.5 mr-1" />
+                <span>Reset</span>
+              </Button>
 
               {/* Fullscreen Toggle */}
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={toggleFullscreen}
-                className="flex items-center justify-center size-6 rounded text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                className="size-6 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded border-white/10 bg-black transition-colors cursor-pointer"
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
-                {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
-              </button>
+                {isFullscreen ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
+              </Button>
             </div>
           </div>
 
@@ -1401,9 +1432,9 @@ export function ContestArenaPage() {
           </div>
 
           {/* Editor Status Bar */}
-          <div className="h-6 px-3 bg-[#0a0a0c] border-t border-white/6 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
+          <div className="h-6 px-3 bg-black border-t border-white/6 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
             <div className="flex items-center gap-1.5 text-zinc-400">
-              <Check className="size-3 text-emerald-400" />
+              <Check className="size-3 text-lime-400" />
               <span>Saved</span>
             </div>
             <div className="flex items-center gap-3 tabular-nums">
@@ -1450,12 +1481,12 @@ export function ContestArenaPage() {
           {/* Console & Execution Drawer */}
           <div
             style={{ height: isDrawerCollapsed ? "0px" : `${drawerHeight}px` }}
-            className={`flex flex-col border-t border-white/8 bg-[#09090b] shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
+            className={`flex flex-col border-t border-white/8 bg-black shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
               isDrawerCollapsed ? "border-t-0" : ""
             }`}
           >
             {/* Drawer Tab Header */}
-            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-[#0e0e11]">
+            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -1463,9 +1494,9 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("testcases");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-sans rounded cursor-pointer transition-colors ${
+                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-[#1c1c20] text-white font-medium"
+                      ? "bg-zinc-900 text-white font-semibold border border-white/10"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -1477,9 +1508,9 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("output");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-sans rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-[#1c1c20] text-white font-medium"
+                      ? "bg-zinc-900 text-white font-semibold border border-white/10"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -1488,7 +1519,7 @@ export function ContestArenaPage() {
                     <span
                       className={`size-1.5 rounded-full ${
                         submitResult.verdict === "ACCEPTED"
-                          ? "bg-emerald-400 shadow-[0_0_6px_#10b981]"
+                          ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
                           : "bg-rose-400"
                       }`}
                     />
@@ -1497,7 +1528,7 @@ export function ContestArenaPage() {
                     <span
                       className={`size-1.5 rounded-full ${
                         runResult.verdict === "ACCEPTED"
-                          ? "bg-emerald-400 shadow-[0_0_6px_#10b981]"
+                          ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
                           : "bg-amber-400"
                       }`}
                     />
@@ -1509,7 +1540,7 @@ export function ContestArenaPage() {
                 <button
                   type="button"
                   onClick={() => setIsDrawerCollapsed(true)}
-                  className="flex items-center gap-1 text-[11px] font-sans text-zinc-500 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
+                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-900 cursor-pointer transition-colors"
                   title="Collapse Console"
                 >
                   <span className="hidden sm:inline">Collapse</span>
@@ -1563,7 +1594,7 @@ export function ContestArenaPage() {
                           value={customStdin}
                           onChange={(e) => setCustomStdin(e.target.value)}
                           placeholder={activeProblem?.sample_testcases?.[0]?.stdin || 'intervals = [[1,3],[2,6]]'}
-                          className="w-full h-24 p-2.5 bg-black border border-white/10 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-emerald-400/60"
+                          className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400/60"
                         />
                       </div>
                     ) : (
@@ -1573,7 +1604,7 @@ export function ContestArenaPage() {
                             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
                               Input
                             </span>
-                            <pre className="p-2.5 bg-black border border-white/10 rounded text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-emerald-400 selection:text-black">
+                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-lime-400 selection:text-black">
                               {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
                             </pre>
                           </div>
@@ -1581,7 +1612,7 @@ export function ContestArenaPage() {
                             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
                               Expected Output
                             </span>
-                            <pre className="p-2.5 bg-black border border-white/10 rounded text-xs font-mono text-emerald-400 overflow-x-auto selection:bg-emerald-400 selection:text-black">
+                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-lime-400 overflow-x-auto selection:bg-lime-400 selection:text-black">
                               {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
                             </pre>
                           </div>
@@ -1598,10 +1629,10 @@ export function ContestArenaPage() {
                   /* Output / Test Result Tab */
                   <div className="space-y-3">
                     {!hasRunCode ? (
-                      /* LeetCode Standard Empty State */
-                      <div className="flex flex-col items-center justify-center py-12 text-zinc-500 space-y-2">
+                      /* LeetCode Standard Empty State in Strix AI Dark Theme */
+                      <div className="flex flex-col items-center justify-center py-12 text-zinc-500 space-y-2 font-mono">
                         <Terminal className="size-6 text-zinc-600" />
-                        <p className="text-xs font-sans">You must run your code first</p>
+                        <p className="text-xs">You must run your code first</p>
                       </div>
                     ) : lastAction === "submit" && submitResult ? (
                       /* Comprehensive Submission Report */
@@ -1609,8 +1640,8 @@ export function ContestArenaPage() {
                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 pb-3">
                           <div className="flex items-center gap-3">
                             {submitResult.verdict === "ACCEPTED" ? (
-                              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase font-mono">
-                                <CheckCircle2 className="size-5 text-emerald-400" />
+                              <div className="flex items-center gap-2 text-lime-400 font-bold text-sm uppercase font-mono">
+                                <CheckCircle2 className="size-5 text-lime-400" />
                                 <span>Accepted</span>
                               </div>
                             ) : (
@@ -1624,13 +1655,13 @@ export function ContestArenaPage() {
                               {submitResult.passed_testcases} / {submitResult.total_testcases} testcases passed
                             </span>
                             {submitResult.points_awarded > 0 && (
-                              <Badge className="bg-emerald-400/15 text-emerald-400 border border-emerald-400/40 text-[11px] font-mono font-bold">
+                              <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 text-[11px] font-mono font-bold">
                                 +{submitResult.points_awarded} pts
                               </Badge>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-3 text-xs font-mono text-zinc-400">
+                          <div className="flex items-center gap-3 text-xs font-mono text-zinc-400 tabular-nums">
                             {submitResult.execution_time !== undefined && (
                               <span>Runtime: {Math.round(submitResult.execution_time * 1000)}ms</span>
                             )}
@@ -1644,7 +1675,7 @@ export function ContestArenaPage() {
                         <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full transition-all duration-500 rounded-full ${
-                              submitResult.verdict === "ACCEPTED" ? "bg-emerald-400" : "bg-rose-500"
+                              submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-rose-500"
                             }`}
                             style={{
                               width: `${Math.round(
@@ -1671,7 +1702,7 @@ export function ContestArenaPage() {
                                 >
                                   <span
                                     className={`size-1.5 rounded-full ${
-                                      tc.passed ? "bg-emerald-400" : "bg-rose-400"
+                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
                                     }`}
                                   />
                                   <span>{tc.name || `Case ${idx + 1}`}</span>
@@ -1683,12 +1714,12 @@ export function ContestArenaPage() {
                               const curTc = submitResult.testcase_results[activeSubmitCaseIndex];
                               if (curTc.is_hidden) {
                                 return (
-                                  <div className="p-3 bg-black border border-white/10 rounded space-y-2">
+                                  <div className="p-3 bg-zinc-950 border border-white/10 rounded space-y-2">
                                     <div className="flex items-center gap-2">
                                       <Lock className="size-4 text-zinc-500" />
                                       <span className="font-semibold text-xs text-white">Hidden Evaluation Testcase</span>
                                       {curTc.passed ? (
-                                        <Badge className="bg-emerald-400/10 text-emerald-400 border border-emerald-400/30 text-[10px]">
+                                        <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">
                                           Passed
                                         </Badge>
                                       ) : (
@@ -1711,7 +1742,7 @@ export function ContestArenaPage() {
                                     <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                       Input
                                     </span>
-                                    <pre className="p-2 bg-black border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                    <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
                                       {curTc.input}
                                     </pre>
                                   </div>
@@ -1721,9 +1752,9 @@ export function ContestArenaPage() {
                                         Output
                                       </span>
                                       <pre
-                                        className={`p-2 bg-black border rounded text-xs overflow-x-auto ${
+                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
                                           curTc.passed
-                                            ? "border-emerald-400/30 text-emerald-400"
+                                            ? "border-lime-400/30 text-lime-400"
                                             : "border-rose-500/30 text-rose-400"
                                         }`}
                                       >
@@ -1734,7 +1765,7 @@ export function ContestArenaPage() {
                                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                         Expected
                                       </span>
-                                      <pre className="p-2 bg-black border border-white/10 rounded text-xs text-emerald-400 overflow-x-auto">
+                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
                                         {curTc.expected_output}
                                       </pre>
                                     </div>
@@ -1762,8 +1793,8 @@ export function ContestArenaPage() {
                         <div className="flex items-center justify-between border-b border-white/8 pb-2.5">
                           <div className="flex items-center gap-3">
                             {runResult.verdict === "ACCEPTED" ? (
-                              <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs font-mono uppercase">
-                                <CheckCircle2 className="size-4 text-emerald-400" />
+                              <div className="flex items-center gap-1.5 text-lime-400 font-bold text-xs font-mono uppercase">
+                                <CheckCircle2 className="size-4 text-lime-400" />
                                 <span>Accepted</span>
                               </div>
                             ) : (
@@ -1802,7 +1833,7 @@ export function ContestArenaPage() {
                                 >
                                   <span
                                     className={`size-1.5 rounded-full ${
-                                      tc.passed ? "bg-emerald-400" : "bg-rose-400"
+                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
                                     }`}
                                   />
                                   <span>Case {idx + 1}</span>
@@ -1819,7 +1850,7 @@ export function ContestArenaPage() {
                                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                         Input
                                       </span>
-                                      <pre className="p-2 bg-black border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
                                         {curTc.stdin}
                                       </pre>
                                     </div>
@@ -1830,9 +1861,9 @@ export function ContestArenaPage() {
                                         Output
                                       </span>
                                       <pre
-                                        className={`p-2 bg-black border rounded text-xs overflow-x-auto ${
+                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
                                           curTc.passed
-                                            ? "border-emerald-400/30 text-emerald-400"
+                                            ? "border-lime-400/30 text-lime-400"
                                             : "border-rose-500/30 text-rose-400"
                                         }`}
                                       >
@@ -1843,7 +1874,7 @@ export function ContestArenaPage() {
                                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                         Expected
                                       </span>
-                                      <pre className="p-2 bg-black border border-white/10 rounded text-xs text-emerald-400 overflow-x-auto">
+                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
                                         {curTc.expected_output}
                                       </pre>
                                     </div>
@@ -1867,7 +1898,7 @@ export function ContestArenaPage() {
                             {runResult.stdout && (
                               <div>
                                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Stdout</span>
-                                <pre className="p-2 bg-black border border-white/8 rounded text-xs text-white overflow-x-auto">
+                                <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
                                   {runResult.stdout}
                                 </pre>
                               </div>
@@ -1894,17 +1925,17 @@ export function ContestArenaPage() {
             )}
           </div>
 
-          {/* Action Footer */}
-          <div className="h-10 px-3 border-t border-white/8 flex items-center justify-between bg-[#0a0a0c] shrink-0">
+          {/* Action Footer in Strix AI Dark Theme */}
+          <div className="h-11 px-4 border-t border-white/8 flex items-center justify-between bg-black shrink-0">
             <div className="flex items-center gap-3">
               {/* LeetCode-style Console Toggle */}
               <button
                 type="button"
                 onClick={() => setIsDrawerCollapsed((prev) => !prev)}
-                className="flex items-center gap-1.5 text-xs font-sans text-zinc-400 hover:text-white px-2 py-1 rounded bg-[#18181b] border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-950 border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
                 title={isDrawerCollapsed ? "Open Console Drawer" : "Close Console Drawer"}
               >
-                <Terminal className="size-3 text-emerald-400" />
+                <Terminal className="size-3 text-lime-400" />
                 <span>Console</span>
                 {isDrawerCollapsed ? (
                   <ChevronUp className="size-3 text-zinc-500" />
@@ -1913,8 +1944,8 @@ export function ContestArenaPage() {
                 )}
               </button>
 
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
-                <span className={`size-1.5 rounded-full ${isContestOver ? "bg-rose-500" : "bg-emerald-400"}`} />
+              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                <span className={`size-1.5 rounded-full ${isContestOver ? "bg-red-500" : "bg-lime-400"}`} />
                 <span>{isContestOver ? "Contest locked" : "Workstation online"}</span>
               </div>
             </div>
@@ -1926,9 +1957,9 @@ export function ContestArenaPage() {
                 size="sm"
                 disabled={isRunningCode || isSubmittingCode || isContestOver}
                 onClick={handleRunCode}
-                className="h-7 px-3 text-xs font-mono font-medium rounded-md bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-white border-white/10 cursor-pointer transition-colors"
+                className="font-mono text-xs font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors"
               >
-                <Play className="size-2.5 fill-current" />
+                <Play className="size-3 fill-current" />
                 <span>Run</span>
               </Button>
 
@@ -1937,9 +1968,9 @@ export function ContestArenaPage() {
                 size="sm"
                 disabled={isRunningCode || isSubmittingCode || isContestOver}
                 onClick={handleSubmitCode}
-                className="h-7 px-3 text-xs font-mono font-semibold rounded-md bg-emerald-600 text-white hover:bg-emerald-500 cursor-pointer transition-colors"
+                className="font-mono text-xs font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)]"
               >
-                <Send className="size-2.5 fill-current" />
+                <Send className="size-3 fill-current" />
                 <span>Submit</span>
               </Button>
             </div>
@@ -1947,28 +1978,28 @@ export function ContestArenaPage() {
         </div>
       </div>
 
-      {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) */}
+      {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) in Strix AI Theme */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="border border-white/10 bg-[#121214] text-white p-6 max-w-lg rounded-xl shadow-2xl">
+        <DialogContent className="border border-white/10 bg-zinc-950 text-white p-6 max-w-lg rounded-lg shadow-2xl">
           <DialogHeader className="space-y-1.5 text-left">
             <DialogTitle className="text-base font-semibold text-white tracking-tight flex items-center gap-2">
-              <Settings className="size-4 text-emerald-400" />
+              <Settings className="size-4 text-lime-400" />
               <span>Contest Workspace Settings</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-zinc-400 font-sans">
+            <DialogDescription className="text-xs text-zinc-400 font-mono">
               Personalize editor typography, formatting, and inspect keyboard bindings.
             </DialogDescription>
           </DialogHeader>
 
           {/* Settings Tabs */}
-          <div className="flex items-center gap-1 border-b border-white/10 pb-2 pt-1 text-xs font-sans">
+          <div className="flex items-center gap-1 border-b border-white/10 pb-2 pt-1 text-xs font-mono">
             <button
               type="button"
               onClick={() => setActiveSettingsTab("editor")}
               className={`px-3 py-1 rounded transition-colors cursor-pointer ${
                 activeSettingsTab === "editor"
-                  ? "bg-white/10 text-white font-medium"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
               Code Editor
@@ -1978,8 +2009,8 @@ export function ContestArenaPage() {
               onClick={() => setActiveSettingsTab("shortcuts")}
               className={`px-3 py-1 rounded transition-colors cursor-pointer ${
                 activeSettingsTab === "shortcuts"
-                  ? "bg-white/10 text-white font-medium"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
               Shortcuts
@@ -1989,22 +2020,22 @@ export function ContestArenaPage() {
               onClick={() => setActiveSettingsTab("timer")}
               className={`px-3 py-1 rounded transition-colors cursor-pointer ${
                 activeSettingsTab === "timer"
-                  ? "bg-white/10 text-white font-medium"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
               Contest Clock
             </button>
           </div>
 
-          <div className="py-3 text-xs">
+          <div className="py-3 text-xs font-mono">
             {activeSettingsTab === "editor" && (
-              <div className="space-y-4 font-sans">
+              <div className="space-y-4">
                 {/* Font Size */}
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-zinc-200 font-medium">Font Size</div>
-                    <div className="text-[11px] text-zinc-500">Editor character rendering scale</div>
+                    <div className="text-[11px] text-zinc-500">Editor character scale</div>
                   </div>
                   <div className="flex items-center gap-1">
                     {[12, 13, 14, 15, 16].map((size) => (
@@ -2017,10 +2048,10 @@ export function ContestArenaPage() {
                             localStorage.setItem("ccc_editor_font_size", String(size));
                           } catch {}
                         }}
-                        className={`size-7 rounded font-mono text-xs transition-colors cursor-pointer ${
+                        className={`size-7 rounded font-mono text-xs transition-colors cursor-pointer border ${
                           editorFontSize === size
-                            ? "bg-emerald-500 text-black font-bold"
-                            : "bg-[#18181b] text-zinc-400 hover:text-white hover:bg-white/10"
+                            ? "bg-lime-400 text-black border-lime-400 font-bold"
+                            : "bg-black text-zinc-400 border-white/10 hover:border-lime-400 hover:text-white"
                         }`}
                       >
                         {size}
@@ -2033,7 +2064,7 @@ export function ContestArenaPage() {
                 <div className="flex items-center justify-between border-t border-white/5 pt-3">
                   <div>
                     <div className="text-zinc-200 font-medium">Word Wrap</div>
-                    <div className="text-[11px] text-zinc-500">Wrap long lines instead of horizontal scroll</div>
+                    <div className="text-[11px] text-zinc-500">Wrap long lines to fit editor viewport</div>
                   </div>
                   <button
                     type="button"
@@ -2046,8 +2077,8 @@ export function ContestArenaPage() {
                     }}
                     className={`px-3 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
                       editorWordWrap
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold"
-                        : "bg-[#18181b] text-zinc-500 border border-white/10"
+                        ? "bg-lime-400/20 text-lime-400 border border-lime-400/40 font-semibold"
+                        : "bg-black text-zinc-500 border border-white/10"
                     }`}
                   >
                     {editorWordWrap ? "Enabled" : "Disabled"}
@@ -2058,7 +2089,7 @@ export function ContestArenaPage() {
                 <div className="flex items-center justify-between border-t border-white/5 pt-3">
                   <div>
                     <div className="text-zinc-200 font-medium">Tab Indentation</div>
-                    <div className="text-[11px] text-zinc-500">Spaces per indentation level</div>
+                    <div className="text-[11px] text-zinc-500">Spaces per tab indentation level</div>
                   </div>
                   <div className="flex items-center gap-1">
                     {[2, 4].map((spaces) => (
@@ -2071,10 +2102,10 @@ export function ContestArenaPage() {
                             localStorage.setItem("ccc_editor_tab_size", String(spaces));
                           } catch {}
                         }}
-                        className={`px-3 py-1 rounded font-mono text-xs transition-colors cursor-pointer ${
+                        className={`px-3 py-1 rounded font-mono text-xs transition-colors cursor-pointer border ${
                           editorTabSize === spaces
-                            ? "bg-emerald-500 text-black font-bold"
-                            : "bg-[#18181b] text-zinc-400 hover:text-white hover:bg-white/10"
+                            ? "bg-lime-400 text-black border-lime-400 font-bold"
+                            : "bg-black text-zinc-400 border-white/10 hover:border-lime-400 hover:text-white"
                         }`}
                       >
                         {spaces} Spaces
@@ -2087,40 +2118,40 @@ export function ContestArenaPage() {
 
             {activeSettingsTab === "shortcuts" && (
               <div className="space-y-2 font-mono text-xs">
-                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
-                  <span className="text-zinc-300 font-sans">Run Code</span>
-                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌘ ' / Ctrl + '</kbd>
+                <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
+                  <span className="text-zinc-300">Run Code</span>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-lime-400 border border-white/10 font-bold">⌘ ' / Ctrl + '</kbd>
                 </div>
-                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
-                  <span className="text-zinc-300 font-sans">Submit Solution</span>
-                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌘ ⏎ / Ctrl + Enter</kbd>
+                <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
+                  <span className="text-zinc-300">Submit Solution</span>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-lime-400 border border-white/10 font-bold">⌘ ⏎ / Ctrl + Enter</kbd>
                 </div>
-                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
-                  <span className="text-zinc-300 font-sans">Previous Question</span>
-                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌥ ← / Alt + Left</kbd>
+                <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
+                  <span className="text-zinc-300">Previous Question</span>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-white/10">⌥ ← / Alt + Left</kbd>
                 </div>
-                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
-                  <span className="text-zinc-300 font-sans">Next Question</span>
-                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌥ → / Alt + Right</kbd>
+                <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
+                  <span className="text-zinc-300">Next Question</span>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-white/10">⌥ → / Alt + Right</kbd>
                 </div>
               </div>
             )}
 
             {activeSettingsTab === "timer" && (
-              <div className="space-y-3 font-sans text-xs">
-                <div className="p-3 bg-black/50 border border-white/8 rounded-lg space-y-2">
-                  <div className="flex items-center justify-between font-mono">
+              <div className="space-y-3 font-mono text-xs">
+                <div className="p-3 bg-black border border-white/8 rounded-md space-y-2">
+                  <div className="flex items-center justify-between">
                     <span className="text-zinc-400">Contest Remaining:</span>
-                    <span className="text-emerald-400 font-semibold tabular-nums text-sm">
+                    <span className="text-lime-400 font-semibold tabular-nums text-sm">
                       {formatTimer(remainingSeconds)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between font-mono border-t border-white/5 pt-2">
+                  <div className="flex items-center justify-between border-t border-white/5 pt-2">
                     <span className="text-zinc-400">Official Status:</span>
                     <span className="text-zinc-200">{arenaData?.status || "Live"}</span>
                   </div>
                 </div>
-                <p className="text-zinc-500 text-[11px] leading-relaxed">
+                <p className="text-zinc-500 text-[11px] leading-relaxed font-sans">
                   The contest clock is synchronized to server time via WebSockets. Solutions submitted after the clock expires will not receive contest points.
                 </p>
               </div>
@@ -2131,7 +2162,7 @@ export function ContestArenaPage() {
             <Button
               type="button"
               onClick={() => setShowSettingsModal(false)}
-              className="w-full rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-sans text-xs font-semibold cursor-pointer"
+              className="w-full rounded-md bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs font-bold cursor-pointer transition-colors"
             >
               Done
             </Button>
@@ -2180,7 +2211,7 @@ export function ContestArenaPage() {
               </div>
               <button
                 onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-                className="font-mono text-xs font-semibold uppercase text-white border border-white/20 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer"
+                className="font-mono text-xs font-semibold uppercase text-white border border-white/20 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer [&_svg]:transition-colors"
               >
                 View Final Results →
               </button>
