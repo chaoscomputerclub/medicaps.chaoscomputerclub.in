@@ -11,9 +11,13 @@ import {
   BadgeCheck,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Copy,
   Cpu,
+  GripHorizontal,
+  GripVertical,
   Maximize2,
   Minimize2,
   Play,
@@ -116,6 +120,138 @@ export function ContestArenaPage() {
 
   const contestOverRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // LeetCode-style Draggable Splitters (Width & Height)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rightPaneRef = useRef<HTMLDivElement>(null);
+
+  const [leftWidthPercent, setLeftWidthPercent] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("ccc_arena_split_width");
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed >= 20 && parsed <= 80) return parsed;
+      }
+    }
+    return 45; // Default 45% problem, 55% editor
+  });
+
+  const [drawerHeight, setDrawerHeight] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("ccc_arena_drawer_height");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 100 && parsed <= 800) return parsed;
+      }
+    }
+    return 240; // Default 240px console drawer height
+  });
+
+  const [isDrawerCollapsed, setIsDrawerCollapsed] = useState(false);
+  const [isDraggingWidth, setIsDraggingWidth] = useState(false);
+  const [isDraggingHeight, setIsDraggingHeight] = useState(false);
+
+  // Horizontal Width Dragging
+  useEffect(() => {
+    if (!isDraggingWidth) return;
+
+    const handleMove = (clientX: number) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const rawPercent = ((clientX - rect.left) / rect.width) * 100;
+      const clamped = Math.min(Math.max(rawPercent, 20), 80);
+      setLeftWidthPercent(clamped);
+    };
+
+    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) handleMove(e.touches[0].clientX);
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingWidth(false);
+      setLeftWidthPercent((current) => {
+        try {
+          localStorage.setItem("ccc_arena_split_width", current.toFixed(1));
+        } catch {}
+        return current;
+      });
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchmove", onTouchMove);
+    window.addEventListener("touchend", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onMouseUp);
+    };
+  }, [isDraggingWidth]);
+
+  // Vertical Height Dragging
+  useEffect(() => {
+    if (!isDraggingHeight) return;
+
+    const handleMove = (clientY: number) => {
+      if (!rightPaneRef.current) return;
+      const rect = rightPaneRef.current.getBoundingClientRect();
+      // Distance from bottom of right pane minus 44px footer
+      const newHeight = rect.bottom - clientY - 44;
+      const maxHeight = Math.max(rect.height - 150, 200);
+      const clamped = Math.min(Math.max(newHeight, 90), maxHeight);
+      setDrawerHeight(clamped);
+      if (isDrawerCollapsed && clamped > 70) {
+        setIsDrawerCollapsed(false);
+      }
+    };
+
+    const onMouseMove = (e: MouseEvent) => handleMove(e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) handleMove(e.touches[0].clientY);
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingHeight(false);
+      setDrawerHeight((current) => {
+        try {
+          localStorage.setItem("ccc_arena_drawer_height", Math.round(current).toString());
+        } catch {}
+        return current;
+      });
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchmove", onTouchMove);
+    window.addEventListener("touchend", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onMouseUp);
+    };
+  }, [isDraggingHeight, isDrawerCollapsed]);
+
+  const handleResetWidth = () => {
+    setLeftWidthPercent(50);
+    try {
+      localStorage.setItem("ccc_arena_split_width", "50");
+    } catch {}
+    toast.info("Reset pane width (50/50)");
+  };
+
+  const handleResetHeight = () => {
+    setDrawerHeight(240);
+    setIsDrawerCollapsed(false);
+    try {
+      localStorage.setItem("ccc_arena_drawer_height", "240");
+    } catch {}
+    toast.info("Reset console height (240px)");
+  };
+
   // Sync remaining contest clock
   const [remainingSeconds, setRemainingSeconds] = useState<number>(7200);
   const [isContestOver, setIsContestOver] = useState(false);
@@ -216,6 +352,7 @@ export function ContestArenaPage() {
 
   const handleRunCode = async () => {
     if (!activeProblem) return;
+    setIsDrawerCollapsed(false);
     setActiveConsoleTab("output");
     const result = await dispatch(
       runArenaCodeThunk({
@@ -241,6 +378,7 @@ export function ContestArenaPage() {
 
   const handleSubmitCode = async () => {
     if (!activeProblem) return;
+    setIsDrawerCollapsed(false);
     setActiveConsoleTab("output");
     const result = await dispatch(
       submitArenaCodeThunk({
@@ -489,9 +627,12 @@ export function ContestArenaPage() {
       </div>
 
       {/* Main 2-Pane Split */}
-      <div className="flex-1 flex overflow-hidden">
+      <div ref={containerRef} className="flex-1 flex overflow-hidden relative">
         {/* Left: Problem Statement Pane */}
-        <div className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-5 bg-black">
+        <div
+          style={{ width: `${leftWidthPercent}%` }}
+          className="border-r border-white/8 overflow-y-auto p-6 space-y-5 bg-black shrink-0 min-w-[260px] max-w-[calc(100%-280px)]"
+        >
           {activeProblem ? (
             <div className="space-y-5">
               <div className="border-b border-white/8 pb-3 space-y-1">
@@ -586,9 +727,44 @@ export function ContestArenaPage() {
           )}
         </div>
 
+        {/* LeetCode-style Draggable Width Adjuster */}
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize problem pane and code editor"
+          onMouseDown={() => setIsDraggingWidth(true)}
+          onTouchStart={() => setIsDraggingWidth(true)}
+          onDoubleClick={handleResetWidth}
+          className={`group relative flex items-center justify-center w-2 -mx-1 z-20 cursor-col-resize select-none shrink-0 transition-colors ${
+            isDraggingWidth ? "bg-lime-400/20" : "hover:bg-lime-400/10"
+          }`}
+          title="Drag to resize pane width · Double-click to reset (50/50)"
+        >
+          <div
+            className={`w-px h-full transition-colors ${
+              isDraggingWidth
+                ? "bg-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.8)]"
+                : "bg-white/10 group-hover:bg-lime-400/80"
+            }`}
+          />
+          <div
+            className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-3.5 h-7 rounded-full border shadow-sm transition-all pointer-events-none ${
+              isDraggingWidth
+                ? "bg-lime-400 border-lime-400 text-black scale-110"
+                : "bg-zinc-900 border-white/20 text-zinc-400 group-hover:border-lime-400 group-hover:bg-black group-hover:text-lime-400"
+            }`}
+          >
+            <GripVertical className="size-2.5" />
+          </div>
+        </div>
+
         {/* Right: Editor & Drawer */}
-        <div className="w-1/2 flex flex-col bg-black">
-          <div className="flex-1 relative overflow-hidden bg-black">
+        <div
+          ref={rightPaneRef}
+          className="flex-1 flex flex-col bg-black min-w-0 h-full overflow-hidden relative"
+        >
+          {/* Top: Editor */}
+          <div className="flex-1 relative overflow-hidden bg-black min-h-0">
             <MonacoEditor
               value={currentCode}
               language={selectedLanguage}
@@ -596,14 +772,55 @@ export function ContestArenaPage() {
             />
           </div>
 
+          {/* LeetCode-style Draggable Height Adjuster */}
+          {!isDrawerCollapsed && (
+            <div
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label="Resize console drawer"
+              onMouseDown={() => setIsDraggingHeight(true)}
+              onTouchStart={() => setIsDraggingHeight(true)}
+              onDoubleClick={handleResetHeight}
+              className={`group relative flex items-center justify-center h-2 -my-1 z-20 cursor-row-resize select-none shrink-0 transition-colors ${
+                isDraggingHeight ? "bg-lime-400/20" : "hover:bg-lime-400/10"
+              }`}
+              title="Drag to adjust console height · Double-click to reset (240px)"
+            >
+              <div
+                className={`h-px w-full transition-colors ${
+                  isDraggingHeight
+                    ? "bg-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.8)]"
+                    : "bg-white/10 group-hover:bg-lime-400/80"
+                }`}
+              />
+              <div
+                className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-3.5 w-7 rounded-full border shadow-sm transition-all pointer-events-none ${
+                  isDraggingHeight
+                    ? "bg-lime-400 border-lime-400 text-black scale-110"
+                    : "bg-zinc-900 border-white/20 text-zinc-400 group-hover:border-lime-400 group-hover:bg-black group-hover:text-lime-400"
+                }`}
+              >
+                <GripHorizontal className="size-2.5" />
+              </div>
+            </div>
+          )}
+
           {/* Execution Drawer */}
-          <div className="h-56 flex flex-col border-t border-white/8 bg-black">
+          <div
+            style={{ height: isDrawerCollapsed ? "0px" : `${drawerHeight}px` }}
+            className={`flex flex-col border-t border-white/8 bg-black shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
+              isDrawerCollapsed ? "border-t-0" : ""
+            }`}
+          >
             {/* Drawer Tab Header */}
             <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => setActiveConsoleTab("testcases")}
+                  onClick={() => {
+                    setActiveConsoleTab("testcases");
+                    if (isDrawerCollapsed) setIsDrawerCollapsed(false);
+                  }}
                   className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
                       ? "bg-zinc-900 text-white font-semibold"
@@ -614,7 +831,10 @@ export function ContestArenaPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveConsoleTab("output")}
+                  onClick={() => {
+                    setActiveConsoleTab("output");
+                    if (isDrawerCollapsed) setIsDrawerCollapsed(false);
+                  }}
                   className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
                       ? "bg-zinc-900 text-white font-semibold"
@@ -638,178 +858,218 @@ export function ContestArenaPage() {
                   )}
                 </button>
               </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setIsDrawerCollapsed(true)}
+                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-900 cursor-pointer transition-colors"
+                  title="Collapse Console"
+                >
+                  <span className="hidden sm:inline">Collapse</span>
+                  <ChevronDown className="size-3" />
+                </button>
+              </div>
             </div>
 
             {/* Drawer Content */}
-            <div className="flex-1 overflow-y-auto p-3 font-mono text-xs">
-              {activeConsoleTab === "testcases" ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1.5">
-                    {activeProblem?.sample_testcases?.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setActiveTestcaseIndex(i)}
-                        className={`px-2 py-0.5 text-xs font-mono rounded ${
-                          activeTestcaseIndex === i
-                            ? "bg-zinc-900 text-white border border-white/10"
-                            : "text-zinc-500 hover:text-white"
-                        }`}
-                      >
-                        Case {i + 1}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setActiveTestcaseIndex(-1)}
-                      className={`px-2 py-0.5 text-xs font-mono rounded ${
-                        activeTestcaseIndex === -1
-                          ? "bg-zinc-900 text-white border border-white/10"
-                          : "text-zinc-500 hover:text-white"
-                      }`}
-                    >
-                      Custom
-                    </button>
-                  </div>
-
-                  {activeTestcaseIndex === -1 ? (
-                    <textarea
-                      value={customStdin}
-                      onChange={(e) => setCustomStdin(e.target.value)}
-                      placeholder="Enter custom input stdin..."
-                      className="w-full h-20 p-2 rounded bg-black border border-white/10 text-zinc-300 font-mono text-xs resize-none focus:outline-none focus:border-lime-400"
-                    />
-                  ) : (
-                    activeProblem?.sample_testcases?.[activeTestcaseIndex] && (
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                            Standard Input
-                          </span>
-                          <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white">
-                            {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
-                          </pre>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                            Expected Output
-                          </span>
-                          <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-lime-400">
-                            {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
-                          </pre>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                /* Output Tab */
-                <div className="space-y-3">
-                  {submitResult ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        {submitResult.verdict === "ACCEPTED" ? (
-                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-semibold text-xs uppercase font-sans">
-                            <CheckCircle2 className="size-3.5 text-emerald-400" /> Accepted
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-red-500/30 bg-red-950/40 text-red-400 font-semibold text-xs uppercase font-sans">
-                            <XCircle className="size-3.5" /> {submitResult.verdict}
-                          </div>
-                        )}
-                        <span className="text-zinc-600">·</span>
-                        <span className="text-white font-sans tabular-nums">
-                          {submitResult.passed_testcases} / {submitResult.total_testcases} passed
-                        </span>
-                        {submitResult.points_awarded > 0 && (
-                          <Badge className="bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 rounded font-sans text-[10px] tabular-nums">
-                            +{submitResult.points_awarded} pts
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-zinc-400 font-sans">{submitResult.message}</p>
-                    </div>
-                  ) : runResult ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 font-sans">
-                        <span
-                          className={`font-semibold uppercase text-xs ${
-                            runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-amber-400"
+            {!isDrawerCollapsed && (
+              <div className="flex-1 overflow-y-auto p-3 font-mono text-xs">
+                {activeConsoleTab === "testcases" ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-1.5">
+                      {activeProblem?.sample_testcases?.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setActiveTestcaseIndex(i)}
+                          className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+                            activeTestcaseIndex === i
+                              ? "bg-zinc-800 text-white font-semibold"
+                              : "text-zinc-500 hover:text-white bg-zinc-950"
                           }`}
                         >
-                          Verdict: {runResult.verdict}
-                        </span>
-                        {runResult.time !== undefined && (
-                          <span className="text-zinc-500 text-xs tabular-nums">
-                            ({Math.round(runResult.time * 1000)}ms)
+                          Case {i + 1}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setActiveTestcaseIndex(-1)}
+                        className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer ${
+                          activeTestcaseIndex === -1
+                            ? "bg-zinc-800 text-white font-semibold"
+                            : "text-zinc-500 hover:text-white bg-zinc-950"
+                        }`}
+                      >
+                        Custom Stdin
+                      </button>
+                    </div>
+
+                    {activeTestcaseIndex === -1 ? (
+                      <div>
+                        <textarea
+                          value={customStdin}
+                          onChange={(e) => setCustomStdin(e.target.value)}
+                          placeholder="Enter custom stdin test values..."
+                          className="w-full h-20 p-2 bg-black border border-white/8 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400/60"
+                        />
+                      </div>
+                    ) : (
+                      activeProblem?.sample_testcases?.[activeTestcaseIndex] && (
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                              Stdin
+                            </span>
+                            <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white">
+                              {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
+                            </pre>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                              Expected Output
+                            </span>
+                            <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-lime-400">
+                              {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
+                            </pre>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  /* Output Tab */
+                  <div className="space-y-3">
+                    {submitResult ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          {submitResult.verdict === "ACCEPTED" ? (
+                            <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs uppercase font-sans">
+                              <CheckCircle2 className="size-4" /> Accepted
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 text-red-400 font-bold text-xs uppercase font-sans">
+                              <XCircle className="size-4" /> {submitResult.verdict}
+                            </div>
+                          )}
+                          <span className="text-zinc-600">·</span>
+                          <span className="text-zinc-300 font-sans text-xs">
+                            {submitResult.passed_testcases} / {submitResult.total_testcases} passed
                           </span>
+                          {submitResult.points_awarded > 0 && (
+                            <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">
+                              +{submitResult.points_awarded} pts
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-zinc-400 font-sans">{submitResult.message}</p>
+                      </div>
+                    ) : runResult ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 font-sans">
+                          <span
+                            className={`font-semibold uppercase text-xs ${
+                              runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-amber-400"
+                            }`}
+                          >
+                            Verdict: {runResult.verdict}
+                          </span>
+                          {runResult.time !== undefined && (
+                            <span className="text-zinc-500 text-xs tabular-nums">
+                              ({Math.round(runResult.time * 1000)}ms)
+                            </span>
+                          )}
+                        </div>
+                        {runResult.stdout && (
+                          <div>
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
+                              Stdout
+                            </span>
+                            <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
+                              {runResult.stdout}
+                            </pre>
+                          </div>
+                        )}
+                        {runResult.stderr && (
+                          <div>
+                            <span className="text-[10px] text-red-400 uppercase tracking-wider font-mono">
+                              Stderr
+                            </span>
+                            <pre className="p-2 bg-black border border-red-500/20 rounded text-xs text-red-400 overflow-x-auto">
+                              {runResult.stderr}
+                            </pre>
+                          </div>
                         )}
                       </div>
-                      {runResult.stdout && (
-                        <div>
-                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
-                            Stdout
-                          </span>
-                          <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
-                            {runResult.stdout}
-                          </pre>
-                        </div>
-                      )}
-                      {runResult.stderr && (
-                        <div>
-                          <span className="text-[10px] text-red-400 uppercase tracking-wider font-mono">
-                            Stderr
-                          </span>
-                          <pre className="p-2 bg-black border border-red-500/20 rounded text-xs text-red-400 overflow-x-auto">
-                            {runResult.stderr}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-zinc-600 text-center py-6 font-mono text-xs">
-                      Run code against sample cases or submit for evaluation.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+                    ) : (
+                      <p className="text-zinc-600 text-center py-6 font-mono text-xs">
+                        Run code against sample cases or submit for evaluation.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
-            {/* Action Footer */}
-            <div className="h-11 px-4 border-t border-white/8 flex items-center justify-between bg-black">
+          {/* Action Footer */}
+          <div className="h-11 px-4 border-t border-white/8 flex items-center justify-between bg-black shrink-0">
+            <div className="flex items-center gap-3">
+              {/* LeetCode-style Console Toggle */}
+              <button
+                type="button"
+                onClick={() => setIsDrawerCollapsed((prev) => !prev)}
+                className="flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-950 border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
+                title={isDrawerCollapsed ? "Open Console Drawer" : "Close Console Drawer"}
+              >
+                <Terminal className="size-3 text-lime-400" />
+                <span>Console</span>
+                {isDrawerCollapsed ? <ChevronUp className="size-3 text-zinc-500" /> : <ChevronDown className="size-3 text-zinc-500" />}
+              </button>
+
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
                 <span className={`size-1.5 rounded-full ${isContestOver ? 'bg-red-500' : 'bg-lime-400'}`} />
                 <span>{isContestOver ? 'Contest locked' : 'Workstation online'}</span>
               </div>
+            </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isRunningCode || isSubmittingCode || isContestOver}
-                  onClick={handleRunCode}
-                  className="font-mono text-xs font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors"
-                >
-                  <Play className="size-3 fill-current" />
-                  <span>{isRunningCode ? "Running…" : "Run"}</span>
-                </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isRunningCode || isSubmittingCode || isContestOver}
+                onClick={handleRunCode}
+                className="font-mono text-xs font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors"
+              >
+                <Play className="size-3 fill-current" />
+                <span>{isRunningCode ? "Running…" : "Run"}</span>
+              </Button>
 
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={isRunningCode || isSubmittingCode || isContestOver}
-                  onClick={handleSubmitCode}
-                  className="font-mono text-xs font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)]"
-                >
-                  <Send className="size-3 fill-current" />
-                  <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
-                </Button>
-              </div>
+              <Button
+                type="button"
+                size="sm"
+                disabled={isRunningCode || isSubmittingCode || isContestOver}
+                onClick={handleSubmitCode}
+                className="font-mono text-xs font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)]"
+              >
+                <Send className="size-3 fill-current" />
+                <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
+              </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Overlay during drag to prevent mouse capturing or text selection */}
+      {(isDraggingWidth || isDraggingHeight) && (
+        <div
+          className={`fixed inset-0 z-50 select-none ${
+            isDraggingWidth ? "cursor-col-resize" : "cursor-row-resize"
+          }`}
+          style={{ userSelect: "none" }}
+        />
+      )}
 
       {/* Contest Over Overlay */}
       {isContestOver && (
