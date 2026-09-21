@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, registerContestThunk } from "@/store/slices/contestSlice";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
   ArrowLeft,
   Calendar,
@@ -21,7 +22,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { invalidateSwrCache } from "@/lib/cache/swrCache";
+
 import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 
@@ -107,7 +108,13 @@ export function ContestOverviewPage() {
     }
   };
 
-  if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
+  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
+  const cachedContest = !contest && contestSlug
+    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
+    : null;
+  const resolvedContest = contest ?? cachedContest;
+
+  if (isLoadingDetail && !resolvedContest) return <ContestDetailSkeleton />;
   if (!contest) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">

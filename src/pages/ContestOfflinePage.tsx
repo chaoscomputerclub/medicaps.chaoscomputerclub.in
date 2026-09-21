@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { globalSwrStore } from "@/lib/cache/swrCache";
 import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft,
@@ -60,7 +61,13 @@ export function ContestOfflinePage() {
     }
   };
 
-  if (isLoadingDetail && !contest) {
+  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
+  const cachedContest = !contest && contestSlug
+    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
+    : null;
+  const resolvedContest = contest ?? cachedContest;
+
+  if (isLoadingDetail && !resolvedContest) {
     return <ContestOfflineSkeleton />;
   }
 

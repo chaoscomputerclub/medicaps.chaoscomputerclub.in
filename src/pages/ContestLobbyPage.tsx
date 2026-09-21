@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
+import { globalSwrStore } from "@/lib/cache/swrCache";
 import {
   ASSESSMENT_DURATION_MINUTES,
   ASSESSMENT_WINDOW_HOURS,
@@ -43,11 +44,18 @@ export function ContestLobbyPage() {
     }
   }, [contestSlug, dispatch]);
 
-  if (isLoadingDetail && !contest) {
+  // On reload, Redux resets to null while the thunk is in-flight.
+  // Hydrate from SWR sessionStorage cache instantly — zero skeleton flash.
+  const cachedContest = !contest && contestSlug
+    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
+    : null;
+  const resolvedContest = contest ?? cachedContest;
+
+  if (isLoadingDetail && !resolvedContest) {
     return <ContestLobbySkeleton />;
   }
 
-  if (!contest) {
+  if (!resolvedContest) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
         Contest not found.
@@ -55,7 +63,7 @@ export function ContestLobbyPage() {
     );
   }
 
-  const phase = contestPhase(contest, registration ?? null);
+  const phase = contestPhase(resolvedContest, registration ?? null);
   const isInProgress = Boolean(
     registration?.can_resume_assessment ||
     (registration?.assessment_status === "in_progress" && !registration?.assessment_taken)
@@ -67,7 +75,7 @@ export function ContestLobbyPage() {
       registration?.assessment_status === "submitted"
     )
   );
-  const opensAt = assessmentOpensAt(contest);
+  const opensAt = assessmentOpensAt(resolvedContest);
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const notYetOpen = phase === "registration_open" && !isDevBypass;
   const canStart =

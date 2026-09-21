@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { FINALIST_SEATS, formatWhen } from "@/features/contest/lifecycle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, fetchCampusPassThunk } from "@/store/slices/contestSlice";
-import { invalidateSwrCache } from "@/lib/cache/swrCache";
+import { invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
 import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { PageHeader, SectionHeader } from "@/organization/components/ui";
@@ -100,7 +100,13 @@ export function ContestQualifiedPage() {
     };
   }, [contestSlug, refreshData]);
 
-  if (isLoadingDetail && !contest) {
+  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
+  const cachedContest = !contest && contestSlug
+    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
+    : null;
+  const resolvedContest = contest ?? cachedContest;
+
+  if (isLoadingDetail && !resolvedContest) {
     return <ContestOfflineSkeleton />;
   }
 
