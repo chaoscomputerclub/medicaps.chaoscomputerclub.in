@@ -26,7 +26,7 @@ export function RatingDistributionCard({
 
   let percentileDisplay = "—";
   if (hasAttended && member?.university_rank) {
-    const cohortTotal = Math.max(distribution?.total || 1, 1);
+    const cohortTotal = Math.max(distribution?.total || (member as any)?.active_members || 1, 1);
     const rank = Math.max(1, member.university_rank || 1);
     const pct = (rank / cohortTotal) * 100;
     percentileDisplay = pct < 1 ? `Top ${pct.toFixed(2)}%` : `Top ${pct.toFixed(1)}%`;
@@ -37,7 +37,7 @@ export function RatingDistributionCard({
 
   const buckets = distribution?.buckets ?? [];
   const total = distribution?.total ?? 0;
-  const isEmpty = total === 0 || buckets.length === 0;
+  const isEmpty = !loading && (total === 0 || buckets.length === 0);
   const maxCount = isEmpty ? 1 : Math.max(...buckets.map((b) => b.count), 1);
 
   const memberRating = userRating ?? member?.rating ?? 1200;

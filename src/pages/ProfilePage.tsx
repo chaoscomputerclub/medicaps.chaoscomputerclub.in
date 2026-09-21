@@ -150,7 +150,7 @@ export function ProfilePage() {
     { ttl: 5 * 60 * 1000, enabled: !isViewingSelf }
   );
 
-  const { data: distribution } = useSwrData(
+  const { data: distribution, loading: distLoading } = useSwrData(
     "leaderboard:distribution",
     () => getRatingDistribution(),
     { ttl: 10 * 60 * 1000 }
@@ -193,8 +193,8 @@ export function ProfilePage() {
       </div>
     );
   }
-  const history = activeData.history || [];
-  const battles = activeData.battles || [];
+  const history = activeData.history || activeData.ratingHistory || [];
+  const battles = activeData.battles || activeData.recentBattles || [];
   const achievements = activeData.achievements || [];
   const proofs = activeData.proofs || [];
 
@@ -204,7 +204,14 @@ export function ProfilePage() {
     (currentMember?.handle && (m.handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase())
   );
 
-  const enrollmentNo = m.enrollment_number || m.enrollment_no || m.enrollment || "—";
+  const enrollmentNo =
+    m.enrollment_number ||
+    m.enrollment_no ||
+    m.enrollment ||
+    (m.prn && m.prn !== "N/A" && m.prn !== "—" ? m.prn : null) ||
+    (m.email && m.email.includes("@") && /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
+      ? m.email.split("@")[0].toUpperCase()
+      : "—");
   const formattedFullName = formatFullName(m.first_name, m.last_name, m.full_name);
   const displayName = formattedFullName || m.handle || "Cadet";
 
@@ -552,7 +559,11 @@ export function ProfilePage() {
           <RatingChart data={history} />
         </div>
         <div>
-          <RatingDistributionCard member={m} distribution={distribution} />
+          <RatingDistributionCard
+            member={m}
+            distribution={distribution}
+            loading={distLoading && !distribution}
+          />
         </div>
       </section>
 

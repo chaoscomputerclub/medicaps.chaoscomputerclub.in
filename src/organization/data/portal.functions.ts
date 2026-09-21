@@ -126,10 +126,18 @@ export async function getMemberProfileData(force = false) {
         }
         if (res.ok) {
           const data = await res.json();
+          const rHistory = Array.isArray(data.ratingHistory)
+            ? data.ratingHistory
+            : (Array.isArray(data.history) ? data.history : []);
+          const rBattles = Array.isArray(data.recentBattles)
+            ? data.recentBattles
+            : (Array.isArray(data.battles) ? data.battles : []);
           return {
             member: data.member || null,
-            ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
-            recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
+            ratingHistory: rHistory,
+            history: rHistory,
+            recentBattles: rBattles,
+            battles: rBattles,
             campusPass: data.campusPass || null,
             proofs: Array.isArray(data.proofs) ? data.proofs : [],
             achievements: Array.isArray(data.achievements) ? data.achievements : [],
@@ -142,7 +150,9 @@ export async function getMemberProfileData(force = false) {
       return {
         member: null,
         ratingHistory: [],
+        history: [],
         recentBattles: [],
+        battles: [],
         campusPass: null,
         proofs: [],
         achievements: [],
@@ -251,10 +261,18 @@ export async function getStudentProfileData(handle: string, force = false) {
         });
         if (res.ok) {
           const data = await res.json();
+          const rHistory = Array.isArray(data.ratingHistory)
+            ? data.ratingHistory
+            : (Array.isArray(data.history) ? data.history : []);
+          const rBattles = Array.isArray(data.recentBattles)
+            ? data.recentBattles
+            : (Array.isArray(data.battles) ? data.battles : []);
           return {
             member: data.member || null,
-            ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
-            recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
+            ratingHistory: rHistory,
+            history: rHistory,
+            recentBattles: rBattles,
+            battles: rBattles,
             problemStats: data.problemStats || {
               total_solved: 0,
               easy_solved: 0,
@@ -276,7 +294,9 @@ export async function getStudentProfileData(handle: string, force = false) {
       return {
         member: null,
         ratingHistory: [],
+        history: [],
         recentBattles: [],
+        battles: [],
         problemStats: {
           total_solved: 0,
           easy_solved: 0,
