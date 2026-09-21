@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-21T10:35:40.870Z",
-  "totalElements": 252,
-  "functionalCount": 252,
+  "timestamp": "2026-09-21T10:51:37.386Z",
+  "totalElements": 253,
+  "functionalCount": 253,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 31,
     "backendQueries": 6,
-    "routingNavigation": 160,
+    "routingNavigation": 161,
     "clientUiState": 36,
     "conditionalLocked": 13,
     "uiPrimitiveWrappers": 6,
@@ -18,8 +18,8 @@
       "file": "src/AppRoutes.tsx",
       "line": 30,
       "tag": "<Navigate>",
-      "label": "[to={/portal/profile/${handle ? enco...",
-      "handler": "{`/portal/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
+      "label": "[to={/profile/${handle ? encodeURICo...",
+      "handler": "{`/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -27,26 +27,35 @@
       "file": "src/AppRoutes.tsx",
       "line": 35,
       "tag": "<Navigate>",
-      "label": "[to={/portal/contests/${contestSlug ...",
-      "handler": "{`/portal/contests/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}`}",
+      "label": "[to={/contests/${contestSlug ? encod...",
+      "handler": "{`/contests/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 43,
+      "line": 41,
       "tag": "<Navigate>",
-      "label": "[to=/portal]",
-      "handler": "\"/portal\"",
+      "label": "[to={${target}${location.search}${lo...",
+      "handler": "{`${target}${location.search}${location.hash}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 98,
+      "line": 54,
       "tag": "<Navigate>",
-      "label": "[to=/portal]",
-      "handler": "\"/portal\"",
+      "label": "[to=/]",
+      "handler": "\"/\"",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/AppRoutes.tsx",
+      "line": 105,
+      "tag": "<Navigate>",
+      "label": "[to=/]",
+      "handler": "\"/\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -64,7 +73,7 @@
       "line": 126,
       "tag": "<Button>",
       "label": "Button",
-      "handler": "{() => {\n                  window.location.href = \"/portal\";\n                }}",
+      "handler": "{() => {\n                  window.location.href = \"/\";\n                }}",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
@@ -145,7 +154,7 @@
       "line": 208,
       "tag": "<Link>",
       "label": "Details",
-      "handler": "{`/portal/contests/${contest.slug}`}",
+      "handler": "{`/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -163,7 +172,7 @@
       "line": 213,
       "tag": "<Link>",
       "label": "Standings →",
-      "handler": "{`/portal/contests/${contest.slug}/results`}",
+      "handler": "{`/contests/${contest.slug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -190,7 +199,7 @@
       "line": 132,
       "tag": "<Link>",
       "label": "{event.title}",
-      "handler": "{`/portal/contests/${event.slug}`}",
+      "handler": "{`/contests/${event.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -207,8 +216,8 @@
       "file": "src/lib/guards/AuthGuard.tsx",
       "line": 29,
       "tag": "<Navigate>",
-      "label": "[to=/portal]",
-      "handler": "\"/portal\"",
+      "label": "[to=/]",
+      "handler": "\"/\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -261,8 +270,8 @@
       "file": "src/organization/components/PortalShell.tsx",
       "line": 133,
       "tag": "<Link>",
-      "label": "[to=/portal]",
-      "handler": "\"/portal\"",
+      "label": "[to=/]",
+      "handler": "\"/\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -288,7 +297,7 @@
       "file": "src/organization/components/PortalShell.tsx",
       "line": 165,
       "tag": "<Link>",
-      "label": "[to=/portal]",
+      "label": "[to=/]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
@@ -306,8 +315,8 @@
       "file": "src/organization/components/PortalShell.tsx",
       "line": 208,
       "tag": "<Link>",
-      "label": "[to=/portal/profile]",
-      "handler": "\"/portal/profile\"",
+      "label": "[to=/profile]",
+      "handler": "\"/profile\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -369,7 +378,7 @@
       "file": "src/organization/components/SocialDrawer.tsx",
       "line": 257,
       "tag": "<Link>",
-      "label": "[to={/portal/profile/${student.handl...",
+      "label": "[to={/profile/${student.handle}}]",
       "handler": "{() => dispatch(closeSocialDrawer())}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
@@ -406,7 +415,7 @@
       "line": 299,
       "tag": "<button>",
       "label": "View Standings",
-      "handler": "{() => navigate(`/portal/contests/${contestSlug}/results`)}",
+      "handler": "{() => navigate(`/contests/${contestSlug}/results`)}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -415,13 +424,13 @@
       "line": 306,
       "tag": "<button>",
       "label": "Return to Contest Details",
-      "handler": "{() => navigate(`/portal/contests/${contestSlug}`)}",
+      "handler": "{() => navigate(`/contests/${contestSlug}`)}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 344,
+      "line": 343,
       "tag": "<Button>",
       "label": "Close & Return",
       "handler": "{() => {\n              if (window.opener) window.close();\n              else nav",
@@ -430,16 +439,16 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 379,
+      "line": 378,
       "tag": "<a>",
-      "label": "[href={/portal/contests/${contestSlu...",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "label": "[href={/contests/${contestSlug}/resu...",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 380,
+      "line": 379,
       "tag": "<Button>",
       "label": "View Standings",
       "handler": "none",
@@ -448,7 +457,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 386,
+      "line": 385,
       "tag": "<Button>",
       "label": "{isRegistering ? Registering... : ...",
       "handler": "{handleDirectRegister}",
@@ -457,7 +466,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 396,
+      "line": 395,
       "tag": "<a>",
       "label": "[href={/auth?redirect=/assessments/$...",
       "handler": "{`/auth?redirect=/assessments/${contestSlug}`}",
@@ -466,7 +475,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 397,
+      "line": 396,
       "tag": "<Button>",
       "label": "Sign In to Continue",
       "handler": "none",
@@ -475,7 +484,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 402,
+      "line": 401,
       "tag": "<Button>",
       "label": "Return to Contest Details",
       "handler": "{() => {\n                if (window.opener) window.close();\n                else",
@@ -484,7 +493,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 436,
+      "line": 435,
       "tag": "<button>",
       "label": "{isFullScore && <CheckCircle2 size={1...",
       "handler": "{() => dispatch(setActiveProblemIndex(idx))}",
@@ -493,7 +502,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 504,
+      "line": 503,
       "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 size={13} ...",
       "handler": "{toggleFullscreen}",
@@ -502,7 +511,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 516,
+      "line": 515,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRun}",
@@ -511,7 +520,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 528,
+      "line": 527,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmit}",
@@ -520,7 +529,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 539,
+      "line": 538,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleExitWindow}",
@@ -529,7 +538,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 550,
+      "line": 549,
       "tag": "<Button>",
       "label": "Finish",
       "handler": "{handleFinish}",
@@ -538,7 +547,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 642,
+      "line": 641,
       "tag": "<button>",
       "label": "{copiedIndex === idx ? <Check size={1...",
       "handler": "{() => handleCopy(inputVal, idx)}",
@@ -547,7 +556,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 699,
+      "line": 698,
       "tag": "<button>",
       "label": "Reset Starter",
       "handler": "{() => {\n                if (!activeProblem) return;\n                if (confirm",
@@ -556,7 +565,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 718,
+      "line": 717,
       "tag": "<button>",
       "label": "Testcases",
       "handler": "{() => dispatch(setActiveConsoleTab(\"testcases\"))}",
@@ -565,7 +574,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 729,
+      "line": 728,
       "tag": "<button>",
       "label": "{runResult && (                     <...",
       "handler": "{() => dispatch(setActiveConsoleTab(\"output\"))}",
@@ -574,7 +583,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 900,
+      "line": 899,
       "tag": "<Button>",
       "label": "Acknowledge & Continue",
       "handler": "{() => dispatch(dismissAntiCheatWarning())}",
@@ -676,7 +685,7 @@
       "line": 278,
       "tag": "<Link>",
       "label": "View Finalist Pass",
-      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
+      "handler": "{`/contests/${contestSlug}/qualified`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -703,7 +712,7 @@
       "line": 295,
       "tag": "<Link>",
       "label": "Exit Lobby",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -721,7 +730,7 @@
       "line": 319,
       "tag": "<Link>",
       "label": "Exit",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -739,7 +748,7 @@
       "line": 368,
       "tag": "<Link>",
       "label": "Scoreboard",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -838,7 +847,7 @@
       "line": 786,
       "tag": "<button>",
       "label": "View Final Results →",
-      "handler": "{() => navigate(`/portal/contests/${contestSlug}/final-results`)}",
+      "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -847,7 +856,7 @@
       "line": 54,
       "tag": "<Link>",
       "label": "Back to {contest?.title ?? Contest}",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -856,7 +865,7 @@
       "line": 152,
       "tag": "<Link>",
       "label": "{row.full_name}",
-      "handler": "{`/portal/profile/${row.handle}`}",
+      "handler": "{`/profile/${row.handle}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -874,7 +883,7 @@
       "line": 182,
       "tag": "<Link>",
       "label": "Back to Contest Details",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -883,7 +892,7 @@
       "line": 80,
       "tag": "<Link>",
       "label": "Back to {contest.title}",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
@@ -901,7 +910,7 @@
       "line": 113,
       "tag": "<Link>",
       "label": "View Live Standings",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -919,7 +928,7 @@
       "line": 116,
       "tag": "<Link>",
       "label": "Contest Overview",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -937,7 +946,7 @@
       "line": 142,
       "tag": "<Link>",
       "label": "Register Slot",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -955,7 +964,7 @@
       "line": 181,
       "tag": "<Link>",
       "label": "Back to Contest",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -973,7 +982,7 @@
       "line": 206,
       "tag": "<Link>",
       "label": "Back to Contest",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1009,7 +1018,7 @@
       "line": 316,
       "tag": "<Link>",
       "label": "Back to Overview",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1045,7 +1054,7 @@
       "line": 354,
       "tag": "<Link>",
       "label": "Not Now",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1054,7 +1063,7 @@
       "line": 70,
       "tag": "<Link>",
       "label": "Back to contests",
-      "handler": "\"/portal/contests\"",
+      "handler": "\"/contests\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1063,7 +1072,7 @@
       "line": 81,
       "tag": "<Link>",
       "label": "Back to contest",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1081,7 +1090,7 @@
       "line": 97,
       "tag": "<Link>",
       "label": "View Round 1 Standings",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1090,7 +1099,7 @@
       "line": 110,
       "tag": "<Link>",
       "label": "Back to contest",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1108,7 +1117,7 @@
       "line": 138,
       "tag": "<Link>",
       "label": "Enter Arena",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "handler": "{`/contests/${contestSlug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1135,7 +1144,7 @@
       "line": 218,
       "tag": "<Link>",
       "label": "Open in Arena",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "handler": "{`/contests/${contestSlug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1144,7 +1153,7 @@
       "line": 250,
       "tag": "<Link>",
       "label": "Solve →",
-      "handler": "{`/portal/contests/${contestSlug}/arena?problem=${problem.problem_index}`}",
+      "handler": "{`/contests/${contestSlug}/arena?problem=${problem.problem_index}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1153,7 +1162,7 @@
       "line": 133,
       "tag": "<Link>",
       "label": "Back to Contests Hub",
-      "handler": "\"/portal/contests\"",
+      "handler": "\"/contests\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1171,7 +1180,7 @@
       "line": 231,
       "tag": "<Link>",
       "label": "Enter Contest Arena",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "handler": "{`/contests/${contestSlug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1189,7 +1198,7 @@
       "line": 241,
       "tag": "<Link>",
       "label": "View Final Standings",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1207,7 +1216,7 @@
       "line": 261,
       "tag": "<Link>",
       "label": "Enter Arena (Dev Mode)",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "handler": "{`/contests/${contestSlug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1234,7 +1243,7 @@
       "line": 402,
       "tag": "<Link>",
       "label": "Solve →",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "handler": "{`/contests/${contestSlug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1243,7 +1252,7 @@
       "line": 416,
       "tag": "<Link>",
       "label": "View Standings →",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1252,7 +1261,7 @@
       "line": 131,
       "tag": "<Link>",
       "label": "Back to {contest.title}",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
@@ -1270,7 +1279,7 @@
       "line": 239,
       "tag": "<Link>",
       "label": "Enter Arena",
-      "handler": "{`/portal/contests/${contestSlug}/arena`}",
+      "handler": "{`/contests/${contestSlug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1297,7 +1306,7 @@
       "line": 291,
       "tag": "<Link>",
       "label": "View Standings",
-      "handler": "{`/portal/contests/${contestSlug}/results`}",
+      "handler": "{`/contests/${contestSlug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1315,7 +1324,7 @@
       "line": 294,
       "tag": "<Link>",
       "label": "Contest Overview",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1324,7 +1333,7 @@
       "line": 77,
       "tag": "<Link>",
       "label": "Back to {contest?.title ?? Contest}",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1342,7 +1351,7 @@
       "line": 135,
       "tag": "<Link>",
       "label": "View Campus Pass",
-      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
+      "handler": "{`/contests/${contestSlug}/qualified`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1360,7 +1369,7 @@
       "line": 141,
       "tag": "<Link>",
       "label": "University Leaderboard →",
-      "handler": "\"/portal/leaderboard\"",
+      "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1387,7 +1396,7 @@
       "line": 255,
       "tag": "<Link>",
       "label": "View Campus Pass",
-      "handler": "{`/portal/contests/${contestSlug}/qualified`}",
+      "handler": "{`/contests/${contestSlug}/qualified`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1405,7 +1414,7 @@
       "line": 261,
       "tag": "<Link>",
       "label": "Contest Details",
-      "handler": "{`/portal/contests/${contestSlug}`}",
+      "handler": "{`/contests/${contestSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1423,7 +1432,7 @@
       "line": 264,
       "tag": "<Link>",
       "label": "University Leaderboard →",
-      "handler": "\"/portal/leaderboard\"",
+      "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1432,7 +1441,7 @@
       "line": 295,
       "tag": "<Link>",
       "label": "{row.full_name}",
-      "handler": "{`/portal/profile/${row.handle}`}",
+      "handler": "{`/profile/${row.handle}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1450,7 +1459,7 @@
       "line": 330,
       "tag": "<Link>",
       "label": "Problem Archive",
-      "handler": "\"/portal/problems\"",
+      "handler": "\"/problems\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1468,7 +1477,7 @@
       "line": 331,
       "tag": "<Link>",
       "label": "Leaderboard",
-      "handler": "\"/portal/leaderboard\"",
+      "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1486,7 +1495,7 @@
       "line": 374,
       "tag": "<Link>",
       "label": "Enter Contest Arena",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}/arena`}",
+      "handler": "{`/contests/${upcomingWeekly.slug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1504,7 +1513,7 @@
       "line": 379,
       "tag": "<Link>",
       "label": "Contest Details",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "handler": "{`/contests/${upcomingWeekly.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1522,7 +1531,7 @@
       "line": 389,
       "tag": "<Link>",
       "label": "Contest Details",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "handler": "{`/contests/${upcomingWeekly.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1549,7 +1558,7 @@
       "line": 402,
       "tag": "<Link>",
       "label": "Contest Details",
-      "handler": "{`/portal/contests/${upcomingWeekly.slug}`}",
+      "handler": "{`/contests/${upcomingWeekly.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1567,7 +1576,7 @@
       "line": 431,
       "tag": "<Link>",
       "label": "Enter Arena",
-      "handler": "{`/portal/contests/${contest.slug}/arena`}",
+      "handler": "{`/contests/${contest.slug}/arena`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1585,7 +1594,7 @@
       "line": 437,
       "tag": "<Link>",
       "label": "Registered",
-      "handler": "{`/portal/contests/${contest.slug}`}",
+      "handler": "{`/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1612,7 +1621,7 @@
       "line": 445,
       "tag": "<Link>",
       "label": "Details",
-      "handler": "{`/portal/contests/${contest.slug}`}",
+      "handler": "{`/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1630,7 +1639,7 @@
       "line": 518,
       "tag": "<Link>",
       "label": "{contest.title}",
-      "handler": "{`/portal/contests/${contest.slug}`}",
+      "handler": "{`/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1648,7 +1657,7 @@
       "line": 527,
       "tag": "<Link>",
       "label": "Overview",
-      "handler": "{`/portal/contests/${contest.slug}`}",
+      "handler": "{`/contests/${contest.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1666,7 +1675,7 @@
       "line": 528,
       "tag": "<Link>",
       "label": "Scoreboard",
-      "handler": "{`/portal/contests/${contest.slug}/final-results`}",
+      "handler": "{`/contests/${contest.slug}/final-results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1693,7 +1702,7 @@
       "line": 573,
       "tag": "<Link>",
       "label": "View Summary",
-      "handler": "{`/portal/contests/${record.contest_slug}`}",
+      "handler": "{`/contests/${record.contest_slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1702,7 +1711,7 @@
       "line": 591,
       "tag": "<Link>",
       "label": "Full",
-      "handler": "\"/portal/leaderboard\"",
+      "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1711,7 +1720,7 @@
       "line": 618,
       "tag": "<Link>",
       "label": "University Standings",
-      "handler": "\"/portal/leaderboard\"",
+      "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1729,7 +1738,7 @@
       "line": 151,
       "tag": "<Link>",
       "label": "Enter Live Arena",
-      "handler": "{`/portal/contests/${live.slug}`}",
+      "handler": "{`/contests/${live.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1747,7 +1756,7 @@
       "line": 174,
       "tag": "<Link>",
       "label": "View Contest",
-      "handler": "{`/portal/contests/${next.slug}`}",
+      "handler": "{`/contests/${next.slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1756,7 +1765,7 @@
       "line": 190,
       "tag": "<Link>",
       "label": "Profile Dossier →",
-      "handler": "\"/portal/profile\"",
+      "handler": "\"/profile\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1774,7 +1783,7 @@
       "line": 226,
       "tag": "<Link>",
       "label": "Browse Tournaments",
-      "handler": "\"/portal/contests\"",
+      "handler": "\"/contests\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1783,7 +1792,7 @@
       "line": 239,
       "tag": "<Link>",
       "label": "Full Standings →",
-      "handler": "\"/portal/leaderboard\"",
+      "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1792,7 +1801,7 @@
       "line": 254,
       "tag": "<Link>",
       "label": "Verify Proofs →",
-      "handler": "\"/portal/verify\"",
+      "handler": "\"/verify\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1801,7 +1810,7 @@
       "line": 166,
       "tag": "<Link>",
       "label": "@ {x.handle}",
-      "handler": "{`/portal/profile/${x.handle}`}",
+      "handler": "{`/profile/${x.handle}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1846,7 +1855,7 @@
       "line": 100,
       "tag": "<Link>",
       "label": "Browse Contests",
-      "handler": "\"/portal/contests\"",
+      "handler": "\"/contests\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1864,7 +1873,7 @@
       "line": 119,
       "tag": "<Link>",
       "label": "Explore Contests",
-      "handler": "\"/portal/contests\"",
+      "handler": "\"/contests\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1873,7 +1882,7 @@
       "line": 186,
       "tag": "<Link>",
       "label": "{c.contest_title}",
-      "handler": "{`/portal/contests/${c.contest_slug}`}",
+      "handler": "{`/contests/${c.contest_slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1891,7 +1900,7 @@
       "line": 267,
       "tag": "<Link>",
       "label": "Assessment",
-      "handler": "{`/portal/contests/${c.contest_slug}/lobby`}",
+      "handler": "{`/contests/${c.contest_slug}/lobby`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1909,7 +1918,7 @@
       "line": 279,
       "tag": "<Link>",
       "label": "Details",
-      "handler": "{`/portal/contests/${c.contest_slug}`}",
+      "handler": "{`/contests/${c.contest_slug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1927,7 +1936,7 @@
       "line": 291,
       "tag": "<Link>",
       "label": "Standings",
-      "handler": "{`/portal/contests/${c.contest_slug}/results`}",
+      "handler": "{`/contests/${c.contest_slug}/results`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1935,8 +1944,8 @@
       "file": "src/pages/ProblemArchivePage.tsx",
       "line": 80,
       "tag": "<Link>",
-      "label": "[to={/portal/problems/${c.slug}--${p...",
-      "handler": "{`/portal/problems/${c.slug}--${pSlug}`}",
+      "label": "[to={/problems/${c.slug}--${pSlug}}]",
+      "handler": "{`/problems/${c.slug}--${pSlug}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1945,7 +1954,7 @@
       "line": 44,
       "tag": "<Link>",
       "label": "Back to problem archive",
-      "handler": "\"/portal/problems\"",
+      "handler": "\"/problems\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1954,7 +1963,7 @@
       "line": 59,
       "tag": "<Link>",
       "label": "Problem archive",
-      "handler": "\"/portal/problems\"",
+      "handler": "\"/problems\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -1998,8 +2007,8 @@
       "file": "src/pages/ProfilePage.tsx",
       "line": 364,
       "tag": "<Link>",
-      "label": "[to=/portal/settings]",
-      "handler": "\"/portal/settings\"",
+      "label": "[to=/settings]",
+      "handler": "\"/settings\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -2062,7 +2071,7 @@
       "line": 603,
       "tag": "<Link>",
       "label": "Open Verification Console",
-      "handler": "{`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",
+      "handler": "{`/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -2089,7 +2098,7 @@
       "line": 459,
       "tag": "<Link>",
       "label": "View profile",
-      "handler": "\"/portal/profile\"",
+      "handler": "\"/profile\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -2215,7 +2224,7 @@
       "line": 978,
       "tag": "<Link>",
       "label": "View my proof certificates",
-      "handler": "\"/portal/verify\"",
+      "handler": "\"/verify\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },

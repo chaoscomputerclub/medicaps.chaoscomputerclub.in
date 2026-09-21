@@ -114,6 +114,7 @@ const ROUTING_PATTERNS = [
   /window\.location/i,
   /to=["'{]/i,
   /href=["'{]\/portal/i,
+  /href=["'{]\/(contests|problems|leaderboard|profile|settings|verify)/i,
   /href=["'{]\/auth/i,
   /href=["'{]\/u\//i,
   /href=["'{]https?:\/\//i,

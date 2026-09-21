@@ -205,12 +205,12 @@ export function ContestCard({
 
       <CardFooter className="justify-between gap-2 border-t border-white/6 p-4">
         <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white hover:border-white/20">
-          <Link to={`/portal/contests/${contest.slug}`}>
+          <Link to={`/contests/${contest.slug}`}>
             Details
           </Link>
         </Button>
         <Button asChild variant="ghost" size="sm" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
-          <Link to={`/portal/contests/${contest.slug}/results`}>
+          <Link to={`/contests/${contest.slug}/results`}>
             Standings →
           </Link>
         </Button>

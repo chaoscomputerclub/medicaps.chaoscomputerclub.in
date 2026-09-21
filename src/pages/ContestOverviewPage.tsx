@@ -131,7 +131,7 @@ export function ContestOverviewPage() {
       {/* Back Navigation */}
       <div>
         <Link
-          to="/portal/contests"
+          to="/contests"
           className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
         >
           <ArrowLeft className="size-3.5" /> Back to Contests Hub
@@ -228,7 +228,7 @@ export function ContestOverviewPage() {
                 size="lg"
                 className="rounded-md bg-lime-400 font-semibold text-xs text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20 active:scale-[0.98] cursor-pointer"
               >
-                <Link to={`/portal/contests/${contestSlug}/arena`}>
+                <Link to={`/contests/${contestSlug}/arena`}>
                   <Play className="mr-1.5 size-4 fill-black" /> Enter Contest Arena
                 </Link>
               </Button>
@@ -238,7 +238,7 @@ export function ContestOverviewPage() {
                 size="lg"
                 className="rounded-md bg-lime-400 font-semibold text-xs text-black hover:bg-lime-300 active:scale-[0.98] cursor-pointer"
               >
-                <Link to={`/portal/contests/${contestSlug}/results`}>
+                <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy className="mr-1.5 size-4" /> View Final Standings
                 </Link>
               </Button>
@@ -258,7 +258,7 @@ export function ContestOverviewPage() {
                     size="sm"
                     className="rounded-md border-lime-400/30 bg-black text-lime-400 hover:bg-lime-400/10 text-xs font-mono"
                   >
-                    <Link to={`/portal/contests/${contestSlug}/arena`}>
+                    <Link to={`/contests/${contestSlug}/arena`}>
                       <Play className="mr-1.5 size-3.5 fill-current" /> Enter Arena (Dev Mode)
                     </Link>
                   </Button>
@@ -399,7 +399,7 @@ export function ContestOverviewPage() {
                           size="sm"
                           className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:text-white"
                         >
-                          <Link to={`/portal/contests/${contestSlug}/arena`}>
+                          <Link to={`/contests/${contestSlug}/arena`}>
                             Solve →
                           </Link>
                         </Button>
@@ -414,7 +414,7 @@ export function ContestOverviewPage() {
           <div className="pt-3 border-t border-white/8 flex items-center justify-between text-xs font-mono text-zinc-500">
             <span>Runtime: CodeBox Judge Environment</span>
             <Link
-              to={`/portal/contests/${contestSlug}/results`}
+              to={`/contests/${contestSlug}/results`}
               className="text-lime-400 hover:underline flex items-center gap-1"
             >
               View Standings →

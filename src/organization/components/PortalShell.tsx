@@ -35,44 +35,44 @@ import {
 } from "./skeletons";
 
 const links = [
-  { to: "/portal", label: "Dashboard", icon: SquaresFour, exact: true },
-  { to: "/portal/contests", label: "Contests", icon: Trophy, exact: false },
-  { to: "/portal/my-contests", label: "My Contests", icon: BookmarkSimple, exact: false },
-  { to: "/portal/leaderboard", label: "Leaderboard", icon: ChartBar, exact: true },
-  { to: "/portal/problems", label: "Problems", icon: Code, exact: false },
-  { to: "/portal/verify", label: "Verify Proof", icon: ShieldCheck, exact: false },
-  { to: "/portal/settings", label: "Settings", icon: Gear, exact: false },
+  { to: "/", label: "Dashboard", icon: SquaresFour, exact: true },
+  { to: "/contests", label: "Contests", icon: Trophy, exact: false },
+  { to: "/my-contests", label: "My Contests", icon: BookmarkSimple, exact: false },
+  { to: "/leaderboard", label: "Leaderboard", icon: ChartBar, exact: true },
+  { to: "/problems", label: "Problems", icon: Code, exact: false },
+  { to: "/verify", label: "Verify Proof", icon: ShieldCheck, exact: false },
+  { to: "/settings", label: "Settings", icon: Gear, exact: false },
 ] as const;
 
 function PortalRouteSkeleton() {
   const { pathname } = useLocation();
-  const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
+  const cleanPath = pathname.replace(/\/+$/, "") || "/";
 
-  if (cleanPath === "/portal/contests") {
+  if (cleanPath === "/contests") {
     return <ContestsHubSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/contests/")) {
+  if (cleanPath.startsWith("/contests/")) {
     return <ContestDetailSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/my-contests")) {
+  if (cleanPath.startsWith("/my-contests")) {
     return <MyContestsSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/leaderboard")) {
+  if (cleanPath.startsWith("/leaderboard")) {
     return <LeaderboardSkeleton />;
   }
-  if (cleanPath === "/portal/problems") {
+  if (cleanPath === "/problems") {
     return <ProblemArchiveSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/problems/")) {
+  if (cleanPath.startsWith("/problems/")) {
     return <ProblemDetailSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/settings")) {
+  if (cleanPath.startsWith("/settings")) {
     return <SettingsSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/profile") || cleanPath.startsWith("/portal/u/")) {
+  if (cleanPath.startsWith("/profile") || cleanPath.startsWith("/u/")) {
     return <ProfileSkeleton />;
   }
-  if (cleanPath.startsWith("/portal/verify")) {
+  if (cleanPath.startsWith("/verify")) {
     return <VerifyProofSkeleton />;
   }
   return <DashboardSkeleton />;
@@ -113,7 +113,7 @@ export function PortalShell() {
     : (displayHandle.slice(0, 2) || "CC").toUpperCase();
   const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
 
-  const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
+  const cleanPath = pathname.replace(/\/+$/, "") || "/";
   const isFullscreenWorkspace = cleanPath.includes("/assessment") || cleanPath.includes("/arena");
 
   if (isFullscreenWorkspace) {
@@ -130,7 +130,7 @@ export function PortalShell() {
     <div className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
-        <Link to="/portal" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <img src="/logo.png" alt="Chaos Computer Club" className="w-7 h-7 object-contain" />
           <div className="flex flex-col">
             <span className="font-mono font-bold text-xs tracking-wider text-white leading-none">CCC MEDI-CAPS</span>
@@ -163,7 +163,7 @@ export function PortalShell() {
       >
         {/* Brand Header */}
         <Link
-          to="/portal"
+          to="/"
           className="flex items-center gap-3 pb-4 mb-2 border-b border-white/8 group"
           onClick={() => dispatch(setSidebarOpen(false))}
         >
@@ -206,7 +206,7 @@ export function PortalShell() {
         {/* User Identity Footer */}
         <div className="pt-3 border-t border-white/8 flex items-center justify-between gap-2">
           <Link
-            to="/portal/profile"
+            to="/profile"
             className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity"
             title="View Profile"
           >

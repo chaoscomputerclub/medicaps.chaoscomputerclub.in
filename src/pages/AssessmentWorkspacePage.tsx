@@ -199,7 +199,7 @@ export function AssessmentWorkspacePage() {
       if (window.opener) {
         window.close();
       } else {
-        navigate(`/portal/contests/${contestSlug}`);
+        navigate(`/contests/${contestSlug}`);
       }
     }
   }
@@ -213,7 +213,7 @@ export function AssessmentWorkspacePage() {
       if (window.opener) {
         window.close();
       } else {
-        navigate(`/portal/contests/${contestSlug}`);
+        navigate(`/contests/${contestSlug}`);
       }
     }
   }
@@ -289,7 +289,7 @@ export function AssessmentWorkspacePage() {
                 if (window.opener) {
                   window.close();
                 } else {
-                  navigate(`/portal/contests/${contestSlug}`);
+                  navigate(`/contests/${contestSlug}`);
                 }
               }}
               className="w-full py-2 px-4 rounded-md bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 transition-colors cursor-pointer"
@@ -298,14 +298,14 @@ export function AssessmentWorkspacePage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/portal/contests/${contestSlug}/results`)}
+              onClick={() => navigate(`/contests/${contestSlug}/results`)}
               className="w-full py-2 px-4 rounded-md bg-black border border-white/10 text-white font-semibold font-mono text-xs hover:bg-zinc-950 transition-colors cursor-pointer"
             >
               View Standings
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/portal/contests/${contestSlug}`)}
+              onClick={() => navigate(`/contests/${contestSlug}`)}
               className="w-full py-2 px-4 rounded-md border border-white/6 text-zinc-500 font-mono text-xs hover:text-white transition-colors cursor-pointer"
             >
               Return to Contest Details
@@ -321,22 +321,21 @@ export function AssessmentWorkspacePage() {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
         <div className="max-w-md w-full p-8 rounded-lg bg-black border border-white/8 text-center space-y-6">
-          <div className="size-12 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto text-lime-400">
-            <Clock size={24} />
+          <div className="size-14 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto text-lime-400">
+            <Clock size={28} />
           </div>
           <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-              Contest Arena Locked
-            </span>
-            <h2 className="text-xl font-semibold text-white tracking-tight">
-              {assessment.title}
+            <h2 className="text-xl font-semibold tracking-tight text-white">
+              Assessment Opens Soon
             </h2>
             <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              The live contest arena opens at the scheduled competition start time. Please wait in the lobby until the countdown unlocks.
+              You are registered. The assessment workspace unseals automatically at the contest start time.
             </p>
           </div>
-          <div className="p-4 bg-zinc-950 rounded-md border border-white/8">
-            <span className="font-mono text-[10px] text-zinc-500 block uppercase tracking-wider">Opens In</span>
+          <div className="p-4 rounded-md border border-white/8 bg-zinc-950">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 block">
+              Time Remaining Until Unseal
+            </span>
             <div className="font-mono text-2xl font-bold text-lime-400 mt-1 tabular-nums">
               {formatTimer(assessment.opens_in_seconds || 0)}
             </div>
@@ -344,7 +343,7 @@ export function AssessmentWorkspacePage() {
           <Button
             onClick={() => {
               if (window.opener) window.close();
-              else navigate(`/portal/contests/${contestSlug}`);
+              else navigate(`/contests/${contestSlug}`);
             }}
             className="w-full bg-lime-400 text-black font-mono font-semibold text-xs rounded-md hover:bg-lime-300"
           >
@@ -376,7 +375,7 @@ export function AssessmentWorkspacePage() {
 
           <div className="pt-2 flex flex-col gap-2">
             {isLifecycleErr && (
-              <a href={`/portal/contests/${contestSlug}/results`} className="w-full">
+              <a href={`/contests/${contestSlug}/results`} className="w-full">
                 <Button className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md">
                   <Trophy size={14} className="mr-1.5" /> View Standings
                 </Button>
@@ -403,7 +402,7 @@ export function AssessmentWorkspacePage() {
               variant="outline"
               onClick={() => {
                 if (window.opener) window.close();
-                else window.location.href = `/portal/contests/${contestSlug}`;
+                else window.location.href = `/contests/${contestSlug}`;
               }}
               className="w-full font-mono text-xs border-white/10 bg-black text-zinc-400 hover:text-white rounded-md"
             >

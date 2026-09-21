@@ -164,7 +164,7 @@ export function LeaderboardPage() {
                       <TableCell>
                         <div className="flex flex-col">
                           <Link
-                            to={`/portal/profile/${x.handle}`}
+                            to={`/profile/${x.handle}`}
                             className="font-mono text-xs font-semibold text-white hover:text-lime-400 transition-colors w-fit"
                           >
                             @{x.handle}

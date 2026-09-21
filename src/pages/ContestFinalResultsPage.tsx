@@ -52,7 +52,7 @@ export function ContestFinalResultsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Link
-        to={`/portal/contests/${contestSlug}`}
+        to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Back to {contest?.title ?? "Contest"}
@@ -149,7 +149,7 @@ export function ContestFinalResultsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <Link to={`/portal/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
+                        <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
                           {row.full_name}
                         </Link>
                         <span className="font-mono text-[10px] text-zinc-500">
@@ -179,7 +179,7 @@ export function ContestFinalResultsPage() {
 
       <div className="pt-2">
         <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
-          <Link to={`/portal/contests/${contestSlug}`}>Back to Contest Details</Link>
+          <Link to={`/contests/${contestSlug}`}>Back to Contest Details</Link>
         </Button>
       </div>
     </div>

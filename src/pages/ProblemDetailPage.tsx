@@ -41,7 +41,7 @@ export function ProblemDetailPage() {
   if (!data) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 space-y-4">
-        <Link to="/portal/problems" className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors">
+        <Link to="/problems" className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to problem archive
         </Link>
         <h1 className="text-xl font-semibold text-white">Archived Problem Not Found</h1>
@@ -57,7 +57,7 @@ export function ProblemDetailPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Link
-        to="/portal/problems"
+        to="/problems"
         className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Problem archive

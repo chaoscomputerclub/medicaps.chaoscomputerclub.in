@@ -127,12 +127,12 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  window.location.href = "/portal";
+                  window.location.href = "/";
                 }}
                 className="border-white/10 bg-zinc-900/70 hover:bg-zinc-800 hover:text-white text-zinc-200 font-mono text-xs uppercase font-bold rounded-none h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
               >
                 <Home size={13} />
-                <span>Return to Portal</span>
+                <span>Return to Arena</span>
               </Button>
 
               <Button

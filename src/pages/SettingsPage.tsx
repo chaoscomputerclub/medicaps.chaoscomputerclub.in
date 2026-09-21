@@ -456,7 +456,7 @@ export function SettingsPage() {
           size="sm"
           className="hidden sm:flex text-xs border-white/10 bg-black hover:bg-zinc-950 text-zinc-300 hover:text-white rounded-md gap-1.5 font-mono"
         >
-          <Link to="/portal/profile">
+          <Link to="/profile">
             View profile
             <ExternalLink size={11} className="opacity-60" />
           </Link>
@@ -975,7 +975,7 @@ export function SettingsPage() {
                       These certificates are permanently anchored to your institutional identity and cannot be revoked or altered.
                     </p>
                     <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 rounded-md gap-1.5 cursor-pointer">
-                      <Link to="/portal/verify">
+                      <Link to="/verify">
                         View my proof certificates
                         <ChevronRight size={12} />
                       </Link>

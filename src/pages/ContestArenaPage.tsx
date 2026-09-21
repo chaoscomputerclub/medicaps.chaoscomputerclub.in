@@ -131,7 +131,7 @@ export function ContestArenaPage() {
       setRedirectCountdown(count);
       if (count <= 0) {
         clearInterval(tick);
-        navigate(`/portal/contests/${contestSlug}/final-results`);
+        navigate(`/contests/${contestSlug}/final-results`);
       }
     }, 1000);
     contestOverRedirectRef.current = tick;
@@ -275,7 +275,7 @@ export function ContestArenaPage() {
               asChild
               className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
             >
-              <Link to={`/portal/contests/${contestSlug}/qualified`}>
+              <Link to={`/contests/${contestSlug}/qualified`}>
                 <QrCode className="mr-2 size-3.5" /> View Finalist Pass
               </Link>
             </Button>
@@ -292,7 +292,7 @@ export function ContestArenaPage() {
                 variant="ghost"
                 className="rounded-md font-mono text-xs text-zinc-500 hover:text-white"
               >
-                <Link to={`/portal/contests/${contestSlug}`}>
+                <Link to={`/contests/${contestSlug}`}>
                   Exit Lobby
                 </Link>
               </Button>
@@ -316,7 +316,7 @@ export function ContestArenaPage() {
             size="sm"
             className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs"
           >
-            <Link to={`/portal/contests/${contestSlug}`}>
+            <Link to={`/contests/${contestSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
               Exit
             </Link>
@@ -365,7 +365,7 @@ export function ContestArenaPage() {
             size="sm"
             className="hidden sm:flex h-7 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:text-white rounded-md"
           >
-            <Link to={`/portal/contests/${contestSlug}/results`} target="_blank">
+            <Link to={`/contests/${contestSlug}/results`} target="_blank">
               <Trophy className="size-3 mr-1 text-lime-400" />
               Scoreboard
             </Link>
@@ -784,7 +784,7 @@ export function ContestArenaPage() {
               <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
             </div>
             <button
-              onClick={() => navigate(`/portal/contests/${contestSlug}/final-results`)}
+              onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
               className="font-mono text-xs font-semibold uppercase text-lime-400 border border-lime-400/40 bg-lime-400/10 px-5 py-2 rounded-md hover:bg-lime-400/20 transition-colors"
             >
               View Final Results →

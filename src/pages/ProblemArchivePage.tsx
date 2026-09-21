@@ -78,7 +78,7 @@ export function ProblemArchivePage() {
                         {p.points ?? 0} pts
                       </strong>
                       <Link
-                        to={`/portal/problems/${c.slug}--${pSlug}`}
+                        to={`/problems/${c.slug}--${pSlug}`}
                         className="size-8 rounded-md bg-zinc-950 border border-white/8 hover:bg-lime-400 hover:text-black text-zinc-400 transition-colors flex items-center justify-center"
                       >
                         <ArrowRight className="size-3.5" />

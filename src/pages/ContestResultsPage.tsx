@@ -75,7 +75,7 @@ export function ContestResultsPage() {
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
       {/* Back button */}
       <Link
-        to={`/portal/contests/${contestSlug}`}
+        to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Back to {contest?.title ?? "Contest"}
@@ -132,13 +132,13 @@ export function ContestResultsPage() {
             {/* CTA */}
             {isQualified ? (
               <Button asChild className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300 shrink-0">
-                <Link to={`/portal/contests/${contestSlug}/qualified`}>
+                <Link to={`/contests/${contestSlug}/qualified`}>
                   <QrCode className="mr-1.5 size-3.5" /> View Campus Pass
                 </Link>
               </Button>
             ) : (
               <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white shrink-0">
-                <Link to="/portal/leaderboard">University Leaderboard →</Link>
+                <Link to="/leaderboard">University Leaderboard →</Link>
               </Button>
             )}
           </div>
@@ -252,16 +252,16 @@ export function ContestResultsPage() {
       <div className="flex flex-wrap items-center gap-3 pt-2">
         {isQualified && (
           <Button asChild className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300">
-            <Link to={`/portal/contests/${contestSlug}/qualified`}>
+            <Link to={`/contests/${contestSlug}/qualified`}>
               <QrCode className="mr-1.5 size-3.5" /> View Campus Pass
             </Link>
           </Button>
         )}
         <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
-          <Link to={`/portal/contests/${contestSlug}`}>Contest Details</Link>
+          <Link to={`/contests/${contestSlug}`}>Contest Details</Link>
         </Button>
         <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
-          <Link to="/portal/leaderboard">University Leaderboard →</Link>
+          <Link to="/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>
     </div>
@@ -292,7 +292,7 @@ function RankRow({
         </TableCell>
         <TableCell>
           <div className="flex flex-col">
-            <Link to={`/portal/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
+            <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
               {row.full_name}
             </Link>
             <span className="font-mono text-[10px] text-zinc-500">

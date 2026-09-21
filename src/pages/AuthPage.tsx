@@ -149,7 +149,7 @@ export function AuthPage() {
       if (isOnboarded) {
         void (async () => {
           await preloadFullProfile(tokenParam);
-          navigate("/portal");
+          navigate("/");
         })();
         return;
       } else {
@@ -163,7 +163,7 @@ export function AuthPage() {
         .unwrap()
         .then((m) => {
           if (m.is_onboarded) {
-            navigate("/portal");
+            navigate("/");
           } else {
             if (m.email) dispatch(setEmail(m.email));
             if (m.full_name) dispatch(setName(m.full_name));
@@ -223,7 +223,7 @@ export function AuthPage() {
       const res = resultAction.payload;
       if (!res.is_new_user && res.member?.is_onboarded) {
         await preloadFullProfile(res.access_token);
-        navigate("/portal");
+        navigate("/");
       }
     }
   }
@@ -270,7 +270,7 @@ export function AuthPage() {
 
     if (completeOnboardingThunk.fulfilled.match(resultAction)) {
       await preloadFullProfile();
-      navigate("/portal");
+      navigate("/");
     }
   }
 

@@ -67,7 +67,7 @@ export function ContestOfflinePage() {
   if (!contest) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-        <Link to="/portal/contests" className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+        <Link to="/contests" className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to contests
         </Link>
         <p className="text-xs font-mono text-zinc-500">Contest not found.</p>
@@ -78,7 +78,7 @@ export function ContestOfflinePage() {
   if (!qualified) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-        <Link to={`/portal/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+        <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to contest
         </Link>
         <Card className="rounded-lg border border-white/8 bg-black">
@@ -94,7 +94,7 @@ export function ContestOfflinePage() {
                 `This workstation portal is accessible only to Top ${FINALIST_SEATS} verified qualifiers.`}
             </p>
             <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white mt-2">
-              <Link to={`/portal/contests/${contestSlug}/results`}>
+              <Link to={`/contests/${contestSlug}/results`}>
                 View Round 1 Standings
                 <ArrowRight className="ml-1.5 size-3" />
               </Link>
@@ -107,7 +107,7 @@ export function ContestOfflinePage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-      <Link to={`/portal/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+      <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
         <ArrowLeft className="size-3.5" /> Back to contest
       </Link>
 
@@ -135,7 +135,7 @@ export function ContestOfflinePage() {
           </p>
         </div>
         <Button asChild size="lg" className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold">
-          <Link to={`/portal/contests/${contestSlug}/arena`}>
+          <Link to={`/contests/${contestSlug}/arena`}>
             <Play className="size-3.5 fill-current mr-1.5" />
             Enter Arena
           </Link>
@@ -215,7 +215,7 @@ export function ContestOfflinePage() {
             Final Problem Set
           </h2>
           <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
-            <Link to={`/portal/contests/${contestSlug}/arena`}>
+            <Link to={`/contests/${contestSlug}/arena`}>
               <Play className="size-3 mr-1 text-lime-400" /> Open in Arena
             </Link>
           </Button>
@@ -248,7 +248,7 @@ export function ContestOfflinePage() {
                     <TableCell className="text-right font-mono text-xs tabular-nums text-lime-400">{problem.points}</TableCell>
                     <TableCell className="text-right">
                       <Link
-                        to={`/portal/contests/${contestSlug}/arena?problem=${problem.problem_index}`}
+                        to={`/contests/${contestSlug}/arena?problem=${problem.problem_index}`}
                         className="font-mono text-xs text-lime-400 hover:underline"
                       >
                         Solve →

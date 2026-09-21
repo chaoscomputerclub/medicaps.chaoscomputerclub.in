@@ -129,7 +129,7 @@ export function ContestQualifiedPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Link
-        to={`/portal/contests/${contestSlug}`}
+        to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Back to {contest.title}
@@ -236,7 +236,7 @@ export function ContestQualifiedPage() {
                         <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">Round 2 Is Live</span>
                       </div>
                       <Button asChild size="sm" className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold">
-                        <Link to={`/portal/contests/${contestSlug}/arena`}>
+                        <Link to={`/contests/${contestSlug}/arena`}>
                           <Play className="mr-1 size-3 fill-black" /> Enter Arena
                         </Link>
                       </Button>
@@ -288,10 +288,10 @@ export function ContestQualifiedPage() {
           </div>
           <div className="pt-2 flex justify-center gap-3">
             <Button asChild className="rounded-md bg-lime-400 text-black font-semibold text-xs hover:bg-lime-300">
-              <Link to={`/portal/contests/${contestSlug}/results`}>View Standings</Link>
+              <Link to={`/contests/${contestSlug}/results`}>View Standings</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-md border-white/10 bg-black text-zinc-300 text-xs hover:text-white">
-              <Link to={`/portal/contests/${contestSlug}`}>Contest Overview</Link>
+              <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>
         </div>

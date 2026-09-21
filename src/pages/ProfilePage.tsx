@@ -228,7 +228,7 @@ export function ProfilePage() {
     (m.handle ? actionPendingId === m.handle : false);
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/portal/profile/${m.handle}`;
+    const url = `${window.location.origin}/profile/${m.handle}`;
     void navigator.clipboard.writeText(url);
     setCopied(true);
     toast.success("Profile URL copied!");
@@ -361,7 +361,7 @@ export function ProfilePage() {
                     size="sm"
                     className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-zinc-300 border border-white/10 bg-black hover:text-white hover:border-white/20 rounded-md"
                   >
-                    <Link to="/portal/settings">
+                    <Link to="/settings">
                       <Edit3 size={11} />
                       <span>Settings</span>
                     </Link>
@@ -601,7 +601,7 @@ export function ProfilePage() {
             <>
               <ProofBadge proof={proofs[0]} />
               <Link
-                to={`/portal/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? "")}`}
+                to={`/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? "")}`}
                 className="inline-flex items-center gap-1 font-mono text-xs text-lime-400 hover:underline pt-2"
               >
                 Open Verification Console <ExternalLink className="size-3" />

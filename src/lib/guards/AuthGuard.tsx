@@ -26,7 +26,7 @@ export function GuestGuard() {
 
   // If already authenticated, redirect straight to inner operations console
   if (token && authed) {
-    return <Navigate to="/portal" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

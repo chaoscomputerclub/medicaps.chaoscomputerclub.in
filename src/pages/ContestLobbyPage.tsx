@@ -78,7 +78,7 @@ export function ContestLobbyPage() {
     <div className="flex min-h-[calc(100vh-140px)] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
       {/* Back button */}
       <Link
-        to={`/portal/contests/${contestSlug}`}
+        to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
       >
         <ArrowLeft className="size-3.5" /> Back to {contest.title}
@@ -110,10 +110,10 @@ export function ContestLobbyPage() {
               asChild
               className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
             >
-              <Link to={`/portal/contests/${contestSlug}/results`}>View Live Standings</Link>
+              <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
-              <Link to={`/portal/contests/${contestSlug}`}>Contest Overview</Link>
+              <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>
         </div>
@@ -139,7 +139,7 @@ export function ContestLobbyPage() {
             </p>
           </div>
           <Button asChild className="rounded-md font-mono text-xs font-semibold bg-lime-400 hover:bg-lime-300 text-black">
-            <Link to={`/portal/contests/${contestSlug}`}>Register Slot</Link>
+            <Link to={`/contests/${contestSlug}`}>Register Slot</Link>
           </Button>
         </div>
       ) : notYetOpen ? (
@@ -178,7 +178,7 @@ export function ContestLobbyPage() {
             </div>
           </div>
           <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
-            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
+            <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
       ) : (phase === "assessment_closed" && !isDevBypass) ? (
@@ -203,7 +203,7 @@ export function ContestLobbyPage() {
             </p>
           </div>
           <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
-            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
+            <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
       ) : (
@@ -313,7 +313,7 @@ export function ContestLobbyPage() {
                   </a>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
-                  <Link to={`/portal/contests/${contestSlug}`}>Back to Overview</Link>
+                  <Link to={`/contests/${contestSlug}`}>Back to Overview</Link>
                 </Button>
               </div>
             </div>
@@ -351,7 +351,7 @@ export function ContestLobbyPage() {
                   </a>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
-                  <Link to={`/portal/contests/${contestSlug}`}>Not Now</Link>
+                  <Link to={`/contests/${contestSlug}`}>Not Now</Link>
                 </Button>
               </div>
 

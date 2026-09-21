@@ -255,7 +255,7 @@ export function SocialDrawer() {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Link
-                      to={`/portal/profile/${student.handle}`}
+                      to={`/profile/${student.handle}`}
                       onClick={() => dispatch(closeSocialDrawer())}
                       className="cursor-pointer"
                     >
@@ -276,7 +276,7 @@ export function SocialDrawer() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <Link
-                          to={`/portal/profile/${student.handle}`}
+                          to={`/profile/${student.handle}`}
                           onClick={() => dispatch(closeSocialDrawer())}
                           className="text-xs font-mono text-white truncate tracking-tight hover:text-lime-400 transition-colors font-semibold"
                         >

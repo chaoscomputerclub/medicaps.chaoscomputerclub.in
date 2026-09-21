@@ -327,8 +327,8 @@ export function ContestsHubPage() {
               <p className="max-w-xs text-xs text-zinc-500">Upcoming tournaments will appear here. Practice problem sets in the archive in the meantime.</p>
             </div>
             <div className="flex gap-2">
-              <Button asChild variant="outline" size="sm" className="text-xs"><Link to="/portal/problems">Problem Archive</Link></Button>
-              <Button asChild variant="ghost" size="sm" className="text-xs"><Link to="/portal/leaderboard">Leaderboard</Link></Button>
+              <Button asChild variant="outline" size="sm" className="text-xs"><Link to="/problems">Problem Archive</Link></Button>
+              <Button asChild variant="ghost" size="sm" className="text-xs"><Link to="/leaderboard">Leaderboard</Link></Button>
             </div>
           </div>
         ) : (
@@ -371,12 +371,12 @@ export function ContestsHubPage() {
                     {upcomingWeekly.status === "live" ? (
                       <>
                         <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md shadow-lg shadow-lime-400/20">
-                          <Link to={`/portal/contests/${upcomingWeekly.slug}/arena`}>
+                          <Link to={`/contests/${upcomingWeekly.slug}/arena`}>
                             <Play className="mr-1.5 size-4 fill-black" /> Enter Contest Arena
                           </Link>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="text-xs">
-                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
+                          <Link to={`/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
                         </Button>
                       </>
                     ) : isWeeklyRegistered ? (
@@ -386,7 +386,7 @@ export function ContestsHubPage() {
                           <span>Registered · Contest Opens at Start Time</span>
                         </div>
                         <Button asChild variant="outline" size="sm" className="text-xs font-mono border-white/8">
-                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
+                          <Link to={`/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
                         </Button>
                       </>
                     ) : (
@@ -399,7 +399,7 @@ export function ContestsHubPage() {
                           {registeringSlug === upcomingWeekly.slug ? "Registering..." : "Register for Contest"}
                         </Button>
                         <Button asChild variant="outline" size="sm" className="text-xs">
-                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
+                          <Link to={`/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
                         </Button>
                       </>
                     )}
@@ -428,13 +428,13 @@ export function ContestsHubPage() {
                     <div className="flex items-center gap-2 pt-1">
                       {isLive ? (
                         <Button asChild className="flex-1 bg-lime-400 text-xs font-mono font-semibold uppercase text-black hover:bg-lime-300">
-                          <Link to={`/portal/contests/${contest.slug}/arena`}>
+                          <Link to={`/contests/${contest.slug}/arena`}>
                             <Play className="mr-1.5 size-4 fill-black" /> Enter Arena
                           </Link>
                         </Button>
                       ) : isReg ? (
                         <Button asChild variant="outline" className="flex-1 text-xs text-lime-400 border-lime-400/30">
-                          <Link to={`/portal/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Registered</Link>
+                          <Link to={`/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Registered</Link>
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
@@ -442,7 +442,7 @@ export function ContestsHubPage() {
                           {registeringSlug === contest.slug ? "Registering..." : "Register Now"}
                         </Button>
                       )}
-                      <Button asChild variant="outline" size="sm" className="text-xs"><Link to={`/portal/contests/${contest.slug}`}>Details</Link></Button>
+                      <Button asChild variant="outline" size="sm" className="text-xs"><Link to={`/contests/${contest.slug}`}>Details</Link></Button>
                     </div>
                   </div>
                 </div>
@@ -515,7 +515,7 @@ export function ContestsHubPage() {
                           </span>
                         </div>
                         <h3 className="truncate font-semibold text-white transition-colors group-hover:text-lime-400 font-sans">
-                          <Link to={`/portal/contests/${contest.slug}`}>{contest.title}</Link>
+                          <Link to={`/contests/${contest.slug}`}>{contest.title}</Link>
                         </h3>
                         <div className="flex items-center gap-4 font-mono text-xs text-zinc-500">
                           <span className="flex items-center gap-1"><Clock className="size-3" /> 2 Hrs</span>
@@ -524,8 +524,8 @@ export function ContestsHubPage() {
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center gap-2">
-                        <Button asChild size="sm" variant="outline" className="text-xs"><Link to={`/portal/contests/${contest.slug}`}>Overview</Link></Button>
-                        <Button asChild size="sm" variant="outline" className="text-xs"><Link to={`/portal/contests/${contest.slug}/final-results`}>Scoreboard</Link></Button>
+                        <Button asChild size="sm" variant="outline" className="text-xs"><Link to={`/contests/${contest.slug}`}>Overview</Link></Button>
+                        <Button asChild size="sm" variant="outline" className="text-xs"><Link to={`/contests/${contest.slug}/final-results`}>Scoreboard</Link></Button>
                       </div>
                     </article>
                   ))
@@ -570,7 +570,7 @@ export function ContestsHubPage() {
                       </div>
                     </div>
                     <Button asChild size="sm" variant="outline" className="text-xs shrink-0">
-                      <Link to={`/portal/contests/${record.contest_slug}`}>View Summary</Link>
+                      <Link to={`/contests/${record.contest_slug}`}>View Summary</Link>
                     </Button>
                   </article>
                 ))
@@ -588,7 +588,7 @@ export function ContestsHubPage() {
                 <Trophy className="size-4 text-lime-400" />
                 <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-white">Top Rankers</h3>
               </div>
-              <Link to="/portal/leaderboard" className="flex items-center gap-1 font-mono text-[11px] font-semibold text-lime-400 hover:underline">
+              <Link to="/leaderboard" className="flex items-center gap-1 font-mono text-[11px] font-semibold text-lime-400 hover:underline">
                 Full <ExternalLink className="size-3" />
               </Link>
             </div>
@@ -615,7 +615,7 @@ export function ContestsHubPage() {
               })}
             </div>
             <div className="border-t border-white/8 bg-black p-3 text-center">
-              <Link to="/portal/leaderboard" className="flex items-center justify-center gap-1.5 text-xs font-medium text-white transition-colors hover:text-lime-400 font-mono">
+              <Link to="/leaderboard" className="flex items-center justify-center gap-1.5 text-xs font-medium text-white transition-colors hover:text-lime-400 font-mono">
                 University Standings <ArrowRight className="size-3" />
               </Link>
             </div>

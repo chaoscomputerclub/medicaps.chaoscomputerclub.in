@@ -97,7 +97,7 @@ export function MyContestsPage() {
             title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
           <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:text-white">
-            <Link to="/portal/contests">
+            <Link to="/contests">
               Browse Contests
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Link>
@@ -116,7 +116,7 @@ export function MyContestsPage() {
                 : "Participate in campus contests to establish your university ranking."}
             </p>
             <Button asChild className="rounded-md bg-lime-400 text-black hover:bg-lime-300 text-xs font-mono font-semibold">
-              <Link to="/portal/contests">Explore Contests</Link>
+              <Link to="/contests">Explore Contests</Link>
             </Button>
           </div>
         ) : (
@@ -183,7 +183,7 @@ export function MyContestsPage() {
                       </div>
 
                       <h2 className="text-sm font-semibold text-white hover:text-lime-400 transition-colors">
-                        <Link to={`/portal/contests/${c.contest_slug}`}>
+                        <Link to={`/contests/${c.contest_slug}`}>
                           {c.contest_title}
                         </Link>
                       </h2>
@@ -264,7 +264,7 @@ export function MyContestsPage() {
                           size="sm"
                           className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold"
                         >
-                          <Link to={`/portal/contests/${c.contest_slug}/lobby`}>
+                          <Link to={`/contests/${c.contest_slug}/lobby`}>
                             <Play className="w-3 h-3 mr-1 fill-black" />
                             Assessment
                           </Link>
@@ -276,7 +276,7 @@ export function MyContestsPage() {
                           asChild
                           className="rounded-md border-white/10 bg-black text-zinc-300 hover:text-white font-mono text-xs"
                         >
-                          <Link to={`/portal/contests/${c.contest_slug}`}>
+                          <Link to={`/contests/${c.contest_slug}`}>
                             Details
                             <ArrowRight className="w-3 h-3 ml-1" />
                           </Link>
@@ -288,7 +288,7 @@ export function MyContestsPage() {
                           asChild
                           className="rounded-md border-white/10 bg-black text-zinc-300 hover:text-white font-mono text-xs"
                         >
-                          <Link to={`/portal/contests/${c.contest_slug}/results`}>
+                          <Link to={`/contests/${c.contest_slug}/results`}>
                             Standings
                             <ArrowRight className="w-3 h-3 ml-1" />
                           </Link>

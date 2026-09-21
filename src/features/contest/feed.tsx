@@ -129,7 +129,7 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
               {event.kind}
             </span>
             <h3 className="font-bold text-sm text-white hover:text-lime-400 transition-colors">
-              <Link to={`/portal/contests/${event.slug}`}>
+              <Link to={`/contests/${event.slug}`}>
                 {event.title}
               </Link>
             </h3>

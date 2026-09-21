@@ -148,7 +148,7 @@ export function DashboardPage() {
             </div>
             <div className="shrink-0">
               <Button asChild className="w-full sm:w-auto font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-lime-400 text-black hover:bg-lime-300">
-                <Link to={`/portal/contests/${live.slug}`}>
+                <Link to={`/contests/${live.slug}`}>
                   Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </Button>
@@ -171,7 +171,7 @@ export function DashboardPage() {
               <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
             </div>
             <Button asChild variant="outline" className="text-xs">
-              <Link to={`/portal/contests/${next.slug}`}>
+              <Link to={`/contests/${next.slug}`}>
                 View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </Button>
@@ -187,7 +187,7 @@ export function DashboardPage() {
             index="Telemetry"
             title="University Elo Progression"
             action={
-              <Link to="/portal/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+              <Link to="/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
                 Profile Dossier →
               </Link>
             }
@@ -223,7 +223,7 @@ export function DashboardPage() {
           </div>
           <div className="pt-4">
             <Button asChild variant="outline" className="w-full text-xs font-mono rounded-md border-white/10 hover:border-white/20">
-              <Link to="/portal/contests">Browse Tournaments</Link>
+              <Link to="/contests">Browse Tournaments</Link>
             </Button>
           </div>
         </section>
@@ -236,7 +236,7 @@ export function DashboardPage() {
           index="Live"
           title="Campus Scoreboard"
           action={
-            <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+            <Link to="/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
               Full Standings →
             </Link>
           }
@@ -251,7 +251,7 @@ export function DashboardPage() {
           index="Telemetry"
           title="Live Activity Stream"
           action={
-            <Link to="/portal/verify" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+            <Link to="/verify" className="text-xs font-mono font-medium text-lime-400 hover:underline">
               Verify Proofs →
             </Link>
           }
