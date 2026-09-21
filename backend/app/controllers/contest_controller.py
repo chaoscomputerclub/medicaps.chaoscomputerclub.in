@@ -908,6 +908,7 @@ class ContestController:
             code=payload.code,
             language=payload.language,
             problem_index=problem.problem_index,
+            starter_codes=getattr(problem, "starter_codes", None) or {},
         )
 
         provider = get_judge_provider()
@@ -998,6 +999,7 @@ class ContestController:
             code=payload.code,
             language=payload.language,
             problem_index=problem.problem_index,
+            starter_codes=getattr(problem, "starter_codes", None) or {},
         )
 
         provider = get_judge_provider()

@@ -81,6 +81,7 @@ class AssessmentController:
             code=code,
             language=lang_str,
             problem_index=problem.problem_index,
+            starter_codes=getattr(problem, "starter_codes", None) or {},
         )
 
         provider = get_judge_provider()
@@ -168,6 +169,7 @@ class AssessmentController:
             code=code,
             language=lang_str,
             problem_index=problem.problem_index,
+            starter_codes=getattr(problem, "starter_codes", None) or {},
         )
 
         provider = get_judge_provider()
