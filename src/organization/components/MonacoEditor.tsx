@@ -29,34 +29,31 @@ const LANG_TO_MONACO: Record<string, string> = {
   typescript: "typescript",
 };
 
-// Authentic VS Code Dark+ theme definition
-const VSCODE_DARK_THEME = {
+// The CCC dark theme definition — pure pitch black with Electric Lime accents
+const CCC_DARK_THEME = {
   base: "vs-dark" as const,
   inherit: true,
   rules: [
-    { token: "comment", foreground: "6a9955", fontStyle: "italic" },
-    { token: "keyword", foreground: "569cd6" },
-    { token: "keyword.control", foreground: "c586c0" },
-    { token: "identifier", foreground: "9cdcfe" },
-    { token: "string", foreground: "ce9178" },
-    { token: "number", foreground: "b5cea8" },
-    { token: "type", foreground: "4ec9b0" },
-    { token: "function", foreground: "dcdcaa" },
-    { token: "delimiter", foreground: "d4d4d4" },
-    { token: "operator", foreground: "d4d4d4" },
+    { token: "comment", foreground: "52525b", fontStyle: "italic" },
+    { token: "keyword", foreground: "CCFF00", fontStyle: "bold" },
+    { token: "identifier", foreground: "f4f4f5" },
+    { token: "string", foreground: "a1a1aa" },
+    { token: "number", foreground: "CCFF00" },
+    { token: "type", foreground: "ffffff" },
+    { token: "delimiter", foreground: "71717a" },
   ],
   colors: {
-    "editor.background": "#1e1e1e",
-    "editor.foreground": "#d4d4d4",
-    "editorCursor.foreground": "#aeafad",
-    "editor.lineHighlightBackground": "#282828",
-    "editorLineNumber.foreground": "#858585",
-    "editorLineNumber.activeForeground": "#c6c6c6",
-    "editor.selectionBackground": "#264f78",
-    "editor.inactiveSelectionBackground": "#3a3d41",
-    "editorGutter.background": "#1e1e1e",
-    "editorIndentGuide.background1": "#404040",
-    "editorIndentGuide.activeBackground1": "#707070",
+    "editor.background": "#000000",
+    "editor.foreground": "#f4f4f5",
+    "editorCursor.foreground": "#CCFF00",
+    "editor.lineHighlightBackground": "#0a0a0a",
+    "editorLineNumber.foreground": "#3f3f46",
+    "editorLineNumber.activeForeground": "#CCFF00",
+    "editor.selectionBackground": "#1f1f1f",
+    "editor.inactiveSelectionBackground": "#121212",
+    "editorGutter.background": "#000000",
+    "editorIndentGuide.background1": "#141414",
+    "editorIndentGuide.activeBackground1": "#242424",
   },
 };
 
@@ -85,9 +82,9 @@ export const MonacoEditor = memo(function MonacoEditor({
 
   const handleMount: OnMount = useCallback((editor, monaco) => {
     monacoRef.current = monaco;
-    // Register the authentic VS Code dark theme on mount
-    monaco.editor.defineTheme("vscode-dark-plus", VSCODE_DARK_THEME);
-    monaco.editor.setTheme("vscode-dark-plus");
+    // Register the original CCC dark theme on mount
+    monaco.editor.defineTheme("ccc-dark", CCC_DARK_THEME);
+    monaco.editor.setTheme("ccc-dark");
 
     editor.onDidChangeCursorPosition((e) => {
       onCursorChange?.(e.position.lineNumber, e.position.column);
@@ -104,7 +101,7 @@ export const MonacoEditor = memo(function MonacoEditor({
   const monacoLanguage = LANG_TO_MONACO[language] ?? "python";
 
   return (
-    <div className="relative w-full h-full bg-[#1e1e1e] overflow-hidden">
+    <div className="relative w-full h-full bg-black overflow-hidden">
       <Editor
         height={height}
         language={monacoLanguage}
@@ -114,7 +111,7 @@ export const MonacoEditor = memo(function MonacoEditor({
         onMount={handleMount}
         loading={
           <div className="p-4 text-xs font-mono text-zinc-500 animate-pulse">
-            Initializing VS Code editor…
+            Initializing terminal code editor…
           </div>
         }
         options={{
@@ -131,21 +128,16 @@ export const MonacoEditor = memo(function MonacoEditor({
           scrollBeyondLastLine: false,
           lineNumbers: "on",
           lineNumbersMinChars: 3,
-          renderLineHighlight: "all",
-          renderLineHighlightOnlyWhenFocus: false,
+          renderLineHighlight: "gutter",
           padding: { top: 12, bottom: 12 },
           tabSize,
           wordWrap,
           automaticLayout: true,
-          scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8, useShadows: false },
+          scrollbar: { verticalScrollbarSize: 6, horizontalScrollbarSize: 6, useShadows: false },
           overviewRulerLanes: 0,
           renderWhitespace: "none",
           contextmenu: true,
           folding: true,
-          bracketPairColorization: { enabled: true },
-          guides: { bracketPairs: true, indentation: true },
-          roundedSelection: false,
-          smoothScrolling: true,
         }}
       />
     </div>

@@ -155,43 +155,6 @@ input.font-mono {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* VS Code Dark+ Containers & Input/Output Blocks */
-.vscode-block {
-  background-color: #1e1e1e;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.vscode-block-header {
-  background-color: #252526;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 5px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-mono) !important;
-  font-size: 11px;
-  color: #9cdcfe;
-  user-select: none;
-}
-
-.vscode-block-body {
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-  font-family: var(--font-mono) !important;
-  font-size: 13px !important;
-  line-height: 1.55 !important;
-  letter-spacing: 0;
-  tab-size: 4;
-}
-
-.vscode-block-body::selection,
-.vscode-block-body *::selection {
-  background-color: #264f78 !important;
-  color: #ffffff !important;
-}
-
 /* Mobile Touch Actions */
 button,
 a,

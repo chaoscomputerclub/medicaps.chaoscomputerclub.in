@@ -1205,30 +1205,22 @@ export function ContestArenaPage() {
                     </div>
 
                     {activeProblem.input_format && (
-                      <div className="vscode-block space-y-0">
-                        <div className="vscode-block-header">
-                          <span className="flex items-center gap-1.5 text-[#9cdcfe]">
-                            <FileText className="size-3" />
-                            <span className="font-semibold uppercase tracking-wider text-[10px]">Input Format</span>
-                          </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">stdin</span>
-                        </div>
-                        <div className="vscode-block-body p-3 text-[13px] whitespace-pre-line leading-relaxed">
+                      <div className="space-y-1.5">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Input Format
+                        </span>
+                        <div className="bg-zinc-950 border border-white/8 rounded-md p-3 text-[13px] font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
                           {activeProblem.input_format}
                         </div>
                       </div>
                     )}
 
                     {activeProblem.output_format && (
-                      <div className="vscode-block space-y-0">
-                        <div className="vscode-block-header">
-                          <span className="flex items-center gap-1.5 text-[#4ec9b0]">
-                            <Terminal className="size-3" />
-                            <span className="font-semibold uppercase tracking-wider text-[10px]">Output Format</span>
-                          </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">stdout</span>
-                        </div>
-                        <div className="vscode-block-body p-3 text-[13px] whitespace-pre-line leading-relaxed">
+                      <div className="space-y-1.5">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Output Format
+                        </span>
+                        <div className="bg-zinc-950 border border-white/8 rounded-md p-3 text-[13px] font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
                           {activeProblem.output_format}
                         </div>
                       </div>
@@ -1236,65 +1228,44 @@ export function ContestArenaPage() {
 
                     {/* Examples Section */}
                     {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 && (
-                      <div className="space-y-3 pt-2">
+                      <div className="space-y-3 pt-1">
                         <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
                           Sample Testcases
                         </span>
                         {activeProblem.sample_testcases.map((st, i) => (
-                          <div key={i} className="vscode-block">
-                            <div className="vscode-block-header">
-                              <div className="flex items-center gap-2 text-[#cccccc] font-semibold">
-                                <Code2 className="size-3.5 text-[#569cd6]" />
-                                <span>Example {i + 1}</span>
-                                <span className="text-[10px] text-zinc-500 font-normal px-1.5 py-0.5 rounded bg-black/40 border border-white/6 font-mono">
-                                  testcase
-                                </span>
-                              </div>
+                          <div key={i} className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono">
+                            <div className="flex items-center justify-between text-zinc-400 font-semibold">
+                              <span>Example {i + 1}</span>
                               <button
                                 type="button"
                                 onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
-                                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white px-2 py-0.5 rounded hover:bg-white/10 transition-colors cursor-pointer font-mono"
-                                title="Copy input to clipboard"
+                                className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer font-mono"
                               >
                                 {copiedKey === `tc_in_${i}` ? (
                                   <Check className="size-3 text-lime-400" />
                                 ) : (
                                   <Copy className="size-3" />
                                 )}
-                                <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy Input"}</span>
+                                <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
                               </button>
                             </div>
-
-                            <div className="p-3.5 space-y-3 bg-[#1e1e1e]">
-                              {/* Input Box */}
-                              <div className="space-y-1">
-                                <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
-                                  <span className="text-[#9cdcfe] font-semibold">Input:</span>
-                                  <span className="text-[10px] text-zinc-500">stdin</span>
-                                </div>
-                                <pre className="vscode-block-body p-2.5 rounded bg-[#181818] border border-[#2d2d2d] text-[13px] overflow-x-auto whitespace-pre-wrap">
-                                  {st.stdin}
-                                </pre>
-                              </div>
-
-                              {/* Expected Output Box */}
-                              <div className="space-y-1">
-                                <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
-                                  <span className="text-[#4ec9b0] font-semibold">Expected Output:</span>
-                                  <span className="text-[10px] text-zinc-500">stdout</span>
-                                </div>
-                                <pre className="vscode-block-body p-2.5 rounded bg-[#181818] border border-[#2d2d2d] text-[13px] text-lime-400 overflow-x-auto whitespace-pre-wrap">
-                                  {st.expected_output}
-                                </pre>
-                              </div>
-
-                              {/* Explanation / Comment */}
-                              {st.explanation && (
-                                <div className="pt-2 border-t border-[#2d2d2d] text-xs font-mono text-[#6a9955] italic leading-relaxed">
-                                  // Note: {st.explanation}
-                                </div>
-                              )}
+                            <div className="space-y-1">
+                              <span className="text-[10px] text-zinc-500">Input</span>
+                              <pre className="p-2.5 rounded bg-black border border-white/6 text-zinc-200 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
+                                {st.stdin}
+                              </pre>
                             </div>
+                            <div className="space-y-1">
+                              <span className="text-[10px] text-zinc-500">Expected Output</span>
+                              <pre className="p-2.5 rounded bg-black border border-white/6 text-lime-400 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
+                                {st.expected_output}
+                              </pre>
+                            </div>
+                            {st.explanation && (
+                              <div className="text-[11px] text-zinc-400 italic pt-1 font-mono">
+                                Note: {st.explanation}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1302,15 +1273,11 @@ export function ContestArenaPage() {
 
                     {/* Constraints Section */}
                     {activeProblem.constraints && (
-                      <div className="vscode-block space-y-0 pt-0">
-                        <div className="vscode-block-header">
-                          <span className="flex items-center gap-1.5 text-[#ce9178]">
-                            <AlertCircle className="size-3" />
-                            <span className="font-semibold uppercase tracking-wider text-[10px]">Constraints</span>
-                          </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">limits</span>
-                        </div>
-                        <pre className="vscode-block-body p-3 text-[13px] text-[#ce9178] overflow-x-auto whitespace-pre-wrap">
+                      <div className="space-y-1.5 pt-1">
+                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                          Constraints
+                        </span>
+                        <pre className="text-[13px] font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap leading-relaxed">
                           {activeProblem.constraints}
                         </pre>
                       </div>
@@ -1622,69 +1589,40 @@ export function ContestArenaPage() {
 
                     {/* Active Testcase View */}
                     {activeTestcaseIndex === -1 ? (
-                      <div className="vscode-block space-y-0">
-                        <div className="vscode-block-header">
-                          <span className="flex items-center gap-1.5 text-[#9cdcfe]">
-                            <Terminal className="size-3" />
-                            <span className="font-semibold uppercase tracking-wider text-[10px]">Custom Input</span>
-                          </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">stdin</span>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                          <span>Custom Arguments</span>
+                          <span className="text-[10px] text-zinc-500">Standard input</span>
                         </div>
                         <textarea
                           value={customStdin}
                           onChange={(e) => setCustomStdin(e.target.value)}
                           placeholder={activeProblem?.sample_testcases?.[0]?.stdin || "Enter custom test inputs..."}
-                          className="vscode-block-body w-full h-24 p-3 bg-[#1e1e1e] text-[13px] text-[#d4d4d4] resize-none focus:outline-none focus:ring-1 focus:ring-[#007acc]"
+                          className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-[13px] font-mono text-white resize-none focus:outline-none focus:border-lime-400/60 leading-relaxed"
                         />
                       </div>
                     ) : (
                       activeProblem?.sample_testcases?.[activeTestcaseIndex] && (
                         <div className="space-y-3">
-                          <div className="vscode-block space-y-0">
-                            <div className="vscode-block-header">
-                              <span className="flex items-center gap-1.5 text-[#9cdcfe]">
-                                <Terminal className="size-3" />
-                                <span className="font-semibold uppercase tracking-wider text-[10px]">Input</span>
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  copyToClipboard(
-                                    activeProblem.sample_testcases[activeTestcaseIndex].stdin,
-                                    `tc_drawer_${activeTestcaseIndex}`
-                                  )
-                                }
-                                className="flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors cursor-pointer font-mono"
-                              >
-                                {copiedKey === `tc_drawer_${activeTestcaseIndex}` ? (
-                                  <Check className="size-3 text-lime-400" />
-                                ) : (
-                                  <Copy className="size-3" />
-                                )}
-                                <span>{copiedKey === `tc_drawer_${activeTestcaseIndex}` ? "Copied" : "Copy"}</span>
-                              </button>
-                            </div>
-                            <pre className="vscode-block-body p-3 text-[13px] overflow-x-auto whitespace-pre-wrap">
+                          <div>
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
+                              Input
+                            </span>
+                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-[13px] font-mono text-zinc-200 overflow-x-auto selection:bg-lime-400 selection:text-black leading-relaxed">
                               {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
                             </pre>
                           </div>
-
-                          <div className="vscode-block space-y-0">
-                            <div className="vscode-block-header">
-                              <span className="flex items-center gap-1.5 text-[#4ec9b0]">
-                                <Terminal className="size-3" />
-                                <span className="font-semibold uppercase tracking-wider text-[10px]">Expected Output</span>
-                              </span>
-                              <span className="text-[10px] text-zinc-500 font-mono">stdout</span>
-                            </div>
-                            <pre className="vscode-block-body p-3 text-[13px] text-lime-400 overflow-x-auto whitespace-pre-wrap">
+                          <div>
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
+                              Expected Output
+                            </span>
+                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-[13px] font-mono text-lime-400 overflow-x-auto selection:bg-lime-400 selection:text-black leading-relaxed">
                               {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
                             </pre>
                           </div>
-
                           {activeProblem.sample_testcases[activeTestcaseIndex].explanation && (
-                            <div className="p-2.5 rounded bg-[#1e1e1e] border border-[#2d2d2d] text-xs font-mono text-[#6a9955] italic">
-                              // Note: {activeProblem.sample_testcases[activeTestcaseIndex].explanation}
+                            <div className="text-[11px] font-mono text-zinc-400 italic">
+                              Note: {activeProblem.sample_testcases[activeTestcaseIndex].explanation}
                             </div>
                           )}
                         </div>
