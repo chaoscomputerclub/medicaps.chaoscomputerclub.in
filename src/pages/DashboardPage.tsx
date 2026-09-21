@@ -64,19 +64,6 @@ export function DashboardPage() {
   };
   const contests = publicData.contests || [];
   const history = profile?.ratingHistory || [];
-  const pass = profile?.campusPass;
-  const isRealPass = Boolean(
-    pass &&
-    pass.pass_code &&
-    pass.pass_code !== "NONE" &&
-    pass.pass_code !== "CCC-PASS-0001" &&
-    pass.status !== "expired" &&
-    pass.seat &&
-    pass.seat !== "LAB-04-WS-12" &&
-    pass.seat !== "Assigned Physical Lab" &&
-    pass.seat !== "Unassigned"
-  );
-
   const live = contests.find((c) => c.status === "live");
   const next = contests.find((c) => c.status === "upcoming");
   const greetingName = getFirstName(member?.full_name, member?.handle);
@@ -155,7 +142,7 @@ export function DashboardPage() {
                   Division {live.division}
                 </span>
                 <span className="text-zinc-500">
-                  {live.problem_count} Problems · {live.registered_count}/{live.seat_capacity} Seated
+                  {live.problem_count} Problems · {live.registered_count} Registered
                 </span>
               </div>
             </div>
@@ -181,7 +168,7 @@ export function DashboardPage() {
           <div className="flex flex-wrap items-center gap-4 font-mono text-xs shrink-0">
             <div>
               <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
-              <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.check_in_opens_at)}</strong>
+              <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
             </div>
             <Button asChild variant="outline" className="text-xs">
               <Link to={`/portal/contests/${next.slug}`}>

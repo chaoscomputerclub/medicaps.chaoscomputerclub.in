@@ -148,7 +148,7 @@ export function ContestLobbyPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500">
-                Round 1 · Scheduled
+                Contest · Scheduled
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -156,24 +156,24 @@ export function ContestLobbyPage() {
                 <Clock className="size-5" />
               </div>
               <h1 className="text-xl font-semibold text-white tracking-tight">
-                Screening Window Locked
+                Contest Arena Waiting Room
               </h1>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Registration confirmed. The Phase 1 screening assessment unlocks 24 hours prior to the finals:
+              Registration confirmed. The live contest arena unlocks when the competition begins:
             </p>
             <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Opens:</span>
-                <span className="text-lime-400 font-semibold">{formatWhen(opensAt.toISOString())}</span>
+                <span>Starts at:</span>
+                <span className="text-lime-400 font-semibold">{formatWhen(contest.starts_at)}</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Closes:</span>
-                <span className="text-white font-semibold">{formatWhen(assessmentClosesAt(contest).toISOString())}</span>
+                <span>Duration:</span>
+                <span className="text-white font-semibold">{ASSESSMENT_DURATION_MINUTES} Minutes</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400 border-t border-white/6 pt-2">
-                <span>Final:</span>
-                <span className="text-zinc-300 font-semibold">{formatWhen(contest.starts_at)}</span>
+                <span>Access:</span>
+                <span className="text-zinc-300 font-semibold">Open to All Enrolled Students</span>
               </div>
             </div>
           </div>
@@ -187,7 +187,7 @@ export function ContestLobbyPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest text-red-400">
-                Round 1 · Window Closed
+                Contest Concluded
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -195,11 +195,11 @@ export function ContestLobbyPage() {
                 <Lock className="size-5" />
               </div>
               <h1 className="text-xl font-semibold text-white tracking-tight">
-                Assessment Closed
+                Contest Concluded
               </h1>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              The Round 1 screening window has concluded. Final scoring and verification are underway.
+              The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
           <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
@@ -213,7 +213,7 @@ export function ContestLobbyPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Screening Lobby · Round 1
+                Live Contest Arena Lobby
               </span>
               {isDevBypass && (
                 <span className="px-1.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 font-mono text-[9px] uppercase tracking-wider text-lime-400 font-semibold">
@@ -223,7 +223,7 @@ export function ContestLobbyPage() {
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-white">{contest.title}</h1>
             <p className="text-xs text-zinc-400 font-mono">
-              Carefully review the assessment protocols and test regulations before entering.
+              Review the competition guidelines and regulations before entering.
             </p>
           </div>
 
@@ -236,7 +236,7 @@ export function ContestLobbyPage() {
                 sub: "Continuous timer",
               },
               { label: "Attempt", value: "Single", sub: "Cannot pause or reset" },
-              { label: "Advancement", value: `Top ${FINALIST_SEATS}`, sub: "Campus final cut" },
+              { label: "Rating Impact", value: "Elo Rated", sub: "Campus leaderboard" },
             ].map(({ label, value, sub }) => (
               <div key={label} className="flex flex-col gap-0.5 p-3.5">
                 <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
@@ -253,7 +253,7 @@ export function ContestLobbyPage() {
             <div className="flex items-center justify-between border-b border-white/6 pb-2.5">
               <span className="text-[11px] font-semibold text-white flex items-center gap-2">
                 <Shield className="size-3.5 text-lime-400" />
-                Assessment Regulations & Integrity Code
+                Tournament Regulations & Fair Play Code
               </span>
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
                 CCC PROCTOR v2.1
@@ -282,7 +282,7 @@ export function ContestLobbyPage() {
               <li className="flex items-start gap-2.5">
                 <span className="text-lime-400 font-semibold shrink-0">04.</span>
                 <span>
-                  <strong className="text-white">Top 30 Final:</strong> Only the highest verified scoring participants advance to the physical campus championship.
+                  <strong className="text-white">Leaderboard & Rating:</strong> Official Elo ratings are computed and updated on the university leaderboard after the contest ends.
                 </span>
               </li>
             </ul>

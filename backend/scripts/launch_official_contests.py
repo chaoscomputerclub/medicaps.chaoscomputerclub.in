@@ -54,7 +54,40 @@ async def launch_contests(force: bool = False):
             print(f"  ✓ Official contest '{existing_contest.title}' ({existing_contest.slug}) is already established.")
             print(f"  ✓ Starts at (UTC): {existing_contest.starts_at}")
             print(f"  ✓ Ends at (UTC):   {existing_contest.ends_at}")
-            print("  ✓ Preserving existing contest schedule, countdown timers, and participant records with ZERO changes.")
+
+            clean_summary = (
+                "Wednesday algorithmic showdown for Medi-Caps students. 4 algorithmic challenges "
+                "testing graph traversal, greedy optimization, and dynamic programming. "
+                "Open to all students — ratings update on the university leaderboard."
+            )
+            clean_rules = [
+                "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the online arena.",
+                "Format: 4 algorithmic problems ranging from Easy to Hard in a 90-minute live session.",
+                "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
+                "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
+                "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
+            ]
+            existing_contest.summary = clean_summary
+            existing_contest.rules = clean_rules
+            existing_contest.venue = "Online Arena · Open to All Students"
+            existing_contest.environment = "Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21"
+            existing_contest.seat_capacity = 1000
+
+            assess_res = await db.execute(
+                select(Assessment).where(Assessment.contest_id == existing_contest.id)
+            )
+            existing_assess = assess_res.scalars().first()
+            if existing_assess:
+                existing_assess.title = "Weekly Contest 1 — Live Algorithmic Arena"
+                existing_assess.summary = "Official weekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 90 minutes."
+
+            await db.commit()
+            print("  ✓ Updated contest content and rules to clean LeetCode open format.")
+            try:
+                await delete_cache_pattern("cache:*")
+                print("  ✓ Redis cache invalidated.")
+            except Exception as e:
+                print("Notice on cache delete:", e)
             return
 
         if force or not existing_contest:
@@ -88,21 +121,21 @@ async def launch_contests(force: bool = False):
             starts_at=weekly_starts,
             ends_at=weekly_ends,
             check_in_opens_at=weekly_checkin,
-            venue="Medi-Caps University Main Computing Lab (Lab 04)",
-            seat_capacity=60,
+            venue="Online Arena · Open to All Students",
+            seat_capacity=1000,
             registered_count=0,
             problem_count=4,
-            environment="Air-Gapped Workstation LAN · Clang 18 / GCC 14 / Python 3.12",
+            environment="Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
             chief_proctors=["Chief Proctor (CCC Core)", "CCC Operations Desk"],
             prize_pool="₹15,000 Cash Prize + Merit Certificates",
             sponsor="Chaos Computer Club Medi-Caps Chapter",
-            summary="Wednesday algorithmic showdown for Medi-Caps cadets. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Top 30 online screening qualifiers advance to the air-gapped lab final.",
+            summary="Wednesday algorithmic showdown for Medi-Caps students. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Open to all students — ratings update on the university leaderboard.",
             rules=[
-                "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the on-premise air-gapped lab.",
-                "Phase 1 Online Screening: 90-minute proctored session in anti-cheat browser arena.",
-                "Top 30 verified scorers qualify for the Phase 2 on-premise air-gapped lab final.",
-                "Submissions evaluated via CodeBox with sub-millisecond precision.",
-                "Standard penalty: 20 minutes per non-accepted submission on tie-breaks."
+                "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the online arena.",
+                "Format: 4 algorithmic problems ranging from Easy to Hard in a 90-minute live session.",
+                "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
+                "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
+                "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
             ],
             created_at=now_utc(),
         )
@@ -113,8 +146,8 @@ async def launch_contests(force: bool = False):
         weekly_assessment = Assessment(
             contest_id=weekly_contest.id,
             slug="weekly-contest-1",
-            title="Weekly Contest 1 — Online Screening Round",
-            summary="Phase 1 online qualification round for CCC Weekly Contest 1. Solve all 4 challenges within 90 minutes.",
+            title="Weekly Contest 1 — Live Algorithmic Arena",
+            summary="Official weekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 90 minutes.",
             duration_minutes=90,
             starts_at=assess_opens, # Strictly unlocks 24 hours prior (Tuesday 3:00 PM IST)
             ends_at=assess_closes, # Strictly closes 2 hours before physical contest (Wednesday 1:00 PM IST)

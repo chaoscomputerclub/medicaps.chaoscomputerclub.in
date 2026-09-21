@@ -5,12 +5,9 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { CalendarClock, Flag, ListOrdered, Play, Trophy } from "lucide-react";
+import { CalendarClock, Flag, Play, Trophy } from "lucide-react";
 import { contestApi } from "./api";
 import {
-  FINALIST_SEATS,
-  assessmentClosesAt,
-  assessmentOpensAt,
   cadenceLabel,
   formatWhen,
 } from "./lifecycle";
@@ -27,55 +24,49 @@ type FeedEvent = {
 };
 
 function eventsFor(contest: ContestSummary): FeedEvent[] {
-  const opens = assessmentOpensAt(contest);
-  const closes = assessmentClosesAt(contest);
   const label = `${cadenceLabel(contest)}${contest.edition ? ` ${contest.edition}` : ""}`;
+  const contestStarts = new Date(contest.starts_at).getTime();
+  const contestEnds = new Date(contest.ends_at ?? contest.starts_at).getTime();
+  const regOpens = contestStarts - 7 * 86400000;
 
   const events: FeedEvent[] = [
     {
       key: `${contest.slug}-reg`,
-      kind: "registration open",
-      at: new Date(contest.check_in_opens_at ?? contest.starts_at).getTime() - 7 * 86400000,
-      title: `${label} — registration open`,
-      body: `${contest.registered_count} of ${contest.seat_capacity} seats claimed for ${contest.title}.`,
+      kind: "registration",
+      at: regOpens,
+      title: `${label} — Registration Open`,
+      body: `Registration is open to all Medi-Caps students for ${contest.title}.`,
       slug: contest.slug,
       icon: Flag,
     },
     {
-      key: `${contest.slug}-r1`,
-      kind: "round 1 window",
-      at: opens.getTime(),
-      title: `${label} — Round 1 opens`,
-      body: `Online assessment window ${formatWhen(opens.toISOString())} → ${formatWhen(
-        closes.toISOString()
-      )}. One 2-hour attempt.`,
+      key: `${contest.slug}-scheduled`,
+      kind: "upcoming round",
+      at: contestStarts,
+      title: `${label} — Scheduled Start`,
+      body: `Live 90-minute competitive programming contest on ${formatWhen(contest.starts_at)}. 4 algorithmic problems.`,
       slug: contest.slug,
       icon: Play,
     },
-    {
-      key: `${contest.slug}-cut`,
-      kind: "results",
-      at: closes.getTime(),
-      title: `${label} — Top ${FINALIST_SEATS} announced`,
-      body: "Round 1 ranking is verified and QR campus passes are issued to qualifiers.",
-      slug: contest.slug,
-      icon: ListOrdered,
-    },
   ];
 
-  if (contest.status !== "upcoming") {
+  if (contest.status === "live") {
+    events.push({
+      key: `${contest.slug}-live`,
+      kind: "live arena",
+      at: Date.now(),
+      title: `${label} is LIVE`,
+      body: `The competition is currently underway! Solve 4 algorithmic challenges in the live arena.`,
+      slug: contest.slug,
+      icon: Trophy,
+    });
+  } else if (contest.status === "finished") {
     events.push({
       key: `${contest.slug}-final`,
-      kind: contest.status === "live" ? "final live" : "final complete",
-      at: new Date(contest.starts_at).getTime(),
-      title:
-        contest.status === "live"
-          ? `${label} — final live at ${contest.venue}`
-          : `${label} — final results published`,
-      body:
-        contest.status === "live"
-          ? "The campus final is running. Finalists check in with their QR pass."
-          : `Verified standings from ${contest.venue} are available.`,
+      kind: "results",
+      at: contestEnds,
+      title: `${label} — Results & Ratings Published`,
+      body: `Contest concluded. Official problem solutions, verified rankings, and Elo ratings updated on the university leaderboard.`,
       slug: contest.slug,
       icon: Trophy,
     });

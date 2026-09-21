@@ -106,10 +106,10 @@ export function RegisterConfirmModal({
               <Sparkles className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="text-xs font-mono uppercase text-white block">
-                  Phase 1 · Online Screening
+                  Live Algorithmic Arena
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Algorithmic problem set. Unlocks <strong>strictly 24 hours</strong> prior to live contest start.
+                  90-minute live contest. 4 algorithmic challenges testing data structures and optimization.
                 </p>
               </div>
             </div>
@@ -118,10 +118,10 @@ export function RegisterConfirmModal({
               <Users className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="text-xs font-mono uppercase text-white block">
-                  Phase 2 · Top 30 Campus Finals
+                  Open Registration & Elo Rated
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Only the 30 highest verified scores qualify for the physical, air-gapped laboratory round.
+                  Open to all Medi-Caps students. Performance officially impacts your campus ranking and Elo rating.
                 </p>
               </div>
             </div>
@@ -130,10 +130,10 @@ export function RegisterConfirmModal({
               <MapPin className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="text-xs font-mono uppercase text-white block">
-                  Final Venue
+                  Contest Arena
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  {contest.logistics?.venue || "Computing Complex · Lab Block 04"}
+                  {contest.logistics?.venue || "Online Arena · Medi-Caps University"}
                 </p>
               </div>
             </div>
@@ -147,7 +147,7 @@ export function RegisterConfirmModal({
               className="mt-0.5 border-white/20 data-[state=checked]:bg-lime-400 data-[state=checked]:text-black"
             />
             <span className="text-xs text-zinc-300 leading-relaxed">
-              I certify that I am an enrolled Medi-Caps University student. I acknowledge that automated proctoring, browser telemetry, and air-gapped lab integrity guidelines are strictly enforced.
+              I certify that I am an enrolled Medi-Caps University student. I agree to abide by the university competition code of conduct and fair play integrity guidelines.
             </span>
           </label>
         </div>

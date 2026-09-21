@@ -174,10 +174,11 @@ class DynamicContestService:
             sponsor=payload.sponsor,
             summary=payload.summary,
             rules=payload.rules if payload.rules else [
-                "Phase 1 Online Screening: 120-minute timed round in anti-cheat browser arena.",
-                "Top 30 verified scorers qualify for the Phase 2 on-premise air-gapped lab final.",
-                "Submissions evaluated via CodeBox with sub-millisecond precision.",
-                "Standard penalty: 20 minutes per non-accepted submission on tie-breaks."
+                "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the online arena.",
+                "Format: 4 algorithmic problems ranging from Easy to Hard in a 90-minute live session.",
+                "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
+                "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
+                "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
             ],
             banner_url=payload.banner_url,
             created_at=now,

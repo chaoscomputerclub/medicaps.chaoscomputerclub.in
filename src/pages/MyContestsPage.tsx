@@ -61,11 +61,11 @@ export function MyContestsPage() {
             </div>
             <div className="flex flex-col border-l border-white/20 pl-3">
               <strong className="font-mono tabular-nums text-xl font-semibold text-white">{registeredCount}</strong>
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Standby</span>
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Upcoming</span>
             </div>
             <div className="flex flex-col border-l border-lime-400/40 pl-3">
               <strong className="font-mono tabular-nums text-xl font-semibold text-lime-400">{qualifiedCount}</strong>
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Top 30</span>
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Ranked</span>
             </div>
           </div>
         }
@@ -113,7 +113,7 @@ export function MyContestsPage() {
             <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
               {filter === "registered"
                 ? "You have not registered for any upcoming tournament rounds yet."
-                : "Enter tournament screening rounds to establish your university ranking."}
+                : "Participate in campus contests to establish your university ranking."}
             </p>
             <Button asChild className="rounded-md bg-lime-400 text-black hover:bg-lime-300 text-xs font-mono font-semibold">
               <Link to="/portal/contests">Explore Contests</Link>
@@ -166,18 +166,18 @@ export function MyContestsPage() {
                         {isQualified && (
                           <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
                             <ShieldCheck size={10} />
-                            Top 30 Qualified
+                            Ranked
                           </span>
                         )}
                         {isUpcoming && (
                           <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-amber-300 bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-500/30">
-                            Seat Reserved
+                            Registered
                           </span>
                         )}
                         {isLive && (
                           <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
                             <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
-                            Live Screening
+                            Contest Live
                           </span>
                         )}
                       </div>

@@ -326,13 +326,13 @@ export function AssessmentWorkspacePage() {
           </div>
           <div className="space-y-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-              Round 1 Screening Locked
+              Contest Arena Locked
             </span>
             <h2 className="text-xl font-semibold text-white tracking-tight">
               {assessment.title}
             </h2>
             <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              The proctored assessment window opens strictly prior to the contest final. Please wait in the lobby until the timer unlocks.
+              The live contest arena opens at the scheduled competition start time. Please wait in the lobby until the countdown unlocks.
             </p>
           </div>
           <div className="p-4 bg-zinc-950 rounded-md border border-white/8">
@@ -368,7 +368,7 @@ export function AssessmentWorkspacePage() {
             {isLifecycleErr ? <Lock size={22} className="text-amber-400" /> : <ShieldAlert size={22} className="text-red-400" />}
           </div>
           <h2 className="text-base font-semibold font-mono text-white">
-            {isLifecycleErr ? "Screening Assessment Closed" : "Assessment Access Gate"}
+            {isLifecycleErr ? "Contest Arena Closed" : "Contest Access Gate"}
           </h2>
           <p className="text-xs text-zinc-400 font-mono leading-relaxed">
             {error}
