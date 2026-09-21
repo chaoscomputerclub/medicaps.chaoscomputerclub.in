@@ -345,10 +345,9 @@ export function ContestArenaPage() {
             <span className="text-zinc-300 font-medium">{arenaData?.chief_proctors?.length ? arenaData.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-zinc-950 text-xs font-mono">
-            <Cpu className="size-3 text-cyan-400" />
-            <span className="text-zinc-500">WS:</span>
-            <span className="text-white font-semibold">{arenaData?.assigned_seat || "Lab-04-WS-07"}</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-black text-xs font-mono">
+            <span className="size-1.5 rounded-full bg-lime-400" />
+            <span className="text-zinc-300 font-medium">Elo Rated</span>
           </div>
         </div>
 

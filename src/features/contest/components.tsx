@@ -179,11 +179,11 @@ export function ContestCard({
         <dl className="grid grid-cols-2 gap-2.5 font-mono text-xs text-zinc-400 border-t border-white/6 pt-4">
           <div className="flex items-center gap-2">
             <CalendarClock className="size-3.5 text-zinc-500 shrink-0" />
-            <span className="truncate">{formatWhen(assessmentOpensAt(contest).toISOString())}</span>
+            <span className="truncate">{formatWhen(contest.starts_at)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <MapPin className="size-3.5 text-zinc-500 shrink-0" />
-            <span className="truncate">{contest.venue}</span>
+            <Clock className="size-3.5 text-zinc-500 shrink-0" />
+            <span className="truncate">90 Mins</span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="size-3.5 text-zinc-500 shrink-0" />
@@ -191,7 +191,7 @@ export function ContestCard({
           </div>
           <div className="flex items-center gap-2">
             <Trophy className="size-3.5 text-lime-400 shrink-0" />
-            <span>Top <span className="text-white font-semibold tabular-nums">{FINALIST_SEATS}</span> advance</span>
+            <span>Rated Contest</span>
           </div>
         </dl>
         <div className="space-y-1.5">

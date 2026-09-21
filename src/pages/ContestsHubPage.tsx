@@ -268,7 +268,7 @@ export function ContestsHubPage() {
     try {
       setRegisteringSlug(slug);
       await dispatch(registerContestThunk(slug)).unwrap();
-      toast.success("Registered! Phase 1 screening unlocks 24h before the contest.");
+      toast.success("Successfully registered for the contest!");
       refreshHubData(true);
     } catch (err: any) {
       toast.error(err || "Registration failed");
@@ -368,43 +368,39 @@ export function ContestsHubPage() {
                     <CountdownDisplay days={weeklyCountdown.days} hours={weeklyCountdown.hours} minutes={weeklyCountdown.minutes} seconds={weeklyCountdown.seconds} accentSec />
                   </div>
                   <div className="flex flex-wrap items-center gap-3 pt-1">
-                    {isWeeklySubmitted ? (
+                    {upcomingWeekly.status === "live" ? (
+                      <>
+                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md shadow-lg shadow-lime-400/20">
+                          <Link to={`/portal/contests/${upcomingWeekly.slug}/arena`}>
+                            <Play className="mr-1.5 size-4 fill-black" /> Enter Contest Arena
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm" className="text-xs">
+                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
+                        </Button>
+                      </>
+                    ) : isWeeklyRegistered ? (
                       <>
                         <div className="flex items-center gap-2 rounded-md border border-lime-400/30 bg-lime-400/8 px-3.5 py-2 text-xs font-mono text-lime-400">
                           <CheckCircle2 className="size-4 text-lime-400" />
-                          <span>Assessment Completed {assessmentInfo?.score !== undefined && assessmentInfo?.score !== null ? `(${assessmentInfo.score} Pts)` : "· Submitted"}</span>
+                          <span>Registered · Contest Opens at Start Time</span>
                         </div>
-                        <Button asChild variant="outline" className="text-xs px-5 py-2">
-                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}><CheckCircle2 className="mr-1.5 size-4" /> View Status & Results</Link>
+                        <Button asChild variant="outline" size="sm" className="text-xs font-mono border-white/8">
+                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
                         </Button>
-                        <Button asChild variant="outline" size="sm" className="text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
                       </>
-                    ) : isWeeklyRegistered ? (
-                      assessmentInfo?.isOpen ? (
-                        <>
-                          <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md">
-                            <Link to={`/portal/contests/${upcomingWeekly.slug}/lobby`}>
-                              <Play className="mr-1.5 size-4 fill-black" /> Enter Contest Lobby
-                            </Link>
-                          </Button>
-                          <Button asChild variant="outline" size="sm" className="text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-2 rounded-md border border-lime-400/30 bg-lime-400/8 px-3.5 py-2 text-xs font-mono text-lime-400">
-                            <CheckCircle2 className="size-4 text-lime-400" />
-                            <span>Registered · Contest Access Opens Soon</span>
-                          </div>
-                          <Button asChild variant="outline" size="sm" className="text-xs font-mono border-white/8"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
-                        </>
-                      )
                     ) : (
                       <>
-                        <Button onClick={() => handleRegister(upcomingWeekly.slug)} disabled={registeringSlug === upcomingWeekly.slug}
-                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md">
+                        <Button
+                          onClick={() => handleRegister(upcomingWeekly.slug)}
+                          disabled={registeringSlug === upcomingWeekly.slug}
+                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md cursor-pointer"
+                        >
                           {registeringSlug === upcomingWeekly.slug ? "Registering..." : "Register for Contest"}
                         </Button>
-                        <Button asChild variant="outline" size="sm" className="text-xs"><Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link></Button>
+                        <Button asChild variant="outline" size="sm" className="text-xs">
+                          <Link to={`/portal/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
+                        </Button>
                       </>
                     )}
                   </div>
@@ -414,8 +410,8 @@ export function ContestsHubPage() {
 
             {/* ── OTHER UPCOMING ── */}
             {otherUpcomingContests.map((contest) => {
-              const isSubmitted = isContestAssessmentSubmitted(contest);
               const isReg = Boolean(contest.registered || myParticipations.some((p) => p.contest_slug === contest.slug));
+              const isLive = contest.status === "live";
               return (
                 <div key={contest.slug} className="group relative overflow-hidden rounded-lg border border-white/8 bg-black p-5 transition-colors hover:border-white/20">
                   <div className="flex flex-col gap-3">
@@ -430,25 +426,19 @@ export function ContestsHubPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 pt-1">
-                      {isSubmitted ? (
-                        <Button asChild variant="outline" className="flex-1 text-xs text-lime-400 border-lime-400/30">
-                          <Link to={`/portal/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Submitted</Link>
-                        </Button>
-                      ) : isContestAssessmentInProgress(contest) ? (
+                      {isLive ? (
                         <Button asChild className="flex-1 bg-lime-400 text-xs font-mono font-semibold uppercase text-black hover:bg-lime-300">
-                          <Link to={`/portal/contests/${contest.slug}/lobby`}>
-                            <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                          <Link to={`/portal/contests/${contest.slug}/arena`}>
+                            <Play className="mr-1.5 size-4 fill-black" /> Enter Arena
                           </Link>
                         </Button>
                       ) : isReg ? (
-                        <Button asChild className="flex-1 bg-lime-400 text-xs font-mono font-semibold uppercase text-black hover:bg-lime-300">
-                          <Link to={`/portal/contests/${contest.slug}/lobby`}>
-                            <Play className="mr-1.5 size-4 fill-black" /> Enter Lobby
-                          </Link>
+                        <Button asChild variant="outline" className="flex-1 text-xs text-lime-400 border-lime-400/30">
+                          <Link to={`/portal/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Registered</Link>
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
-                          className="flex-1 text-xs font-mono font-semibold uppercase bg-lime-400 text-black hover:bg-lime-300">
+                          className="flex-1 text-xs font-mono font-semibold uppercase bg-lime-400 text-black hover:bg-lime-300 cursor-pointer">
                           {registeringSlug === contest.slug ? "Registering..." : "Register Now"}
                         </Button>
                       )}
@@ -461,196 +451,6 @@ export function ContestsHubPage() {
           </div>
         )}
       </section>
-
-      {/* ─── PHASE 1 SCREENING BANNER ────────────────── */}
-      {assessmentInfo && (
-        <section className="relative overflow-hidden rounded-none border border-lime-400/30 bg-zinc-900/60 backdrop-blur-md shadow-xl">
-          <div className="h-0.5 w-full bg-lime-400" />
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-lime-400/10 blur-3xl" />
-          <div className="relative grid gap-0 lg:grid-cols-[1fr_360px]">
-            {/* Info side */}
-            <div className="flex flex-col justify-center gap-5 p-6 lg:p-8">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center gap-1.5 rounded-none border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest ${
-                  assessmentInfo.hasTaken
-                    ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                    : "border-lime-400/30 bg-lime-400/10 text-lime-400"
-                }`}>
-                  {assessmentInfo.hasTaken ? <CheckCircle2 className="size-3 text-emerald-400" /> : <Flame className="size-3 text-lime-400" />}
-                  {assessmentInfo.hasTaken ? "Phase 1 · Screening Completed" : "Phase 1 · Online Screening"}
-                </span>
-                <span className="font-mono text-[11px] text-zinc-400">
-                  {assessmentInfo.hasTaken ? "Attempt locked & securely recorded" : "Strict 24h window · Closes 2h before contest for pass generation"}
-                </span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">
-                  {assessmentInfo.hasTaken ? "Screening Complete — Session Locked"
-                    : assessmentInfo.isOpen ? "🔴 Assessment Window is LIVE Now"
-                    : assessmentInfo.isUpcoming ? "Screening Unlocks 24h Before Contest"
-                    : "Online Screening Layer"}
-                </h3>
-                <p className="mt-2 max-w-lg text-sm leading-relaxed text-zinc-400">
-                  {assessmentInfo.hasTaken
-                    ? "Your screening session has been finalized. Scores and anti-cheat telemetry are securely processed by CodeBox. Top 30 qualifiers receive digital QR passes to the air-gapped lab final."
-                    : "Registered cadets solve algorithmic problems in a 120-min proctored session. The Top 30 verified scores earn a QR pass to the physical air-gapped lab final."}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {[
-                  { label: "Duration", value: assessmentInfo.hasTaken ? "120 Min (Done)" : "120 Min" },
-                  { label: "Qualifiers", value: "Top 30", hi: true },
-                  { label: "Proctoring", value: assessmentInfo.hasTaken ? "Verified" : "Automated" },
-                  { label: "Lab Entry", value: assessmentInfo.isTop30 ? "QR Pass Ready" : "Pending Results", hi: assessmentInfo.isTop30 },
-                ].map(({ label, value, hi }) => (
-                  <div key={label} className="rounded-none border border-white/10 bg-zinc-950/60 p-3">
-                    <span className="block font-mono text-[9px] font-semibold uppercase tracking-widest text-zinc-400">{label}</span>
-                    <strong className={`font-mono text-sm font-bold tabular-nums ${hi ? "text-lime-400" : "text-white"}`}>{value}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Action side */}
-            <div className="flex flex-col justify-center gap-4 border-t border-white/10 bg-zinc-950/80 p-6 lg:border-l lg:border-t-0 lg:p-8">
-              {assessmentInfo.hasTaken ? (
-                <>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <span className="text-xs text-zinc-400">Your Screening Score</span>
-                      <span className="font-mono text-2xl font-black tabular-nums text-lime-400">{assessmentInfo.score ?? 0} Pts</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">Status</span>
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                        <CheckCircle2 className="size-3.5" /> Submitted & Finalized
-                      </span>
-                    </div>
-                    {assessmentInfo.rank ? (
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-zinc-400">Provisional Rank</span>
-                        <span className="font-mono text-sm font-bold tabular-nums text-white">#{assessmentInfo.rank}</span>
-                      </div>
-                    ) : null}
-                    {assessmentInfo.isTop30 && (
-                      <div className="flex items-center gap-2 font-bold text-emerald-400 text-sm">
-                        <CheckCircle2 className="size-4" /> Qualified for Lab Final
-                      </div>
-                    )}
-                  </div>
-                  <Button asChild className="w-full rounded-none text-xs font-bold uppercase bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-md shadow-lime-400/20">
-                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}${assessmentInfo.isTop30 ? "/qualified" : ""}`}>
-                      {assessmentInfo.isTop30 ? <><QrCode className="mr-1.5 size-4" /> View Campus QR Pass</> : "View Contest Details & Results"}
-                    </Link>
-                  </Button>
-                </>
-              ) : assessmentInfo.isInProgress ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <ShieldAlert className="size-4 text-amber-400" />
-                    <span className="text-xs font-bold text-amber-400">Attempt In Progress · Disconnect Detected</span>
-                    <span className="ml-auto font-mono text-xs text-amber-300 font-bold">
-                      Warning {assessmentInfo.antiCheatViolations} of {assessmentInfo.maxViolations}
-                    </span>
-                  </div>
-                  <Button asChild
-                    className="w-full rounded-none bg-amber-400 text-xs font-bold uppercase text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300">
-                    <a href={`/assessments/${assessmentInfo.contest.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
-                    </a>
-                  </Button>
-                  <p className="text-center font-mono text-[10px] text-zinc-400">Proctored session active · Server clock synchronized</p>
-                </>
-              ) : (registeredUpcomingContest || isWeeklyRegistered) && assessmentInfo.isOpen ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-400">Registration Active · Window Open</span>
-                    <span className="ml-auto font-mono text-xs text-lime-400 font-bold">120 MIN</span>
-                  </div>
-                  <Button asChild
-                    className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
-                    <a href={`/assessments/${assessmentInfo.contest.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Play className="mr-1.5 size-4 fill-black" /> Take Assessment Now
-                    </a>
-                  </Button>
-                  <p className="text-center font-mono text-[10px] text-zinc-400">Full-screen Monaco IDE · Anti-cheat active</p>
-                </>
-              ) : (registeredUpcomingContest || isWeeklyRegistered) ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-lime-400" />
-                    <span className="text-xs font-bold text-lime-400">Registration Active</span>
-                    <span className="ml-auto font-mono text-[10px] text-zinc-500 uppercase">Phase 1</span>
-                  </div>
-                  <div className="p-3 bg-zinc-950/80 border border-white/10 rounded-none space-y-1.5 font-mono">
-                    <div className="flex items-center gap-1.5 text-xs text-zinc-300">
-                      <Lock className="size-3.5 text-amber-400" />
-                      <span>Screening Window Locked</span>
-                    </div>
-                    <p className="text-[11px] text-zinc-500 leading-relaxed">
-                      Unlocks Tuesday 3:00 PM IST (strictly 24h prior) and closes Wednesday 1:00 PM IST (strictly 2h prior).
-                    </p>
-                  </div>
-                  <Button asChild variant="outline" className="w-full rounded-none border-white/10 text-xs font-mono">
-                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}`}>View Contest Details</Link>
-                  </Button>
-                </>
-              ) : assessmentInfo.isOpen ? (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-red-400 animate-pulse">
-                      <AlertCircle className="size-4" /> Window Closes In
-                    </span>
-                    <span className="font-mono text-sm font-bold tabular-nums text-white">
-                      {String(assessmentRemainingTimer.hours).padStart(2, "0")}:{String(assessmentRemainingTimer.minutes).padStart(2, "0")}:{String(assessmentRemainingTimer.seconds).padStart(2, "0")}
-                    </span>
-                  </div>
-                  <Button asChild className="w-full rounded-none bg-lime-400 text-xs font-bold uppercase text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20">
-                    <Link to={`/portal/contests/${assessmentInfo.contest.slug}/lobby`}><Play className="mr-1.5 size-4 fill-black" /> Take Assessment</Link>
-                  </Button>
-                </>
-              ) : assessmentInfo.isUpcoming ? (
-                <>
-                  <div className="space-y-1">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Unlocks In</span>
-                    <div className="font-mono text-3xl font-extrabold tabular-nums text-lime-400">
-                      {assessmentUnlockTimer.days > 0 ? `${assessmentUnlockTimer.days}d ` : ""}
-                      {String(assessmentUnlockTimer.hours).padStart(2, "0")}:{String(assessmentUnlockTimer.minutes).padStart(2, "0")}:{String(assessmentUnlockTimer.seconds).padStart(2, "0")}
-                    </div>
-                    <p className="font-mono text-[11px] text-zinc-400">Opens: {assessmentInfo.openDateFormatted}</p>
-                  </div>
-                  {assessmentInfo.isRegistered ? (
-                    <div className="flex items-center justify-center gap-2 rounded-none border border-lime-400/30 bg-lime-400/10 px-4 py-2.5 text-xs font-mono font-bold text-lime-400 uppercase tracking-wider">
-                      <CheckCircle2 className="size-4 text-lime-400" />
-                      <span>Registered · Unlocks {assessmentInfo.openDateFormatted}</span>
-                    </div>
-                  ) : (
-                    <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
-                      className="w-full rounded-none text-xs font-bold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-lg shadow-lime-400/20">
-                      <Sparkles className="mr-1.5 size-3.5" /> Register to Unlock
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <div className="space-y-3 text-center">
-                  <p className="text-xs text-zinc-400">Register for an upcoming contest to enter the screening pipeline.</p>
-                  {assessmentInfo.isRegistered ? (
-                    <div className="flex items-center justify-center gap-2 rounded-none border border-lime-400/30 bg-lime-400/10 px-4 py-2.5 text-xs font-mono font-bold text-lime-400 uppercase tracking-wider">
-                      <CheckCircle2 className="size-4 text-lime-400" />
-                      <span>Registered</span>
-                    </div>
-                  ) : (
-                    <Button onClick={() => handleRegister(assessmentInfo.contest.slug)} disabled={registeringSlug === assessmentInfo.contest.slug}
-                      className="w-full rounded-none text-xs font-bold uppercase bg-lime-400 text-black hover:bg-lime-300 font-bold shadow-lg shadow-lime-400/20">
-                      {registeringSlug === assessmentInfo.contest.slug ? "Registering..." : "Register for Screening"}
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ─── PAST CONTESTS + SIDEBAR ─────────────────── */}
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">

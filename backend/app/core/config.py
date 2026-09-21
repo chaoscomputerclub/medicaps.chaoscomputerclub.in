@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     DEV_BYPASS_RESTRICTIONS: bool = os.getenv("DEV_BYPASS_RESTRICTIONS", "false").lower() in ("true", "1", "yes")
     DEV_MODE: bool = os.getenv("DEV_MODE", "false").lower() in ("true", "1", "yes")
     DISABLE_MAIL_DISPATCH: bool = os.getenv("DISABLE_MAIL_DISPATCH", "false").lower() in ("true", "1", "yes")
+    FEATURE_ASSESSMENT_AND_QR_ENABLED: bool = os.getenv("FEATURE_ASSESSMENT_AND_QR_ENABLED", "false").lower() in ("true", "1", "yes")
 
     @property
     def is_dev_bypass_enabled(self) -> bool:

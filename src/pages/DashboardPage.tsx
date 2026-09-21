@@ -209,51 +209,33 @@ export function DashboardPage() {
         </section>
 
         <section className="p-5 rounded-lg border border-white/8 bg-black flex flex-col justify-between">
-          <div>
-            <SectionHeader kicker="Hardware Station" index="Pass" title="Lab Workstation" />
-            {isRealPass && pass ? (
-              <div className="p-4 rounded-md border border-lime-400/30 bg-black font-mono space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-lime-400">CCC / MCU</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-lime-400/8 text-lime-400 border border-lime-400/25 uppercase font-medium">
-                    {pass.status.toUpperCase()}
-                  </span>
+          <div className="space-y-4">
+            <SectionHeader kicker="Platform" index="System" title="Tournament Engine" />
+            <div className="p-4 rounded-md border border-white/8 bg-black font-mono space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-zinc-300">CodeBox Engine</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 uppercase font-semibold">
+                  Online
+                </span>
+              </div>
+              <div className="space-y-1.5 text-xs text-zinc-400 pt-1 border-t border-white/8">
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Contest Access:</span>
+                  <span className="text-white font-medium">Open to All Students</span>
                 </div>
-                <div>
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Assigned Event</span>
-                  <strong className="text-xs text-white block mt-0.5 truncate">{pass.contest_title}</strong>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Evaluation:</span>
+                  <span className="text-white font-medium">Automated I/O Sandbox</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/8">
-                  <div>
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Seat</span>
-                    <strong className="text-xs text-white block mt-0.5">{pass.seat}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Pass Code</span>
-                    <strong className="text-xs text-lime-400 block mt-0.5 truncate">{pass.pass_code}</strong>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Leaderboard:</span>
+                  <span className="text-lime-400 font-medium">Elo Rated</span>
                 </div>
               </div>
-            ) : (
-              <div className="p-4 rounded-md border border-white/8 bg-black font-mono space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-zinc-400">CCC / MCU</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded border border-white/10 text-zinc-500 uppercase font-mono">
-                    Open Arena
-                  </span>
-                </div>
-                <div className="py-1">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Workstation Access</span>
-                  <strong className="text-xs text-zinc-300 block mt-0.5">Campus Arena Direct Access</strong>
-                  <p className="text-[11px] text-zinc-500 mt-1 leading-normal">
-                    Contests are open to all enrolled Medi-Caps University students without screening gates.
-                  </p>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
           <div className="pt-4">
-            <Button asChild variant="outline" className="w-full text-xs font-mono">
+            <Button asChild variant="outline" className="w-full text-xs font-mono rounded-md border-white/10 hover:border-white/20">
               <Link to="/portal/contests">Browse Tournaments</Link>
             </Button>
           </div>

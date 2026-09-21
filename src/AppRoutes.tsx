@@ -30,9 +30,9 @@ function ProfileHandleRedirect() {
   return <Navigate to={`/portal/profile/${handle ? encodeURIComponent(handle) : ""}`} replace />;
 }
 
-function ContestAssessmentRedirect() {
+function ContestRedirect() {
   const { contestSlug } = useParams<{ contestSlug: string }>();
-  return <Navigate to={`/assessments/${contestSlug ? encodeURIComponent(contestSlug) : ""}`} replace />;
+  return <Navigate to={`/portal/contests/${contestSlug ? encodeURIComponent(contestSlug) : ""}`} replace />;
 }
 
 export function AppRoutes() {
@@ -49,8 +49,8 @@ export function AppRoutes() {
 
         {/* Strictly Protected Inner Platform Routes */}
         <Route element={<AuthGuard />}>
-          {/* Standalone Assessment Workspace (FullScreen distraction-free testing in dedicated window) */}
-          <Route path="/assessments/:contestSlug" element={<AssessmentWorkspacePage />} />
+          {/* Assessment Workspace route redirected to contest flow */}
+          <Route path="/assessments/:contestSlug" element={<ContestRedirect />} />
 
           {/* Portal Shell Routes */}
           <Route path="/portal" element={<PortalShell />}>
@@ -62,9 +62,9 @@ export function AppRoutes() {
             <Route path="contests/:contestSlug" element={<ContestOverviewPage />} />
             <Route path="contests/:contestSlug/lobby" element={<ContestLobbyPage />} />
             <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
-            <Route path="contests/:contestSlug/assessment" element={<ContestAssessmentRedirect />} />
-            <Route path="contests/:contestSlug/offline" element={<ContestOfflinePage />} />
-            <Route path="contests/:contestSlug/qualified" element={<ContestQualifiedPage />} />
+            <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
+            <Route path="contests/:contestSlug/offline" element={<ContestRedirect />} />
+            <Route path="contests/:contestSlug/qualified" element={<ContestRedirect />} />
             <Route path="contests/:contestSlug/results" element={<ContestResultsPage />} />
             <Route path="contests/:contestSlug/final-results" element={<ContestFinalResultsPage />} />
 

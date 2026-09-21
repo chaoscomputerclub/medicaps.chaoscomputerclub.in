@@ -347,7 +347,9 @@ class ContestController:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
         if contest.status == "live":
-            is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
+            is_eligible, reason = await is_member_eligible_for_live_contest(
+                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+            )
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Access restricted: {reason}")
 
@@ -504,7 +506,29 @@ class ContestController:
         )
         can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
 
-        if is_test_user or is_dev_contest:
+        if not settings.FEATURE_ASSESSMENT_AND_QR_ENABLED:
+            can_take_assessment = False
+            can_resume_assessment = False
+            is_top_30_qualified = True
+            is_checked_in = True
+            check_in_status = "checked_in"
+            can_enter_live_contest = (contest_status == "live" and is_registered) or is_test_user
+
+            if is_test_user:
+                is_registered = True
+                can_enter_live_contest = True
+                eligibility_message = "Test mode active: full arena access unlocked."
+            elif contest_status == "upcoming":
+                if not is_registered:
+                    eligibility_message = "Registration is open. Register to participate in the contest."
+                else:
+                    eligibility_message = "You are registered. The contest arena will unlock at the scheduled start time."
+            elif contest_status == "live":
+                can_enter_live_contest = True
+                eligibility_message = "Contest is live! Enter the arena now to start solving."
+            else:
+                eligibility_message = "This contest has officially concluded."
+        elif is_test_user or is_dev_contest:
             is_registered = True
             is_top_30_qualified = True
             is_checked_in = True
@@ -582,10 +606,10 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        if contest.status != "upcoming":
+        if contest.status not in ("upcoming", "live"):
             raise HTTPException(
                 status_code=400,
-                detail="Registration and Phase 1 screening are only open for UPCOMING contests. Live contests are restricted strictly to pre-qualified Top 30 finalists.",
+                detail="Registration is only open for upcoming or live contests.",
             )
 
         existing_reg = await db.execute(
@@ -757,7 +781,9 @@ class ContestController:
         is_test_user = is_privileged_test_member(current_member)
 
         if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
-            is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
+            is_eligible, reason = await is_member_eligible_for_live_contest(
+                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+            )
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
 
@@ -850,7 +876,9 @@ class ContestController:
         is_test_user = is_privileged_test_member(current_member)
 
         if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
-            is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
+            is_eligible, reason = await is_member_eligible_for_live_contest(
+                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+            )
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
 
@@ -927,7 +955,9 @@ class ContestController:
         is_test_user = is_privileged_test_member(current_member)
 
         if not is_test_user and contest.status == "live" and not slug.startswith("dev-"):
-            is_eligible, reason = await is_member_eligible_for_live_contest(current_member, contest, db, require_checked_in=True)
+            is_eligible, reason = await is_member_eligible_for_live_contest(
+                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+            )
             if not is_eligible:
                 raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
 

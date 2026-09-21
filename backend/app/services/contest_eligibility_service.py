@@ -70,7 +70,12 @@ async def is_member_eligible_for_live_contest(
     if getattr(member, "is_core_member", False):
         return True, "Authorized chapter core team / proctor access."
 
-    # 4. Check whether member is a Top 30 qualified finalist or registered finalist
+    # 4. Standard Open Contest Mode (Online Assessment & QR turned off):
+    # Pure LeetCode-style: open for everyone to participate when live.
+    if not settings.FEATURE_ASSESSMENT_AND_QR_ENABLED:
+        return True, "Open contest arena: All authenticated members are eligible."
+
+    # 5. Check whether member is a Top 30 qualified finalist or registered finalist
     is_qualified = False
     qualify_reason = ""
 
