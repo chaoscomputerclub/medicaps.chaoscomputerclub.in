@@ -63,7 +63,7 @@ def _otp_email_template(otp_code: str) -> str:
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="38" style="width:38px;border-collapse:collapse;">
             <tr>
               <td align="center" valign="middle" height="48" bgcolor="#09090b" style="height:48px;width:38px;background-color:#09090b;background-image:linear-gradient(#09090b,#09090b);border:2px solid #1a1a24;text-align:center;">
-                <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:26px;font-weight:900;color:#ccff00 !important;line-height:48px;display:inline-block;mso-line-height-rule:exactly;">{d}</span>
+                <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:26px;font-weight:900;color:#ccff00 !important;line-height:48px;display:inline-block;mso-line-height-rule:exactly;">{d}</span>
               </td>
             </tr>
           </table>
@@ -92,7 +92,7 @@ def _otp_email_template(otp_code: str) -> str:
   <![endif]-->
 
   <style type="text/css">
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@700;800&family=JetBrains+Mono:wght@500;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@700;800&display=swap');
 
     :root {{
       color-scheme: only dark !important;
@@ -215,7 +215,7 @@ def _otp_email_template(otp_code: str) -> str:
                       </a>
                     </td>
                     <td align="right" valign="middle">
-                      <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:1.8px;color:#5a5a64;text-transform:uppercase;">
+                      <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.8px;color:#5a5a64;text-transform:uppercase;">
                         AUTH // OTP
                       </span>
                     </td>
@@ -252,7 +252,7 @@ def _otp_email_template(otp_code: str) -> str:
                                 {digit_cells_html}
                               </tr>
                             </table>
-                            <div style="font-family:'JetBrains Mono',Consolas,monospace;font-size:9px;font-weight:bold;letter-spacing:1.4px;color:#0e0e10;text-transform:uppercase;margin-top:10px;">
+                            <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:bold;letter-spacing:1.4px;color:#0e0e10;text-transform:uppercase;margin-top:10px;">
                               EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
                             </div>
                           </td>
@@ -267,12 +267,12 @@ def _otp_email_template(otp_code: str) -> str:
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
                           <tr>
                             <td align="left" style="padding:0 2px;">
-                              <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#0e0e10;text-transform:uppercase;">
+                              <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#0e0e10;text-transform:uppercase;">
                                 [ TOKEN // 06-DIGIT ]
                               </span>
                             </td>
                             <td align="right" style="padding:0 2px;">
-                              <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1px;color:#181800;text-transform:uppercase;">
+                              <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;color:#181800;text-transform:uppercase;">
                                 TTL 300S &bull; ACTIVE
                               </span>
                             </td>
@@ -288,7 +288,7 @@ def _otp_email_template(otp_code: str) -> str:
 
                         <!-- Subtext within container -->
                         <div style="text-align:center;margin-top:10px;">
-                          <span style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#0e0e10;text-transform:uppercase;">
+                          <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#0e0e10;text-transform:uppercase;">
                             EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
                           </span>
                         </div>
@@ -319,12 +319,12 @@ def _otp_email_template(otp_code: str) -> str:
               <td bgcolor="#0a0a0c" class="card-footer" style="padding:14px 18px;border-top:1px solid #181820;background-color:#0a0a0c;background-image:linear-gradient(#0a0a0c,#0a0a0c);">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    <td align="left" style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:#ccff00;text-transform:uppercase;line-height:1.4;">
+                    <td align="left" style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;color:#ccff00;text-transform:uppercase;line-height:1.4;">
                       EXPLORE &middot; BUILD &middot; COMPETE &middot; FAIL &middot; LEARN
                     </td>
                   </tr>
                   <tr>
-                    <td align="left" style="padding-top:4px;font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:0.8px;color:#3e3e48;text-transform:uppercase;">
+                    <td align="left" style="padding-top:4px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;letter-spacing:0.8px;color:#3e3e48;text-transform:uppercase;">
                       medicaps.chaoscomputerclub.in
                     </td>
                   </tr>
@@ -335,7 +335,7 @@ def _otp_email_template(otp_code: str) -> str:
           </table>
 
           <!-- Below-Card Tagline -->
-          <div style="font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:0.8px;color:#2e2e36;text-transform:uppercase;margin-top:12px;text-align:center;line-height:1.4;">
+          <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;letter-spacing:0.8px;color:#2e2e36;text-transform:uppercase;margin-top:12px;text-align:center;line-height:1.4;">
             ESTABLISHED 2026 &bull; OPEN BY DEFAULT &bull; PEER DRIVEN
           </div>
 

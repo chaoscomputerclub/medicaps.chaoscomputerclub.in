@@ -51,7 +51,7 @@ export function RatingChartInner({ data }: { data: RatingHistoryPoint[] }) {
               background: "#000000",
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: "6px",
-              fontFamily: "monospace",
+              fontFamily: '"Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               fontSize: 12,
               color: "#ffffff",
             }}
