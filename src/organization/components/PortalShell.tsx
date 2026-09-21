@@ -2,17 +2,17 @@ import { SocialDrawer } from "./SocialDrawer";
 import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  SquaresFour,
+  LayoutDashboard,
   Trophy,
-  BookmarkSimple,
-  ChartBar,
-  Code,
+  Bookmark,
+  BarChart2,
+  Code2,
   ShieldCheck,
-  Gear,
-  SignOut,
-  List,
+  Settings,
+  LogOut,
+  Menu,
   X,
-} from "@phosphor-icons/react";
+} from "lucide-react";
 import { useEffect, useState, useRef, Suspense } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -35,13 +35,13 @@ import {
 } from "./skeletons";
 
 const links = [
-  { to: "/", label: "Dashboard", icon: SquaresFour, exact: true },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/contests", label: "Contests", icon: Trophy, exact: false },
-  { to: "/my-contests", label: "My Contests", icon: BookmarkSimple, exact: false },
-  { to: "/leaderboard", label: "Leaderboard", icon: ChartBar, exact: true },
-  { to: "/problems", label: "Problems", icon: Code, exact: false },
+  { to: "/my-contests", label: "My Contests", icon: Bookmark, exact: false },
+  { to: "/leaderboard", label: "Leaderboard", icon: BarChart2, exact: true },
+  { to: "/problems", label: "Problems", icon: Code2, exact: false },
   { to: "/verify", label: "Verify Proof", icon: ShieldCheck, exact: false },
-  { to: "/settings", label: "Settings", icon: Gear, exact: false },
+  { to: "/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
 
 function PortalRouteSkeleton() {
@@ -176,7 +176,7 @@ export function PortalShell() {
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Chaos Computer Club" className="w-7 h-7 object-contain" />
+          <img src="/logo.webp" alt="Chaos Computer Club" className="w-7 h-7 object-contain" />
           <div className="flex flex-col">
             <span className="font-sans font-bold text-xs tracking-wider text-white leading-none">CCC MEDI-CAPS</span>
             <span className="font-sans text-[8px] text-zinc-500 tracking-widest mt-0.5">TOURNAMENT ARENA</span>
@@ -188,7 +188,7 @@ export function PortalShell() {
           onClick={() => dispatch(toggleSidebar())}
           aria-label="Toggle navigation"
         >
-          {open ? <X size={20} /> : <List size={20} />}
+          {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </header>
 
@@ -213,7 +213,7 @@ export function PortalShell() {
           onClick={() => dispatch(setSidebarOpen(false))}
         >
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="Chaos Computer Club Medi-Caps"
             className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform duration-150"
           />
@@ -268,7 +268,6 @@ export function PortalShell() {
               >
                 <Icon
                   size={16}
-                  weight="regular"
                   className={`shrink-0 transition-colors duration-150 ${
                     active ? "text-lime-400" : "text-zinc-400 group-hover:text-zinc-200"
                   }`}
@@ -309,7 +308,7 @@ export function PortalShell() {
             aria-label="Sign out"
             className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
           >
-            <SignOut size={16} />
+            <LogOut size={16} />
           </button>
         </div>
       </aside>

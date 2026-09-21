@@ -1,3 +1,5 @@
+/* Self-hosted Inter variable font — no Google Fonts, no render block */
+@import "@fontsource-variable/inter";
 @import "tailwindcss";
 @import "tw-animate-css";
 

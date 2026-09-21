@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T13:55:37.865Z",
+  "timestamp": "2026-09-21T14:10:19.823Z",
   "totalElements": 251,
   "functionalCount": 251,
   "connectivityRate": "100.0%",
@@ -279,7 +279,7 @@
       "file": "src/organization/components/PortalShell.tsx",
       "line": 185,
       "tag": "<button>",
-      "label": "{open ? <X size={20} /> : <List size=...",
+      "label": "{open ? <X size={20} /> : <Menu size=...",
       "handler": "{() => dispatch(toggleSidebar())}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 284,
+      "line": 283,
       "tag": "<Link>",
       "label": "[to=/profile]",
       "handler": "\"/profile\"",
@@ -322,7 +322,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 306,
+      "line": 305,
       "tag": "<button>",
       "label": "dispatch(logout())}\n            aria-...",
       "handler": "{() => dispatch(logout())}",
