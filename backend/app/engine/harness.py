@@ -132,25 +132,20 @@ if __name__ == '__main__':
             target_fn = methods[0]
 
     if not target_fn:
+        # ANTI-CHEAT: Only accept known problem-specific function names.
+        # Generic names like 'solve' or 'solution' are intentionally excluded
+        # so that copy-pasted solutions with wrong function names are rejected.
         known_names = [
             'countMirrorPairs',
             'maxBandwidthUtility',
             'minTransmissionLatency',
             'maxPacketPriority',
-            'solve',
-            'solution',
         ]
         for name in known_names:
             if name in globals() and callable(globals()[name]):
                 target_fn = globals()[name]
                 break
 
-    if not target_fn:
-        # Check any globally defined function
-        for k, v in list(globals().items()):
-            if callable(v) and not k.startswith('_') and not inspect.isclass(v) and not inspect.ismodule(v):
-                target_fn = v
-                break
 
     if not target_fn:
         sys.stderr.write("Judge Harness Error: No Solution class method or solution function found.\\n")
@@ -211,7 +206,9 @@ def _prepare_javascript_solution(code: str, is_ts: bool = False) -> str:
         }
     }
     if (!targetFn) {
-        const known = ['countMirrorPairs', 'maxBandwidthUtility', 'minTransmissionLatency', 'maxPacketPriority', 'solve', 'solution'];
+        // ANTI-CHEAT: Only accept known problem-specific function names.
+        // 'solve', 'solution', and any other generic names are excluded.
+        const known = ['countMirrorPairs', 'maxBandwidthUtility', 'minTransmissionLatency', 'maxPacketPriority'];
         for (const k of known) {
             try {
                 if (typeof eval(k) === 'function') {
