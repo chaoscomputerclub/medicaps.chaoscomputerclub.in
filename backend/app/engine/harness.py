@@ -31,12 +31,16 @@ def prepare_solution_code(
 
     if lang in {"python", "py", "python3"}:
         return _prepare_python_solution(code)
-    elif lang in {"javascript", "js", "nodejs", "node", "typescript", "ts"}:
-        return _prepare_javascript_solution(code)
+    elif lang in {"javascript", "js", "nodejs", "node"}:
+        return _prepare_javascript_solution(code, is_ts=False)
+    elif lang in {"typescript", "ts"}:
+        return _prepare_javascript_solution(code, is_ts=True)
     elif lang in {"cpp", "c++", "cxx"}:
         return _prepare_cpp_solution(code, problem_index=problem_index, method_name=method_name)
+    elif lang in {"c"}:
+        return _prepare_c_solution(code, problem_index=problem_index, method_name=method_name)
     elif lang in {"java"}:
-        return _prepare_java_solution(code)
+        return _prepare_java_solution(code, problem_index=problem_index, method_name=method_name)
 
     return code
 
@@ -175,7 +179,7 @@ if __name__ == '__main__':
     return code + "\n" + harness
 
 
-def _prepare_javascript_solution(code: str) -> str:
+def _prepare_javascript_solution(code: str, is_ts: bool = False) -> str:
     # If code already reads stdin and has no class Solution or function assignment, leave as-is
     has_script_main = (
         ("readFileSync(0" in code or "readline" in code)
@@ -188,11 +192,12 @@ def _prepare_javascript_solution(code: str) -> str:
     if has_script_main:
         return code
 
-    harness = """
+    ts_decls = "declare var require: any;\ndeclare var process: any;\n" if is_ts else ""
+    harness = f"""
 // ==========================================
 // CCC LeetCode-Style Evaluation Driver Harness
 // ==========================================
-(function() {
+{ts_decls}(function() {{
     const fs = require('fs');
     const raw = fs.readFileSync(0, 'utf-8').trim();
 
@@ -579,6 +584,263 @@ int main() {
     return header_prefix + code + "\n" + driver
 
 
-def _prepare_java_solution(code: str) -> str:
-    # Java typically has a public class Main or Solution
-    return code
+def _prepare_c_solution(
+    code: str,
+    problem_index: Optional[str] = None,
+    method_name: Optional[str] = None,
+) -> str:
+    if "int main(" in code or "int main (" in code:
+        return code
+
+    headers = []
+    if "#include <stdio.h>" not in code:
+        headers.append("#include <stdio.h>")
+    if "#include <stdlib.h>" not in code:
+        headers.append("#include <stdlib.h>")
+    if "#include <string.h>" not in code:
+        headers.append("#include <string.h>")
+    header_prefix = "\n".join(headers) + "\n\n" if headers else ""
+
+    idx = (problem_index or "").upper()
+    if not idx:
+        if "countMirrorPairs" in code:
+            idx = "A"
+        elif "maxBandwidthUtility" in code:
+            idx = "B"
+        elif "minTransmissionLatency" in code:
+            idx = "C"
+        elif "maxPacketPriority" in code:
+            idx = "D"
+
+    if idx == "A":
+        driver = """
+int main(void) {
+    char buf[8192];
+    if (!fgets(buf, sizeof(buf), stdin)) return 0;
+    char* passes[200];
+    int count = 0;
+    char* p = buf;
+    while ((p = strchr(p, 34)) != NULL) {
+        p++;
+        char* end = strchr(p, 34);
+        if (!end) break;
+        *end = '\\0';
+        passes[count++] = p;
+        p = end + 1;
+    }
+    printf("%d\\n", countMirrorPairs(passes, count));
+    return 0;
+}
+"""
+    else:
+        driver = """
+int main(void) {
+    return 0;
+}
+"""
+    return header_prefix + code + "\n" + driver
+
+
+def _prepare_java_solution(
+    code: str,
+    problem_index: Optional[str] = None,
+    method_name: Optional[str] = None,
+) -> str:
+    if "public class Main" in code or "public static void main" in code:
+        return code
+
+    # Convert public class Solution to class Solution so it compiles in Main.java
+    clean_code = re.sub(r"\bpublic\s+class\s+Solution\b", "class Solution", code)
+    if "import java.util." not in clean_code:
+        clean_code = "import java.util.*;\n" + clean_code
+
+    idx = (problem_index or "").upper()
+    if not idx:
+        if "countMirrorPairs" in clean_code:
+            idx = "A"
+        elif "maxBandwidthUtility" in clean_code:
+            idx = "B"
+        elif "minTransmissionLatency" in clean_code:
+            idx = "C"
+        elif "maxPacketPriority" in clean_code:
+            idx = "D"
+
+    if idx == "A":
+        driver = """
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Scanner sc = new Scanner(System.in);
+            StringBuilder sb = new StringBuilder();
+            while (sc.hasNextLine()) {
+                sb.append(sc.nextLine()).append(' ');
+            }
+            String input = sb.toString().trim();
+            List<String> passes = new ArrayList<>();
+            int start = 0;
+            while ((start = input.indexOf((char)34, start)) != -1) {
+                int end = input.indexOf((char)34, start + 1);
+                if (end == -1) break;
+                passes.add(input.substring(start + 1, end));
+                start = end + 1;
+            }
+            Solution sol = new Solution();
+            System.out.println(sol.countMirrorPairs(passes));
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+}
+"""
+    elif idx == "B":
+        driver = """
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Scanner sc = new Scanner(System.in);
+            StringBuilder sb = new StringBuilder();
+            while (sc.hasNextLine()) {
+                sb.append(sc.nextLine()).append('\\n');
+            }
+            String text = sb.toString().trim();
+            int k = 0;
+            long m = 0;
+            for (String line : text.split("\\n")) {
+                line = line.trim();
+                if (line.startsWith("k") && line.contains("=")) {
+                    k = Integer.parseInt(line.split("=")[1].trim());
+                } else if (line.startsWith("m") && line.contains("=")) {
+                    m = Long.parseLong(line.split("=")[1].trim());
+                }
+            }
+            List<int[]> procList = new ArrayList<>();
+            int idx = text.indexOf("[[");
+            if (idx != -1) {
+                int endIdx = text.lastIndexOf("]]");
+                if (endIdx != -1) {
+                    String sub = text.substring(idx + 2, endIdx);
+                    String[] rows = sub.split("\\]\\\\s*,\\\\s*\\[");
+                    for (String r : rows) {
+                        String[] parts = r.split(",");
+                        if (parts.length >= 3) {
+                            procList.add(new int[]{
+                                Integer.parseInt(parts[0].trim()),
+                                Integer.parseInt(parts[1].trim()),
+                                Integer.parseInt(parts[2].trim())
+                            });
+                        }
+                    }
+                }
+            }
+            int[][] processes = procList.toArray(new int[0][0]);
+            Solution sol = new Solution();
+            System.out.println(sol.maxBandwidthUtility(k, (int)m, processes));
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+}
+"""
+    elif idx == "C":
+        driver = """
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Scanner sc = new Scanner(System.in);
+            StringBuilder sb = new StringBuilder();
+            while (sc.hasNextLine()) {
+                sb.append(sc.nextLine()).append('\\n');
+            }
+            String text = sb.toString().trim();
+            int n = 0, m = 0, k = 0;
+            for (String line : text.split("\\n")) {
+                line = line.trim();
+                if (line.startsWith("n") && line.contains("=")) n = Integer.parseInt(line.split("=")[1].trim());
+                else if (line.startsWith("m") && line.contains("=")) m = Integer.parseInt(line.split("=")[1].trim());
+                else if (line.startsWith("k") && line.contains("=")) k = Integer.parseInt(line.split("=")[1].trim());
+            }
+            List<int[]> chList = new ArrayList<>();
+            int idx = text.indexOf("[[");
+            if (idx != -1) {
+                int endIdx = text.lastIndexOf("]]");
+                if (endIdx != -1) {
+                    String sub = text.substring(idx + 2, endIdx);
+                    String[] rows = sub.split("\\]\\\\s*,\\\\s*\\[");
+                    for (String r : rows) {
+                        String[] parts = r.split(",");
+                        if (parts.length >= 3) {
+                            chList.add(new int[]{
+                                Integer.parseInt(parts[0].trim()),
+                                Integer.parseInt(parts[1].trim()),
+                                Integer.parseInt(parts[2].trim())
+                            });
+                        }
+                    }
+                }
+            }
+            int[][] channels = chList.toArray(new int[0][0]);
+            Solution sol = new Solution();
+            System.out.println(sol.minTransmissionLatency(n, m, k, channels));
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+}
+"""
+    elif idx == "D":
+        driver = """
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Scanner sc = new Scanner(System.in);
+            StringBuilder sb = new StringBuilder();
+            while (sc.hasNextLine()) {
+                sb.append(sc.nextLine()).append('\\n');
+            }
+            String text = sb.toString().trim();
+            List<int[]> pkList = new ArrayList<>();
+            int idx = text.indexOf("[[");
+            if (idx != -1) {
+                int endIdx = text.lastIndexOf("]]");
+                if (endIdx != -1) {
+                    String sub = text.substring(idx + 2, endIdx);
+                    String[] rows = sub.split("\\]\\\\s*,\\\\s*\\[");
+                    for (String r : rows) {
+                        String[] parts = r.split(",");
+                        if (parts.length >= 3) {
+                            pkList.add(new int[]{
+                                Integer.parseInt(parts[0].trim()),
+                                Integer.parseInt(parts[1].trim()),
+                                Integer.parseInt(parts[2].trim())
+                            });
+                        }
+                    }
+                }
+            }
+            int[][] packets = pkList.toArray(new int[0][0]);
+            Solution sol = new Solution();
+            System.out.println(sol.maxPacketPriority(packets));
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+}
+"""
+    else:
+        driver = """
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Solution sol = new Solution();
+            System.out.println(0);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
+}
+"""
+    return clean_code + "\n" + driver

@@ -75,10 +75,18 @@ class AssessmentController:
                 for i, s in enumerate(sample_list)
             ]
 
+        from app.engine.harness import prepare_solution_code
+        lang_str = language.value if hasattr(language, "value") else str(language)
+        exec_code = prepare_solution_code(
+            code=code,
+            language=lang_str,
+            problem_index=problem.problem_index,
+        )
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
-            language=language,
-            code=code,
+            language=lang_str,
+            code=exec_code,
             testcases=tcs,
             time_limit=problem.time_limit,
             memory_limit_mb=problem.memory_limit,
@@ -154,10 +162,18 @@ class AssessmentController:
                 )
             )
 
+        from app.engine.harness import prepare_solution_code
+        lang_str = language.value if hasattr(language, "value") else str(language)
+        exec_code = prepare_solution_code(
+            code=code,
+            language=lang_str,
+            problem_index=problem.problem_index,
+        )
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
-            language=language,
-            code=code,
+            language=lang_str,
+            code=exec_code,
             testcases=all_tcs,
             time_limit=problem.time_limit,
             memory_limit_mb=problem.memory_limit,

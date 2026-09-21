@@ -38,6 +38,14 @@ LANGUAGE_SPECS: Dict[Language, LanguageSpec] = {
         compile_command=["sh", "-c", "g++ -O2 -std=c++17 -o solution solution.cpp 2>&1"],
         run_command="./solution < stdin.txt",
     ),
+    Language.C: LanguageSpec(
+        language=Language.C,
+        image="interleet-cpp:latest",
+        filename="solution.c",
+        requires_compile=True,
+        compile_command=["sh", "-c", "gcc -O2 -std=c11 -o solution solution.c 2>&1"],
+        run_command="./solution < stdin.txt",
+    ),
     Language.JAVA: LanguageSpec(
         language=Language.JAVA,
         image="interleet-java:latest",
@@ -91,7 +99,7 @@ ALIAS_MAP: Dict[str, Language] = {
     "py": Language.PYTHON,
     "cpp": Language.CPP,
     "c++": Language.CPP,
-    "c": Language.CPP,
+    "c": Language.C,
     "java": Language.JAVA,
     "javascript": Language.JAVASCRIPT,
     "js": Language.JAVASCRIPT,

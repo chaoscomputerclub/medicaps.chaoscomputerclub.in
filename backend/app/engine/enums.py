@@ -9,6 +9,7 @@ from enum import Enum
 class Language(str, Enum):
     PYTHON = "python"
     CPP = "cpp"
+    C = "c"
     JAVA = "java"
     JAVASCRIPT = "javascript"
     TYPESCRIPT = "typescript"

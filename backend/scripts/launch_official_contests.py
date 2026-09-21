@@ -48,8 +48,10 @@ OFFICIAL_WEEKLY_PROBLEMS = [
         "starter_codes": {
             "python": "class Solution:\n    def countMirrorPairs(self, passes: list[str]) -> int:\n        # Write your solution here\n        pass\n",
             "cpp": "#include <vector>\n#include <string>\n#include <unordered_map>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int countMirrorPairs(vector<string>& passes) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "c": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint countMirrorPairs(char** passes, int passesSize) {\n    // Write your solution here\n    return 0;\n}\n",
+            "java": "class Solution {\n    public int countMirrorPairs(String[] passes) {\n        // Write your solution here\n        return 0;\n    }\n}\n",
             "javascript": "/**\n * @param {string[]} passes\n * @return {number}\n */\nvar countMirrorPairs = function(passes) {\n    // Write your solution here\n};\n",
-            "java": "class Solution {\n    public int countMirrorPairs(String[] passes) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+            "typescript": "function countMirrorPairs(passes: string[]): number {\n    // Write your solution here\n    return 0;\n};\n"
         },
         "sample_testcases": [
             {
@@ -84,8 +86,10 @@ OFFICIAL_WEEKLY_PROBLEMS = [
         "starter_codes": {
             "python": "class Solution:\n    def maxBandwidthUtility(self, k: int, m: int, processes: list[list[int]]) -> int:\n        # Write your solution here\n        pass\n",
             "cpp": "#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxBandwidthUtility(int k, int m, vector<vector<int>>& processes) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "c": "#include <stdio.h>\n#include <stdlib.h>\n\nlong long maxBandwidthUtility(int k, long long m, int** processes, int processesSize, int* processesColSize) {\n    // Write your solution here\n    return 0;\n}\n",
+            "java": "class Solution {\n    public int maxBandwidthUtility(int k, int m, int[][] processes) {\n        // Write your solution here\n        return 0;\n    }\n}\n",
             "javascript": "/**\n * @param {number} k\n * @param {number} m\n * @param {number[][]} processes\n * @return {number}\n */\nvar maxBandwidthUtility = function(k, m, processes) {\n    // Write your solution here\n};\n",
-            "java": "class Solution {\n    public int maxBandwidthUtility(int k, int m, int[][] processes) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+            "typescript": "function maxBandwidthUtility(k: number, m: number, processes: number[][]): number {\n    // Write your solution here\n    return 0;\n};\n"
         },
         "sample_testcases": [
             {
@@ -119,8 +123,10 @@ OFFICIAL_WEEKLY_PROBLEMS = [
         "starter_codes": {
             "python": "class Solution:\n    def minTransmissionLatency(self, n: int, m: int, k: int, channels: list[list[int]]) -> int:\n        # Write your solution here\n        pass\n",
             "cpp": "#include <vector>\n#include <queue>\n#include <tuple>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int minTransmissionLatency(int n, int m, int k, vector<vector<int>>& channels) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "c": "#include <stdio.h>\n#include <stdlib.h>\n\nint minTransmissionLatency(int n, int m, int k, int** channels, int channelsSize, int* channelsColSize) {\n    // Write your solution here\n    return 0;\n}\n",
+            "java": "class Solution {\n    public int minTransmissionLatency(int n, int m, int k, int[][] channels) {\n        // Write your solution here\n        return 0;\n    }\n}\n",
             "javascript": "/**\n * @param {number} n\n * @param {number} m\n * @param {number} k\n * @param {number[][]} channels\n * @return {number}\n */\nvar minTransmissionLatency = function(n, m, k, channels) {\n    // Write your solution here\n};\n",
-            "java": "class Solution {\n    public int minTransmissionLatency(int n, int m, int k, int[][] channels) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+            "typescript": "function minTransmissionLatency(n: number, m: number, k: number, channels: number[][]): number {\n    // Write your solution here\n    return 0;\n};\n"
         },
         "sample_testcases": [
             {
@@ -149,8 +155,10 @@ OFFICIAL_WEEKLY_PROBLEMS = [
         "starter_codes": {
             "python": "class Solution:\n    def maxPacketPriority(self, packets: list[list[int]]) -> int:\n        # Write your solution here\n        pass\n",
             "cpp": "#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxPacketPriority(vector<vector<int>>& packets) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
+            "c": "#include <stdio.h>\n#include <stdlib.h>\n\nlong long maxPacketPriority(int** packets, int packetsSize, int* packetsColSize) {\n    // Write your solution here\n    return 0;\n}\n",
+            "java": "class Solution {\n    public int maxPacketPriority(int[][] packets) {\n        // Write your solution here\n        return 0;\n    }\n}\n",
             "javascript": "/**\n * @param {number[][]} packets\n * @return {number}\n */\nvar maxPacketPriority = function(packets) {\n    // Write your solution here\n};\n",
-            "java": "class Solution {\n    public int maxPacketPriority(int[][] packets) {\n        // Write your solution here\n        return 0;\n    }\n}\n"
+            "typescript": "function maxPacketPriority(packets: number[][]): number {\n    // Write your solution here\n    return 0;\n};\n"
         },
         "sample_testcases": [
             {

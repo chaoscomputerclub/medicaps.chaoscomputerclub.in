@@ -504,7 +504,10 @@ export function AssessmentWorkspacePage() {
             <SelectContent className="border-white/10 bg-black text-xs font-mono text-zinc-300 rounded-md">
               <SelectItem value="python">Python 3</SelectItem>
               <SelectItem value="cpp">C++ 14</SelectItem>
-              <SelectItem value="javascript">Node.js</SelectItem>
+              <SelectItem value="c">C (GCC)</SelectItem>
+              <SelectItem value="java">Java 21</SelectItem>
+              <SelectItem value="javascript">JavaScript</SelectItem>
+              <SelectItem value="typescript">TypeScript</SelectItem>
             </SelectContent>
           </Select>
 

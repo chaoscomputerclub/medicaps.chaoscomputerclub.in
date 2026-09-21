@@ -62,6 +62,17 @@ function formatTimer(totalSeconds: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+export type ArenaLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "typescript";
+
+const DEFAULT_LANGUAGE_STARTERS: Record<ArenaLanguage, string> = {
+  python: "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n",
+  cpp: "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n",
+  c: "#include <stdio.h>\n#include <stdlib.h>\n\nint solve() {\n    // Write your solution here\n    return 0;\n}\n",
+  java: "class Solution {\n    public int solve() {\n        // Write your solution here\n        return 0;\n    }\n}\n",
+  javascript: "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n",
+  typescript: "function solve(): number {\n    // Write your solution here\n    return 0;\n}\n",
+};
+
 export function ContestArenaPage() {
   const { contestSlug = "", problemSlug = "" } = useParams<{ contestSlug: string; problemSlug?: string }>();
   const [searchParams] = useSearchParams();
@@ -349,11 +360,8 @@ export function ContestArenaPage() {
 
     return (
       activeProblem?.starter_codes?.[selectedLanguage] ??
-      (selectedLanguage === "python"
-        ? "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n"
-        : selectedLanguage === "cpp"
-          ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
-          : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n")
+      DEFAULT_LANGUAGE_STARTERS[selectedLanguage] ??
+      "// Write your solution here\n"
     );
   };
 
@@ -371,11 +379,8 @@ export function ContestArenaPage() {
   const handleResetStarter = () => {
     const defaultStarter =
       activeProblem?.starter_codes?.[selectedLanguage] ||
-      (selectedLanguage === "python"
-        ? "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n"
-        : selectedLanguage === "cpp"
-          ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
-          : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n");
+      DEFAULT_LANGUAGE_STARTERS[selectedLanguage] ||
+      "// Write your solution here\n";
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
     if (typeof window !== "undefined") {
       try {
@@ -664,7 +669,10 @@ export function ContestArenaPage() {
             <SelectContent className="bg-black border-white/15 text-white font-mono text-xs rounded-md">
               <SelectItem value="python">Python 3.12</SelectItem>
               <SelectItem value="cpp">C++ (GCC 14)</SelectItem>
-              <SelectItem value="javascript">JavaScript</SelectItem>
+              <SelectItem value="c">C (GCC 14)</SelectItem>
+              <SelectItem value="java">Java 21</SelectItem>
+              <SelectItem value="javascript">JavaScript (Node.js)</SelectItem>
+              <SelectItem value="typescript">TypeScript 5.0</SelectItem>
             </SelectContent>
           </Select>
 

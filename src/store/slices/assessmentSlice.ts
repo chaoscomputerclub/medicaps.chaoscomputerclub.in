@@ -55,7 +55,7 @@ export interface AssessmentState {
   } | null;
   problems: AssessmentProblemData[];
   activeProblemIndex: number;
-  selectedLanguage: "python" | "cpp" | "javascript";
+  selectedLanguage: SupportedLanguage;
   codeMap: Record<string, string>;
   customStdin: string;
   activeConsoleTab: "testcases" | "output";
@@ -175,7 +175,7 @@ export const assessmentSlice = createSlice({
       state.runResult = null;
       state.submitResult = null;
     },
-    setSelectedLanguage(state, action: PayloadAction<"python" | "cpp" | "javascript">) {
+    setSelectedLanguage(state, action: PayloadAction<SupportedLanguage>) {
       state.selectedLanguage = action.payload;
     },
     setCode(state, action: PayloadAction<{ problemId: string; language: string; code: string }>) {
@@ -244,7 +244,7 @@ export const assessmentSlice = createSlice({
       // Populate starter codes if codeMap is empty for problem
       for (const p of action.payload.problems) {
         const starters = p.starter_codes || {};
-        for (const lang of ["python", "cpp", "javascript"]) {
+        for (const lang of ["python", "cpp", "c", "java", "javascript", "typescript"] as const) {
           const key = `${p.id}_${lang}`;
           const current = state.codeMap[key];
           const isLegacy = current && (current.includes("TODO: Calculate valid mirror pairs") || current.includes("def main():") || (lang === "python" && !current.includes("class Solution")));

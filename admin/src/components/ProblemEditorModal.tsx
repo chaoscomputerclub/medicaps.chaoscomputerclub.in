@@ -43,11 +43,26 @@ var solve = function() {
 };
 `;
 
+const DEFAULT_C_STARTER = `#include <stdio.h>
+#include <stdlib.h>
+
+int solve() {
+    // Write your solution here
+    return 0;
+}
+`;
+
 const DEFAULT_JAVA_STARTER = `class Solution {
     public int solve() {
         // Write your solution here
         return 0;
     }
+}
+`;
+
+const DEFAULT_TS_STARTER = `function solve(): number {
+    // Write your solution here
+    return 0;
 }
 `;
 
@@ -71,12 +86,14 @@ export function ProblemEditorModal({
   const [constraints, setConstraints] = useState("");
   const [target, setTarget] = useState<"contest" | "assessment" | "both">(defaultTarget);
 
-  const [activeCodeLang, setActiveCodeLang] = useState<"python" | "cpp" | "javascript" | "java">("python");
+  const [activeCodeLang, setActiveCodeLang] = useState<"python" | "cpp" | "c" | "java" | "javascript" | "typescript">("python");
   const [starterCodes, setStarterCodes] = useState<Record<string, string>>({
     python: DEFAULT_PY_STARTER,
     cpp: DEFAULT_CPP_STARTER,
-    javascript: DEFAULT_JS_STARTER,
+    c: DEFAULT_C_STARTER,
     java: DEFAULT_JAVA_STARTER,
+    javascript: DEFAULT_JS_STARTER,
+    typescript: DEFAULT_TS_STARTER,
   });
 
   const [sampleTestcases, setSampleTestcases] = useState<TestCaseItem[]>([
@@ -463,7 +480,7 @@ export function ProblemEditorModal({
                   Select programming language to customize boilerplate starter template:
                 </span>
                 <div className="flex gap-1">
-                  {(["python", "cpp", "javascript", "java"] as const).map((lang) => (
+                  {(["python", "cpp", "c", "java", "javascript", "typescript"] as const).map((lang) => (
                     <Button
                       key={lang}
                       type="button"

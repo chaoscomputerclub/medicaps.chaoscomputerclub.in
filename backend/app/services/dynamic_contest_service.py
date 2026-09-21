@@ -104,11 +104,29 @@ class DynamicContestService:
             "    }\n"
             "}\n"
         )
+        c_template = (
+            f"// {problem_title}\n"
+            "#include <stdio.h>\n"
+            "#include <stdlib.h>\n\n"
+            "int solve() {\n"
+            "    // Write your solution here\n"
+            "    return 0;\n"
+            "}\n"
+        )
+        ts_template = (
+            f"// {problem_title}\n"
+            "function solve(): number {\n"
+            "    // Write your solution here\n"
+            "    return 0;\n"
+            "}\n"
+        )
         return {
             "python": py_template,
             "cpp": cpp_template,
-            "javascript": js_template,
+            "c": c_template,
             "java": java_template,
+            "javascript": js_template,
+            "typescript": ts_template,
         }
 
 

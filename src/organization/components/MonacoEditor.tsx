@@ -23,8 +23,10 @@ loader.config({ monaco });
 const LANG_TO_MONACO: Record<string, string> = {
   python: "python",
   cpp: "cpp",
-  javascript: "javascript",
+  c: "c",
   java: "java",
+  javascript: "javascript",
+  typescript: "typescript",
 };
 
 // The CCC dark theme definition — identical to the original
