@@ -79,7 +79,7 @@ export function ProblemArchivePage() {
                       </strong>
                       <Link
                         to={`/problems/${c.slug}--${pSlug}`}
-                        className="size-8 rounded-md bg-transparent border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 text-white transition-colors flex items-center justify-center [&_svg]:transition-colors"
+                        className="size-8 rounded-md bg-zinc-950 border border-white/8 hover:bg-lime-400 hover:text-black text-zinc-400 transition-colors flex items-center justify-center"
                       >
                         <ArrowRight className="size-3.5" />
                       </Link>

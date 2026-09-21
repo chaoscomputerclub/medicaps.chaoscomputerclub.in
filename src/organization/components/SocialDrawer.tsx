@@ -120,8 +120,8 @@ export function SocialDrawer() {
               className={cn(
                 "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer",
                 drawerType === "followers"
-                  ? "bg-lime-400 text-black shadow-sm"
-                  : "bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400",
+                  ? "bg-lime-400 text-black shadow-sm hover:bg-lime-400 hover:text-black"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5",
               )}
             >
               <Users size={12} />
@@ -145,8 +145,8 @@ export function SocialDrawer() {
               className={cn(
                 "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer",
                 drawerType === "following"
-                  ? "bg-lime-400 text-black shadow-sm"
-                  : "bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400",
+                  ? "bg-lime-400 text-black shadow-sm hover:bg-lime-400 hover:text-black"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5",
               )}
             >
               <UserCheck size={12} />
@@ -331,9 +331,9 @@ export function SocialDrawer() {
                         "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-none flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer h-auto active:scale-[0.98]",
                         isFollowing
                           ? isHovered
-                            ? "bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-600 hover:text-white"
-                            : "bg-transparent border-white/20 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
-                          : "bg-transparent border-white/20 text-white hover:bg-lime-400 hover:text-black hover:border-lime-400",
+                            ? "bg-rose-500/10 border-rose-500/40 text-rose-400 hover:bg-rose-500/20"
+                            : "bg-zinc-800/60 border-white/10 text-zinc-300 hover:text-white"
+                          : "bg-lime-400/10 border-lime-400/40 text-lime-400 hover:bg-lime-400 hover:text-black shadow-sm",
                       )}
                     >
                       {isPending ? (

@@ -290,7 +290,7 @@ export function ContestQualifiedPage() {
             <Button asChild className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
               <Link to={`/contests/${contestSlug}/results`}>View Standings</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-semibold text-xs transition-colors [&_svg]:transition-colors">
+            <Button asChild variant="outline" className="rounded-md border-white/10 bg-black text-zinc-300 text-xs hover:text-white">
               <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>

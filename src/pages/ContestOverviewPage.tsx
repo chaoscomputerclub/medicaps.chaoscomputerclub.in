@@ -256,7 +256,7 @@ export function ContestOverviewPage() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="rounded-md border border-white/20 bg-transparent text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 text-xs font-mono transition-colors [&_svg]:transition-colors"
+                    className="rounded-md border-lime-400/30 bg-black text-lime-400 hover:bg-lime-400/10 text-xs font-mono"
                   >
                     <Link to={`/contests/${contestSlug}/arena`}>
                       <Play className="mr-1.5 size-3.5 fill-current" /> Enter Arena (Dev Mode)
@@ -397,7 +397,7 @@ export function ContestOverviewPage() {
                           asChild
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2.5 text-[11px] font-mono bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
+                          className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:text-white"
                         >
                           <Link to={`/contests/${contestSlug}/arena`}>
                             Solve →

@@ -137,7 +137,7 @@ export function ContestResultsPage() {
                 </Link>
               </Button>
             ) : (
-              <Button asChild variant="outline" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold shrink-0 transition-colors [&_svg]:transition-colors">
+              <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white shrink-0">
                 <Link to="/leaderboard">University Leaderboard →</Link>
               </Button>
             )}
@@ -257,10 +257,10 @@ export function ContestResultsPage() {
             </Link>
           </Button>
         )}
-        <Button asChild variant="outline" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
+        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
           <Link to={`/contests/${contestSlug}`}>Contest Details</Link>
         </Button>
-        <Button asChild variant="outline" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
+        <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
           <Link to="/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>

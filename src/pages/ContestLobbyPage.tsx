@@ -112,7 +112,7 @@ export function ContestLobbyPage() {
             >
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-md font-mono text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+            <Button asChild variant="outline" className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
               <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>
@@ -178,7 +178,7 @@ export function ContestLobbyPage() {
               </div>
             </div>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
@@ -203,7 +203,7 @@ export function ContestLobbyPage() {
               The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
@@ -310,7 +310,7 @@ export function ContestLobbyPage() {
                     <Play className="mr-1.5 size-3.5 fill-current" /> Resume Assessment
                   </a>
                 </Button>
-                <Button asChild variant="outline" className="rounded-md font-mono text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/contests/${contestSlug}`}>Back to Overview</Link>
                 </Button>
               </div>
@@ -348,7 +348,7 @@ export function ContestLobbyPage() {
                     <Play className="mr-1.5 size-3.5 fill-current" /> Launch Workspace
                   </a>
                 </Button>
-                <Button asChild variant="outline" className="rounded-md font-mono text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
                   <Link to={`/contests/${contestSlug}`}>Not Now</Link>
                 </Button>
               </div>

@@ -85,9 +85,9 @@ export function FirstContestExplainer() {
 
         <DialogFooter className="gap-2 sm:justify-between pt-2">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={dismiss}
-            className="rounded-md font-mono text-xs uppercase bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
+            className="rounded-none font-mono text-xs uppercase text-zinc-400 hover:text-white"
           >
             Skip
           </Button>

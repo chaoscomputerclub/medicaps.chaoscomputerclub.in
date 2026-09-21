@@ -374,7 +374,7 @@ export function AuthPage() {
 
           <button
             type="button"
-            className="w-full h-10 px-4 font-mono text-xs font-semibold uppercase tracking-wider border border-white/20 bg-transparent hover:bg-lime-400 hover:text-black hover:border-lime-400 text-white transition-colors flex items-center justify-center gap-2.5 rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:transition-colors"
+            className="w-full h-10 px-4 font-mono text-xs font-medium border border-white/12 bg-black hover:bg-zinc-900/50 hover:border-white/25 text-white transition-all flex items-center justify-center gap-2.5 rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleGoogle}
             disabled={pending}
           >
