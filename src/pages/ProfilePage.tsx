@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Users,
+  User,
   Edit3,
   UserCheck,
   UserPlus,
@@ -168,7 +169,30 @@ export function ProfilePage() {
     return <ProfileSkeleton />;
   }
 
-  const m = activeData.member;
+  const m = activeData.member || (isViewingSelf ? currentMember : null);
+
+  if (!m) {
+    if (isLoading || ownLoading || studentLoading) {
+      return <ProfileSkeleton />;
+    }
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center mb-4 text-zinc-500">
+          <User className="size-6" />
+        </div>
+        <h2 className="text-lg font-bold text-white mb-2">Member Profile Not Found</h2>
+        <p className="text-sm text-zinc-400 max-w-md mb-6">
+          The requested cadet profile could not be found or you may need to sign in.
+        </p>
+        <Button
+          onClick={() => navigate(isViewingSelf ? "/auth" : "/leaderboard")}
+          className="bg-lime-400 hover:bg-lime-300 text-black font-semibold text-xs cursor-pointer"
+        >
+          {isViewingSelf ? "Sign In to Access Profile" : "Back to Leaderboard"}
+        </Button>
+      </div>
+    );
+  }
   const history = activeData.history || [];
   const battles = activeData.battles || [];
   const achievements = activeData.achievements || [];
