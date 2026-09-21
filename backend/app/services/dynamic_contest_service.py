@@ -63,11 +63,21 @@ class DynamicContestService:
 
     @staticmethod
     def _default_starter_codes(problem_title: str) -> Dict[str, str]:
-        """Generate default starter code templates for common languages."""
+        """Generate default starter code templates with problem-specific function name."""
+        words = re.findall(r"[a-zA-Z0-9]+", problem_title)
+        if words:
+            first = words[0].lower()
+            rest = "".join(w.capitalize() for w in words[1:])
+            fn_name = first + rest
+            if not fn_name[0].isalpha():
+                fn_name = "solve" + fn_name
+        else:
+            fn_name = "solve"
+
         py_template = (
             f"# {problem_title}\n"
             "class Solution:\n"
-            "    def solve(self) -> int:\n"
+            f"    def {fn_name}(self) -> int:\n"
             "        # Write your solution here\n"
             "        pass\n"
         )
@@ -80,7 +90,7 @@ class DynamicContestService:
             "using namespace std;\n\n"
             "class Solution {\n"
             "public:\n"
-            "    int solve() {\n"
+            f"    int {fn_name}() {{\n"
             "        // Write your solution here\n"
             "        return 0;\n"
             "    }\n"
@@ -91,14 +101,14 @@ class DynamicContestService:
             "/**\n"
             " * @return {number}\n"
             " */\n"
-            "var solve = function() {\n"
+            f"var {fn_name} = function() {{\n"
             "    // Write your solution here\n"
             "};\n"
         )
         java_template = (
             f"// {problem_title}\n"
             "class Solution {\n"
-            "    public int solve() {\n"
+            f"    public int {fn_name}() {{\n"
             "        // Write your solution here\n"
             "        return 0;\n"
             "    }\n"
@@ -108,14 +118,14 @@ class DynamicContestService:
             f"// {problem_title}\n"
             "#include <stdio.h>\n"
             "#include <stdlib.h>\n\n"
-            "int solve() {\n"
+            f"int {fn_name}() {{\n"
             "    // Write your solution here\n"
             "    return 0;\n"
             "}\n"
         )
         ts_template = (
             f"// {problem_title}\n"
-            "function solve(): number {\n"
+            f"function {fn_name}(): number {{\n"
             "    // Write your solution here\n"
             "    return 0;\n"
             "}\n"

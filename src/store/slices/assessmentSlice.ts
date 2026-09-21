@@ -246,8 +246,15 @@ export const assessmentSlice = createSlice({
         const starters = p.starter_codes || {};
         for (const lang of ["python", "cpp", "c", "java", "javascript", "typescript"] as const) {
           const key = `${p.id}_${lang}`;
-          const current = state.codeMap[key];
-          const isLegacy = current && (current.includes("TODO: Calculate valid mirror pairs") || current.includes("def main():") || (lang === "python" && !current.includes("class Solution")));
+          const isLegacy =
+            current &&
+            (current.includes("TODO: Calculate valid mirror pairs") ||
+              current.includes("def main():") ||
+              current.includes("def solve(") ||
+              current.includes("int solve(") ||
+              current.includes("var solve =") ||
+              current.includes("function solve(") ||
+              (lang === "python" && !current.includes("class Solution")));
           if ((!current || isLegacy) && starters[lang]) {
             state.codeMap[key] = starters[lang];
           }

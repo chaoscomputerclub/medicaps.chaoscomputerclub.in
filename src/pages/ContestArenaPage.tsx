@@ -64,14 +64,26 @@ function formatTimer(totalSeconds: number): string {
 
 export type ArenaLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "typescript";
 
-const DEFAULT_LANGUAGE_STARTERS: Record<ArenaLanguage, string> = {
-  python: "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n",
-  cpp: "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n",
-  c: "#include <stdio.h>\n#include <stdlib.h>\n\nint solve() {\n    // Write your solution here\n    return 0;\n}\n",
-  java: "class Solution {\n    public int solve() {\n        // Write your solution here\n        return 0;\n    }\n}\n",
-  javascript: "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n",
-  typescript: "function solve(): number {\n    // Write your solution here\n    return 0;\n}\n",
-};
+function getFallbackStarter(lang: ArenaLanguage, title?: string): string {
+  const words = (title || "solve").match(/[a-zA-Z0-9]+/g) || ["solve"];
+  let fnName = words[0].toLowerCase() + words.slice(1).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join("");
+  if (!/^[a-zA-Z]/.test(fnName)) fnName = "solve" + fnName;
+
+  switch (lang) {
+    case "python":
+      return `class Solution:\n    def ${fnName}(self) -> int:\n        # Write your solution here\n        pass\n`;
+    case "cpp":
+      return `#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int ${fnName}() {\n        // Write your solution here\n        return 0;\n    }\n};\n`;
+    case "c":
+      return `#include <stdio.h>\n#include <stdlib.h>\n\nint ${fnName}() {\n    // Write your solution here\n    return 0;\n}\n`;
+    case "java":
+      return `class Solution {\n    public int ${fnName}() {\n        // Write your solution here\n        return 0;\n    }\n}\n`;
+    case "javascript":
+      return `/**\n * @return {number}\n */\nvar ${fnName} = function() {\n    // Write your solution here\n};\n`;
+    case "typescript":
+      return `function ${fnName}(): number {\n    // Write your solution here\n    return 0;\n}\n`;
+  }
+}
 
 export function ContestArenaPage() {
   const { contestSlug = "", problemSlug = "" } = useParams<{ contestSlug: string; problemSlug?: string }>();
@@ -116,7 +128,7 @@ export function ContestArenaPage() {
     }
   }, [problems, problemSlug, contestSlug, navigate]);
 
-  const [selectedLanguage, setSelectedLanguage] = useState<"python" | "cpp" | "javascript">("python");
+  const [selectedLanguage, setSelectedLanguage] = useState<ArenaLanguage>("python");
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
   const [customStdin, setCustomStdin] = useState("");
   const [activeConsoleTab, setActiveConsoleTab] = useState<"testcases" | "output">("testcases");
@@ -319,7 +331,7 @@ export function ContestArenaPage() {
 
   const problemKey = `${activeProblem?.id || "p"}_${selectedLanguage}`;
   const problemStorageKey = activeProblem
-    ? `ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
+    ? `ccc_code_v4_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
     : "";
 
   // Load durable code: state -> validated localStorage -> official problem starter_code
@@ -329,6 +341,10 @@ export function ContestArenaPage() {
         codeMap[problemKey].includes("def main():") ||
         codeMap[problemKey].includes("sys.stdin.read()") ||
         codeMap[problemKey].includes("TODO: Calculate valid mirror pairs") ||
+        codeMap[problemKey].includes("def solve(") ||
+        codeMap[problemKey].includes("int solve(") ||
+        codeMap[problemKey].includes("var solve =") ||
+        codeMap[problemKey].includes("function solve(") ||
         (selectedLanguage === "python" && !codeMap[problemKey].includes("class Solution"));
       if (!isLegacy) {
         return codeMap[problemKey];
@@ -340,14 +356,19 @@ export function ContestArenaPage() {
         if (activeProblem?.id) {
           localStorage.removeItem(`ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
           localStorage.removeItem(`ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(`ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
         }
         const saved = localStorage.getItem(problemStorageKey);
         if (saved) {
-          // If saved code contains old competitive programming script boilerplate, purge it
+          // If saved code contains old competitive programming script or generic placeholder, purge it
           const isLegacy =
             saved.includes("def main():") ||
             saved.includes("sys.stdin.read()") ||
             saved.includes("TODO: Calculate valid mirror pairs") ||
+            saved.includes("def solve(") ||
+            saved.includes("int solve(") ||
+            saved.includes("var solve =") ||
+            saved.includes("function solve(") ||
             (selectedLanguage === "python" && !saved.includes("class Solution"));
           if (isLegacy) {
             localStorage.removeItem(problemStorageKey);
@@ -360,8 +381,7 @@ export function ContestArenaPage() {
 
     return (
       activeProblem?.starter_codes?.[selectedLanguage] ??
-      DEFAULT_LANGUAGE_STARTERS[selectedLanguage] ??
-      "// Write your solution here\n"
+      getFallbackStarter(selectedLanguage, activeProblem?.title)
     );
   };
 
@@ -379,8 +399,7 @@ export function ContestArenaPage() {
   const handleResetStarter = () => {
     const defaultStarter =
       activeProblem?.starter_codes?.[selectedLanguage] ||
-      DEFAULT_LANGUAGE_STARTERS[selectedLanguage] ||
-      "// Write your solution here\n";
+      getFallbackStarter(selectedLanguage, activeProblem?.title);
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
     if (typeof window !== "undefined") {
       try {
@@ -388,6 +407,8 @@ export function ContestArenaPage() {
         if (activeProblem?.id) {
           localStorage.removeItem(`ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
           localStorage.removeItem(`ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(`ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(`ccc_code_v4_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
         }
       } catch {}
     }

@@ -14,6 +14,20 @@ interface ProblemEditorModalProps {
   defaultTarget?: "contest" | "assessment" | "both";
 }
 
+function generateProblemStarters(problemTitle: string): Record<string, string> {
+  const words = (problemTitle || "solve").match(/[a-zA-Z0-9]+/g) || ["solve"];
+  let fnName = words[0].toLowerCase() + words.slice(1).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join("");
+  if (!/^[a-zA-Z]/.test(fnName)) fnName = "solve" + fnName;
+  return {
+    python: `class Solution:\n    def ${fnName}(self) -> int:\n        # Write your solution here\n        pass\n`,
+    cpp: `#include <vector>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    int ${fnName}() {\n        // Write your solution here\n        return 0;\n    }\n};\n`,
+    c: `#include <stdio.h>\n#include <stdlib.h>\n\nint ${fnName}() {\n    // Write your solution here\n    return 0;\n}\n`,
+    java: `class Solution {\n    public int ${fnName}() {\n        // Write your solution here\n        return 0;\n    }\n}\n`,
+    javascript: `/**\n * @return {number}\n */\nvar ${fnName} = function() {\n    // Write your solution here\n};\n`,
+    typescript: `function ${fnName}(): number {\n    // Write your solution here\n    return 0;\n}\n`,
+  };
+}
+
 const DEFAULT_PY_STARTER = `class Solution:
     def solve(self) -> int:
         # Write your solution here
@@ -479,21 +493,35 @@ export function ProblemEditorModal({
                 <span className="text-xs text-zinc-400">
                   Select programming language to customize boilerplate starter template:
                 </span>
-                <div className="flex gap-1">
-                  {(["python", "cpp", "c", "java", "javascript", "typescript"] as const).map((lang) => (
-                    <Button
-                      key={lang}
-                      type="button"
-                      variant={activeCodeLang === lang ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setActiveCodeLang(lang)}
-                      className={`h-7 rounded-none text-[10px] font-mono uppercase font-bold ${
-                        activeCodeLang === lang ? "bg-lime-400 text-black" : "border-white/10 text-zinc-400"
-                      }`}
-                    >
-                      {lang}
-                    </Button>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setStarterCodes(generateProblemStarters(title));
+                      toast.info("Auto-generated problem function starters for all 6 languages.");
+                    }}
+                    className="h-7 rounded-none text-[10px] font-mono border-lime-400/40 text-lime-400 hover:bg-lime-400 hover:text-black cursor-pointer"
+                  >
+                    Auto-Generate from Title
+                  </Button>
+                  <div className="flex gap-1">
+                    {(["python", "cpp", "c", "java", "javascript", "typescript"] as const).map((lang) => (
+                      <Button
+                        key={lang}
+                        type="button"
+                        variant={activeCodeLang === lang ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setActiveCodeLang(lang)}
+                        className={`h-7 rounded-none text-[10px] font-mono uppercase font-bold ${
+                          activeCodeLang === lang ? "bg-lime-400 text-black" : "border-white/10 text-zinc-400"
+                        }`}
+                      >
+                        {lang}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

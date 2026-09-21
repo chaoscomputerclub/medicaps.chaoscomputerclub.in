@@ -684,8 +684,15 @@ public class Main {
                 passes.add(input.substring(start + 1, end));
                 start = end + 1;
             }
+            String[] passesArr = passes.toArray(new String[0]);
             Solution sol = new Solution();
-            System.out.println(sol.countMirrorPairs(passes));
+            try {
+                java.lang.reflect.Method m = sol.getClass().getMethod("countMirrorPairs", String[].class);
+                System.out.println(m.invoke(sol, (Object)passesArr));
+            } catch (NoSuchMethodException nsme) {
+                java.lang.reflect.Method m = sol.getClass().getMethod("countMirrorPairs", List.class);
+                System.out.println(m.invoke(sol, passes));
+            }
         } catch (Exception e) {
             e.printStackTrace(System.err);
             System.exit(1);
