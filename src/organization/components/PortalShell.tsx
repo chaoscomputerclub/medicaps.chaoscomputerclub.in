@@ -119,7 +119,13 @@ export function PortalShell() {
     cleanPath.includes("/assessment") ||
     cleanPath.includes("/arena") ||
     cleanPath.includes("/lobby") ||
-    (cleanPath.includes("/contests/") && cleanPath.includes("/problems"));
+    cleanPath.includes("/summary") ||
+    cleanPath.includes("/submit") ||
+    (cleanPath.includes("/contests/") && (
+      cleanPath.includes("/problems") ||
+      cleanPath.includes("/summary") ||
+      cleanPath.includes("/submit")
+    ));
 
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});

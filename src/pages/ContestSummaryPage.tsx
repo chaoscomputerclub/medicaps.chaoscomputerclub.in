@@ -180,47 +180,74 @@ export function ContestSummaryPage() {
     : "";
 
   return (
-    <div className="min-h-[100dvh] w-full bg-black text-white font-sans selection:bg-lime-400 selection:text-black">
-      {/* Top Utility Header */}
-      <header className="sticky top-0 z-30 border-b border-white/8 bg-black/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+    <div className="min-h-[100dvh] w-full bg-black text-white font-sans selection:bg-lime-400 selection:text-black flex flex-col">
+      {/* Top Microservice Header */}
+      <header className="sticky top-0 z-30 border-b border-white/8 bg-black/95 backdrop-blur-md px-4 sm:px-6 h-14 flex items-center justify-between gap-4 shrink-0">
+        {/* Left: Microservice Brand & Navigation */}
+        <div className="flex items-center gap-3.5 min-w-0">
+          <Link
+            to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}
+            className="flex items-center gap-2 shrink-0 group"
+            title="Return to Contest Arena"
+          >
+            <div className="size-7 rounded bg-lime-400/10 border border-lime-400/30 flex items-center justify-center group-hover:bg-lime-400/20 transition-colors">
+              <img src="/logo.webp" alt="CCC" className="size-5 object-contain" />
+            </div>
+            <div className="hidden md:flex flex-col leading-none">
+              <span className="font-mono text-[11px] font-bold text-white tracking-wider">
+                CCC CONTEST SERVICE
+              </span>
+              <span className="font-mono text-[8px] text-lime-400 font-semibold tracking-widest mt-0.5">
+                MICROSERVICE RUNTIME
+              </span>
+            </div>
+          </Link>
+
+          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+
+          {/* Breadcrumb / Title */}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-mono text-xs text-zinc-300 font-medium truncate max-w-[200px] sm:max-w-[320px]">
+              {contestTitle}
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-zinc-900 text-[10px] font-mono text-zinc-400">
+              <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
+              LIVE ASSESSMENT
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Actions, Timer, Profile */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {/* Back to Arena Button */}
           <Button
             asChild
             variant="outline"
             size="sm"
-            className="h-8 px-2.5 rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors"
+            className="h-8 px-2.5 rounded-md font-mono text-xs border-white/10 bg-zinc-950 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
           >
             <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
-              <span>Back to Code Workspace</span>
+              <span className="hidden sm:inline">Back to</span> Workspace
             </Link>
           </Button>
 
-          <div className="h-4 w-px bg-white/10 hidden sm:block" />
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400">
-                Test Summary &amp; Review
-              </span>
-              <span className="size-1 rounded-full bg-zinc-600 hidden sm:inline" />
-              <span className="text-xs text-zinc-400 font-mono hidden sm:inline truncate max-w-[240px]">
-                {contestTitle}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Timer Pill */}
-        <div className="flex items-center gap-2.5">
+          {/* Live Timer Pill */}
           <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-white/10 bg-zinc-950 font-mono text-xs shadow-inner">
             <Clock className={`size-3.5 ${remainingSeconds < 300 ? "text-red-400 animate-pulse" : "text-lime-400"}`} />
-            <span className="text-zinc-500 uppercase text-[10px] tracking-wider hidden md:inline">Time Remaining:</span>
+            <span className="text-zinc-500 uppercase text-[10px] tracking-wider hidden lg:inline">Time Left:</span>
             <span className={`font-semibold tabular-nums ${remainingSeconds < 300 ? "text-red-400" : "text-white"}`}>
               {formatTimer(remainingSeconds)}
             </span>
           </div>
 
+          {/* Candidate Badge */}
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-white/8 bg-zinc-950 font-mono text-xs text-zinc-300">
+            <span className="size-1.5 rounded-full bg-lime-400" />
+            <span className="text-zinc-400">@{member?.handle || "Cadet"}</span>
+          </div>
+
+          {/* Submit Contest Primary CTA */}
           <Button
             onClick={() => setShowSubmitModal(true)}
             size="sm"
@@ -231,6 +258,28 @@ export function ContestSummaryPage() {
           </Button>
         </div>
       </header>
+
+      {/* Microservice Sub-bar */}
+      <div className="border-b border-white/6 bg-zinc-950/80 px-4 sm:px-8 py-2 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 text-zinc-300">
+            <span className="size-1.5 rounded-full bg-lime-400" />
+            Service: <span className="text-white">svc-contest-assessment</span>
+          </span>
+          <span className="text-zinc-600 hidden sm:inline">|</span>
+          <span className="hidden sm:inline text-zinc-400">
+            Session: <span className="text-zinc-200">#{contestSlug}</span>
+          </span>
+          <span className="text-zinc-600 hidden md:inline">|</span>
+          <span className="hidden md:inline text-zinc-400">
+            Runtime: <span className="text-zinc-200">Air-Gapped Sandbox</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-500">Status:</span>
+          <span className="text-lime-400 font-medium">Awaiting Final Submission</span>
+        </div>
+      </div>
 
       {/* Main Content Area */}
       <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 space-y-8">
@@ -452,6 +501,20 @@ export function ContestSummaryPage() {
           </div>
         </section>
       </main>
+
+      {/* Microservice Architecture Telemetry Footer */}
+      <footer className="mt-auto border-t border-white/6 py-6 px-4 text-center font-mono text-xs text-zinc-500 bg-zinc-950/60">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <span className="flex items-center gap-1.5 text-zinc-400">
+            <span className="size-1.5 rounded-full bg-lime-400" />
+            Chaos Computer Club Contest Service
+          </span>
+          <span className="text-zinc-700 hidden sm:inline">•</span>
+          <span>Medi-Caps University Chapter</span>
+          <span className="text-zinc-700 hidden sm:inline">•</span>
+          <span>Air-Gapped CodeBox Sandbox Node</span>
+        </div>
+      </footer>
 
       {/* Final Submission Confirmation Dialog */}
       <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>

@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-21T17:24:37.047Z",
-  "totalElements": 276,
-  "functionalCount": 276,
+  "timestamp": "2026-09-21T17:31:01.707Z",
+  "totalElements": 277,
+  "functionalCount": 277,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 33,
     "backendQueries": 9,
-    "routingNavigation": 174,
-    "clientUiState": 41,
+    "routingNavigation": 176,
+    "clientUiState": 40,
     "conditionalLocked": 13,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
@@ -268,7 +268,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 186,
+      "line": 192,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -277,7 +277,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 193,
+      "line": 199,
       "tag": "<button>",
       "label": "{open ? <X size={20} /> : <Menu size=...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -286,7 +286,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 205,
+      "line": 211,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -295,7 +295,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 218,
+      "line": 224,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -304,7 +304,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 264,
+      "line": 270,
       "tag": "<Link>",
       "label": "[to={item.to}]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 294,
+      "line": 300,
       "tag": "<Link>",
       "label": "[to=/profile]",
       "handler": "\"/profile\"",
@@ -322,7 +322,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 319,
+      "line": 325,
       "tag": "<button>",
       "label": "dispatch(logout())}\n            aria-...",
       "handler": "{() => dispatch(logout())}",
@@ -1582,16 +1582,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 187,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 193,
+      "line": 188,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/proble...",
       "handler": "{`/contests/${contestSlug}/problems/${firstProblemSlug}`}",
@@ -1600,16 +1591,34 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 224,
+      "line": 223,
       "tag": "<Button>",
-      "label": "setShowSubmitModal(true)}\n           ...",
-      "handler": "{() => setShowSubmitModal(true)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 343,
+      "line": 229,
+      "tag": "<Link>",
+      "label": "Workspace",
+      "handler": "{`/contests/${contestSlug}/problems/${firstProblemSlug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestSummaryPage.tsx",
+      "line": 251,
+      "tag": "<Button>",
+      "label": "setShowSubmitModal(true)}\n           ...",
+      "handler": "{() => setShowSubmitModal(true)}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestSummaryPage.tsx",
+      "line": 392,
       "tag": "<Link>",
       "label": "{problem.title}",
       "handler": "{`/contests/${contestSlug}/problems/${problemSlug}`}",
@@ -1618,7 +1627,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 391,
+      "line": 440,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1627,7 +1636,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 397,
+      "line": 446,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/proble...",
       "handler": "{`/contests/${contestSlug}/problems/${problemSlug}`}",
@@ -1636,7 +1645,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 434,
+      "line": 483,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1645,7 +1654,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 439,
+      "line": 488,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/proble...",
       "handler": "{`/contests/${contestSlug}/problems/${firstProblemSlug}`}",
@@ -1654,7 +1663,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 445,
+      "line": 494,
       "tag": "<Button>",
       "label": "setShowSubmitModal(true)}\n           ...",
       "handler": "{() => setShowSubmitModal(true)}",
@@ -1663,7 +1672,7 @@
     },
     {
       "file": "src/pages/ContestSummaryPage.tsx",
-      "line": 495,
+      "line": 558,
       "tag": "<AlertDialogAction>",
       "label": "{isSubmittingFinal ? (               ...",
       "handler": "{(e) => {\n                e.preventDefault();\n                handleFinalSubmit(",
