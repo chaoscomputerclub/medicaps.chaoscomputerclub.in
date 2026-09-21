@@ -348,7 +348,7 @@ def _prepare_javascript_solution(
             cands.append(name)
     cands_repr = repr(list(dict.fromkeys(cands)))
 
-    harness = ts_decls + f"""
+    harness = f"""
 // ==========================================
 // CCC LeetCode-Style Evaluation Driver Harness (JS/TS)
 // ==========================================
@@ -469,7 +469,7 @@ def _prepare_javascript_solution(
     }}
 }})();
 """
-    return code + "\n" + harness
+    return ts_decls + code + "\n" + harness
 
 
 # ---------------------------------------------------------------------------
