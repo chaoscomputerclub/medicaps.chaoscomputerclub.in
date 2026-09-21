@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
-import { TacticalRouteFallback } from "@/components/TacticalRouteFallback";
+import { AppShellSkeleton } from "@/components/TacticalRouteFallback";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 // Dynamic Route Code-Splitting Chunks with Automated Retry & Invalidation Recovery
@@ -37,7 +37,7 @@ function ContestRedirect() {
 
 export function AppRoutes() {
   return (
-    <Suspense fallback={<TacticalRouteFallback />}>
+    <Suspense fallback={<AppShellSkeleton />}>
       <Routes>
         {/* Root redirect */}
         <Route path="/" element={<Navigate to="/portal" replace />} />

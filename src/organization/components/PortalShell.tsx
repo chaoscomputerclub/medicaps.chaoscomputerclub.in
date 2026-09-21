@@ -13,13 +13,26 @@ import {
   List,
   X,
 } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { getToken, decodeJwtPayload } from "@/lib/auth";
 import { formatFullName, resolveAvatarUrl } from "@/lib/utils";
+import {
+  ContestsHubSkeleton,
+  ContestDetailSkeleton,
+  LeaderboardSkeleton,
+  MyContestsSkeleton,
+  ProblemArchiveSkeleton,
+  ProblemDetailSkeleton,
+  ProfileSkeleton,
+  SettingsSkeleton,
+  VerifyProofSkeleton,
+  DashboardSkeleton,
+  AssessmentStudioSkeleton,
+} from "./skeletons";
 
 const links = [
   { to: "/portal", label: "Dashboard", icon: SquaresFour, exact: true },
@@ -30,6 +43,40 @@ const links = [
   { to: "/portal/verify", label: "Verify Proof", icon: ShieldCheck, exact: false },
   { to: "/portal/settings", label: "Settings", icon: Gear, exact: false },
 ] as const;
+
+function PortalRouteSkeleton() {
+  const { pathname } = useLocation();
+  const cleanPath = pathname.replace(/\/+$/, "") || "/portal";
+
+  if (cleanPath === "/portal/contests") {
+    return <ContestsHubSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/contests/")) {
+    return <ContestDetailSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/my-contests")) {
+    return <MyContestsSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/leaderboard")) {
+    return <LeaderboardSkeleton />;
+  }
+  if (cleanPath === "/portal/problems") {
+    return <ProblemArchiveSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/problems/")) {
+    return <ProblemDetailSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/settings")) {
+    return <SettingsSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/profile") || cleanPath.startsWith("/portal/u/")) {
+    return <ProfileSkeleton />;
+  }
+  if (cleanPath.startsWith("/portal/verify")) {
+    return <VerifyProofSkeleton />;
+  }
+  return <DashboardSkeleton />;
+}
 
 export function PortalShell() {
   const [, setHydrated] = useState(false);
@@ -72,7 +119,9 @@ export function PortalShell() {
   if (isFullscreenWorkspace) {
     return (
       <main className="min-h-screen bg-black text-white">
-        <Outlet />
+        <Suspense fallback={<AssessmentStudioSkeleton />}>
+          <Outlet />
+        </Suspense>
       </main>
     );
   }
@@ -184,7 +233,9 @@ export function PortalShell() {
 
       {/* Main Viewport */}
       <main className="flex-1 md:ml-[220px] min-h-screen bg-black p-4 md:p-8 relative">
-        <Outlet />
+        <Suspense fallback={<PortalRouteSkeleton />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <SocialDrawer />
