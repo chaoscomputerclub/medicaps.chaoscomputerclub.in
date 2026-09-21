@@ -11,6 +11,7 @@ export const ContestsHubPage = lazyWithRetry(() => import("./pages/ContestsHubPa
 export const ContestOverviewPage = lazyWithRetry(() => import("./pages/ContestOverviewPage"), "ContestOverviewPage");
 export const ContestLobbyPage = lazyWithRetry(() => import("./pages/ContestLobbyPage"), "ContestLobbyPage");
 export const ContestArenaPage = lazyWithRetry(() => import("./pages/ContestArenaPage"), "ContestArenaPage");
+export const ContestSummaryPage = lazyWithRetry(() => import("./pages/ContestSummaryPage"), "ContestSummaryPage");
 export const ContestOfflinePage = lazyWithRetry(() => import("./pages/ContestOfflinePage"), "ContestOfflinePage");
 export const ContestQualifiedPage = lazyWithRetry(() => import("./pages/ContestQualifiedPage"), "ContestQualifiedPage");
 export const ContestResultsPage = lazyWithRetry(() => import("./pages/ContestResultsPage"), "ContestResultsPage");
@@ -89,6 +90,8 @@ export function AppRoutes() {
             <Route path="contests/:contestSlug/problems/:problemSlug" element={<ContestArenaPage />} />
             <Route path="contests/:contestSlug/problems" element={<ContestArenaPage />} />
             <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
+            <Route path="contests/:contestSlug/summary" element={<ContestSummaryPage />} />
+            <Route path="contests/:contestSlug/submit" element={<ContestSummaryPage />} />
             <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
             <Route path="contests/:contestSlug/offline" element={<ContestRedirect />} />
             <Route path="contests/:contestSlug/qualified" element={<ContestRedirect />} />

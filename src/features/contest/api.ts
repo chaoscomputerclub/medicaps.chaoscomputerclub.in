@@ -471,6 +471,17 @@ export const contestApi = {
     invalidateSwrCache(`contest:final_standings:${slug}*`);
     return res;
   },
+
+  async finishContest(slug: string): Promise<{ success: boolean; message: string; total_score?: number }> {
+    const res = await request<{ success: boolean; message: string; total_score?: number }>(
+      `/assessment/${encodeURIComponent(slug)}/finish`,
+      { method: "POST" }
+    );
+    invalidateSwrCache("contests:*");
+    invalidateSwrCache(`contest:*:${slug}*`);
+    invalidateSwrCache(`contest:reg_status:${slug}*`);
+    return res;
+  },
 };
 
 type ContestStatusAlias = ParticipationRecord["status"];

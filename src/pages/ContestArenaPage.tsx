@@ -10,6 +10,7 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   BadgeCheck,
   Check,
   CheckCircle2,
@@ -18,10 +19,12 @@ import {
   Clock,
   Copy,
   Cpu,
+  FileText,
   GripHorizontal,
   GripVertical,
   Lock,
   LogIn,
+  LogOut,
   Maximize2,
   Minimize2,
   Play,
@@ -36,6 +39,14 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -141,6 +152,7 @@ export function ContestArenaPage() {
   const [lastAction, setLastAction] = useState<"run" | "submit" | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
   const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(`ccc_solved_${contestSlug}`);
@@ -753,16 +765,10 @@ export function ContestArenaPage() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => {
-              if (window.opener) {
-                window.close();
-              } else {
-                navigate(`/contests/${contestSlug}`);
-              }
-            }}
+            onClick={() => setShowExitModal(true)}
             className="h-7 px-2.5 text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center transition-colors"
           >
-            <ArrowLeft className="size-3.5" />
+            <ArrowLeft className="size-3.5 mr-1" />
             <span>Exit</span>
           </Button>
 
@@ -807,6 +813,18 @@ export function ContestArenaPage() {
               <Trophy className="size-3.5 text-lime-400 group-hover:text-black transition-colors shrink-0" />
               <span>Scoreboard</span>
             </Link>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExitModal(true)}
+            className="h-7 px-2.5 text-lime-400 border-lime-400/30 bg-lime-400/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center gap-1.5 transition-colors shrink-0"
+          >
+            <FileText className="size-3.5" />
+            <span className="hidden sm:inline">Review &amp; Submit</span>
+            <span className="sm:hidden">Review</span>
           </Button>
 
           <Button
@@ -1592,6 +1610,67 @@ export function ContestArenaPage() {
           </div>
         </div>
       )}
+
+      {/* Exit Confirmation Dialog (HackerRank Flow) */}
+      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
+        <DialogContent className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-2xl">
+          <DialogHeader className="space-y-3 text-left">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+                <AlertTriangle className="size-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-semibold text-white tracking-tight font-sans">
+                  Exit Coding Workspace?
+                </DialogTitle>
+                <p className="text-xs text-zinc-400 font-mono">
+                  Review questions before final submission
+                </p>
+              </div>
+            </div>
+            <DialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed pt-1">
+              Your written code and test progress are automatically saved. Exiting will navigate you to the <strong className="text-white font-semibold">Contest Summary &amp; Submission Console</strong>, where you can inspect all attempted questions, check unattempted challenges, and officially submit your test.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-500">Challenges Solved:</span>
+              <span className="font-semibold text-lime-400">
+                {solvedProblemIds.size} / {problems.length} Solved
+              </span>
+            </div>
+            <div className="flex items-center justify-between border-t border-white/6 pt-2">
+              <span className="text-zinc-500">Time Remaining:</span>
+              <span className="font-semibold text-zinc-300">
+                {formatTimer(remainingSeconds)}
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowExitModal(false)}
+              className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer"
+            >
+              Continue Solving
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowExitModal(false);
+                navigate(`/contests/${contestSlug}/summary`);
+              }}
+              className="rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer"
+            >
+              <span>Proceed to Summary</span>
+              <ArrowRight className="size-3.5 ml-1" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

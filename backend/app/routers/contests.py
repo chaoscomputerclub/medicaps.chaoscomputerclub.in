@@ -216,6 +216,21 @@ async def submit_contest_arena_code(
     )
 
 
+@router.post("/{slug}/finish")
+async def finish_contest_endpoint(
+    slug: str,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Candidate finishes and officially submits the contest attempt."""
+    from app.controllers.assessment_controller import AssessmentController
+    return await AssessmentController.finish_assessment(
+        contest_slug=slug,
+        current_member=current_member,
+        db=db,
+    )
+
+
 # ─── Dynamic Contest Management Endpoints ────────────────────────────────────
 
 @router.post("/dynamic", summary="Dynamically create contest, screening assessment, and problems", status_code=201)

@@ -312,13 +312,38 @@ class AssessmentController:
         )
         session = s_result.scalars().first()
         if not session:
-            raise HTTPException(status_code=404, detail="Assessment session not found.")
+            score_val = 0.0
+            if contest:
+                sb_res = await db.execute(
+                    select(ScoreboardEntry).where(
+                        ScoreboardEntry.contest_id == contest.id,
+                        ScoreboardEntry.member_id == current_member.id,
+                    )
+                )
+                sb_entry = sb_res.scalars().first()
+                if sb_entry:
+                    score_val = float(sb_entry.score or 0.0)
+
+            session = AssessmentSession(
+                assessment_id=assessment.id,
+                member_id=current_member.id,
+                handle=current_member.handle or f"cadet_{current_member.id[:6]}",
+                full_name=current_member.full_name or "Cadet",
+                department=current_member.department or "CSE",
+                batch=current_member.batch or "2026",
+                started_at=now_utc(),
+                submitted_at=now_utc(),
+                status="submitted",
+                total_score=score_val,
+            )
+            db.add(session)
+            await db.flush()
 
         if session.status == "submitted":
             return {
                 "success": True,
                 "already_submitted": True,
-                "message": "Assessment already submitted.",
+                "message": "Contest attempt already submitted.",
                 "total_score": session.total_score,
             }
 
