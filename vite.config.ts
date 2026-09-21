@@ -52,10 +52,19 @@ export default defineConfig({
     target: "esnext",
     sourcemap: false,
     chunkSizeWarningLimit: 600,
-    // Disable modulepreload — Vite injects <link rel="modulepreload"> for every lazy chunk,
-    // which tells the browser to fetch ALL route JS files immediately, defeating code splitting.
-    // With this off, chunks load only when the route is actually navigated to.
-    modulePreload: false,
+    // Smart modulepreload: preload core vendor chunks (React, Redux, Radix, common) for instantaneous boot,
+    // but filter out heavy non-initial chunks (vendor-monaco, non-active route pages)
+    modulePreload: {
+      polyfill: true,
+      resolveDependencies: (_filename, deps) => {
+        return deps.filter(
+          (dep) =>
+            !dep.includes("vendor-monaco") &&
+            !dep.includes("vendor-charts") &&
+            !dep.includes("Page-")
+        );
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {

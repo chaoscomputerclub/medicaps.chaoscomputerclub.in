@@ -1,6 +1,7 @@
 import { SocialDrawer } from "./SocialDrawer";
 import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { prefetchRoute } from "@/AppRoutes";
 import {
   LayoutDashboard,
   Trophy,
@@ -127,7 +128,23 @@ export function PortalShell() {
     height: number;
     opacity: number;
     ready: boolean;
-  }>({ top: 0, height: 0, opacity: 0, ready: false });
+  }>({ top: 0, height: 36, opacity: 0, ready: false });
+
+  // Idle background prefetch of core route chunks for instant navigation
+  useEffect(() => {
+    const warmup = () => {
+      prefetchRoute("/contests");
+      prefetchRoute("/leaderboard");
+      prefetchRoute("/problems");
+      prefetchRoute("/my-contests");
+      prefetchRoute("/settings");
+    };
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(warmup);
+    } else {
+      setTimeout(warmup, 1000);
+    }
+  }, []);
 
   useEffect(() => {
     const activeItem = links.find((item) =>
@@ -141,28 +158,15 @@ export function PortalShell() {
       return;
     }
 
-    const updateIndicator = () => {
-      const navEl = navRef.current;
-      const activeEl = itemRefs.current[activeItem.to];
-      if (navEl && activeEl) {
-        const navRect = navEl.getBoundingClientRect();
-        const activeRect = activeEl.getBoundingClientRect();
-        setIndicatorStyle({
-          top: activeRect.top - navRect.top,
-          height: activeRect.height,
-          opacity: 1,
-          ready: true,
-        });
-      }
-    };
-
-    updateIndicator();
-    const frameId = requestAnimationFrame(updateIndicator);
-    window.addEventListener("resize", updateIndicator);
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", updateIndicator);
-    };
+    const activeEl = itemRefs.current[activeItem.to];
+    if (activeEl) {
+      setIndicatorStyle({
+        top: activeEl.offsetTop,
+        height: activeEl.offsetHeight || 36,
+        opacity: 1,
+        ready: true,
+      });
+    }
   }, [cleanPath, open]);
 
   if (isFullscreenWorkspace) {
@@ -238,11 +242,11 @@ export function PortalShell() {
             aria-hidden="true"
             className={`absolute left-0 right-0 pointer-events-none rounded-md bg-white/[0.06] border border-white/10 ${
               indicatorStyle.ready
-                ? "transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                ? "transition-[transform,opacity] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 : "transition-none"
             }`}
             style={{
-              transform: `translateY(${indicatorStyle.top}px)`,
+              transform: `translate3d(0, ${indicatorStyle.top}px, 0)`,
               height: indicatorStyle.height ? `${indicatorStyle.height}px` : "36px",
               opacity: indicatorStyle.opacity,
             }}
@@ -263,6 +267,9 @@ export function PortalShell() {
                   itemRefs.current[item.to] = el;
                 }}
                 to={item.to}
+                onMouseEnter={() => prefetchRoute(item.to)}
+                onFocus={() => prefetchRoute(item.to)}
+                onTouchStart={() => prefetchRoute(item.to)}
                 onClick={() => dispatch(setSidebarOpen(false))}
                 className={`relative z-10 flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-sans select-none group transition-colors duration-150 ${
                   active
@@ -286,6 +293,9 @@ export function PortalShell() {
         <div className="pt-3 border-t border-white/8 flex items-center justify-between gap-2">
           <Link
             to="/profile"
+            onMouseEnter={() => prefetchRoute("/profile")}
+            onFocus={() => prefetchRoute("/profile")}
+            onTouchStart={() => prefetchRoute("/profile")}
             className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity"
             title="View Profile"
           >

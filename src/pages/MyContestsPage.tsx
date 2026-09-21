@@ -24,7 +24,7 @@ export function MyContestsPage() {
   const { data: rawData, loading } = useSwrData(
     "system:contests:history",
     () => contestSystemService.getHistory(),
-    { ttl: 2 * 60 * 1000 }
+    { ttl: 5 * 60 * 1000, staleTime: 30000, persistSession: true }
   );
   const data = rawData || [];
   const [filter, setFilter] = useState<"all" | "registered" | "live" | "completed">("all");

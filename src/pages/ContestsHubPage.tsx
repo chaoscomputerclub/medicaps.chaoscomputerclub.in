@@ -109,13 +109,15 @@ export function ContestsHubPage() {
     }
   }, [dispatch, member]);
 
-  // Initial load with skeleton indicators
+  // Initial load with instant cache hydration
   useEffect(() => {
     dispatch(fetchContestsThunk(false));
     getUniversityLeaderboardData().then((res) => setLeaders(res || []));
     if (member) {
-      setIsLoadingParticipations(true);
-      contestApi.participated(true)
+      if (myParticipations.length === 0) {
+        setIsLoadingParticipations(true);
+      }
+      contestApi.participated(false)
         .then((res: ParticipationRecord[]) => setMyParticipations(res || []))
         .catch(() => {})
         .finally(() => setIsLoadingParticipations(false));

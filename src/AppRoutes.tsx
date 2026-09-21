@@ -5,25 +5,43 @@ import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 import { AppShellSkeleton } from "@/components/TacticalRouteFallback";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
-// Dynamic Route Code-Splitting Chunks with Automated Retry & Invalidation Recovery
-const AuthPage = lazyWithRetry(() => import("./pages/AuthPage"), "AuthPage");
-const DashboardPage = lazyWithRetry(() => import("./pages/DashboardPage"), "DashboardPage");
-const ContestsHubPage = lazyWithRetry(() => import("./pages/ContestsHubPage"), "ContestsHubPage");
-const ContestOverviewPage = lazyWithRetry(() => import("./pages/ContestOverviewPage"), "ContestOverviewPage");
-const ContestLobbyPage = lazyWithRetry(() => import("./pages/ContestLobbyPage"), "ContestLobbyPage");
-const ContestArenaPage = lazyWithRetry(() => import("./pages/ContestArenaPage"), "ContestArenaPage");
-const ContestOfflinePage = lazyWithRetry(() => import("./pages/ContestOfflinePage"), "ContestOfflinePage");
-const ContestQualifiedPage = lazyWithRetry(() => import("./pages/ContestQualifiedPage"), "ContestQualifiedPage");
-const ContestResultsPage = lazyWithRetry(() => import("./pages/ContestResultsPage"), "ContestResultsPage");
-const ContestFinalResultsPage = lazyWithRetry(() => import("./pages/ContestFinalResultsPage"), "ContestFinalResultsPage");
-const AssessmentWorkspacePage = lazyWithRetry(() => import("./pages/AssessmentWorkspacePage"), "AssessmentWorkspacePage");
-const MyContestsPage = lazyWithRetry(() => import("./pages/MyContestsPage"), "MyContestsPage");
-const LeaderboardPage = lazyWithRetry(() => import("./pages/LeaderboardPage"), "LeaderboardPage");
-const ProblemArchivePage = lazyWithRetry(() => import("./pages/ProblemArchivePage"), "ProblemArchivePage");
-const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDetailPage"), "ProblemDetailPage");
-const VerifyProofPage = lazyWithRetry(() => import("./pages/VerifyProofPage"), "VerifyProofPage");
-const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
-const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
+export const AuthPage = lazyWithRetry(() => import("./pages/AuthPage"), "AuthPage");
+export const DashboardPage = lazyWithRetry(() => import("./pages/DashboardPage"), "DashboardPage");
+export const ContestsHubPage = lazyWithRetry(() => import("./pages/ContestsHubPage"), "ContestsHubPage");
+export const ContestOverviewPage = lazyWithRetry(() => import("./pages/ContestOverviewPage"), "ContestOverviewPage");
+export const ContestLobbyPage = lazyWithRetry(() => import("./pages/ContestLobbyPage"), "ContestLobbyPage");
+export const ContestArenaPage = lazyWithRetry(() => import("./pages/ContestArenaPage"), "ContestArenaPage");
+export const ContestOfflinePage = lazyWithRetry(() => import("./pages/ContestOfflinePage"), "ContestOfflinePage");
+export const ContestQualifiedPage = lazyWithRetry(() => import("./pages/ContestQualifiedPage"), "ContestQualifiedPage");
+export const ContestResultsPage = lazyWithRetry(() => import("./pages/ContestResultsPage"), "ContestResultsPage");
+export const ContestFinalResultsPage = lazyWithRetry(() => import("./pages/ContestFinalResultsPage"), "ContestFinalResultsPage");
+export const AssessmentWorkspacePage = lazyWithRetry(() => import("./pages/AssessmentWorkspacePage"), "AssessmentWorkspacePage");
+export const MyContestsPage = lazyWithRetry(() => import("./pages/MyContestsPage"), "MyContestsPage");
+export const LeaderboardPage = lazyWithRetry(() => import("./pages/LeaderboardPage"), "LeaderboardPage");
+export const ProblemArchivePage = lazyWithRetry(() => import("./pages/ProblemArchivePage"), "ProblemArchivePage");
+export const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDetailPage"), "ProblemDetailPage");
+export const VerifyProofPage = lazyWithRetry(() => import("./pages/VerifyProofPage"), "VerifyProofPage");
+export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
+export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
+
+export const routePreloaders: Record<string, () => Promise<any>> = {
+  "/": () => DashboardPage.preload(),
+  "/contests": () => ContestsHubPage.preload(),
+  "/my-contests": () => MyContestsPage.preload(),
+  "/leaderboard": () => LeaderboardPage.preload(),
+  "/problems": () => ProblemArchivePage.preload(),
+  "/verify": () => VerifyProofPage.preload(),
+  "/profile": () => ProfilePage.preload(),
+  "/settings": () => SettingsPage.preload(),
+};
+
+export function prefetchRoute(path: string): void {
+  const clean = path.replace(/\/+$/, "") || "/";
+  const loader = routePreloaders[clean];
+  if (loader) {
+    loader().catch(() => {});
+  }
+}
 
 function ProfileHandleRedirect() {
   const { handle } = useParams<{ handle: string }>();

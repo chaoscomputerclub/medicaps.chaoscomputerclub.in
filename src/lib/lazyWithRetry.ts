@@ -1,53 +1,77 @@
 /**
  * Chaos Computer Club India — Medi-Caps Chapter
- * Resilient Dynamic Module Importer with Exponential Fallback & Auto-Refresh
+ * Resilient Dynamic Module Importer with Exponential Fallback, Auto-Refresh & Instant Preload
  * Compliant with modern SPA chunk invalidation best practices.
  */
 
 import React from "react";
 
+export interface PreloadableLazyComponent<P = any>
+  extends React.LazyExoticComponent<React.ComponentType<P>> {
+  preload: () => Promise<any>;
+}
+
 /**
- * Wraps React.lazy with automated retry and auto-reload on stale chunk hashes.
- * Protects against Vite re-bundling, network drops, and post-deployment chunk 404s.
+ * Wraps React.lazy with automated retry, auto-reload on stale chunk hashes,
+ * and high-performance preloading for instant 0ms route transitions.
  */
 export function lazyWithRetry<T extends Record<string, any>, K extends keyof T>(
   importer: () => Promise<T>,
   exportName?: K
-): React.LazyExoticComponent<React.ComponentType<any>> {
-  return React.lazy(async () => {
+): PreloadableLazyComponent {
+  let cachedPromise: Promise<{ default: React.ComponentType<any> }> | null = null;
+
+  const load = async (): Promise<{ default: React.ComponentType<any> }> => {
+    if (cachedPromise) return cachedPromise;
+
     const pageKey = exportName ? String(exportName) : "module";
     const sessionKey = `ccc_chunk_reload_${pageKey}`;
 
-    try {
-      const module = await importer();
-      // Clean up reload guard on successful import
-      sessionStorage.removeItem(sessionKey);
-      return { default: exportName ? module[exportName] : (module.default || module) };
-    } catch (primaryError: any) {
-      console.warn(`[CCC] Dynamic import failed for ${pageKey}. Initiating retry...`, primaryError);
-
-      // Short delay before second attempt
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
+    cachedPromise = (async () => {
       try {
-        const retryModule = await importer();
-        sessionStorage.removeItem(sessionKey);
-        return { default: exportName ? retryModule[exportName] : (retryModule.default || retryModule) };
-      } catch (retryError: any) {
-        // Check if we haven't auto-reloaded in the past 15 seconds
-        const lastReload = sessionStorage.getItem(sessionKey);
-        const now = Date.now();
-
-        if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
-          sessionStorage.setItem(sessionKey, String(now));
-          console.error(`[CCC] Chunk stale or missing for ${pageKey}. Reloading application window...`);
-          window.location.reload();
-          // Return a placeholder promise while page reloads
-          return new Promise(() => {});
+        const module = await importer();
+        if (typeof window !== "undefined" && window.sessionStorage) {
+          sessionStorage.removeItem(sessionKey);
         }
+        return { default: exportName ? module[exportName] : (module.default || module) };
+      } catch (primaryError: any) {
+        console.warn(`[CCC] Dynamic import failed for ${pageKey}. Initiating retry...`, primaryError);
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
-        throw retryError;
+        try {
+          const retryModule = await importer();
+          if (typeof window !== "undefined" && window.sessionStorage) {
+            sessionStorage.removeItem(sessionKey);
+          }
+          return { default: exportName ? retryModule[exportName] : (retryModule.default || retryModule) };
+        } catch (retryError: any) {
+          cachedPromise = null; // Clear on error so future retries can run
+          const lastReload =
+            typeof window !== "undefined" && window.sessionStorage
+              ? sessionStorage.getItem(sessionKey)
+              : null;
+          const now = Date.now();
+
+          if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+            if (typeof window !== "undefined" && window.sessionStorage) {
+              sessionStorage.setItem(sessionKey, String(now));
+            }
+            console.error(`[CCC] Chunk stale or missing for ${pageKey}. Reloading application window...`);
+            if (typeof window !== "undefined") {
+              window.location.reload();
+            }
+            return new Promise(() => {});
+          }
+
+          throw retryError;
+        }
       }
-    }
-  });
+    })();
+
+    return cachedPromise;
+  };
+
+  const LazyComponent = React.lazy(load) as unknown as PreloadableLazyComponent;
+  LazyComponent.preload = load;
+  return LazyComponent;
 }
