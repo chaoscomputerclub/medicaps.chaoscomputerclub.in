@@ -193,11 +193,11 @@ def _prepare_javascript_solution(code: str, is_ts: bool = False) -> str:
         return code
 
     ts_decls = "declare var require: any;\ndeclare var process: any;\n" if is_ts else ""
-    harness = f"""
+    harness = ts_decls + """
 // ==========================================
 // CCC LeetCode-Style Evaluation Driver Harness
 // ==========================================
-{ts_decls}(function() {{
+(function() {
     const fs = require('fs');
     const raw = fs.readFileSync(0, 'utf-8').trim();
 
@@ -310,6 +310,10 @@ def _prepare_cpp_solution(
         headers.append("using namespace std;")
 
     header_prefix = "\n".join(headers) + "\n\n" if headers else ""
+
+    # Ensure Solution wrapper exists if code defines naked function
+    if "class Solution" not in code:
+        code = f"class Solution {{\npublic:\n{code}\n}};\n"
 
     # Detect which problem or method
     idx = (problem_index or "").upper()
@@ -651,6 +655,8 @@ def _prepare_java_solution(
 
     # Convert public class Solution to class Solution so it compiles in Main.java
     clean_code = re.sub(r"\bpublic\s+class\s+Solution\b", "class Solution", code)
+    if "class Solution" not in clean_code:
+        clean_code = f"class Solution {{\n{clean_code}\n}}"
     if "import java.util." not in clean_code:
         clean_code = "import java.util.*;\n" + clean_code
 
