@@ -61,14 +61,22 @@ interface MonacoEditorProps {
   value: string;
   language: string;
   onChange?: (val: string) => void;
+  onCursorChange?: (line: number, col: number) => void;
   height?: string | number;
+  fontSize?: number;
+  wordWrap?: "on" | "off";
+  tabSize?: number;
 }
 
 export const MonacoEditor = memo(function MonacoEditor({
   value,
   language,
   onChange,
+  onCursorChange,
   height = "100%",
+  fontSize = 13,
+  wordWrap = "on",
+  tabSize = 4,
 }: MonacoEditorProps) {
   const monacoRef = useRef<any>(null);
 
@@ -77,7 +85,11 @@ export const MonacoEditor = memo(function MonacoEditor({
     // Register the CCC dark theme once on mount
     monaco.editor.defineTheme("ccc-dark", CCC_DARK_THEME);
     monaco.editor.setTheme("ccc-dark");
-  }, []);
+
+    editor.onDidChangeCursorPosition((e) => {
+      onCursorChange?.(e.position.lineNumber, e.position.column);
+    });
+  }, [onCursorChange]);
 
   const handleChange: OnChange = useCallback(
     (val) => {
@@ -103,7 +115,7 @@ export const MonacoEditor = memo(function MonacoEditor({
           </div>
         }
         options={{
-          fontSize: 13,
+          fontSize,
           fontFamily: '"Geist Mono", "JetBrains Mono", Consolas, monospace',
           fontLigatures: true,
           minimap: { enabled: false },
@@ -111,8 +123,8 @@ export const MonacoEditor = memo(function MonacoEditor({
           lineNumbers: "on",
           renderLineHighlight: "gutter",
           padding: { top: 12, bottom: 12 },
-          tabSize: 4,
-          wordWrap: "on",
+          tabSize,
+          wordWrap,
           automaticLayout: true,
           scrollbar: { verticalScrollbarSize: 6, horizontalScrollbarSize: 6 },
           overviewRulerLanes: 0,

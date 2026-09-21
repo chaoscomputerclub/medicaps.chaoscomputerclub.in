@@ -1,18 +1,18 @@
 # 🛡️ UI Elements & Buttons Backend Connectivity Audit Report
 
-**Generated**: `2026-09-21T18:19:01.212Z`  
-**Total Audited Elements**: `277`  
+**Generated**: `2026-09-21T21:36:19.367Z`  
+**Total Audited Elements**: `294`  
 **Overall Functional Connectivity**: `100.0%`
 
 ## 📊 Classification Summary
 
 | Classification | Count | Description |
 | :--- | :---: | :--- |
-| 🟢 **Live Backend Mutation** | `33` | Triggers API POST/PUT/DELETE, Redux Thunks, or database mutations |
+| 🟢 **Live Backend Mutation** | `35` | Triggers API POST/PUT/DELETE, Redux Thunks, or database mutations |
 | 🟢 **Live Backend Query** | `9` | Triggers live backend SWR cache queries & data refetches |
-| 🔵 **Routing & Navigation** | `176` | Navigates between platform routes via React Router |
-| 🟡 **Client UI State Toggle** | `40` | Controls modals, drawers, tab bars, clipboard copy, and UI toggles |
-| 🔒 **Conditional Lock / Gate** | `13` | Disabled status badges or qualification gates |
+| 🔵 **Routing & Navigation** | `175` | Navigates between platform routes via React Router |
+| 🟡 **Client UI State Toggle** | `54` | Controls modals, drawers, tab bars, clipboard copy, and UI toggles |
+| 🔒 **Conditional Lock / Gate** | `15` | Disabled status badges or qualification gates |
 | 🧱 **UI Primitive Wrappers** | `6` | Generic UI primitives forwarding props dynamically |
 | 🔴 **Static Dummy / NO-OP** | `0` | Buttons with no handlers or placeholder hrefs |
 

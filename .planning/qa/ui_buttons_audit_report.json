@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-09-21T18:19:01.211Z",
-  "totalElements": 277,
-  "functionalCount": 277,
+  "timestamp": "2026-09-21T21:36:19.365Z",
+  "totalElements": 294,
+  "functionalCount": 294,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 33,
+    "backendMutations": 35,
     "backendQueries": 9,
-    "routingNavigation": 176,
-    "clientUiState": 40,
-    "conditionalLocked": 13,
+    "routingNavigation": 175,
+    "clientUiState": 54,
+    "conditionalLocked": 15,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
   },
@@ -673,7 +673,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 562,
+      "line": 713,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -682,7 +682,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 566,
+      "line": 717,
       "tag": "<Link>",
       "label": "[to={/auth?redirect=${encodeURICompo...",
       "handler": "{`/auth?redirect=${encodeURIComponent(`/contests/${contestSlug}/arena`)}`}",
@@ -691,7 +691,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 571,
+      "line": 722,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -700,7 +700,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 576,
+      "line": 727,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}}]",
       "handler": "{`/contests/${contestSlug}`}",
@@ -709,7 +709,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 608,
+      "line": 759,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -718,7 +718,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 612,
+      "line": 763,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/lobby}]",
       "handler": "{`/contests/${contestSlug}/lobby`}",
@@ -727,7 +727,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 617,
+      "line": 768,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -736,7 +736,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 622,
+      "line": 773,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}}]",
       "handler": "{`/contests/${contestSlug}`}",
@@ -745,7 +745,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 654,
+      "line": 805,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -754,7 +754,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 658,
+      "line": 809,
       "tag": "<Link>",
       "label": "[to=/contests]",
       "handler": "\"/contests\"",
@@ -763,7 +763,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 690,
+      "line": 841,
       "tag": "<Button>",
       "label": "dispatch(fetchContestArenaThunk(conte...",
       "handler": "{() => dispatch(fetchContestArenaThunk(contestSlug))}",
@@ -772,7 +772,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 698,
+      "line": 849,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -781,7 +781,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 703,
+      "line": 854,
       "tag": "<Link>",
       "label": "Exit to Overview",
       "handler": "{`/contests/${contestSlug}`}",
@@ -790,7 +790,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 734,
+      "line": 885,
       "tag": "<Button>",
       "label": "dispatch(fetchContestArenaThunk(conte...",
       "handler": "{() => dispatch(fetchContestArenaThunk(contestSlug))}",
@@ -799,7 +799,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 742,
+      "line": 893,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -808,7 +808,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 747,
+      "line": 898,
       "tag": "<Link>",
       "label": "Back to Contest",
       "handler": "{`/contests/${contestSlug}`}",
@@ -817,16 +817,34 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 764,
-      "tag": "<Button>",
+      "line": 916,
+      "tag": "<button>",
       "label": "setShowExitModal(true)}\n            c...",
       "handler": "{() => setShowExitModal(true)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 806,
+      "line": 937,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{handlePrevProblem}",
+      "category": "CONDITIONALLY_LOCKED",
+      "description": "Disabled conditional gate / status lock"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 946,
+      "tag": "<button>",
+      "label": "= problems.length - 1}\n              ...",
+      "handler": "{handleNextProblem}",
+      "category": "CONDITIONALLY_LOCKED",
+      "description": "Disabled conditional gate / status lock"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 957,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -835,7 +853,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 812,
+      "line": 963,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -844,124 +862,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 818,
-      "tag": "<Button>",
-      "label": "setShowExitModal(true)}\n            c...",
-      "handler": "{() => setShowExitModal(true)}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 830,
-      "tag": "<Button>",
-      "label": "{isFullscreen ? <Minimize2 className=...",
-      "handler": "{toggleFullscreen}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 850,
-      "tag": "<Link>",
-      "label": "{isSolved && (                   <Che...",
-      "handler": "{() => dispatch(clearArenaResults())}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 894,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "{handleResetStarter}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
       "line": 976,
-      "tag": "<button>",
-      "label": "{copiedKey === tc_${i} ? <Check cla...",
-      "handler": "{() => copyToClipboard(st.stdin, `tc_${i}`)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1096,
-      "tag": "<button>",
-      "label": "Testcase",
-      "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1110,
-      "tag": "<button>",
-      "label": "{submitResult && (                   ...",
-      "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1141,
-      "tag": "<button>",
-      "label": "setIsDrawerCollapsed(true)}\n         ...",
-      "handler": "{() => setIsDrawerCollapsed(true)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1161,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => setActiveTestcaseIndex(i)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1174,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => setActiveTestcaseIndex(-1)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1288,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => setActiveSubmitCaseIndex(idx)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1413,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => setActiveRunCaseIndex(idx)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1519,
-      "tag": "<button>",
-      "label": "{isDrawerCollapsed ? <ChevronUp class...",
-      "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1537,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRunCode}",
@@ -970,7 +871,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1549,
+      "line": 989,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmitCode}",
@@ -979,7 +880,259 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1603,
+      "line": 1007,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "\"button\"",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1018,
+      "tag": "<DropdownMenuItem>",
+      "label": "Default Split Layout",
+      "handler": "{() => setIsFocusMode(false)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1024,
+      "tag": "<DropdownMenuItem>",
+      "label": "🧘 Focus Mode (Full Editor)",
+      "handler": "{() => setIsFocusMode(true)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1031,
+      "tag": "<DropdownMenuItem>",
+      "label": "Reset Pane Split (50/50)",
+      "handler": "{handleResetWidth}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1038,
+      "tag": "<button>",
+      "label": "setShowSettingsModal(true)}\n         ...",
+      "handler": "{() => setShowSettingsModal(true)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1076,
+      "tag": "<Link>",
+      "label": "{isSolved && <CheckCircle2 className=...",
+      "handler": "{() => dispatch(clearArenaResults())}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1106,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => setActiveProblemTab(\"description\")}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1118,
+      "tag": "<button>",
+      "label": "{submissionHistory.length > 0 && (   ...",
+      "handler": "{() => setActiveProblemTab(\"submissions\")}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1200,
+      "tag": "<button>",
+      "label": "{copiedKey === tc_in_${i} ? (      ...",
+      "handler": "{() => copyToClipboard(st.stdin, `tc_in_${i}`)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1368,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{handleResetStarter}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1379,
+      "tag": "<button>",
+      "label": "{isFullscreen ? <Minimize2 className=...",
+      "handler": "{toggleFullscreen}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1460,
+      "tag": "<button>",
+      "label": "Testcase",
+      "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1474,
+      "tag": "<button>",
+      "label": "{submitResult && (                   ...",
+      "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1509,
+      "tag": "<button>",
+      "label": "setIsDrawerCollapsed(true)}\n         ...",
+      "handler": "{() => setIsDrawerCollapsed(true)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1529,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => setActiveTestcaseIndex(i)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1542,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => setActiveTestcaseIndex(-1)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1662,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => setActiveSubmitCaseIndex(idx)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1793,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => setActiveRunCaseIndex(idx)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1901,
+      "tag": "<button>",
+      "label": "{isDrawerCollapsed ? (               ...",
+      "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1923,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "{handleRunCode}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1935,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "{handleSubmitCode}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1965,
+      "tag": "<button>",
+      "label": "Code Editor",
+      "handler": "{() => setActiveSettingsTab(\"editor\")}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1976,
+      "tag": "<button>",
+      "label": "Shortcuts",
+      "handler": "{() => setActiveSettingsTab(\"shortcuts\")}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 1987,
+      "tag": "<button>",
+      "label": "Contest Clock",
+      "handler": "{() => setActiveSettingsTab(\"timer\")}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 2011,
+      "tag": "<button>",
+      "label": "{size}",
+      "handler": "{() => {\n                          setEditorFontSize(size);\n                    ",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 2038,
+      "tag": "<button>",
+      "label": "{editorWordWrap ? Enabled : Disabl...",
+      "handler": "{() => {\n                      const next = !editorWordWrap;\n                   ",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 2065,
+      "tag": "<button>",
+      "label": "{spaces} Spaces",
+      "handler": "{() => {\n                          setEditorTabSize(spaces);\n                   ",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 2131,
+      "tag": "<Button>",
+      "label": "Done",
+      "handler": "{() => setShowSettingsModal(false)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestArenaPage.tsx",
+      "line": 2181,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
@@ -988,7 +1141,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1652,
+      "line": 2230,
       "tag": "<Button>",
       "label": "Continue Solving",
       "handler": "{() => setShowExitModal(false)}",
@@ -997,7 +1150,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1660,
+      "line": 2238,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                setShowExitModal(false);\n                navigate(`/con",

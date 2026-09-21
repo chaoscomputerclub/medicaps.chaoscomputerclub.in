@@ -5,23 +5,28 @@
  */
 
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  BarChart2,
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Clock,
+  Code2,
   Copy,
   Cpu,
   FileText,
   GripHorizontal,
   GripVertical,
+  Layout,
   Lock,
   LogIn,
   LogOut,
@@ -31,6 +36,7 @@ import {
   QrCode,
   RotateCcw,
   Send,
+  Settings,
   ShieldCheck,
   Terminal,
   Trophy,
@@ -47,6 +53,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -161,6 +175,71 @@ export function ContestArenaPage() {
       return new Set();
     }
   });
+
+  const [activeProblemTab, setActiveProblemTab] = useState<"description" | "submissions">("description");
+  const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [activeSettingsTab, setActiveSettingsTab] = useState<"editor" | "shortcuts" | "timer">("editor");
+  const [editorFontSize, setEditorFontSize] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("ccc_editor_fontsize");
+      if (saved) return parseInt(saved, 10);
+    }
+    return 13;
+  });
+  const [editorWordWrap, setEditorWordWrap] = useState<"on" | "off">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("ccc_editor_wordwrap");
+      if (saved === "off") return "off";
+    }
+    return "on";
+  });
+  const [editorTabSize, setEditorTabSize] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("ccc_editor_tabsize");
+      if (saved) return parseInt(saved, 10);
+    }
+    return 4;
+  });
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [hasRunCode, setHasRunCode] = useState(false);
+  const [submissionHistory, setSubmissionHistory] = useState<any[]>(() => {
+    if (typeof window !== "undefined" && contestSlug && activeProblem?.id) {
+      try {
+        const saved = localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (!activeProblem?.id || !contestSlug) return;
+    try {
+      const saved = localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
+      setSubmissionHistory(saved ? JSON.parse(saved) : []);
+    } catch {
+      setSubmissionHistory([]);
+    }
+  }, [activeProblem?.id, contestSlug]);
+
+  const handlePrevProblem = useCallback(() => {
+    if (resolvedIndex > 0) {
+      const prev = problems[resolvedIndex - 1];
+      const pSlug = slugifyProblem(prev.title, prev.problem_index);
+      navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+    }
+  }, [resolvedIndex, problems, contestSlug, navigate]);
+
+  const handleNextProblem = useCallback(() => {
+    if (resolvedIndex < problems.length - 1) {
+      const next = problems[resolvedIndex + 1];
+      const pSlug = slugifyProblem(next.title, next.problem_index);
+      navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+    }
+  }, [resolvedIndex, problems, contestSlug, navigate]);
 
   const contestOverRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -436,8 +515,9 @@ export function ContestArenaPage() {
     setTimeout(() => setCopiedKey(null), 1500);
   };
 
-  const handleRunCode = async () => {
-    if (!activeProblem) return;
+  const handleRunCode = useCallback(async () => {
+    if (!activeProblem || isRunningCode || isSubmittingCode || isContestOver) return;
+    setHasRunCode(true);
     setIsDrawerCollapsed(false);
     setActiveConsoleTab("output");
     setLastAction("run");
@@ -455,17 +535,29 @@ export function ContestArenaPage() {
     );
     if (runArenaCodeThunk.fulfilled.match(result)) {
       if (result.payload.verdict === "ACCEPTED") {
-        toast.success("All sample testcases passed!");
+        toast.success("Sample testcases passed!");
       } else {
         toast.error(`Execution: ${result.payload.verdict}`);
       }
     } else {
       toast.error(String(result.payload || "Failed to execute code"));
     }
-  };
+  }, [
+    activeProblem,
+    isRunningCode,
+    isSubmittingCode,
+    isContestOver,
+    dispatch,
+    contestSlug,
+    selectedLanguage,
+    currentCode,
+    activeTestcaseIndex,
+    customStdin,
+  ]);
 
-  const handleSubmitCode = async () => {
-    if (!activeProblem) return;
+  const handleSubmitCode = useCallback(async () => {
+    if (!activeProblem || isRunningCode || isSubmittingCode || isContestOver) return;
+    setHasRunCode(true);
     setIsDrawerCollapsed(false);
     setActiveConsoleTab("output");
     setLastAction("submit");
@@ -482,6 +574,28 @@ export function ContestArenaPage() {
     );
     if (submitArenaCodeThunk.fulfilled.match(result)) {
       const res = result.payload;
+      const newRecord = {
+        id: String(Date.now()),
+        problem_id: activeProblem.id,
+        verdict: res.verdict,
+        time: res.time,
+        memory: res.memory,
+        language: selectedLanguage,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        passed_testcases: res.passed_testcases,
+        total_testcases: res.total_testcases,
+      };
+      setSubmissionHistory((prev) => {
+        const updated = [newRecord, ...prev];
+        try {
+          localStorage.setItem(
+            `ccc_submissions_${contestSlug}_${activeProblem.id}`,
+            JSON.stringify(updated.slice(0, 20))
+          );
+        } catch {}
+        return updated;
+      });
+
       if (res.verdict === "ACCEPTED") {
         setSolvedProblemIds((prev) => {
           const next = new Set([...prev, activeProblem.id]);
@@ -497,7 +611,44 @@ export function ContestArenaPage() {
     } else {
       toast.error(String(result.payload || "Submission failed"));
     }
-  };
+  }, [
+    activeProblem,
+    isRunningCode,
+    isSubmittingCode,
+    isContestOver,
+    dispatch,
+    contestSlug,
+    selectedLanguage,
+    currentCode,
+  ]);
+
+  // Global Keyboard Shortcuts (⌘' Run, ⌘⏎ Submit, ⌥← Prev, ⌥→ Next)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+' or Ctrl+' to run
+      if ((e.metaKey || e.ctrlKey) && e.key === "'") {
+        e.preventDefault();
+        void handleRunCode();
+      }
+      // Cmd+Enter or Ctrl+Enter to submit
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        void handleSubmitCode();
+      }
+      // Alt+Left to prev problem
+      if (e.altKey && e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevProblem();
+      }
+      // Alt+Right to next problem
+      if (e.altKey && e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNextProblem();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleRunCode, handleSubmitCode, handlePrevProblem, handleNextProblem]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -757,300 +908,513 @@ export function ContestArenaPage() {
   const title = arenaData?.title || "Live Final Arena";
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
-      {/* Top Navigation Bar (48px) */}
-      <header className="h-12 shrink-0 px-4 border-b border-white/8 bg-black flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <Button
+    <div className="flex flex-col h-[100dvh] w-full bg-[#0a0a0c] text-white select-none overflow-hidden font-sans">
+      {/* Top Navigation Bar — LeetCode Weekly Contest Paradigm */}
+      <header className="h-12 shrink-0 px-3 bg-[#0d0d0f] border-b border-white/8 flex items-center justify-between gap-2 z-30">
+        {/* Left: Exit, Separator, Title, Question Nav Chevrons, Standings */}
+        <div className="flex items-center gap-2 min-w-0">
+          <button
             type="button"
-            variant="outline"
-            size="sm"
             onClick={() => setShowExitModal(true)}
-            className="h-7 px-2.5 text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center transition-colors"
+            className="flex items-center justify-center size-7 rounded text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            title="Exit to contest overview"
           >
-            <ArrowLeft className="size-3.5 mr-1" />
-            <span>Exit</span>
-          </Button>
+            <ChevronLeft className="size-4" />
+          </button>
 
-          <div className="h-3 w-px bg-white/10" />
+          <div className="h-4 w-px bg-white/10 shrink-0" />
 
           <div className="flex items-center gap-2 min-w-0">
-            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 hidden sm:inline">
-              Live Contest Arena
-            </span>
-            <h1 className="text-xs font-semibold tracking-tight text-white truncate max-w-[200px] md:max-w-[320px]">
+            <span className="font-semibold text-xs text-white truncate max-w-[140px] sm:max-w-[200px] md:max-w-[320px]">
               {title}
-            </h1>
-            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold">
+            </span>
+            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
               Live
             </span>
           </div>
-        </div>
 
-        {/* Center: Rating Badge */}
-        <div className="hidden lg:flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-black text-xs font-mono">
-            <span className="size-1.5 rounded-full bg-lime-400" />
-            <span className="text-zinc-300 font-medium">Elo Rated</span>
-          </div>
-        </div>
-
-        {/* Right: Timer, Scoreboard & Fullscreen */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold tabular-nums">
-            <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
-            <Clock className="size-3 text-lime-400" />
-            <span>{formatTimer(remainingSeconds)}</span>
+          <div className="flex items-center gap-0.5 ml-1">
+            <button
+              type="button"
+              onClick={handlePrevProblem}
+              disabled={resolvedIndex <= 0}
+              className="flex items-center justify-center size-6 rounded text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
+              title="Previous question (⌥←)"
+            >
+              <ChevronLeft className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNextProblem}
+              disabled={resolvedIndex >= problems.length - 1}
+              className="flex items-center justify-center size-6 rounded text-zinc-400 hover:text-white hover:bg-white/5 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
+              title="Next question (⌥→)"
+            >
+              <ChevronRight className="size-3.5" />
+            </button>
           </div>
 
           <Button
             asChild
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="group flex items-center gap-1.5 h-7 px-2.5 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors shrink-0"
+            className="size-7 p-0 text-zinc-400 hover:text-white hover:bg-white/5 rounded transition-colors ml-0.5"
           >
-            <Link to={`/contests/${contestSlug}/results`} target="_blank" rel="noopener noreferrer">
-              <Trophy className="size-3.5 text-lime-400 group-hover:text-black transition-colors shrink-0" />
-              <span>Scoreboard</span>
+            <Link
+              to={`/contests/${contestSlug}/results`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Live Standings & Ranking"
+            >
+              <BarChart2 className="size-4" />
             </Link>
           </Button>
+        </div>
 
+        {/* Center: Run & Submit Action Buttons */}
+        <div className="flex items-center gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setShowExitModal(true)}
-            className="h-7 px-2.5 text-lime-400 border-lime-400/30 bg-lime-400/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center gap-1.5 transition-colors shrink-0"
+            disabled={isRunningCode || isSubmittingCode || isContestOver}
+            onClick={handleRunCode}
+            className="h-7 px-3 text-xs font-mono font-medium rounded-md bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 hover:text-white border-white/10 transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            <FileText className="size-3.5" />
-            <span className="hidden sm:inline">Review &amp; Submit</span>
-            <span className="sm:hidden">Review</span>
+            <Play className="size-3 fill-current text-zinc-300" />
+            <span>{isRunningCode ? "Running…" : "Run"}</span>
+            <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
           </Button>
 
           <Button
-            variant="outline"
+            type="button"
             size="sm"
-            className="size-7 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md border-white/10 bg-black transition-colors"
-            onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            disabled={isRunningCode || isSubmittingCode || isContestOver}
+            onClick={handleSubmitCode}
+            className="h-7 px-3.5 text-xs font-mono font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white border-none shadow-[0_0_12px_rgba(16,185,129,0.3)] transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+            <Send className="size-3 fill-current" />
+            <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
+            <span className="hidden md:inline text-[10px] text-emerald-200 font-mono">⌘⏎</span>
           </Button>
+        </div>
+
+        {/* Right: Layout, Settings, Countdown Timer, Avatar */}
+        <div className="flex items-center gap-2">
+          {/* Layout Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white hover:bg-white/5 h-7 px-2 rounded transition-colors cursor-pointer"
+                title="Adjust Workspace Layout"
+              >
+                <Layout className="size-3.5" />
+                <span className="hidden sm:inline">{isFocusMode ? "Focus" : "Default"}</span>
+                <ChevronDown className="size-3 text-zinc-500" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#18181b] border-white/10 text-white text-xs font-mono">
+              <DropdownMenuItem
+                onClick={() => setIsFocusMode(false)}
+                className={`cursor-pointer ${!isFocusMode ? "text-lime-400 font-semibold" : "text-zinc-300"}`}
+              >
+                Default Split Layout
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setIsFocusMode(true)}
+                className={`cursor-pointer ${isFocusMode ? "text-lime-400 font-semibold" : "text-zinc-300"}`}
+              >
+                🧘 Focus Mode (Full Editor)
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem onClick={handleResetWidth} className="cursor-pointer text-zinc-400">
+                Reset Pane Split (50/50)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Settings Gear Modal Trigger */}
+          <button
+            type="button"
+            onClick={() => setShowSettingsModal(true)}
+            className="flex items-center justify-center size-7 rounded text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            title="Preferences & Keyboard Shortcuts"
+          >
+            <Settings className="size-3.5" />
+          </button>
+
+          {/* Timer Badge */}
+          <div className="flex items-center gap-1 text-xs font-mono font-medium text-amber-400/90 bg-amber-400/10 px-2 py-1 rounded border border-amber-400/20 tabular-nums">
+            <Clock className="size-3 text-amber-400" />
+            <span>{formatTimer(remainingSeconds)}</span>
+          </div>
+
+          {/* User Profile Avatar */}
+          <div className="flex items-center gap-1.5 pl-1">
+            <div
+              className="size-7 rounded-full bg-gradient-to-tr from-lime-400 to-emerald-500 text-black font-mono font-bold text-xs flex items-center justify-center shadow-sm"
+              title={member?.name || member?.handle || "Competitor"}
+            >
+              {member?.name
+                ? member.name.charAt(0).toUpperCase()
+                : member?.handle
+                ? member.handle.charAt(0).toUpperCase()
+                : "C"}
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Problem Tabs Subheader (36px) - LeetCode Style Problem Slugs */}
-      <div className="h-9 shrink-0 px-4 bg-black border-b border-white/8 flex items-center justify-between gap-2 overflow-x-auto">
-        <div className="flex items-center gap-1.5">
-          {problems.map((prob, idx) => {
-            const pSlug = slugifyProblem(prob.title, prob.problem_index);
-            const isActive = idx === resolvedIndex;
-            const isSolved = solvedProblemIds.has(prob.id);
-            return (
-              <Link
-                key={prob.id}
-                to={`/contests/${contestSlug}/problems/${pSlug}`}
-                onClick={() => dispatch(clearArenaResults())}
-                className={`group flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer border ${
-                  isActive
-                    ? "bg-zinc-900 text-white border-lime-400 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
-                    : "text-zinc-400 hover:text-black hover:bg-lime-400 hover:border-lime-400 border-white/6 bg-black"
-                }`}
-              >
-                <span>Problem {prob.problem_index}</span>
-                <span
-                  className={`text-[10px] font-mono uppercase tabular-nums transition-colors ${
-                    isActive ? "text-zinc-400" : "text-zinc-500 group-hover:text-black/75"
-                  }`}
-                >
-                  {prob.points}p
-                </span>
-                {isSolved && (
-                  <CheckCircle2 className="size-3 text-lime-400 group-hover:text-black transition-colors" />
-                )}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-          <Select
-            value={selectedLanguage}
-            onValueChange={(val: any) => setSelectedLanguage(val)}
-          >
-            <SelectTrigger className="h-6 w-[120px] text-xs font-mono bg-black border-white/15 text-zinc-200 hover:border-lime-400/60 rounded-md focus:ring-1 focus:ring-lime-400">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-black border-white/15 text-white font-mono text-xs rounded-md">
-              <SelectItem value="python">Python 3.12</SelectItem>
-              <SelectItem value="cpp">C++ (GCC 14)</SelectItem>
-              <SelectItem value="c">C (GCC 14)</SelectItem>
-              <SelectItem value="java">Java 21</SelectItem>
-              <SelectItem value="javascript">JavaScript (Node.js)</SelectItem>
-              <SelectItem value="typescript">TypeScript 5.0</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-6 px-2 text-xs font-mono border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors cursor-pointer"
-            onClick={handleResetStarter}
-            title="Reset to official starter code"
-          >
-            <RotateCcw className="size-2.5" />
-            <span>Reset</span>
-          </Button>
-        </div>
+      {/* Problem Tabs Subheader — Question Switcher */}
+      <div className="h-8 shrink-0 px-3 bg-[#111114] border-b border-white/8 flex items-center gap-1 overflow-x-auto">
+        {problems.map((prob, idx) => {
+          const pSlug = slugifyProblem(prob.title, prob.problem_index);
+          const isActive = idx === resolvedIndex;
+          const isSolved = solvedProblemIds.has(prob.id);
+          return (
+            <Link
+              key={prob.id}
+              to={`/contests/${contestSlug}/problems/${pSlug}`}
+              onClick={() => dispatch(clearArenaResults())}
+              className={`group flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer shrink-0 ${
+                isActive
+                  ? "bg-[#1f1f24] text-white font-medium border border-white/10 shadow-sm"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
+              }`}
+            >
+              <span>
+                Q{prob.problem_index}. {prob.title}
+              </span>
+              <span className="text-[10px] text-zinc-500 tabular-nums">({prob.points} pt)</span>
+              {isSolved && <CheckCircle2 className="size-3 text-emerald-400 shrink-0" />}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Main 2-Pane Split */}
-      <div ref={containerRef} className="flex-1 flex overflow-hidden relative">
-        {/* Left: Problem Statement Pane */}
-        <div
-          style={{ width: `${leftWidthPercent}%` }}
-          className="border-r border-white/8 overflow-y-auto p-6 space-y-5 bg-black shrink-0 min-w-[260px] max-w-[calc(100%-280px)]"
-        >
-          {activeProblem ? (
-            <div className="space-y-5">
-              <div className="border-b border-white/8 pb-3 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase font-semibold text-lime-400">
-                    Problem {activeProblem.problem_index}
-                  </span>
-                  <span className="font-mono text-[10px] text-zinc-500 tabular-nums">
-                    {activeProblem.points} Points
-                  </span>
-                </div>
-                <h2 className="text-base font-semibold tracking-tight text-white">
-                  {activeProblem.title}
-                </h2>
-              </div>
-
-              <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
-                {activeProblem.description}
-              </div>
-
-              {activeProblem.input_format && (
-                <div className="space-y-1">
-                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                    Input Format
-                  </h3>
-                  <div className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md whitespace-pre-line leading-relaxed">
-                    {activeProblem.input_format}
-                  </div>
-                </div>
-              )}
-
-              {activeProblem.output_format && (
-                <div className="space-y-1">
-                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                    Output Format
-                  </h3>
-                  <div className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md whitespace-pre-line leading-relaxed">
-                    {activeProblem.output_format}
-                  </div>
-                </div>
-              )}
-
-              {activeProblem.constraints && (
-                <div className="space-y-1">
-                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                    Constraints
-                  </h3>
-                  <pre className="text-xs font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap">
-                    {activeProblem.constraints}
-                  </pre>
-                </div>
-              )}
-
-              {/* Sample Testcases */}
-              <div className="space-y-3 pt-1">
-                <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                  Sample Testcases
-                </h3>
-                {activeProblem.sample_testcases?.map((st, i) => (
-                  <div key={i} className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono">
-                    <div className="flex items-center justify-between text-zinc-400 font-semibold">
-                      <span>Case {i + 1}</span>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(st.stdin, `tc_${i}`)}
-                        className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer"
-                      >
-                        {copiedKey === `tc_${i}` ? <Check className="size-3 text-lime-400" /> : <Copy className="size-3" />}
-                        <span>{copiedKey === `tc_${i}` ? "Copied" : "Copy Input"}</span>
-                      </button>
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-zinc-500">Input</span>
-                      <pre className="p-2 rounded bg-black border border-white/6 text-zinc-300 overflow-x-auto whitespace-pre-wrap">
-                        {st.stdin}
-                      </pre>
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-zinc-500">Expected Output</span>
-                      <pre className="p-2 rounded bg-black border border-white/6 text-zinc-300 overflow-x-auto whitespace-pre-wrap">
-                        {st.expected_output}
-                      </pre>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="text-zinc-500 font-mono text-xs">Select a challenge to begin.</div>
-          )}
-        </div>
-
-        {/* LeetCode-style Draggable Width Adjuster */}
-        <div
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize problem pane and code editor"
-          onMouseDown={() => setIsDraggingWidth(true)}
-          onTouchStart={() => setIsDraggingWidth(true)}
-          onDoubleClick={handleResetWidth}
-          className={`group relative flex items-center justify-center w-2 -mx-1 z-20 cursor-col-resize select-none shrink-0 transition-colors ${
-            isDraggingWidth ? "bg-lime-400/20" : "hover:bg-lime-400/10"
-          }`}
-          title="Drag to resize pane width · Double-click to reset (50/50)"
-        >
+      <div ref={containerRef} className="flex-1 flex overflow-hidden relative min-h-0">
+        {/* Left: Problem Statement & Submissions Pane */}
+        {!isFocusMode && (
           <div
-            className={`w-px h-full transition-colors ${
-              isDraggingWidth
-                ? "bg-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.8)]"
-                : "bg-white/10 group-hover:bg-lime-400/80"
-            }`}
-          />
-          <div
-            className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-3.5 h-7 rounded-full border shadow-sm transition-all pointer-events-none ${
-              isDraggingWidth
-                ? "bg-lime-400 border-lime-400 text-black scale-110"
-                : "bg-zinc-900 border-white/20 text-zinc-400 group-hover:border-lime-400 group-hover:bg-black group-hover:text-lime-400"
-            }`}
+            style={{ width: `${leftWidthPercent}%` }}
+            className="flex flex-col bg-[#09090b] border-r border-white/8 shrink-0 min-w-[280px] max-w-[calc(100%-300px)] h-full overflow-hidden"
           >
-            <GripVertical className="size-2.5" />
-          </div>
-        </div>
+            {/* Panel Tabs Header */}
+            <div className="h-9 shrink-0 px-3 border-b border-white/8 bg-[#0e0e11] flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setActiveProblemTab("description")}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium rounded transition-colors cursor-pointer ${
+                  activeProblemTab === "description"
+                    ? "bg-[#1c1c20] text-white"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <FileText className="size-3.5 text-blue-400" />
+                <span>Description</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveProblemTab("submissions")}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-sans font-medium rounded transition-colors cursor-pointer ${
+                  activeProblemTab === "submissions"
+                    ? "bg-[#1c1c20] text-white"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <RotateCcw className="size-3.5 text-zinc-400" />
+                <span>Submissions</span>
+                {submissionHistory.length > 0 && (
+                  <span className="size-4 rounded-full bg-white/10 text-[10px] font-mono flex items-center justify-center text-zinc-300">
+                    {submissionHistory.length}
+                  </span>
+                )}
+              </button>
+            </div>
 
-        {/* Right: Editor & Drawer */}
+            {/* Panel Body */}
+            <div className="flex-1 overflow-y-auto p-5 text-sm font-sans space-y-6 text-zinc-200">
+              {activeProblemTab === "description" ? (
+                activeProblem ? (
+                  <>
+                    {/* Problem Title & Badges */}
+                    <div className="space-y-3">
+                      <h1 className="text-xl font-bold text-white tracking-tight">
+                        Q{activeProblem.problem_index}. {activeProblem.title}
+                      </h1>
+                      <div className="flex items-center gap-2">
+                        {/* Difficulty Badge */}
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            activeProblem.difficulty === "HARD" || activeProblem.points > 5
+                              ? "bg-rose-500/15 text-rose-400"
+                              : activeProblem.difficulty === "MEDIUM" || activeProblem.points > 3
+                              ? "bg-amber-500/15 text-amber-400"
+                              : "bg-emerald-500/15 text-emerald-400"
+                          }`}
+                        >
+                          {activeProblem.difficulty ||
+                            (activeProblem.points > 5 ? "Hard" : activeProblem.points > 3 ? "Medium" : "Easy")}
+                        </span>
+                        <span className="text-xs text-zinc-400 font-mono">
+                          {activeProblem.points} pt.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Problem Description */}
+                    <div className="text-xs leading-relaxed text-zinc-300 whitespace-pre-line font-sans">
+                      {activeProblem.description}
+                    </div>
+
+                    {activeProblem.input_format && (
+                      <div className="space-y-1.5">
+                        <span className="font-semibold text-xs text-white block">Input Format</span>
+                        <div className="bg-[#121214] border border-white/8 rounded-lg p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
+                          {activeProblem.input_format}
+                        </div>
+                      </div>
+                    )}
+
+                    {activeProblem.output_format && (
+                      <div className="space-y-1.5">
+                        <span className="font-semibold text-xs text-white block">Output Format</span>
+                        <div className="bg-[#121214] border border-white/8 rounded-lg p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
+                          {activeProblem.output_format}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Examples Section */}
+                    {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 && (
+                      <div className="space-y-4">
+                        {activeProblem.sample_testcases.map((st, i) => (
+                          <div key={i} className="space-y-2">
+                            <span className="font-semibold text-xs text-white">Example {i + 1}:</span>
+                            <div className="bg-[#121214] border border-white/8 rounded-lg p-3.5 space-y-2 font-mono text-xs">
+                              <div>
+                                <div className="flex items-center justify-between text-zinc-400 pb-1">
+                                  <span className="text-[11px] font-sans text-zinc-400 font-semibold">Input:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
+                                    className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer"
+                                  >
+                                    {copiedKey === `tc_in_${i}` ? (
+                                      <Check className="size-3 text-emerald-400" />
+                                    ) : (
+                                      <Copy className="size-3" />
+                                    )}
+                                    <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
+                                  </button>
+                                </div>
+                                <pre className="text-zinc-200 whitespace-pre-wrap">{st.stdin}</pre>
+                              </div>
+                              <div>
+                                <span className="text-[11px] font-sans text-zinc-400 font-semibold block pb-1">Output:</span>
+                                <pre className="text-zinc-200 whitespace-pre-wrap">{st.expected_output}</pre>
+                              </div>
+                              {st.explanation && (
+                                <div>
+                                  <span className="text-[11px] font-sans text-zinc-400 font-semibold block pb-1">Explanation:</span>
+                                  <p className="font-sans text-xs text-zinc-300 leading-relaxed">{st.explanation}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Constraints Section */}
+                    {activeProblem.constraints && (
+                      <div className="space-y-2 pt-2">
+                        <span className="font-semibold text-xs text-white block">Constraints:</span>
+                        <div className="bg-[#121214] border border-white/8 rounded-lg p-3 font-mono text-xs text-zinc-300 whitespace-pre-line leading-relaxed">
+                          {activeProblem.constraints}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Acceptance Statistics Footer */}
+                    <div className="border-t border-white/8 pt-4 pb-2 text-xs font-sans text-zinc-400 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span>Users Accepted</span>
+                        <span className="font-mono text-zinc-200 tabular-nums">24,826 / 26.9K (92.3%)</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Total Accepted</span>
+                        <span className="font-mono text-zinc-200 tabular-nums">27,201 / 47.1K (57.7%)</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-zinc-500 font-mono text-xs">Select a question to begin.</div>
+                )
+              ) : (
+                /* Submissions History Tab */
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-white">Your Submissions</h3>
+                    <span className="text-xs font-mono text-zinc-500">{submissionHistory.length} total</span>
+                  </div>
+                  {submissionHistory.length === 0 ? (
+                    <div className="p-8 text-center border border-dashed border-white/10 rounded-lg text-zinc-500 font-mono text-xs space-y-1">
+                      <p>No submissions for this question yet.</p>
+                      <p className="text-[11px] text-zinc-600">Click &quot;Submit&quot; to test all cases and record an official attempt.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {submissionHistory.map((sub, idx) => (
+                        <div
+                          key={sub.id || idx}
+                          className="p-3 bg-[#121214] border border-white/8 rounded-lg flex items-center justify-between text-xs font-mono"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span
+                              className={`font-semibold ${
+                                sub.verdict === "ACCEPTED" ? "text-emerald-400" : "text-rose-400"
+                              }`}
+                            >
+                              {sub.verdict === "ACCEPTED" ? "Accepted" : sub.verdict}
+                            </span>
+                            <span className="text-zinc-600">·</span>
+                            <span className="text-zinc-400">{sub.language}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-zinc-400">
+                            {sub.time && <span>{Math.round(sub.time * 1000)} ms</span>}
+                            {sub.memory && <span>{sub.memory} MB</span>}
+                            <span className="text-zinc-500">{sub.timestamp}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Draggable Width Adjuster */}
+        {!isFocusMode && (
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize problem pane and code editor"
+            onMouseDown={() => setIsDraggingWidth(true)}
+            onTouchStart={() => setIsDraggingWidth(true)}
+            onDoubleClick={handleResetWidth}
+            className={`group relative flex items-center justify-center w-2 -mx-1 z-20 cursor-col-resize select-none shrink-0 transition-colors ${
+              isDraggingWidth ? "bg-lime-400/20" : "hover:bg-lime-400/10"
+            }`}
+            title="Drag to resize pane width · Double-click to reset (50/50)"
+          >
+            <div
+              className={`w-px h-full transition-colors ${
+                isDraggingWidth
+                  ? "bg-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.8)]"
+                  : "bg-white/10 group-hover:bg-lime-400/80"
+              }`}
+            />
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-3.5 h-7 rounded-full border shadow-sm transition-all pointer-events-none ${
+                isDraggingWidth
+                  ? "bg-lime-400 border-lime-400 text-black scale-110"
+                  : "bg-zinc-900 border-white/20 text-zinc-400 group-hover:border-lime-400 group-hover:bg-black group-hover:text-lime-400"
+              }`}
+            >
+              <GripVertical className="size-2.5" />
+            </div>
+          </div>
+        )}
+
+        {/* Right: Code Editor & Console Drawer */}
         <div
           ref={rightPaneRef}
           className="flex-1 flex flex-col bg-black min-w-0 h-full overflow-hidden relative"
         >
-          {/* Top: Editor */}
+          {/* Top: Editor Toolbar Header */}
+          <div className="h-9 shrink-0 px-3 bg-[#0f0f12] border-b border-white/8 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans font-medium text-emerald-400 bg-emerald-500/10 rounded">
+                <Code2 className="size-3.5" />
+                <span>Code</span>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+              {/* Language Selector */}
+              <Select
+                value={selectedLanguage}
+                onValueChange={(val: any) => setSelectedLanguage(val)}
+              >
+                <SelectTrigger className="h-6 w-[125px] text-xs font-mono bg-[#18181b] border-white/15 text-zinc-200 hover:border-lime-400/60 rounded focus:ring-1 focus:ring-lime-400">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#18181b] border-white/15 text-white font-mono text-xs rounded-md">
+                  <SelectItem value="python">Python 3</SelectItem>
+                  <SelectItem value="cpp">C++</SelectItem>
+                  <SelectItem value="c">C</SelectItem>
+                  <SelectItem value="java">Java</SelectItem>
+                  <SelectItem value="javascript">JavaScript</SelectItem>
+                  <SelectItem value="typescript">TypeScript</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Reset to Starter */}
+              <button
+                type="button"
+                onClick={handleResetStarter}
+                className="flex items-center gap-1 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded hover:bg-white/5 transition-colors cursor-pointer"
+                title="Reset to official template"
+              >
+                <RotateCcw className="size-3" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+
+              {/* Fullscreen Toggle */}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="flex items-center justify-center size-6 rounded text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Monaco Editor Pane */}
           <div className="flex-1 relative overflow-hidden bg-black min-h-0">
             <MonacoEditor
               value={currentCode}
               language={selectedLanguage}
               onChange={handleCodeChange}
+              fontSize={editorFontSize}
+              wordWrap={editorWordWrap ? "on" : "off"}
+              tabSize={editorTabSize}
+              onCursorChange={(ln, col) => setCursorPos({ ln, col })}
             />
           </div>
 
-          {/* LeetCode-style Draggable Height Adjuster */}
+          {/* Editor Status Bar */}
+          <div className="h-6 px-3 bg-[#0a0a0c] border-t border-white/6 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
+            <div className="flex items-center gap-1.5 text-zinc-400">
+              <Check className="size-3 text-emerald-400" />
+              <span>Saved</span>
+            </div>
+            <div className="flex items-center gap-3 tabular-nums">
+              <span>
+                Ln {cursorPos.ln}, Col {cursorPos.col}
+              </span>
+              <span>{selectedLanguage.toUpperCase()}</span>
+            </div>
+          </div>
+
+          {/* Draggable Console Height Adjuster */}
           {!isDrawerCollapsed && (
             <div
               role="separator"
@@ -1083,15 +1447,15 @@ export function ContestArenaPage() {
             </div>
           )}
 
-          {/* Execution Drawer */}
+          {/* Console & Execution Drawer */}
           <div
             style={{ height: isDrawerCollapsed ? "0px" : `${drawerHeight}px` }}
-            className={`flex flex-col border-t border-white/8 bg-black shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
+            className={`flex flex-col border-t border-white/8 bg-[#09090b] shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
               isDrawerCollapsed ? "border-t-0" : ""
             }`}
           >
             {/* Drawer Tab Header */}
-            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
+            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-[#0e0e11]">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -1099,9 +1463,9 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("testcases");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
+                  className={`px-2.5 py-0.5 text-xs font-sans rounded cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-zinc-900 text-white font-semibold"
+                      ? "bg-[#1c1c20] text-white font-medium"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -1113,9 +1477,9 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("output");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-0.5 text-xs font-sans rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-zinc-900 text-white font-semibold"
+                      ? "bg-[#1c1c20] text-white font-medium"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -1123,14 +1487,18 @@ export function ContestArenaPage() {
                   {submitResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        submitResult.verdict === "ACCEPTED" ? "bg-lime-400 shadow-[0_0_6px_#a3e635]" : "bg-red-400"
+                        submitResult.verdict === "ACCEPTED"
+                          ? "bg-emerald-400 shadow-[0_0_6px_#10b981]"
+                          : "bg-rose-400"
                       }`}
                     />
                   )}
                   {!submitResult && runResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        runResult.verdict === "ACCEPTED" ? "bg-lime-400 shadow-[0_0_6px_#a3e635]" : "bg-amber-400"
+                        runResult.verdict === "ACCEPTED"
+                          ? "bg-emerald-400 shadow-[0_0_6px_#10b981]"
+                          : "bg-amber-400"
                       }`}
                     />
                   )}
@@ -1141,7 +1509,7 @@ export function ContestArenaPage() {
                 <button
                   type="button"
                   onClick={() => setIsDrawerCollapsed(true)}
-                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-900 cursor-pointer transition-colors"
+                  className="flex items-center gap-1 text-[11px] font-sans text-zinc-500 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-white/5 cursor-pointer transition-colors"
                   title="Collapse Console"
                 >
                   <span className="hidden sm:inline">Collapse</span>
@@ -1189,13 +1557,13 @@ export function ContestArenaPage() {
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
                           <span>Custom Function Arguments</span>
-                          <span className="text-[10px] text-zinc-500">e.g. passes = ["AB", "BA"] or pure JSON values</span>
+                          <span className="text-[10px] text-zinc-500">e.g. intervals = [[1,3],[2,6]]</span>
                         </div>
                         <textarea
                           value={customStdin}
                           onChange={(e) => setCustomStdin(e.target.value)}
-                          placeholder={activeProblem?.sample_testcases?.[0]?.stdin || 'passes = ["AB", "BA"]'}
-                          className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400/60"
+                          placeholder={activeProblem?.sample_testcases?.[0]?.stdin || 'intervals = [[1,3],[2,6]]'}
+                          className="w-full h-24 p-2.5 bg-black border border-white/10 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-emerald-400/60"
                         />
                       </div>
                     ) : (
@@ -1205,7 +1573,7 @@ export function ContestArenaPage() {
                             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
                               Input
                             </span>
-                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-lime-400 selection:text-black">
+                            <pre className="p-2.5 bg-black border border-white/10 rounded text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-emerald-400 selection:text-black">
                               {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
                             </pre>
                           </div>
@@ -1213,7 +1581,7 @@ export function ContestArenaPage() {
                             <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-semibold">
                               Expected Output
                             </span>
-                            <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-lime-400 overflow-x-auto selection:bg-lime-400 selection:text-black">
+                            <pre className="p-2.5 bg-black border border-white/10 rounded text-xs font-mono text-emerald-400 overflow-x-auto selection:bg-emerald-400 selection:text-black">
                               {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
                             </pre>
                           </div>
@@ -1229,14 +1597,20 @@ export function ContestArenaPage() {
                 ) : (
                   /* Output / Test Result Tab */
                   <div className="space-y-3">
-                    {lastAction === "submit" && submitResult ? (
+                    {!hasRunCode ? (
+                      /* LeetCode Standard Empty State */
+                      <div className="flex flex-col items-center justify-center py-12 text-zinc-500 space-y-2">
+                        <Terminal className="size-6 text-zinc-600" />
+                        <p className="text-xs font-sans">You must run your code first</p>
+                      </div>
+                    ) : lastAction === "submit" && submitResult ? (
                       /* Comprehensive Submission Report */
                       <div className="space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 pb-3">
                           <div className="flex items-center gap-3">
                             {submitResult.verdict === "ACCEPTED" ? (
-                              <div className="flex items-center gap-2 text-lime-400 font-bold text-sm uppercase font-mono">
-                                <CheckCircle2 className="size-5 text-lime-400" />
+                              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase font-mono">
+                                <CheckCircle2 className="size-5 text-emerald-400" />
                                 <span>Accepted</span>
                               </div>
                             ) : (
@@ -1250,7 +1624,7 @@ export function ContestArenaPage() {
                               {submitResult.passed_testcases} / {submitResult.total_testcases} testcases passed
                             </span>
                             {submitResult.points_awarded > 0 && (
-                              <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 text-[11px] font-mono font-bold">
+                              <Badge className="bg-emerald-400/15 text-emerald-400 border border-emerald-400/40 text-[11px] font-mono font-bold">
                                 +{submitResult.points_awarded} pts
                               </Badge>
                             )}
@@ -1270,7 +1644,7 @@ export function ContestArenaPage() {
                         <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full transition-all duration-500 rounded-full ${
-                              submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-rose-500"
+                              submitResult.verdict === "ACCEPTED" ? "bg-emerald-400" : "bg-rose-500"
                             }`}
                             style={{
                               width: `${Math.round(
@@ -1297,7 +1671,7 @@ export function ContestArenaPage() {
                                 >
                                   <span
                                     className={`size-1.5 rounded-full ${
-                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
+                                      tc.passed ? "bg-emerald-400" : "bg-rose-400"
                                     }`}
                                   />
                                   <span>{tc.name || `Case ${idx + 1}`}</span>
@@ -1309,20 +1683,24 @@ export function ContestArenaPage() {
                               const curTc = submitResult.testcase_results[activeSubmitCaseIndex];
                               if (curTc.is_hidden) {
                                 return (
-                                  <div className="p-3 bg-zinc-950 border border-white/10 rounded space-y-2">
+                                  <div className="p-3 bg-black border border-white/10 rounded space-y-2">
                                     <div className="flex items-center gap-2">
                                       <Lock className="size-4 text-zinc-500" />
                                       <span className="font-semibold text-xs text-white">Hidden Evaluation Testcase</span>
                                       {curTc.passed ? (
-                                        <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">Passed</Badge>
+                                        <Badge className="bg-emerald-400/10 text-emerald-400 border border-emerald-400/30 text-[10px]">
+                                          Passed
+                                        </Badge>
                                       ) : (
-                                        <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px]">Failed</Badge>
+                                        <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px]">
+                                          Failed
+                                        </Badge>
                                       )}
                                     </div>
                                     <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                                       {curTc.passed
                                         ? "Your solution passed this hidden verification case."
-                                        : "Your solution produced an incorrect result or runtime error on this hidden edge case. Proprietary inputs are masked to preserve contest integrity."}
+                                        : "Your solution produced an incorrect result or runtime error on this hidden edge case."}
                                     </p>
                                   </div>
                                 );
@@ -1333,7 +1711,7 @@ export function ContestArenaPage() {
                                     <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                       Input
                                     </span>
-                                    <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                    <pre className="p-2 bg-black border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
                                       {curTc.input}
                                     </pre>
                                   </div>
@@ -1343,8 +1721,10 @@ export function ContestArenaPage() {
                                         Output
                                       </span>
                                       <pre
-                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
-                                          curTc.passed ? "border-lime-400/30 text-lime-400" : "border-rose-500/30 text-rose-400"
+                                        className={`p-2 bg-black border rounded text-xs overflow-x-auto ${
+                                          curTc.passed
+                                            ? "border-emerald-400/30 text-emerald-400"
+                                            : "border-rose-500/30 text-rose-400"
                                         }`}
                                       >
                                         {curTc.stdout || "(empty)"}
@@ -1354,7 +1734,7 @@ export function ContestArenaPage() {
                                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                         Expected
                                       </span>
-                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
+                                      <pre className="p-2 bg-black border border-white/10 rounded text-xs text-emerald-400 overflow-x-auto">
                                         {curTc.expected_output}
                                       </pre>
                                     </div>
@@ -1382,8 +1762,8 @@ export function ContestArenaPage() {
                         <div className="flex items-center justify-between border-b border-white/8 pb-2.5">
                           <div className="flex items-center gap-3">
                             {runResult.verdict === "ACCEPTED" ? (
-                              <div className="flex items-center gap-1.5 text-lime-400 font-bold text-xs font-mono uppercase">
-                                <CheckCircle2 className="size-4 text-lime-400" />
+                              <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs font-mono uppercase">
+                                <CheckCircle2 className="size-4 text-emerald-400" />
                                 <span>Accepted</span>
                               </div>
                             ) : (
@@ -1422,7 +1802,7 @@ export function ContestArenaPage() {
                                 >
                                   <span
                                     className={`size-1.5 rounded-full ${
-                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
+                                      tc.passed ? "bg-emerald-400" : "bg-rose-400"
                                     }`}
                                   />
                                   <span>Case {idx + 1}</span>
@@ -1439,7 +1819,7 @@ export function ContestArenaPage() {
                                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                         Input
                                       </span>
-                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                      <pre className="p-2 bg-black border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
                                         {curTc.stdin}
                                       </pre>
                                     </div>
@@ -1450,8 +1830,10 @@ export function ContestArenaPage() {
                                         Output
                                       </span>
                                       <pre
-                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
-                                          curTc.passed ? "border-lime-400/30 text-lime-400" : "border-rose-500/30 text-rose-400"
+                                        className={`p-2 bg-black border rounded text-xs overflow-x-auto ${
+                                          curTc.passed
+                                            ? "border-emerald-400/30 text-emerald-400"
+                                            : "border-rose-500/30 text-rose-400"
                                         }`}
                                       >
                                         {curTc.stdout || "(empty)"}
@@ -1461,7 +1843,7 @@ export function ContestArenaPage() {
                                       <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                         Expected
                                       </span>
-                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
+                                      <pre className="p-2 bg-black border border-white/10 rounded text-xs text-emerald-400 overflow-x-auto">
                                         {curTc.expected_output}
                                       </pre>
                                     </div>
@@ -1485,7 +1867,7 @@ export function ContestArenaPage() {
                             {runResult.stdout && (
                               <div>
                                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Stdout</span>
-                                <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
+                                <pre className="p-2 bg-black border border-white/8 rounded text-xs text-white overflow-x-auto">
                                   {runResult.stdout}
                                 </pre>
                               </div>
@@ -1513,23 +1895,27 @@ export function ContestArenaPage() {
           </div>
 
           {/* Action Footer */}
-          <div className="h-11 px-4 border-t border-white/8 flex items-center justify-between bg-black shrink-0">
+          <div className="h-10 px-3 border-t border-white/8 flex items-center justify-between bg-[#0a0a0c] shrink-0">
             <div className="flex items-center gap-3">
               {/* LeetCode-style Console Toggle */}
               <button
                 type="button"
                 onClick={() => setIsDrawerCollapsed((prev) => !prev)}
-                className="flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-950 border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 text-xs font-sans text-zinc-400 hover:text-white px-2 py-1 rounded bg-[#18181b] border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
                 title={isDrawerCollapsed ? "Open Console Drawer" : "Close Console Drawer"}
               >
-                <Terminal className="size-3 text-lime-400" />
+                <Terminal className="size-3 text-emerald-400" />
                 <span>Console</span>
-                {isDrawerCollapsed ? <ChevronUp className="size-3 text-zinc-500" /> : <ChevronDown className="size-3 text-zinc-500" />}
+                {isDrawerCollapsed ? (
+                  <ChevronUp className="size-3 text-zinc-500" />
+                ) : (
+                  <ChevronDown className="size-3 text-zinc-500" />
+                )}
               </button>
 
-              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
-                <span className={`size-1.5 rounded-full ${isContestOver ? 'bg-red-500' : 'bg-lime-400'}`} />
-                <span>{isContestOver ? 'Contest locked' : 'Workstation online'}</span>
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
+                <span className={`size-1.5 rounded-full ${isContestOver ? "bg-rose-500" : "bg-emerald-400"}`} />
+                <span>{isContestOver ? "Contest locked" : "Workstation online"}</span>
               </div>
             </div>
 
@@ -1540,10 +1926,10 @@ export function ContestArenaPage() {
                 size="sm"
                 disabled={isRunningCode || isSubmittingCode || isContestOver}
                 onClick={handleRunCode}
-                className="font-mono text-xs font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors"
+                className="h-7 px-3 text-xs font-mono font-medium rounded-md bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-white border-white/10 cursor-pointer transition-colors"
               >
-                <Play className="size-3 fill-current" />
-                <span>{isRunningCode ? "Running…" : "Run"}</span>
+                <Play className="size-2.5 fill-current" />
+                <span>Run</span>
               </Button>
 
               <Button
@@ -1551,15 +1937,207 @@ export function ContestArenaPage() {
                 size="sm"
                 disabled={isRunningCode || isSubmittingCode || isContestOver}
                 onClick={handleSubmitCode}
-                className="font-mono text-xs font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)]"
+                className="h-7 px-3 text-xs font-mono font-semibold rounded-md bg-emerald-600 text-white hover:bg-emerald-500 cursor-pointer transition-colors"
               >
-                <Send className="size-3 fill-current" />
-                <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
+                <Send className="size-2.5 fill-current" />
+                <span>Submit</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) */}
+      <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+        <DialogContent className="border border-white/10 bg-[#121214] text-white p-6 max-w-lg rounded-xl shadow-2xl">
+          <DialogHeader className="space-y-1.5 text-left">
+            <DialogTitle className="text-base font-semibold text-white tracking-tight flex items-center gap-2">
+              <Settings className="size-4 text-emerald-400" />
+              <span>Contest Workspace Settings</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-400 font-sans">
+              Personalize editor typography, formatting, and inspect keyboard bindings.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Settings Tabs */}
+          <div className="flex items-center gap-1 border-b border-white/10 pb-2 pt-1 text-xs font-sans">
+            <button
+              type="button"
+              onClick={() => setActiveSettingsTab("editor")}
+              className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                activeSettingsTab === "editor"
+                  ? "bg-white/10 text-white font-medium"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Code Editor
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSettingsTab("shortcuts")}
+              className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                activeSettingsTab === "shortcuts"
+                  ? "bg-white/10 text-white font-medium"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Shortcuts
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSettingsTab("timer")}
+              className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+                activeSettingsTab === "timer"
+                  ? "bg-white/10 text-white font-medium"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Contest Clock
+            </button>
+          </div>
+
+          <div className="py-3 text-xs">
+            {activeSettingsTab === "editor" && (
+              <div className="space-y-4 font-sans">
+                {/* Font Size */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-zinc-200 font-medium">Font Size</div>
+                    <div className="text-[11px] text-zinc-500">Editor character rendering scale</div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {[12, 13, 14, 15, 16].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setEditorFontSize(size);
+                          try {
+                            localStorage.setItem("ccc_editor_font_size", String(size));
+                          } catch {}
+                        }}
+                        className={`size-7 rounded font-mono text-xs transition-colors cursor-pointer ${
+                          editorFontSize === size
+                            ? "bg-emerald-500 text-black font-bold"
+                            : "bg-[#18181b] text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Word Wrap */}
+                <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                  <div>
+                    <div className="text-zinc-200 font-medium">Word Wrap</div>
+                    <div className="text-[11px] text-zinc-500">Wrap long lines instead of horizontal scroll</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !editorWordWrap;
+                      setEditorWordWrap(next);
+                      try {
+                        localStorage.setItem("ccc_editor_word_wrap", String(next));
+                      } catch {}
+                    }}
+                    className={`px-3 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
+                      editorWordWrap
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold"
+                        : "bg-[#18181b] text-zinc-500 border border-white/10"
+                    }`}
+                  >
+                    {editorWordWrap ? "Enabled" : "Disabled"}
+                  </button>
+                </div>
+
+                {/* Tab Size */}
+                <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                  <div>
+                    <div className="text-zinc-200 font-medium">Tab Indentation</div>
+                    <div className="text-[11px] text-zinc-500">Spaces per indentation level</div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {[2, 4].map((spaces) => (
+                      <button
+                        key={spaces}
+                        type="button"
+                        onClick={() => {
+                          setEditorTabSize(spaces);
+                          try {
+                            localStorage.setItem("ccc_editor_tab_size", String(spaces));
+                          } catch {}
+                        }}
+                        className={`px-3 py-1 rounded font-mono text-xs transition-colors cursor-pointer ${
+                          editorTabSize === spaces
+                            ? "bg-emerald-500 text-black font-bold"
+                            : "bg-[#18181b] text-zinc-400 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        {spaces} Spaces
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSettingsTab === "shortcuts" && (
+              <div className="space-y-2 font-mono text-xs">
+                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
+                  <span className="text-zinc-300 font-sans">Run Code</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌘ ' / Ctrl + '</kbd>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
+                  <span className="text-zinc-300 font-sans">Submit Solution</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌘ ⏎ / Ctrl + Enter</kbd>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
+                  <span className="text-zinc-300 font-sans">Previous Question</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌥ ← / Alt + Left</kbd>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded bg-black/40 border border-white/5">
+                  <span className="text-zinc-300 font-sans">Next Question</span>
+                  <kbd className="px-2 py-0.5 rounded bg-white/10 text-zinc-200 border border-white/10">⌥ → / Alt + Right</kbd>
+                </div>
+              </div>
+            )}
+
+            {activeSettingsTab === "timer" && (
+              <div className="space-y-3 font-sans text-xs">
+                <div className="p-3 bg-black/50 border border-white/8 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="text-zinc-400">Contest Remaining:</span>
+                    <span className="text-emerald-400 font-semibold tabular-nums text-sm">
+                      {formatTimer(remainingSeconds)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between font-mono border-t border-white/5 pt-2">
+                    <span className="text-zinc-400">Official Status:</span>
+                    <span className="text-zinc-200">{arenaData?.status || "Live"}</span>
+                  </div>
+                </div>
+                <p className="text-zinc-500 text-[11px] leading-relaxed">
+                  The contest clock is synchronized to server time via WebSockets. Solutions submitted after the clock expires will not receive contest points.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setShowSettingsModal(false)}
+              className="w-full rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-sans text-xs font-semibold cursor-pointer"
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Fullscreen Overlay during drag to prevent mouse capturing or text selection */}
       {(isDraggingWidth || isDraggingHeight) && (
@@ -1602,7 +2180,7 @@ export function ContestArenaPage() {
               </div>
               <button
                 onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-                className="font-mono text-xs font-semibold uppercase text-white border border-white/20 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer [&_svg]:transition-colors"
+                className="font-mono text-xs font-semibold uppercase text-white border border-white/20 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer"
               >
                 View Final Results →
               </button>
