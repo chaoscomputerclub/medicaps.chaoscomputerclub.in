@@ -28,8 +28,11 @@ import {
   Code2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { registerForContest } from "@/lib/auth";
+import { registerForContest, getToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { resolveAvatarUrl, formatFullName } from "@/lib/utils";
+import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import {
   Select,
   SelectContent,
@@ -87,6 +90,23 @@ export function AssessmentWorkspacePage() {
     isLoading,
     error,
   } = useAppSelector((state) => state.assessment);
+  const member = useAppSelector((state) => state.auth.member);
+
+  useEffect(() => {
+    if (!member && getToken()) {
+      dispatch(fetchCurrentUserThunk());
+    }
+  }, [member, dispatch]);
+
+  const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
+  const displayName = formatFullName(member?.full_name) || member?.handle || member?.email?.split("@")[0] || "Competitor";
+  const userInitial = member?.full_name?.trim()
+    ? member.full_name.trim().charAt(0).toUpperCase()
+    : member?.handle?.trim()
+    ? member.handle.trim().charAt(0).toUpperCase()
+    : member?.email?.trim()
+    ? member.email.trim().charAt(0).toUpperCase()
+    : "U";
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -568,6 +588,26 @@ export function AssessmentWorkspacePage() {
           >
             Finish
           </Button>
+
+          {/* User Profile Logo / Avatar */}
+          <Link
+            to="/profile"
+            className="flex items-center gap-1.5 pl-1 hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+            title={displayName ? `Profile (${displayName})` : "View Profile"}
+          >
+            <Avatar className="size-7 rounded-full border border-white/15 bg-black shrink-0">
+              {resolvedAvatar ? (
+                <AvatarImage
+                  src={resolvedAvatar}
+                  alt={displayName}
+                  className="size-full rounded-full object-cover"
+                />
+              ) : null}
+              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
       </header>
 

@@ -48,6 +48,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -79,9 +80,10 @@ import {
   submitArenaCodeThunk,
   clearArenaResults,
 } from "@/store/slices/contestSlice";
+import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
-import { slugifyProblem } from "@/lib/utils";
+import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
@@ -128,6 +130,22 @@ export function ContestArenaPage() {
   const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error } =
     useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
+
+  useEffect(() => {
+    if (!member && getToken()) {
+      dispatch(fetchCurrentUserThunk());
+    }
+  }, [member, dispatch]);
+
+  const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
+  const displayName = formatFullName(member?.full_name) || member?.handle || member?.email?.split("@")[0] || "Competitor";
+  const userInitial = member?.full_name?.trim()
+    ? member.full_name.trim().charAt(0).toUpperCase()
+    : member?.handle?.trim()
+    ? member.handle.trim().charAt(0).toUpperCase()
+    : member?.email?.trim()
+    ? member.email.trim().charAt(0).toUpperCase()
+    : "U";
 
   useEffect(() => {
     if (contestSlug) {
@@ -933,7 +951,7 @@ export function ContestArenaPage() {
     );
   }
 
-  const title = arenaData?.title || "Live Final Arena";
+  const title = arenaData?.title || contestSlug || "Contest Arena";
 
   return (
     <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
@@ -965,9 +983,11 @@ export function ContestArenaPage() {
             <span className="font-semibold text-xs sm:text-sm text-white truncate max-w-[130px] sm:max-w-[200px] md:max-w-[280px]">
               {title}
             </span>
-            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
-              Live
-            </span>
+            {arenaData?.status && (
+              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
+                {arenaData.status}
+              </span>
+            )}
             <ChevronRight className="size-3.5 text-zinc-400 group-hover:text-lime-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
           </button>
 
@@ -1113,19 +1133,25 @@ export function ContestArenaPage() {
             <span>{formatTimer(remainingSeconds)}</span>
           </div>
 
-          {/* User Profile Avatar */}
-          <div className="flex items-center gap-1.5 pl-0.5">
-            <div
-              className="size-7 rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center shadow-sm"
-              title={member?.name || member?.handle || "Competitor"}
-            >
-              {member?.name
-                ? member.name.charAt(0).toUpperCase()
-                : member?.handle
-                ? member.handle.charAt(0).toUpperCase()
-                : "C"}
-            </div>
-          </div>
+          {/* User Profile Logo / Avatar */}
+          <Link
+            to="/profile"
+            className="flex items-center gap-1.5 pl-0.5 hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+            title={displayName ? `Profile (${displayName})` : "View Profile"}
+          >
+            <Avatar className="size-7 rounded-full border border-white/15 bg-black shrink-0">
+              {resolvedAvatar ? (
+                <AvatarImage
+                  src={resolvedAvatar}
+                  alt={displayName}
+                  className="size-full rounded-full object-cover"
+                />
+              ) : null}
+              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
       </header>
 
@@ -2221,9 +2247,11 @@ export function ContestArenaPage() {
             <h2 className="font-semibold text-xs text-white truncate max-w-[220px]">
               {title}
             </h2>
-            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
-              Live Arena
-            </span>
+            {arenaData?.status ? (
+              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
+                {arenaData.status} Arena
+              </span>
+            ) : null}
           </div>
 
           {/* Close Button (✕) */}
@@ -2395,7 +2423,7 @@ export function ContestArenaPage() {
                 Live Tournament Standings
               </span>
               <span className="text-lime-400 font-semibold tabular-nums">
-                {rankingData?.rows?.length || 0} cadets
+                {rankingData?.rows?.length || 0} {rankingData?.rows?.length === 1 ? "competitor" : "competitors"}
               </span>
             </div>
 

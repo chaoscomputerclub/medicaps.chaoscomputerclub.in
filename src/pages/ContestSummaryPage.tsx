@@ -36,11 +36,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestArenaThunk, fetchContestDetailThunk } from "@/store/slices/contestSlice";
+import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
-import { slugifyProblem } from "@/lib/utils";
+import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
+import { getToken } from "@/lib/auth";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -59,6 +62,22 @@ export function ContestSummaryPage() {
     (state) => state.contest
   );
   const member = useAppSelector((state) => state.auth.member);
+
+  useEffect(() => {
+    if (!member && getToken()) {
+      dispatch(fetchCurrentUserThunk());
+    }
+  }, [member, dispatch]);
+
+  const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
+  const displayName = formatFullName(member?.full_name) || member?.handle || member?.email?.split("@")[0] || "Competitor";
+  const userInitial = member?.full_name?.trim()
+    ? member.full_name.trim().charAt(0).toUpperCase()
+    : member?.handle?.trim()
+    ? member.handle.trim().charAt(0).toUpperCase()
+    : member?.email?.trim()
+    ? member.email.trim().charAt(0).toUpperCase()
+    : "U";
 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -241,11 +260,24 @@ export function ContestSummaryPage() {
             </span>
           </div>
 
-          {/* Candidate Badge */}
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-white/8 bg-zinc-950 font-mono text-xs text-zinc-300">
-            <span className="size-1.5 rounded-full bg-lime-400" />
-            <span className="text-zinc-400">@{member?.handle || "Cadet"}</span>
-          </div>
+          {/* Candidate Profile / Avatar */}
+          <Link
+            to="/profile"
+            className="hidden md:flex items-center gap-2 pl-1 hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+            title={displayName ? `Profile (${displayName})` : "View Profile"}
+          >
+            <Avatar className="size-7 rounded-full border border-white/15 bg-black shrink-0">
+              {resolvedAvatar ? (
+                <AvatarImage src={resolvedAvatar} alt={displayName} className="size-full rounded-full object-cover" />
+              ) : null}
+              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-zinc-300 font-mono text-xs">
+              @{member?.handle || displayName}
+            </span>
+          </Link>
 
           {/* Submit Contest Primary CTA */}
           <Button
