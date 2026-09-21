@@ -40,7 +40,10 @@ import {
   ShieldCheck,
   Terminal,
   Trophy,
+  X,
   XCircle,
+  ListOrdered,
+  Coins,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +83,9 @@ import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { slugifyProblem } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
+import { useSwrData } from "@/lib/cache/swrCache";
+import { contestApi } from "@/features/contest/api";
+import type { AssessmentRanking } from "@/features/contest/types";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -177,6 +183,19 @@ export function ContestArenaPage() {
   });
 
   const [activeProblemTab, setActiveProblemTab] = useState<"description" | "submissions">("description");
+  const [isProblemListOpen, setIsProblemListOpen] = useState(false);
+  const [problemListTab, setProblemListTab] = useState<"problems" | "ranking">("problems");
+
+  const { data: rankingData } = useSwrData<AssessmentRanking>(
+    contestSlug ? `contest:ranking:${contestSlug}` : null,
+    () => contestApi.ranking(contestSlug),
+    { ttl: 30 * 1000 }
+  );
+
+  const totalEarnedPoints = problems.reduce(
+    (acc, p) => (solvedProblemIds.has(p.id) ? acc + (p.points || 0) : acc),
+    0
+  );
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeSettingsTab, setActiveSettingsTab] = useState<"editor" | "shortcuts" | "timer">("editor");
@@ -645,6 +664,15 @@ export function ContestArenaPage() {
         e.preventDefault();
         handleNextProblem();
       }
+      // Escape to close Problem List drawer
+      if (e.key === "Escape") {
+        setIsProblemListOpen(false);
+      }
+      // Alt+P to toggle problem list drawer
+      if (e.altKey && (e.key === "p" || e.key === "P")) {
+        e.preventDefault();
+        setIsProblemListOpen((prev) => !prev);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -911,7 +939,7 @@ export function ContestArenaPage() {
     <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
       {/* Top Navigation Bar — LeetCode Weekly Contest Architecture in Strix AI Dark Theme */}
       <header className="h-12 shrink-0 px-3 bg-black border-b border-white/8 flex items-center justify-between gap-2 z-30">
-        {/* Left: Exit, Separator, Title, Question Nav Chevrons, Standings */}
+        {/* Left: Exit, Separator, Title (Drawer Opener), Question Switcher & Chevrons */}
         <div className="flex items-center gap-2 min-w-0">
           <Button
             type="button"
@@ -927,18 +955,23 @@ export function ContestArenaPage() {
 
           <div className="h-3.5 w-px bg-white/10 shrink-0" />
 
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 hidden sm:inline">
-              Live Arena
-            </span>
-            <span className="font-semibold text-xs text-white truncate max-w-[140px] sm:max-w-[200px] md:max-w-[320px]">
+          {/* Drawer Opener via Contest Title button */}
+          <button
+            type="button"
+            onClick={() => setIsProblemListOpen(true)}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-zinc-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors cursor-pointer group min-w-0 text-left"
+            title="Open Problem List & Standings (⌥P)"
+          >
+            <span className="font-semibold text-xs sm:text-sm text-white truncate max-w-[130px] sm:max-w-[200px] md:max-w-[280px]">
               {title}
             </span>
-            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden md:inline">
+            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
               Live
             </span>
-          </div>
+            <ChevronRight className="size-3.5 text-zinc-400 group-hover:text-lime-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
+          </button>
 
+          {/* Question Nav Switcher Pill & Chevrons */}
           <div className="flex items-center gap-0.5 ml-1">
             <Button
               type="button"
@@ -951,6 +984,23 @@ export function ContestArenaPage() {
             >
               <ChevronLeft className="size-3.5" />
             </Button>
+
+            <button
+              type="button"
+              onClick={() => setIsProblemListOpen(true)}
+              className="h-7 px-2.5 rounded-md border border-white/10 bg-zinc-950 text-xs font-mono font-medium text-zinc-300 hover:border-lime-400/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+              title="Open Problem List (⌥P)"
+            >
+              <ListOrdered className="size-3 text-lime-400" />
+              <span className="font-semibold text-lime-400">
+                Q{activeProblem?.problem_index || resolvedIndex + 1}
+              </span>
+              <span className="text-zinc-500 hidden sm:inline text-[10px]">
+                / {problems.length}
+              </span>
+              <ChevronDown className="size-3 text-zinc-500 ml-0.5" />
+            </button>
+
             <Button
               type="button"
               variant="outline"
@@ -1079,39 +1129,6 @@ export function ContestArenaPage() {
         </div>
       </header>
 
-      {/* Problem Tabs Subheader — Question Switcher in Strix AI Dark Theme */}
-      <div className="h-8 shrink-0 px-3 bg-black border-b border-white/8 flex items-center gap-1 overflow-x-auto">
-        {problems.map((prob, idx) => {
-          const pSlug = slugifyProblem(prob.title, prob.problem_index);
-          const isActive = idx === resolvedIndex;
-          const isSolved = solvedProblemIds.has(prob.id);
-          return (
-            <Link
-              key={prob.id}
-              to={`/contests/${contestSlug}/problems/${pSlug}`}
-              onClick={() => dispatch(clearArenaResults())}
-              className={`group flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer shrink-0 border ${
-                isActive
-                  ? "bg-zinc-900 text-white border-lime-400 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
-                  : "text-zinc-400 hover:text-black hover:bg-lime-400 hover:border-lime-400 border-white/6 bg-black"
-              }`}
-            >
-              <span>
-                Q{prob.problem_index}. {prob.title}
-              </span>
-              <span
-                className={`text-[10px] font-mono uppercase tabular-nums transition-colors ${
-                  isActive ? "text-zinc-400" : "text-zinc-500 group-hover:text-black/75"
-                }`}
-              >
-                ({prob.points}p)
-              </span>
-              {isSolved && <CheckCircle2 className="size-3 text-lime-400 group-hover:text-black shrink-0 transition-colors" />}
-            </Link>
-          );
-        })}
-      </div>
-
       {/* Main 2-Pane Split */}
       <div ref={containerRef} className="flex-1 flex overflow-hidden relative min-h-0">
         {/* Left: Problem Statement & Submissions Pane */}
@@ -1184,7 +1201,7 @@ export function ContestArenaPage() {
                     </div>
 
                     {/* Problem Description */}
-                    <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
+                    <div className="text-sm font-sans text-zinc-200 leading-relaxed whitespace-pre-line">
                       {activeProblem.description}
                     </div>
 
@@ -2182,6 +2199,250 @@ export function ContestArenaPage() {
           </div>
         </div>
       )}
+
+      {/* Slide-out Problem List Drawer (LeetCode Contest Style) */}
+      {isProblemListOpen && (
+        <div
+          role="presentation"
+          className="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 transition-opacity animate-in fade-in duration-150"
+          onClick={() => setIsProblemListOpen(false)}
+        />
+      )}
+
+      <aside
+        aria-label="Contest Problem List and Standings"
+        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#0c0c0e] border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-200 ease-out ${
+          isProblemListOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
+        }`}
+      >
+        {/* Drawer Header: Title + Virtual/Live badge + Chevron + ✕ Close */}
+        <div className="h-14 px-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/60">
+          <div className="flex items-center gap-2 min-w-0">
+            <h2 className="font-semibold text-sm text-white truncate max-w-[240px]">
+              {title}
+            </h2>
+            <span className="border border-purple-500/40 bg-purple-500/15 text-purple-300 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
+              Virtual
+            </span>
+            <ChevronRight className="size-3.5 text-zinc-500 shrink-0" />
+          </div>
+
+          {/* Close Button (✕) */}
+          <button
+            type="button"
+            onClick={() => setIsProblemListOpen(false)}
+            className="size-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            title="Close Problem List (Esc)"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        {/* Drawer Subheader: Problem List vs Ranking Tabs + Points indicator */}
+        <div className="px-4 py-3 border-b border-white/8 flex items-center justify-between gap-2 shrink-0 bg-zinc-950/40">
+          {/* Sub-tabs: Problem List vs Ranking */}
+          <div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-lg border border-white/10">
+            <button
+              type="button"
+              onClick={() => setProblemListTab("problems")}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                problemListTab === "problems"
+                  ? "border border-amber-500/60 bg-amber-500/15 text-amber-400 shadow-sm"
+                  : "text-zinc-400 hover:text-white border border-transparent"
+              }`}
+            >
+              <ListOrdered className="size-3.5" />
+              <span>Problem List</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setProblemListTab("ranking")}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                problemListTab === "ranking"
+                  ? "border border-amber-500/60 bg-amber-500/15 text-amber-400 shadow-sm"
+                  : "text-zinc-400 hover:text-white border border-transparent"
+              }`}
+            >
+              <BarChart2 className="size-3.5" />
+              <span>Ranking</span>
+            </button>
+          </div>
+
+          {/* Points & Progress Pips */}
+          <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+            <div className="flex items-center gap-1 text-amber-400 font-semibold tabular-nums">
+              <span>🪙</span>
+              <span>{totalEarnedPoints}&nbsp;pt.</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {problems.map((p) => {
+                const isPsolved = solvedProblemIds.has(p.id);
+                return (
+                  <span
+                    key={p.id}
+                    className={`h-1.5 w-2.5 rounded-full transition-colors ${
+                      isPsolved
+                        ? "bg-lime-400 shadow-[0_0_6px_rgba(204,255,0,0.6)]"
+                        : "bg-zinc-800"
+                    }`}
+                    title={`Q${p.problem_index}: ${p.title} (${isPsolved ? "Solved" : "Unsolved"})`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Drawer Body */}
+        {problemListTab === "problems" ? (
+          <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+            {problems.map((prob, idx) => {
+              const pSlug = slugifyProblem(prob.title, prob.problem_index);
+              const isActive = idx === resolvedIndex;
+              const isSolved = solvedProblemIds.has(prob.id);
+
+              const diffUpper = (prob.difficulty || "").toUpperCase();
+              const isHard = diffUpper === "HARD" || prob.points > 5;
+              const isMed = diffUpper === "MEDIUM" || (!isHard && prob.points > 3);
+              const diffLabel = isHard ? "Hard" : isMed ? "Med." : "Easy";
+
+              return (
+                <button
+                  key={prob.id}
+                  type="button"
+                  onClick={() => {
+                    navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+                    dispatch(clearArenaResults());
+                    setIsProblemListOpen(false);
+                  }}
+                  className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 group ${
+                    isActive
+                      ? "bg-white text-zinc-950 border-white shadow-lg shadow-black/40"
+                      : "bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-200 border-white/6 hover:border-white/15"
+                  }`}
+                >
+                  {/* Title & Status */}
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    {isSolved ? (
+                      <CheckCircle2 className="size-4 text-lime-500 shrink-0" />
+                    ) : (
+                      <span
+                        className={`size-2 rounded-full shrink-0 ${
+                          isActive ? "bg-zinc-900" : "bg-zinc-600 group-hover:bg-zinc-400"
+                        }`}
+                      />
+                    )}
+                    <span
+                      className={`text-xs truncate font-medium ${
+                        isActive ? "text-zinc-950 font-semibold" : "text-zinc-200 group-hover:text-white"
+                      }`}
+                    >
+                      Q{prob.problem_index}. {prob.title}
+                    </span>
+                  </div>
+
+                  {/* Difficulty & Points */}
+                  <div className="flex items-center gap-1.5 shrink-0 font-mono">
+                    <span
+                      className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
+                        isActive
+                          ? isHard
+                            ? "text-rose-600 bg-rose-50"
+                            : isMed
+                            ? "text-amber-700 bg-amber-50"
+                            : "text-emerald-700 bg-emerald-50"
+                          : isHard
+                          ? "text-rose-400 bg-rose-500/10"
+                          : isMed
+                          ? "text-amber-400 bg-amber-500/10"
+                          : "text-emerald-400 bg-emerald-500/10"
+                      }`}
+                    >
+                      {diffLabel}
+                    </span>
+
+                    <span
+                      className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
+                        isActive
+                          ? "bg-zinc-100 text-zinc-800"
+                          : "bg-zinc-800/80 text-zinc-400"
+                      }`}
+                    >
+                      {prob.points}&nbsp;pt.
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          /* Ranking Tab */
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col">
+            <div className="flex items-center justify-between text-xs font-mono pb-3 border-b border-white/8">
+              <span className="text-zinc-400">Live Standings</span>
+              <span className="text-lime-400 tabular-nums">
+                {rankingData?.rows?.length || 0} competitors
+              </span>
+            </div>
+
+            <div className="flex-1 py-3 space-y-2 overflow-y-auto">
+              {rankingData?.rows && rankingData.rows.length > 0 ? (
+                rankingData.rows.slice(0, 20).map((row, idx) => (
+                  <div
+                    key={row.handle || idx}
+                    className="p-2.5 rounded-lg bg-zinc-950 border border-white/6 flex items-center justify-between text-xs font-mono"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`w-5 text-center font-bold tabular-nums ${
+                          idx === 0
+                            ? "text-amber-400"
+                            : idx === 1
+                            ? "text-zinc-300"
+                            : idx === 2
+                            ? "text-amber-600"
+                            : "text-zinc-500"
+                        }`}
+                      >
+                        #{row.rank || idx + 1}
+                      </span>
+                      <span className="truncate text-white font-medium max-w-[140px]">
+                        {row.full_name || row.handle}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 tabular-nums shrink-0">
+                      <span className="text-lime-400 font-semibold">{row.total_score} pts</span>
+                      <span className="text-zinc-500 text-[11px]">{row.penalty_minutes || 0}m</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-12 text-center text-zinc-500 text-xs font-mono space-y-2">
+                  <Trophy className="size-8 mx-auto text-zinc-700 stroke-1" />
+                  <p>Standings will update as competitors submit solutions.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-white/8 shrink-0">
+              <Button
+                asChild
+                className="w-full h-9 bg-zinc-900 border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 text-xs font-mono font-semibold transition-colors cursor-pointer"
+              >
+                <Link
+                  to={`/contests/${contestSlug}/results`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5"
+                >
+                  <BarChart2 className="size-3.5" />
+                  <span>Open Full Live Standings ↗</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+      </aside>
 
       {/* Exit Confirmation Dialog (HackerRank Flow) */}
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
