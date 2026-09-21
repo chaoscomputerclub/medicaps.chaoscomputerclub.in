@@ -205,6 +205,7 @@ export type ArenaRunResult = {
     expected_output: string;
     stdin?: string;
     stderr: string;
+    compile_output?: string;
     wall_time_ms: number;
   }>;
 };
@@ -219,6 +220,8 @@ export type ArenaSubmitResult = {
   execution_time?: number;
   memory?: number;
   message: string;
+  compile_output?: string;
+  stderr?: string;
   testcase_results?: Array<{
     testcase_id: string;
     name: string;
@@ -229,6 +232,7 @@ export type ArenaSubmitResult = {
     expected_output: string;
     input: string;
     stderr: string;
+    compile_output?: string;
     wall_time_ms: number;
   }>;
 };

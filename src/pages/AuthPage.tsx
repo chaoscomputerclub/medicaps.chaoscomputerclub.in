@@ -420,7 +420,7 @@ export function AuthPage() {
               </InputOTP>
             </div>
             <div className="mt-3 flex items-center justify-between font-mono text-xs text-zinc-500">
-              <span>6 digits · Valid 10m</span>
+              <span>6 digits · Valid 15m</span>
               <button
                 type="button"
                 onClick={handleResendOtp}

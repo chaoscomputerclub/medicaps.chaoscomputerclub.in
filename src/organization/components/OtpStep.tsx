@@ -58,7 +58,7 @@ export function OtpStep({
           </InputOTPGroup>
         </InputOTP>
         <p className="font-mono text-xs tabular-nums text-zinc-500">
-          Six digits · expires in 10 minutes
+          Six digits · expires in 15 minutes
         </p>
       </div>
 

@@ -166,12 +166,11 @@ def _prepare_python_solution(code: str, fn_name: Optional[str] = None) -> str:
     if has_script_main:
         return code
 
-    # Build the anti-cheat known-names list dynamically
     known_names_repr = repr([fn_name]) if fn_name else "[]"
 
     harness = f"""
 # ==========================================
-# CCC LeetCode-Style Evaluation Driver Harness
+# CCC LeetCode-Style Evaluation Driver Harness (Python)
 # ==========================================
 import sys, inspect as _inspect
 
@@ -197,34 +196,70 @@ def _ccc_parse_val(s):
     return s
 
 def _ccc_parse_args(raw_data, expected_param_count):
-    lines = [l.strip() for l in raw_data.strip().splitlines() if l.strip()]
-    # Try named param assignment: param = value
-    if all('=' in l and not l.startswith('[') and not l.startswith('{{') for l in lines) and len(lines) == expected_param_count:
-        return [_ccc_parse_val(l.split('=', 1)[1]) for l in lines]
-    # Try one-value-per-line
+    raw_data = raw_data.strip()
+    if not raw_data:
+        return []
+    lines = [l.strip() for l in raw_data.splitlines() if l.strip()]
+
+    # Case 1: Extract named param assignments (handle multiline brackets)
+    assign_chunks = []
+    cur_chunk = ""
+    bracket_depth = 0
+    is_assign_mode = False
+
+    for l in lines:
+        if bracket_depth == 0:
+            if '=' in l and not l.startswith('[') and not l.startswith('{{') and not l.startswith('"'):
+                is_assign_mode = True
+                if cur_chunk:
+                    assign_chunks.append(cur_chunk.strip())
+                cur_chunk = l.split('=', 1)[1].strip()
+            elif is_assign_mode:
+                cur_chunk += " " + l
+        else:
+            cur_chunk += " " + l
+
+        for c in l:
+            if c in '[{{(':
+                bracket_depth += 1
+            elif c in ']}})':
+                bracket_depth = max(0, bracket_depth - 1)
+
+    if cur_chunk:
+        assign_chunks.append(cur_chunk.strip())
+
+    if is_assign_mode and len(assign_chunks) == expected_param_count:
+        return [_ccc_parse_val(c) for c in assign_chunks]
+
+    # Case 2: Direct one-value-per-line (when no assignments)
     if len(lines) == expected_param_count and expected_param_count > 1:
         try:
             return [_ccc_parse_val(l) for l in lines]
         except Exception:
             pass
-    # Try JSON array of args
+
+    # Case 3: JSON array of args matching parameter count
     try:
         import json as _json
-        parsed = _json.loads(raw_data.strip())
-        if isinstance(parsed, list) and len(parsed) == expected_param_count:
+        parsed = _json.loads(raw_data)
+        if isinstance(parsed, list) and len(parsed) == expected_param_count and expected_param_count > 1:
             return parsed
-        return [parsed]
+        if expected_param_count == 1:
+            return [parsed]
     except Exception:
         pass
-    # Fallback: tokens
-    tokens = raw_data.split()
+
+    # Case 4: Single parameter fallback
     if expected_param_count == 1:
-        return [tokens]
+        return [_ccc_parse_val(raw_data)]
+
+    # Case 5: Token fallback
+    tokens = raw_data.split()
     return [_ccc_parse_val(t) for t in tokens[:expected_param_count]]
 
 raw_input = sys.stdin.read()
 
-# Discover the target function — ANTI-CHEAT: only accept the exact problem function name
+# Discover the target function dynamically
 target_fn = None
 _EXPECTED_FN_NAMES = {known_names_repr}
 
@@ -235,15 +270,25 @@ if 'Solution' in globals() and isinstance(globals()['Solution'], type):
         if callable(getattr(sol, m)) and not m.startswith('_')
     ]
     if _EXPECTED_FN_NAMES:
-        methods = [m for m in methods if m.__name__ in _EXPECTED_FN_NAMES]
-    if methods:
+        matched = [m for m in methods if m.__name__ in _EXPECTED_FN_NAMES]
+        if matched:
+            target_fn = matched[0]
+    if not target_fn and methods:
         target_fn = methods[0]
 
-if not target_fn:
+if not target_fn and _EXPECTED_FN_NAMES:
     for name in _EXPECTED_FN_NAMES:
         if name in globals() and callable(globals()[name]):
             target_fn = globals()[name]
             break
+
+if not target_fn:
+    user_callables = [
+        f for f in globals().values()
+        if callable(f) and getattr(f, '__module__', None) == '__main__' and not getattr(f, '__name__', '').startswith('_')
+    ]
+    if user_callables:
+        target_fn = user_callables[0]
 
 if not target_fn:
     sys.stderr.write("Judge Error: Required function not found. Check that your function is named exactly as specified in the problem starter code.\\n")
@@ -257,7 +302,10 @@ try:
     res = target_fn(*call_args)
     if isinstance(res, bool):
         print('true' if res else 'false')
-    elif isinstance(res, list):
+    elif isinstance(res, (list, tuple)):
+        import json as _json
+        print(_json.dumps(list(res)))
+    elif isinstance(res, dict):
         import json as _json
         print(_json.dumps(res))
     elif res is None:
@@ -285,43 +333,57 @@ def _prepare_javascript_solution(
         or "require('readline')" in code
         or 'require("readline")' in code
         or "fs.readFileSync" in code
-        and "countMirrorPairs" not in code
-        and "maxBandwidthUtility" not in code
-        and "minTransmissionLatency" not in code
-        and "maxPacketPriority" not in code
     )
     if has_script_main:
         return code
 
-    ts_decls = "declare var require: any;\ndeclare var process: any;\n" if is_ts else ""
+    ts_decls = "// @ts-nocheck\ndeclare var require: any;\ndeclare var process: any;\ndeclare var Solution: any;\n" if is_ts else ""
     known_js = repr([fn_name]) if fn_name else "[]"
+
+    # Extract function identifiers that might be declared at top-level
+    cands = []
+    for m in re.finditer(r'(?:function|var|const|let)\s+([a-zA-Z_][a-zA-Z0-9_]*)\b', code):
+        name = m.group(1)
+        if name not in {'require', 'process', 'Solution', 'fs', 'main'}:
+            cands.append(name)
+    cands_repr = repr(list(dict.fromkeys(cands)))
 
     harness = ts_decls + f"""
 // ==========================================
-// CCC LeetCode-Style Evaluation Driver Harness
+// CCC LeetCode-Style Evaluation Driver Harness (JS/TS)
 // ==========================================
 (function() {{
     const fs = require('fs');
     const raw = fs.readFileSync(0, 'utf-8').trim();
 
     const EXPECTED_FN_NAMES = {known_js};
+    const CANDIDATE_NAMES = {cands_repr};
 
     let targetFn = null;
     if (typeof Solution === 'function') {{
-        const proto = Solution.prototype;
-        const methods = Object.getOwnPropertyNames(proto).filter(p => typeof proto[p] === 'function' && p !== 'constructor');
-        const matched = EXPECTED_FN_NAMES.length ? methods.filter(m => EXPECTED_FN_NAMES.includes(m)) : methods;
-        if (matched.length > 0) {{
-            const inst = new Solution();
-            targetFn = inst[matched[0]].bind(inst);
-        }}
+        try {{
+            const proto = Solution.prototype;
+            const methods = Object.getOwnPropertyNames(proto).filter(function(p) {{
+                return typeof proto[p] === 'function' && p !== 'constructor';
+            }});
+            const matched = EXPECTED_FN_NAMES.length ? methods.filter(function(m) {{
+                return EXPECTED_FN_NAMES.indexOf(m) !== -1;
+            }}) : methods;
+            if (matched.length > 0) {{
+                const inst = new Solution();
+                targetFn = inst[matched[0]].bind(inst);
+            }}
+        }} catch(e) {{}}
     }}
+
     if (!targetFn) {{
-        // ANTI-CHEAT: only accept the exact problem function name
-        for (const k of EXPECTED_FN_NAMES) {{
+        const searchList = EXPECTED_FN_NAMES.concat(CANDIDATE_NAMES);
+        for (let i = 0; i < searchList.length; i++) {{
+            const k = searchList[i];
             try {{
-                if (typeof eval(k) === 'function') {{
-                    targetFn = eval(k);
+                const fn = eval(k);
+                if (typeof fn === 'function') {{
+                    targetFn = fn;
                     break;
                 }}
             }} catch(e) {{}}
@@ -336,24 +398,43 @@ def _prepare_javascript_solution(
     const paramCount = targetFn.length;
     let args = [];
     if (raw) {{
-        const lines = raw.split('\\n').map(l => l.trim()).filter(Boolean);
+        const lines = raw.split('\\n').map(function(l) {{ return l.trim(); }}).filter(Boolean);
         let isParamAssign = true;
         let paramVals = [];
-        for (const l of lines) {{
-            if (l.includes('=') && !l.startsWith('[') && !l.startsWith('{{') && !l.startsWith('"')) {{
-                paramVals.push(l.split('=').slice(1).join('=').trim());
+        let curChunk = '';
+        let bracketDepth = 0;
+
+        for (let i = 0; i < lines.length; i++) {{
+            const l = lines[i];
+            if (bracketDepth === 0) {{
+                if (l.indexOf('=') !== -1 && !l.startsWith('[') && !l.startsWith('{{') && !l.startsWith('"')) {{
+                    if (curChunk) paramVals.push(curChunk.trim());
+                    curChunk = l.split('=').slice(1).join('=').trim();
+                }} else if (paramVals.length > 0 || curChunk) {{
+                    curChunk += ' ' + l;
+                }} else {{
+                    isParamAssign = false;
+                    break;
+                }}
             }} else {{
-                isParamAssign = false;
-                break;
+                curChunk += ' ' + l;
+            }}
+
+            for (let j = 0; j < l.length; j++) {{
+                const c = l[j];
+                if (c === '[' || c === '{{') bracketDepth++;
+                else if (c === ']' || c === '}}') bracketDepth = Math.max(0, bracketDepth - 1);
             }}
         }}
+        if (curChunk) paramVals.push(curChunk.trim());
+
         if (isParamAssign && paramVals.length === paramCount) {{
-            args = paramVals.map(v => {{
+            args = paramVals.map(function(v) {{
                 try {{ return JSON.parse(v); }} catch(e) {{ return v; }}
             }});
         }} else if (lines.length === paramCount && paramCount > 1) {{
             try {{
-                args = lines.map(l => JSON.parse(l));
+                args = lines.map(function(l) {{ return JSON.parse(l); }});
             }} catch(e) {{
                 args = [raw];
             }}
@@ -395,62 +476,18 @@ def _prepare_javascript_solution(
 # C++ driver (universal generic — works for any function name / signature)
 # ---------------------------------------------------------------------------
 
-def _prepare_cpp_solution(
-    code: str,
-    fn_name: Optional[str] = None,
-    starter_codes: Optional[Dict[str, str]] = None,
-) -> str:
-    if "int main(" in code or "int main (" in code:
-        return code
-
-    headers = []
-    for h in ["<iostream>", "<vector>", "<string>", "<sstream>", "<algorithm>", "<unordered_map>"]:
-        if f"#include {h}" not in code:
-            headers.append(f"#include {h}")
-    if "using namespace std;" not in code:
-        headers.append("using namespace std;")
-    header_prefix = "\n".join(headers) + "\n\n" if headers else ""
-
-    if "class Solution" not in code:
-        code = f"class Solution {{\npublic:\n{code}\n}};\n"
-
-    # Infer function name from starter_codes if not provided
-    if not fn_name and starter_codes:
-        fn_name = extract_function_name(starter_codes, "cpp")
-
+def _extract_cpp_info(code: str, fn_name: Optional[str]) -> Tuple[str, List[Dict]]:
     if not fn_name:
-        # Last resort: scan the code itself for a method inside Solution
-        m = re.search(r"public:\s*\n\s*\S+\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", code)
-        if m and m.group(1) not in {"Solution", "main"}:
-            fn_name = m.group(1)
-
-    # Infer parameter types from the starter code for a universal driver
-    cpp_starter = (starter_codes or {}).get("cpp", code)
-    param_info = _extract_cpp_params(cpp_starter, fn_name)
-
-    driver = _build_cpp_driver(fn_name, param_info)
-
-    return header_prefix + code + "\n" + driver
-
-
-def _extract_cpp_params(code: str, fn_name: Optional[str]) -> List[Dict]:
-    """
-    Parse the parameter list of fn_name from C++ starter code.
-    Returns a list of dicts: [{"type": "...", "name": "..."}]
-    """
-    if not fn_name:
-        return []
-    # Find the function signature line
-    pattern = rf"\b{re.escape(fn_name)}\s*\(([^)]*)\)"
+        return ("int", [])
+    pattern = rf"([A-Za-z0-9_<>:,\s]+?)\s+\b{re.escape(fn_name)}\s*\(([^)]*)\)"
     m = re.search(pattern, code)
     if not m:
-        return []
-    raw_params = m.group(1).strip()
-    if not raw_params:
-        return []
+        return ("int", [])
+    ret_type = m.group(1).strip()
+    raw_params = m.group(2).strip()
+    ret_type = re.sub(r'\b(public|protected|private|static|virtual|inline)\b', '', ret_type).strip()
 
     params = []
-    # Split on comma but respect template brackets < >
     depth = 0
     current = ""
     for ch in raw_params:
@@ -469,29 +506,55 @@ def _extract_cpp_params(code: str, fn_name: Optional[str]) -> List[Dict]:
     result = []
     for p in params:
         p = p.strip().rstrip("&").rstrip("*").strip()
-        # Split off the parameter name (last word)
         parts = p.rsplit(None, 1)
         if len(parts) == 2:
             result.append({"type": parts[0].strip(), "name": parts[1].strip().lstrip("*&")})
         elif len(parts) == 1:
             result.append({"type": parts[0], "name": f"arg{len(result)}"})
-    return result
+    return (ret_type, result)
 
 
-def _build_cpp_driver(fn_name: Optional[str], params: List[Dict]) -> str:
-    """Build a universal C++ main() that reads stdin, parses params, calls Solution."""
+def _prepare_cpp_solution(
+    code: str,
+    fn_name: Optional[str] = None,
+    starter_codes: Optional[Dict[str, str]] = None,
+) -> str:
+    if "int main(" in code or "int main (" in code:
+        return code
+
+    headers = []
+    for h in ["<iostream>", "<vector>", "<string>", "<sstream>", "<algorithm>", "<unordered_map>", "<queue>", "<tuple>", "<cctype>"]:
+        if f"#include {h}" not in code:
+            headers.append(f"#include {h}")
+    if "using namespace std;" not in code:
+        headers.append("using namespace std;")
+    header_prefix = "\n".join(headers) + "\n\n" if headers else ""
+
+    if "class Solution" not in code:
+        code = f"class Solution {{\npublic:\n{code}\n}};\n"
+
+    # Infer function name from starter_codes if not provided
+    if not fn_name and starter_codes:
+        fn_name = extract_function_name(starter_codes, "cpp")
+
+    if not fn_name:
+        m = re.search(r"public:\s*\n?\s*\S+\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", code)
+        if m and m.group(1) not in {"Solution", "main"}:
+            fn_name = m.group(1)
+
+    cpp_starter = (starter_codes or {}).get("cpp", code)
+    ret_type, param_info = _extract_cpp_info(cpp_starter, fn_name)
+    if not param_info:
+        ret_type, param_info = _extract_cpp_info(code, fn_name)
+
+    driver = _build_cpp_driver(fn_name, ret_type, param_info)
+    return header_prefix + code + "\n" + driver
+
+
+def _build_cpp_driver(fn_name: Optional[str], ret_type: str, params: List[Dict]) -> str:
     if not fn_name:
         return "\nint main() { return 0; }\n"
 
-    # Classify parameter types
-    lines = []
-    lines.append("int main() {")
-    lines.append("    ios_base::sync_with_stdio(false);")
-    lines.append("    cin.tie(NULL);")
-    lines.append("    string _full_input, _line;")
-    lines.append("    while (getline(cin, _line)) { _full_input += _line + \"\\n\"; }")
-
-    # For each param, emit parsing code
     decl_lines = []
     call_args = []
     for i, p in enumerate(params):
@@ -500,125 +563,231 @@ def _build_cpp_driver(fn_name: Optional[str], params: List[Dict]) -> str:
         call_args.append(pname)
         decl_lines.append(_cpp_parse_param(ptype, pname, i, len(params)))
 
-    lines.extend(decl_lines)
-    lines.append(f"    Solution _sol;")
-    lines.append(f"    auto _result = _sol.{fn_name}({', '.join(call_args)});")
-    lines.append("    // Output result")
-    lines.append("    cout << _result << \"\\n\";")
-    lines.append("    return 0;")
-    lines.append("}")
+    arg_list = ", ".join(call_args)
+    if ret_type == "void":
+        invoc = f"    _sol.{fn_name}({arg_list});\n"
+        if params:
+            invoc += f"    _ccc_print({call_args[0]});\n"
+    else:
+        invoc = f"    _ccc_print(_sol.{fn_name}({arg_list}));\n"
 
-    return "\n" + "\n".join(lines) + "\n"
+    driver_code = r'''
+// Universal print overloads
+inline void _ccc_print(bool v) { cout << (v ? "true" : "false") << "\n"; }
+template<typename T> inline void _ccc_print(const T& v) { cout << v << "\n"; }
+template<typename T> inline void _ccc_print(const vector<T>& vec) {
+    cout << "[";
+    for (size_t i = 0; i < vec.size(); i++) { if (i > 0) cout << ", "; cout << vec[i]; }
+    cout << "]\n";
+}
+template<typename T> inline void _ccc_print(const vector<vector<T>>& vec2d) {
+    cout << "[";
+    for (size_t i = 0; i < vec2d.size(); i++) {
+        if (i > 0) cout << ", ";
+        cout << "[";
+        for (size_t j = 0; j < vec2d[i].size(); j++) { if (j > 0) cout << ", "; cout << vec2d[i][j]; }
+        cout << "]";
+    }
+    cout << "]\n";
+}
+
+inline vector<string> _ccc_extract_chunks(const string& input) {
+    vector<string> chunks;
+    stringstream ss(input);
+    string line;
+    string cur;
+    int bracket_depth = 0;
+    while (getline(ss, line)) {
+        string t = line;
+        while (!t.empty() && isspace((unsigned char)t.back())) t.pop_back();
+        size_t s = 0;
+        while (s < t.size() && isspace((unsigned char)t[s])) s++;
+        t = t.substr(s);
+        if (t.empty()) continue;
+
+        if (bracket_depth == 0) {
+            size_t eq = t.find('=');
+            if (eq != string::npos && t[0] != '[' && t[0] != '{' && t[0] != '"') {
+                if (!cur.empty()) {
+                    while (!cur.empty() && isspace((unsigned char)cur.back())) cur.pop_back();
+                    size_t cs = 0;
+                    while (cs < cur.size() && isspace((unsigned char)cur[cs])) cs++;
+                    cur = cur.substr(cs);
+                    if (!cur.empty()) chunks.push_back(cur);
+                }
+                cur = t.substr(eq + 1);
+            } else {
+                cur += (cur.empty() ? "" : " ") + t;
+            }
+        } else {
+            cur += " " + t;
+        }
+
+        for (char c : t) {
+            if (c == '[' || c == '{') bracket_depth++;
+            else if (c == ']' || c == '}') bracket_depth = max(0, bracket_depth - 1);
+        }
+
+        if (bracket_depth == 0 && !cur.empty() && cur.find('=') == string::npos) {
+            while (!cur.empty() && isspace((unsigned char)cur.back())) cur.pop_back();
+            size_t cs = 0;
+            while (cs < cur.size() && isspace((unsigned char)cur[cs])) cs++;
+            cur = cur.substr(cs);
+            if (!cur.empty()) chunks.push_back(cur);
+            cur.clear();
+        }
+    }
+    if (!cur.empty()) {
+        while (!cur.empty() && isspace((unsigned char)cur.back())) cur.pop_back();
+        size_t cs = 0;
+        while (cs < cur.size() && isspace((unsigned char)cur[cs])) cs++;
+        cur = cur.substr(cs);
+        if (!cur.empty()) chunks.push_back(cur);
+    }
+    return chunks;
+}
+
+inline int _ccc_to_int(const string& raw) {
+    if (raw.empty()) return 0;
+    string num;
+    for (char c : raw) {
+        if (isdigit((unsigned char)c) || c == '-') num += c;
+        else if (!num.empty()) break;
+    }
+    if (num.empty() || num == "-") return 0;
+    try { return stoi(num); } catch (...) { return 0; }
+}
+
+inline long long _ccc_to_long_long(const string& raw) {
+    if (raw.empty()) return 0LL;
+    string num;
+    for (char c : raw) {
+        if (isdigit((unsigned char)c) || c == '-') num += c;
+        else if (!num.empty()) break;
+    }
+    if (num.empty() || num == "-") return 0LL;
+    try { return stoll(num); } catch (...) { return 0LL; }
+}
+
+inline double _ccc_to_double(const string& raw) {
+    if (raw.empty()) return 0.0;
+    try { return stod(raw); } catch (...) { return 0.0; }
+}
+
+inline bool _ccc_to_bool(const string& raw) {
+    string lower = raw;
+    for (char& c : lower) c = tolower((unsigned char)c);
+    return lower.find("true") != string::npos || lower == "1";
+}
+
+inline string _ccc_to_string(const string& raw) {
+    size_t q1 = raw.find('"');
+    if (q1 != string::npos) {
+        size_t q2 = raw.find('"', q1 + 1);
+        if (q2 != string::npos) return raw.substr(q1 + 1, q2 - q1 - 1);
+    }
+    return raw;
+}
+
+inline vector<string> _ccc_to_vector_string(const string& raw, const string& full_input) {
+    const string& src = (raw.find('"') != string::npos) ? raw : full_input;
+    vector<string> res;
+    size_t qi = 0;
+    while ((qi = src.find('"', qi)) != string::npos) {
+        size_t qe = src.find('"', qi + 1);
+        if (qe == string::npos) break;
+        res.push_back(src.substr(qi + 1, qe - qi - 1));
+        qi = qe + 1;
+    }
+    return res;
+}
+
+inline vector<int> _ccc_to_vector_int(const string& raw, const string& full_input) {
+    const string& src = (raw.find('[') != string::npos) ? raw : full_input;
+    vector<int> res;
+    string num;
+    bool inside = false;
+    for (char c : src) {
+        if (c == '[') inside = true;
+        else if (c == ']') {
+            if (!num.empty()) { try { res.push_back(stoi(num)); } catch(...) {} num.clear(); }
+            inside = false;
+        } else if (inside && (isdigit((unsigned char)c) || c == '-')) {
+            num += c;
+        } else if (inside && (c == ',' || isspace((unsigned char)c))) {
+            if (!num.empty()) { try { res.push_back(stoi(num)); } catch(...) {} num.clear(); }
+        }
+    }
+    if (res.empty() && !raw.empty()) {
+        stringstream ss(raw);
+        int v;
+        while (ss >> v) res.push_back(v);
+    }
+    return res;
+}
+
+inline vector<vector<int>> _ccc_to_vector_vector_int(const string& raw, const string& full_input) {
+    const string& src = (raw.find("[[") != string::npos) ? raw : full_input;
+    vector<vector<int>> res;
+    size_t lb = src.find("[[");
+    if (lb == string::npos) return res;
+    vector<int> cur;
+    string num;
+    bool in_row = false;
+    for (size_t i = lb; i < src.size(); i++) {
+        char c = src[i];
+        if (c == '[') {
+            if (in_row) cur.clear();
+            else in_row = true;
+        } else if (c == ']') {
+            if (!num.empty()) { try { cur.push_back(stoi(num)); } catch(...) {} num.clear(); }
+            if (in_row) { res.push_back(cur); cur.clear(); in_row = false; }
+        } else if (isdigit((unsigned char)c) || c == '-') {
+            num += c;
+        } else if (c == ',' || isspace((unsigned char)c)) {
+            if (!num.empty()) { try { cur.push_back(stoi(num)); } catch(...) {} num.clear(); }
+        }
+    }
+    return res;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    string _full_input, _line;
+    while (getline(cin, _line)) { _full_input += _line + "\n"; }
+    vector<string> _chunks = _ccc_extract_chunks(_full_input);
+
+'''
+    return driver_code + "\n".join(decl_lines) + f"\n\n    Solution _sol;\n{invoc}    return 0;\n}}\n"
 
 
 def _cpp_parse_param(ptype: str, pname: str, idx: int, total: int) -> str:
     """Generate C++ parsing code for a parameter based on its type."""
     ptype_clean = re.sub(r'\s*(const|&|\*)\s*', ' ', ptype).strip()
 
-    # vector<string>
+    chunk_expr = f'(_chunks.size() > {idx} ? _chunks[{idx}] : "")'
+
     if re.match(r'vector\s*<\s*string\s*>', ptype_clean, re.I):
-        return f"""    vector<string> {pname};
-    {{
-        size_t _qi = 0;
-        while ((_qi = _full_input.find('"', _qi)) != string::npos) {{
-            size_t _qe = _full_input.find('"', _qi + 1);
-            if (_qe == string::npos) break;
-            {pname}.push_back(_full_input.substr(_qi + 1, _qe - _qi - 1));
-            _qi = _qe + 1;
-        }}
-        if ({pname}.empty()) {{
-            stringstream _ss(_full_input);
-            string _tok;
-            while (_ss >> _tok) {pname}.push_back(_tok);
-        }}
-    }}"""
-
-    # vector<vector<int>> or similar
-    if re.match(r'vector\s*<\s*vector\s*<', ptype_clean, re.I):
-        return f"""    vector<vector<int>> {pname};
-    {{
-        size_t _lb = _full_input.find("[[");
-        if (_lb != string::npos) {{
-            vector<int> _cur;
-            string _nb;
-            bool _inn = false;
-            for (size_t _ii = _lb; _ii < _full_input.size(); _ii++) {{
-                char _cc = _full_input[_ii];
-                if (_cc == '[') {{ if (_inn) _cur.clear(); else _inn = true; }}
-                else if (_cc == ']') {{
-                    if (!_nb.empty()) {{ _cur.push_back(stoi(_nb)); _nb = ""; }}
-                    if (_inn) {{ if (!_cur.empty()) {pname}.push_back(_cur); _cur.clear(); _inn = false; }}
-                }}
-                else if (isdigit(_cc) || _cc == '-') _nb += _cc;
-                else if (_cc == ',' || isspace(_cc)) {{ if (!_nb.empty()) {{ _cur.push_back(stoi(_nb)); _nb = ""; }} }}
-            }}
-        }}
-    }}"""
-
-    # vector<int>
-    if re.match(r'vector\s*<\s*int\s*>', ptype_clean, re.I):
-        return f"""    vector<int> {pname};
-    {{
-        string _nb;
-        bool _inside = false;
-        for (char _cc : _full_input) {{
-            if (_cc == '[') _inside = true;
-            else if (_cc == ']') {{ if (!_nb.empty()) {{ {pname}.push_back(stoi(_nb)); _nb = ""; }} _inside = false; }}
-            else if (_inside && (isdigit(_cc) || _cc == '-')) _nb += _cc;
-            else if (_inside && (_cc == ',' || isspace(_cc))) {{ if (!_nb.empty()) {{ {pname}.push_back(stoi(_nb)); _nb = ""; }} }}
-        }}
-        if ({pname}.empty()) {{
-            stringstream _ss(_full_input);
-            int _v;
-            while (_ss >> _v) {pname}.push_back(_v);
-        }}
-    }}"""
-
-    # string
-    if ptype_clean in ("string", "std::string"):
-        return f"""    string {pname};
-    {{
-        size_t _qi = _full_input.find('"');
-        if (_qi != string::npos) {{
-            size_t _qe = _full_input.find('"', _qi + 1);
-            {pname} = (_qe != string::npos) ? _full_input.substr(_qi + 1, _qe - _qi - 1) : _full_input;
-        }} else {{
-            stringstream _ss(_full_input);
-            _ss >> {pname};
-        }}
-    }}"""
-
-    # long long
-    if "long" in ptype_clean:
-        var_line = f"    long long {pname} = 0;"
-        if total == 1:
-            return var_line + f"\n    {{ stringstream _ss(_full_input); _ss >> {pname}; }}"
-        # nth scalar: extract idx-th number token
-        return var_line + f"""
-    {{
-        string _cleaned;
-        for (char _cc : _full_input) {{ if (isdigit(_cc) || _cc == '-') _cleaned += _cc; else _cleaned += ' '; }}
-        stringstream _ss(_cleaned);
-        long long _tmp; int _ci = 0;
-        while (_ss >> _tmp) {{ if (_ci++ == {idx}) {{ {pname} = _tmp; break; }} }}
-    }}"""
-
-    # int (default scalar)
-    var_line = f"    int {pname} = 0;"
-    if total == 1:
-        return var_line + f"\n    {{ stringstream _ss(_full_input); _ss >> {pname}; }}"
-    return var_line + f"""
-    {{
-        string _cleaned;
-        for (char _cc : _full_input) {{ if (isdigit(_cc) || _cc == '-') _cleaned += _cc; else _cleaned += ' '; }}
-        stringstream _ss(_cleaned);
-        int _tmp; int _ci = 0;
-        while (_ss >> _tmp) {{ if (_ci++ == {idx}) {{ {pname} = _tmp; break; }} }}
-    }}"""
+        return f"    vector<string> {pname} = _ccc_to_vector_string({chunk_expr}, _full_input);"
+    elif re.match(r'vector\s*<\s*vector\s*<', ptype_clean, re.I):
+        return f"    vector<vector<int>> {pname} = _ccc_to_vector_vector_int({chunk_expr}, _full_input);"
+    elif re.match(r'vector\s*<\s*int\s*>', ptype_clean, re.I):
+        return f"    vector<int> {pname} = _ccc_to_vector_int({chunk_expr}, _full_input);"
+    elif ptype_clean in ("string", "std::string"):
+        return f"    string {pname} = _ccc_to_string({chunk_expr});"
+    elif "long" in ptype_clean:
+        return f"    long long {pname} = _ccc_to_long_long({chunk_expr});"
+    elif ptype_clean in ("bool", "boolean"):
+        return f"    bool {pname} = _ccc_to_bool({chunk_expr});"
+    elif ptype_clean in ("double", "float"):
+        return f"    double {pname} = _ccc_to_double({chunk_expr});"
+    else:
+        return f"    int {pname} = _ccc_to_int({chunk_expr});"
 
 
 # ---------------------------------------------------------------------------
-# C driver (universal generic)
+# C driver (universal generic — dynamic type and signature resolution)
 # ---------------------------------------------------------------------------
 
 def _prepare_c_solution(
@@ -630,7 +799,7 @@ def _prepare_c_solution(
         return code
 
     headers = []
-    for h in ["<stdio.h>", "<stdlib.h>", "<string.h>"]:
+    for h in ["<stdio.h>", "<stdlib.h>", "<string.h>", "<ctype.h>"]:
         if f"#include {h}" not in code:
             headers.append(f"#include {h}")
     header_prefix = "\n".join(headers) + "\n\n" if headers else ""
@@ -638,9 +807,9 @@ def _prepare_c_solution(
     if not fn_name and starter_codes:
         fn_name = extract_function_name(starter_codes, "c")
     if not fn_name:
-        m = re.search(r"\bint\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", code)
-        if m and m.group(1) != "main":
-            fn_name = m.group(1)
+        m = re.search(r"\b(int|long\s+long|long|void)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", code)
+        if m and m.group(2) != "main":
+            fn_name = m.group(2)
 
     c_starter = (starter_codes or {}).get("c", code)
     driver = _build_c_driver(fn_name, c_starter)
@@ -654,15 +823,22 @@ def _build_c_driver(fn_name: Optional[str], c_starter: str) -> str:
         return "\nint main(void) { return 0; }\n"
 
     # Inspect the function signature from the starter
-    pattern = rf"\b{re.escape(fn_name)}\s*\(([^)]*)\)"
+    pattern = rf"(?:[A-Za-z0-9_*]+\s+)?\b{re.escape(fn_name)}\s*\(([^)]*)\)"
     m = re.search(pattern, c_starter)
     raw_params = m.group(1).strip() if m else ""
 
-    # Simple heuristic: if it takes a char** and int (string array pattern)
+    # Infer return type
+    ret_pattern = rf"([A-Za-z0-9_*]+)\s+\b{re.escape(fn_name)}\s*\("
+    rm = re.search(ret_pattern, c_starter)
+    ret_type = rm.group(1).strip() if rm else "int"
+    ret_fmt = "%lld" if "long" in ret_type else "%d"
+    call_ret_cast = "(long long)" if "long" in ret_type else ""
+
+    # 1. String array signature: char** and count
     if "char**" in raw_params or "char *" in raw_params:
         return f"""
 int main(void) {{
-    char buf[65536];
+    char buf[131072];
     size_t total = 0;
     int c;
     while ((c = getchar()) != EOF && total < sizeof(buf) - 1)
@@ -680,33 +856,138 @@ int main(void) {{
         passes[count++] = p;
         p = end + 1;
     }}
-    printf("%d\\n", {fn_name}(passes, count));
+    printf("{ret_fmt}\\n", {call_ret_cast}{fn_name}(passes, count));
     return 0;
 }}
 """
 
-    # int/long long scalar(s) — read up to 4 ints from stdin
-    if "int" in raw_params or "long" in raw_params:
-        # Count scalars
-        param_parts = [p.strip() for p in raw_params.split(",") if p.strip()]
-        n = len(param_parts)
-        vars_decl = "\n    ".join([f"long long _v{i} = 0;" for i in range(n)])
-        reads = " ".join([f"&_v{i}" for i in range(n)])
-        fmt = " ".join(["%lld"] * n)
-        call = ", ".join([f"(int)_v{i}" for i in range(n)])
+    # 2. 2D array signature: int** (e.g. matrix, channels, packets, processes)
+    if "int**" in raw_params:
+        before_matrix = raw_params.split("int**")[0].strip().rstrip(",")
+        scalar_parts = [p.strip() for p in before_matrix.split(",") if p.strip()]
+
+        scalar_decls = []
+        scalar_parses = []
+        scalar_call_args = []
+        for i, sp in enumerate(scalar_parts):
+            var_name = f"_sc{i}"
+            sp_name = sp.rsplit(None, 1)[-1].strip("*&")
+            is_long = "long" in sp
+            type_decl = "long long" if is_long else "int"
+            scalar_decls.append(f"    {type_decl} {var_name} = 0;")
+            scalar_parses.append(f"""
+    {{
+        char _k1[64], _k2[64];
+        snprintf(_k1, sizeof(_k1), "{sp_name} =");
+        snprintf(_k2, sizeof(_k2), "{sp_name}=");
+        char* _sp = strstr(buf, _k1);
+        if (!_sp) _sp = strstr(buf, _k2);
+        if (_sp) {{
+            while (*_sp && *_sp != '=') _sp++;
+            if (*_sp == '=') {{ _sp++; while (*_sp == ' ') _sp++; {var_name} = {'atoll' if is_long else 'atoi'}(_sp); }}
+        }} else {{
+            char* _lb = strstr(buf, "[[");
+            char* _scan = buf;
+            int _cnt = 0;
+            while (_scan < (_lb ? _lb : buf + total)) {{
+                if (isdigit((unsigned char)*_scan) || *_scan == '-') {{
+                    if (_cnt++ == {i}) {{ {var_name} = {'atoll' if is_long else 'atoi'}(_scan); break; }}
+                    while (*_scan && (isdigit((unsigned char)*_scan) || *_scan == '-')) _scan++;
+                }} else _scan++;
+            }}
+        }}
+    }}""")
+            scalar_call_args.append(var_name)
+
+        call_args_str = ", ".join(scalar_call_args + ["_rows", "_rowCount", "_cols"])
         return f"""
+int main(void) {{
+    char buf[131072];
+    size_t total = 0;
+    int c;
+    while ((c = getchar()) != EOF && total < sizeof(buf) - 1)
+        buf[total++] = (char)c;
+    buf[total] = '\\0';
+
+{chr(10).join(scalar_decls)}
+{chr(10).join(scalar_parses)}
+
+    int* _rows[10000];
+    int _cols[10000];
+    int _rowCount = 0;
+
+    char* _p = strstr(buf, "[[");
+    if (_p) {{
+        _p++;
+        while (*_p) {{
+            while (*_p && *_p != '[') _p++;
+            if (*_p != '[') break;
+            _p++;
+            int* _cur = (int*)malloc(sizeof(int) * 1000);
+            int _colCount = 0;
+            while (*_p && *_p != ']') {{
+                while (*_p && (isspace((unsigned char)*_p) || *_p == ',')) _p++;
+                if (isdigit((unsigned char)*_p) || *_p == '-') {{
+                    _cur[_colCount++] = atoi(_p);
+                    while (*_p && (isdigit((unsigned char)*_p) || *_p == '-')) _p++;
+                }} else if (*_p != ']') {{
+                    _p++;
+                }}
+            }}
+            if (*_p == ']') _p++;
+            _cols[_rowCount] = _colCount;
+            _rows[_rowCount++] = _cur;
+            while (*_p && (isspace((unsigned char)*_p) || *_p == ',')) _p++;
+            if (*_p == ']') break;
+        }}
+    }}
+
+    printf("{ret_fmt}\\n", {call_ret_cast}{fn_name}({call_args_str}));
+    return 0;
+}}
+"""
+
+    # 2.5 1D integer array signature: int* (e.g. nums, arr) and size
+    if ("int*" in raw_params or "int *" in raw_params or "int[]" in raw_params) and "int**" not in raw_params:
+        return f"""
+int main(void) {{
+    char buf[131072];
+    size_t total = 0;
+    int c;
+    while ((c = getchar()) != EOF && total < sizeof(buf) - 1)
+        buf[total++] = (char)c;
+    buf[total] = '\\0';
+
+    int _arr[100000];
+    int _arrSize = 0;
+    char* _p = strchr(buf, '[');
+    if (_p) {{
+        _p++;
+        while (*_p && *_p != ']') {{
+            while (*_p && (isspace((unsigned char)*_p) || *_p == ',')) _p++;
+            if (isdigit((unsigned char)*_p) || *_p == '-') {{
+                _arr[_arrSize++] = atoi(_p);
+                while (*_p && (isdigit((unsigned char)*_p) || *_p == '-')) _p++;
+            }} else break;
+        }}
+    }}
+    printf("{ret_fmt}\\n", {call_ret_cast}{fn_name}(_arr, _arrSize));
+    return 0;
+}}
+"""
+
+    # 3. Scalar(s) only: read via scanf
+    param_parts = [p.strip() for p in raw_params.split(",") if p.strip()]
+    n = max(1, len(param_parts))
+    vars_decl = "\n    ".join([f"long long _v{i} = 0;" for i in range(n)])
+    reads = ", ".join([f"&_v{i}" for i in range(n)])
+    fmt = " ".join(["%lld"] * n)
+    call = ", ".join([f"(int)_v{i}" for i in range(n)])
+    return f"""
 int main(void) {{
     {vars_decl}
     scanf("{fmt}", {reads});
-    printf("%d\\n", {fn_name}({call}));
-    return 0;
-}}
-"""
-
-    # Fallback: bare call
-    return f"""
-int main(void) {{
-    printf("%d\\n", {fn_name}());
+    printf("{ret_fmt}\\n", {call_ret_cast}{fn_name}({call}));
     return 0;
 }}
 """
@@ -845,13 +1126,38 @@ public class Main {
     static java.util.List<String> _ccc_extract_vals(String input) {
         String[] lines = input.split("\n");
         java.util.List<String> vals = new java.util.ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        int bracketDepth = 0;
         for (String l : lines) {
-            l = l.trim();
-            if (l.contains("=") && !l.startsWith("[") && !l.startsWith("{")) {
-                vals.add(l.substring(l.indexOf('=') + 1).trim());
-            } else if (!l.isEmpty()) {
-                vals.add(l);
+            String t = l.trim();
+            if (t.isEmpty()) continue;
+            if (bracketDepth == 0) {
+                if (t.contains("=") && !t.startsWith("[") && !t.startsWith("{") && !t.startsWith("\"")) {
+                    if (cur.length() > 0) {
+                        String s = cur.toString().trim();
+                        if (!s.isEmpty()) vals.add(s);
+                    }
+                    cur = new StringBuilder(t.substring(t.indexOf('=') + 1).trim());
+                } else {
+                    if (cur.length() > 0) cur.append(" ");
+                    cur.append(t);
+                }
+            } else {
+                cur.append(" ").append(t);
             }
+            for (char c : t.toCharArray()) {
+                if (c == '[' || c == '{') bracketDepth++;
+                else if (c == ']' || c == '}') bracketDepth = Math.max(0, bracketDepth - 1);
+            }
+            if (bracketDepth == 0 && cur.indexOf("=") == -1) {
+                String s = cur.toString().trim();
+                if (!s.isEmpty()) vals.add(s);
+                cur = new StringBuilder();
+            }
+        }
+        if (cur.length() > 0) {
+            String s = cur.toString().trim();
+            if (!s.isEmpty()) vals.add(s);
         }
         return vals;
     }

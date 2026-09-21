@@ -11,7 +11,7 @@ from app.lib.otp import hash_otp
 
 logger = logging.getLogger(__name__)
 
-OTP_TTL_SECONDS = 300   # 5-minute expiry
+OTP_TTL_SECONDS = 900   # 15-minute expiry (aligned with email verification template)
 MAX_ATTEMPTS = 5
 
 

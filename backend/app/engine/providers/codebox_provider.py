@@ -156,6 +156,17 @@ class CodeboxProvider(JudgeProvider):
         stdout = data.get("stdout") or ""
         stderr = data.get("stderr") or ""
         compile_out = data.get("compile_output") or ""
+        status_desc = (data.get("status") or {}).get("description") or ""
+
+        if status_id == 6:
+            if not compile_out:
+                compile_out = stderr or status_desc or "Compilation error"
+            if not stderr:
+                stderr = compile_out
+        elif status_id in {7, 8, 9, 10, 11, 12}:
+            if not stderr:
+                stderr = compile_out or status_desc or "Runtime error"
+
         time_sec = float(data.get("time") or 0.0)
         mem_kb = int(data.get("memory") or 0)
 
@@ -244,6 +255,7 @@ class CodeboxProvider(JudgeProvider):
         stdout = data.get("stdout") or ""
         stderr = data.get("stderr") or ""
         compile_out = data.get("compile_output") or ""
+        status_desc = (data.get("status") or {}).get("description") or ""
         time_sec = float(data.get("time") or 0.0)
         time_ms = time_sec * 1000
         mem_kb = float(data.get("memory") or 0.0)
@@ -255,10 +267,18 @@ class CodeboxProvider(JudgeProvider):
 
         if status_id == 6:
             final_verdict = Verdict.COMPILATION_ERROR
+            if not compile_out:
+                compile_out = stderr or status_desc or "Compilation error"
+            if not stderr:
+                stderr = compile_out
         elif status_id == 5:
             final_verdict = Verdict.TIME_LIMIT_EXCEEDED
+            if not stderr:
+                stderr = "Time Limit Exceeded"
         elif status_id in {7, 8, 9, 10, 11, 12}:
             final_verdict = Verdict.RUNTIME_ERROR
+            if not stderr:
+                stderr = compile_out or status_desc or "Runtime error"
         elif status_id == 3 or raw_verdict == Verdict.ACCEPTED:
             # Check comparison with configured mode
             passed = JudgeEngine.compare(
@@ -361,10 +381,18 @@ class CodeboxProvider(JudgeProvider):
         # Determine overall verdict
         if any(r.verdict == Verdict.COMPILATION_ERROR for r in results):
             top_verdict = Verdict.COMPILATION_ERROR
+            if not compile_out and first_stderr:
+                compile_out = first_stderr
+            if not first_stderr and compile_out:
+                first_stderr = compile_out
         elif any(r.verdict == Verdict.TIME_LIMIT_EXCEEDED for r in results):
             top_verdict = Verdict.TIME_LIMIT_EXCEEDED
+            if not first_stderr:
+                first_stderr = "Time Limit Exceeded"
         elif any(r.verdict == Verdict.RUNTIME_ERROR for r in results):
             top_verdict = Verdict.RUNTIME_ERROR
+            if not first_stderr and compile_out:
+                first_stderr = compile_out
         elif any(r.verdict == Verdict.WRONG_ANSWER for r in results):
             top_verdict = Verdict.WRONG_ANSWER
         elif all(r.verdict == Verdict.ACCEPTED for r in results) and total_count > 0:

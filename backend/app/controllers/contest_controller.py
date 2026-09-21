@@ -960,6 +960,7 @@ class ContestController:
                     "expected_output": tr.expected_output,
                     "stdin": (tcs[i].stdin if i < len(tcs) else ""),
                     "stderr": tr.stderr,
+                    "compile_output": tr.compile_output,
                     "wall_time_ms": tr.wall_time_ms,
                 }
                 for i, tr in enumerate(exec_result.testcase_results)
@@ -1128,6 +1129,7 @@ class ContestController:
                 "expected_output": tr.expected_output if not is_hidden else "[Hidden]",
                 "input": tc.stdin if (tc and not is_hidden) else "[Hidden]",
                 "stderr": tr.stderr,
+                "compile_output": tr.compile_output,
                 "wall_time_ms": tr.wall_time_ms,
             })
 
@@ -1140,6 +1142,8 @@ class ContestController:
             "points_awarded": points_awarded,
             "execution_time": exec_result.time,
             "memory": exec_result.memory,
+            "compile_output": exec_result.compile_output,
+            "stderr": exec_result.stderr,
             "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({exec_result.passed_testcases}/{exec_result.total_testcases} testcases passed)",
             "testcase_results": submit_tc_results,
         }

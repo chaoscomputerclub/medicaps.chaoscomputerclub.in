@@ -1715,6 +1715,19 @@ export function ContestArenaPage() {
                           />
                         </div>
 
+                        {/* Compiler Diagnostics if compilation error or compile output present */}
+                        {(submitResult.compile_output || (submitResult.verdict === "COMPILATION_ERROR" && submitResult.stderr)) && (
+                          <div className="p-3 bg-black border border-rose-500/30 rounded font-mono text-xs space-y-1.5">
+                            <div className="flex items-center gap-2 text-rose-400 font-semibold text-[11px] uppercase tracking-wider">
+                              <AlertCircle className="size-3.5" />
+                              <span>Compiler Diagnostics</span>
+                            </div>
+                            <pre className="text-rose-300/90 whitespace-pre-wrap font-mono text-xs max-h-48 overflow-y-auto leading-relaxed">
+                              {submitResult.compile_output || submitResult.stderr}
+                            </pre>
+                          </div>
+                        )}
+
                         {/* Submission Testcases Breakdown */}
                         {submitResult.testcase_results && submitResult.testcase_results.length > 0 && (
                           <div className="space-y-3">
@@ -1800,6 +1813,16 @@ export function ContestArenaPage() {
                                       </pre>
                                     </div>
                                   </div>
+                                  {curTc.compile_output && (
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                        Compiler Output
+                                      </span>
+                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
+                                        {curTc.compile_output}
+                                      </pre>
+                                    </div>
+                                  )}
                                   {curTc.stderr && (
                                     <div>
                                       <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
@@ -1845,6 +1868,19 @@ export function ContestArenaPage() {
                             </span>
                           )}
                         </div>
+
+                        {/* Compiler Diagnostics if compilation error or compile output present */}
+                        {(runResult.compile_output || (runResult.verdict === "COMPILATION_ERROR" && runResult.stderr)) && (
+                          <div className="p-3 bg-black border border-rose-500/30 rounded font-mono text-xs space-y-1.5">
+                            <div className="flex items-center gap-2 text-rose-400 font-semibold text-[11px] uppercase tracking-wider">
+                              <AlertCircle className="size-3.5" />
+                              <span>Compiler Diagnostics</span>
+                            </div>
+                            <pre className="text-rose-300/90 whitespace-pre-wrap font-mono text-xs max-h-48 overflow-y-auto leading-relaxed">
+                              {runResult.compile_output || runResult.stderr}
+                            </pre>
+                          </div>
+                        )}
 
                         {/* Testcase Sub-tabs */}
                         {runResult.testcase_results && runResult.testcase_results.length > 0 ? (
@@ -1909,6 +1945,16 @@ export function ContestArenaPage() {
                                       </pre>
                                     </div>
                                   </div>
+                                  {curTc.compile_output && (
+                                    <div>
+                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                        Compiler Output
+                                      </span>
+                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
+                                        {curTc.compile_output}
+                                      </pre>
+                                    </div>
+                                  )}
                                   {curTc.stderr && (
                                     <div>
                                       <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
@@ -1925,6 +1971,14 @@ export function ContestArenaPage() {
                           </div>
                         ) : (
                           <div className="space-y-2">
+                            {runResult.compile_output && (
+                              <div>
+                                <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">Compiler Output</span>
+                                <pre className="p-2 bg-black border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
+                                  {runResult.compile_output}
+                                </pre>
+                              </div>
+                            )}
                             {runResult.stdout && (
                               <div>
                                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Stdout</span>

@@ -1,13 +1,12 @@
 """
 Chaos Computer Club — Medi-Caps Chapter
 utils/email.py — Async SMTP email dispatcher
-Branded email template based on Chaos Computer Club India design system.
-Production v5: Minimal, void-black only (immune to OS theme flips),
-tag-cut dual chamfer acid container, 6-digit segmented hardware-authenticator UI,
-anti-inversion protections for Gmail & cross-client parity,
-RFC-compliant multipart/alternative (HTML + plaintext).
+Minimalist clean card UI template for email verification OTP,
+pixel-matched to the specification (Verify your email, left-aligned typography,
+clean card border, RFC-compliant multipart/alternative HTML + plaintext).
 """
 import asyncio
+import html as html_lib
 import smtplib
 import logging
 from email.mime.multipart import MIMEMultipart
@@ -17,70 +16,49 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _otp_email_plaintext(otp_code: str) -> str:
+def _otp_email_plaintext(to_email: str, otp_code: str) -> str:
     """
     Plain-text fallback version of the OTP verification email.
     Required by spam filters and text-only email clients.
     """
-    return f"""CHAOS COMPUTER CLUB // AUTH // OTP
+    app_name = settings.SMTP_FROM_NAME or "Chaos Computer Club"
+    return f"""Verify your email
 
-AUTHENTICATE SESSION
-Enter the one-time authentication token below to complete verification.
+We need to verify your email address {to_email} before you can access your account. Enter the code below in your open browser window.
 
-==================================================
-  ONE-TIME TOKEN:    {otp_code}
-  VALIDITY:          EXPIRES IN 5 MINUTES
-  POLICY:            SINGLE USE ONLY
-==================================================
+{otp_code}
 
-If you did not initiate this request, ignore this transmission. Never disclose this token.
-
---
-EXPLORE · BUILD · COMPETE · FAIL · LEARN
-https://medicaps.chaoscomputerclub.in
-https://chaoscomputerclub.in
-
-ESTABLISHED 2026 · OPEN BY DEFAULT · PEER DRIVEN
+This code expires in 15 minutes.
+If you didn't sign up for {app_name}, you can safely ignore this email. Someone else might have typed your email address by mistake.
 """
 
 
-def _otp_email_template(otp_code: str) -> str:
+def _otp_email_template(to_email: str, otp_code: str) -> str:
     """
-    Chaos Computer Club India — Production Email Template v6
-    Hardened for Mobile & Tablet Gmail / Cross-Client Consistency:
-    - Inset tactile void-black cells (#09090b) with linear-gradient background protection
-    - High-saturation acid-lime digits (#ccff00) completely immune to dark mode inversion
-    - Mobile-responsive max-width 460px block wrapper preventing table clipping on 375px+ screens
-    - Anti-inversion off-white typography hierarchy (#eaeaea) preventing dimmed headers
-    - tag-cut dual chamfer geometry with robust fallback
+    Clean, minimalist email verification OTP template.
+    Pixel-matched to the clean UI card specification:
+    - Rounded border card (#ffffff background, #e5e7eb border, border-radius: 20px)
+    - Bold left-aligned header 'Verify your email'
+    - Dynamic email address display in instruction paragraph
+    - High-visibility 36px monospace-capable tabular numeral OTP token
+    - Clean horizontal separator
+    - 15-minute expiration notice and safe-ignore footer
     """
-    digits = list(otp_code.strip()) if len(otp_code.strip()) == 6 else ["7", "3", "9", "1", "0", "4"]
-    preview_padding = "&#847; &zwnj; &nbsp; &#8199; &shy; " * 30
-
-    digit_cells_html = ""
-    for d in digits:
-        digit_cells_html += f"""<td align="center" valign="middle" width="38" style="width:38px;padding:0 2px;">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="38" style="width:38px;border-collapse:collapse;">
-            <tr>
-              <td align="center" valign="middle" height="48" bgcolor="#09090b" style="height:48px;width:38px;background-color:#09090b;background-image:linear-gradient(#09090b,#09090b);border:2px solid #1a1a24;text-align:center;">
-                <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:26px;font-weight:900;color:#ccff00 !important;line-height:48px;display:inline-block;mso-line-height-rule:exactly;">{d}</span>
-              </td>
-            </tr>
-          </table>
-        </td>"""
+    safe_email = html_lib.escape(to_email.strip())
+    safe_code = html_lib.escape(otp_code.strip())
+    app_name = html_lib.escape(settings.SMTP_FROM_NAME or "Chaos Computer Club")
+    preview_padding = "&#847; &zwnj; &nbsp; &#8199; &shy; " * 25
 
     return f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!-- STRICT: Only dark mode, never adapt to light OS theme -->
-  <meta name="color-scheme" content="only dark">
-  <meta name="supported-color-schemes" content="only dark">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-  <title>CCC — Authenticate Session</title>
-
+  <title>Verify your email address</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -90,262 +68,96 @@ def _otp_email_template(otp_code: str) -> str:
     </xml>
   </noscript>
   <![endif]-->
-
   <style type="text/css">
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@700;800&display=swap');
-
-    :root {{
-      color-scheme: only dark !important;
-      supported-color-schemes: only dark !important;
-    }}
-
-    body, table, td, a, p, span, div {{
+    body, table, td, p, a, div {{
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
       margin: 0;
       padding: 0;
     }}
-
     table, td {{
       mso-table-lspace: 0pt;
       mso-table-rspace: 0pt;
-      border-collapse: collapse;
+      border-collapse: separate;
     }}
-
-    img {{
-      -ms-interpolation-mode: bicubic;
-      border: 0;
-      height: auto;
-      line-height: 100%;
-      outline: none;
-      text-decoration: none;
-      display: block;
-    }}
-
-    /* Prevent any client in light mode from turning backgrounds white */
-    @media (prefers-color-scheme: light) {{
-      html, body, .body-canvas {{
-        background-color: #080808 !important;
-        background-image: linear-gradient(#080808, #080808) !important;
-        color: #eaeaea !important;
+    @media only screen and (max-width: 600px) {{
+      .card-wrap {{
+        padding: 24px 16px !important;
       }}
-      .card-box {{
-        background-color: #0e0e10 !important;
-        background-image: linear-gradient(#0e0e10, #0e0e10) !important;
+      .card-container {{
+        padding: 32px 24px !important;
+        border-radius: 16px !important;
       }}
-      .card-footer {{
-        background-color: #0a0a0c !important;
-        background-image: linear-gradient(#0a0a0c, #0a0a0c) !important;
+      .otp-display {{
+        font-size: 32px !important;
+        margin-bottom: 28px !important;
       }}
-      .acid-hero {{
-        background-color: #ccff00 !important;
-        background-image: linear-gradient(#ccff00, #ccff00) !important;
-      }}
-    }}
-
-    /* Outlook.com Web dark overrides */
-    [data-ogsc] html, [data-ogsc] body, [data-ogsc] .body-canvas {{
-      background-color: #080808 !important;
-      background-image: linear-gradient(#080808, #080808) !important;
-    }}
-    [data-ogsc] .card-box {{
-      background-color: #0e0e10 !important;
-      background-image: linear-gradient(#0e0e10, #0e0e10) !important;
-    }}
-    [data-ogsc] .card-footer {{
-      background-color: #0a0a0c !important;
-      background-image: linear-gradient(#0a0a0c, #0a0a0c) !important;
-    }}
-    [data-ogsc] .acid-hero {{
-      background-color: #ccff00 !important;
-      background-image: linear-gradient(#ccff00, #ccff00) !important;
-    }}
-
-    /* Modern client polygon: exact tag-cut geometry from root app */
-    .tag-cut-container {{
-      clip-path: polygon(
-        0 0,
-        calc(100% - 16px) 0,
-        100% 16px,
-        100% 100%,
-        16px 100%,
-        0 calc(100% - 16px)
-      );
     }}
   </style>
 </head>
-<body bgcolor="#080808" class="body-canvas" style="margin:0;padding:0;background-color:#080808;background-image:linear-gradient(#080808,#080808);color:#eaeaea;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
 
-  <!-- Preheader preview text -->
-  <div style="display:none;font-size:1px;color:#080808;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">
-    Your Chaos Computer Club authentication token is {otp_code}. Valid for 5 minutes.
+  <!-- Preheader text (inbox preview) -->
+  <div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;">
+    Your verification code is {safe_code}. Valid for 15 minutes.
     {preview_padding}
   </div>
 
-  <!-- Canvas wrapper table: 100% width, void black -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#080808" class="body-canvas" style="background-color:#080808;background-image:linear-gradient(#080808,#080808);width:100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:#ffffff;">
     <tr>
-      <td align="center" valign="top" bgcolor="#080808" class="body-canvas" style="padding:24px 10px 36px 10px;background-color:#080808;background-image:linear-gradient(#080808,#080808);">
+      <td align="center" valign="top" class="card-wrap" style="padding:48px 16px 64px 16px;">
 
-        <!-- Responsive Block Wrapper (Forces max-width clamping across all browsers) -->
-        <div style="max-width:460px;width:100%;margin:0 auto;">
+        <!--[if (gte mso 9)|(IE)]>
+        <table align="center" border="0" cellspacing="0" cellpadding="0" width="520">
+          <tr>
+            <td align="left" valign="top" width="520">
+        <![endif]-->
 
-          <!--[if (gte mso 9)|(IE)]>
-          <table align="center" border="0" cellspacing="0" cellpadding="0" width="460" bgcolor="#0e0e10" style="background-color:#0e0e10;">
-            <tr>
-              <td align="center" valign="top" width="460" bgcolor="#0e0e10" style="background-color:#0e0e10;">
-          <![endif]-->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="card-container" style="max-width:520px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:20px;padding:44px 40px;text-align:left;box-sizing:border-box;">
+          <tr>
+            <td align="left" style="padding:0;">
 
-          <!-- Main Card Container -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0e0e10" class="card-box" style="width:100%;background-color:#0e0e10;background-image:linear-gradient(#0e0e10,#0e0e10);border:1px solid #1e1e26;">
+              <!-- Heading -->
+              <h1 style="margin:0 0 18px 0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;color:#111827;line-height:1.25;letter-spacing:-0.2px;">
+                Verify your email
+              </h1>
 
-            <!-- Acid Lime Top Bar -->
-            <tr>
-              <td height="2" bgcolor="#ccff00" style="background-color:#ccff00;font-size:2px;line-height:2px;height:2px;">&nbsp;</td>
-            </tr>
+              <!-- Instruction Paragraph -->
+              <p style="margin:0 0 32px 0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#374151;">
+                We need to verify your email address <a href="mailto:{safe_email}" style="color:#2563eb;text-decoration:none;">{safe_email}</a> before you can access your account. Enter the code below in your open browser window.
+              </p>
 
-            <!-- Header: Logo Mark Only + Context Label -->
-            <tr>
-              <td style="padding:16px 18px;border-bottom:1px solid #181820;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td align="left" valign="middle">
-                      <a href="https://chaoscomputerclub.in" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-block;">
-                        <img src="https://chaoscomputerclub.in/logo.png" width="30" height="30" alt="Chaos Computer Club" border="0" style="display:block;width:30px;height:30px;border:0;outline:none;" />
-                      </a>
-                    </td>
-                    <td align="right" valign="middle">
-                      <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.8px;color:#5a5a64;text-transform:uppercase;">
-                        AUTH // OTP
-                      </span>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
+              <!-- OTP Code Display -->
+              <div class="otp-display" style="margin:0 0 32px 0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:36px;font-weight:600;color:#111827;letter-spacing:2px;line-height:1;font-variant-numeric:tabular-nums;">
+                {safe_code}
+              </div>
 
-            <!-- Content Body -->
-            <tr>
-              <td style="padding:22px 18px 20px 18px;">
+              <!-- Thin Horizontal Divider -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0 0 24px 0;">
+                <tr>
+                  <td style="border-top:1px solid #f3f4f6;height:1px;line-height:1px;font-size:1px;padding:0;">&nbsp;</td>
+                </tr>
+              </table>
 
-                <!-- Headline (Anti-inversion off-white) -->
-                <div style="margin:0 0 8px 0;padding:0;font-family:'Inter Tight','Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#eaeaea;line-height:1.2;">
-                  Authenticate session
-                </div>
+              <!-- Expiry Notice -->
+              <p style="margin:0 0 10px 0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#6b7280;">
+                This code expires in 15 minutes.
+              </p>
 
-                <!-- Minimal instruction -->
-                <p style="margin:0 0 20px 0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:#7e7e88;line-height:1.5;">
-                  Enter the one-time authentication token below to complete verification.
-                </p>
+              <!-- Disclaimer / Ignore -->
+              <p style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#6b7280;">
+                If you didn't sign up for {app_name}, you can safely ignore this email. Someone else might have typed your email address by mistake.
+              </p>
 
-                <!-- HERO: RECTANGLE ACID CONTAINER WITH TACTILE HARDWARE CELLS -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;">
-                  <tr>
-                    <td style="padding:0;">
+            </td>
+          </tr>
+        </table>
 
-                      <!--[if mso]>
-                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ccff00" style="background-color:#ccff00;">
-                        <tr>
-                          <td align="center" valign="middle" style="padding:16px 10px 14px 10px;text-align:center;">
-                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
-                              <tr>
-                                {digit_cells_html}
-                              </tr>
-                            </table>
-                            <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:bold;letter-spacing:1.4px;color:#0e0e10;text-transform:uppercase;margin-top:10px;">
-                              EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-                      <![endif]-->
-
-                      <!--[if !mso]><!-- -->
-                      <div class="tag-cut-container acid-hero" style="position:relative;background-color:#ccff00;background-image:linear-gradient(#ccff00,#ccff00);padding:16px 10px 14px 10px;border:1px solid #ccff00;">
-
-                        <!-- Micro-Telemetry Top Row -->
-                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
-                          <tr>
-                            <td align="left" style="padding:0 2px;">
-                              <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#0e0e10;text-transform:uppercase;">
-                                [ TOKEN // 06-DIGIT ]
-                              </span>
-                            </td>
-                            <td align="right" style="padding:0 2px;">
-                              <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;color:#181800;text-transform:uppercase;">
-                                TTL 300S &bull; ACTIVE
-                              </span>
-                            </td>
-                          </tr>
-                        </table>
-
-                        <!-- 6 Segmented Digit Slots (Tactile Hardware Token Display) -->
-                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
-                          <tr>
-                            {digit_cells_html}
-                          </tr>
-                        </table>
-
-                        <!-- Subtext within container -->
-                        <div style="text-align:center;margin-top:10px;">
-                          <span style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#0e0e10;text-transform:uppercase;">
-                            EXPIRES IN 5 MIN &bull; SINGLE USE ONLY
-                          </span>
-                        </div>
-
-                      </div>
-                      <!--<![endif]-->
-
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- 1-line security disclaimer -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td style="border-left:2px solid #22222a;padding:2px 0 2px 10px;">
-                      <p style="margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;color:#5a5a64;line-height:1.5;">
-                        If you did not initiate this request, ignore this transmission. Never disclose this token.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-
-              </td>
-            </tr>
-
-            <!-- Minimal Footer -->
-            <tr>
-              <td bgcolor="#0a0a0c" class="card-footer" style="padding:14px 18px;border-top:1px solid #181820;background-color:#0a0a0c;background-image:linear-gradient(#0a0a0c,#0a0a0c);">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td align="left" style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;color:#ccff00;text-transform:uppercase;line-height:1.4;">
-                      EXPLORE &middot; BUILD &middot; COMPETE &middot; FAIL &middot; LEARN
-                    </td>
-                  </tr>
-                  <tr>
-                    <td align="left" style="padding-top:4px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;letter-spacing:0.8px;color:#3e3e48;text-transform:uppercase;">
-                      medicaps.chaoscomputerclub.in
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-          </table>
-
-          <!-- Below-Card Tagline -->
-          <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:9px;letter-spacing:0.8px;color:#2e2e36;text-transform:uppercase;margin-top:12px;text-align:center;line-height:1.4;">
-            ESTABLISHED 2026 &bull; OPEN BY DEFAULT &bull; PEER DRIVEN
-          </div>
-
-          <!--[if (gte mso 9)|(IE)]>
-              </td>
-            </tr>
-          </table>
-          <![endif]-->
-
-        </div>
+        <!--[if (gte mso 9)|(IE)]>
+            </td>
+          </tr>
+        </table>
+        <![endif]-->
 
       </td>
     </tr>
@@ -410,9 +222,9 @@ async def send_otp_email(to_email: str, otp: str) -> bool:
         return True
 
     try:
-        subject = f"Your Chaos Computer Club Code: {otp}"
-        html = _otp_email_template(otp)
-        plaintext = _otp_email_plaintext(otp)
+        subject = "Verify your email address"
+        html = _otp_email_template(to_email, otp)
+        plaintext = _otp_email_plaintext(to_email, otp)
         await asyncio.to_thread(_smtp_send_sync, to_email, subject, html, plaintext)
         logger.info("✓ OTP email sent to %s", to_email)
         return True

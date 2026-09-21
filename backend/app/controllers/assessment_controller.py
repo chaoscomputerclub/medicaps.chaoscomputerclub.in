@@ -114,6 +114,7 @@ class AssessmentController:
                     "stdout": tr.stdout,
                     "expected_output": tr.expected_output,
                     "stderr": tr.stderr,
+                    "compile_output": tr.compile_output,
                     "wall_time_ms": tr.wall_time_ms,
                 }
                 for tr in exec_result.testcase_results
@@ -252,6 +253,8 @@ class AssessmentController:
             "total_testcases": exec_result.total_testcases,
             "runtime_ms": round(exec_result.time * 1000.0, 2),
             "memory_mb": exec_result.memory,
+            "compile_output": exec_result.compile_output,
+            "stderr": exec_result.stderr,
             "testcase_results": [
                 {
                     "testcase_id": tr.testcase_id,
@@ -261,6 +264,8 @@ class AssessmentController:
                     "hidden": tr.hidden,
                     "stdout": tr.stdout if not tr.hidden else "(hidden testcase)",
                     "expected_output": tr.expected_output if not tr.hidden else "(hidden testcase)",
+                    "stderr": tr.stderr,
+                    "compile_output": tr.compile_output,
                     "wall_time_ms": tr.wall_time_ms,
                 }
                 for tr in exec_result.testcase_results

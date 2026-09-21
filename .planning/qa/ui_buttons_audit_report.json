@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T22:24:16.995Z",
+  "timestamp": "2026-09-21T22:46:55.390Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -1051,7 +1051,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1723,
+      "line": 1736,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveSubmitCaseIndex(idx)}",
@@ -1060,7 +1060,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1854,
+      "line": 1890,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveRunCaseIndex(idx)}",
@@ -1069,7 +1069,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1962,
+      "line": 2016,
       "tag": "<button>",
       "label": "{isDrawerCollapsed ? (               ...",
       "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
@@ -1078,7 +1078,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2001,
+      "line": 2055,
       "tag": "<button>",
       "label": "Code Editor",
       "handler": "{() => setActiveSettingsTab(\"editor\")}",
@@ -1087,7 +1087,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2012,
+      "line": 2066,
       "tag": "<button>",
       "label": "Shortcuts",
       "handler": "{() => setActiveSettingsTab(\"shortcuts\")}",
@@ -1096,7 +1096,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2023,
+      "line": 2077,
       "tag": "<button>",
       "label": "Contest Clock",
       "handler": "{() => setActiveSettingsTab(\"timer\")}",
@@ -1105,7 +1105,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2047,
+      "line": 2101,
       "tag": "<button>",
       "label": "{size}",
       "handler": "{() => {\n                          setEditorFontSize(size);\n                    ",
@@ -1114,7 +1114,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2074,
+      "line": 2128,
       "tag": "<button>",
       "label": "{editorWordWrap ? Enabled : Disabl...",
       "handler": "{() => {\n                      const next = !editorWordWrap;\n                   ",
@@ -1123,7 +1123,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2101,
+      "line": 2155,
       "tag": "<button>",
       "label": "{spaces} Spaces",
       "handler": "{() => {\n                          setEditorTabSize(spaces);\n                   ",
@@ -1132,7 +1132,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2167,
+      "line": 2221,
       "tag": "<Button>",
       "label": "Done",
       "handler": "{() => setShowSettingsModal(false)}",
@@ -1141,7 +1141,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2217,
+      "line": 2271,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
@@ -1150,7 +1150,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2230,
+      "line": 2284,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => setIsProblemListOpen(false)}",
@@ -1159,7 +1159,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2258,
+      "line": 2312,
       "tag": "<Button>",
       "label": "setIsProblemListOpen(false)}\n        ...",
       "handler": "{() => setIsProblemListOpen(false)}",
@@ -1168,7 +1168,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2274,
+      "line": 2328,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setProblemListTab(\"problems\")}",
@@ -1177,7 +1177,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2286,
+      "line": 2340,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setProblemListTab(\"ranking\")}",
@@ -1186,7 +1186,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2339,
+      "line": 2393,
       "tag": "<button>",
       "label": "{isActive && (                     <d...",
       "handler": "{() => {\n                    navigate(`/contests/${contestSlug}/problems/${pSlug",
@@ -1195,7 +1195,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2470,
+      "line": 2524,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1204,7 +1204,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2474,
+      "line": 2528,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -1213,7 +1213,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2527,
+      "line": 2581,
       "tag": "<Button>",
       "label": "Continue Solving",
       "handler": "{() => setShowExitModal(false)}",
@@ -1222,7 +1222,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2535,
+      "line": 2589,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                setShowExitModal(false);\n                navigate(`/con",
