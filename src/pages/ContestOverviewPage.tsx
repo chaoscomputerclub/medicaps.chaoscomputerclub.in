@@ -240,9 +240,13 @@ export function ContestOverviewPage() {
                 size="lg"
                 className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
-                <Link to={`/contests/${contestSlug}/lobby`}>
+                <a
+                  href={`/contests/${contestSlug}/lobby`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
-                </Link>
+                </a>
               </Button>
             ) : isFinished ? (
               <Button
@@ -268,11 +272,15 @@ export function ContestOverviewPage() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="rounded-md border-lime-400/30 bg-black text-lime-400 hover:bg-lime-400/10 text-xs font-mono"
+                    className="rounded-md border-lime-400/30 bg-black text-lime-400 hover:bg-lime-400/10 text-xs font-mono cursor-pointer"
                   >
-                    <Link to={`/contests/${contestSlug}/lobby`}>
+                    <a
+                      href={`/contests/${contestSlug}/lobby`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Play className="mr-1.5 size-3.5 fill-current" /> Enter Arena (Dev Mode)
-                    </Link>
+                    </a>
                   </Button>
                 )}
               </div>

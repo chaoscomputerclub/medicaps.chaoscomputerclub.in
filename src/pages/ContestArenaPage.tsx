@@ -311,15 +311,20 @@ export function ContestArenaPage() {
       <header className="h-12 shrink-0 px-4 border-b border-white/8 bg-black flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <Button
-            asChild
+            type="button"
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs"
+            onClick={() => {
+              if (window.opener) {
+                window.close();
+              } else {
+                navigate(`/contests/${contestSlug}`);
+              }
+            }}
+            className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs cursor-pointer flex items-center"
           >
-            <Link to={`/contests/${contestSlug}`}>
-              <ArrowLeft className="size-3.5 mr-1" />
-              Exit
-            </Link>
+            <ArrowLeft className="size-3.5 mr-1" />
+            Exit
           </Button>
 
           <div className="h-3 w-px bg-white/10" />

@@ -88,14 +88,21 @@ export function ContestLobbyPage() {
     (Boolean(resolvedRegistration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
 
   return (
-    <div className="flex min-h-[calc(100vh-140px)] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
-      {/* Back button */}
-      <Link
-        to={`/contests/${contestSlug}`}
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
+    <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
+      {/* Back / Close button */}
+      <button
+        type="button"
+        onClick={() => {
+          if (window.opener) {
+            window.close();
+          } else {
+            navigate(`/contests/${contestSlug}`);
+          }
+        }}
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start cursor-pointer"
       >
         <ArrowLeft className="size-3.5" /> Back to {resolvedContest.title}
-      </Link>
+      </button>
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (
@@ -360,8 +367,19 @@ export function ContestLobbyPage() {
                     </span>
                   )}
                 </Button>
-                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
-                  <Link to={`/contests/${contestSlug}`}>Not Now</Link>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    if (window.opener) {
+                      window.close();
+                    } else {
+                      navigate(`/contests/${contestSlug}`);
+                    }
+                  }}
+                  className="rounded-md font-mono text-xs text-zinc-500 hover:text-white cursor-pointer"
+                >
+                  Not Now
                 </Button>
               </div>
 

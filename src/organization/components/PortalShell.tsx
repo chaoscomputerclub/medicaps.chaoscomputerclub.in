@@ -114,7 +114,10 @@ export function PortalShell() {
   const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
 
   const cleanPath = pathname.replace(/\/+$/, "") || "/";
-  const isFullscreenWorkspace = cleanPath.includes("/assessment") || cleanPath.includes("/arena");
+  const isFullscreenWorkspace =
+    cleanPath.includes("/assessment") ||
+    cleanPath.includes("/arena") ||
+    cleanPath.includes("/lobby");
 
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});

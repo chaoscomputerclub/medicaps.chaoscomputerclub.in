@@ -370,10 +370,10 @@ export function ContestsHubPage() {
                   <div className="flex flex-wrap items-center gap-3 pt-1">
                     {upcomingWeekly.status === "live" ? (
                       <>
-                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md transition-colors [&_svg]:transition-colors">
-                          <Link to={`/contests/${upcomingWeekly.slug}/lobby`}>
+                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md transition-colors [&_svg]:transition-colors cursor-pointer">
+                          <a href={`/contests/${upcomingWeekly.slug}/lobby`} target="_blank" rel="noopener noreferrer">
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
-                          </Link>
+                          </a>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="text-xs">
                           <Link to={`/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
@@ -427,10 +427,10 @@ export function ContestsHubPage() {
                     </div>
                     <div className="flex items-center gap-2 pt-1">
                       {isLive ? (
-                        <Button asChild className="flex-1 bg-transparent text-xs font-sans font-semibold uppercase text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
-                          <Link to={`/contests/${contest.slug}/lobby`}>
+                        <Button asChild className="flex-1 bg-transparent text-xs font-sans font-semibold uppercase text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors cursor-pointer">
+                          <a href={`/contests/${contest.slug}/lobby`} target="_blank" rel="noopener noreferrer">
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Arena
-                          </Link>
+                          </a>
                         </Button>
                       ) : isReg ? (
                         <Button asChild variant="outline" className="flex-1 text-xs text-emerald-400 border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-950/50 hover:text-emerald-300 font-sans">

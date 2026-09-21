@@ -141,11 +141,11 @@ export function ContestOfflinePage() {
             Seat: <strong className="text-lime-400">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </p>
         </div>
-        <Button asChild size="lg" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
-          <Link to={`/contests/${contestSlug}/lobby`}>
+        <Button asChild size="lg" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors cursor-pointer">
+          <a href={`/contests/${contestSlug}/lobby`} target="_blank" rel="noopener noreferrer">
             <Play className="size-3.5 fill-current mr-1.5" />
             Enter Arena
-          </Link>
+          </a>
         </Button>
       </div>
 
