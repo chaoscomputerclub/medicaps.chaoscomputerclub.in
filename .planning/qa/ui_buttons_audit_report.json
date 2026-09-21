@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T10:29:04.570Z",
+  "timestamp": "2026-09-21T10:35:40.870Z",
   "totalElements": 252,
   "functionalCount": 252,
   "connectivityRate": "100.0%",
@@ -268,7 +268,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 137,
+      "line": 140,
       "tag": "<button>",
       "label": "{open ? <X size={20} /> : <List size=...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -277,7 +277,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 149,
+      "line": 152,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -286,7 +286,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 162,
+      "line": 165,
       "tag": "<Link>",
       "label": "[to=/portal]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -295,7 +295,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 182,
+      "line": 189,
       "tag": "<Link>",
       "label": "[to={item.to}]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -304,7 +304,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 201,
+      "line": 208,
       "tag": "<Link>",
       "label": "[to=/portal/profile]",
       "handler": "\"/portal/profile\"",
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 223,
+      "line": 230,
       "tag": "<button>",
       "label": "dispatch(logout())}\n            aria-...",
       "handler": "{() => dispatch(logout())}",

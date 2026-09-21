@@ -29,7 +29,7 @@ export function AuthLayout({
       <div className="w-full max-w-md">
         {/* Minimalist Logo & Title */}
         <div className="mb-6 flex items-center justify-center gap-2.5">
-          <div className="w-3 h-3 rounded-full bg-lime-400" />
+          <img src="/logo.png" alt="Chaos Computer Club" className="w-8 h-8 object-contain" />
           <Link to="/" className="font-mono text-sm font-bold tracking-wider text-white">
             CCC MEDI-CAPS
           </Link>

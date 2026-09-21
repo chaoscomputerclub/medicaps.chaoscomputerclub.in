@@ -16,20 +16,23 @@ export function AppShellSkeleton() {
     >
       {/* Mobile Topbar Skeleton */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <Skeleton className="w-2.5 h-2.5 rounded-full bg-lime-400/30" />
-          <Skeleton className="h-3 w-24" />
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="w-7 h-7 rounded-md shrink-0" />
+          <div className="flex flex-col gap-1">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-2 w-16" />
+          </div>
         </div>
         <Skeleton className="w-6 h-6 rounded-md" />
       </div>
 
       {/* Desktop Sidebar Skeleton */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-[220px] bg-black border-r border-white/8 px-3 py-4 flex-col z-50">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-black border-r border-white/8 px-4 py-4 flex-col z-50">
         {/* Brand Header */}
-        <div className="flex items-center gap-2.5 px-2 pb-4 mb-2 border-b border-white/8">
-          <Skeleton className="w-2.5 h-2.5 rounded-full bg-lime-400/30 shrink-0" />
+        <div className="flex items-center gap-3 pb-4 mb-2 border-b border-white/8">
+          <Skeleton className="w-8 h-8 rounded-md shrink-0" />
           <div className="flex flex-col gap-1.5 flex-1">
-            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-3 w-32" />
             <Skeleton className="h-2 w-20" />
           </div>
         </div>
@@ -58,7 +61,7 @@ export function AppShellSkeleton() {
       </aside>
 
       {/* Main Content Viewport Skeleton */}
-      <main className="flex-1 md:ml-[220px] min-h-screen bg-black p-4 md:p-8 space-y-8">
+      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8 space-y-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header Row */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6">

@@ -130,9 +130,12 @@ export function PortalShell() {
     <div className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
-        <Link to="/portal" className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-lime-400 animate-pulse" />
-          <span className="font-mono font-semibold text-xs tracking-wider text-white">CCC · ARENA</span>
+        <Link to="/portal" className="flex items-center gap-2.5">
+          <img src="/logo.png" alt="Chaos Computer Club" className="w-7 h-7 object-contain" />
+          <div className="flex flex-col">
+            <span className="font-mono font-bold text-xs tracking-wider text-white leading-none">CCC MEDI-CAPS</span>
+            <span className="font-mono text-[8px] text-zinc-500 tracking-widest mt-0.5">TOURNAMENT ARENA</span>
+          </div>
         </Link>
         <button
           type="button"
@@ -154,20 +157,24 @@ export function PortalShell() {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 w-[220px] bg-black border-r border-white/8 px-3 py-4 flex flex-col z-50 transition-transform duration-150 ease-out md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 w-64 bg-black border-r border-white/8 px-4 py-4 flex flex-col z-50 transition-transform duration-150 ease-out md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Header */}
         <Link
           to="/portal"
-          className="flex items-center gap-2.5 px-2 pb-4 mb-2 border-b border-white/8 group"
+          className="flex items-center gap-3 pb-4 mb-2 border-b border-white/8 group"
           onClick={() => dispatch(setSidebarOpen(false))}
         >
-          <div className="w-2.5 h-2.5 rounded-full bg-lime-400 shrink-0" />
-          <div className="flex flex-col">
-            <span className="font-mono text-xs font-bold tracking-wider text-white leading-none">CCC MEDI-CAPS</span>
-            <span className="font-mono text-[9px] text-zinc-500 tracking-widest mt-1">TOURNAMENT ARENA</span>
+          <img
+            src="/logo.png"
+            alt="Chaos Computer Club Medi-Caps"
+            className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform duration-150"
+          />
+          <div className="flex flex-col min-w-0">
+            <strong className="font-mono text-xs font-bold tracking-wider text-white leading-tight">CHAOS COMPUTER CLUB</strong>
+            <span className="font-mono text-[9px] font-medium text-zinc-400 tracking-wider">MEDI-CAPS CHAPTER</span>
           </div>
         </Link>
 
@@ -232,7 +239,7 @@ export function PortalShell() {
       </aside>
 
       {/* Main Viewport */}
-      <main className="flex-1 md:ml-[220px] min-h-screen bg-black p-4 md:p-8 relative">
+      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8 relative">
         <Suspense fallback={<PortalRouteSkeleton />}>
           <Outlet />
         </Suspense>
