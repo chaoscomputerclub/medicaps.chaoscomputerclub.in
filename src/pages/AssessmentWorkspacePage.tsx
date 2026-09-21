@@ -1,6 +1,7 @@
 /**
  * Chaos Computer Club India — Clean Standalone Assessment Environment
  * Pure distraction-free full-screen testing workspace.
+ * Redesigned to Strix AI Paradigm (Pure Pitch Black × Electric Lime)
  */
 
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -52,7 +53,6 @@ import {
   dismissAntiCheatWarning,
 } from "@/store/slices/assessmentSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
-
 
 function formatTimer(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -131,7 +131,7 @@ export function AssessmentWorkspacePage() {
 
     return () => {
       window.removeEventListener("blur", onBlur);
-      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("visibilitychange", onVisibility);
     };
   }, [contestSlug, session?.status, dispatch]);
 
@@ -148,7 +148,7 @@ export function AssessmentWorkspacePage() {
     ? (codeMap[`${activeProblem.id}_${selectedLanguage}`] ??
       activeProblem.starter_codes?.[selectedLanguage] ??
       "")
-    : "";
+  : "";
 
   const activeSubmission = activeProblem ? submissionsMap[activeProblem.id] : null;
 
@@ -242,44 +242,42 @@ export function AssessmentWorkspacePage() {
     return <AssessmentStudioSkeleton />;
   }
 
-  // ── Submitted / Completed gate ───────────────────────────────────────────
-  // When the session is already done show a clean completion screen instead of
-  // the live editor. This prevents any re-entry path from reaching the workspace.
+  // ── Submitted / Completed Gate ───────────────────────────────────────────
   if (session && (session.status === "submitted" || session.status === "disqualified")) {
     const isDisqualified = session.status === "disqualified";
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#080808] text-[#e0e0e0] font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-none bg-[#0e0e0e] border border-[#1e1e1e] text-center space-y-6">
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-lg bg-black border border-white/8 text-center space-y-6">
           <div
-            className={`w-16 h-16 rounded-none flex items-center justify-center mx-auto border ${
+            className={`size-14 rounded-md flex items-center justify-center mx-auto border ${
               isDisqualified
-                ? "bg-red-950/30 border-red-500/30 text-red-400"
-                : "bg-emerald-950/30 border-emerald-500/30 text-emerald-400"
+                ? "bg-red-500/10 border-red-500/30 text-red-400"
+                : "bg-lime-400/10 border-lime-400/30 text-lime-400"
             }`}
           >
-            {isDisqualified ? <ShieldAlert size={28} /> : <CheckCircle2 size={28} />}
+            {isDisqualified ? <ShieldAlert size={26} /> : <CheckCircle2 size={26} />}
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-lg font-bold font-mono text-white">
+            <h2 className="text-xl font-semibold tracking-tight text-white">
               {isDisqualified ? "Assessment Disqualified" : "Assessment Submitted"}
             </h2>
-            <p className="text-sm text-[#888] font-mono leading-relaxed">
+            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
               {isDisqualified
-                ? "Your session was disqualified due to anti-cheat policy violations. Your answers were not recorded."
-                : "Your answers have been recorded. Results will be published after the 24-hour entry window closes."}
+                ? "Your session was disqualified due to anti-cheat policy violations."
+                : "Your answers have been recorded. Results will update automatically."}
             </p>
           </div>
 
           {!isDisqualified && (
-            <div className="rounded-none bg-[#141414] border border-[#1e1e1e] p-4 space-y-1">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666]">Score recorded</span>
-                <span className="text-emerald-400 font-bold">{session.total_score ?? 0} pts</span>
+            <div className="rounded-md bg-zinc-950 border border-white/8 p-4 space-y-2 font-mono text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500">Score recorded</span>
+                <span className="text-lime-400 font-semibold tabular-nums">{session.total_score ?? 0} pts</span>
               </div>
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666]">Status</span>
-                <span className="text-[#ccc] font-bold uppercase tracking-wider">Submitted</span>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500">Status</span>
+                <span className="text-white font-semibold uppercase tracking-wider">Submitted</span>
               </div>
             </div>
           )}
@@ -294,21 +292,21 @@ export function AssessmentWorkspacePage() {
                   navigate(`/portal/contests/${contestSlug}`);
                 }
               }}
-              className="w-full py-2 px-4 rounded-none bg-lime-400 text-black font-bold font-mono text-xs hover:bg-lime-300 transition-colors uppercase tracking-wider cursor-pointer"
+              className="w-full py-2 px-4 rounded-md bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 transition-colors cursor-pointer"
             >
-              Close Assessment Window
+              Close Workspace
             </button>
             <button
               type="button"
               onClick={() => navigate(`/portal/contests/${contestSlug}/results`)}
-              className="w-full py-2 px-4 rounded-none bg-zinc-900 border border-white/10 text-white font-bold font-mono text-xs hover:bg-zinc-800 transition-colors uppercase tracking-wider cursor-pointer"
+              className="w-full py-2 px-4 rounded-md bg-black border border-white/10 text-white font-semibold font-mono text-xs hover:bg-zinc-950 transition-colors cursor-pointer"
             >
-              View Round 1 Ranking
+              View Standings
             </button>
             <button
               type="button"
               onClick={() => navigate(`/portal/contests/${contestSlug}`)}
-              className="w-full py-2 px-4 rounded-none border border-[#2a2a2a] text-[#aaa] font-mono text-xs hover:bg-[#161616] transition-colors cursor-pointer"
+              className="w-full py-2 px-4 rounded-md border border-white/6 text-zinc-500 font-mono text-xs hover:text-white transition-colors cursor-pointer"
             >
               Return to Contest Details
             </button>
@@ -318,28 +316,28 @@ export function AssessmentWorkspacePage() {
     );
   }
 
-  // ── Waiting Room Gate (When Assessment Window has not opened yet) ───────────
+  // ── Waiting Room Gate ───────────────────────────────────────────────────
   if (assessment && !session) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-950 text-zinc-100 font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-none bg-zinc-900/80 border border-white/10 text-center space-y-6 backdrop-blur-md shadow-2xl">
-          <div className="size-14 rounded-none bg-zinc-800/60 border border-white/10 flex items-center justify-center mx-auto text-lime-400">
-            <Clock size={28} />
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-lg bg-black border border-white/8 text-center space-y-6">
+          <div className="size-12 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto text-lime-400">
+            <Clock size={24} />
           </div>
           <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
-              Round 1 Screening Gated
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+              Round 1 Screening Locked
             </span>
-            <h2 className="text-xl font-bold font-mono text-white uppercase">
+            <h2 className="text-xl font-semibold text-white tracking-tight">
               {assessment.title}
             </h2>
             <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              The 2-hour proctored assessment window opens strictly prior to the contest final. Please wait in the lobby until the timer unlocks.
+              The proctored assessment window opens strictly prior to the contest final. Please wait in the lobby until the timer unlocks.
             </p>
           </div>
-          <div className="p-4 bg-zinc-950/80 rounded-none border border-white/10">
-            <span className="font-mono text-xs text-zinc-400 block uppercase">Opens In</span>
-            <div className="font-mono text-2xl font-bold text-white mt-1 tabular-nums">
+          <div className="p-4 bg-zinc-950 rounded-md border border-white/8">
+            <span className="font-mono text-[10px] text-zinc-500 block uppercase tracking-wider">Opens In</span>
+            <div className="font-mono text-2xl font-bold text-lime-400 mt-1 tabular-nums">
               {formatTimer(assessment.opens_in_seconds || 0)}
             </div>
           </div>
@@ -348,39 +346,39 @@ export function AssessmentWorkspacePage() {
               if (window.opener) window.close();
               else navigate(`/portal/contests/${contestSlug}`);
             }}
-            className="w-full bg-lime-400 text-black font-mono font-bold text-xs uppercase rounded-none hover:bg-lime-300 shadow-lg shadow-lime-400/20"
+            className="w-full bg-lime-400 text-black font-mono font-semibold text-xs rounded-md hover:bg-lime-300"
           >
-            Close Window & Return
+            Close & Return
           </Button>
         </div>
       </div>
     );
   }
 
-  // Error / Registration / Lifecycle Gate
+  // ── Error / Gate Screen ─────────────────────────────────────────────────
   if (error && !assessment) {
     const isRegistrationErr = error.toLowerCase().includes("registration");
     const isAuthErr = error.toLowerCase().includes("credential") || error.toLowerCase().includes("token") || error.toLowerCase().includes("login");
     const isLifecycleErr = error.toLowerCase().includes("upcoming") || error.toLowerCase().includes("live") || error.toLowerCase().includes("top 30");
 
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070707] text-[#e0e0e0] font-sans p-6">
-        <div className="max-w-md w-full p-6 rounded-none bg-[#0e0e0e] border border-[#222] text-center space-y-4">
-          <div className="w-12 h-12 rounded-none bg-[#161616] border border-[#282828] flex items-center justify-center mx-auto text-accent">
-            {isLifecycleErr ? <Lock size={24} className="text-amber-400" /> : <ShieldAlert size={24} />}
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
+        <div className="max-w-md w-full p-6 rounded-lg bg-black border border-white/8 text-center space-y-4">
+          <div className="size-12 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto">
+            {isLifecycleErr ? <Lock size={22} className="text-amber-400" /> : <ShieldAlert size={22} className="text-red-400" />}
           </div>
           <h2 className="text-base font-semibold font-mono text-white">
             {isLifecycleErr ? "Screening Assessment Closed" : "Assessment Access Gate"}
           </h2>
-          <p className="text-xs text-[#888] font-mono leading-relaxed">
+          <p className="text-xs text-zinc-400 font-mono leading-relaxed">
             {error}
           </p>
 
           <div className="pt-2 flex flex-col gap-2">
             {isLifecycleErr && (
-              <a href={`/portal/assessments/${contestSlug}/leaderboard`} className="w-full">
-                <Button className="w-full bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90">
-                  <Trophy size={14} className="mr-1.5" /> View Screening Standings & Cutoff 🏆
+              <a href={`/portal/contests/${contestSlug}/results`} className="w-full">
+                <Button className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md">
+                  <Trophy size={14} className="mr-1.5" /> View Standings
                 </Button>
               </a>
             )}
@@ -388,15 +386,15 @@ export function AssessmentWorkspacePage() {
               <Button
                 onClick={handleDirectRegister}
                 disabled={isRegistering}
-                className="w-full bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90"
+                className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md"
               >
                 <Users size={14} className="mr-1.5" />
-                {isRegistering ? "Registering..." : "Register Now & Enter Workspace"}
+                {isRegistering ? "Registering..." : "Register Now & Enter"}
               </Button>
             )}
             {isAuthErr && (
               <a href={`/auth?redirect=/assessments/${contestSlug}`} className="w-full">
-                <Button className="w-full bg-accent text-black font-bold font-mono text-xs hover:bg-accent/90">
+                <Button className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md">
                   Sign In to Continue
                 </Button>
               </a>
@@ -407,7 +405,7 @@ export function AssessmentWorkspacePage() {
                 if (window.opener) window.close();
                 else window.location.href = `/portal/contests/${contestSlug}`;
               }}
-              className="w-full font-mono text-xs border-[#333] hover:bg-[#181818]"
+              className="w-full font-mono text-xs border-white/10 bg-black text-zinc-400 hover:text-white rounded-md"
             >
               Return to Contest Details
             </Button>
@@ -417,16 +415,17 @@ export function AssessmentWorkspacePage() {
     );
   }
 
+  // ── Main Workspace ─────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen w-screen flex-col bg-[#080808] text-[#e0e0e0] font-sans select-none overflow-hidden">
-      {/* ─── Minimal Ultra-Clean Header (44px) ────────────────────── */}
-      <header className="flex h-11 shrink-0 items-center justify-between border-b border-[#1c1c1c] bg-[#0c0c0c] px-3 z-20">
-        {/* Left: Problem selector pill tabs */}
+    <div className="flex h-screen w-screen flex-col bg-black text-white font-sans select-none overflow-hidden">
+      {/* Top Header (44px) */}
+      <header className="flex h-11 shrink-0 items-center justify-between border-b border-white/8 bg-black px-3 z-20">
+        {/* Left: Problem selector pills */}
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400 mr-2 hidden sm:inline">
-            (01 // {assessment?.title ? assessment.title.slice(0, 26) : "Proctored Terminal"})
+          <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 mr-2 hidden sm:inline">
+            {assessment?.title ? assessment.title.slice(0, 24) : "CCC Assessment"}
           </span>
-          <div className="h-4 w-px bg-white/10 mr-1 hidden sm:inline" />
+          <div className="h-3 w-px bg-white/10 mr-1 hidden sm:inline" />
           {problems.map((prob, idx) => {
             const sub = submissionsMap[prob.id];
             const isFullScore = sub && sub.score === prob.points;
@@ -438,48 +437,47 @@ export function AssessmentWorkspacePage() {
                 key={prob.id}
                 type="button"
                 onClick={() => dispatch(setActiveProblemIndex(idx))}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-none text-xs font-mono transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-zinc-800 text-white border border-lime-400/50 font-semibold"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent"
+                    ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-950 border border-transparent"
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>
-                <span className="text-[10px] text-zinc-500 font-normal">({prob.points}p)</span>
+                <span className="text-[10px] text-zinc-500 tabular-nums">({prob.points}p)</span>
                 {isFullScore && <CheckCircle2 size={12} className="text-lime-400" />}
-                {isPartial && <span className="size-1.5 rounded-none bg-amber-400" />}
+                {isPartial && <span className="size-1.5 rounded-full bg-amber-400" />}
               </button>
             );
           })}
         </div>
 
-        {/* Center: Minimal Countdown Timer & Warning Status Indicator */}
+        {/* Center: Countdown Timer & Anti-Cheat Warnings */}
         <div className="flex items-center gap-2">
           {session && (
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-none font-mono text-xs border ${
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-mono text-xs border ${
                 session.remaining_seconds < 600
-                  ? "border-destructive/40 bg-destructive/10 text-destructive animate-pulse"
-                  : "border-white/10 bg-zinc-900 text-zinc-200"
+                  ? "border-red-500/40 bg-red-950/20 text-red-400 animate-pulse"
+                  : "border-white/10 bg-zinc-950 text-zinc-200"
               }`}
             >
-              <Clock size={12} />
-              <span className="font-bold tracking-wider">{formatTimer(session.remaining_seconds)}</span>
+              <Clock size={12} className="text-lime-400" />
+              <span className="font-semibold tabular-nums">{formatTimer(session.remaining_seconds)}</span>
             </div>
           )}
 
           {session && (
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-none font-mono text-xs border transition-colors ${
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-mono text-xs border ${
                 (session.anti_cheat_violations || 0) > 0
-                  ? "border-amber-500/50 bg-amber-950/40 text-amber-300 font-medium shadow-sm shadow-amber-500/10"
-                  : "border-white/10 bg-zinc-900/80 text-zinc-400"
+                  ? "border-amber-500/40 bg-black text-amber-300 font-semibold"
+                  : "border-white/8 bg-zinc-950 text-zinc-500"
               }`}
-              title={`Proctor Warnings: ${session.anti_cheat_violations || 0} of ${assessment?.max_violations || 3} warnings consumed.`}
             >
-              <ShieldAlert size={12} className={(session.anti_cheat_violations || 0) > 0 ? "text-amber-400 animate-pulse" : "text-zinc-500"} />
-              <span className="tabular-nums font-semibold tracking-wide">
-                Warning: {session.anti_cheat_violations || 0} of {assessment?.max_violations || 3}
+              <ShieldAlert size={12} className={(session.anti_cheat_violations || 0) > 0 ? "text-amber-400" : "text-zinc-600"} />
+              <span className="tabular-nums">
+                Warning {session.anti_cheat_violations || 0} / {assessment?.max_violations || 3}
               </span>
             </div>
           )}
@@ -492,10 +490,10 @@ export function AssessmentWorkspacePage() {
             value={selectedLanguage}
             onValueChange={(val: any) => dispatch(setSelectedLanguage(val))}
           >
-            <SelectTrigger className="h-7 w-[100px] border-[#252525] bg-[#121212] text-xs font-mono text-[#ccc] focus:ring-0">
+            <SelectTrigger className="h-7 w-[105px] border-white/10 bg-black text-xs font-mono text-zinc-300 focus:ring-0 rounded-md">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="border-[#252525] bg-[#121212] text-xs font-mono text-[#ccc]">
+            <SelectContent className="border-white/10 bg-black text-xs font-mono text-zinc-300 rounded-md">
               <SelectItem value="python">Python 3</SelectItem>
               <SelectItem value="cpp">C++ 14</SelectItem>
               <SelectItem value="javascript">Node.js</SelectItem>
@@ -507,46 +505,45 @@ export function AssessmentWorkspacePage() {
             size="sm"
             variant="ghost"
             onClick={toggleFullscreen}
-            className="h-7 px-2 text-xs font-mono text-[#888] hover:text-white hover:bg-[#181818] border border-[#222]"
+            className="h-7 px-2 text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullscreen ? <Minimize2 size={13} className="mr-1" /> : <Maximize2 size={13} className="mr-1" />}
-            <span className="hidden md:inline">{isFullscreen ? "Exit" : "Fullscreen"}</span>
+            <span className="hidden md:inline">{isFullscreen ? "Exit" : "Full"}</span>
           </Button>
 
-          {/* Run Tests Button */}
+          {/* Run Code */}
           <Button
             size="sm"
             variant="outline"
             disabled={isRunning || isSubmitting}
             onClick={handleRun}
-            className="h-7 px-2.5 gap-1 text-xs font-mono border-[#2d2d2d] bg-[#161616] text-[#e0e0e0] hover:bg-[#222] hover:text-white cursor-pointer"
+            className="h-7 px-2.5 gap-1 text-xs font-mono border-white/10 bg-black text-white hover:bg-zinc-950 hover:border-white/20 rounded-md"
           >
-            <Play size={12} className="text-amber-400" />
+            <Play size={12} className="text-lime-400 fill-lime-400" />
             <span>{isRunning ? "Testing..." : "Run"}</span>
           </Button>
 
-          {/* Submit Solution Button */}
+          {/* Submit Solution */}
           <Button
             size="sm"
             disabled={isRunning || isSubmitting}
             onClick={handleSubmit}
-            className="h-7 px-2.5 gap-1 text-xs font-mono bg-accent text-black font-bold hover:bg-accent/90 cursor-pointer"
+            className="h-7 px-2.5 gap-1 text-xs font-mono bg-lime-400 text-black font-semibold hover:bg-lime-300 rounded-md"
           >
             <Send size={12} />
             <span>{isSubmitting ? "Judging..." : "Submit"}</span>
           </Button>
 
-          {/* Exit Window Button */}
+          {/* Exit Window */}
           <Button
             size="sm"
             variant="ghost"
             onClick={handleExitWindow}
-            className="h-7 px-2 text-[11px] font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-zinc-800"
-            title="Save code & exit assessment window (you can resume later)"
+            className="h-7 px-2 text-[11px] font-mono text-zinc-500 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md"
           >
             <X size={12} className="mr-1" />
-            <span className="hidden sm:inline">Exit Window</span>
+            <span className="hidden sm:inline">Exit</span>
           </Button>
 
           {/* Finish Button */}
@@ -554,38 +551,38 @@ export function AssessmentWorkspacePage() {
             size="sm"
             variant="ghost"
             onClick={handleFinish}
-            className="h-7 px-2 text-[11px] font-mono text-destructive/80 hover:text-destructive hover:bg-destructive/10 border border-destructive/30"
+            className="h-7 px-2 text-[11px] font-mono text-red-400 hover:text-red-300 hover:bg-red-950/20 border border-red-500/20 rounded-md"
           >
             Finish
           </Button>
         </div>
       </header>
 
-      {/* ─── Main 2-Pane Split View ───────────────────────────────── */}
+      {/* Main 2-Pane Split View */}
       <div className="flex flex-1 overflow-hidden">
-        {/* LEFT PANE: Clean Problem Statement ─────────────────────── */}
-        <div className="w-1/2 border-r border-[#1c1c1c] overflow-y-auto p-6 space-y-6 bg-[#080808]">
+        {/* LEFT PANE: Problem Statement */}
+        <div className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-6 bg-black">
           {activeProblem ? (
             <div className="space-y-6">
               {/* Problem Title & Points */}
-              <div className="border-b border-white/10 pb-4">
+              <div className="border-b border-white/8 pb-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
-                    (01 // Problem {activeProblem.problem_index})
+                  <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400">
+                    Problem {activeProblem.problem_index}
                   </span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-zinc-900 text-zinc-400 border border-white/10 uppercase tracking-wider">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-white/8 uppercase">
                     {activeProblem.difficulty}
                   </span>
-                  <span className="text-xs font-mono text-zinc-400 tabular-nums">
-                    {activeProblem.points} Points
+                  <span className="text-xs font-mono text-zinc-500 tabular-nums">
+                    {activeProblem.points} Pts
                   </span>
                 </div>
-                <h1 className="text-xl font-bold font-mono text-white uppercase tracking-tight mt-1.5">
+                <h1 className="text-lg font-semibold tracking-tight text-white">
                   {activeProblem.title}
                 </h1>
               </div>
 
-              {/* Problem Description */}
+              {/* Description */}
               <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
                 {activeProblem.description}
               </div>
@@ -593,10 +590,10 @@ export function AssessmentWorkspacePage() {
               {/* Input Format */}
               {activeProblem.input_format && (
                 <div className="space-y-1.5">
-                  <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
-                    (01 // Input Format)
+                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                    Input Format
                   </h3>
-                  <div className="text-xs font-mono text-zinc-200 bg-zinc-950 border border-white/10 p-3 rounded-none leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md leading-relaxed whitespace-pre-line">
                     {activeProblem.input_format}
                   </div>
                 </div>
@@ -605,10 +602,10 @@ export function AssessmentWorkspacePage() {
               {/* Output Format */}
               {activeProblem.output_format && (
                 <div className="space-y-1.5">
-                  <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
-                    (02 // Output Format)
+                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                    Output Format
                   </h3>
-                  <div className="text-xs font-mono text-zinc-200 bg-zinc-950 border border-white/10 p-3 rounded-none leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md leading-relaxed whitespace-pre-line">
                     {activeProblem.output_format}
                   </div>
                 </div>
@@ -617,19 +614,19 @@ export function AssessmentWorkspacePage() {
               {/* Constraints */}
               {activeProblem.constraints && (
                 <div className="space-y-1.5">
-                  <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
-                    (03 // Constraints)
+                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                    Constraints
                   </h3>
-                  <pre className="text-xs font-mono text-amber-300 bg-zinc-950 border border-white/10 p-3 rounded-none overflow-x-auto whitespace-pre-wrap">
+                  <pre className="text-xs font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap">
                     {activeProblem.constraints}
                   </pre>
                 </div>
               )}
 
               {/* Sample Examples */}
-              <div className="space-y-4 pt-2">
-                <h3 className="font-mono text-[11px] uppercase font-bold text-lime-400 tracking-[0.2em]">
-                  (04 // Sample Testcases)
+              <div className="space-y-3 pt-2">
+                <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                  Sample Testcases
                 </h3>
                 {activeProblem.sample_testcases?.map((s, idx) => {
                   const inputVal = s.stdin || (s as any).input || "";
@@ -638,37 +635,37 @@ export function AssessmentWorkspacePage() {
                   return (
                     <div
                       key={idx}
-                      className="p-3.5 rounded-none bg-zinc-950 border border-white/10 space-y-2.5 text-xs font-mono"
+                      className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2.5 text-xs font-mono"
                     >
-                      <div className="flex items-center justify-between text-[#888] font-bold">
-                        <span>Example {idx + 1}</span>
+                      <div className="flex items-center justify-between text-zinc-400 font-semibold">
+                        <span>Case {idx + 1}</span>
                         <button
                           type="button"
                           onClick={() => handleCopy(inputVal, idx)}
-                          className="flex items-center gap-1 text-[11px] text-[#666] hover:text-white cursor-pointer"
+                          className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer"
                         >
-                          {copiedIndex === idx ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                          {copiedIndex === idx ? <Check size={11} className="text-lime-400" /> : <Copy size={11} />}
                           <span>{copiedIndex === idx ? "Copied" : "Copy Input"}</span>
                         </button>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-[#666] text-[11px]">Input:</div>
-                        <pre className="p-2 rounded bg-[#060606] border border-[#181818] text-[#ddd] overflow-x-auto whitespace-pre-wrap font-mono">
+                        <div className="text-zinc-500 text-[10px]">Input</div>
+                        <pre className="p-2 rounded bg-black border border-white/6 text-zinc-300 overflow-x-auto whitespace-pre-wrap font-mono">
                           {inputVal}
                         </pre>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-[#666] text-[11px]">Expected Output:</div>
-                        <pre className="p-2 rounded bg-[#060606] border border-[#181818] text-[#ddd] overflow-x-auto whitespace-pre-wrap font-mono">
+                        <div className="text-zinc-500 text-[10px]">Expected Output</div>
+                        <pre className="p-2 rounded bg-black border border-white/6 text-zinc-300 overflow-x-auto whitespace-pre-wrap font-mono">
                           {outputVal}
                         </pre>
                       </div>
 
                       {s.explanation && (
-                        <div className="text-[#777] text-[11px] italic pt-0.5">
-                          Note: {s.explanation}
+                        <div className="text-zinc-500 text-[11px] italic pt-0.5">
+                          {s.explanation}
                         </div>
                       )}
                     </div>
@@ -677,14 +674,14 @@ export function AssessmentWorkspacePage() {
               </div>
             </div>
           ) : (
-            <div className="text-[#666] font-mono text-xs">Select a problem from the top bar.</div>
+            <div className="text-zinc-500 font-mono text-xs">Select a problem from the top bar.</div>
           )}
         </div>
 
-        {/* RIGHT PANE: Monaco Editor & Output Console ──────────────── */}
-        <div className="w-1/2 flex flex-col bg-[#0a0a0a]">
-          {/* Monaco Editor Container */}
-          <div className="flex-1 relative overflow-hidden">
+        {/* RIGHT PANE: Monaco Editor & Console */}
+        <div className="w-1/2 flex flex-col bg-black">
+          {/* Editor Container */}
+          <div className="flex-1 relative overflow-hidden bg-black">
             <MonacoEditor
               value={currentCode}
               language={selectedLanguage}
@@ -699,7 +696,6 @@ export function AssessmentWorkspacePage() {
                 );
               }}
             />
-            {/* Quick reset starter code pill in editor corner */}
             <button
               type="button"
               onClick={() => {
@@ -708,25 +704,24 @@ export function AssessmentWorkspacePage() {
                   dispatch(resetStarterCode());
                 }
               }}
-              className="absolute bottom-3 right-4 flex items-center gap-1 px-2 py-1 rounded bg-[#181818]/90 hover:bg-[#252525] border border-[#2c2c2c] text-[#888] hover:text-[#ccc] text-[10px] font-mono transition-all backdrop-blur cursor-pointer z-10"
-              title="Reset to starter code"
+              className="absolute bottom-3 right-4 flex items-center gap-1 px-2 py-1 rounded bg-black border border-white/10 text-zinc-400 hover:text-white text-[10px] font-mono transition-colors z-10 cursor-pointer"
             >
               <RotateCcw size={10} /> Reset Starter
             </button>
           </div>
 
-          {/* Interactive Console / Execution Output Panel */}
-          <div className="h-56 flex flex-col border-t border-[#1c1c1c] bg-[#0c0c0c]">
-            {/* Console Tab Bar */}
-            <div className="flex h-8 shrink-0 items-center justify-between border-b border-[#181818] px-3 bg-[#0a0a0a]">
+          {/* Output / Execution Drawer */}
+          <div className="h-56 flex flex-col border-t border-white/8 bg-black">
+            {/* Tab Bar */}
+            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => dispatch(setActiveConsoleTab("testcases"))}
-                  className={`px-2.5 py-1 text-xs font-mono rounded cursor-pointer transition-colors ${
+                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-[#1f1f1f] text-white font-semibold"
-                      : "text-[#777] hover:text-[#ccc]"
+                      ? "bg-zinc-900 text-white font-semibold"
+                      : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
                   Testcases
@@ -734,24 +729,24 @@ export function AssessmentWorkspacePage() {
                 <button
                   type="button"
                   onClick={() => dispatch(setActiveConsoleTab("output"))}
-                  className={`px-2.5 py-1 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1 ${
+                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-[#1f1f1f] text-white font-semibold"
-                      : "text-[#777] hover:text-[#ccc]"
+                      ? "bg-zinc-900 text-white font-semibold"
+                      : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
                   <span>Result</span>
                   {runResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        runResult.verdict === "ACCEPTED" ? "bg-emerald-400" : "bg-destructive"
+                        runResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-red-400"
                       }`}
                     />
                   )}
                   {submitResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        submitResult.verdict === "ACCEPTED" ? "bg-emerald-400" : "bg-destructive"
+                        submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-red-400"
                       }`}
                     />
                   )}
@@ -759,73 +754,73 @@ export function AssessmentWorkspacePage() {
               </div>
 
               {activeSubmission && (
-                <div className="text-[10px] font-mono text-[#666]">
+                <div className="text-[10px] font-mono text-zinc-500">
                   Best Score:{" "}
-                  <span className="text-accent font-bold">
+                  <span className="text-lime-400 font-semibold tabular-nums">
                     {activeSubmission.score} / {activeProblem?.points}
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Console Body */}
+            {/* Console Output Body */}
             <div className="flex-1 overflow-y-auto p-3 font-mono text-xs">
               {activeConsoleTab === "testcases" ? (
                 <div className="space-y-3">
-                  <div className="text-[10px] text-[#666] uppercase tracking-wider">
+                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
                     Sample Testcases Input
                   </div>
                   {activeProblem?.sample_testcases?.map((st, i) => (
-                    <div key={i} className="p-2 rounded bg-[#101010] border border-[#1b1b1b]">
-                      <span className="text-[#666] text-[10px]">CASE {i + 1}</span>
-                      <pre className="text-[#ccc] mt-0.5 whitespace-pre-wrap">{st.stdin || (st as any).input}</pre>
+                    <div key={i} className="p-2 rounded bg-zinc-950 border border-white/8">
+                      <span className="text-zinc-500 text-[10px]">CASE {i + 1}</span>
+                      <pre className="text-zinc-300 mt-0.5 whitespace-pre-wrap">{st.stdin || (st as any).input}</pre>
                     </div>
                   ))}
                   <div className="space-y-1 pt-1">
-                    <span className="text-[10px] text-[#666] uppercase tracking-wider">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
                       Custom Stdin (Optional)
                     </span>
                     <textarea
                       value={customStdin}
                       onChange={(e) => dispatch(setCustomStdin(e.target.value))}
-                      placeholder="Enter custom input to test arbitrary inputs..."
-                      className="w-full h-14 p-2 rounded bg-[#070707] border border-[#222] text-[#ccc] font-mono text-xs resize-none focus:outline-none focus:border-accent"
+                      placeholder="Enter custom input to test arbitrary test cases..."
+                      className="w-full h-14 p-2 rounded bg-black border border-white/10 text-zinc-300 font-mono text-xs resize-none focus:outline-none focus:border-lime-400"
                     />
                   </div>
                 </div>
               ) : (
                 <div>
                   {isRunning || isSubmitting ? (
-                    <div className="flex items-center gap-2 text-accent py-6 justify-center">
+                    <div className="flex items-center gap-2 text-lime-400 py-6 justify-center">
                       <Terminal size={14} className="animate-spin" />
-                      <span>{isRunning ? "Executing tests in sandbox..." : "Judging solution..."}</span>
+                      <span>{isRunning ? "Compiling and testing sandbox..." : "Judging solution..."}</span>
                     </div>
                   ) : submitResult ? (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2.5 rounded bg-[#101010] border border-[#202020]">
+                      <div className="flex items-center justify-between p-2.5 rounded bg-zinc-950 border border-white/8">
                         <div className="flex items-center gap-2">
                           {submitResult.verdict === "ACCEPTED" ? (
-                            <CheckCircle2 size={16} className="text-emerald-400" />
+                            <CheckCircle2 size={16} className="text-lime-400" />
                           ) : (
-                            <XCircle size={16} className="text-destructive" />
+                            <XCircle size={16} className="text-red-400" />
                           )}
-                          <span className="font-bold text-white uppercase">{submitResult.verdict}</span>
+                          <span className="font-semibold text-white uppercase">{submitResult.verdict}</span>
                         </div>
-                        <div className="text-[11px] text-[#888]">
-                          Passed: <strong className="text-white">{submitResult.passed_testcases} / {submitResult.total_testcases}</strong> · Score: <strong className="text-accent">{submitResult.score} pts</strong>
+                        <div className="text-[11px] text-zinc-400">
+                          Passed: <strong className="text-white">{submitResult.passed_testcases} / {submitResult.total_testcases}</strong> · Score: <strong className="text-lime-400">{submitResult.score} pts</strong>
                         </div>
                       </div>
 
                       {submitResult.testcase_results?.map((tc: any, i: number) => (
-                        <div key={i} className="p-2 rounded bg-[#0e0e0e] border border-[#1a1a1a] text-[11px] space-y-1">
+                        <div key={i} className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[#777]">{tc.name || `Testcase ${i + 1}`}</span>
-                            <span className={tc.passed ? "text-emerald-400 font-bold" : "text-destructive font-bold"}>
+                            <span className="text-zinc-500">{tc.name || `Case ${i + 1}`}</span>
+                            <span className={tc.passed ? "text-lime-400 font-semibold" : "text-red-400 font-semibold"}>
                               {tc.verdict}
                             </span>
                           </div>
                           {tc.stderr && (
-                            <pre className="p-1 rounded bg-[#140000] text-red-400 overflow-x-auto text-[10px]">
+                            <pre className="p-1 rounded bg-black text-red-400 overflow-x-auto text-[10px]">
                               {tc.stderr}
                             </pre>
                           )}
@@ -834,40 +829,40 @@ export function AssessmentWorkspacePage() {
                     </div>
                   ) : runResult ? (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2.5 rounded bg-[#101010] border border-[#202020]">
+                      <div className="flex items-center justify-between p-2.5 rounded bg-zinc-950 border border-white/8">
                         <div className="flex items-center gap-2">
                           {runResult.verdict === "ACCEPTED" ? (
-                            <CheckCircle2 size={16} className="text-emerald-400" />
+                            <CheckCircle2 size={16} className="text-lime-400" />
                           ) : (
                             <AlertCircle size={16} className="text-amber-400" />
                           )}
-                          <span className="font-bold text-white uppercase">{runResult.verdict}</span>
+                          <span className="font-semibold text-white uppercase">{runResult.verdict}</span>
                         </div>
-                        <div className="text-[11px] text-[#888]">
+                        <div className="text-[11px] text-zinc-400">
                           Passed: <strong className="text-white">{runResult.passed_testcases} / {runResult.total_testcases}</strong>
                         </div>
                       </div>
 
                       {runResult.testcase_results?.map((tc: any, i: number) => (
-                        <div key={i} className="p-2 rounded bg-[#0e0e0e] border border-[#1a1a1a] text-[11px] space-y-1">
+                        <div key={i} className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[#777]">{tc.name || `Case ${i + 1}`}</span>
-                            <span className={tc.passed ? "text-emerald-400 font-bold" : "text-amber-400 font-bold"}>
+                            <span className="text-zinc-500">{tc.name || `Case ${i + 1}`}</span>
+                            <span className={tc.passed ? "text-lime-400 font-semibold" : "text-amber-400 font-semibold"}>
                               {tc.verdict}
                             </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-[10px]">
                             <div>
-                              <span className="text-[#555]">Your Output:</span>
-                              <pre className="p-1 rounded bg-[#060606] text-[#ccc] overflow-x-auto">{tc.stdout || "(no output)"}</pre>
+                              <span className="text-zinc-600">Your Output:</span>
+                              <pre className="p-1 rounded bg-black text-zinc-300 overflow-x-auto">{tc.stdout || "(no output)"}</pre>
                             </div>
                             <div>
-                              <span className="text-[#555]">Expected:</span>
-                              <pre className="p-1 rounded bg-[#060606] text-[#ccc] overflow-x-auto">{tc.expected_output}</pre>
+                              <span className="text-zinc-600">Expected:</span>
+                              <pre className="p-1 rounded bg-black text-zinc-300 overflow-x-auto">{tc.expected_output}</pre>
                             </div>
                           </div>
                           {tc.stderr && (
-                            <pre className="p-1 rounded bg-[#140000] text-red-400 overflow-x-auto text-[10px]">
+                            <pre className="p-1 rounded bg-black text-red-400 overflow-x-auto text-[10px]">
                               {tc.stderr}
                             </pre>
                           )}
@@ -875,8 +870,8 @@ export function AssessmentWorkspacePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-[#555] py-4 text-center">
-                      Click "Run" to test your code against sample cases, or "Submit" to grade all test cases.
+                    <div className="text-zinc-600 py-6 text-center">
+                      Click "Run" to test sample cases, or "Submit" for full verification.
                     </div>
                   )}
                 </div>
@@ -886,25 +881,25 @@ export function AssessmentWorkspacePage() {
         </div>
       </div>
 
-      {/* Anti-cheat telemetry warning dialog */}
+      {/* Anti-cheat Telemetry Warning Dialog */}
       {antiCheatWarningOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full p-6 rounded-none bg-[#141414] border border-amber-500/40 text-center space-y-4 shadow-2xl shadow-black">
-            <div className="w-11 h-11 rounded-none bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+          <div className="max-w-md w-full p-6 rounded-lg bg-black border border-amber-500/40 text-center space-y-4 shadow-2xl">
+            <div className="size-11 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
               <ShieldAlert size={22} />
             </div>
-            <div className="space-y-1.5">
-              <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">Proctored Session Warning</h3>
-              <div className="inline-block px-2.5 py-0.5 rounded-none border border-amber-500/30 bg-amber-950/40 text-amber-300 font-mono text-xs font-semibold tabular-nums">
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold font-mono text-white uppercase tracking-wider">Proctored Session Warning</h3>
+              <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-mono text-xs tabular-nums">
                 Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
               </div>
             </div>
-            <p className="text-xs text-zinc-300 font-mono leading-relaxed px-2">
+            <p className="text-xs text-zinc-400 font-mono leading-relaxed px-2">
               {antiCheatWarningMessage || "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
             </p>
             <Button
               onClick={() => dispatch(dismissAntiCheatWarning())}
-              className="w-full rounded-none bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs font-bold uppercase tracking-wider"
+              className="w-full rounded-md bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs font-semibold"
             >
               Acknowledge & Continue
             </Button>

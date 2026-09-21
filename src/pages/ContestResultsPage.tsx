@@ -5,7 +5,6 @@ import { ArrowLeft, Crown, Lock, QrCode, Search, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FINALIST_SEATS } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
 import type { RankingRow, AssessmentRanking } from "@/features/contest/types";
 import { ContestResultsSkeleton } from "@/organization/components/skeletons";
@@ -73,135 +72,123 @@ export function ContestResultsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
-      {/* Back */}
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+      {/* Back button */}
       <Link
         to={`/portal/contests/${contestSlug}`}
-        className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-white"
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
       >
-        <ArrowLeft className="size-4" /> {contest?.title ?? "Back to contest"}
+        <ArrowLeft className="size-3.5" /> Back to {contest?.title ?? "Contest"}
       </Link>
 
-      {/* ─── YOUR STANDING HERO ───────────────────────────── */}
+      {/* Your Standing Hero */}
       {myRow ? (
         <div
           className={cn(
-            "relative overflow-hidden rounded-none border bg-zinc-900/60 backdrop-blur-md transition-all shadow-xl",
-            isQualified ? "border-lime-400/40 shadow-lime-400/5" : "border-white/10"
+            "relative overflow-hidden rounded-lg border bg-black transition-colors p-6",
+            isQualified ? "border-lime-400/40" : "border-white/8"
           )}
         >
-          {isQualified && (
-            <div className="h-1 w-full bg-gradient-to-r from-lime-400 to-amber-500" />
-          )}
-          <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
-              {/* Rank number */}
               <div
                 className={cn(
-                  "flex h-16 w-16 shrink-0 items-center justify-center rounded-none border text-center font-mono",
+                  "flex h-14 w-14 shrink-0 items-center justify-center rounded-md border text-center font-mono",
                   isQualified
-                    ? "border-lime-400/40 bg-lime-400/10 shadow-inner"
-                    : "border-white/10 bg-zinc-800/50"
+                    ? "border-lime-400/40 bg-lime-400/10 text-lime-400"
+                    : "border-white/10 bg-zinc-950 text-white"
                 )}
               >
                 <div>
-                  <div className={cn("text-2xl font-black leading-none font-mono tabular-nums", isQualified ? "text-lime-400" : "text-white")}>
+                  <div className="text-xl font-semibold tabular-nums leading-none">
                     #{myRow.rank}
                   </div>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-zinc-400">rank</div>
+                  <div className="mt-1 font-mono text-[9px] uppercase tracking-wider text-zinc-500">Rank</div>
                 </div>
               </div>
+
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "rounded-none border px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest",
+                      "rounded px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider",
                       isQualified
-                        ? "border-lime-400/40 bg-lime-400/10 text-lime-400"
-                        : "border-amber-500/40 bg-amber-950/30 text-amber-400"
+                        ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
+                        : "border border-amber-500/30 bg-black text-amber-400"
                     )}
                   >
-                    {isQualified ? "✓ Qualified for Final" : "Below the cut"}
+                    {isQualified ? "Qualified for Final" : "Below Cutoff"}
                   </span>
                 </div>
-                <p className="text-xl font-bold text-white font-mono tabular-nums">
-                  {myRow.total_score} <span className="font-sans text-sm font-normal text-zinc-400">points</span>
+                <p className="text-lg font-semibold text-white font-mono tabular-nums">
+                  {myRow.total_score} <span className="font-sans text-xs font-normal text-zinc-500">points</span>
                 </p>
-                <p className="text-xs text-zinc-400">
-                  {myRow.full_name} · {myRow.department} · Penalty <span className="font-mono tabular-nums">{myRow.penalty_minutes}m</span>
+                <p className="text-xs text-zinc-400 font-mono">
+                  {myRow.full_name} · {myRow.department} · {myRow.penalty_minutes}m penalty
                 </p>
               </div>
             </div>
 
-            {/* CTA based on result */}
+            {/* CTA */}
             {isQualified ? (
-              <Button asChild className="rounded-none bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-400 shrink-0 shadow-lg shadow-lime-400/20 active:scale-[0.98]">
+              <Button asChild className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300 shrink-0">
                 <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                  <QrCode className="mr-2 size-4" /> View Campus Pass
+                  <QrCode className="mr-1.5 size-3.5" /> View Campus Pass
                 </Link>
               </Button>
             ) : (
-              <Button asChild variant="outline" className="rounded-none border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white shrink-0 active:scale-[0.98]">
+              <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white shrink-0">
                 <Link to="/portal/leaderboard">University Leaderboard →</Link>
               </Button>
             )}
           </div>
         </div>
       ) : (
-        /* Header for non-participants */
         <PageHeader
-          kicker="01 // Screening Standings"
+          kicker="01 // Standings"
           index={`CUTOFF #${ranking.cutoff}`}
           badge={
-            <span className="inline-flex items-center gap-1.5 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-lime-400">
-              Round 1 · Online Assessment
+            <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+              Round 1 · Online Screening
             </span>
           }
-          title={contest?.title ?? "Assessment Ranking"}
-          description={`Ranked by score, then by penalty time. Official cut-off set at rank ${ranking.cutoff}.`}
+          title={contest ? `${contest.title} Standings` : "Assessment Rankings"}
+          description={`Ranked by total score, then penalty time. Cut-off set at rank #${ranking.cutoff}.`}
         />
       )}
 
-      {/* ─── RANKING SEALED NOTICE ───────────────────────── */}
+      {/* Sealed Notice */}
       {!ranking.released && (
-        <div className="flex items-start gap-4 rounded-none border border-amber-500/30 bg-amber-950/20 p-5 backdrop-blur-md">
-          <Lock className="mt-0.5 size-5 shrink-0 text-amber-400" />
-          <div className="space-y-1">
-            <p className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+        <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-black p-4 font-mono">
+          <Lock className="mt-0.5 size-4 shrink-0 text-amber-400" />
+          <div className="space-y-0.5">
+            <p className="text-xs font-semibold text-white uppercase tracking-wider">
               Ranking Sealed
             </p>
-            <p className="text-sm text-zinc-400">
-              {ranking.message ?? "Results stay hidden while the assessment window is open — no candidate can pace against live rivals."}
+            <p className="text-xs text-zinc-400">
+              {ranking.message ?? "Standings are hidden while the testing window is active."}
             </p>
             {ranking.releases_at && (
-              <p className="font-mono text-xs text-lime-400">
-                Publishes {new Date(ranking.releases_at).toLocaleString("en-IN")}
+              <p className="text-xs text-lime-400 pt-1">
+                Publishes: {new Date(ranking.releases_at).toLocaleString("en-IN")}
               </p>
             )}
           </div>
         </div>
       )}
 
-      {/* ─── STANDINGS SECTION HEADER ─────────────────────── */}
-      <SectionHeader
-        kicker="02 // Competitive Standings"
-        index="QUALIFIER MATRIX"
-        title="Cadet Assessment Standings"
-      />
-
-      {/* ─── FILTERS + SEARCH ────────────────────────────── */}
+      {/* Filters + Search */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Pill filters */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {FILTERS.map((key) => (
             <button
               key={key}
               onClick={() => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("filter", key); return p; })}
               className={cn(
-                "rounded-none px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-all",
+                "rounded-md px-3 py-1 font-mono text-xs uppercase tracking-wider transition-colors",
                 filter === key
-                  ? "bg-lime-400 text-black font-bold shadow-md shadow-lime-400/20"
-                  : "border border-white/10 bg-zinc-900/60 text-zinc-400 hover:border-white/20 hover:text-white"
+                  ? "bg-lime-400 text-black font-semibold"
+                  : "border border-white/8 bg-black text-zinc-400 hover:text-white"
               )}
             >
               {key}
@@ -209,46 +196,41 @@ export function ContestResultsPage() {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500" />
           <Input
             value={query}
             onChange={(e) => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("query", e.target.value); return p; })}
-            placeholder="Search name or handle..."
-            className="rounded-none border-white/10 bg-zinc-900/60 pl-9 font-mono text-xs text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60"
+            placeholder="Search cadet..."
+            className="rounded-md border-white/10 bg-black pl-8 font-mono text-xs text-white placeholder:text-zinc-600 focus-visible:border-lime-400"
           />
         </div>
 
-        {/* Stats inline */}
-        <div className="ml-auto flex items-center gap-4 text-xs text-zinc-400 font-mono">
-          <span className="flex items-center gap-1.5">
-            <Trophy className="size-3.5 text-lime-400" />
-            <span className="tabular-nums font-bold text-white">{ranking.total_participants}</span> participants
-          </span>
-          <span className="text-zinc-700">·</span>
-          <span><span className="tabular-nums font-bold text-white">{ranking.cutoff}</span> finalist seats</span>
+        <div className="ml-auto flex items-center gap-3 text-xs text-zinc-500 font-mono">
+          <span><span className="tabular-nums font-semibold text-white">{ranking.total_participants}</span> participants</span>
+          <span>·</span>
+          <span><span className="tabular-nums font-semibold text-white">{ranking.cutoff}</span> seats</span>
         </div>
       </div>
 
-      {/* ─── RANKINGS TABLE ──────────────────────────────── */}
-      <div className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
+      {/* Table */}
+      <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-white/10 bg-zinc-950/40 hover:bg-transparent">
-              <TableHead className="w-16 font-mono text-[10px] uppercase tracking-widest text-zinc-400">Rank</TableHead>
-              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Cadet</TableHead>
-              <TableHead className="hidden font-mono text-[10px] uppercase tracking-widest text-zinc-400 sm:table-cell">Dept</TableHead>
-              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Score</TableHead>
-              <TableHead className="hidden text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400 sm:table-cell">Penalty</TableHead>
-              <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Status</TableHead>
+            <TableRow className="border-b border-white/8 hover:bg-transparent">
+              <TableHead className="w-16 font-mono text-[10px] uppercase text-zinc-500">Rank</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Cadet</TableHead>
+              <TableHead className="hidden font-mono text-[10px] uppercase text-zinc-500 sm:table-cell">Dept</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Score</TableHead>
+              <TableHead className="hidden text-right font-mono text-[10px] uppercase text-zinc-500 sm:table-cell">Penalty</TableHead>
+              <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
-              <TableRow className="border-b border-white/5">
-                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-zinc-500">
-                  No submissions match this view.
+              <TableRow className="border-b border-white/6">
+                <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-zinc-600">
+                  No submissions match this filter.
                 </TableCell>
               </TableRow>
             ) : (
@@ -266,19 +248,19 @@ export function ContestResultsPage() {
         </Table>
       </div>
 
-      {/* ─── BOTTOM ACTIONS ──────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Bottom Actions */}
+      <div className="flex flex-wrap items-center gap-3 pt-2">
         {isQualified && (
-          <Button asChild className="rounded-none bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider text-black hover:bg-lime-400 shadow-md shadow-lime-400/20 active:scale-[0.98]">
+          <Button asChild className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300">
             <Link to={`/portal/contests/${contestSlug}/qualified`}>
-              <QrCode className="mr-2 size-4" /> View Campus Pass
+              <QrCode className="mr-1.5 size-3.5" /> View Campus Pass
             </Link>
           </Button>
         )}
-        <Button asChild variant="outline" className="rounded-none border-white/10 bg-zinc-900/60 font-mono text-xs text-zinc-300 hover:border-white/20 hover:text-white active:scale-[0.98]">
-          <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
+        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
+          <Link to={`/portal/contests/${contestSlug}`}>Contest Details</Link>
         </Button>
-        <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white active:scale-[0.98]">
+        <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
           <Link to="/portal/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>
@@ -295,46 +277,46 @@ function RankRow({
   return (
     <>
       {showCutLine && (
-        <TableRow className="border-y border-lime-400/30 bg-lime-400/10">
-          <TableCell colSpan={6} className="py-2.5 text-center font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
-            ── Top {cutoff} qualification line ──
+        <TableRow className="border-y border-lime-400/20 bg-lime-400/5 hover:bg-lime-400/5">
+          <TableCell colSpan={6} className="py-2 text-center font-mono text-[10px] uppercase tracking-wider text-lime-400 font-semibold">
+            ── Top {cutoff} Final Qualification Boundary ──
           </TableCell>
         </TableRow>
       )}
-      <TableRow className={cn("border-b border-white/5 transition-colors hover:bg-white/[0.02]", isMe && "bg-lime-400/10 hover:bg-lime-400/15")}>
-        <TableCell className="font-mono text-sm font-black text-white">
+      <TableRow className={cn("border-b border-white/6 hover:bg-zinc-950 transition-colors", isMe && "bg-lime-400/10 hover:bg-lime-400/15")}>
+        <TableCell className="font-mono text-xs font-semibold text-white">
           <span className="inline-flex items-center gap-1.5 tabular-nums">
-            {row.rank <= 3 && <Crown className="size-3.5 text-amber-400" />}
+            {row.rank <= 3 && <Crown className="size-3 text-lime-400" />}
             {row.rank}
           </span>
         </TableCell>
         <TableCell>
-          <div className="flex flex-col gap-0.5">
-            <Link to={`/portal/profile/${row.handle}`} className="text-sm font-semibold text-white transition-colors hover:text-lime-400">
+          <div className="flex flex-col">
+            <Link to={`/portal/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
               {row.full_name}
             </Link>
-            <Link to={`/portal/profile/${row.handle}`} className="font-mono text-[10px] text-zinc-400 transition-colors hover:text-zinc-200">
+            <span className="font-mono text-[10px] text-zinc-500">
               @{row.handle}
-            </Link>
+            </span>
           </div>
         </TableCell>
         <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
           {row.department}
         </TableCell>
-        <TableCell className="text-right font-mono text-sm font-black tabular-nums text-lime-400">
+        <TableCell className="text-right font-mono text-xs font-semibold tabular-nums text-lime-400">
           {row.total_score}
         </TableCell>
-        <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-400 sm:table-cell">
+        <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-500 sm:table-cell">
           {row.penalty_minutes}m
         </TableCell>
         <TableCell className="text-right">
           <span className={cn(
-            "rounded-none border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest font-semibold",
+            "rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider font-semibold",
             qualified
-              ? "border-lime-400/40 bg-lime-400/10 text-lime-400"
-              : "border-white/10 bg-zinc-800/40 text-zinc-400"
+              ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
+              : "border border-white/8 bg-black text-zinc-500"
           )}>
-            {qualified ? "Qualified" : row.status === "in_progress" ? "In progress" : "Ranked"}
+            {qualified ? "Qualified" : row.status === "in_progress" ? "In Progress" : "Ranked"}
           </span>
         </TableCell>
       </TableRow>

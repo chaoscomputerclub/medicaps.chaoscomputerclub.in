@@ -66,12 +66,10 @@ export function ContestOverviewPage() {
     dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
   }, [contestSlug, dispatch]);
 
-  // Initial load
   useEffect(() => {
     refreshDetail(false);
   }, [refreshDetail]);
 
-  // Real-time synchronization
   useRealtimeEvents(contestSlug, (event) => {
     if (
       event.event === "contest_status_changed" ||
@@ -109,7 +107,7 @@ export function ContestOverviewPage() {
   if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
   if (!contest) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-400">
+      <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
         Contest not found.
       </div>
     );
@@ -154,25 +152,23 @@ export function ContestOverviewPage() {
     }
   };
 
-  // Determine the single primary action for this phase
   const renderPrimaryAction = () => {
-    // In-progress assessment attempt (e.g. left due to sudden power cut or by mistake)
     if (isInProgress) {
       return (
         <div className="flex flex-wrap items-center gap-3">
           <Button
             asChild
             size="lg"
-            className="rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
+            className="rounded-md bg-amber-400 font-mono text-xs font-semibold text-black hover:bg-amber-300"
           >
             <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
-              <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+              <Play className="mr-1.5 size-3.5 fill-black" /> Resume Session
             </a>
           </Button>
-          <div className="flex items-center gap-2 px-3 py-2 border border-amber-500/40 bg-amber-950/30 text-amber-300 font-mono text-xs">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-amber-500/30 bg-black text-amber-300 font-mono text-xs">
             <ShieldAlert size={14} className="text-amber-400 shrink-0" />
             <span>
-              Session Active · Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}
+              Active Attempt · Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}
             </span>
           </div>
           {isDevBypass && (
@@ -180,31 +176,30 @@ export function ContestOverviewPage() {
               variant="outline"
               size="sm"
               onClick={handleResetAttempt}
-              className="rounded-none border-white/10 font-mono text-xs text-zinc-400 hover:text-white"
+              className="rounded-md border-white/10 font-mono text-xs text-zinc-400 hover:text-white"
             >
-              <RotateCcw className="mr-1.5 size-3.5" /> Reset
+              <RotateCcw className="mr-1.5 size-3" /> Reset
             </Button>
           )}
         </div>
       );
     }
 
-    // Dev bypass reset
     if (isDevBypass) {
       return (
         <div className="flex flex-wrap items-center gap-3">
           <Button
             asChild
-            className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-md shadow-lime-400/20"
+            className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
           >
             <Link to={`/portal/contests/${contestSlug}/lobby`}>
-              <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+              <Play className="mr-1.5 size-3.5 fill-black" /> Enter Assessment Lobby
             </Link>
           </Button>
           {(phase === "final_live" || isDevBypass) && (
-            <Button asChild className="rounded-none bg-cyan-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
+            <Button asChild variant="outline" className="rounded-md border-white/12 bg-black font-mono text-xs font-semibold text-white hover:border-white/25">
               <Link to={`/portal/contests/${contestSlug}/arena`}>
-                <Zap className="mr-1.5 size-4 fill-black" /> Enter Final Arena
+                <Zap className="mr-1.5 size-3.5 text-lime-400" /> Enter Final Arena
               </Link>
             </Button>
           )}
@@ -212,40 +207,38 @@ export function ContestOverviewPage() {
             variant="outline"
             size="sm"
             onClick={handleResetAttempt}
-            className="rounded-none border-white/10 font-mono text-xs text-zinc-400 hover:text-white"
+            className="rounded-md border-white/10 font-mono text-xs text-zinc-400 hover:text-white"
           >
-            <RotateCcw className="mr-1.5 size-3.5" /> Reset
+            <RotateCcw className="mr-1.5 size-3" /> Reset
           </Button>
         </div>
       );
     }
 
-    // Not registered
     if (!isRegistered) {
       return (
         <Button
           onClick={() => setConfirmOpen(true)}
           size="lg"
-          className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20"
+          className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
         >
-          <Sparkles className="mr-1.5 size-4" /> Register for Contest
+          <Sparkles className="mr-1.5 size-3.5" /> Register for Contest
         </Button>
       );
     }
 
-    // Registered, assessment submitted
     if (isAssessmentSubmitted) {
       if (qualified && (phase === "final_live" || phase === "complete")) {
         return (
           <div className="flex flex-wrap items-center gap-3">
-            <Button asChild size="lg" className="rounded-none bg-cyan-500 font-mono text-xs font-black uppercase tracking-wider text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
+            <Button asChild size="lg" className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300">
               <Link to={`/portal/contests/${contestSlug}/arena`}>
-                <Play className="mr-1.5 size-4 fill-black" /> Enter Live Final
+                <Play className="mr-1.5 size-3.5 fill-black" /> Enter Final Arena
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-none border-white/10 font-mono text-xs uppercase text-white hover:bg-zinc-800">
+            <Button asChild variant="outline" size="lg" className="rounded-md border-white/10 bg-black font-mono text-xs text-white hover:border-white/20">
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-1.5 size-4 text-lime-400" /> Campus Pass
+                <QrCode className="mr-1.5 size-3.5 text-lime-400" /> Finalist Pass
               </Link>
             </Button>
           </div>
@@ -253,15 +246,15 @@ export function ContestOverviewPage() {
       }
       return (
         <div className="flex flex-wrap items-center gap-3">
-          <Button asChild variant="outline" size="lg" className="rounded-none border-emerald-500/40 bg-emerald-950/20 font-mono text-xs font-bold uppercase text-emerald-400 hover:bg-emerald-950/40">
+          <Button asChild variant="outline" size="lg" className="rounded-md border-lime-400/30 bg-black font-mono text-xs font-semibold text-lime-400 hover:bg-lime-400/10">
             <Link to={`/portal/contests/${contestSlug}/results`}>
-              <BadgeCheck className="mr-1.5 size-4" /> Submitted · View Standings
+              <BadgeCheck className="mr-1.5 size-3.5" /> View Standings
             </Link>
           </Button>
           {qualified && (
-            <Button asChild variant="outline" size="lg" className="rounded-none font-mono text-xs uppercase border-white/10">
+            <Button asChild variant="outline" size="lg" className="rounded-md font-mono text-xs border-white/10 bg-black text-white hover:border-white/20">
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-1.5 size-4 text-lime-400" /> Campus Pass
+                <QrCode className="mr-1.5 size-3.5 text-lime-400" /> Finalist Pass
               </Link>
             </Button>
           )}
@@ -269,234 +262,199 @@ export function ContestOverviewPage() {
       );
     }
 
-    // Registered, not yet submitted
     if (phase === "final_live") {
       if (qualified) {
         return (
           <div className="flex flex-wrap items-center gap-3">
-            <Button asChild size="lg" className="rounded-none bg-cyan-500 font-mono text-xs font-black uppercase text-white hover:bg-cyan-600 shadow-md shadow-cyan-500/20">
+            <Button asChild size="lg" className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300">
               <Link to={`/portal/contests/${contestSlug}/arena`}>
-                <Play className="mr-1.5 size-4 fill-black" /> Enter Live Final
+                <Play className="mr-1.5 size-3.5 fill-black" /> Enter Final Arena
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-none font-mono text-xs uppercase border-white/10">
+            <Button asChild variant="outline" size="lg" className="rounded-md font-mono text-xs border-white/10 bg-black text-white">
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-1.5 size-4 text-lime-400" /> Campus Pass
+                <QrCode className="mr-1.5 size-3.5 text-lime-400" /> Finalist Pass
               </Link>
             </Button>
           </div>
         );
       }
       return (
-        <Button variant="outline" disabled size="lg" className="rounded-none font-mono text-xs uppercase border-white/10">
-          <Lock className="mr-1.5 size-4" /> Top {FINALIST_SEATS} Only
+        <Button variant="outline" disabled size="lg" className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-600">
+          <Lock className="mr-1.5 size-3.5" /> Top {FINALIST_SEATS} Finalists Only
         </Button>
       );
     }
 
-    // Assessment is not yet open (Strict 24h window)
     if (phase === "registration_open" && !isDevBypass) {
       return (
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="outline"
-            disabled
-            size="lg"
-            className="rounded-none font-mono text-xs uppercase border-amber-500/30 bg-amber-950/20 text-amber-400 cursor-not-allowed"
-          >
-            <Lock className="mr-1.5 size-4 text-amber-400" /> Assessment Unlocks {formatWhen(opensAt.toISOString())}
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          disabled
+          size="lg"
+          className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-500 cursor-not-allowed"
+        >
+          <Lock className="mr-1.5 size-3.5 text-zinc-500" /> Unlocks {formatWhen(opensAt.toISOString())}
+        </Button>
       );
     }
 
-    // Assessment entry window has concluded (2h prior to physical final)
     if (phase === "assessment_closed" && !isDevBypass) {
       return (
         <Button
           variant="outline"
           disabled
           size="lg"
-          className="rounded-none font-mono text-xs uppercase border-white/10 text-zinc-500 cursor-not-allowed"
+          className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-600 cursor-not-allowed"
         >
-          <Lock className="mr-1.5 size-4" /> Assessment Closed (Verification In Progress)
+          <Lock className="mr-1.5 size-3.5" /> Assessment Window Concluded
         </Button>
       );
     }
 
-    // Assessment is genuinely open or dev sandbox contest
     return (
       <Button
         asChild
         size="lg"
-        className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20"
+        className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
       >
         <Link to={`/portal/contests/${contestSlug}/lobby`}>
-          <Play className="mr-1.5 size-4 fill-black" /> Take Assessment
+          <Play className="mr-1.5 size-3.5 fill-black" /> Start Assessment
         </Link>
       </Button>
     );
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Back */}
-      <Link to="/portal/contests" className="inline-flex items-center gap-2 font-mono text-xs text-zinc-400 hover:text-white transition-colors">
-        <ArrowLeft className="size-3.5" /> Back to contests
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      {/* Back navigation */}
+      <Link to="/portal/contests" className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+        <ArrowLeft className="size-3.5" /> Back to Contests
       </Link>
 
-      {/* Active In-Progress Session Alert (Power cut / window exit recovery) */}
+      {/* In-Progress Alert */}
       {isInProgress && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-none border border-amber-500/50 bg-amber-950/30 backdrop-blur-md shadow-lg shadow-amber-950/40">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 rounded-none bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
-              <ShieldAlert className="size-5" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg border border-amber-500/30 bg-black">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
+              <ShieldAlert className="size-4" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold uppercase tracking-wider text-amber-300">
-                  Active Assessment Session in Progress
+                <span className="font-mono text-xs font-semibold text-amber-400">
+                  Active Assessment Session
                 </span>
-                <span className="font-mono text-[10px] px-2 py-0.5 rounded-none border border-amber-500/40 bg-amber-900/40 text-amber-300 uppercase font-semibold">
-                  Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 uppercase">
+                  Warning {registration?.anti_cheat_violations || 1} / {registration?.max_violations || 3}
                 </span>
               </div>
-              <p className="font-mono text-xs text-zinc-300 leading-relaxed max-w-2xl">
-                You left your Phase 1 assessment without submitting (sudden power cut or window exit detected). Your session is still active with strict server-side clock synchronization. Resume immediately to complete your test.
+              <p className="font-mono text-xs text-zinc-400 max-w-2xl">
+                Your session is active with strict server synchronization. Resume to complete your submission.
               </p>
             </div>
           </div>
           <Button
             asChild
-            size="lg"
-            className="shrink-0 rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
+            size="sm"
+            className="shrink-0 rounded-md bg-amber-400 font-mono text-xs font-semibold text-black hover:bg-amber-300"
           >
             <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
-              <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+              <Play className="mr-1.5 size-3.5 fill-black" /> Resume
             </a>
           </Button>
         </div>
       )}
 
-      {/* ─── HERO HEADER ──────────────────────────────────── */}
-      <header className="grid gap-0 overflow-hidden rounded-none border border-white/10 bg-zinc-900/60 backdrop-blur-md shadow-xl lg:grid-cols-[1fr_280px]">
+      {/* Hero Header */}
+      <header className="grid gap-0 overflow-hidden rounded-lg border border-white/8 bg-black lg:grid-cols-[1fr_300px]">
         {/* Left: Identity */}
-        <div className="flex flex-col justify-between gap-8 p-7">
-          {/* Phase + cadence chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
-              (01 // Contest Briefing)
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              INDEX 1.0 · {contest.season}
-            </span>
-            <PhaseBadge phase={phase} />
-            <span className="rounded-none border border-white/10 bg-zinc-800/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-zinc-400">
-              {cadenceLabel(contest)} {contest.edition || ""}
-            </span>
-            {isDevBypass && (
-              <span className="rounded-none border border-emerald-500/40 bg-emerald-950/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
-                ⚡ Dev Bypass
-              </span>
-            )}
-          </div>
-
-          {/* Title */}
+        <div className="flex flex-col justify-between gap-6 p-6 sm:p-7">
           <div className="space-y-3">
-            <div className="flex items-start gap-4">
-              <div className="hidden size-12 shrink-0 items-center justify-center rounded-none border border-white/10 bg-zinc-950/60 text-lime-400 sm:flex shadow-inner">
-                <Trophy className="size-5" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-black leading-tight text-white md:text-4xl uppercase font-mono">
-                  {contest.title}
-                </h1>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-zinc-400">
-                  {contest.summary}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Meta pills */}
-          <div className="flex flex-wrap items-center gap-5 text-xs text-zinc-400 font-mono">
-            <span className="flex items-center gap-1.5">
-              <Clock className="size-3.5 text-lime-400" />
-              {ASSESSMENT_DURATION_MINUTES} min assessment
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Users className="size-3.5 text-lime-400" />
-              Top {FINALIST_SEATS} advance
-            </span>
-            <span className="flex items-center gap-1.5">
-              <MapPin className="size-3.5 text-lime-400" />
-              Campus final
-            </span>
-          </div>
-
-          {/* Primary Action */}
-          <div className="flex flex-col gap-3">
-            {renderPrimaryAction()}
-
-            {/* Ghost secondary: view results always visible when submitted */}
-            {(isAssessmentSubmitted || pastContestsHaveResults(phase)) && (
-              <Link
-                to={`/portal/contests/${contestSlug}/results`}
-                className="w-fit font-mono text-xs text-zinc-400 underline-offset-4 hover:text-white hover:underline"
-              >
-                View full rankings →
-              </Link>
-            )}
-          </div>
-
-          {/* Registration status strip */}
-          {isRegistered && (
-            <div className="flex items-center gap-3 border-t border-white/10 pt-5">
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-white">
-                  {isAssessmentSubmitted
-                    ? "Your answers are safely recorded"
-                    : phase === "complete"
-                      ? "Contest completed"
-                      : "Your place is reserved"}
-                </p>
-                {!isAssessmentSubmitted && (
-                  <p className="text-xs text-zinc-400">
-                    Timer starts the moment you enter — it cannot be paused.
-                  </p>
-                )}
-              </div>
-              {registration?.assessment_rank && (
-                <span className="ml-auto shrink-0 rounded-none border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-xs font-bold tabular-nums text-lime-400">
-                  Rank #{registration.assessment_rank} · {registration.assessment_score ?? 0} pts
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                {contest.season} · {cadenceLabel(contest)} {contest.edition || ""}
+              </span>
+              <PhaseBadge phase={phase} />
+              {isDevBypass && (
+                <span className="rounded px-2 py-0.5 border border-lime-400/30 bg-lime-400/10 font-mono text-[10px] uppercase tracking-wider text-lime-400 font-semibold">
+                  Dev Bypass
                 </span>
               )}
             </div>
-          )}
+
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+                {contest.title}
+              </h1>
+              <p className="text-sm text-zinc-400 leading-relaxed max-w-xl">
+                {contest.summary}
+              </p>
+            </div>
+
+            {/* Meta pills */}
+            <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Clock className="size-3.5 text-lime-400" />
+                {ASSESSMENT_DURATION_MINUTES} min window
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Users className="size-3.5 text-lime-400" />
+                Top {FINALIST_SEATS} qualify
+              </span>
+              <span className="flex items-center gap-1.5">
+                <MapPin className="size-3.5 text-lime-400" />
+                Campus final
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-2">
+            <div>{renderPrimaryAction()}</div>
+
+            {/* Registration status strip */}
+            {isRegistered && (
+              <div className="flex items-center justify-between border-t border-white/6 pt-4 text-xs font-mono">
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <CheckCircle2 className="size-3.5 text-lime-400 shrink-0" />
+                  <span>
+                    {isAssessmentSubmitted
+                      ? "Assessment recorded"
+                      : phase === "complete"
+                      ? "Contest finished"
+                      : "Slot confirmed · single-attempt"}
+                  </span>
+                </div>
+                {registration?.assessment_rank && (
+                  <span className="font-semibold tabular-nums text-lime-400">
+                    Rank #{registration.assessment_rank} ({registration.assessment_score ?? 0} pts)
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Right: Next milestone sidebar */}
-        <div className="flex flex-col justify-between border-t border-white/10 bg-zinc-950/60 p-6 lg:border-l lg:border-t-0">
-          <div className="space-y-5">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
-              Next milestone
-            </p>
-            <dl className="space-y-4">
+        {/* Right: Milestone Info */}
+        <div className="flex flex-col justify-between border-t border-white/8 bg-black p-6 lg:border-l lg:border-t-0">
+          <div className="space-y-4">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+              Schedule & Location
+            </span>
+            <dl className="space-y-3.5">
               <div className="flex gap-3">
-                <CalendarDays className="mt-0.5 size-4 shrink-0 text-lime-400" />
+                <CalendarDays className="mt-0.5 size-3.5 shrink-0 text-zinc-400" />
                 <div>
-                  <dt className="text-xs text-zinc-400">Round 1 opens</dt>
-                  <dd className="mt-0.5 text-xs font-semibold text-white">
+                  <dt className="text-xs text-zinc-500">Assessment opens</dt>
+                  <dd className="text-xs font-medium text-white">
                     {formatWhen(opensAt.toISOString())}
                   </dd>
                 </div>
               </div>
               <div className="flex gap-3">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-lime-400" />
+                <MapPin className="mt-0.5 size-3.5 shrink-0 text-zinc-400" />
                 <div>
-                  <dt className="text-xs text-zinc-400">Offline final</dt>
-                  <dd className="mt-0.5 text-xs font-semibold text-white">
+                  <dt className="text-xs text-zinc-500">Final venue</dt>
+                  <dd className="text-xs font-medium text-white">
                     {formatWhen(contest.starts_at)}
                   </dd>
                   {contest.venue && (
@@ -506,28 +464,28 @@ export function ContestOverviewPage() {
               </div>
               {contest.environment && (
                 <div className="flex gap-3">
-                  <Code2 className="mt-0.5 size-4 shrink-0 text-lime-400" />
+                  <Code2 className="mt-0.5 size-3.5 shrink-0 text-zinc-400" />
                   <div>
-                    <dt className="text-xs text-zinc-400">Environment</dt>
-                    <dd className="mt-0.5 text-xs font-semibold text-white">{contest.environment}</dd>
+                    <dt className="text-xs text-zinc-500">Runtime environment</dt>
+                    <dd className="text-xs font-medium text-white">{contest.environment}</dd>
                   </div>
                 </div>
               )}
             </dl>
           </div>
 
-          <div className="mt-6 border-t border-white/10 pt-5">
-            <div className="flex items-baseline justify-between font-mono">
-              <span className="text-2xl font-black tabular-nums text-white">
+          <div className="mt-6 border-t border-white/8 pt-4">
+            <div className="flex items-baseline justify-between font-mono text-xs">
+              <span className="text-lg font-semibold tabular-nums text-white">
                 {contest.registered_count}
               </span>
-              <span className="text-xs tabular-nums text-zinc-400">
+              <span className="tabular-nums text-zinc-500">
                 / {contest.seat_capacity} registered
               </span>
             </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-none bg-zinc-800">
+            <div className="mt-2 h-1 w-full overflow-hidden rounded bg-zinc-900">
               <div
-                className="h-full bg-lime-400 transition-all rounded-none"
+                className="h-full bg-lime-400 transition-all rounded"
                 style={{ width: `${Math.min(100, ((contest.registered_count || 0) / (contest.seat_capacity || 60)) * 100)}%` }}
               />
             </div>
@@ -535,104 +493,118 @@ export function ContestOverviewPage() {
         </div>
       </header>
 
-      {/* ─── ROUNDS TIMELINE ──────────────────────────────── */}
-      <section className="space-y-4">
+      {/* Rounds Progression */}
+      <section className="space-y-3">
         <SectionHeader
-          kicker="01 // Progression Timeline"
-          index="ROUNDS 1 & 2"
-          title="Your Path to the Final"
+          kicker="01 // Progression"
+          index="ROUNDS"
+          title="Tournament Pipeline"
         />
-        <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
+        <div className="rounded-lg border border-white/8 bg-black p-5">
           <RoundsTimeline contest={contest} phase={phase} />
         </div>
       </section>
 
-      {/* ─── RULES & PROBLEM SET ──────────────────────────── */}
-      <section className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-        <div className="rounded-none border border-white/10 bg-zinc-900/60 p-6 space-y-4 backdrop-blur-md shadow-xl">
+      {/* Rules & Problem Set */}
+      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="rounded-lg border border-white/8 bg-black p-5 space-y-4">
           <SectionHeader
-            kicker="02 // Tournament Rules"
+            kicker="02 // Protocol"
             index={`TOP ${FINALIST_SEATS}`}
-            title="Contest Regulations"
+            title="Integrity Regulations"
           />
-          <ol className="space-y-3">
+          <ol className="space-y-3 font-mono text-xs">
             {(contest.rules.length
               ? contest.rules
               : [
-                  "Round 1 is individual and fully timed.",
-                  `Top ${FINALIST_SEATS} scores advance to the campus final.`,
-                  "Keep the assessment open — closing does not stop your timer.",
-                  "Offline final uses campus workstations with QR pass entry.",
+                  "Round 1 is strictly timed, single-attempt only.",
+                  `Top ${FINALIST_SEATS} ranked candidates advance to campus final.`,
+                  "Full-screen anti-cheat enforced with tab-switch penalties.",
+                  "Offline final requires digital campus pass authentication.",
                 ]
             ).map((rule, i) => (
-              <li key={rule} className="flex gap-3 text-xs leading-relaxed text-zinc-300">
-                <span className="font-mono font-bold text-lime-400">{String(i + 1).padStart(2, "0")}</span>
-                {rule}
+              <li key={rule} className="flex gap-3 text-zinc-400">
+                <span className="text-lime-400 font-semibold">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-zinc-300">{rule}</span>
               </li>
             ))}
           </ol>
           {contest.prize_pool && (
-            <div className="flex items-center gap-2 border-t border-white/10 pt-4 text-xs font-semibold text-white">
-              <Gift className="size-4 text-lime-400" />
-              {contest.prize_pool}
+            <div className="flex items-center gap-2 border-t border-white/8 pt-3 text-xs font-mono text-white">
+              <Gift className="size-3.5 text-lime-400" />
+              <span>Pool: {contest.prize_pool}</span>
             </div>
           )}
         </div>
 
-        {/* ─── PROBLEM SET ────────────────────────────────── */}
-        <div className="rounded-none border border-white/10 bg-zinc-900/60 overflow-hidden backdrop-blur-md shadow-xl">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-            <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">Problem Set</h2>
-            <span className="font-mono text-xs tabular-nums text-zinc-400">
-              {problems.length || contest.problem_count} problems
-            </span>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/10 hover:bg-transparent bg-zinc-950/40">
-                <TableHead className="w-12 font-mono text-[10px] uppercase tracking-widest text-zinc-400">#</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Problem</TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase tracking-widest text-zinc-400">Pts</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {problems.length === 0 ? (
-                <TableRow className="border-white/5">
-                  <TableCell colSpan={3} className="py-10 text-center font-mono text-xs text-zinc-400">
-                    <Lock className="mx-auto mb-2 size-4 text-zinc-500" />
-                    Sealed until Round 1 opens
-                  </TableCell>
+        {/* Problem Set */}
+        <div className="rounded-lg border border-white/8 bg-black overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+              <h2 className="font-mono text-xs font-semibold text-zinc-300 uppercase tracking-wider">Problem Set</h2>
+              <span className="font-mono text-xs tabular-nums text-zinc-500">
+                {problems.length || contest.problem_count} challenges
+              </span>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-white/8 hover:bg-transparent">
+                  <TableHead className="w-12 font-mono text-[10px] uppercase text-zinc-500">#</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Problem</TableHead>
+                  <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Pts</TableHead>
                 </TableRow>
-              ) : (
-                problems.map((p) => (
-                  <TableRow key={p.problem_index} className="border-white/5 hover:bg-zinc-800/40">
-                    <TableCell className="font-mono text-xs font-bold text-lime-400">{p.problem_index}</TableCell>
-                    <TableCell className="text-sm font-medium text-white">{p.title}</TableCell>
-                    <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-white">{p.points}</TableCell>
+              </TableHeader>
+              <TableBody>
+                {problems.length === 0 ? (
+                  <TableRow className="border-white/4">
+                    <TableCell colSpan={3} className="py-10 text-center font-mono text-xs text-zinc-500">
+                      <Lock className="mx-auto mb-2 size-4 text-zinc-600" />
+                      Problems sealed until assessment opens
+                    </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  problems.map((p) => (
+                    <TableRow key={p.problem_index} className="border-white/4 hover:bg-zinc-950">
+                      <TableCell className="font-mono text-xs font-semibold text-lime-400">{p.problem_index}</TableCell>
+                      <TableCell className="text-xs font-medium text-white">{p.title}</TableCell>
+                      <TableCell className="text-right font-mono text-xs tabular-nums text-zinc-400">{p.points}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {(isAssessmentSubmitted || pastContestsHaveResults(phase)) && (
+            <div className="p-4 border-t border-white/8 text-right">
+              <Link
+                to={`/portal/contests/${contestSlug}/results`}
+                className="font-mono text-xs text-lime-400 hover:underline inline-flex items-center gap-1"
+              >
+                View Full Standings →
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Registration dialog */}
+      {/* Registration Confirmation Dialog */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="border-white/10 bg-zinc-900 text-white rounded-none">
+        <DialogContent className="border-white/10 bg-black text-white rounded-lg max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">Register for {contest.title}?</DialogTitle>
-            <DialogDescription className="text-zinc-400">
-              This reserves your Round 1 slot. The assessment opens {formatWhen(opensAt.toISOString())} and stays open for 24 hours.
-              Your {ASSESSMENT_DURATION_MINUTES}-minute timer starts the moment you enter and cannot be paused.
+            <DialogTitle className="text-base font-semibold text-white tracking-tight">
+              Register for {contest.title}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-400 leading-relaxed font-mono">
+              Reserves your workstation slot for Round 1. The assessment opens {formatWhen(opensAt.toISOString())} for 24 hours. Your {ASSESSMENT_DURATION_MINUTES}-minute timer starts the moment you launch.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" className="rounded-none border-white/10" onClick={() => setConfirmOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button variant="outline" className="rounded-md border-white/10 text-zinc-400 hover:text-white" onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
-            <Button className="rounded-none font-mono text-xs font-bold bg-lime-400 hover:bg-lime-300 text-black font-bold" onClick={handleRegister}>
-              Confirm Registration
+            <Button className="rounded-md bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs font-semibold" onClick={handleRegister}>
+              Confirm Slot
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -22,27 +22,27 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex flex-col md:flex-row md:items-end justify-between gap-6",
+        "rounded-lg border border-white/8 bg-black p-6 flex flex-col md:flex-row md:items-end justify-between gap-6 shadow-none",
         className
       )}
     >
-      <div className="space-y-2 max-w-2xl">
+      <div className="space-y-1.5 max-w-2xl">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
             {formattedKicker}
           </span>
           {index && (
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
-              {index}
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 tabular-nums">
+              · {index}
             </span>
           )}
           {badge}
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase font-mono">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white font-sans">
           {title}
         </h1>
         {description && (
-          <p className="text-sm leading-relaxed text-zinc-400 font-sans">
+          <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 font-sans">
             {description}
           </p>
         )}
@@ -67,19 +67,19 @@ export function SectionHeader({
 }) {
   const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
   return (
-    <div className={cn("flex items-end justify-between gap-4 border-b border-white/10 pb-4 mb-6", className)}>
+    <div className={cn("flex items-end justify-between gap-4 border-b border-white/8 pb-3 mb-5", className)}>
       <div>
         <div className="flex items-center gap-2">
-          <p className="text-[11px] font-mono font-bold tracking-[0.2em] text-lime-400 uppercase">
+          <p className="text-[10px] font-mono font-semibold tracking-wider text-lime-400 uppercase">
             {formattedKicker}
           </p>
           {index && (
-            <span className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase tabular-nums">
-              {index}
+            <span className="text-[10px] font-mono tracking-wider text-zinc-500 uppercase tabular-nums">
+              · {index}
             </span>
           )}
         </div>
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-1 uppercase font-mono">
+        <h2 className="text-lg font-semibold tracking-tight text-white mt-1 font-sans">
           {title}
         </h2>
       </div>
@@ -90,9 +90,9 @@ export function SectionHeader({
 
 export function StatusDot({ status }: { status: "live" | "upcoming" | "finished" }) {
   const styles = {
-    live: "text-lime-400 bg-lime-400/10 border-lime-400/30",
-    upcoming: "text-zinc-300 bg-zinc-900 border-white/10",
-    finished: "text-zinc-400 bg-zinc-900/80 border-white/10",
+    live: "text-lime-400 bg-lime-400/8 border-lime-400/30",
+    upcoming: "text-zinc-300 bg-black border-white/12",
+    finished: "text-zinc-500 bg-black border-white/8",
   }[status];
 
   const dotColor = {
@@ -102,8 +102,8 @@ export function StatusDot({ status }: { status: "live" | "upcoming" | "finished"
   }[status];
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-none text-xs font-mono font-semibold uppercase tracking-wider border", styles)}>
-      <span className={cn("w-1.5 h-1.5 rounded-none", dotColor)} />
+    <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-mono font-medium uppercase tracking-wider border", styles)}>
+      <span className={cn("w-1.5 h-1.5 rounded-full", dotColor)} />
       {status}
     </span>
   );
@@ -119,17 +119,17 @@ export function Metric({
   detail?: string;
 }) {
   return (
-    <div className="p-4 rounded-none border border-white/8 bg-zinc-900/60 backdrop-blur-sm">
-      <span className="block text-[11px] font-mono font-semibold text-slate-400 uppercase tracking-wider">{label}</span>
-      <strong className="block text-2xl font-mono font-bold text-white mt-1.5 tabular-nums">{value}</strong>
-      {detail && <small className="block text-xs font-mono text-slate-500 mt-1">{detail}</small>}
+    <div className="p-4 rounded-lg border border-white/8 bg-black">
+      <span className="block text-[10px] font-mono font-medium text-zinc-500 uppercase tracking-wider">{label}</span>
+      <strong className="block text-xl font-mono font-bold text-white mt-1 tabular-nums">{value}</strong>
+      {detail && <small className="block text-[10px] font-mono text-zinc-500 mt-1">{detail}</small>}
     </div>
   );
 }
 
 export function TierBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none text-xs font-mono font-bold uppercase tracking-wider bg-lime-400/10 border border-lime-400/30 text-lime-400">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium uppercase tracking-wider bg-lime-400/8 border border-lime-400/25 text-lime-400">
       {children}
     </span>
   );
@@ -137,7 +137,7 @@ export function TierBadge({ children }: { children: ReactNode }) {
 
 export function MonoTag({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-none text-[11px] font-mono font-medium tracking-wide bg-zinc-900 border border-white/10 text-zinc-300", className)}>
+    <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-black border border-white/10 text-zinc-300", className)}>
       {children}
     </span>
   );
@@ -145,10 +145,10 @@ export function MonoTag({ children, className }: { children: ReactNode; classNam
 
 export function EmptyState({ title, body }: { title: string; body: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-white/10 rounded-none bg-zinc-900/30 my-6">
-      <span className="text-3xl text-slate-600 font-mono mb-3">∅</span>
-      <h3 className="text-base font-semibold text-slate-200">{title}</h3>
-      <p className="text-sm text-slate-400 max-w-md mt-1">{body}</p>
+    <div className="flex flex-col items-center justify-center p-12 text-center border border-white/8 rounded-lg bg-black my-6">
+      <span className="text-2xl text-zinc-600 font-mono mb-2">∅</span>
+      <h3 className="text-sm font-semibold text-white">{title}</h3>
+      <p className="text-xs text-zinc-500 max-w-md mt-1">{body}</p>
     </div>
   );
 }

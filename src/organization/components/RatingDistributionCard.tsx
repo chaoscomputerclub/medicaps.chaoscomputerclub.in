@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * RatingDistributionCard
- * Renders a real histogram sourced from the backend's /leaderboard/distribution endpoint.
- * Falls back to an all-zero chart when the app has no members yet — no fake data.
+ * Renders a histogram sourced from the backend's /leaderboard/distribution endpoint.
+ * Strix AI pure black + electric lime styling.
  */
 export function RatingDistributionCard({
   member,
@@ -24,7 +24,6 @@ export function RatingDistributionCard({
   const attendanceCount = member?.attendance_count ?? 0;
   const hasAttended = attendanceCount > 0;
 
-  // --- Percentile & rank display ---
   let percentileDisplay = "—";
   if (hasAttended && member?.university_rank) {
     const cohortTotal = Math.max(distribution?.total || 1, 1);
@@ -36,17 +35,11 @@ export function RatingDistributionCard({
   }
   const rankDisplay = member?.university_rank ? `#${member.university_rank}` : "—";
 
-  // --- Build buckets from live backend data ---
   const buckets = distribution?.buckets ?? [];
   const total = distribution?.total ?? 0;
-
-  // If no members yet, show ghost bars at equal low height (not a fake peak)
   const isEmpty = total === 0 || buckets.length === 0;
-
-  // Normalise: find real max count so bars scale relative to each other
   const maxCount = isEmpty ? 1 : Math.max(...buckets.map((b) => b.count), 1);
 
-  // Find bucket that contains the member's rating
   const memberRating = userRating ?? member?.rating ?? 1200;
   let activeBucketIndex = -1;
   if (!isEmpty) {
@@ -54,12 +47,10 @@ export function RatingDistributionCard({
       (b) => memberRating >= b.min && memberRating < b.max
     );
     if (activeBucketIndex === -1) {
-      // If rating is at/above last bucket's min, use last bucket
       activeBucketIndex = buckets.length - 1;
     }
   }
 
-  // Ghost placeholder buckets (for empty state / loading)
   const PLACEHOLDER_BUCKETS = Array.from({ length: 28 }, (_, i) => ({
     min: 1000 + i * 50,
     max: 1050 + i * 50,
@@ -70,13 +61,13 @@ export function RatingDistributionCard({
   const MAX_BAR_PX = 72;
 
   return (
-    <div className="flex flex-col justify-between h-full rounded-none border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md shadow-xl">
+    <div className="flex flex-col justify-between h-full rounded-lg border border-white/8 bg-black p-5 sm:p-6">
       {/* Top Percentile Display */}
       <div>
-        <span className="text-xs font-medium text-zinc-400 font-sans tracking-wide block">
-          {hasAttended ? "Percentile" : "Standing"}
+        <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block">
+          {hasAttended ? "Cohort Standing" : "Standing"}
         </span>
-        <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-0.5 font-sans">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mt-1 font-sans">
           {percentileDisplay}
         </h2>
       </div>
@@ -85,18 +76,17 @@ export function RatingDistributionCard({
       <div className="my-6 relative">
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <span className="text-[10px] font-mono text-zinc-500 tracking-widest opacity-80">
-              NO CONTEST DATA YET
+            <span className="text-[9px] font-mono text-zinc-600 tracking-widest uppercase">
+              NO CONTEST DATA RECORDED
             </span>
           </div>
         )}
         <div
-          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[90px] w-full"
+          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[80px] w-full"
           aria-label="Rating distribution histogram"
         >
           {displayBuckets.map((bucket, index) => {
             const count = isEmpty ? 0 : (bucket.count ?? 0);
-            // Min height: 3px for ghost bars, otherwise 3px + scaled
             const barHeightPx = isEmpty
               ? 3
               : Math.max(3, Math.round((count / maxCount) * MAX_BAR_PX));
@@ -113,24 +103,24 @@ export function RatingDistributionCard({
               >
                 {/* Tooltip */}
                 {isHovered && !isEmpty && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-white/10 text-[10px] font-mono text-zinc-200 rounded-none whitespace-nowrap z-20 pointer-events-none shadow-lg">
-                    {bucket.min}–{bucket.min + 50}: <span className="tabular-nums font-bold">{count}</span>
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black border border-white/10 text-[9px] font-mono text-white rounded whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                    {bucket.min}–{bucket.min + 50}: <span className="tabular-nums font-semibold text-lime-400">{count}</span>
                   </div>
                 )}
                 {/* Bar */}
                 <div
                   style={{ height: `${barHeightPx}px` }}
                   className={cn(
-                    "w-full rounded-none transition-all duration-150",
+                    "w-full rounded-t-[2px] transition-colors",
                     isEmpty
-                      ? "bg-zinc-800 opacity-40"
+                      ? "bg-zinc-900"
                       : isUserBucket
-                      ? "bg-lime-400 shadow-md shadow-lime-400/40 brightness-110"
+                      ? "bg-lime-400"
                       : isHovered
                       ? "bg-zinc-400"
                       : count === 0
-                      ? "bg-zinc-800/40"
-                      : "bg-zinc-700/60"
+                      ? "bg-zinc-900"
+                      : "bg-zinc-800"
                   )}
                 />
               </div>
@@ -140,28 +130,28 @@ export function RatingDistributionCard({
       </div>
 
       {/* Stats Summary Footer */}
-      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/10 text-left">
+      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/6 text-left font-mono">
         <div>
-          <span className="text-[10px] font-mono text-zinc-400 uppercase block">
-            Contest Rating
+          <span className="text-[9px] text-zinc-500 uppercase block">
+            Elo Rating
           </span>
-          <strong className="text-sm font-mono font-bold text-lime-400 block mt-0.5 tabular-nums">
+          <strong className="text-xs font-semibold text-lime-400 block mt-0.5 tabular-nums">
             {(userRating ?? member?.rating)?.toLocaleString() ?? 1200}
           </strong>
         </div>
         <div>
-          <span className="text-[10px] font-mono text-zinc-400 uppercase block">
-            Global Rank
+          <span className="text-[9px] text-zinc-500 uppercase block">
+            Rank
           </span>
-          <strong className="text-sm font-mono font-bold text-white block mt-0.5 tabular-nums">
+          <strong className="text-xs font-semibold text-white block mt-0.5 tabular-nums">
             {rankDisplay}
           </strong>
         </div>
         <div>
-          <span className="text-[10px] font-mono text-zinc-400 uppercase block">
+          <span className="text-[9px] text-zinc-500 uppercase block">
             Attended
           </span>
-          <strong className="text-sm font-mono font-bold text-white block mt-0.5 tabular-nums">
+          <strong className="text-xs font-semibold text-white block mt-0.5 tabular-nums">
             {attendanceCount}
           </strong>
         </div>

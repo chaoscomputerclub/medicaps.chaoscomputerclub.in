@@ -1,7 +1,7 @@
 /**
  * Chaos Computer Club India — Medi-Caps Chapter
  * Dedicated Air-Gapped Live Contest Arena (Round 2 Final)
- * Pure Redux Toolkit & React Router Architecture
+ * Redesigned to Strix AI Paradigm (Pure Pitch Black × Electric Lime)
  */
 
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -43,7 +43,7 @@ import {
   submitArenaCodeThunk,
   clearArenaResults,
 } from "@/store/slices/contestSlice";
-import { AssessmentStudioSkeleton, Skeleton } from "@/organization/components/skeletons";
+import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
 
 function formatTimer(totalSeconds: number): string {
@@ -103,14 +103,14 @@ export function ContestArenaPage() {
     }
   }, [arenaData?.ends_at]);
 
-  // Real-time arena clock push: proctors can pause, extend, or reset timers via SSE/Webhooks
+  // Real-time arena clock push
   useRealtimeEvents(contestSlug, (event) => {
     if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
       setRemainingSeconds(event.data.remaining_seconds);
-      toast.info("Contest clock updated by Chief Proctor Command.");
+      toast.info("Contest clock synchronized by Chief Proctor.");
     } else if (event.event === "contest_status_changed" && event.data?.status === "finished") {
       setRemainingSeconds(0);
-      toast.warning("Contest concluded by Proctor Command.");
+      toast.warning("Contest concluded by Chief Proctor.");
     }
   });
 
@@ -125,7 +125,6 @@ export function ContestArenaPage() {
   useEffect(() => {
     if (remainingSeconds > 0 || isContestOver) return;
     setIsContestOver(true);
-    // Countdown 5 → 0 then navigate
     let count = 5;
     const tick = setInterval(() => {
       count -= 1;
@@ -215,7 +214,7 @@ export function ContestArenaPage() {
       const res = result.payload;
       if (res.verdict === "ACCEPTED") {
         setSolvedProblemIds((prev) => new Set([...prev, activeProblem.id]));
-        toast.success(`🎉 Problem ${activeProblem.problem_index} Solved! +${res.points_awarded} pts`);
+        toast.success(`Problem ${activeProblem.problem_index} Solved! +${res.points_awarded} pts`);
       } else {
         toast.error(`Verdict: ${res.verdict} (${res.passed_testcases}/${res.total_testcases} passed)`);
       }
@@ -242,61 +241,59 @@ export function ContestArenaPage() {
 
   if (!arenaData) {
     return (
-      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-zinc-950 p-4 text-white">
-        <div className="w-full max-w-lg space-y-6 rounded-none border border-amber-500/40 bg-zinc-900/80 p-8 shadow-2xl relative overflow-hidden text-center backdrop-blur-md">
-          <div className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-amber-500/10 blur-3xl" />
-
-          <div className="mx-auto flex size-16 items-center justify-center rounded-none border border-amber-500/40 bg-amber-500/10">
-            <ShieldCheck className="size-8 text-amber-400" />
+      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+        <div className="w-full max-w-lg space-y-6 rounded-lg border border-amber-500/30 bg-black p-8 text-center">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+            <ShieldCheck className="size-7" />
           </div>
 
           <div className="space-y-2">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-amber-400">
-              Air-Gapped Physical Gate Check-in Required
+            <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
+              Physical Gate Check-in Required
             </span>
-            <h1 className="text-xl font-black uppercase tracking-tight text-white font-mono">
+            <h1 className="text-xl font-semibold tracking-tight text-white">
               Proctor Verification Required
             </h1>
             <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              Round 2 Live Final is strictly an on-premise, physically proctored event at the Medi-Caps Computing Complex. Remote access from outside the lab gate is blocked until your QR Campus Pass is scanned by a proctor.
+              Round 2 Live Final is strictly an on-premise event at Medi-Caps Computing Complex. Access is unlocked once your digital Campus Pass is scanned by a proctor.
             </p>
           </div>
 
-          <div className="space-y-2 rounded-none border border-white/10 bg-zinc-950/60 p-4 text-left font-mono text-xs">
+          <div className="space-y-2 rounded-md border border-white/8 bg-zinc-950 p-4 text-left font-mono text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Round 1 Screening:</span>
-              <span className="font-bold text-emerald-400">✓ Top 30 Confirmed</span>
+              <span className="text-zinc-500">Round 1 Screening:</span>
+              <span className="font-semibold text-lime-400">Top 30 Qualified</span>
             </div>
-            <div className="flex items-center justify-between border-t border-white/10 pt-2">
-              <span className="text-zinc-400">Lab Gate Check-in:</span>
-              <span className="font-bold text-amber-400">● Awaiting Proctor Scan</span>
+            <div className="flex items-center justify-between border-t border-white/6 pt-2">
+              <span className="text-zinc-500">Lab Gate Check-in:</span>
+              <span className="font-semibold text-amber-400">Awaiting Proctor Scan</span>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 pt-2">
+          <div className="flex flex-col gap-2 pt-2">
             <Button
               asChild
-              className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20"
+              className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
             >
               <Link to={`/portal/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-2 size-4" /> View Your QR Campus Pass
+                <QrCode className="mr-2 size-3.5" /> View Finalist Pass
               </Link>
             </Button>
             <div className="flex gap-2">
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
                 variant="outline"
-                className="w-full rounded-none font-mono text-xs"
+                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white"
               >
-                <RotateCcw className="mr-1.5 size-3.5" /> Re-check Gate Status
+                <RotateCcw className="mr-1.5 size-3" /> Re-check Status
               </Button>
               <Button
                 asChild
                 variant="ghost"
-                className="rounded-none font-mono text-xs text-zinc-400"
+                className="rounded-md font-mono text-xs text-zinc-500 hover:text-white"
               >
                 <Link to={`/portal/contests/${contestSlug}`}>
-                  Exit to Lobby
+                  Exit Lobby
                 </Link>
               </Button>
             </div>
@@ -306,74 +303,71 @@ export function ContestArenaPage() {
     );
   }
 
-  const title = arenaData?.title || "Live Contest Arena";
+  const title = arenaData?.title || "Live Final Arena";
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-zinc-950 text-zinc-100 select-none overflow-hidden font-sans">
-      {/* ── TOP NAV BAR ────────────────────────────────────────────────────────── */}
-      <header className="h-14 shrink-0 px-4 border-b border-white/10 bg-zinc-900/90 backdrop-blur-md flex items-center justify-between gap-4">
+    <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
+      {/* Top Navigation Bar (48px) */}
+      <header className="h-12 shrink-0 px-4 border-b border-white/8 bg-black flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <Button
             asChild
             variant="ghost"
             size="sm"
-            className="h-8 px-2.5 text-zinc-400 hover:text-white rounded-none font-mono text-xs uppercase"
+            className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs"
           >
             <Link to={`/portal/contests/${contestSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
-              Exit Arena
+              Exit
             </Link>
           </Button>
 
-          <div className="h-4 w-px bg-white/10" />
+          <div className="h-3 w-px bg-white/10" />
 
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400 hidden sm:inline">
-              (02 // Final Arena)
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 hidden sm:inline">
+              Final Arena
             </span>
-            <h1 className="text-xs font-bold uppercase tracking-wider text-white font-mono truncate max-w-[200px] md:max-w-[320px]">
+            <h1 className="text-xs font-semibold tracking-tight text-white truncate max-w-[200px] md:max-w-[320px]">
               {title}
             </h1>
-            <Badge
-              variant="outline"
-              className="border-lime-400/40 bg-lime-400/10 text-lime-400 font-mono text-[10px] uppercase rounded-none tracking-wider"
-            >
-              Live Final
-            </Badge>
+            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold">
+              Live
+            </span>
           </div>
         </div>
 
-        {/* Center: Chief Proctor & Workstation Indicator */}
+        {/* Center: Proctor & Workstation Indicator */}
         <div className="hidden lg:flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-none bg-zinc-800/60 border border-white/10 text-xs font-mono">
-            <ShieldCheck className="size-3.5 text-lime-400" />
-            <span className="text-zinc-400">Proctors:</span>
-            <span className="text-white font-medium">{arenaData?.chief_proctors?.length ? arenaData.chief_proctors.join(", ") : "Chief Proctor, CCC Operations Desk"}</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-zinc-950 text-xs font-mono">
+            <ShieldCheck className="size-3 text-lime-400" />
+            <span className="text-zinc-500">Proctors:</span>
+            <span className="text-zinc-300 font-medium">{arenaData?.chief_proctors?.length ? arenaData.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-none bg-zinc-800/60 border border-white/10 text-xs font-mono">
-            <Cpu className="size-3.5 text-cyan-400" />
-            <span className="text-zinc-400">Workstation:</span>
-            <span className="text-white font-bold">{arenaData?.assigned_seat || "Lab-04-WS-07"}</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-zinc-950 text-xs font-mono">
+            <Cpu className="size-3 text-cyan-400" />
+            <span className="text-zinc-500">WS:</span>
+            <span className="text-white font-semibold">{arenaData?.assigned_seat || "Lab-04-WS-07"}</span>
           </div>
         </div>
 
-        {/* Right: Countdown, Scoreboard & Fullscreen */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-none bg-lime-400/10 border border-lime-400/30 text-lime-400 font-mono text-xs font-bold tabular-nums">
+        {/* Right: Timer, Scoreboard & Fullscreen */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold tabular-nums">
             <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
-            <Clock className="size-3.5 text-lime-400" />
-            <span className="tracking-wider">{formatTimer(remainingSeconds)}</span>
+            <Clock className="size-3 text-lime-400" />
+            <span>{formatTimer(remainingSeconds)}</span>
           </div>
 
           <Button
             asChild
             variant="outline"
             size="sm"
-            className="hidden sm:flex h-8 text-xs font-mono uppercase tracking-wider border-white/10 bg-zinc-800/60 text-white hover:bg-zinc-700/60 rounded-none"
+            className="hidden sm:flex h-7 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:text-white rounded-md"
           >
             <Link to={`/portal/contests/${contestSlug}/results`} target="_blank">
-              <Trophy className="size-3.5 mr-1.5 text-amber-400" />
+              <Trophy className="size-3 mr-1 text-lime-400" />
               Scoreboard
             </Link>
           </Button>
@@ -381,17 +375,17 @@ export function ContestArenaPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 text-zinc-400 hover:text-white rounded-none hover:bg-zinc-800/60"
+            className="size-7 text-zinc-400 hover:text-white rounded-md hover:bg-zinc-950"
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+            {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
           </Button>
         </div>
       </header>
 
-      {/* ── PROBLEM TABS SUBHEADER ────────────────────────────────────────────── */}
-      <div className="h-10 shrink-0 px-4 bg-zinc-900/80 border-b border-white/10 flex items-center justify-between gap-2 overflow-x-auto">
+      {/* Problem Tabs Subheader (36px) */}
+      <div className="h-9 shrink-0 px-4 bg-black border-b border-white/8 flex items-center justify-between gap-2 overflow-x-auto">
         <div className="flex items-center gap-1">
           {problems.map((prob, idx) => {
             const isActive = idx === activeIndex;
@@ -404,32 +398,31 @@ export function ContestArenaPage() {
                   setActiveIndex(idx);
                   dispatch(clearArenaResults());
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-medium rounded-none transition-colors border ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded transition-colors cursor-pointer border ${
                   isActive
-                    ? "bg-zinc-800 text-lime-400 border-lime-400/50 shadow-sm"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50 border-transparent"
+                    ? "bg-zinc-900 text-white border-lime-400/40 font-semibold"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-950 border-transparent"
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase bg-zinc-900 text-zinc-400">
+                <span className="text-[10px] px-1 py-0.2 rounded font-mono uppercase bg-zinc-950 text-zinc-500">
                   {prob.points}p
                 </span>
-                {isSolved && <BadgeCheck className="size-3.5 text-lime-400" />}
+                {isSolved && <BadgeCheck className="size-3 text-lime-400" />}
               </button>
             );
           })}
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-          <span className="hidden md:inline uppercase text-[10px] tracking-wider">Lang:</span>
           <Select
             value={selectedLanguage}
             onValueChange={(val: any) => setSelectedLanguage(val)}
           >
-            <SelectTrigger className="h-7 w-[125px] text-xs font-mono uppercase bg-zinc-800 border-white/10 text-white rounded-none focus:ring-0">
+            <SelectTrigger className="h-6 w-[110px] text-xs font-mono bg-black border-white/10 text-zinc-300 rounded-md focus:ring-0">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-white/10 text-white font-mono text-xs rounded-none">
+            <SelectContent className="bg-black border-white/10 text-white font-mono text-xs rounded-md">
               <SelectItem value="python">Python 3.12</SelectItem>
               <SelectItem value="cpp">C++ (GCC 14)</SelectItem>
               <SelectItem value="javascript">JavaScript</SelectItem>
@@ -439,275 +432,221 @@ export function ContestArenaPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-xs font-mono uppercase text-zinc-400 hover:text-white rounded-none hover:bg-zinc-800"
+            className="h-6 px-1.5 text-xs font-mono text-zinc-500 hover:text-white rounded-md hover:bg-zinc-950"
             onClick={handleResetStarter}
-            title="Reset starter template"
           >
-            <RotateCcw className="size-3 mr-1" /> Reset
+            <RotateCcw className="size-2.5 mr-1" /> Reset
           </Button>
         </div>
       </div>
 
-      {/* ── WORKSPACE SPLIT: PROBLEM (LEFT) vs MONACO EDITOR (RIGHT) ──────────── */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
-        {/* LEFT COLUMN: Problem Description & Statements */}
-        <div className="w-full md:w-1/2 lg:w-5/12 h-full border-r border-white/10 overflow-y-auto p-5 space-y-6 bg-zinc-900/40">
+      {/* Main 2-Pane Split */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left: Problem Statement Pane */}
+        <div className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-5 bg-black">
           {activeProblem ? (
             <div className="space-y-5">
-              <div className="space-y-2 border-b border-white/10 pb-4">
+              <div className="border-b border-white/8 pb-3 space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
-                    (01 // Problem {activeProblem.problem_index})
+                  <span className="font-mono text-[10px] uppercase font-semibold text-lime-400">
+                    Problem {activeProblem.problem_index}
+                  </span>
+                  <span className="font-mono text-[10px] text-zinc-500 tabular-nums">
+                    {activeProblem.points} Points
                   </span>
                 </div>
-                <h2 className="text-xl font-bold uppercase tracking-tight text-white font-mono">
+                <h2 className="text-base font-semibold tracking-tight text-white">
                   {activeProblem.title}
                 </h2>
-                <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-                  <Badge
-                    variant="outline"
-                    className={`font-mono text-[10px] uppercase rounded-none tracking-wider ${
-                      activeProblem.difficulty === "EASY"
-                        ? "border-emerald-500/40 text-emerald-400 bg-emerald-950/20"
-                        : activeProblem.difficulty === "HARD"
-                          ? "border-rose-500/40 text-rose-400 bg-rose-950/20"
-                          : "border-amber-500/40 text-amber-400 bg-amber-950/20"
-                    }`}
-                  >
-                    {activeProblem.difficulty}
-                  </Badge>
-                  <span className="text-zinc-600">·</span>
-                  <span className="text-zinc-400">{activeProblem.topic}</span>
-                  <span className="text-zinc-600">·</span>
-                  <span className="text-lime-400 font-bold tabular-nums">{activeProblem.points} points</span>
-                </div>
               </div>
 
-              {/* Description */}
-              <div className="text-sm leading-relaxed text-zinc-300 whitespace-pre-line font-sans">
+              <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
                 {activeProblem.description}
               </div>
 
-              {/* Input Format */}
               {activeProblem.input_format && (
-                <div className="space-y-1.5">
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
-                    (01 // Input Format)
+                <div className="space-y-1">
+                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                    Input Format
                   </h3>
-                  <div className="text-xs text-zinc-200 font-mono p-3 rounded-none bg-zinc-900 border border-white/10 whitespace-pre-line">
+                  <div className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md whitespace-pre-line leading-relaxed">
                     {activeProblem.input_format}
                   </div>
                 </div>
               )}
 
-              {/* Output Format */}
               {activeProblem.output_format && (
-                <div className="space-y-1.5">
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
-                    (02 // Output Format)
+                <div className="space-y-1">
+                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                    Output Format
                   </h3>
-                  <div className="text-xs text-zinc-200 font-mono p-3 rounded-none bg-zinc-900 border border-white/10 whitespace-pre-line">
+                  <div className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md whitespace-pre-line leading-relaxed">
                     {activeProblem.output_format}
                   </div>
                 </div>
               )}
 
-              {/* Constraints */}
               {activeProblem.constraints && (
-                <div className="space-y-1.5">
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
-                    (03 // Constraints)
+                <div className="space-y-1">
+                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                    Constraints
                   </h3>
-                  <div className="text-xs text-amber-300 font-mono p-3 rounded-none bg-amber-950/20 border border-amber-500/20 whitespace-pre-line">
+                  <pre className="text-xs font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap">
                     {activeProblem.constraints}
-                  </div>
+                  </pre>
                 </div>
               )}
 
               {/* Sample Testcases */}
-              <div className="space-y-3 pt-2">
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-mono text-lime-400">
-                  (04 // Sample Testcases)
+              <div className="space-y-3 pt-1">
+                <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
+                  Sample Testcases
                 </h3>
-                {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 ? (
-                  activeProblem.sample_testcases.map((tc, idx) => (
-                    <div key={idx} className="space-y-2.5 border border-white/10 rounded-none p-3.5 bg-zinc-950/60">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                          Sample #{idx + 1}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 text-[11px] font-mono uppercase tracking-wider text-zinc-400 hover:text-white rounded-none border border-white/10 bg-zinc-900 hover:bg-zinc-800"
-                          onClick={() => copyToClipboard(tc.stdin, `tc_in_${idx}`)}
-                        >
-                          {copiedKey === `tc_in_${idx}` ? (
-                            <Check className="size-3 text-lime-400 mr-1" />
-                          ) : (
-                            <Copy className="size-3 mr-1" />
-                          )}
-                          Copy Input
-                        </Button>
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
-                          Input
-                        </span>
-                        <pre className="p-2.5 rounded-none bg-zinc-900 border border-white/10 text-xs font-mono text-zinc-200 overflow-x-auto">
-                          {tc.stdin}
-                        </pre>
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
-                          Expected Output
-                        </span>
-                        <pre className="p-2.5 rounded-none bg-zinc-900 border border-white/10 text-xs font-mono text-lime-400 overflow-x-auto">
-                          {tc.expected_output}
-                        </pre>
-                      </div>
-
-                      {tc.explanation && (
-                        <p className="text-xs text-zinc-400 italic pt-1 border-t border-white/10">
-                          {tc.explanation}
-                        </p>
-                      )}
+                {activeProblem.sample_testcases?.map((st, i) => (
+                  <div key={i} className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono">
+                    <div className="flex items-center justify-between text-zinc-400 font-semibold">
+                      <span>Case {i + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(st.stdin, `tc_${i}`)}
+                        className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer"
+                      >
+                        {copiedKey === `tc_${i}` ? <Check className="size-3 text-lime-400" /> : <Copy className="size-3" />}
+                        <span>{copiedKey === `tc_${i}` ? "Copied" : "Copy Input"}</span>
+                      </button>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-zinc-400">No sample testcases provided.</p>
-                )}
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-zinc-500">Input</span>
+                      <pre className="p-2 rounded bg-black border border-white/6 text-zinc-300 overflow-x-auto whitespace-pre-wrap">
+                        {st.stdin}
+                      </pre>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-zinc-500">Expected Output</span>
+                      <pre className="p-2 rounded bg-black border border-white/6 text-zinc-300 overflow-x-auto whitespace-pre-wrap">
+                        {st.expected_output}
+                      </pre>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-20" />
-              </div>
-              <Skeleton className="h-7 w-64" />
-              <div className="space-y-2 pt-2">
-                <Skeleton className="h-3.5 w-full" />
-                <Skeleton className="h-3.5 w-11/12" />
-                <Skeleton className="h-3.5 w-4/5" />
-              </div>
-              <div className="pt-4 space-y-3">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-16 w-full" />
-              </div>
-            </div>
+            <div className="text-zinc-500 font-mono text-xs">Select a challenge to begin.</div>
           )}
         </div>
 
-        {/* RIGHT COLUMN: Monaco Code Editor + Interactive Console */}
-        <div className="w-full md:w-1/2 lg:w-7/12 h-full flex flex-col min-h-0 bg-zinc-950">
-          {/* Top: Monaco Editor Area */}
-          <div className="flex-1 min-h-[260px] overflow-hidden relative border-b border-white/10 bg-zinc-950">
+        {/* Right: Editor & Drawer */}
+        <div className="w-1/2 flex flex-col bg-black">
+          <div className="flex-1 relative overflow-hidden bg-black">
             <MonacoEditor
               value={currentCode}
               language={selectedLanguage}
               onChange={handleCodeChange}
-              height="100%"
             />
           </div>
 
-          {/* Bottom: Console / Testcase Drawer */}
-          <div className="h-[230px] shrink-0 flex flex-col bg-zinc-900">
-            <div className="h-9 px-3 border-b border-white/10 flex items-center justify-between bg-zinc-900/90">
+          {/* Execution Drawer */}
+          <div className="h-56 flex flex-col border-t border-white/8 bg-black">
+            {/* Drawer Tab Header */}
+            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => setActiveConsoleTab("testcases")}
-                  className={`px-3 py-1 text-xs font-mono uppercase tracking-wider font-medium rounded-none transition-colors ${
+                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-zinc-800 text-lime-400 border-t-2 border-t-lime-400"
-                      : "text-zinc-400 hover:text-white"
+                      ? "bg-zinc-900 text-white font-semibold"
+                      : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
-                  <Terminal className="size-3.5 inline mr-1" />
                   Testcases
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveConsoleTab("output")}
-                  className={`px-3 py-1 text-xs font-mono uppercase tracking-wider font-medium rounded-none transition-colors ${
+                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-zinc-800 text-lime-400 border-t-2 border-t-lime-400"
-                      : "text-zinc-400 hover:text-white"
+                      ? "bg-zinc-900 text-white font-semibold"
+                      : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
-                  Console Output
-                  {runResult || submitResult ? (
-                    <span className="size-1.5 rounded-full bg-lime-400 inline-block ml-1.5" />
-                  ) : null}
+                  <span>Output</span>
+                  {submitResult && (
+                    <span
+                      className={`size-1.5 rounded-full ${
+                        submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-red-400"
+                      }`}
+                    />
+                  )}
+                  {runResult && (
+                    <span
+                      className={`size-1.5 rounded-full ${
+                        runResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-amber-400"
+                      }`}
+                    />
+                  )}
                 </button>
               </div>
-
-              {activeConsoleTab === "testcases" && (
-                <div className="flex items-center gap-1 text-[11px] font-mono">
-                  {activeProblem?.sample_testcases?.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveTestcaseIndex(idx)}
-                      className={`px-2 py-0.5 rounded-none border text-xs font-mono ${
-                        activeTestcaseIndex === idx
-                          ? "bg-lime-400/10 text-lime-400 border-lime-400/50"
-                          : "text-zinc-400 hover:text-white border-white/10 bg-zinc-900"
-                      }`}
-                    >
-                      Case {idx + 1}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setActiveTestcaseIndex(-1)}
-                    className={`px-2 py-0.5 rounded-none border text-xs font-mono ${
-                      activeTestcaseIndex === -1
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/50"
-                        : "text-zinc-400 hover:text-white border-white/10 bg-zinc-900"
-                    }`}
-                  >
-                    Custom Input
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* Console Content */}
-            <div className="flex-1 overflow-y-auto p-3.5 text-xs font-mono bg-zinc-900/60">
+            {/* Drawer Content */}
+            <div className="flex-1 overflow-y-auto p-3 font-mono text-xs">
               {activeConsoleTab === "testcases" ? (
-                <div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1.5">
+                    {activeProblem?.sample_testcases?.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setActiveTestcaseIndex(i)}
+                        className={`px-2 py-0.5 text-xs font-mono rounded ${
+                          activeTestcaseIndex === i
+                            ? "bg-zinc-900 text-white border border-white/10"
+                            : "text-zinc-500 hover:text-white"
+                        }`}
+                      >
+                        Case {i + 1}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTestcaseIndex(-1)}
+                      className={`px-2 py-0.5 text-xs font-mono rounded ${
+                        activeTestcaseIndex === -1
+                          ? "bg-zinc-900 text-white border border-white/10"
+                          : "text-zinc-500 hover:text-white"
+                      }`}
+                    >
+                      Custom
+                    </button>
+                  </div>
+
                   {activeTestcaseIndex === -1 ? (
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
-                        Custom Stdin Input:
-                      </span>
-                      <textarea
-                        value={customStdin}
-                        onChange={(e) => setCustomStdin(e.target.value)}
-                        placeholder="Enter custom stdin test values..."
-                        className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400"
-                      />
-                    </div>
+                    <textarea
+                      value={customStdin}
+                      onChange={(e) => setCustomStdin(e.target.value)}
+                      placeholder="Enter custom input stdin..."
+                      className="w-full h-20 p-2 rounded bg-black border border-white/10 text-zinc-300 font-mono text-xs resize-none focus:outline-none focus:border-lime-400"
+                    />
                   ) : (
                     activeProblem?.sample_testcases?.[activeTestcaseIndex] && (
-                      <div className="space-y-2.5">
+                      <div className="space-y-2">
                         <div>
-                          <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
+                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
                             Standard Input
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs text-white">
+                          <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white">
                             {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
                           </pre>
                         </div>
                         <div>
-                          <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
+                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
                             Expected Output
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs text-lime-400">
+                          <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-lime-400">
                             {activeProblem.sample_testcases[activeTestcaseIndex].expected_output}
                           </pre>
                         </div>
@@ -719,23 +658,23 @@ export function ContestArenaPage() {
                 /* Output Tab */
                 <div className="space-y-3">
                   {submitResult ? (
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         {submitResult.verdict === "ACCEPTED" ? (
-                          <div className="flex items-center gap-1.5 text-lime-400 font-bold text-xs uppercase font-mono">
-                            <CheckCircle2 className="size-4 text-emerald-400" /> Accepted
+                          <div className="flex items-center gap-1.5 text-lime-400 font-semibold text-xs uppercase font-mono">
+                            <CheckCircle2 className="size-4" /> Accepted
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs uppercase font-mono">
+                          <div className="flex items-center gap-1.5 text-red-400 font-semibold text-xs uppercase font-mono">
                             <XCircle className="size-4" /> {submitResult.verdict}
                           </div>
                         )}
                         <span className="text-zinc-600">·</span>
                         <span className="text-white font-mono tabular-nums">
-                          {submitResult.passed_testcases} / {submitResult.total_testcases} testcases passed
+                          {submitResult.passed_testcases} / {submitResult.total_testcases} passed
                         </span>
                         {submitResult.points_awarded > 0 && (
-                          <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 rounded-none font-mono text-[10px] tabular-nums">
+                          <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 rounded font-mono text-[10px] tabular-nums">
                             +{submitResult.points_awarded} pts
                           </Badge>
                         )}
@@ -743,66 +682,56 @@ export function ContestArenaPage() {
                       <p className="text-xs text-zinc-400 font-mono">{submitResult.message}</p>
                     </div>
                   ) : runResult ? (
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2 font-mono">
                         <span
-                          className={`font-bold uppercase text-xs ${
-                            runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-amber-400"
+                          className={`font-semibold uppercase text-xs ${
+                            runResult.verdict === "ACCEPTED" ? "text-lime-400" : "text-amber-400"
                           }`}
                         >
                           Verdict: {runResult.verdict}
                         </span>
                         {runResult.time !== undefined && (
-                          <span className="text-zinc-400 text-xs tabular-nums">
+                          <span className="text-zinc-500 text-xs tabular-nums">
                             ({Math.round(runResult.time * 1000)}ms)
                           </span>
                         )}
                       </div>
                       {runResult.stdout && (
                         <div>
-                          <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">
+                          <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
                             Stdout
                           </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded-none text-xs text-white overflow-x-auto">
+                          <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
                             {runResult.stdout}
                           </pre>
                         </div>
                       )}
                       {runResult.stderr && (
                         <div>
-                          <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">
+                          <span className="text-[10px] text-red-400 uppercase tracking-wider font-mono">
                             Stderr
                           </span>
-                          <pre className="p-2.5 bg-rose-950/20 border border-rose-500/30 rounded-none text-xs text-rose-400 overflow-x-auto">
+                          <pre className="p-2 bg-black border border-red-500/20 rounded text-xs text-red-400 overflow-x-auto">
                             {runResult.stderr}
-                          </pre>
-                        </div>
-                      )}
-                      {runResult.compile_output && (
-                        <div>
-                          <span className="text-[10px] text-amber-400 uppercase tracking-wider font-mono">
-                            Compiler Output
-                          </span>
-                          <pre className="p-2.5 bg-zinc-950 border border-amber-500/30 rounded-none text-xs text-amber-300 overflow-x-auto">
-                            {runResult.compile_output}
                           </pre>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <p className="text-zinc-400 text-center py-6 font-mono text-xs">
-                      Click "Run Code" to test sample cases or "Submit Solution" for official judging.
+                    <p className="text-zinc-600 text-center py-6 font-mono text-xs">
+                      Run code against sample cases or submit for evaluation.
                     </p>
                   )}
                 </div>
               )}
             </div>
 
-            {/* ── ACTION FOOTER ─────────────────────────────────────────────────── */}
-            <div className="h-12 px-4 border-t border-white/10 flex items-center justify-between bg-zinc-900/90">
-              <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-                <span className={`size-2 rounded-full ${isContestOver ? 'bg-rose-500' : 'bg-emerald-400'}`} />
-                <span>{isContestOver ? 'Contest ended — submissions locked' : 'Lab workstation online'}</span>
+            {/* Action Footer */}
+            <div className="h-11 px-4 border-t border-white/8 flex items-center justify-between bg-black">
+              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                <span className={`size-1.5 rounded-full ${isContestOver ? 'bg-red-500' : 'bg-lime-400'}`} />
+                <span>{isContestOver ? 'Contest locked' : 'Workstation online'}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -811,20 +740,20 @@ export function ContestArenaPage() {
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleRunCode}
-                  className="font-mono text-xs uppercase tracking-wider rounded-none border-white/10 bg-zinc-800/80 text-white hover:bg-zinc-700/80 disabled:opacity-30"
+                  className="font-mono text-xs rounded-md border-white/10 bg-black text-white hover:bg-zinc-950 disabled:opacity-30"
                 >
-                  <Play className="size-3.5 mr-1 text-cyan-400" />
-                  {isRunningCode ? "Running…" : "Run Code"}
+                  <Play className="size-3 mr-1 text-lime-400" />
+                  {isRunningCode ? "Running…" : "Run"}
                 </Button>
 
                 <Button
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleSubmitCode}
-                  className="font-mono text-xs uppercase font-bold tracking-wider rounded-none bg-lime-400 hover:bg-lime-300 text-black font-bold shadow-lg shadow-lime-400/20 disabled:opacity-30"
+                  className="font-mono text-xs font-semibold rounded-md bg-lime-400 hover:bg-lime-300 text-black disabled:opacity-30"
                 >
-                  <Send className="size-3.5 mr-1" />
-                  {isSubmittingCode ? "Evaluating…" : "Submit Solution"}
+                  <Send className="size-3 mr-1" />
+                  {isSubmittingCode ? "Judging…" : "Submit"}
                 </Button>
               </div>
             </div>
@@ -832,42 +761,34 @@ export function ContestArenaPage() {
         </div>
       </div>
 
-      {/* ── CONTEST OVER OVERLAY ────────────────────────────────────────────── */}
+      {/* Contest Over Overlay */}
       {isContestOver && (
         <div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8 bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 bg-black/95 backdrop-blur-md"
         >
-          {/* Glow ring */}
-          <div className="relative flex size-28 items-center justify-center">
-            <div className="absolute inset-0 rounded-none bg-lime-400/20 blur-2xl animate-pulse" />
-            <div className="flex size-24 items-center justify-center rounded-none border-2 border-lime-400/40 bg-zinc-900">
-              <Trophy className="size-10 text-lime-400" />
-            </div>
+          <div className="flex size-20 items-center justify-center rounded-lg border border-lime-400/40 bg-black">
+            <Trophy className="size-8 text-lime-400" />
           </div>
 
-          <div className="space-y-3 text-center">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-lime-400">Contest Concluded</p>
-            <h2 className="text-4xl font-black uppercase tracking-tight text-white">
+          <div className="space-y-2 text-center">
+            <p className="font-mono text-xs font-semibold uppercase tracking-widest text-lime-400">Contest Concluded</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-white">
               Time's Up
             </h2>
-            <p className="max-w-sm text-sm text-zinc-400 font-mono leading-relaxed">
-              All submissions are locked. The proctors are collecting results.
-              Final standings will be published shortly.
+            <p className="max-w-sm text-xs text-zinc-400 font-mono leading-relaxed">
+              All submissions are locked. Standings will be finalized.
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-4">
-            <p className="font-mono text-xs text-zinc-400 uppercase tracking-widest">
-              Redirecting to Final Results in
-            </p>
-            <div className="flex size-16 items-center justify-center rounded-none border-2 border-lime-400 bg-lime-400/10">
-              <span className="text-2xl font-black text-lime-400 tabular-nums">{redirectCountdown}</span>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
+              <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
             </div>
             <button
               onClick={() => navigate(`/portal/contests/${contestSlug}/final-results`)}
-              className="font-mono text-xs font-bold uppercase tracking-widest text-lime-400 border border-lime-400/40 bg-lime-400/10 px-6 py-2.5 rounded-none hover:bg-lime-400/20 transition-colors"
+              className="font-mono text-xs font-semibold uppercase text-lime-400 border border-lime-400/40 bg-lime-400/10 px-5 py-2 rounded-md hover:bg-lime-400/20 transition-colors"
             >
-              View Final Results Now →
+              View Final Results →
             </button>
           </div>
         </div>

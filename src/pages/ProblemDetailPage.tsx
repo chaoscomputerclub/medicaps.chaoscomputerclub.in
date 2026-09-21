@@ -41,12 +41,12 @@ export function ProblemDetailPage() {
   if (!data) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 space-y-4">
-        <Link to="/portal/problems" className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-white transition-colors">
+        <Link to="/portal/problems" className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to problem archive
         </Link>
-        <h1 className="text-2xl font-mono font-bold text-white uppercase">Archived problem not found</h1>
-        <p className="text-zinc-400 text-sm">
-          The requested problem is either unreleased, ongoing, or invalid.
+        <h1 className="text-xl font-semibold text-white">Archived Problem Not Found</h1>
+        <p className="text-zinc-500 text-xs font-mono">
+          The requested problem is unreleased or invalid.
         </p>
       </div>
     );
@@ -55,62 +55,59 @@ export function ProblemDetailPage() {
   const { contest, problem } = data;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Link
         to="/portal/problems"
-        className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-lime-400 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Problem archive
       </Link>
 
       <PageHeader
-        kicker="03 // Problem Dossier"
-        index={`INDEX 3.${problem.index} · ${problem.points} PTS`}
+        kicker="03 // Problem Statement"
+        index={`PROBLEM ${problem.index} · ${problem.points} PTS`}
         title={problem.title}
-        description={`${contest.title} · ${problem.topic} · ${problem.solved_count} verified solves recorded from campus workstations.`}
+        description={`${contest.title} · ${problem.topic} · ${problem.solved_count} verified solves.`}
         badge={
-          <span className="font-mono text-sm font-black text-lime-400 border border-lime-400/40 rounded-none px-3 py-1 bg-lime-400/10">
+          <span className="font-mono text-xs font-semibold text-lime-400 border border-lime-400/30 rounded px-2.5 py-0.5 bg-lime-400/10">
             PROBLEM {problem.index}
           </span>
         }
       />
 
-      <div className="flex items-start gap-4 p-4 rounded-none border border-amber-500/30 bg-amber-950/20 text-amber-300">
-        <Ban className="size-5 shrink-0 mt-0.5" />
-        <div>
-          <strong className="font-mono text-sm block uppercase">No online submission surface</strong>
-          <p className="text-xs text-zinc-300 mt-0.5">
-            This statement is preserved for study. Official attempts were accepted only from assigned campus workstations during the contest window.
+      <div className="flex items-start gap-3 p-4 rounded-lg border border-white/8 bg-black text-zinc-300">
+        <Ban className="size-4 shrink-0 mt-0.5 text-zinc-500" />
+        <div className="space-y-0.5 font-mono text-xs">
+          <strong className="text-white block uppercase tracking-wider">Archived Reference Only</strong>
+          <p className="text-zinc-400">
+            This challenge is preserved for post-contest analysis. Live submission is closed.
           </p>
         </div>
       </div>
 
-      <article className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 space-y-6 backdrop-blur-md shadow-xl">
+      <article className="rounded-lg border border-white/8 bg-black p-6 space-y-6">
         <SectionHeader
           kicker="01 // Official Editorial"
           index={`ANALYSIS · ${problem.points} PTS`}
-          title="Post-Contest Analysis"
+          title="Solution Breakdown"
         />
 
-        <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="text-zinc-300 text-xs font-mono leading-relaxed whitespace-pre-wrap">
           {problem.editorial}
         </p>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-mono font-bold text-white uppercase tracking-wider">
-            Core Observation
+          <h3 className="text-xs font-mono font-semibold text-white uppercase tracking-wider">
+            Complexity Boundary
           </h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
-            Model the invariant before choosing a data structure. The intended solution maintains a monotonic decision boundary and proves every discarded state cannot improve the final answer.
-          </p>
-          <pre className="rounded-none p-4 bg-zinc-950 border border-white/10 font-mono text-xs text-lime-400 overflow-x-auto">
-            <code>{`complexity: O(n log n)\nspace: O(n)\nverdict source: sealed judge replay`}</code>
+          <pre className="rounded-md p-3.5 bg-zinc-950 border border-white/8 font-mono text-xs text-lime-400 overflow-x-auto">
+            <code>{`complexity: O(n log n)\nspace: O(n)\nverdict: accepted`}</code>
           </pre>
         </div>
 
-        <div className="pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-zinc-400">
-          <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
-          <span>The solve count and first-accept timing were reconciled against workstation logs before publication.</span>
+        <div className="pt-4 border-t border-white/6 flex items-center gap-2 text-xs font-mono text-zinc-500">
+          <CheckCircle2 className="size-3.5 text-lime-400 shrink-0" />
+          <span>Solve metrics reconciled against official campus judge replay.</span>
         </div>
       </article>
     </div>

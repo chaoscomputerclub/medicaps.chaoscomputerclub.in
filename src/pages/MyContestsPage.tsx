@@ -46,81 +46,81 @@ export function MyContestsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       {/* Header with quick stats */}
       <PageHeader
         kicker="04 // Participation Record"
-        index="INDEX 4.0 · CADET DOSSIER"
+        index="DOSSIER"
         title="My Contests"
-        description="Everything you entered, qualified for, or completed — in one place."
+        description="All entered, active, and completed competitive programming tournaments."
         action={
           <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
-            <div className="flex flex-col border-l-2 border-lime-400 pl-3">
-              <strong className="font-mono tabular-nums text-2xl font-bold text-white">{data.length}</strong>
-              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOTAL ENTERED</span>
+            <div className="flex flex-col border-l border-lime-400 pl-3">
+              <strong className="font-mono tabular-nums text-xl font-semibold text-white">{data.length}</strong>
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Total</span>
             </div>
-            <div className="flex flex-col border-l-2 border-amber-500 pl-3">
-              <strong className="font-mono tabular-nums text-2xl font-bold text-white">{registeredCount}</strong>
-              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">ACTIVE STANDBY</span>
+            <div className="flex flex-col border-l border-white/20 pl-3">
+              <strong className="font-mono tabular-nums text-xl font-semibold text-white">{registeredCount}</strong>
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Standby</span>
             </div>
-            <div className="flex flex-col border-l-2 border-emerald-500 pl-3">
-              <strong className="font-mono tabular-nums text-2xl font-bold text-white">{qualifiedCount}</strong>
-              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">TOP 30 QUALIFIED</span>
+            <div className="flex flex-col border-l border-lime-400/40 pl-3">
+              <strong className="font-mono tabular-nums text-xl font-semibold text-lime-400">{qualifiedCount}</strong>
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Top 30</span>
             </div>
           </div>
         }
       />
 
-      {/* Segmented Filter Controls using shadcn Tabs */}
-      <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-6">
-        <TabsList className="h-auto flex-wrap gap-1 rounded-none border border-white/10 bg-zinc-900/60 p-1.5 backdrop-blur-md">
-          <TabsTrigger value="all" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+      {/* Segmented Filter Controls */}
+      <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-4">
+        <TabsList className="h-auto flex-wrap gap-1 rounded-md border border-white/8 bg-black p-1">
+          <TabsTrigger value="all" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
             All (<span className="tabular-nums">{data.length}</span>)
           </TabsTrigger>
-          <TabsTrigger value="registered" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+          <TabsTrigger value="registered" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
             Registered (<span className="tabular-nums">{registeredCount}</span>)
           </TabsTrigger>
-          <TabsTrigger value="live" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
-            Live Screening (<span className="tabular-nums">{liveCount}</span>)
+          <TabsTrigger value="live" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
+            Live (<span className="tabular-nums">{liveCount}</span>)
           </TabsTrigger>
-          <TabsTrigger value="completed" className="rounded-none font-mono text-xs uppercase font-bold text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-md transition-all">
+          <TabsTrigger value="completed" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
             Completed (<span className="tabular-nums">{completedCount}</span>)
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="overflow-hidden rounded-none border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl">
-        <div className="flex items-center justify-between border-b border-white/10 bg-zinc-950/40 p-4 sm:p-6">
+      <section className="overflow-hidden rounded-lg border border-white/8 bg-black">
+        <div className="flex items-center justify-between border-b border-white/8 p-4 sm:p-5">
           <SectionHeader
-            kicker="Contest Ledger"
-            title={`Showing ${filteredContests.length} ${filter === "all" ? "participations" : filter + " contests"}`}
+            kicker="Contest History"
+            title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild className="rounded-none font-mono text-xs text-zinc-300 border-white/10 bg-zinc-900/60 hover:border-white/20 hover:text-white active:scale-[0.98]">
+          <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:text-white">
             <Link to="/portal/contests">
-              Browse All Contests
+              Browse Contests
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Link>
           </Button>
         </div>
 
         {filteredContests.length === 0 ? (
-          <div className="py-16 px-6 text-center">
-            <Trophy className="w-10 h-10 text-zinc-600 mx-auto mb-3 opacity-60" />
-            <h3 className="font-mono text-base font-bold text-white uppercase tracking-wider">
+          <div className="py-16 px-6 text-center font-mono">
+            <Trophy className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+            <h3 className="text-sm font-semibold text-white">
               No contests found in this view
             </h3>
-            <p className="text-sm text-zinc-400 max-w-md mx-auto mt-1 mb-6">
+            <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
               {filter === "registered"
-                ? "You haven't registered for upcoming contests yet. Explore the contest calendar and claim your workstation seat."
-                : "Enter two-round campus contests to build your verified competitive record."}
+                ? "You have not registered for any upcoming tournament rounds yet."
+                : "Enter tournament screening rounds to establish your university ranking."}
             </p>
-            <Button asChild className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-lime-400/20 active:scale-[0.98]">
-              <Link to="/portal/contests">Explore Active Contests</Link>
+            <Button asChild className="rounded-md bg-lime-400 text-black hover:bg-lime-300 text-xs font-mono font-semibold">
+              <Link to="/portal/contests">Explore Contests</Link>
             </Button>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-white/6">
             {filteredContests.map((c) => {
               const isUpcoming = c.status === "upcoming" || c.outcome === "registered";
               const isLive = c.status === "live" || c.outcome === "live";
@@ -130,65 +130,67 @@ export function MyContestsPage() {
               return (
                 <article
                   key={c.contest_slug}
-                  className="flex flex-col justify-between gap-5 p-5 transition-colors hover:bg-white/[0.02] sm:p-6 lg:flex-row lg:items-center"
+                  className="flex flex-col justify-between gap-4 p-5 transition-colors hover:bg-zinc-950 lg:flex-row lg:items-center"
                 >
-                  {/* Left: Status Icon & Details */}
-                  <div className="flex items-start gap-4">
-                    <div className="shrink-0 mt-1">
+                  {/* Left: Details */}
+                  <div className="flex items-start gap-3.5">
+                    <div className="shrink-0 mt-0.5">
                       {isQualified ? (
-                        <div className="w-10 h-10 rounded-none bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shadow-sm">
-                          <CheckCircle2 size={20} />
+                        <div className="size-9 rounded-md bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
+                          <CheckCircle2 size={18} />
                         </div>
                       ) : isLive ? (
-                        <div className="w-10 h-10 rounded-none bg-amber-950/80 border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-sm">
-                          <Radio size={20} className="animate-pulse" />
+                        <div className="size-9 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                          <Radio size={18} className="animate-pulse" />
                         </div>
                       ) : isUpcoming ? (
-                        <div className="w-10 h-10 rounded-none bg-amber-950/30 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm">
-                          <Clock3 size={20} />
+                        <div className="size-9 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center text-zinc-400">
+                          <Clock3 size={18} />
                         </div>
                       ) : isPending ? (
-                        <div className="w-10 h-10 rounded-none bg-cyan-950/40 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-sm">
-                          <Clock3 size={20} />
+                        <div className="size-9 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center text-zinc-400">
+                          <Clock3 size={18} />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-none bg-zinc-800/60 border border-white/10 flex items-center justify-center text-zinc-400 shadow-sm">
-                          <MinusCircle size={20} />
+                        <div className="size-9 rounded-md bg-zinc-950 border border-white/8 flex items-center justify-center text-zinc-600">
+                          <MinusCircle size={18} />
                         </div>
                       )}
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-none bg-zinc-800/80 text-zinc-300 border border-white/10">{c.season}</span>
+                        <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-white/8">
+                          {c.season}
+                        </span>
                         {isQualified && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-none border border-emerald-500/40">
-                            <ShieldCheck size={11} />
+                          <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
+                            <ShieldCheck size={10} />
                             Top 30 Qualified
                           </span>
                         )}
                         {isUpcoming && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-none border border-amber-500/40">
-                            Registered · Seat Confirmed
+                          <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-amber-300 bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-500/30">
+                            Seat Reserved
                           </span>
                         )}
                         {isLive && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-none border border-amber-500/50">
-                            <i className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-ping" />
-                            Screening Active
+                          <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
+                            <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
+                            Live Screening
                           </span>
                         )}
                       </div>
 
-                      <h2 className="text-base sm:text-lg font-bold text-white hover:text-lime-400 transition-colors">
+                      <h2 className="text-sm font-semibold text-white hover:text-lime-400 transition-colors">
                         <Link to={`/portal/contests/${c.contest_slug}`}>
                           {c.contest_title}
                         </Link>
                       </h2>
 
-                      <div className="flex items-center gap-4 text-xs text-zinc-400 flex-wrap font-mono">
+                      <div className="flex items-center gap-4 text-xs text-zinc-500 flex-wrap font-mono">
                         <span className="inline-flex items-center gap-1.5">
-                          <CalendarDays size={13} className="text-zinc-500" />
+                          <CalendarDays size={12} className="text-zinc-600" />
                           {c.starts_at
                             ? new Date(c.starts_at).toLocaleDateString("en-IN", {
                                 day: "2-digit",
@@ -206,33 +208,33 @@ export function MyContestsPage() {
 
                         {c.venue && (
                           <span className="inline-flex items-center gap-1.5">
-                            <MapPin size={13} className="text-zinc-500" />
+                            <MapPin size={12} className="text-zinc-600" />
                             {c.venue}
                           </span>
                         )}
 
                         <span className="inline-flex items-center gap-1.5">
-                          <Users size={13} className="text-zinc-500" />
-                          <span className="tabular-nums text-white font-bold">{c.participants}</span> competitors
+                          <Users size={12} className="text-zinc-600" />
+                          <span className="tabular-nums text-zinc-400">{c.participants}</span> participants
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Score Metrics & Action Buttons */}
-                  <div className="flex items-center gap-4 sm:gap-6 justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-white/10">
+                  {/* Right: Scores & Actions */}
+                  <div className="flex items-center gap-4 sm:gap-6 justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-white/6">
                     <dl className="flex items-center gap-4 sm:gap-6 text-right font-mono">
                       {c.rank !== null ? (
                         <div>
-                          <dt className="text-[10px] text-zinc-400 uppercase">Rank</dt>
-                          <dd className="text-sm sm:text-base font-extrabold text-white tabular-nums">
+                          <dt className="text-[9px] text-zinc-500 uppercase">Rank</dt>
+                          <dd className="text-sm font-semibold text-white tabular-nums">
                             #{c.rank}
                           </dd>
                         </div>
                       ) : isUpcoming ? (
                         <div>
-                          <dt className="text-[10px] text-zinc-400 uppercase">Status</dt>
-                          <dd className="text-xs font-bold text-lime-400">
+                          <dt className="text-[9px] text-zinc-500 uppercase">Status</dt>
+                          <dd className="text-xs font-semibold text-lime-400">
                             Standby
                           </dd>
                         </div>
@@ -240,16 +242,16 @@ export function MyContestsPage() {
 
                       {c.score !== null ? (
                         <div>
-                          <dt className="text-[10px] text-zinc-400 uppercase">Score</dt>
-                          <dd className="text-sm sm:text-base font-extrabold text-lime-400 tabular-nums">
+                          <dt className="text-[9px] text-zinc-500 uppercase">Score</dt>
+                          <dd className="text-sm font-semibold text-lime-400 tabular-nums">
                             {c.score}/100
                           </dd>
                         </div>
                       ) : isUpcoming ? (
                         <div>
-                          <dt className="text-[10px] text-zinc-400 uppercase">Workstation</dt>
+                          <dt className="text-[9px] text-zinc-500 uppercase">Workstation</dt>
                           <dd className="text-xs font-semibold text-white">
-                            Allocated
+                            Reserved
                           </dd>
                         </div>
                       ) : null}
@@ -259,33 +261,36 @@ export function MyContestsPage() {
                       {isLive && !c.assessment_submitted && c.score === null ? (
                         <Button
                           asChild
-                          className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider shadow-lg shadow-lime-400/20 active:scale-[0.98]"
+                          size="sm"
+                          className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}/lobby`}>
-                            <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
+                            <Play className="w-3 h-3 mr-1 fill-black" />
                             Assessment
                           </Link>
                         </Button>
                       ) : isUpcoming && !c.assessment_submitted ? (
                         <Button
                           variant="outline"
+                          size="sm"
                           asChild
-                          className="rounded-none border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
+                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:text-white font-mono text-xs"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}`}>
-                            View Brief
-                            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                            Details
+                            <ArrowRight className="w-3 h-3 ml-1" />
                           </Link>
                         </Button>
                       ) : (
                         <Button
                           variant="outline"
+                          size="sm"
                           asChild
-                          className="rounded-none border-white/10 bg-zinc-900/60 text-zinc-300 hover:border-white/20 hover:text-white font-mono text-xs font-semibold uppercase active:scale-[0.98]"
+                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:text-white font-mono text-xs"
                         >
                           <Link to={`/portal/contests/${c.contest_slug}/results`}>
-                            Scoreboard
-                            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                            Standings
+                            <ArrowRight className="w-3 h-3 ml-1" />
                           </Link>
                         </Button>
                       )}

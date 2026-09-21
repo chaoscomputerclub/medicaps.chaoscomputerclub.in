@@ -8,6 +8,9 @@ import {
   Play,
   Shield,
   ShieldAlert,
+  ShieldCheck,
+  Cpu,
+  Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -46,7 +49,7 @@ export function ContestLobbyPage() {
 
   if (!contest) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-400">
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
         Contest not found.
       </div>
     );
@@ -72,246 +75,230 @@ export function ContestLobbyPage() {
     (Boolean(registration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] max-w-2xl mx-auto px-4 sm:px-6 py-12 flex-col justify-center space-y-10">
-      {/* Back */}
-      <Link to={`/portal/contests/${contestSlug}`} className="inline-flex items-center gap-2 font-mono text-xs text-zinc-400 hover:text-white transition-colors self-start">
-        <ArrowLeft className="size-3.5" /> {contest.title}
+    <div className="flex min-h-[calc(100vh-140px)] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
+      {/* Back button */}
+      <Link
+        to={`/portal/contests/${contestSlug}`}
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
+      >
+        <ArrowLeft className="size-3.5" /> Back to {contest.title}
       </Link>
 
-      {/* ─── SUBMITTED STATE ──────────────────────────────── */}
+      {/* Submitted State */}
       {isAssessmentSubmitted ? (
-        <div className="space-y-8 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">
+        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
-                (01 // Assessment Concluded)
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
-                ROUND 1 · RECORDED
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                Round 1 · Assessment Concluded
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="size-6 text-emerald-400" />
-              <h1 className="text-2xl sm:text-3xl font-black text-white font-mono uppercase">Assessment Submitted</h1>
+              <div className="p-2 rounded-md bg-lime-400/10 border border-lime-400/20 text-lime-400">
+                <CheckCircle2 className="size-5" />
+              </div>
+              <h1 className="text-xl font-semibold text-white tracking-tight">
+                Assessment Submitted
+              </h1>
             </div>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              Your attempt is locked and recorded. Results are published once the screening window closes.
-              Reattempts are not permitted under the single-attempt protocol.
+            <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+              Your test session has concluded and your scores are safely recorded. Standings will update automatically as evaluations finish.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               asChild
-              className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase text-black hover:bg-lime-300 shadow-md shadow-lime-400/20"
+              className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
             >
-              <Link to={`/portal/contests/${contestSlug}/results`}>View Standings</Link>
+              <Link to={`/portal/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-none font-mono text-xs border-white/10">
-              <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
+            <Button asChild variant="outline" className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
+              <Link to={`/portal/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>
         </div>
       ) : !registration?.registered ? (
-        /* ─── NOT REGISTERED ─────────────────────────────── */
-        <div className="space-y-6 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">
+        /* Not Registered */
+        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
-                (01 // Gated Entry)
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
-                ROUND 1 · UNREGISTERED
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                Round 1 · Slot Required
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Lock className="size-6 text-zinc-500" />
-              <h1 className="text-2xl sm:text-3xl font-black text-white font-mono uppercase">Registration Required</h1>
+              <div className="p-2 rounded-md bg-zinc-900 border border-white/10 text-zinc-400">
+                <Lock className="size-5" />
+              </div>
+              <h1 className="text-xl font-semibold text-white tracking-tight">
+                Registration Required
+              </h1>
             </div>
-            <p className="text-sm text-zinc-400">
-              Register for this contest first, then return here when the assessment window opens.
+            <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+              You must register for this tournament round before accessing the proctored assessment terminal.
             </p>
           </div>
-          <Button asChild className="rounded-none font-mono text-xs font-black uppercase bg-lime-400 hover:bg-lime-300 text-black font-bold shadow-md shadow-lime-400/20">
-            <Link to={`/portal/contests/${contestSlug}`}>Register for Contest</Link>
+          <Button asChild className="rounded-md font-mono text-xs font-semibold bg-lime-400 hover:bg-lime-300 text-black">
+            <Link to={`/portal/contests/${contestSlug}`}>Register Slot</Link>
           </Button>
         </div>
       ) : notYetOpen ? (
-        /* ─── NOT YET OPEN (LOCKED WAITING ROOM) ─────────── */
-        <div className="space-y-6 rounded-none border border-amber-500/30 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl font-mono">
+        /* Locked Waiting Room */
+        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8 font-mono">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
-                (01 // Screening Window Locked)
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
-                ROUND 1 · SCHEDULED
+              <span className="text-[10px] uppercase tracking-widest text-zinc-500">
+                Round 1 · Scheduled
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Lock className="size-6 text-amber-400" />
-              <h1 className="text-2xl sm:text-3xl font-black text-white uppercase">Screening Window Locked</h1>
+              <div className="p-2 rounded-md bg-zinc-900 border border-white/10 text-zinc-400">
+                <Clock className="size-5" />
+              </div>
+              <h1 className="text-xl font-semibold text-white tracking-tight">
+                Screening Window Locked
+              </h1>
             </div>
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              Registration confirmed. The Phase 1 Online Screening Assessment strictly unlocks 24 hours prior to the physical contest final:
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Registration confirmed. The Phase 1 screening assessment unlocks 24 hours prior to the finals:
             </p>
-            <div className="p-4 rounded-none border border-white/10 bg-zinc-950 text-xs space-y-2">
+            <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Assessment Opens:</span>
-                <span className="text-lime-400 font-bold">{formatWhen(opensAt.toISOString())}</span>
+                <span>Opens:</span>
+                <span className="text-lime-400 font-semibold">{formatWhen(opensAt.toISOString())}</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Assessment Closes:</span>
-                <span className="text-white font-bold">{formatWhen(assessmentClosesAt(contest).toISOString())}</span>
+                <span>Closes:</span>
+                <span className="text-white font-semibold">{formatWhen(assessmentClosesAt(contest).toISOString())}</span>
               </div>
-              <div className="flex items-center justify-between text-zinc-400 border-t border-white/5 pt-2">
-                <span>Offline Final Contest:</span>
-                <span className="text-cyan-400 font-bold">{formatWhen(contest.starts_at)}</span>
+              <div className="flex items-center justify-between text-zinc-400 border-t border-white/6 pt-2">
+                <span>Final:</span>
+                <span className="text-zinc-300 font-semibold">{formatWhen(contest.starts_at)}</span>
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500">
-              * The assessment terminal will activate automatically when the screening window opens on Tuesday at 3:00 PM IST.
-            </p>
           </div>
-          <Button asChild variant="outline" className="rounded-none text-xs border-white/10 text-zinc-300 hover:text-white">
-            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest Overview</Link>
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
+            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
       ) : (phase === "assessment_closed" && !isDevBypass) ? (
-        /* ─── WINDOW CONCLUDED ───────────────────────────── */
-        <div className="space-y-6 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl font-mono">
+        /* Closed */
+        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8 font-mono">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-400">
-                (01 // Window Concluded)
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 tabular-nums">
-                ROUND 1 · CLOSED
+              <span className="text-[10px] uppercase tracking-widest text-red-400">
+                Round 1 · Window Closed
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Lock className="size-6 text-red-400" />
-              <h1 className="text-2xl sm:text-3xl font-black text-white uppercase">Screening Window Closed</h1>
+              <div className="p-2 rounded-md bg-red-500/10 border border-red-500/20 text-red-400">
+                <Lock className="size-5" />
+              </div>
+              <h1 className="text-xl font-semibold text-white tracking-tight">
+                Assessment Closed
+              </h1>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              The Phase 1 screening assessment window closed 2 hours before the physical lab final. Entry is sealed for score verification and Top 30 finalist workstation assignment.
+              The Round 1 screening window has concluded. Final scoring and verification are underway.
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-none text-xs border-white/10 text-zinc-300 hover:text-white">
-            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest Overview</Link>
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
+            <Link to={`/portal/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
       ) : (
-        /* ─── READY TO ATTEMPT ───────────────────────────── */
-        <div className="space-y-10 rounded-none border border-white/10 bg-zinc-900/60 p-8 backdrop-blur-md shadow-xl">
-          {/* Title */}
+        /* Ready to Attempt / Assessment Lobby */
+        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
+          {/* Header */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-lime-400">
-                (01 // Assessment Lobby)
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                Screening Lobby · Round 1
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                ROUND 1 · ONLINE
-              </span>
+              {isDevBypass && (
+                <span className="px-1.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 font-mono text-[9px] uppercase tracking-wider text-lime-400 font-semibold">
+                  Dev Bypass
+                </span>
+              )}
             </div>
-            <h1 className="text-3xl font-black leading-tight text-white uppercase font-mono">{contest.title}</h1>
-          </div>
-
-          {/* Warning */}
-          <div className="space-y-4 border-l-2 border-lime-400 pl-5">
-            <p className="text-sm font-semibold text-white">
-              The {ASSESSMENT_DURATION_MINUTES}-minute clock cannot be paused.
-            </p>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              Once you press Start, the server clock runs continuously. Closing the tab, refreshing,
-              or losing connection does not stop it. When the timer reaches zero, your work is
-              submitted automatically. There is no second attempt.
+            <h1 className="text-2xl font-semibold tracking-tight text-white">{contest.title}</h1>
+            <p className="text-xs text-zinc-400 font-mono">
+              Carefully review the assessment protocols and test regulations before entering.
             </p>
           </div>
 
-          {/* Key facts */}
-          <div className="grid grid-cols-3 divide-x divide-white/10 rounded-none border border-white/10 bg-zinc-950/60">
+          {/* Quick Metrics */}
+          <div className="grid grid-cols-3 divide-x divide-white/8 rounded-md border border-white/8 bg-black">
             {[
               {
-                label: "Window",
-                value: `${ASSESSMENT_WINDOW_HOURS}h entry`,
-                sub: `${formatWhen(opensAt.toISOString())}`,
+                label: "Time Limit",
+                value: `${ASSESSMENT_DURATION_MINUTES} min`,
+                sub: "Continuous timer",
               },
-              { label: "Attempt", value: "One only", sub: "No pause, no restart" },
-              { label: "Advance", value: `Top ${FINALIST_SEATS}`, sub: "Score then time" },
+              { label: "Attempt", value: "Single", sub: "Cannot pause or reset" },
+              { label: "Advancement", value: `Top ${FINALIST_SEATS}`, sub: "Campus final cut" },
             ].map(({ label, value, sub }) => (
-              <div key={label} className="flex flex-col gap-1 p-4">
-                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-400">
+              <div key={label} className="flex flex-col gap-0.5 p-3.5">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
                   {label}
                 </span>
-                <span className="text-sm font-bold text-white">{value}</span>
+                <span className="text-xs font-semibold text-white font-mono">{value}</span>
                 <span className="font-mono text-[10px] text-zinc-500">{sub}</span>
               </div>
             ))}
           </div>
 
-          {/* Rules & Regulations Section */}
-          <div className="space-y-4 rounded-none border border-white/10 bg-zinc-950/80 p-5 font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-lime-400 flex items-center gap-2">
-                <Shield className="size-4" /> Assessment Regulations & Integrity Code
+          {/* Regulations Card */}
+          <div className="space-y-3 rounded-md border border-white/8 bg-zinc-950 p-4 font-mono text-xs">
+            <div className="flex items-center justify-between border-b border-white/6 pb-2.5">
+              <span className="text-[11px] font-semibold text-white flex items-center gap-2">
+                <Shield className="size-3.5 text-lime-400" />
+                Assessment Regulations & Integrity Code
               </span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest">
-                CCC PROCTOR PROTOCOL v2.0
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                CCC PROCTOR v2.1
               </span>
             </div>
-            <ul className="space-y-2.5 text-zinc-300">
+
+            <ul className="space-y-2.5 text-zinc-400">
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-bold shrink-0">01.</span>
-                <span><strong>Single Continuous Attempt:</strong> The {ASSESSMENT_DURATION_MINUTES}-minute timer starts immediately on launch and cannot be paused or reset. Auto-submits on expiration.</span>
+                <span className="text-lime-400 font-semibold shrink-0">01.</span>
+                <span>
+                  <strong className="text-white">Strict Timer:</strong> Once launched, the {ASSESSMENT_DURATION_MINUTES}-minute countdown runs server-side. Closing the tab or refreshing does not pause it. Auto-submits at 00:00.
+                </span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-bold shrink-0">02.</span>
-                <span><strong>Proctored Full-Screen Guard:</strong> Leaving fullscreen, switching browser tabs, or blurring the workspace logs a telemetry violation. 3 violations result in disqualification.</span>
+                <span className="text-lime-400 font-semibold shrink-0">02.</span>
+                <span>
+                  <strong className="text-white">Full-Screen Focus:</strong> Leaving fullscreen or switching tabs logs an anti-cheat violation. Reaching 3 violations leads to automatic disqualification.
+                </span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-bold shrink-0">03.</span>
-                <span><strong>CodeBox Execution Engine:</strong> Submissions are compiled in isolated sandbox environments with strict 2.0s execution and 256MB memory boundaries.</span>
+                <span className="text-lime-400 font-semibold shrink-0">03.</span>
+                <span>
+                  <strong className="text-white">Code Execution:</strong> Solutions run in isolated Docker sandboxes with 2.0s wall-clock time limit and 256MB memory cap.
+                </span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-bold shrink-0">04.</span>
-                <span><strong>Advancement Criterion:</strong> Only the top {FINALIST_SEATS} verified candidates on the leaderboard qualify for the Round 2 physical campus finals.</span>
+                <span className="text-lime-400 font-semibold shrink-0">04.</span>
+                <span>
+                  <strong className="text-white">Top 30 Final:</strong> Only the highest verified scoring participants advance to the physical campus championship.
+                </span>
               </li>
             </ul>
           </div>
 
-          {/* Dev bypass notice */}
-          {isDevBypass && (
-            <div className="rounded-none border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 font-mono text-xs text-emerald-400">
-              ⚡ <strong>Dev Bypass Active</strong> — timing restrictions are lifted. You can start immediately.
-            </div>
-          )}
-
-          {/* Waiting state */}
-          {notYetOpen && (
-            <div className="flex items-center gap-3 rounded-none border border-white/10 bg-zinc-950/60 px-5 py-4">
-              <Clock className="size-4 shrink-0 text-zinc-400" />
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Opens {formatWhen(opensAt.toISOString())}
-                </p>
-                <p className="text-xs text-zinc-400">
-                  Come back when the window opens to start your attempt.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Acknowledgment + Start OR In-Progress Resume */}
+          {/* In-Progress Session Alert */}
           {isInProgress ? (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 border border-amber-500/40 bg-amber-950/25 text-amber-300 font-mono text-xs">
-                <ShieldAlert className="size-5 shrink-0 text-amber-400 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 rounded-md border border-amber-500/30 bg-black text-amber-300 font-mono text-xs">
+                <ShieldAlert className="size-4 shrink-0 text-amber-400 mt-0.5" />
                 <div className="space-y-1">
-                  <div className="font-bold uppercase tracking-wider text-amber-400">
-                    Active Assessment Session Detected
+                  <div className="font-semibold uppercase tracking-wider text-amber-400">
+                    Active Attempt In Progress
                   </div>
-                  <p className="text-zinc-300 leading-relaxed">
-                    You have an ongoing attempt in progress. Sudden disconnect or window exit was recorded (Warning {registration?.anti_cheat_violations || 1} of {registration?.max_violations || 3}). Resume now to continue your test without losing elapsed time.
+                  <p className="text-zinc-400 leading-relaxed">
+                    You have an ongoing attempt. Warning count: {registration?.anti_cheat_violations || 1} / {registration?.max_violations || 3}. Resume immediately to avoid losing time.
                   </p>
                 </div>
               </div>
@@ -319,51 +306,38 @@ export function ContestLobbyPage() {
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-none bg-amber-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-amber-300 shadow-lg shadow-amber-400/25 border border-amber-300"
+                  className="rounded-md bg-amber-400 font-mono text-xs font-semibold text-black hover:bg-amber-300"
                 >
                   <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
-                    <Play className="mr-1.5 size-4 fill-black" /> Resume Contest
+                    <Play className="mr-1.5 size-3.5 fill-black" /> Resume Assessment
                   </a>
                 </Button>
-                <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
+                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/portal/contests/${contestSlug}`}>Back to Overview</Link>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-5">
-              <label className="flex cursor-pointer items-start gap-3">
-                <div
-                  role="checkbox"
-                  aria-checked={ack}
-                  tabIndex={0}
-                  onClick={() => setAck((v) => !v)}
-                  onKeyDown={(e) => e.key === " " && setAck((v) => !v)}
-                  className={`mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-none border transition-colors focus:outline-none ${
-                    ack
-                      ? "border-lime-400 bg-lime-400 text-black"
-                      : "border-white/20 bg-transparent hover:border-lime-400/60"
-                  }`}
-                >
-                  {ack && (
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </div>
-                <span className="text-sm text-zinc-300">
-                  I understand this is my only attempt, the {ASSESSMENT_DURATION_MINUTES}-minute clock
-                  starts immediately and cannot be paused, and my work is submitted automatically when
-                  time runs out.
+            /* Acknowledgment + Launch */
+            <div className="space-y-4 pt-1">
+              <label className="flex cursor-pointer items-start gap-3 select-none">
+                <input
+                  type="checkbox"
+                  checked={ack}
+                  onChange={(e) => setAck(e.target.checked)}
+                  className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-black text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400"
+                />
+                <span className="text-xs font-mono text-zinc-300 leading-relaxed">
+                  I understand that this is my single continuous attempt. The {ASSESSMENT_DURATION_MINUTES}-minute clock begins immediately and auto-submits on completion.
                 </span>
               </label>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Button
                   asChild
                   disabled={!ack || !canStart}
                   size="lg"
-                  className="rounded-none bg-lime-400 font-mono text-xs font-black uppercase tracking-wider text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20 disabled:opacity-40"
+                  className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300 disabled:opacity-30"
                 >
                   <a
                     href={(!ack || !canStart) ? undefined : `/assessments/${contestSlug}`}
@@ -373,26 +347,26 @@ export function ContestLobbyPage() {
                       if (!ack || !canStart) e.preventDefault();
                     }}
                   >
-                    <Play className="mr-1.5 size-4 fill-black" /> Start Assessment (New Window)
+                    <Play className="mr-1.5 size-3.5 fill-black" /> Launch Workspace
                   </a>
                 </Button>
-                <Button asChild variant="ghost" className="rounded-none font-mono text-xs text-zinc-400 hover:text-white">
-                  <Link to={`/portal/contests/${contestSlug}`}>Not now</Link>
+                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
+                  <Link to={`/portal/contests/${contestSlug}`}>Not Now</Link>
                 </Button>
               </div>
 
               {!canStart && !notYetOpen && (
-                <p className="font-mono text-xs text-amber-300">
-                  {registration?.eligibility_message ?? "Assessment is not accepting attempts right now."}
+                <p className="font-mono text-xs text-amber-400">
+                  {registration?.eligibility_message ?? "Assessment is currently closed."}
                 </p>
               )}
             </div>
           )}
 
-          {/* Security footer */}
-          <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-            <Shield className="size-3.5 shrink-0 text-lime-400" />
-            Full-screen anti-cheat · Monaco editor · Server-side timer · Auto-submit on timeout
+          {/* Telemetry Footer */}
+          <div className="flex items-center gap-2 pt-2 text-[11px] text-zinc-500 font-mono border-t border-white/6">
+            <ShieldCheck className="size-3.5 shrink-0 text-lime-400" />
+            <span>Telemetry Guard Active · Full-Screen Monitoring · Isolated Execution Sandbox</span>
           </div>
         </div>
       )}

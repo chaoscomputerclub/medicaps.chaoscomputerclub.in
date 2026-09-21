@@ -114,20 +114,20 @@ function SettingSection({
   return (
     <section
       className={cn(
-        "border rounded-none",
-        danger ? "border-red-500/30 bg-red-950/10" : "border-white/10 bg-zinc-900/50"
+        "border rounded-lg",
+        danger ? "border-red-500/20 bg-black" : "border-white/8 bg-black"
       )}
     >
       <div
         className={cn(
-          "px-6 py-5 border-b",
-          danger ? "border-red-500/20" : "border-white/10"
+          "px-6 py-4 border-b",
+          danger ? "border-red-500/20" : "border-white/8"
         )}
       >
         <h2
           className={cn(
-            "text-sm font-semibold",
-            danger ? "text-red-300" : "text-white"
+            "text-sm font-semibold tracking-tight",
+            danger ? "text-red-400" : "text-white"
           )}
         >
           {title}
@@ -158,7 +158,7 @@ function SettingRow({
     <div
       className={cn(
         "flex flex-col sm:flex-row sm:items-start gap-4",
-        !borderless && "pb-5 border-b border-white/8"
+        !borderless && "pb-5 border-b border-white/6"
       )}
     >
       <div className="sm:w-48 shrink-0 pt-0.5">
@@ -186,7 +186,7 @@ function SaveIndicator({ status }: { status: "idle" | "saving" | "saved" | "erro
       className={cn(
         "inline-flex items-center gap-1 text-[11px] font-mono ml-2 transition-opacity",
         status === "saving" && "text-zinc-400",
-        status === "saved" && "text-emerald-400",
+        status === "saved" && "text-lime-400",
         status === "error" && "text-red-400"
       )}
     >
@@ -213,7 +213,7 @@ function SaveButton({
       size="sm"
       disabled={disabled || saving}
       onClick={onClick}
-      className="h-8 px-4 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 active:bg-lime-500 disabled:opacity-40 rounded-none cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      className="h-8 px-3.5 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 disabled:opacity-30 rounded-md cursor-pointer transition-colors"
     >
       {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
@@ -437,15 +437,16 @@ export function SettingsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+      {/* Page Title Header */}
+      <div className="flex items-center justify-between mb-6 pb-5 border-b border-white/8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-lime-400 font-bold">
-              ⚙ Configuration
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
+              Configuration
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Settings</h1>
-          <p className="text-sm text-zinc-400 mt-0.5">
+          <h1 className="text-xl font-semibold text-white tracking-tight">Settings</h1>
+          <p className="text-xs text-zinc-400 mt-0.5 font-mono">
             Manage your competitive identity, security, and account preferences.
           </p>
         </div>
@@ -453,18 +454,18 @@ export function SettingsPage() {
           asChild
           variant="outline"
           size="sm"
-          className="hidden sm:flex text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-none gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-lime-400"
+          className="hidden sm:flex text-xs border-white/10 bg-black hover:bg-zinc-950 text-zinc-300 hover:text-white rounded-md gap-1.5 font-mono"
         >
           <Link to="/portal/profile">
             View profile
-            <ExternalLink size={12} className="opacity-60" />
+            <ExternalLink size={11} className="opacity-60" />
           </Link>
         </Button>
       </div>
 
-      <div className="flex gap-8 items-start">
+      <div className="flex gap-6 items-start">
         {/* ── Left sidebar nav ─────────────────────────────────────────────── */}
-        <nav className="hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-0.5" aria-label="Settings navigation">
+        <nav className="hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black" aria-label="Settings navigation">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
@@ -474,19 +475,19 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-left rounded-none transition-colors duration-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400",
+                  "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-mono rounded-md transition-colors cursor-pointer",
                   active
                     ? item.danger
-                      ? "bg-red-950/40 text-red-300 border-l-2 border-red-500"
-                      : "bg-lime-400/10 text-lime-400 border-l-2 border-lime-400"
+                      ? "bg-red-500/10 text-red-400 font-semibold"
+                      : "bg-white/10 text-white font-semibold"
                     : item.danger
-                    ? "text-red-400 hover:text-red-300 hover:bg-red-950/20 border-l-2 border-transparent"
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/60 border-l-2 border-transparent"
+                    ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/5"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-950"
                 )}
               >
-                <Icon size={14} />
+                <Icon size={13} />
                 <span>{item.label}</span>
-                {active && <ChevronRight size={12} className="ml-auto opacity-60" />}
+                {active && <span className="size-1.5 rounded-full bg-lime-400 ml-auto" />}
               </button>
             );
           })}
@@ -503,14 +504,14 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium whitespace-nowrap rounded-none border cursor-pointer transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono whitespace-nowrap rounded-md border transition-colors",
                   active
                     ? item.danger
-                      ? "bg-red-950/40 text-red-300 border-red-500/50"
-                      : "bg-lime-400/10 text-lime-400 border-lime-400/40"
+                      ? "bg-red-500/10 text-red-400 border-red-500/30"
+                      : "bg-white/10 text-white border-white/20"
                     : item.danger
-                    ? "text-red-400 border-white/10 hover:bg-red-950/20"
-                    : "text-zinc-400 border-white/10 hover:bg-zinc-900"
+                    ? "text-red-400 border-white/8 bg-black"
+                    : "text-zinc-400 border-white/8 bg-black"
                 )}
               >
                 <Icon size={12} />
@@ -533,11 +534,11 @@ export function SettingsPage() {
               >
                 <div className="flex flex-col sm:flex-row items-start gap-6">
                   {/* Avatar preview */}
-                  <Avatar className="size-20 rounded-none border-2 border-white/15 bg-zinc-900 shrink-0">
+                  <Avatar className="size-20 rounded-lg border border-white/10 bg-black shrink-0">
                     {avatarUrl ? (
-                      <AvatarImage src={resolveAvatarUrl(avatarUrl)} alt={fullName} className="object-cover" />
+                      <AvatarImage src={resolveAvatarUrl(avatarUrl)} alt={fullName} className="object-cover rounded-lg" />
                     ) : null}
-                    <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-bold text-2xl">
+                    <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-mono font-semibold text-xl">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -550,24 +551,24 @@ export function SettingsPage() {
                       onDrop={handleDrop}
                       onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
                       className={cn(
-                        "border-2 border-dashed px-5 py-6 text-center cursor-pointer transition-colors",
+                        "rounded-lg border border-dashed px-5 py-6 text-center cursor-pointer transition-colors bg-black",
                         isDragging
                           ? "border-lime-400 bg-lime-400/5"
-                          : "border-white/15 hover:border-white/30 hover:bg-zinc-900/40"
+                          : "border-white/10 hover:border-white/25 hover:bg-zinc-950"
                       )}
                     >
                       {isUploadingAvatar ? (
-                        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs">
-                          <Loader2 size={14} className="animate-spin text-lime-400" />
-                          <span>Uploading to MinIO…</span>
+                        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs font-mono">
+                          <Loader2 size={13} className="animate-spin text-lime-400" />
+                          <span>Uploading…</span>
                         </div>
                       ) : (
                         <>
-                          <Upload size={18} className="mx-auto text-zinc-500 mb-2" />
-                          <p className="text-xs text-zinc-400">
-                            <span className="text-lime-400 font-medium">Click to upload</span> or drag &amp; drop
+                          <Upload size={16} className="mx-auto text-zinc-500 mb-2" />
+                          <p className="text-xs text-zinc-400 font-mono">
+                            <span className="text-lime-400 font-semibold">Click to upload</span> or drag &amp; drop
                           </p>
-                          <p className="text-[11px] text-zinc-600 mt-1">PNG, JPG, WebP, GIF — max 10 MB</p>
+                          <p className="text-[11px] text-zinc-600 mt-0.5 font-mono">PNG, JPG, WebP, GIF (max 10 MB)</p>
                         </>
                       )}
                     </div>
@@ -583,17 +584,10 @@ export function SettingsPage() {
                       <button
                         type="button"
                         onClick={removeAvatar}
-                        className="text-[11px] text-red-400 hover:text-red-300 cursor-pointer underline underline-offset-2 transition-colors"
+                        className="text-[11px] font-mono text-red-400 hover:text-red-300 cursor-pointer underline underline-offset-2 transition-colors"
                       >
-                        Remove photo — revert to initials placeholder
+                        Remove photo
                       </button>
-                    )}
-
-                    {!avatarUrl && (
-                      <p className="text-[11px] text-zinc-500">
-                        Currently showing initials placeholder:{" "}
-                        <strong className="text-lime-400 font-mono">{initials}</strong>
-                      </p>
                     )}
                   </div>
                 </div>
@@ -615,8 +609,8 @@ export function SettingsPage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })}
-                      placeholder="Ada Lovelace"
-                      className="h-9 text-sm bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
+                      placeholder="Full Name"
+                      className="h-9 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                     />
                     <SaveButton
                       onClick={() => saveField("full_name", { full_name: fullName.trim() })}
@@ -635,11 +629,11 @@ export function SettingsPage() {
                       maxLength={500}
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
-                      placeholder="Competitive programmer, building expertise in graph algorithms and dynamic programming…"
-                      className="text-sm resize-none bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
+                      placeholder="Competitive programmer, building expertise in algorithms…"
+                      className="text-xs font-mono resize-none bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                     />
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-zinc-600 tabular-nums">{bio.length}/500</span>
+                    <div className="flex items-center justify-between font-mono">
+                      <span className="text-[11px] text-zinc-500 tabular-nums">{bio.length}/500</span>
                       <div className="flex items-center gap-1">
                         <SaveButton
                           onClick={() => saveField("bio", { bio: bio.trim() })}
@@ -657,10 +651,10 @@ export function SettingsPage() {
                     value={department}
                     onValueChange={(v) => { setDepartment(v); saveField("department", { department: v }); }}
                   >
-                    <SelectTrigger id="s-dept" className="h-9 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus:ring-0 focus:border-lime-400">
+                    <SelectTrigger id="s-dept" className="h-9 text-xs font-mono bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none">
+                    <SelectContent className="bg-black border-white/10 text-white font-mono rounded-md">
                       {DEPARTMENTS.map((d) => (
                         <SelectItem key={d.value} value={d.value} className="text-xs">{d.label}</SelectItem>
                       ))}
@@ -673,10 +667,10 @@ export function SettingsPage() {
                     value={batch}
                     onValueChange={(v) => { setBatch(v); saveField("batch", { batch: v }); }}
                   >
-                    <SelectTrigger id="s-batch" className="h-9 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus:ring-0 focus:border-lime-400">
+                    <SelectTrigger id="s-batch" className="h-9 text-xs font-mono bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-white/15 text-white rounded-none">
+                    <SelectContent className="bg-black border-white/10 text-white font-mono rounded-md">
                       {BATCHES.map((b) => (
                         <SelectItem key={b} value={b} className="text-xs">{b}</SelectItem>
                       ))}
@@ -700,7 +694,7 @@ export function SettingsPage() {
                         onChange={(e) => setGithub(e.target.value.replace(/^@/, ""))}
                         onKeyDown={(e) => e.key === "Enter" && saveField("github", { github_username: github.trim() })}
                         placeholder="octocat"
-                        className="h-9 pl-8 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
+                        className="h-9 pl-8 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                       />
                     </div>
                     <SaveButton
@@ -715,7 +709,7 @@ export function SettingsPage() {
                       href={`https://github.com/${github}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
                     >
                       <ExternalLink size={10} />
                       github.com/{github}
@@ -726,14 +720,14 @@ export function SettingsPage() {
                 <SettingRow label="LinkedIn" htmlFor="s-linkedin" hint="Full profile URL or handle." borderless>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500" />
+                      <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-linkedin"
                         value={linkedin}
                         onChange={(e) => setLinkedin(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && saveField("linkedin", { linkedin_url: linkedin.trim() })}
                         placeholder="https://linkedin.com/in/username"
-                        className="h-9 pl-8 text-xs bg-zinc-950 border-white/15 text-white rounded-none focus-visible:border-lime-400 focus-visible:ring-0"
+                        className="h-9 pl-8 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                       />
                     </div>
                     <SaveButton
@@ -756,7 +750,7 @@ export function SettingsPage() {
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Lock size={11} /> Enrollment Number
                     </Label>
-                    <div className="h-9 px-3 flex items-center bg-zinc-950/60 border border-white/8 text-zinc-400 font-mono text-xs select-all">
+                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-mono text-xs select-all">
                       {member.prn && member.prn !== "N/A" && member.prn !== "—"
                         ? member.prn
                         : member.email?.includes("@")
@@ -768,7 +762,7 @@ export function SettingsPage() {
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Lock size={11} /> Institutional Email
                     </Label>
-                    <div className="h-9 px-3 flex items-center bg-zinc-950/60 border border-white/8 text-zinc-400 font-mono text-xs truncate select-all">
+                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-mono text-xs truncate select-all">
                       {member.email}
                     </div>
                   </div>
@@ -794,7 +788,7 @@ export function SettingsPage() {
                           value={handleInput}
                           onChange={(e) => setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                           className={cn(
-                            "h-9 pl-7 text-xs font-mono bg-zinc-950 border-white/15 text-white rounded-none focus-visible:ring-0",
+                            "h-9 pl-7 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:ring-0",
                             isHandleChanged && handleStatus === "available" && "border-emerald-500/60 focus-visible:border-emerald-500",
                             isHandleChanged && handleStatus === "taken" && "border-red-500/60 focus-visible:border-red-500",
                             (!isHandleChanged || handleStatus === "idle") && "focus-visible:border-lime-400"
@@ -807,7 +801,7 @@ export function SettingsPage() {
                         size="sm"
                         disabled={!isHandleChanged || handleInput.length < 3 || handleStatus !== "available" || fieldStatus["handle"] === "saving"}
                         onClick={saveHandle}
-                        className="h-9 px-3 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 disabled:opacity-40 rounded-none cursor-pointer"
+                        className="h-9 px-3 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 disabled:opacity-40 rounded-md cursor-pointer"
                       >
                         {fieldStatus["handle"] === "saving" ? <Loader2 size={12} className="animate-spin" /> : "Update"}
                       </Button>
@@ -841,7 +835,7 @@ export function SettingsPage() {
               >
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-3">
-                    <div className="size-9 bg-zinc-950 border border-white/10 flex items-center justify-center shrink-0">
+                    <div className="size-9 bg-black border border-white/10 rounded-md flex items-center justify-center shrink-0">
                       <span className="font-bold text-sm text-white">G</span>
                     </div>
                     <div>
@@ -849,7 +843,7 @@ export function SettingsPage() {
                       <p className="text-[11px] text-zinc-500 font-mono mt-0.5">{member.email}</p>
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-emerald-500/40 bg-emerald-950/20 text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-emerald-500/40 bg-emerald-950/20 text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 rounded">
                     <span className="size-1.5 rounded-full bg-emerald-400" /> Connected
                   </span>
                 </div>
@@ -869,7 +863,7 @@ export function SettingsPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleExport}
-                    className="text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 hover:text-white rounded-none gap-1.5 cursor-pointer"
+                    className="text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 hover:text-white rounded-md gap-1.5 cursor-pointer"
                   >
                     <Download size={13} />
                     Export
@@ -939,7 +933,7 @@ export function SettingsPage() {
                 title="Active Session"
                 description="Current terminal device authorization and cryptographic token parameters."
               >
-                <div className="flex items-start justify-between gap-4 p-4 bg-zinc-950 border border-white/10">
+                <div className="flex items-start justify-between gap-4 p-4 bg-black border border-white/8 rounded-lg">
                   <div className="flex items-start gap-3">
                     <Monitor size={18} className="text-lime-400 mt-0.5 shrink-0" />
                     <div>
@@ -960,7 +954,7 @@ export function SettingsPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => logout()}
-                    className="text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 hover:text-red-400 hover:border-red-500/40 rounded-none gap-1.5 cursor-pointer"
+                    className="text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 hover:text-red-400 hover:border-red-500/40 rounded-md gap-1.5 cursor-pointer"
                   >
                     <LogOut size={12} />
                     Sign out
@@ -972,7 +966,7 @@ export function SettingsPage() {
                 title="Cryptographic Proof Certificates"
                 description="Your contest participation is anchored to HMAC-SHA256 sealed proof certificates."
               >
-                <div className="p-4 bg-zinc-950 border border-white/8 flex items-start gap-3">
+                <div className="p-4 bg-black border border-white/8 rounded-lg flex items-start gap-3">
                   <Zap size={15} className="text-lime-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-zinc-300">Proof certificates are immutable</p>
@@ -980,7 +974,7 @@ export function SettingsPage() {
                       Each contest you participate in generates a cryptographic proof sealed with your Enrollment Number and timestamp.
                       These certificates are permanently anchored to your institutional identity and cannot be revoked or altered.
                     </p>
-                    <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-zinc-900 text-zinc-300 rounded-none gap-1.5 cursor-pointer">
+                    <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 rounded-md gap-1.5 cursor-pointer">
                       <Link to="/portal/verify">
                         View my proof certificates
                         <ChevronRight size={12} />
@@ -999,7 +993,7 @@ export function SettingsPage() {
               description="Irreversible actions that permanently affect your account."
               danger
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-red-500/20 bg-red-950/10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-red-500/30 bg-red-950/20 rounded-lg">
                 <div>
                   <p className="text-sm font-semibold text-red-200">Delete this account</p>
                   <p className="text-[11px] text-red-300/70 mt-0.5 leading-relaxed">
@@ -1012,13 +1006,13 @@ export function SettingsPage() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="shrink-0 text-xs font-semibold rounded-none bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer"
+                      className="shrink-0 text-xs font-semibold rounded-md bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer"
                     >
                       <Trash2 size={13} className="mr-1.5" />
                       Delete account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-zinc-950 border-red-500/40 rounded-none text-white">
+                  <AlertDialogContent className="bg-black border border-red-500/40 rounded-lg text-white">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-red-400 flex items-center gap-2 text-base">
                         <ShieldAlert size={18} />
@@ -1030,7 +1024,7 @@ export function SettingsPage() {
                           and all associated records including contest history, rating certificates, and standings.
                         </p>
                         <p>
-                          Type <code className="font-mono text-lime-400 bg-zinc-900 px-1.5 py-0.5 border border-white/10">{member.handle}</code> to confirm:
+                          Type <code className="font-mono text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">{member.handle}</code> to confirm:
                         </p>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -1039,20 +1033,20 @@ export function SettingsPage() {
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
                         placeholder={member.handle || "handle"}
-                        className="font-mono text-sm bg-zinc-900 border-red-500/40 text-white rounded-none focus-visible:ring-0 focus-visible:border-red-400"
+                        className="font-mono text-sm bg-black border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
                       />
                     </div>
                     <AlertDialogFooter>
                       <AlertDialogCancel
                         onClick={() => setDeleteConfirmText("")}
-                        className="text-xs rounded-none border-white/15 bg-transparent hover:bg-zinc-900"
+                        className="text-xs rounded-md border-white/15 bg-transparent hover:bg-white/5 text-zinc-300"
                       >
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
                         disabled={deleteConfirmText.trim().toLowerCase() !== member.handle?.toLowerCase() || isDeleting}
                         onClick={handleDelete}
-                        className="text-xs rounded-none bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-40"
+                        className="text-xs rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-40"
                       >
                         {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently delete"}
                       </AlertDialogAction>

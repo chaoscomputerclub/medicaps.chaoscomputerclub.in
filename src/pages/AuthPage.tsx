@@ -278,40 +278,21 @@ export function AuthPage() {
     window.location.href = getGoogleLoginURL();
   }
 
-  let kicker = "00 // Identity Gate";
-  let index = "INDEX 0.0 · CREDENTIAL ENTRY";
-  let title: React.ReactNode = (
-    <>
-      <span className="block whitespace-nowrap">ENTER</span>
-      <span className="block whitespace-nowrap">MEMBER</span>
-      <span className="block whitespace-nowrap">OPERATIONS</span>
-    </>
-  );
-  let description: React.ReactNode = null;
+  let kicker = "Identity Gate";
+  let index = "Credential Entry";
+  let title: React.ReactNode = "Sign In to CCC Arena";
+  let description: React.ReactNode = "Enter your Medi-Caps institutional email to access tournament operations.";
 
   if (step === "otp") {
-    kicker = "00 // Identity Verification";
-    index = "INDEX 0.1 · OTP VERIFICATION";
-    title = (
-      <>
-        <span className="block whitespace-nowrap">VERIFY</span>
-        <span className="block whitespace-nowrap">AUTHENTICATION</span>
-        <span className="block whitespace-nowrap">CODE</span>
-      </>
-    );
-    description = `Enter the six-digit code sent to ${email}.`;
+    kicker = "Security Verification";
+    index = "Step 2 of 2";
+    title = "Enter Verification Code";
+    description = `We sent a 6-digit verification code to ${email}.`;
   } else if (step === "onboarding") {
-    kicker = "00 // Member Onboarding";
-    index = "INDEX 0.2 · CADET REGISTRATION";
-    title = (
-      <>
-        <span className="block whitespace-nowrap">COMPLETE</span>
-        <span className="block whitespace-nowrap">MEMBER</span>
-        <span className="block whitespace-nowrap">REGISTRATION</span>
-      </>
-    );
-    description =
-      "Choose your display name and handle to initialize your portal credential.";
+    kicker = "Cadet Onboarding";
+    index = "Profile Setup";
+    title = "Complete Your Profile";
+    description = "Set your display name and campus alias to initialize your arena credentials.";
   }
 
   return (
@@ -350,55 +331,55 @@ export function AuthPage() {
 
             {/* Realtime Live Domain Warning */}
             {isInvalidDomain && (
-              <div className="p-3 border border-amber-500/40 bg-amber-950/20 text-xs leading-relaxed flex items-start gap-2.5">
+              <div className="p-3 border border-amber-500/30 bg-black text-xs leading-relaxed flex items-start gap-2.5 rounded-md">
                 <AlertTriangle className="size-4 text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-[0.6875rem] text-amber-200/90 leading-relaxed">
-                  Please use your registered <strong className="text-white">@medicaps.ac.in</strong> email address.
+                <p className="text-xs text-amber-300 leading-relaxed font-mono">
+                  Please use your official <strong className="text-white">@medicaps.ac.in</strong> email address.
                 </p>
               </div>
             )}
 
             {/* General Rejection / Auth Message Banner */}
             {message && !isInvalidDomain && (
-              <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1">
-                <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+              <div className="p-3 border border-red-500/30 bg-black text-red-400 font-mono text-xs leading-relaxed space-y-1 rounded-md">
+                <div className="flex items-center gap-1.5 font-semibold tracking-wider uppercase text-[10px]">
                   <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                  <span>[ SECURITY RESTRICTION ]</span>
+                  <span>Access Restriction</span>
                 </div>
-                <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
+                <p className="text-xs text-red-300 leading-relaxed">{message}</p>
               </div>
             )}
 
             <Button
-              className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-lime-400 text-black font-bold hover:bg-lime-400 cursor-pointer disabled:opacity-50 transition-colors"
+              className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-lime-400 text-black hover:bg-lime-300 cursor-pointer disabled:opacity-50 transition-colors"
               disabled={pending || isInvalidDomain}
               type="submit"
             >
               {pending ? (
-                <Loader2 className="spin size-4" />
+                <Loader2 className="animate-spin size-4" />
               ) : (
                 "Continue with Email OTP"
               )}
             </Button>
           </form>
 
-          {/* Divider: ---- or ---- */}
+          {/* Divider */}
           <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="font-mono text-[0.6875rem] uppercase tracking-widest text-zinc-500 select-none">
+            <div className="h-px flex-1 bg-white/8" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 select-none">
               or
             </span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-white/8" />
           </div>
 
           <button
             type="button"
-            className="w-full h-11 px-4 font-sans text-xs sm:text-sm font-medium border border-white/10 bg-zinc-900/60 hover:bg-zinc-800/80 hover:border-zinc-500 text-zinc-200 hover:text-white transition-all flex items-center justify-center gap-2.5 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full h-10 px-4 font-mono text-xs font-medium border border-white/12 bg-black hover:bg-zinc-900/50 hover:border-white/25 text-white transition-all flex items-center justify-center gap-2.5 rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleGoogle}
             disabled={pending}
           >
             <GoogleIcon className="size-4 shrink-0" />
-            <span className="tracking-wide">Continue with Google</span>
+            <span className="tracking-wider uppercase">Continue with Google</span>
           </button>
         </>
       )}
@@ -408,7 +389,7 @@ export function AuthPage() {
           <div>
             <Label
               htmlFor="otp"
-              className="font-mono text-[0.625rem] uppercase tracking-wider text-zinc-400"
+              className="font-mono text-[10px] uppercase tracking-wider text-zinc-400"
             >
               Authentication code
             </Label>
@@ -432,19 +413,19 @@ export function AuthPage() {
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="size-11 rounded-none border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
+                      className="size-11 rounded-md border border-white/12 bg-black font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
                     />
                   ))}
                 </InputOTPGroup>
               </InputOTP>
             </div>
-            <div className="mt-2.5 flex items-center justify-between font-mono text-[0.625rem] text-zinc-400">
-              <span>Six digits · expires in 10 minutes</span>
+            <div className="mt-3 flex items-center justify-between font-mono text-xs text-zinc-500">
+              <span>6 digits · Valid 10m</span>
               <button
                 type="button"
                 onClick={handleResendOtp}
                 disabled={pending}
-                className="hover:text-lime-400 transition-colors underline-offset-4 hover:underline cursor-pointer"
+                className="hover:text-lime-400 transition-colors cursor-pointer"
               >
                 Resend code
               </button>
@@ -452,27 +433,27 @@ export function AuthPage() {
           </div>
 
           {devOtp && (
-            <div className="border border-dashed border-lime-400/40 bg-lime-400/10 px-3 py-2 text-center font-mono text-xs text-lime-400 rounded-none">
+            <div className="border border-dashed border-lime-400/40 bg-lime-400/8 px-3 py-2 text-center font-mono text-xs text-lime-400 rounded-md">
               <span>[DEV OTP] {devOtp}</span>
             </div>
           )}
 
           {message && (
-            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-none">
-              <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+            <div className="p-3 border border-red-500/30 bg-black text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-md">
+              <div className="flex items-center gap-1.5 text-red-400 font-semibold tracking-wider uppercase text-[10px]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                <span>[ AUTHENTICATION ERROR ]</span>
+                <span>Verification Failed</span>
               </div>
-              <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
+              <p className="text-xs text-red-200 leading-relaxed">{message}</p>
             </div>
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-lime-400 text-black font-bold hover:bg-lime-400 cursor-pointer disabled:opacity-50 transition-colors"
+            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-lime-400 text-black hover:bg-lime-300 cursor-pointer disabled:opacity-50 transition-colors"
             disabled={pending || otp.length < 6}
             type="submit"
           >
-            {pending ? <Loader2 className="spin size-4" /> : "Continue"}
+            {pending ? <Loader2 className="animate-spin size-4" /> : "Verify & Continue"}
           </Button>
 
           <button
@@ -482,9 +463,9 @@ export function AuthPage() {
               dispatch(setOtp(""));
               dispatch(setMessage(null));
             }}
-            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-[0.625rem] tracking-[0.16em] text-zinc-400 uppercase transition-colors hover:text-lime-400 cursor-pointer pt-1"
+            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-xs tracking-wider text-zinc-500 uppercase transition-colors hover:text-white cursor-pointer pt-1"
           >
-            <ArrowLeft className="size-3" /> Use another email address
+            <ArrowLeft className="size-3" /> Back to email
           </button>
         </form>
       )}
@@ -497,7 +478,7 @@ export function AuthPage() {
           <div>
             <Label
               htmlFor="ob-name"
-              className="font-mono text-[0.6875rem] uppercase tracking-wider text-zinc-400 block mb-1.5"
+              className="font-mono text-[10px] uppercase tracking-wider text-zinc-400 block mb-1.5"
             >
               Full name
             </Label>
@@ -511,7 +492,7 @@ export function AuthPage() {
               placeholder="Ada Lovelace"
               required
               autoFocus
-              className="font-mono text-sm h-10 rounded-none"
+              className="font-mono text-xs h-10 rounded-md"
             />
           </div>
 
@@ -519,30 +500,30 @@ export function AuthPage() {
             <div className="flex items-center justify-between mb-1.5">
               <Label
                 htmlFor="ob-handle"
-                className="font-mono text-[0.6875rem] uppercase tracking-wider text-zinc-400"
+                className="font-mono text-[10px] uppercase tracking-wider text-zinc-400"
               >
-                Member handle / alias
+                Campus Handle / Alias
               </Label>
               <div className="flex items-center h-4">
                 {handleStatus === "checking" && (
-                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-lime-400/90 font-mono transition-opacity animate-pulse">
-                    <Loader2 className="spin size-3" /> checking...
+                  <span className="inline-flex items-center gap-1 text-xs text-lime-400 font-mono transition-opacity animate-pulse">
+                    <Loader2 className="animate-spin size-3" /> checking…
                   </span>
                 )}
                 {handleStatus === "available" && (
-                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-emerald-400 font-mono font-medium transition-all">
-                    <Check size={12} className="text-emerald-400" /> handle available
+                  <span className="inline-flex items-center gap-1 text-xs text-lime-400 font-mono font-medium transition-all">
+                    <Check size={12} /> available
                   </span>
                 )}
                 {handleStatus === "taken" && (
-                  <span className="inline-flex items-center gap-1 text-[0.6875rem] text-rose-400 font-mono font-medium transition-all">
-                    <X size={12} className="text-rose-400" /> handle taken
+                  <span className="inline-flex items-center gap-1 text-xs text-red-400 font-mono font-medium transition-all">
+                    <X size={12} /> taken
                   </span>
                 )}
               </div>
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sm text-zinc-500">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-zinc-500">
                 @
               </span>
               <Input
@@ -555,29 +536,29 @@ export function AuthPage() {
                 placeholder="adalovelace"
                 required
                 className={cn(
-                  "font-mono text-sm pl-8 h-10 rounded-none",
-                  handleStatus === "available" && "border-emerald-500/70 focus-visible:ring-emerald-500 text-emerald-200",
-                  handleStatus === "taken" && "border-rose-500/70 focus-visible:ring-rose-500 text-rose-200",
+                  "font-mono text-xs pl-8 h-10 rounded-md",
+                  handleStatus === "available" && "border-lime-400/70 focus-visible:ring-lime-400 text-white",
+                  handleStatus === "taken" && "border-red-500/70 focus-visible:ring-red-500 text-red-200",
                 )}
               />
             </div>
-            <p className="mt-1.5 font-mono text-[0.6875rem] text-zinc-500">
-              Letters, numbers, and underscores only. This will be your permanent campus alias.
+            <p className="mt-1.5 font-mono text-[10px] text-zinc-500">
+              Letters, numbers, and underscores only. Permanent university alias.
             </p>
           </div>
 
           {message && (
-            <div className="p-3 border border-red-500/50 bg-red-950/30 text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-none">
-              <div className="flex items-center gap-1.5 text-red-400 font-bold tracking-wider uppercase text-[0.6875rem]">
+            <div className="p-3 border border-red-500/30 bg-black text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-md">
+              <div className="flex items-center gap-1.5 text-red-400 font-semibold tracking-wider uppercase text-[10px]">
                 <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                <span>[ REGISTRATION ERROR ]</span>
+                <span>Registration Error</span>
               </div>
-              <p className="text-[0.6875rem] text-red-200 leading-relaxed">{message}</p>
+              <p className="text-xs text-red-200 leading-relaxed">{message}</p>
             </div>
           )}
 
           <Button
-            className="w-full font-mono text-xs uppercase tracking-wider h-11 font-semibold rounded-none bg-lime-400 text-black font-bold hover:bg-lime-400 cursor-pointer disabled:opacity-50 transition-colors"
+            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-lime-400 text-black hover:bg-lime-300 cursor-pointer disabled:opacity-50 transition-colors"
             disabled={
               pending ||
               !name.trim() ||
@@ -587,7 +568,7 @@ export function AuthPage() {
             }
             type="submit"
           >
-            {pending ? <Loader2 className="spin size-4" /> : "Complete Registration →"}
+            {pending ? <Loader2 className="animate-spin size-4" /> : "Complete Registration →"}
           </Button>
         </form>
       )}

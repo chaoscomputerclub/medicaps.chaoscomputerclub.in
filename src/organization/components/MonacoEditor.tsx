@@ -90,31 +90,31 @@ export const MonacoEditor = memo(function MonacoEditor({
     loadMonaco().then((monaco) => {
       if (!alive || !containerRef.current || editorRef.current) return;
 
-      // Register authentic Chaos Computer Club dark theme
+      // Register authentic Chaos Computer Club / Strix pitch black theme
       monaco.editor.defineTheme("ccc-dark", {
         base: "vs-dark",
         inherit: true,
         rules: [
-          { token: "comment", foreground: "8f918d", fontStyle: "italic" },
-          { token: "keyword", foreground: "c8ff36", fontStyle: "bold" },
-          { token: "identifier", foreground: "eeede5" },
-          { token: "string", foreground: "64d8db" },
-          { token: "number", foreground: "ffb84d" },
+          { token: "comment", foreground: "52525b", fontStyle: "italic" },
+          { token: "keyword", foreground: "CCFF00", fontStyle: "bold" },
+          { token: "identifier", foreground: "f4f4f5" },
+          { token: "string", foreground: "a1a1aa" },
+          { token: "number", foreground: "CCFF00" },
           { token: "type", foreground: "ffffff" },
-          { token: "delimiter", foreground: "8f918d" },
+          { token: "delimiter", foreground: "71717a" },
         ],
         colors: {
-          "editor.background": "#09090b",
-          "editor.foreground": "#eeede5",
-          "editorCursor.foreground": "#c8ff36",
-          "editor.lineHighlightBackground": "#18181b",
-          "editorLineNumber.foreground": "#52525b",
-          "editorLineNumber.activeForeground": "#c8ff36",
-          "editor.selectionBackground": "#27272a",
-          "editor.inactiveSelectionBackground": "#18181b",
-          "editorGutter.background": "#09090b",
-          "editorIndentGuide.background1": "#18181b",
-          "editorIndentGuide.activeBackground1": "#27272a",
+          "editor.background": "#000000",
+          "editor.foreground": "#f4f4f5",
+          "editorCursor.foreground": "#CCFF00",
+          "editor.lineHighlightBackground": "#0a0a0a",
+          "editorLineNumber.foreground": "#3f3f46",
+          "editorLineNumber.activeForeground": "#CCFF00",
+          "editor.selectionBackground": "#1f1f1f",
+          "editor.inactiveSelectionBackground": "#121212",
+          "editorGutter.background": "#000000",
+          "editorIndentGuide.background1": "#141414",
+          "editorIndentGuide.activeBackground1": "#242424",
         },
       });
 

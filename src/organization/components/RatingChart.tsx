@@ -24,7 +24,7 @@ export function RatingChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 w-full flex items-center justify-center text-zinc-500 font-mono text-xs border border-dashed border-white/10 rounded-none bg-zinc-900/30">
+      <div className="h-64 w-full flex items-center justify-center text-zinc-500 font-mono text-xs border border-white/8 rounded-lg bg-black">
         No rating history recorded yet.
       </div>
     );
@@ -40,11 +40,11 @@ export function RatingChart({
         <AreaChart data={data} margin={{ top: 18, right: 12, bottom: 2, left: -16 }}>
           <defs>
             <linearGradient id="ratingFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#CCFF00" stopOpacity={0.25} />
+              <stop offset="0%" stopColor="#CCFF00" stopOpacity={0.15} />
               <stop offset="100%" stopColor="#CCFF00" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="#27272a" vertical={false} />
+          <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={(v) => new Date(v).toLocaleDateString("en-IN", { month: "short" })}
@@ -55,15 +55,15 @@ export function RatingChart({
           <YAxis domain={[1400, 2050]} stroke="#71717a" fontSize={11} tickLine={false} />
           <ReferenceLine
             y={1800}
-            stroke="#eab308"
+            stroke="#CCFF00"
             strokeDasharray="4 4"
-            label={{ value: "MASTER", fill: "#eab308", fontSize: 10 }}
+            label={{ value: "MASTER", fill: "#CCFF00", fontSize: 10 }}
           />
           <Tooltip
             contentStyle={{
-              background: "#080808",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 0,
+              background: "#000000",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "6px",
               fontFamily: "monospace",
               fontSize: 12,
               color: "#ffffff",

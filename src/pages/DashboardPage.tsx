@@ -6,11 +6,8 @@ import { Button } from "@/components/ui/button";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";
 import {
-  Metric,
-  PageHeader,
   SectionHeader,
   StatusDot,
-  TierBadge,
   formatContestDate,
 } from "@/organization/components/ui";
 import { fetchFullProfileData, type FullProfilePayload } from "@/organization/data/queries";
@@ -19,7 +16,7 @@ import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { useAppSelector } from "@/store/hooks";
-import { getFirstName, formatFullName } from "@/lib/utils";
+import { getFirstName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
 
 export function DashboardPage() {
@@ -85,89 +82,110 @@ export function DashboardPage() {
   const greetingName = getFirstName(member?.full_name, member?.handle);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header Profile Summary */}
-      <PageHeader
-        kicker="00 // Operations"
-        index="INDEX 0.0 · CADET OPS"
-        title={`Good morning, ${greetingName}.`}
-        description="Your official competitive record is sealed inside verified Medi-Caps workstation laboratories."
-        action={
-          <div className="flex flex-col items-start md:items-end gap-1.5 p-4 rounded-none border border-white/10 bg-zinc-950/60 backdrop-blur-xs min-w-[200px]">
-            <TierBadge>{member?.tier || "1★ Explorer"}</TierBadge>
-            <strong className="text-3xl md:text-4xl font-mono font-bold text-white tracking-tight tabular-nums">
-              {member?.rating ?? 1200}
-            </strong>
-            <span className="text-[10px] font-mono font-bold tracking-wider text-slate-500 uppercase">
-              University Rank #{member?.university_rank ?? 0}
-            </span>
-          </div>
-        }
-      />
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold text-white font-sans tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Welcome back, {greetingName}. Verified Medi-Caps competitive programming operations.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-md border border-white/8 bg-black">
+          <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
+          <span className="font-mono text-xs text-zinc-300 uppercase tracking-wider">System Operational</span>
+        </div>
+      </div>
 
-      {/* Live Contest Command or Upcoming Briefing */}
+      {/* Telemetry Bento Strip (4 Columns) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-lg border border-white/8 bg-black">
+          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Campus Standings</span>
+          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
+            #{member?.university_rank || 1}
+          </strong>
+          <span className="block text-[10px] font-mono text-zinc-600 mt-1">Medi-Caps University</span>
+        </div>
+
+        <div className="p-4 rounded-lg border border-white/8 bg-black">
+          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Global Rating</span>
+          <strong className="block text-2xl font-mono font-bold text-lime-400 mt-1 tabular-nums">
+            {member?.rating ?? 1200}
+          </strong>
+          <span className="block text-[10px] font-mono text-lime-400/80 mt-1">{member?.tier || "1★ Explorer"}</span>
+        </div>
+
+        <div className="p-4 rounded-lg border border-white/8 bg-black">
+          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Contests Logged</span>
+          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
+            {history.length || (member as any)?.contests_count || 0}
+          </strong>
+          <span className="block text-[10px] font-mono text-zinc-600 mt-1">Verified Tournaments</span>
+        </div>
+
+        <div className="p-4 rounded-lg border border-white/8 bg-black">
+          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Accepted Solutions</span>
+          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
+            {(member as any)?.solved_count || 0}
+          </strong>
+          <span className="block text-[10px] font-mono text-zinc-600 mt-1">Problem Archive</span>
+        </div>
+      </div>
+
+      {/* Live Contest Banner or Next Contest Alert */}
       {live ? (
-        <section className="relative rounded-none border border-lime-400/30 bg-zinc-900/90 overflow-hidden shadow-lg shadow-black">
-          <div className="absolute top-0 left-0 bottom-0 w-1 bg-lime-400" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
-            <div className="p-6 md:p-8 lg:col-span-2 space-y-4">
-              <div className="flex items-center gap-3">
+        <section className="rounded-lg border border-lime-400/40 bg-black p-6 relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
                 <StatusDot status="live" />
-                <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">
-                  Live Arena Now Active
-                </span>
+                <span className="font-mono text-xs text-lime-400 uppercase tracking-wider">Tournament Live</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-mono font-bold text-white uppercase">{live.title}</h2>
-              <p className="text-sm text-slate-300 max-w-xl leading-relaxed">{live.summary}</p>
-              <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-slate-400">
-                <span className="flex items-center gap-1.5">
+              <h2 className="text-xl md:text-2xl font-semibold text-white font-sans">{live.title}</h2>
+              <p className="text-xs text-zinc-400 max-w-2xl leading-normal">{live.summary}</p>
+              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-500 pt-1">
+                <span className="flex items-center gap-1.5 text-zinc-400">
                   <MapPin className="w-3.5 h-3.5 text-lime-400" />
                   {live.venue}
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-zinc-400">
                   <Radio className="w-3.5 h-3.5 text-cyan-400" />
                   Division {live.division}
                 </span>
-              </div>
-              <div className="pt-2">
-                <Button asChild className="bg-lime-400 hover:bg-lime-300 text-black font-bold px-6">
-                  <Link to={`/portal/contests/${live.slug}`}>
-                    Enter Live Arena <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+                <span className="text-zinc-500">
+                  {live.problem_count} Problems · {live.registered_count}/{live.seat_capacity} Seated
+                </span>
               </div>
             </div>
-            <div className="p-6 md:p-8 flex flex-col justify-center gap-4 bg-zinc-950/40">
-              <Metric label="Workstations Seated" value={`${live.registered_count}/${live.seat_capacity}`} />
-              <Metric label="Problems Unsealed" value={live.problem_count} />
-              <Metric label="Workstation Pass" value={pass?.seat ?? "Desk Assigned"} />
+            <div className="shrink-0">
+              <Button asChild className="w-full sm:w-auto font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-lime-400 text-black hover:bg-lime-300">
+                <Link to={`/portal/contests/${live.slug}`}>
+                  Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
       ) : next ? (
-        <section className="rounded-none border border-white/10 bg-zinc-900/60 p-6 md:p-8 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
+        <section className="rounded-lg border border-white/8 bg-black p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
               <StatusDot status="upcoming" />
-              <span className="font-mono text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Next Campus Contest
-              </span>
+              <span className="font-mono text-xs text-zinc-400 uppercase tracking-wider">Next Campus Tournament</span>
             </div>
-            <h2 className="text-xl md:text-2xl font-mono font-bold text-white uppercase">{next.title}</h2>
-            <p className="text-sm text-slate-400 max-w-xl">{next.summary}</p>
+            <h2 className="text-lg md:text-xl font-semibold text-white font-sans">{next.title}</h2>
+            <p className="text-xs text-zinc-400 max-w-xl">{next.summary}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-6 font-mono text-xs">
+          <div className="flex flex-wrap items-center gap-4 font-mono text-xs shrink-0">
             <div>
-              <span className="block text-[10px] text-slate-500 uppercase tracking-wider">Check-in Opens</span>
-              <strong className="block text-slate-200 text-sm mt-0.5">{formatContestDate(next.check_in_opens_at)}</strong>
+              <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
+              <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.check_in_opens_at)}</strong>
             </div>
-            <div>
-              <span className="block text-[10px] text-slate-500 uppercase tracking-wider">Venue</span>
-              <strong className="block text-slate-200 text-sm mt-0.5">{next.venue}</strong>
-            </div>
-            <Button asChild variant="outline" className="border-white/15 hover:bg-zinc-800">
+            <Button asChild variant="outline" className="text-xs">
               <Link to={`/portal/contests/${next.slug}`}>
-                Contest Briefing <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </Button>
           </div>
@@ -176,91 +194,81 @@ export function DashboardPage() {
 
       {/* Grid: Rating Analytics & Pass Card */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
+        <section className="lg:col-span-2 p-5 rounded-lg border border-white/8 bg-black">
           <SectionHeader
-            kicker="01 // Rating Progression"
-            index="INDEX 0.1"
-            title="University Contest Rating"
+            kicker="Rating Trajectory"
+            index="Telemetry"
+            title="University Elo Progression"
             action={
-              <Link to="/portal/profile" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
-                Full Battle Log →
+              <Link to="/portal/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+                Profile Dossier →
               </Link>
             }
           />
           <RatingChart data={history} />
         </section>
 
-        <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm flex flex-col justify-between">
+        <section className="p-5 rounded-lg border border-white/8 bg-black flex flex-col justify-between">
           <div>
-            <SectionHeader kicker="02 // Hardware Pass" index="INDEX 0.2" title="Lab Workstation" />
+            <SectionHeader kicker="Hardware Station" index="Pass" title="Lab Workstation" />
             {isRealPass && pass ? (
-              <div className="p-5 rounded-none border border-lime-400/30 bg-zinc-950/80 font-mono space-y-4">
+              <div className="p-4 rounded-md border border-lime-400/30 bg-black font-mono space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-lime-400">CCC / MCU</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-lime-400/10 text-lime-400 border border-lime-400/30 uppercase font-bold">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-lime-400/8 text-lime-400 border border-lime-400/25 uppercase font-medium">
                     {pass.status.toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Assigned Event</span>
-                  <strong className="text-sm text-white block mt-0.5 truncate">{pass.contest_title}</strong>
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Assigned Event</span>
+                  <strong className="text-xs text-white block mt-0.5 truncate">{pass.contest_title}</strong>
                 </div>
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/8">
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/8">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Seat</span>
-                    <strong className="text-sm text-white block mt-0.5">{pass.seat}</strong>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Seat</span>
+                    <strong className="text-xs text-white block mt-0.5">{pass.seat}</strong>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Pass Code</span>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Pass Code</span>
                     <strong className="text-xs text-lime-400 block mt-0.5 truncate">{pass.pass_code}</strong>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-5 rounded-none border border-white/10 bg-zinc-950/80 font-mono space-y-3">
+              <div className="p-4 rounded-md border border-white/8 bg-black font-mono space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-zinc-500">CCC / MCU</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-amber-400/80 border border-amber-500/20 uppercase font-mono">
-                    LOCKED · TOP 30 ONLY
+                  <span className="text-xs font-semibold text-zinc-400">CCC / MCU</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded border border-white/10 text-zinc-500 uppercase font-mono">
+                    Open Arena
                   </span>
                 </div>
-                <div className="py-1.5">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Hardware Pass Status</span>
-                  <strong className="text-xs text-zinc-200 block mt-1">No Active Lab Pass</strong>
-                  <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
-                    Physical air-gapped lab passes with assigned workstations are awarded exclusively to Top 30 online screening qualifiers.
+                <div className="py-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block">Workstation Access</span>
+                  <strong className="text-xs text-zinc-300 block mt-0.5">Campus Arena Direct Access</strong>
+                  <p className="text-[11px] text-zinc-500 mt-1 leading-normal">
+                    Contests are open to all enrolled Medi-Caps University students without screening gates.
                   </p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/8 text-[11px]">
-                  <div>
-                    <span className="text-[10px] text-zinc-600 uppercase tracking-wider block">Seat</span>
-                    <span className="text-zinc-500 font-bold block mt-0.5">—</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-600 uppercase tracking-wider block">Pass Code</span>
-                    <span className="text-zinc-500 font-bold block mt-0.5">UNALLOCATED</span>
-                  </div>
                 </div>
               </div>
             )}
           </div>
           <div className="pt-4">
-            <Button asChild variant="outline" className="w-full border-white/10 hover:bg-zinc-800 text-xs font-mono">
-              <Link to="/portal/contests">View Tournament Schedule</Link>
+            <Button asChild variant="outline" className="w-full text-xs font-mono">
+              <Link to="/portal/contests">Browse Tournaments</Link>
             </Button>
           </div>
         </section>
       </div>
 
       {/* Campus Scoreboard Radar */}
-      <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
+      <section className="p-5 rounded-lg border border-white/8 bg-black">
         <SectionHeader
-          kicker="03 // Standings Radar"
-          index="INDEX 0.3"
-          title="Verified Campus Scoreboard"
+          kicker="Standings Radar"
+          index="Live"
+          title="Campus Scoreboard"
           action={
-            <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
-              University Rankings →
+            <Link to="/portal/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+              Full Standings →
             </Link>
           }
         />
@@ -268,14 +276,14 @@ export function DashboardPage() {
       </section>
 
       {/* Live Campus Activity Stream */}
-      <section className="p-6 rounded-none border border-white/8 bg-zinc-900/50 backdrop-blur-sm">
+      <section className="p-5 rounded-lg border border-white/8 bg-black">
         <SectionHeader
-          kicker="04 // Network Feed"
-          index="INDEX 0.4"
+          kicker="Network Feed"
+          index="Telemetry"
           title="Live Activity Stream"
           action={
-            <Link to="/portal/verify" className="text-xs font-mono font-medium text-lime-400 hover:text-lime-300">
-              Verify Proof Log →
+            <Link to="/portal/verify" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+              Verify Proofs →
             </Link>
           }
         />

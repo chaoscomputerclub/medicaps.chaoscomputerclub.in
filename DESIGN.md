@@ -7,20 +7,20 @@
 ## 1. Visual Theme & Atmosphere
 
 ### 1.1 Mood & Atmosphere
-The CCC Medi-Caps Chapter platform is a **high-precision competitive programming tournament arena and cybersecurity command center**. It fuses the tactile discipline of an air-gapped mission control terminal with the sleek, hyper-performant polish of modern developer tooling.
+The CCC Medi-Caps Chapter platform is a **high-precision competitive programming tournament arena and cybersecurity command center**, built on the **Strix AI Design Paradigm ([app.strix.ai](https://app.strix.ai))**.
 
-- **Dominant Tone:** Void-black surfaces (`#000000`, `#080808`) paired with sharp, high-contrast **Lime Acid** accents (`#CCFF00` / `lime-400`), crisp pure white (`#ffffff` / `#eaeaea`), and subtle telemetry cyan (`#00e5ff`).
-- **Texture & Light:** Deep matte black surfaces with layered semi-transparent borders (`border-white/10`) and sharp rectangular contours. Zero rounded corners. Zero muddy drop shadows. Zero low-contrast gray-on-gray text.
-- **Brutalist Zero-Radius Standard:** Strictly **NO border radius (`rounded-none`)** across all containers, cards, buttons, badges, tabs, and inputs, directly aligned with the design language of [chaoscomputerclub.in](https://chaoscomputerclub.in).
+- **Dominant Tone:** Pure pitch black canvas (`#000000`) paired with sharp, high-contrast **Electric Lime** accents (`#CCFF00` / `lime-400`) and crisp pure white (`#ffffff`).
+- **Texture & Light:** Void-black surfaces with razor-thin hairline borders (`1px solid rgba(255,255,255,0.08)`). Zero muddy grey card backgrounds (`#18181b`, `#27272a`). Zero blurry glassmorphic overlays. Zero gradient meshes.
+- **SaaS Micro-Radius Standard:** Micro-radius across all surfaces (`rounded-lg` 8px for containers/cards, `rounded-md` 6px for buttons/inputs, `rounded` 4px for status badges).
 
 ### 1.2 The Three Design Dials (Taste Skill Configuration)
 Every frontend surface in this repository is governed by the three calibrated dials:
 
 | Dial | Value (1-10) | Calibration Rationale |
 | :--- | :---: | :--- |
-| **`DESIGN_VARIANCE`** | **`8`** | High architectural variance: asymmetrical bento grids, tactile terminal panels, split viewports for the Monaco IDE, and distinct proctor console workflows. |
-| **`MOTION_INTENSITY`** | **`6`** | Deliberate, purposeful feedback: snappy 150–200ms cubic-bezier transitions, hardware-accelerated GPU transforms (`transform`, `opacity`), live status pulse indicators, and zero gratuitous infinite-loop animations. |
-| **`VISUAL_DENSITY`** | **`8`** | Cockpit-level information density: compact telemetry badges, tabular numeric leaderboards (`tabular-nums`), dense testcase grids, and real-time execution statistics without wasted whitespace. |
+| **`DESIGN_VARIANCE`** | **`7`** | Abstracted, disciplined layout: high signal-to-noise ratio, bento telemetry strips, surgical split-pane Monaco IDE, zero visual clutter. |
+| **`MOTION_INTENSITY`** | **`5`** | Snappy 150ms transitions, hardware-accelerated GPU transforms (`transform`, `opacity`), live status pulse indicators, and zero gratuitous infinite-loop animations. |
+| **`VISUAL_DENSITY`** | **`7`** | High-signal information density: tabular numeric leaderboards (`tabular-nums`), dense testcase matrices, and real-time execution statistics without bloated marketing filler. |
 
 ---
 
@@ -31,19 +31,18 @@ All colors are strictly mapped to semantic functional roles. Ad-hoc hex codes in
 | Semantic Token | Hex Code | HSL / Tailwind | Functional Role |
 | :--- | :--- | :--- | :--- |
 | `--bg-canvas` | `#000000` | `black` | Primary viewport background (root layout) |
-| `--bg-surface-1` | `#080808` | `zinc-950` | Top-level containers, sidebar shells, fixed navigation |
-| `--bg-surface-2` | `#111111` | `zinc-900` | Interactive cards, modal dialogs, drawer panels |
-| `--bg-surface-3` | `#161616` | `zinc-900/60` | Input fields, code editors, nested sub-panels |
-| `--bg-surface-hover` | `#222222` | `zinc-800` | Hover highlight on secondary buttons and table rows |
+| `--bg-surface` | `#000000` | `black` | Top-level containers, sidebar shells, cards (pure pitch black) |
+| `--bg-surface-elevated`| `#050505` | `zinc-950` | Sub-panels, code editor background |
+| `--bg-surface-hover` | `#0f0f0f` | `zinc-900/60` | Hover highlight on secondary buttons and table rows |
 | `--accent-brand` | `#CCFF00` | `lime-400` | Primary action buttons, active tab indicators, focus rings |
-| `--accent-brand-hover` | `#e6ff66` | `lime-300` | Active/hover state for primary action buttons |
-| `--accent-brand-subtle`| `rgba(204,255,0,0.12)`| `lime-400/12` | Active badges, selected list rows, subtle highlights |
-| `--accent-cyan` | `#00e5ff` | `cyan-400` | Live tournament telemetry, timer countdowns, SSE stream status |
-| `--status-success` | `#10b981` | `emerald-500` | Accepted (`AC`), checked-in campus pass, system operational |
+| `--accent-brand-hover` | `#d8ff33` | `lime-300` | Active/hover state for primary action buttons |
+| `--accent-brand-subtle`| `rgba(204,255,0,0.08)`| `lime-400/8` | Active badges, selected list rows, subtle highlights |
+| `--accent-cyan` | `#00e5ff` | `cyan-400` | Telemetry countdowns, SSE stream status |
+| `--status-success` | `#CCFF00` | `lime-400` | Accepted (`AC`), checked-in campus pass, system operational |
 | `--status-error` | `#ff3344` | `red-500` | Wrong Answer (`WA`), Runtime Error, disqualified session |
 | `--status-warning` | `#f59e0b` | `amber-500` | Time Limit Exceeded (`TLE`), anti-cheat warning trigger |
-| `--border-subtle` | `rgba(255,255,255,0.08)` | `white/8` | Standard card and container perimeter borders |
-| `--border-strong` | `rgba(255,255,255,0.16)` | `white/16` | Active input borders, table header dividers |
+| `--border-hairline` | `rgba(255,255,255,0.08)` | `white/8` | Standard card and container perimeter borders |
+| `--border-active` | `rgba(255,255,255,0.18)` | `white/18` | Active input borders, table header dividers |
 | `--border-accent` | `#CCFF00` | `lime-400` | Focused inputs, active contest phase outline |
 | `--text-primary` | `#ffffff` | `white` | Headings, primary labels, code editor syntax foreground |
 | `--text-secondary` | `#a1a1aa` | `zinc-400` | Subtitles, metadata labels, testcase parameters |
