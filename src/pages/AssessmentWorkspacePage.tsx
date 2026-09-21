@@ -144,11 +144,19 @@ export function AssessmentWorkspacePage() {
   }
 
   const activeProblem = problems[activeProblemIndex];
+  const currentProblemKey = activeProblem ? `${activeProblem.id}_${selectedLanguage}` : "";
+  const codeInMap = currentProblemKey ? codeMap[currentProblemKey] : "";
+  const isCodeInMapLegacy =
+    codeInMap &&
+    (codeInMap.includes("def main():") ||
+      codeInMap.includes("sys.stdin.read()") ||
+      codeInMap.includes("TODO: Calculate valid mirror pairs") ||
+      (selectedLanguage === "python" && !codeInMap.includes("class Solution")));
   const currentCode = activeProblem
-    ? (codeMap[`${activeProblem.id}_${selectedLanguage}`] ??
-      activeProblem.starter_codes?.[selectedLanguage] ??
-      "")
-  : "";
+    ? (!isCodeInMapLegacy && codeInMap
+        ? codeInMap
+        : activeProblem.starter_codes?.[selectedLanguage] ?? "")
+    : "";
 
   const activeSubmission = activeProblem ? submissionsMap[activeProblem.id] : null;
 

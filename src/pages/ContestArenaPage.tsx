@@ -308,21 +308,56 @@ export function ContestArenaPage() {
 
   const problemKey = `${activeProblem?.id || "p"}_${selectedLanguage}`;
   const problemStorageKey = activeProblem
-    ? `ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
+    ? `ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
     : "";
 
-  // Load durable code from state, localStorage, or starter template
-  const currentCode =
-    codeMap[problemKey] ??
-    (problemStorageKey && typeof window !== "undefined"
-      ? localStorage.getItem(problemStorageKey)
-      : null) ??
-    activeProblem?.starter_codes?.[selectedLanguage] ??
-    (selectedLanguage === "python"
-      ? "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n"
-      : selectedLanguage === "cpp"
-        ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
-        : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n");
+  // Load durable code: state -> validated localStorage -> official problem starter_code
+  const getInitialCode = (): string => {
+    if (codeMap[problemKey]) {
+      const isLegacy =
+        codeMap[problemKey].includes("def main():") ||
+        codeMap[problemKey].includes("sys.stdin.read()") ||
+        codeMap[problemKey].includes("TODO: Calculate valid mirror pairs") ||
+        (selectedLanguage === "python" && !codeMap[problemKey].includes("class Solution"));
+      if (!isLegacy) {
+        return codeMap[problemKey];
+      }
+    }
+    if (problemStorageKey && typeof window !== "undefined") {
+      try {
+        // Clean up legacy unversioned keys if any
+        if (activeProblem?.id) {
+          localStorage.removeItem(`ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(`ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+        }
+        const saved = localStorage.getItem(problemStorageKey);
+        if (saved) {
+          // If saved code contains old competitive programming script boilerplate, purge it
+          const isLegacy =
+            saved.includes("def main():") ||
+            saved.includes("sys.stdin.read()") ||
+            saved.includes("TODO: Calculate valid mirror pairs") ||
+            (selectedLanguage === "python" && !saved.includes("class Solution"));
+          if (isLegacy) {
+            localStorage.removeItem(problemStorageKey);
+          } else {
+            return saved;
+          }
+        }
+      } catch {}
+    }
+
+    return (
+      activeProblem?.starter_codes?.[selectedLanguage] ??
+      (selectedLanguage === "python"
+        ? "class Solution:\n    def solve(self) -> int:\n        # Write your solution here\n        pass\n"
+        : selectedLanguage === "cpp"
+          ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
+          : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n")
+    );
+  };
+
+  const currentCode = getInitialCode();
 
   const handleCodeChange = (newCode: string) => {
     setCodeMap((prev) => ({ ...prev, [problemKey]: newCode }));
@@ -342,9 +377,13 @@ export function ContestArenaPage() {
           ? "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int solve() {\n        return 0;\n    }\n};\n"
           : "/**\n * @return {number}\n */\nvar solve = function() {\n    // Write your solution here\n};\n");
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
-    if (problemStorageKey && typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
       try {
-        localStorage.removeItem(problemStorageKey);
+        if (problemStorageKey) localStorage.removeItem(problemStorageKey);
+        if (activeProblem?.id) {
+          localStorage.removeItem(`ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(`ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+        }
       } catch {}
     }
     toast.info("Reset code to official template.");

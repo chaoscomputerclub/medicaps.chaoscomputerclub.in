@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T15:54:11.599Z",
+  "timestamp": "2026-09-21T16:02:55.609Z",
   "totalElements": 252,
   "functionalCount": 252,
   "connectivityRate": "100.0%",
@@ -403,7 +403,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 286,
+      "line": 294,
       "tag": "<button>",
       "label": "Close Workspace",
       "handler": "{() => {\n                if (window.opener) {\n                  window.close();\n",
@@ -412,7 +412,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 299,
+      "line": 307,
       "tag": "<button>",
       "label": "View Standings",
       "handler": "{() => navigate(`/contests/${contestSlug}/results`)}",
@@ -421,7 +421,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 306,
+      "line": 314,
       "tag": "<button>",
       "label": "Return to Contest Details",
       "handler": "{() => navigate(`/contests/${contestSlug}`)}",
@@ -430,7 +430,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 343,
+      "line": 351,
       "tag": "<Button>",
       "label": "Close & Return",
       "handler": "{() => {\n              if (window.opener) window.close();\n              else nav",
@@ -439,7 +439,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 378,
+      "line": 386,
       "tag": "<a>",
       "label": "[href={/contests/${contestSlug}/resu...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -448,7 +448,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 379,
+      "line": 387,
       "tag": "<Button>",
       "label": "Button",
       "handler": "none",
@@ -457,7 +457,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 386,
+      "line": 394,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleDirectRegister}",
@@ -466,7 +466,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 396,
+      "line": 404,
       "tag": "<a>",
       "label": "[href={/auth?redirect=/assessments/$...",
       "handler": "{`/auth?redirect=/assessments/${contestSlug}`}",
@@ -475,7 +475,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 397,
+      "line": 405,
       "tag": "<Button>",
       "label": "Sign In to Continue",
       "handler": "none",
@@ -484,7 +484,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 402,
+      "line": 410,
       "tag": "<Button>",
       "label": "Return to Contest Details",
       "handler": "{() => {\n                if (window.opener) window.close();\n                else",
@@ -493,7 +493,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 436,
+      "line": 444,
       "tag": "<button>",
       "label": "{isFullScore && <CheckCircle2 size={1...",
       "handler": "{() => dispatch(setActiveProblemIndex(idx))}",
@@ -502,7 +502,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 504,
+      "line": 512,
       "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 size={13} ...",
       "handler": "{toggleFullscreen}",
@@ -511,7 +511,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 516,
+      "line": 524,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRun}",
@@ -520,7 +520,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 528,
+      "line": 536,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmit}",
@@ -529,7 +529,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 539,
+      "line": 547,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleExitWindow}",
@@ -538,7 +538,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 550,
+      "line": 558,
       "tag": "<Button>",
       "label": "Finish",
       "handler": "{handleFinish}",
@@ -547,7 +547,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 642,
+      "line": 650,
       "tag": "<button>",
       "label": "{copiedIndex === idx ? <Check size={1...",
       "handler": "{() => handleCopy(inputVal, idx)}",
@@ -556,7 +556,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 699,
+      "line": 707,
       "tag": "<button>",
       "label": "Reset Starter",
       "handler": "{() => {\n                if (!activeProblem) return;\n                if (confirm",
@@ -565,7 +565,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 718,
+      "line": 726,
       "tag": "<button>",
       "label": "Testcases",
       "handler": "{() => dispatch(setActiveConsoleTab(\"testcases\"))}",
@@ -574,7 +574,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 729,
+      "line": 737,
       "tag": "<button>",
       "label": "{runResult && (                     <...",
       "handler": "{() => dispatch(setActiveConsoleTab(\"output\"))}",
@@ -583,7 +583,7 @@
     },
     {
       "file": "src/pages/AssessmentWorkspacePage.tsx",
-      "line": 900,
+      "line": 908,
       "tag": "<Button>",
       "label": "Acknowledge & Continue",
       "handler": "{() => dispatch(dismissAntiCheatWarning())}",
@@ -673,7 +673,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 470,
+      "line": 509,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -682,7 +682,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 474,
+      "line": 513,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/qualif...",
       "handler": "{`/contests/${contestSlug}/qualified`}",
@@ -691,7 +691,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 480,
+      "line": 519,
       "tag": "<Button>",
       "label": "dispatch(fetchContestArenaThunk(conte...",
       "handler": "{() => dispatch(fetchContestArenaThunk(contestSlug))}",
@@ -700,7 +700,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 488,
+      "line": 527,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -709,7 +709,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 493,
+      "line": 532,
       "tag": "<Link>",
       "label": "Exit Lobby",
       "handler": "{`/contests/${contestSlug}`}",
@@ -718,7 +718,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 511,
+      "line": 550,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n              if (window.opener) {\n                window.close();\n    ",
@@ -727,7 +727,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 559,
+      "line": 598,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -736,7 +736,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 565,
+      "line": 604,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -745,7 +745,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 571,
+      "line": 610,
       "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 className=...",
       "handler": "{toggleFullscreen}",
@@ -754,7 +754,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 591,
+      "line": 630,
       "tag": "<Link>",
       "label": "{isSolved && (                   <Che...",
       "handler": "{() => dispatch(clearArenaResults())}",
@@ -763,7 +763,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 632,
+      "line": 671,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleResetStarter}",
@@ -772,7 +772,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 714,
+      "line": 753,
       "tag": "<button>",
       "label": "{copiedKey === tc_${i} ? <Check cla...",
       "handler": "{() => copyToClipboard(st.stdin, `tc_${i}`)}",
@@ -781,7 +781,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 834,
+      "line": 873,
       "tag": "<button>",
       "label": "Testcase",
       "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
@@ -790,7 +790,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 848,
+      "line": 887,
       "tag": "<button>",
       "label": "{submitResult && (                   ...",
       "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
@@ -799,7 +799,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 879,
+      "line": 918,
       "tag": "<button>",
       "label": "setIsDrawerCollapsed(true)}\n         ...",
       "handler": "{() => setIsDrawerCollapsed(true)}",
@@ -808,7 +808,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 899,
+      "line": 938,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(i)}",
@@ -817,7 +817,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 912,
+      "line": 951,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -826,7 +826,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1026,
+      "line": 1065,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveSubmitCaseIndex(idx)}",
@@ -835,7 +835,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1151,
+      "line": 1190,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveRunCaseIndex(idx)}",
@@ -844,7 +844,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1257,
+      "line": 1296,
       "tag": "<button>",
       "label": "{isDrawerCollapsed ? <ChevronUp class...",
       "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
@@ -853,7 +853,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1275,
+      "line": 1314,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRunCode}",
@@ -862,7 +862,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1287,
+      "line": 1326,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmitCode}",
@@ -871,7 +871,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1341,
+      "line": 1380,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",

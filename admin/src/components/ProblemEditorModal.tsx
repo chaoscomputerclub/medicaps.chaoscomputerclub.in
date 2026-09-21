@@ -14,31 +14,40 @@ interface ProblemEditorModalProps {
   defaultTarget?: "contest" | "assessment" | "both";
 }
 
-const DEFAULT_PY_STARTER = `import sys
-
-def main():
-    input_data = sys.stdin.read().split()
-    if not input_data:
-        return
-    # Write solution here
-    pass
-
-if __name__ == '__main__':
-    main()
+const DEFAULT_PY_STARTER = `class Solution:
+    def solve(self) -> int:
+        # Write your solution here
+        pass
 `;
 
-const DEFAULT_CPP_STARTER = `#include <iostream>
-#include <vector>
+const DEFAULT_CPP_STARTER = `#include <vector>
 #include <string>
 #include <algorithm>
 
 using namespace std;
 
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    // Write solution here
-    return 0;
+class Solution {
+public:
+    int solve() {
+        // Write your solution here
+        return 0;
+    }
+};
+`;
+
+const DEFAULT_JS_STARTER = `/**
+ * @return {number}
+ */
+var solve = function() {
+    // Write your solution here
+};
+`;
+
+const DEFAULT_JAVA_STARTER = `class Solution {
+    public int solve() {
+        // Write your solution here
+        return 0;
+    }
 }
 `;
 
@@ -66,8 +75,8 @@ export function ProblemEditorModal({
   const [starterCodes, setStarterCodes] = useState<Record<string, string>>({
     python: DEFAULT_PY_STARTER,
     cpp: DEFAULT_CPP_STARTER,
-    javascript: "// Node.js environment\nconst fs = require('fs');\nconst input = fs.readFileSync(0, 'utf-8').trim();\n",
-    java: "// Java solution\nimport java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n    }\n}\n",
+    javascript: DEFAULT_JS_STARTER,
+    java: DEFAULT_JAVA_STARTER,
   });
 
   const [sampleTestcases, setSampleTestcases] = useState<TestCaseItem[]>([
