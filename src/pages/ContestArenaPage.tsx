@@ -582,17 +582,23 @@ export function ContestArenaPage() {
                 key={prob.id}
                 to={`/contests/${contestSlug}/problems/${pSlug}`}
                 onClick={() => dispatch(clearArenaResults())}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer border ${
+                className={`group flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer border ${
                   isActive
                     ? "bg-zinc-900 text-white border-lime-400 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
                     : "text-zinc-400 hover:text-black hover:bg-lime-400 hover:border-lime-400 border-white/6 bg-black"
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>
-                <span className="text-[10px] px-1 py-0.2 rounded font-mono uppercase bg-zinc-950 text-zinc-500">
+                <span
+                  className={`text-[10px] font-mono uppercase tabular-nums transition-colors ${
+                    isActive ? "text-zinc-400" : "text-zinc-500 group-hover:text-black/75"
+                  }`}
+                >
                   {prob.points}p
                 </span>
-                {isSolved && <CheckCircle2 className="size-3 text-lime-400" />}
+                {isSolved && (
+                  <CheckCircle2 className="size-3 text-lime-400 group-hover:text-black transition-colors" />
+                )}
               </Link>
             );
           })}

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T15:32:12.666Z",
+  "timestamp": "2026-09-21T15:37:02.213Z",
   "totalElements": 250,
   "functionalCount": 250,
   "connectivityRate": "100.0%",
@@ -756,14 +756,14 @@
       "file": "src/pages/ContestArenaPage.tsx",
       "line": 581,
       "tag": "<Link>",
-      "label": "{isSolved && <CheckCircle2 className=...",
+      "label": "{isSolved && (                   <Che...",
       "handler": "{() => dispatch(clearArenaResults())}",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 616,
+      "line": 622,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleResetStarter}",
@@ -772,7 +772,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 698,
+      "line": 704,
       "tag": "<button>",
       "label": "{copiedKey === tc_${i} ? <Check cla...",
       "handler": "{() => copyToClipboard(st.stdin, `tc_${i}`)}",
@@ -781,7 +781,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 818,
+      "line": 824,
       "tag": "<button>",
       "label": "Testcases",
       "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
@@ -790,7 +790,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 832,
+      "line": 838,
       "tag": "<button>",
       "label": "{submitResult && (                   ...",
       "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
@@ -799,7 +799,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 863,
+      "line": 869,
       "tag": "<button>",
       "label": "setIsDrawerCollapsed(true)}\n         ...",
       "handler": "{() => setIsDrawerCollapsed(true)}",
@@ -808,7 +808,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 882,
+      "line": 888,
       "tag": "<button>",
       "label": "Case {i + 1}",
       "handler": "{() => setActiveTestcaseIndex(i)}",
@@ -817,7 +817,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 895,
+      "line": 901,
       "tag": "<button>",
       "label": "Custom Stdin",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -826,7 +826,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1019,
+      "line": 1025,
       "tag": "<button>",
       "label": "{isDrawerCollapsed ? <ChevronUp class...",
       "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
@@ -835,7 +835,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1037,
+      "line": 1043,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRunCode}",
@@ -844,7 +844,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1049,
+      "line": 1055,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmitCode}",
@@ -853,7 +853,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1103,
+      "line": 1109,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
