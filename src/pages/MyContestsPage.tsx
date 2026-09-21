@@ -275,7 +275,7 @@ export function MyContestsPage() {
                           variant="outline"
                           size="sm"
                           asChild
-                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:text-white font-mono text-xs"
+                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 font-mono text-xs"
                         >
                           <Link to={`/contests/${c.contest_slug}`}>
                             Details
@@ -287,7 +287,7 @@ export function MyContestsPage() {
                           variant="outline"
                           size="sm"
                           asChild
-                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:text-white font-mono text-xs"
+                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 font-mono text-xs"
                         >
                           <Link to={`/contests/${c.contest_slug}/results`}>
                             Standings
