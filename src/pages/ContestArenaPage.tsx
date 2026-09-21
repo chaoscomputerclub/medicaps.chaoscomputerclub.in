@@ -2200,79 +2200,81 @@ export function ContestArenaPage() {
         </div>
       )}
 
-      {/* Slide-out Problem List Drawer (LeetCode Contest Style) */}
+      {/* Slide-out Problem List Drawer (Strix AI Theme: Pitch Black × Electric Lime) */}
       {isProblemListOpen && (
         <div
           role="presentation"
-          className="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 transition-opacity animate-in fade-in duration-150"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-150"
           onClick={() => setIsProblemListOpen(false)}
         />
       )}
 
       <aside
         aria-label="Contest Problem List and Standings"
-        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#0c0c0e] border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-black border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-200 ease-out ${
           isProblemListOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         }`}
       >
-        {/* Drawer Header: Title + Virtual/Live badge + Chevron + ✕ Close */}
-        <div className="h-14 px-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/60">
+        {/* Drawer Header: Title + Live Arena badge + ✕ Close */}
+        <div className="h-12 px-4 border-b border-white/8 flex items-center justify-between shrink-0 bg-black">
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className="font-semibold text-sm text-white truncate max-w-[240px]">
+            <ListOrdered className="size-4 text-lime-400 shrink-0" />
+            <h2 className="font-semibold text-xs text-white truncate max-w-[220px]">
               {title}
             </h2>
-            <span className="border border-purple-500/40 bg-purple-500/15 text-purple-300 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
-              Virtual
+            <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
+              Live Arena
             </span>
-            <ChevronRight className="size-3.5 text-zinc-500 shrink-0" />
           </div>
 
           {/* Close Button (✕) */}
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => setIsProblemListOpen(false)}
-            className="size-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="size-7 p-0 rounded-md border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer shrink-0"
             title="Close Problem List (Esc)"
           >
-            <X className="size-4" />
-          </button>
+            <X className="size-3.5" />
+          </Button>
         </div>
 
-        {/* Drawer Subheader: Problem List vs Ranking Tabs + Points indicator */}
-        <div className="px-4 py-3 border-b border-white/8 flex items-center justify-between gap-2 shrink-0 bg-zinc-950/40">
-          {/* Sub-tabs: Problem List vs Ranking */}
-          <div className="flex items-center gap-1.5 bg-zinc-900/90 p-1 rounded-lg border border-white/10">
+        {/* Drawer Subheader: Problem List vs Standings Tabs + Score Badge */}
+        <div className="px-4 py-2.5 border-b border-white/8 flex items-center justify-between gap-2 shrink-0 bg-black">
+          {/* Sub-tabs: Challenges vs Standings */}
+          <div className="flex items-center gap-1 bg-zinc-950 p-0.5 rounded-md border border-white/10">
             <button
               type="button"
               onClick={() => setProblemListTab("problems")}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-all cursor-pointer ${
                 problemListTab === "problems"
-                  ? "border border-amber-500/60 bg-amber-500/15 text-amber-400 shadow-sm"
-                  : "text-zinc-400 hover:text-white border border-transparent"
+                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
               <ListOrdered className="size-3.5" />
-              <span>Problem List</span>
+              <span>Challenges</span>
             </button>
             <button
               type="button"
               onClick={() => setProblemListTab("ranking")}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-all cursor-pointer ${
                 problemListTab === "ranking"
-                  ? "border border-amber-500/60 bg-amber-500/15 text-amber-400 shadow-sm"
-                  : "text-zinc-400 hover:text-white border border-transparent"
+                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
               <BarChart2 className="size-3.5" />
-              <span>Ranking</span>
+              <span>Standings</span>
             </button>
           </div>
 
           {/* Points & Progress Pips */}
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-            <div className="flex items-center gap-1 text-amber-400 font-semibold tabular-nums">
-              <span>🪙</span>
-              <span>{totalEarnedPoints}&nbsp;pt.</span>
+          <div className="flex items-center gap-2 font-mono">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs font-semibold tabular-nums">
+              <Trophy className="size-3 text-lime-400" />
+              <span>{totalEarnedPoints}&nbsp;PTS</span>
             </div>
             <div className="flex items-center gap-1">
               {problems.map((p) => {
@@ -2280,10 +2282,10 @@ export function ContestArenaPage() {
                 return (
                   <span
                     key={p.id}
-                    className={`h-1.5 w-2.5 rounded-full transition-colors ${
+                    className={`size-2 rounded-full transition-colors ${
                       isPsolved
-                        ? "bg-lime-400 shadow-[0_0_6px_rgba(204,255,0,0.6)]"
-                        : "bg-zinc-800"
+                        ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
+                        : "bg-zinc-800 border border-white/10"
                     }`}
                     title={`Q${p.problem_index}: ${p.title} (${isPsolved ? "Solved" : "Unsolved"})`}
                   />
@@ -2295,7 +2297,7 @@ export function ContestArenaPage() {
 
         {/* Drawer Body */}
         {problemListTab === "problems" ? (
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {problems.map((prob, idx) => {
               const pSlug = slugifyProblem(prob.title, prob.problem_index);
               const isActive = idx === resolvedIndex;
@@ -2304,7 +2306,7 @@ export function ContestArenaPage() {
               const diffUpper = (prob.difficulty || "").toUpperCase();
               const isHard = diffUpper === "HARD" || prob.points > 5;
               const isMed = diffUpper === "MEDIUM" || (!isHard && prob.points > 3);
-              const diffLabel = isHard ? "Hard" : isMed ? "Med." : "Easy";
+              const diffLabel = isHard ? "Hard" : isMed ? "Medium" : "Easy";
 
               return (
                 <button
@@ -2315,60 +2317,71 @@ export function ContestArenaPage() {
                     dispatch(clearArenaResults());
                     setIsProblemListOpen(false);
                   }}
-                  className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 group ${
+                  className={`w-full text-left p-3 rounded-md border transition-all cursor-pointer flex items-center justify-between gap-3 group relative overflow-hidden ${
                     isActive
-                      ? "bg-white text-zinc-950 border-white shadow-lg shadow-black/40"
-                      : "bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-200 border-white/6 hover:border-white/15"
+                      ? "bg-zinc-950 border-lime-400/60 shadow-[0_0_24px_rgba(204,255,0,0.12)] ring-1 ring-lime-400/30"
+                      : "bg-black hover:bg-zinc-950 border-white/8 hover:border-white/16 text-zinc-300 hover:text-white"
                   }`}
                 >
-                  {/* Title & Status */}
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  {/* Left accent bar for active challenge */}
+                  {isActive && (
+                    <div className="absolute left-0 inset-y-0 w-1 bg-lime-400 shadow-[0_0_10px_#a3e635]" />
+                  )}
+
+                  {/* Left: Indicator, Question Title */}
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1 pl-1">
                     {isSolved ? (
-                      <CheckCircle2 className="size-4 text-lime-500 shrink-0" />
+                      <CheckCircle2 className="size-4 text-lime-400 shrink-0" />
+                    ) : isActive ? (
+                      <span className="size-2 rounded-full bg-lime-400 shadow-[0_0_8px_#a3e635] shrink-0" />
                     ) : (
-                      <span
-                        className={`size-2 rounded-full shrink-0 ${
-                          isActive ? "bg-zinc-900" : "bg-zinc-600 group-hover:bg-zinc-400"
-                        }`}
-                      />
+                      <span className="size-1.5 rounded-full bg-zinc-700 group-hover:bg-zinc-400 transition-colors shrink-0" />
                     )}
-                    <span
-                      className={`text-xs truncate font-medium ${
-                        isActive ? "text-zinc-950 font-semibold" : "text-zinc-200 group-hover:text-white"
-                      }`}
-                    >
-                      Q{prob.problem_index}. {prob.title}
-                    </span>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`font-mono text-xs font-semibold ${
+                            isActive ? "text-lime-400" : "text-zinc-500 group-hover:text-zinc-300"
+                          }`}
+                        >
+                          Q{prob.problem_index}.
+                        </span>
+                        <span
+                          className={`text-xs truncate ${
+                            isActive
+                              ? "text-white font-semibold"
+                              : "text-zinc-300 group-hover:text-white font-medium"
+                          }`}
+                        >
+                          {prob.title}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Difficulty & Points */}
-                  <div className="flex items-center gap-1.5 shrink-0 font-mono">
+                  {/* Right: Difficulty & Points Pills */}
+                  <div className="flex items-center gap-2 shrink-0 font-mono">
                     <span
-                      className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
-                        isActive
-                          ? isHard
-                            ? "text-rose-600 bg-rose-50"
-                            : isMed
-                            ? "text-amber-700 bg-amber-50"
-                            : "text-emerald-700 bg-emerald-50"
-                          : isHard
-                          ? "text-rose-400 bg-rose-500/10"
+                      className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded border ${
+                        isHard
+                          ? "text-rose-400 bg-rose-500/10 border-rose-500/30"
                           : isMed
-                          ? "text-amber-400 bg-amber-500/10"
-                          : "text-emerald-400 bg-emerald-500/10"
+                          ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
+                          : "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
                       }`}
                     >
                       {diffLabel}
                     </span>
 
                     <span
-                      className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
+                      className={`text-[11px] font-semibold tabular-nums px-2 py-0.5 rounded border ${
                         isActive
-                          ? "bg-zinc-100 text-zinc-800"
-                          : "bg-zinc-800/80 text-zinc-400"
+                          ? "bg-lime-400/10 text-lime-400 border-lime-400/30"
+                          : "bg-black text-zinc-400 border-white/8"
                       }`}
                     >
-                      {prob.points}&nbsp;pt.
+                      {prob.points}&nbsp;pt
                     </span>
                   </div>
                 </button>
@@ -2376,37 +2389,39 @@ export function ContestArenaPage() {
             })}
           </div>
         ) : (
-          /* Ranking Tab */
+          /* Standings / Ranking Tab */
           <div className="flex-1 overflow-y-auto p-4 flex flex-col">
             <div className="flex items-center justify-between text-xs font-mono pb-3 border-b border-white/8">
-              <span className="text-zinc-400">Live Standings</span>
-              <span className="text-lime-400 tabular-nums">
-                {rankingData?.rows?.length || 0} competitors
+              <span className="text-zinc-500 uppercase tracking-wider text-[10px] font-semibold">
+                Live Tournament Standings
+              </span>
+              <span className="text-lime-400 font-semibold tabular-nums">
+                {rankingData?.rows?.length || 0} cadets
               </span>
             </div>
 
-            <div className="flex-1 py-3 space-y-2 overflow-y-auto">
+            <div className="flex-1 py-3 space-y-1.5 overflow-y-auto">
               {rankingData?.rows && rankingData.rows.length > 0 ? (
                 rankingData.rows.slice(0, 20).map((row, idx) => (
                   <div
                     key={row.handle || idx}
-                    className="p-2.5 rounded-lg bg-zinc-950 border border-white/6 flex items-center justify-between text-xs font-mono"
+                    className="p-2.5 rounded-md bg-zinc-950 border border-white/8 hover:border-white/16 flex items-center justify-between text-xs font-mono transition-colors"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <span
-                        className={`w-5 text-center font-bold tabular-nums ${
+                        className={`size-5 rounded flex items-center justify-center font-bold tabular-nums text-[11px] ${
                           idx === 0
-                            ? "text-amber-400"
+                            ? "bg-lime-400/15 text-lime-400 border border-lime-400/30"
                             : idx === 1
-                            ? "text-zinc-300"
+                            ? "bg-zinc-800 text-zinc-200 border border-white/10"
                             : idx === 2
-                            ? "text-amber-600"
+                            ? "bg-zinc-900 text-zinc-400 border border-white/10"
                             : "text-zinc-500"
                         }`}
                       >
-                        #{row.rank || idx + 1}
+                        {row.rank || idx + 1}
                       </span>
-                      <span className="truncate text-white font-medium max-w-[140px]">
+                      <span className="truncate text-white font-medium max-w-[150px]">
                         {row.full_name || row.handle}
                       </span>
                     </div>
@@ -2417,9 +2432,9 @@ export function ContestArenaPage() {
                   </div>
                 ))
               ) : (
-                <div className="py-12 text-center text-zinc-500 text-xs font-mono space-y-2">
+                <div className="py-16 text-center text-zinc-500 text-xs font-mono space-y-2">
                   <Trophy className="size-8 mx-auto text-zinc-700 stroke-1" />
-                  <p>Standings will update as competitors submit solutions.</p>
+                  <p className="text-zinc-400">Standings will update as competitors submit.</p>
                 </div>
               )}
             </div>
@@ -2427,7 +2442,7 @@ export function ContestArenaPage() {
             <div className="pt-3 border-t border-white/8 shrink-0">
               <Button
                 asChild
-                className="w-full h-9 bg-zinc-900 border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 text-xs font-mono font-semibold transition-colors cursor-pointer"
+                className="w-full h-9 rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
               >
                 <Link
                   to={`/contests/${contestSlug}/results`}

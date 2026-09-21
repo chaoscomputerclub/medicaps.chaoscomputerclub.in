@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T21:53:40.491Z",
+  "timestamp": "2026-09-21T21:56:15.401Z",
   "totalElements": 300,
   "functionalCount": 300,
   "connectivityRate": "100.0%",
@@ -1142,7 +1142,7 @@
     {
       "file": "src/pages/ContestArenaPage.tsx",
       "line": 2231,
-      "tag": "<button>",
+      "tag": "<Button>",
       "label": "setIsProblemListOpen(false)}\n        ...",
       "handler": "{() => setIsProblemListOpen(false)}",
       "category": "CLIENT_UI_STATE",
@@ -1150,7 +1150,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2245,
+      "line": 2247,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setProblemListTab(\"problems\")}",
@@ -1159,7 +1159,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2257,
+      "line": 2259,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setProblemListTab(\"ranking\")}",
@@ -1168,16 +1168,16 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2310,
+      "line": 2312,
       "tag": "<button>",
-      "label": ") : (",
+      "label": "{isActive && (                     <d...",
       "handler": "{() => {\n                    navigate(`/contests/${contestSlug}/problems/${pSlug",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2428,
+      "line": 2443,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1186,7 +1186,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2432,
+      "line": 2447,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -1195,7 +1195,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2485,
+      "line": 2500,
       "tag": "<Button>",
       "label": "Continue Solving",
       "handler": "{() => setShowExitModal(false)}",
@@ -1204,7 +1204,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2493,
+      "line": 2508,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                setShowExitModal(false);\n                navigate(`/con",
