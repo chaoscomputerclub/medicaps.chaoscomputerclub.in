@@ -404,7 +404,7 @@ export function AssessmentWorkspacePage() {
                 if (window.opener) window.close();
                 else window.location.href = `/contests/${contestSlug}`;
               }}
-              className="w-full font-mono text-xs border-white/10 bg-black text-zinc-400 hover:text-white rounded-md"
+              className="w-full font-mono text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
             >
               Return to Contest Details
             </Button>
@@ -504,7 +504,7 @@ export function AssessmentWorkspacePage() {
             size="sm"
             variant="ghost"
             onClick={toggleFullscreen}
-            className="h-7 px-2 text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md"
+            className="h-7 px-2 text-xs font-mono bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullscreen ? <Minimize2 size={13} className="mr-1" /> : <Maximize2 size={13} className="mr-1" />}
@@ -517,9 +517,9 @@ export function AssessmentWorkspacePage() {
             variant="outline"
             disabled={isRunning || isSubmitting}
             onClick={handleRun}
-            className="h-7 px-2.5 gap-1 text-xs font-mono border-white/10 bg-black text-white hover:bg-zinc-950 hover:border-white/20 rounded-md"
+            className="h-7 px-2.5 gap-1 text-xs font-mono bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
           >
-            <Play size={12} className="text-lime-400 fill-lime-400" />
+            <Play size={12} className="fill-current" />
             <span>{isRunning ? "Testing..." : "Run"}</span>
           </Button>
 
@@ -539,7 +539,7 @@ export function AssessmentWorkspacePage() {
             size="sm"
             variant="ghost"
             onClick={handleExitWindow}
-            className="h-7 px-2 text-[11px] font-mono text-zinc-500 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md"
+            className="h-7 px-2 text-[11px] font-mono bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
           >
             <X size={12} className="mr-1" />
             <span className="hidden sm:inline">Exit</span>

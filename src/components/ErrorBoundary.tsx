@@ -137,9 +137,9 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
 
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={this.handleCopyDiagnostic}
-                className="border border-white/10 hover:border-white/20 text-zinc-400 hover:text-white font-mono text-xs uppercase rounded-none h-10 px-3 cursor-pointer flex items-center gap-1.5 ml-auto transition-colors"
+                className="bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 ml-auto transition-colors [&_svg]:transition-colors"
               >
                 {this.state.copied ? (
                   <>

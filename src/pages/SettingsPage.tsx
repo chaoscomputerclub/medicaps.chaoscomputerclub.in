@@ -487,7 +487,7 @@ export function SettingsPage() {
           asChild
           variant="outline"
           size="sm"
-          className="hidden sm:flex text-xs border-white/10 bg-black hover:bg-zinc-950 text-zinc-300 hover:text-white rounded-md gap-1.5 font-sans"
+          className="hidden sm:flex text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md gap-1.5 font-sans transition-colors [&_svg]:transition-colors"
         >
           <Link to="/profile">
             View profile
@@ -928,7 +928,7 @@ export function SettingsPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleExport}
-                    className="text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 hover:text-white rounded-md gap-1.5 cursor-pointer"
+                    className="text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md gap-1.5 cursor-pointer transition-colors [&_svg]:transition-colors"
                   >
                     <Download size={13} />
                     Export
@@ -1039,7 +1039,7 @@ export function SettingsPage() {
                       Each contest you participate in generates a cryptographic proof sealed with your Enrollment Number and timestamp.
                       These certificates are permanently anchored to your institutional identity and cannot be revoked or altered.
                     </p>
-                    <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 rounded-md gap-1.5 cursor-pointer">
+                    <Button asChild variant="outline" size="sm" className="mt-3 text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md gap-1.5 cursor-pointer transition-colors [&_svg]:transition-colors">
                       <Link to="/verify">
                         View my proof certificates
                         <ChevronRight size={12} />

@@ -283,14 +283,14 @@ export function ContestArenaPage() {
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
                 variant="outline"
-                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white"
+                className="w-full rounded-md font-mono text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
               >
                 <RotateCcw className="mr-1.5 size-3" /> Re-check Status
               </Button>
               <Button
                 asChild
-                variant="ghost"
-                className="rounded-md font-mono text-xs text-zinc-500 hover:text-white"
+                variant="outline"
+                className="rounded-md font-mono text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
               >
                 <Link to={`/contests/${contestSlug}`}>
                   Exit Lobby
@@ -312,9 +312,9 @@ export function ContestArenaPage() {
         <div className="flex items-center gap-3 min-w-0">
           <Button
             asChild
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs"
+            className="h-7 px-2 bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs transition-colors [&_svg]:transition-colors"
           >
             <Link to={`/contests/${contestSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
@@ -357,10 +357,10 @@ export function ContestArenaPage() {
             asChild
             variant="outline"
             size="sm"
-            className="hidden sm:flex h-7 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:text-white rounded-md"
+            className="hidden sm:flex h-7 text-xs font-mono bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
           >
             <Link to={`/contests/${contestSlug}/results`} target="_blank">
-              <Trophy className="size-3 mr-1 text-lime-400" />
+              <Trophy className="size-3 mr-1" />
               Scoreboard
             </Link>
           </Button>
@@ -368,7 +368,7 @@ export function ContestArenaPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-7 text-zinc-400 hover:text-white rounded-md hover:bg-zinc-950"
+            className="size-7 bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
@@ -425,7 +425,7 @@ export function ContestArenaPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-1.5 text-xs font-mono text-zinc-500 hover:text-white rounded-md hover:bg-zinc-950"
+            className="h-6 px-1.5 text-xs font-mono bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
             onClick={handleResetStarter}
           >
             <RotateCcw className="size-2.5 mr-1" /> Reset
@@ -733,9 +733,9 @@ export function ContestArenaPage() {
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleRunCode}
-                  className="font-mono text-xs rounded-md border-white/10 bg-black text-white hover:bg-zinc-950 disabled:opacity-30"
+                  className="font-mono text-xs rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 transition-colors [&_svg]:transition-colors"
                 >
-                  <Play className="size-3 mr-1 text-lime-400" />
+                  <Play className="size-3 mr-1" />
                   {isRunningCode ? "Running…" : "Run"}
                 </Button>
 

@@ -178,7 +178,7 @@ export function ContestFinalResultsPage() {
       )}
 
       <div className="pt-2">
-        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
+        <Button asChild variant="outline" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
           <Link to={`/contests/${contestSlug}`}>Back to Contest Details</Link>
         </Button>
       </div>

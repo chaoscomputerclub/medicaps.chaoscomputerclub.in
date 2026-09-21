@@ -240,7 +240,7 @@ export function LeaderboardPage() {
                 onClick={handlePrevPage}
                 disabled={pageIndex === 0}
                 aria-label="Previous page"
-                className="flex size-7 items-center justify-center rounded-md border border-white/8 bg-black text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                className="flex size-7 items-center justify-center rounded-md border border-white/20 bg-transparent text-white transition-colors hover:border-lime-400 hover:bg-lime-400 hover:text-black disabled:pointer-events-none disabled:opacity-30 [&_svg]:transition-colors"
               >
                 <ChevronLeft className="size-3.5" />
               </button>
@@ -253,7 +253,7 @@ export function LeaderboardPage() {
                 onClick={handleNextPage}
                 disabled={pageIndex >= totalPages - 1}
                 aria-label="Next page"
-                className="flex size-7 items-center justify-center rounded-md border border-white/8 bg-black text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                className="flex size-7 items-center justify-center rounded-md border border-white/20 bg-transparent text-white transition-colors hover:border-lime-400 hover:bg-lime-400 hover:text-black disabled:pointer-events-none disabled:opacity-30 [&_svg]:transition-colors"
               >
                 <ChevronRight className="size-3.5" />
               </button>
