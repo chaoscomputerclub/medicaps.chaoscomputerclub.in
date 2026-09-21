@@ -45,6 +45,7 @@ import {
 } from "@/store/slices/contestSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
+import { slugifyProblem } from "@/lib/utils";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -55,10 +56,11 @@ function formatTimer(totalSeconds: number): string {
 }
 
 export function ContestArenaPage() {
-  const { contestSlug = "" } = useParams<{ contestSlug: string }>();
+  const { contestSlug = "", problemSlug = "" } = useParams<{ contestSlug: string; problemSlug?: string }>();
   const [searchParams] = useSearchParams();
   const problemParam = searchParams.get("problem");
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena } =
     useAppSelector((state) => state.contest);
@@ -73,11 +75,29 @@ export function ContestArenaPage() {
   }, [contestSlug, dispatch]);
 
   const problems = arenaData?.problems || [];
-  const initialIndex = problemParam
-    ? Math.max(0, problems.findIndex((p) => p.problem_index.toUpperCase() === problemParam.toUpperCase()))
-    : 0;
 
-  const [activeIndex, setActiveIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
+  // LeetCode-style URL problem resolution
+  const activeIndex = problems.findIndex((p) => {
+    if (!problemSlug) return false;
+    const clean = problemSlug.toLowerCase();
+    return (
+      slugifyProblem(p.title, p.problem_index) === clean ||
+      p.problem_index.toLowerCase() === clean ||
+      p.id.toLowerCase() === clean ||
+      (problemParam && p.problem_index.toUpperCase() === problemParam.toUpperCase())
+    );
+  });
+  const resolvedIndex = activeIndex >= 0 ? activeIndex : 0;
+  const activeProblem = problems[resolvedIndex] || problems[0];
+
+  // Auto-redirect to first problem's slug if URL is generic /arena or /problems
+  useEffect(() => {
+    if (problems.length > 0 && !problemSlug && contestSlug) {
+      const firstSlug = slugifyProblem(problems[0].title, problems[0].problem_index);
+      navigate(`/contests/${contestSlug}/problems/${firstSlug}`, { replace: true });
+    }
+  }, [problems, problemSlug, contestSlug, navigate]);
+
   const [selectedLanguage, setSelectedLanguage] = useState<"python" | "cpp" | "javascript">("python");
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
   const [customStdin, setCustomStdin] = useState("");
@@ -85,9 +105,15 @@ export function ContestArenaPage() {
   const [activeTestcaseIndex, setActiveTestcaseIndex] = useState(0);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(new Set());
+  const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`ccc_solved_${contestSlug}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
 
-  const navigate = useNavigate();
   const contestOverRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sync remaining contest clock
@@ -138,11 +164,17 @@ export function ContestArenaPage() {
     return () => clearInterval(tick);
   }, [remainingSeconds, isContestOver, contestSlug, navigate]);
 
-  const activeProblem = problems[activeIndex] || problems[0];
   const problemKey = `${activeProblem?.id || "p"}_${selectedLanguage}`;
+  const problemStorageKey = activeProblem
+    ? `ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
+    : "";
 
+  // Load durable code from state, localStorage, or starter template
   const currentCode =
     codeMap[problemKey] ??
+    (problemStorageKey && typeof window !== "undefined"
+      ? localStorage.getItem(problemStorageKey)
+      : null) ??
     activeProblem?.starter_codes?.[selectedLanguage] ??
     (selectedLanguage === "python"
       ? "# Write your solution here\nimport sys\n\ndef main():\n    pass\n\nif __name__ == '__main__':\n    main()\n"
@@ -152,6 +184,11 @@ export function ContestArenaPage() {
 
   const handleCodeChange = (newCode: string) => {
     setCodeMap((prev) => ({ ...prev, [problemKey]: newCode }));
+    if (problemStorageKey && typeof window !== "undefined") {
+      try {
+        localStorage.setItem(problemStorageKey, newCode);
+      } catch {}
+    }
   };
 
   const handleResetStarter = () => {
@@ -163,6 +200,11 @@ export function ContestArenaPage() {
           ? "#include <iostream>\nusing namespace std;\n\nint main() {\n    return 0;\n}\n"
           : "const fs = require('fs');\n// Write your solution here\n");
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
+    if (problemStorageKey && typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(problemStorageKey);
+      } catch {}
+    }
     toast.info("Reset code to official template.");
   };
 
@@ -213,7 +255,13 @@ export function ContestArenaPage() {
     if (submitArenaCodeThunk.fulfilled.match(result)) {
       const res = result.payload;
       if (res.verdict === "ACCEPTED") {
-        setSolvedProblemIds((prev) => new Set([...prev, activeProblem.id]));
+        setSolvedProblemIds((prev) => {
+          const next = new Set([...prev, activeProblem.id]);
+          try {
+            localStorage.setItem(`ccc_solved_${contestSlug}`, JSON.stringify(Array.from(next)));
+          } catch {}
+          return next;
+        });
         toast.success(`Problem ${activeProblem.problem_index} Solved! +${res.points_awarded} pts`);
       } else {
         toast.error(`Verdict: ${res.verdict} (${res.passed_testcases}/${res.total_testcases} passed)`);
@@ -314,7 +362,7 @@ export function ContestArenaPage() {
         <div className="flex items-center gap-3 min-w-0">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => {
               if (window.opener) {
@@ -323,7 +371,7 @@ export function ContestArenaPage() {
                 navigate(`/contests/${contestSlug}`);
               }
             }}
-            className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs cursor-pointer flex items-center"
+            className="h-7 px-2.5 text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center transition-colors"
           >
             <ArrowLeft className="size-3.5" />
             <span>Exit</span>
@@ -333,7 +381,7 @@ export function ContestArenaPage() {
 
           <div className="flex items-center gap-2 min-w-0">
             <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 hidden sm:inline">
-              Final Arena
+              Live Contest Arena
             </span>
             <h1 className="text-xs font-semibold tracking-tight text-white truncate max-w-[200px] md:max-w-[320px]">
               {title}
@@ -364,18 +412,18 @@ export function ContestArenaPage() {
             asChild
             variant="outline"
             size="sm"
-            className="hidden sm:flex h-7 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:text-white rounded-md"
+            className="hidden sm:flex h-7 px-2.5 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors"
           >
-            <Link to={`/contests/${contestSlug}/results`} target="_blank">
-              <Trophy className="size-3 mr-1 text-lime-400" />
-              Scoreboard
+            <Link to={`/contests/${contestSlug}/results`} target="_blank" rel="noopener noreferrer">
+              <Trophy className="size-3 text-lime-400" />
+              <span>Scoreboard</span>
             </Link>
           </Button>
 
           <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 text-zinc-400 hover:text-white rounded-md hover:bg-zinc-950"
+            variant="outline"
+            size="sm"
+            className="size-7 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md border-white/10 bg-black transition-colors"
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
@@ -384,32 +432,34 @@ export function ContestArenaPage() {
         </div>
       </header>
 
-      {/* Problem Tabs Subheader (36px) */}
+      {/* Problem Tabs Subheader (36px) - LeetCode Style Problem Slugs */}
       <div className="h-9 shrink-0 px-4 bg-black border-b border-white/8 flex items-center justify-between gap-2 overflow-x-auto">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {problems.map((prob, idx) => {
-            const isActive = idx === activeIndex;
+            const pSlug = slugifyProblem(prob.title, prob.problem_index);
+            const isActive = idx === resolvedIndex;
             const isSolved = solvedProblemIds.has(prob.id);
             return (
-              <button
+              <Link
                 key={prob.id}
-                type="button"
-                onClick={() => {
-                  setActiveIndex(idx);
-                  dispatch(clearArenaResults());
-                }}
-                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded transition-colors cursor-pointer border ${
+                to={`/contests/${contestSlug}/problems/${pSlug}`}
+                onClick={() => dispatch(clearArenaResults())}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer border ${
                   isActive
-                    ? "bg-zinc-900 text-white border-lime-400/40 font-semibold"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-950 border-transparent"
+                    ? "bg-zinc-900 text-white border-lime-400 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
+                    : "text-zinc-400 hover:text-black hover:bg-lime-400 hover:border-lime-400 border-white/6 bg-black"
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>
-                <span className="text-[10px] px-1 py-0.2 rounded font-mono uppercase bg-zinc-950 text-zinc-500">
+                <span
+                  className={`text-[10px] px-1 py-0.2 rounded font-mono uppercase tabular-nums ${
+                    isActive ? "bg-black text-lime-400 font-semibold" : "bg-zinc-950 text-zinc-500"
+                  }`}
+                >
                   {prob.points}p
                 </span>
-                {isSolved && <BadgeCheck className="size-3 text-lime-400" />}
-              </button>
+                {isSolved && <CheckCircle2 className="size-3 text-lime-400" />}
+              </Link>
             );
           })}
         </div>
@@ -419,10 +469,10 @@ export function ContestArenaPage() {
             value={selectedLanguage}
             onValueChange={(val: any) => setSelectedLanguage(val)}
           >
-            <SelectTrigger className="h-6 w-[110px] text-xs font-mono bg-black border-white/10 text-zinc-300 rounded-md focus:ring-0">
+            <SelectTrigger className="h-6 w-[120px] text-xs font-mono bg-black border-white/15 text-zinc-200 hover:border-lime-400/60 rounded-md focus:ring-1 focus:ring-lime-400">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-black border-white/10 text-white font-mono text-xs rounded-md">
+            <SelectContent className="bg-black border-white/15 text-white font-mono text-xs rounded-md">
               <SelectItem value="python">Python 3.12</SelectItem>
               <SelectItem value="cpp">C++ (GCC 14)</SelectItem>
               <SelectItem value="javascript">JavaScript</SelectItem>
@@ -430,12 +480,14 @@ export function ContestArenaPage() {
           </Select>
 
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-6 px-1.5 text-xs font-mono text-zinc-500 hover:text-white rounded-md hover:bg-zinc-950"
+            className="h-6 px-2 text-xs font-mono border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors cursor-pointer"
             onClick={handleResetStarter}
+            title="Reset to official starter code"
           >
-            <RotateCcw className="size-2.5 mr-1" /> Reset
+            <RotateCcw className="size-2.5" />
+            <span>Reset</span>
           </Button>
         </div>
       </div>
@@ -736,23 +788,25 @@ export function ContestArenaPage() {
 
               <div className="flex items-center gap-2">
                 <Button
+                  type="button"
                   variant="outline"
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleRunCode}
-                  className="font-mono text-xs rounded-md border-white/10 bg-black text-white hover:bg-zinc-950 disabled:opacity-30"
+                  className="font-mono text-xs font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors"
                 >
-                  <Play className="size-3 text-lime-400" />
+                  <Play className="size-3 fill-current" />
                   <span>{isRunningCode ? "Running…" : "Run"}</span>
                 </Button>
 
                 <Button
+                  type="button"
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleSubmitCode}
-                  className="font-mono text-xs font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 transition-colors [&_svg]:transition-colors"
+                  className="font-mono text-xs font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)]"
                 >
-                  <Send className="size-3" />
+                  <Send className="size-3 fill-current" />
                   <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
                 </Button>
               </div>

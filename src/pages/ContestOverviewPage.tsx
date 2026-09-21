@@ -25,6 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
+import { slugifyProblem } from "@/lib/utils";
 
 function useCountdown(targetIsoDate: string | null | undefined) {
   const [timeLeft, setTimeLeft] = useState<{
@@ -422,7 +423,7 @@ export function ContestOverviewPage() {
                           size="sm"
                           className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
                         >
-                          <Link to={`/contests/${contestSlug}/arena`}>
+                          <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
                             Solve →
                           </Link>
                         </Button>

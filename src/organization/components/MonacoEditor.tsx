@@ -7,14 +7,18 @@
 
 import { memo, useRef, useCallback } from "react";
 import Editor, { type OnMount, type OnChange, loader } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
 
-// Point Monaco's loader at the locally bundled workers (served from /monacoeditorwork/)
-// This eliminates the CDN fetch of monaco-editor@0.50.0 (~28 MB, 60+ requests)
-loader.config({
-  paths: {
-    vs: "/monacoeditorwork/vs",
-  },
-});
+// Wire Monaco to use locally bundled worker from vite-plugin-monaco-editor
+if (typeof window !== "undefined") {
+  (window as any).MonacoEnvironment = {
+    getWorkerUrl: function (_moduleId: any, _label: string) {
+      return "/monacoeditorwork/editor.worker.bundle.js";
+    },
+  };
+}
+
+loader.config({ monaco });
 
 const LANG_TO_MONACO: Record<string, string> = {
   python: "python",

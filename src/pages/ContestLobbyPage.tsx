@@ -339,7 +339,7 @@ export function ContestLobbyPage() {
                   size="lg"
                   className="rounded-md bg-transparent text-amber-400 border border-amber-400 font-mono text-xs font-semibold hover:bg-amber-400 hover:text-black transition-colors cursor-pointer"
                 >
-                  <Link to={`/contests/${contestSlug}/arena`}>
+                  <Link to={`/contests/${contestSlug}/problems`}>
                     <Play className="size-3.5 fill-current" />
                     <span>Resume Contest</span>
                   </Link>
@@ -372,7 +372,7 @@ export function ContestLobbyPage() {
                   className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 disabled:pointer-events-none transition-colors [&_svg]:transition-colors cursor-pointer"
                 >
                   {ack && canStart ? (
-                    <Link to={`/contests/${contestSlug}/arena`}>
+                    <Link to={`/contests/${contestSlug}/problems`}>
                       <Play className="size-3.5 fill-current" />
                       <span>Start Contest</span>
                     </Link>

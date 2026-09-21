@@ -28,6 +28,7 @@ import {
   fetchCampusPassThunk,
   checkInContestThunk,
 } from "@/store/slices/contestSlice";
+import { slugifyProblem } from "@/lib/utils";
 import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
 
 export function ContestOfflinePage() {
@@ -225,9 +226,10 @@ export function ContestOfflinePage() {
           <h2 className="font-mono text-xs uppercase tracking-wider text-zinc-400">
             Final Problem Set
           </h2>
-          <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
-            <Link to={`/contests/${contestSlug}/arena`}>
-              <Play className="size-3 mr-1 text-lime-400" /> Open in Arena
+          <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
+            <Link to={`/contests/${contestSlug}/problems`}>
+              <Play className="size-3 text-lime-400" />
+              <span>Open in Arena</span>
             </Link>
           </Button>
         </div>
@@ -259,7 +261,7 @@ export function ContestOfflinePage() {
                     <TableCell className="text-right font-mono text-xs tabular-nums text-lime-400">{problem.points}</TableCell>
                     <TableCell className="text-right">
                       <Link
-                        to={`/contests/${contestSlug}/arena?problem=${problem.problem_index}`}
+                        to={`/contests/${contestSlug}/problems/${slugifyProblem(problem.title, problem.problem_index)}`}
                         className="font-mono text-xs text-lime-400 hover:underline"
                       >
                         Solve →

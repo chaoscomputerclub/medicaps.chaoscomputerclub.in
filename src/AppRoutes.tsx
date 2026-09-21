@@ -68,6 +68,8 @@ export function AppRoutes() {
             <Route path="contests" element={<ContestsHubPage />} />
             <Route path="contests/:contestSlug" element={<ContestOverviewPage />} />
             <Route path="contests/:contestSlug/lobby" element={<ContestLobbyPage />} />
+            <Route path="contests/:contestSlug/problems/:problemSlug" element={<ContestArenaPage />} />
+            <Route path="contests/:contestSlug/problems" element={<ContestArenaPage />} />
             <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
             <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
             <Route path="contests/:contestSlug/offline" element={<ContestRedirect />} />

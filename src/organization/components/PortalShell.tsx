@@ -117,7 +117,8 @@ export function PortalShell() {
   const isFullscreenWorkspace =
     cleanPath.includes("/assessment") ||
     cleanPath.includes("/arena") ||
-    cleanPath.includes("/lobby");
+    cleanPath.includes("/lobby") ||
+    (cleanPath.includes("/contests/") && cleanPath.includes("/problems"));
 
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});

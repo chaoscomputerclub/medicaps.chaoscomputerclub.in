@@ -62,3 +62,21 @@ export function resolveAvatarUrl(url?: string | null): string | undefined {
   }
   return trimmed;
 }
+
+/**
+ * Converts a problem title into a URL-friendly slug (e.g. "Campus Pass String Validator" -> "campus-pass-string-validator").
+ */
+export function slugifyProblem(title?: string | null, index?: string | null): string {
+  if (title) {
+    const slug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    if (slug) return slug;
+  }
+  if (index) {
+    return `problem-${index.toLowerCase().trim()}`;
+  }
+  return "problem-a";
+}
