@@ -68,12 +68,15 @@ export function ContestLobbyPage() {
     );
   }
 
+  const isDevBypass = Boolean(resolvedRegistration?.is_dev_bypass || contestSlug.startsWith("dev-"));
+  const durationMinutes = resolvedContest?.assessment?.duration_minutes || 90;
   const phase = contestPhase(resolvedContest, resolvedRegistration ?? null);
   const isInProgress = Boolean(
     resolvedRegistration?.can_resume_assessment ||
     (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
   );
   const isAssessmentSubmitted = Boolean(
+    !isDevBypass &&
     !isInProgress && (
       phase === "assessment_submitted" ||
       resolvedRegistration?.assessment_taken ||
@@ -81,7 +84,6 @@ export function ContestLobbyPage() {
     )
   );
   const opensAt = assessmentOpensAt(resolvedContest);
-  const isDevBypass = Boolean(resolvedRegistration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const notYetOpen = phase === "registration_open" && !isDevBypass;
   const canStart =
     !isAssessmentSubmitted &&
@@ -110,7 +112,7 @@ export function ContestLobbyPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Round 1 · Assessment Concluded
+                Contest Concluded
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -118,11 +120,11 @@ export function ContestLobbyPage() {
                 <CheckCircle2 className="size-5 text-emerald-400" />
               </div>
               <h1 className="text-xl font-semibold text-white tracking-tight font-sans">
-                Assessment Submitted
+                Contest Solutions Submitted
               </h1>
             </div>
             <p className="text-xs font-mono text-zinc-400 leading-relaxed">
-              Your test session has concluded and your scores are safely recorded. Standings will update automatically as evaluations finish.
+              Your contest submissions have concluded and your scores are safely recorded. Standings and ratings will update automatically as evaluations finish.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -132,8 +134,19 @@ export function ContestLobbyPage() {
             >
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
-              <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (window.opener) {
+                  window.close();
+                } else {
+                  navigate(`/contests/${contestSlug}`);
+                }
+              }}
+              className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white cursor-pointer"
+            >
+              Contest Overview
             </Button>
           </div>
         </div>
@@ -143,7 +156,7 @@ export function ContestLobbyPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Round 1 · Slot Required
+                Contest Registration Required
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -155,7 +168,7 @@ export function ContestLobbyPage() {
               </h1>
             </div>
             <p className="text-xs font-mono text-zinc-400 leading-relaxed">
-              You must register for this tournament round before accessing the proctored assessment terminal.
+              You must register for this tournament round before accessing the live contest arena.
             </p>
           </div>
           <Button asChild className="rounded-md font-mono text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
@@ -190,7 +203,7 @@ export function ContestLobbyPage() {
               </div>
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Duration:</span>
-                <span className="text-white font-semibold">{ASSESSMENT_DURATION_MINUTES} Minutes</span>
+                <span className="text-white font-semibold">{durationMinutes} Minutes</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400 border-t border-white/6 pt-2">
                 <span>Access:</span>
@@ -253,7 +266,7 @@ export function ContestLobbyPage() {
             {[
               {
                 label: "Time Limit",
-                value: `${ASSESSMENT_DURATION_MINUTES} min`,
+                value: `${durationMinutes} min`,
                 sub: "Continuous timer",
               },
               { label: "Attempt", value: "Single", sub: "Cannot pause or reset" },
@@ -282,7 +295,7 @@ export function ContestLobbyPage() {
               <li className="flex items-start gap-2.5">
                 <span className="text-lime-400 font-semibold shrink-0">01.</span>
                 <span>
-                  <strong className="text-white">Continuous Timer:</strong> Once launched, the {ASSESSMENT_DURATION_MINUTES}-minute countdown runs server-side and auto-submits at 00:00.
+                  <strong className="text-white">Continuous Timer:</strong> Once launched, the {durationMinutes}-minute countdown runs server-side and auto-submits at 00:00.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
@@ -346,7 +359,7 @@ export function ContestLobbyPage() {
                   className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-black text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400 cursor-pointer"
                 />
                 <span className="text-xs font-mono text-zinc-300 leading-relaxed">
-                  I understand that this is my single continuous attempt. The {ASSESSMENT_DURATION_MINUTES}-minute clock begins immediately and auto-submits on completion.
+                  I understand that this is my official competition attempt. The {durationMinutes}-minute contest clock begins immediately upon launching the arena.
                 </span>
               </label>
 
@@ -385,7 +398,7 @@ export function ContestLobbyPage() {
 
               {!canStart && !notYetOpen && (
                 <p className="font-mono text-xs text-amber-400">
-                  {resolvedRegistration?.eligibility_message ?? "Assessment is currently closed."}
+                  {resolvedRegistration?.eligibility_message ?? "Contest arena is currently closed."}
                 </p>
               )}
             </div>
