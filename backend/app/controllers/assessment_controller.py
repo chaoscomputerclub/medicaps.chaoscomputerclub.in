@@ -15,6 +15,7 @@ from app.models.db_models import (
     AssessmentSubmission,
     ContestRegistration,
     MemberProfile,
+    ScoreboardEntry,
     now_utc,
 )
 from app.engine.enums import ComparisonMode, Language
