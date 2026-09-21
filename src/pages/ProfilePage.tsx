@@ -338,7 +338,7 @@ export function ProfilePage() {
                     onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
                     disabled={isUploadingAvatar}
                     size="sm"
-                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-black bg-lime-400 hover:bg-lime-300 rounded-md font-semibold"
+                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-lime-400 bg-transparent border border-lime-400 hover:bg-lime-400 hover:text-black rounded-md font-semibold transition-colors"
                   >
                     {isUploadingAvatar ? <Loader2 size={11} className="animate-spin" /> : <Camera size={11} />}
                     <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
@@ -353,6 +353,7 @@ export function ProfilePage() {
                       className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-zinc-400 hover:text-white border-white/10 bg-black rounded-md"
                     >
                       <Trash2 size={10} />
+                      <span>Remove</span>
                     </Button>
                   )}
 
@@ -378,7 +379,7 @@ export function ProfilePage() {
                       "h-7 inline-flex items-center gap-1.5 px-3 font-mono text-xs rounded-md transition-colors",
                       isFollowing
                         ? "bg-black text-zinc-300 border border-white/10 hover:text-white"
-                        : "bg-lime-400 text-black hover:bg-lime-300 font-semibold"
+                        : "bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-semibold"
                     )}
                   >
                     {isFollowing ? (

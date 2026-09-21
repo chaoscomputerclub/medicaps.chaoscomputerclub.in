@@ -1,10 +1,10 @@
 # 🛡️ CCC Medi-Caps — Production API QA Audit Report
 
-> **Audit ID**: `QA-20260921-105053`  
-> **Timestamp (UTC)**: `2026-09-21T10:50:53.487221+00:00`  
+> **Audit ID**: `QA-20260921-110517`  
+> **Timestamp (UTC)**: `2026-09-21T11:05:17.701766+00:00`  
 > **Target Base URL**: `http://testserver`  
 > **Overall Success Rate**: **`100.0%`** (51/51 Tests Passed)  
-> **Total Execution Latency**: `372.53ms`  
+> **Total Execution Latency**: `368.57ms`  
 
 ---
 
@@ -12,19 +12,19 @@
 
 | Category | Total | Passed | Failed | Success Rate | Avg Latency |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| 🟢 **System & Health** | 1 | 1 | 0 | **100.0%** | 33.78ms |
-| 🟢 **Authentication** | 12 | 12 | 0 | **100.0%** | 3.22ms |
-| 🟢 **Contests** | 4 | 4 | 0 | **100.0%** | 5.03ms |
-| 🟢 **Leaderboards & Ratings** | 4 | 4 | 0 | **100.0%** | 2.34ms |
-| 🟢 **Scoreboards** | 2 | 2 | 0 | **100.0%** | 2.16ms |
-| 🟢 **Trust of Proof** | 2 | 2 | 0 | **100.0%** | 2.72ms |
-| 🟢 **Campus Passes** | 2 | 2 | 0 | **100.0%** | 3.93ms |
-| 🟢 **Campus Feed** | 2 | 2 | 0 | **100.0%** | 3.45ms |
-| 🟢 **Social & OG** | 9 | 9 | 0 | **100.0%** | 3.85ms |
-| 🟢 **Versioned v1 Gateway** | 3 | 3 | 0 | **100.0%** | 10.99ms |
-| 🟢 **Dynamic Contest Engine** | 7 | 7 | 0 | **100.0%** | 5.84ms |
-| 🟢 **Assessment Service** | 1 | 1 | 0 | **100.0%** | 5.65ms |
-| 🟢 **Validation & Edge Cases** | 2 | 2 | 0 | **100.0%** | 2.08ms |
+| 🟢 **System & Health** | 1 | 1 | 0 | **100.0%** | 34.49ms |
+| 🟢 **Authentication** | 12 | 12 | 0 | **100.0%** | 3.53ms |
+| 🟢 **Contests** | 4 | 4 | 0 | **100.0%** | 5.46ms |
+| 🟢 **Leaderboards & Ratings** | 4 | 4 | 0 | **100.0%** | 2.41ms |
+| 🟢 **Scoreboards** | 2 | 2 | 0 | **100.0%** | 1.94ms |
+| 🟢 **Trust of Proof** | 2 | 2 | 0 | **100.0%** | 2.58ms |
+| 🟢 **Campus Passes** | 2 | 2 | 0 | **100.0%** | 3.47ms |
+| 🟢 **Campus Feed** | 2 | 2 | 0 | **100.0%** | 2.48ms |
+| 🟢 **Social & OG** | 9 | 9 | 0 | **100.0%** | 3.69ms |
+| 🟢 **Versioned v1 Gateway** | 3 | 3 | 0 | **100.0%** | 10.78ms |
+| 🟢 **Dynamic Contest Engine** | 7 | 7 | 0 | **100.0%** | 6.53ms |
+| 🟢 **Assessment Service** | 1 | 1 | 0 | **100.0%** | 8.48ms |
+| 🟢 **Validation & Edge Cases** | 2 | 2 | 0 | **100.0%** | 1.26ms |
 
 ---
 
@@ -32,35 +32,35 @@
 
 ### ✅ PASS `[HEALTH-01]` Production Health Probe & Infrastructure Readiness
 - **Endpoint**: `GET /api/health`
-- **Category**: `System & Health` | **Latency**: `33.78ms`
+- **Category**: `System & Health` | **Latency**: `34.49ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['status', 'chapter', 'version', 'services']`
 - **Actual Response**: `Dict with keys: ['status', 'chapter', 'environment', 'version', 'services']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 33.78ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 34.49ms)
 
 ### ✅ PASS `[AUTH-01]` RSA 256 JWT Public Key Fetch
 - **Endpoint**: `GET /api/auth/jwt-public-key`
-- **Category**: `Authentication` | **Latency**: `4.29ms`
+- **Category**: `Authentication` | **Latency**: `4.4ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['algorithm', 'public_key']`
 - **Actual Response**: `Dict with keys: ['algorithm', 'public_key']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.29ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.4ms)
 
 ### ✅ PASS `[AUTH-02]` Handle Availability Check (Available)
 - **Endpoint**: `GET /api/auth/check-handle?handle=qa_cadet_unique_99`
-- **Category**: `Authentication` | **Latency**: `1.68ms`
+- **Category**: `Authentication` | **Latency**: `2.07ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['available', 'handle']`
 - **Actual Response**: `Dict with keys: ['available', 'handle']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.68ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.07ms)
 
 ### ✅ PASS `[AUTH-03]` Non-Medi-Caps Email Rejection
 - **Endpoint**: `POST /api/auth/send-otp`
-- **Category**: `Authentication` | **Latency**: `0.88ms`
+- **Category**: `Authentication` | **Latency**: `1.34ms`
 - **Expected Status**: `HTTP [400, 422]` ➔ **Actual Status**: `HTTP 422`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 0.88ms)
+- **Assertion Result**: ✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 1.34ms)
 ```json
 // Request Body
 {
@@ -70,171 +70,171 @@
 
 ### ✅ PASS `[AUTH-04]` Taken Handle Availability Check
 - **Endpoint**: `GET /api/auth/check-handle?handle=admin`
-- **Category**: `Authentication` | **Latency**: `1.07ms`
+- **Category**: `Authentication` | **Latency**: `1.85ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['available', 'handle']`
 - **Actual Response**: `Dict with keys: ['available', 'handle']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.07ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.85ms)
 
 ### ✅ PASS `[AUTH-05]` Unauthenticated Profile Access (401 Rejection)
 - **Endpoint**: `GET /api/auth/me`
-- **Category**: `Authentication` | **Latency**: `0.85ms`
+- **Category**: `Authentication` | **Latency**: `0.88ms`
 - **Expected Status**: `HTTP 401` ➔ **Actual Status**: `HTTP 401`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.85ms)
+- **Assertion Result**: ✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.88ms)
 
 ### ✅ PASS `[AUTH-06]` Authenticated Member Profile Fetch (/me)
 - **Endpoint**: `GET /api/auth/me`
-- **Category**: `Authentication` | **Latency**: `10.56ms`
+- **Category**: `Authentication` | **Latency**: `9.43ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['member', 'campusPass', 'ratingHistory']`
 - **Actual Response**: `Dict with keys: ['member', 'campusPass', 'ratingHistory', 'recentBattles', 'achievements', 'proofs']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 10.56ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 9.43ms)
 
 ### ✅ PASS `[AUTH-07]` Student Public Profile View (/profile/{handle})
 - **Endpoint**: `GET /api/auth/profile/qa_organizer`
-- **Category**: `Authentication` | **Latency**: `9.86ms`
+- **Category**: `Authentication` | **Latency**: `11.81ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['member', 'ratingHistory', 'problemStats', 'submissionCalendar']`
 - **Actual Response**: `Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 9.86ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 11.81ms)
 
 ### ✅ PASS `[AUTH-08]` Student Public Profile View Alias (/users/{handle})
 - **Endpoint**: `GET /api/auth/users/qa_organizer`
-- **Category**: `Authentication` | **Latency**: `1.8ms`
+- **Category**: `Authentication` | **Latency**: `2.09ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['member', 'ratingHistory', 'problemStats']`
 - **Actual Response**: `Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.8ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 2.09ms)
 
 ### ✅ PASS `[AUTH-09]` Authenticated Full Profile Alias (/profile/full)
 - **Endpoint**: `GET /api/auth/profile/full`
-- **Category**: `Authentication` | **Latency**: `1.35ms`
+- **Category**: `Authentication` | **Latency**: `1.5ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['member', 'campusPass']`
 - **Actual Response**: `Dict with keys: ['member', 'campusPass', 'ratingHistory', 'recentBattles', 'achievements', 'proofs']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.35ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.5ms)
 
 ### ✅ PASS `[AUTH-10]` Student Public Profile View with Leading @ (/profile/@{handle})
 - **Endpoint**: `GET /api/auth/profile/@qa_organizer`
-- **Category**: `Authentication` | **Latency**: `1.61ms`
+- **Category**: `Authentication` | **Latency**: `1.69ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['member', 'ratingHistory', 'problemStats']`
 - **Actual Response**: `Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.61ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.69ms)
 
 ### ✅ PASS `[AUTH-11]` Non-Existent Cadet Profile 404 Assertion
 - **Endpoint**: `GET /api/auth/profile/non_existent_cadet_99999`
-- **Category**: `Authentication` | **Latency**: `0.94ms`
+- **Category**: `Authentication` | **Latency**: `1.09ms`
 - **Expected Status**: `HTTP 404` ➔ **Actual Status**: `HTTP 404`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 0.94ms)
+- **Assertion Result**: ✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.09ms)
 
 ### ✅ PASS `[AUTH-12]` Student Profile Deep Metric Schema Verification
 - **Endpoint**: `GET /api/auth/profile/qa_organizer`
-- **Category**: `Authentication` | **Latency**: `3.77ms`
+- **Category**: `Authentication` | **Latency**: `4.23ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['member', 'problemStats', 'ratingHistory', 'recentBattles']`
 - **Actual Response**: `Dict with keys: ['member', 'ratingHistory', 'recentBattles', 'problemStats', 'submissionCalendar', 'proofs', 'achievements']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 3.77ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 4.23ms)
 
 ### ✅ PASS `[CONTEST-01]` List Official Campus Contests
 - **Endpoint**: `GET /api/contests` `[Cache: MISS]`
-- **Category**: `Contests` | **Latency**: `13.25ms`
+- **Category**: `Contests` | **Latency**: `15.07ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['id', 'title', 'slug', 'status', 'starts_at', 'ends_at', 'division', 'seat_capacity']`
 - **Actual Response**: `List [1 items]. First item keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 8 schema keys verified in list items (Latency: 13.25ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 8 schema keys verified in list items (Latency: 15.07ms)
 
 ### ✅ PASS `[CONTEST-02]` Get Specific Contest Overview (weekly-contest-1)
 - **Endpoint**: `GET /api/contests/weekly-contest-1` `[Cache: MISS]`
-- **Category**: `Contests` | **Latency**: `2.84ms`
-- **Expected Status**: `HTTP [200, 404]` ➔ **Actual Status**: `HTTP 200`
-- **Expected Schema**: `Any valid response`
-- **Actual Response**: `Dict with keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.84ms)
-
-### ✅ PASS `[CONTEST-03]` Get Contest Problem Arena (weekly-contest-1)
-- **Endpoint**: `GET /api/contests/weekly-contest-1/problems` `[Cache: MISS]`
 - **Category**: `Contests` | **Latency**: `2.91ms`
 - **Expected Status**: `HTTP [200, 404]` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Any valid response`
-- **Actual Response**: `List [4 items]. First item keys: ['id', 'contest_id', 'problem_index', 'title', 'topic', 'points', 'solved_count', 'first_ac_seconds']`
+- **Actual Response**: `Dict with keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']`
 - **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.91ms)
+
+### ✅ PASS `[CONTEST-03]` Get Contest Problem Arena (weekly-contest-1)
+- **Endpoint**: `GET /api/contests/weekly-contest-1/problems` `[Cache: MISS]`
+- **Category**: `Contests` | **Latency**: `2.68ms`
+- **Expected Status**: `HTTP [200, 404]` ➔ **Actual Status**: `HTTP 200`
+- **Expected Schema**: `Any valid response`
+- **Actual Response**: `List [4 items]. First item keys: ['id', 'contest_id', 'problem_index', 'title', 'topic', 'points', 'solved_count', 'first_ac_seconds']`
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.68ms)
 
 ### ✅ PASS `[CONTEST-04]` Non-Existent Contest 404 Assertion
 - **Endpoint**: `GET /api/contests/invalid-contest-slug-nonexistent`
-- **Category**: `Contests` | **Latency**: `1.1ms`
+- **Category**: `Contests` | **Latency**: `1.17ms`
 - **Expected Status**: `HTTP 404` ➔ **Actual Status**: `HTTP 404`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.1ms)
+- **Assertion Result**: ✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.17ms)
 
 ### ✅ PASS `[LEADER-01]` University Overall Leaderboard Standings
 - **Endpoint**: `GET /api/leaderboard` `[Cache: MISS]`
-- **Category**: `Leaderboards & Ratings` | **Latency**: `4.67ms`
+- **Category**: `Leaderboards & Ratings` | **Latency**: `4.77ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['rank', 'handle', 'rating', 'department', 'tier', 'ratings']`
 - **Actual Response**: `List [2 items]. First item keys: ['id', 'avatar_url', 'rank', 'university_rank', 'previous_rank', 'handle', 'full_name', 'prn']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 6 schema keys verified in list items (Latency: 4.67ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 6 schema keys verified in list items (Latency: 4.77ms)
 
 ### ✅ PASS `[LEADER-02]` Departmental Aggregate Ratings
 - **Endpoint**: `GET /api/leaderboard/departments` `[Cache: MISS]`
-- **Category**: `Leaderboards & Ratings` | **Latency**: `1.81ms`
+- **Category**: `Leaderboards & Ratings` | **Latency**: `1.79ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['department', 'total_members', 'avg_rating', 'top_rating']`
 - **Actual Response**: `List [2 items]. First item keys: ['department', 'total_members', 'avg_rating', 'top_rating']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.81ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.79ms)
 
 ### ✅ PASS `[LEADER-03]` Rating Distribution Histogram
 - **Endpoint**: `GET /api/leaderboard/distribution` `[Cache: MISS]`
-- **Category**: `Leaderboards & Ratings` | **Latency**: `1.98ms`
+- **Category**: `Leaderboards & Ratings` | **Latency**: `2.29ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['total', 'buckets']`
 - **Actual Response**: `Dict with keys: ['total', 'buckets']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.98ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.29ms)
 
 ### ✅ PASS `[LEADER-04]` Rating Distribution Histogram Defensive Schema Assertion
 - **Endpoint**: `GET /api/leaderboard/distribution` `[Cache: HIT]`
-- **Category**: `Leaderboards & Ratings` | **Latency**: `0.9ms`
+- **Category**: `Leaderboards & Ratings` | **Latency**: `0.78ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['buckets']`
 - **Actual Response**: `Dict with keys: ['total', 'buckets']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 0.9ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 0.78ms)
 
 ### ✅ PASS `[SCORE-01]` Contest Scoreboard Matrix (weekly-contest-1)
 - **Endpoint**: `GET /api/scoreboards/weekly-contest-1` `[Cache: MISS]`
-- **Category**: `Scoreboards` | **Latency**: `2.25ms`
+- **Category**: `Scoreboards` | **Latency**: `2.11ms`
 - **Expected Status**: `HTTP [200, 404]` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Any valid response`
 - **Actual Response**: `List [0 items]. First item keys: primitive`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.25ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.11ms)
 
 ### ✅ PASS `[SCORE-02]` Contest Scoreboard Division Filtering (weekly-contest-1)
 - **Endpoint**: `GET /api/scoreboards/weekly-contest-1?division=division_1` `[Cache: MISS]`
-- **Category**: `Scoreboards` | **Latency**: `2.07ms`
+- **Category**: `Scoreboards` | **Latency**: `1.78ms`
 - **Expected Status**: `HTTP [200, 404]` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Any valid response`
 - **Actual Response**: `List [0 items]. First item keys: primitive`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.07ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 1.78ms)
 
 ### ✅ PASS `[PROOF-01]` List Cryptographic Trust Proofs
 - **Endpoint**: `GET /api/verify/proofs` `[Cache: MISS]`
-- **Category**: `Trust of Proof` | **Latency**: `3.84ms`
+- **Category**: `Trust of Proof` | **Latency**: `3.68ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['certificate_id', 'sha256_digest', 'issued_at', 'status']`
 - **Actual Response**: `List [0 items]. First item keys: primitive`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.84ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.68ms)
 
 ### ✅ PASS `[PROOF-02]` Tamper-Proof Verification Query (Invalid Token)
 - **Endpoint**: `POST /api/verify`
-- **Category**: `Trust of Proof` | **Latency**: `1.6ms`
+- **Category**: `Trust of Proof` | **Latency**: `1.47ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['is_valid', 'message']`
 - **Actual Response**: `Dict with keys: ['is_valid', 'proof', 'message']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.6ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.47ms)
 ```json
 // Request Body
 {
@@ -244,139 +244,139 @@
 
 ### ✅ PASS `[PASS-01]` List Contest Attendees for Proctors
 - **Endpoint**: `GET /api/passes/contest/weekly-contest-1/attendees`
-- **Category**: `Campus Passes` | **Latency**: `6.48ms`
+- **Category**: `Campus Passes` | **Latency**: `5.66ms`
 - **Expected Status**: `HTTP [200, 404]` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Any valid response`
 - **Actual Response**: `List [1 items]. First item keys: ['rank', 'handle', 'full_name', 'department', 'batch', 'seat_number', 'pass_code', 'check_in_status']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 6.48ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 5.66ms)
 
 ### ✅ PASS `[PASS-02]` Invalid Pass Code Lookup (404)
 - **Endpoint**: `GET /api/passes/INVALID_PASS_9999`
-- **Category**: `Campus Passes` | **Latency**: `1.38ms`
+- **Category**: `Campus Passes` | **Latency**: `1.28ms`
 - **Expected Status**: `HTTP 404` ➔ **Actual Status**: `HTTP 404`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.38ms)
+- **Assertion Result**: ✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.28ms)
 
 ### ✅ PASS `[FEED-01]` List Campus Announcements & Bulletins
 - **Endpoint**: `GET /api/feed/announcements` `[Cache: MISS]`
-- **Category**: `Campus Feed` | **Latency**: `3.53ms`
+- **Category**: `Campus Feed` | **Latency**: `3.0ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['id', 'title', 'content', 'kind', 'published_at']`
 - **Actual Response**: `List [0 items]. First item keys: primitive`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.53ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.0ms)
 
 ### ✅ PASS `[FEED-02]` Filter Announcements by Category
 - **Endpoint**: `GET /api/feed/announcements?kind=system` `[Cache: MISS]`
-- **Category**: `Campus Feed` | **Latency**: `3.37ms`
+- **Category**: `Campus Feed` | **Latency**: `1.95ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['id', 'title', 'kind']`
 - **Actual Response**: `List [0 items]. First item keys: primitive`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.37ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 1.95ms)
 
 ### ✅ PASS `[SOCIAL-01]` Cadet Followers Network Query
 - **Endpoint**: `GET /api/social/qa_organizer/followers`
-- **Category**: `Social & OG` | **Latency**: `9.18ms`
+- **Category**: `Social & OG` | **Latency**: `7.9ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['count', 'students']`
 - **Actual Response**: `Dict with keys: ['count', 'followers_count', 'following_count', 'students']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 9.18ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 7.9ms)
 
 ### ✅ PASS `[SOCIAL-02]` Cadet Following Network Query
 - **Endpoint**: `GET /api/social/qa_organizer/following`
-- **Category**: `Social & OG` | **Latency**: `2.63ms`
+- **Category**: `Social & OG` | **Latency**: `2.11ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['count', 'students']`
 - **Actual Response**: `Dict with keys: ['count', 'followers_count', 'following_count', 'students']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.63ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.11ms)
 
 ### ✅ PASS `[SOCIAL-03]` My Following IDs Endpoint
 - **Endpoint**: `GET /api/social/my-following-ids`
-- **Category**: `Social & OG` | **Latency**: `2.4ms`
+- **Category**: `Social & OG` | **Latency**: `3.54ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['following_ids']`
 - **Actual Response**: `Dict with keys: ['following_ids']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 2.4ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 3.54ms)
 
 ### ✅ PASS `[SOCIAL-04]` Handle Sanitization With Leading @
 - **Endpoint**: `GET /api/social/@qa_organizer/followers`
-- **Category**: `Social & OG` | **Latency**: `3.0ms`
+- **Category**: `Social & OG` | **Latency**: `3.34ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['count', 'students']`
 - **Actual Response**: `Dict with keys: ['count', 'followers_count', 'following_count', 'students']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.0ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.34ms)
 
 ### ✅ PASS `[SOCIAL-05]` Self Follow Rejection (400)
 - **Endpoint**: `POST /api/social/follow/qa_organizer`
-- **Category**: `Social & OG` | **Latency**: `2.34ms`
+- **Category**: `Social & OG` | **Latency**: `2.24ms`
 - **Expected Status**: `HTTP 400` ➔ **Actual Status**: `HTTP 400`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 2.34ms)
+- **Assertion Result**: ✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 2.24ms)
 
 ### ✅ PASS `[SOCIAL-06]` Peer Profile Followers Drawer Query with Leading @
 - **Endpoint**: `GET /api/social/@qa_organizer/following`
-- **Category**: `Social & OG` | **Latency**: `2.42ms`
+- **Category**: `Social & OG` | **Latency**: `2.04ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['count', 'students']`
 - **Actual Response**: `Dict with keys: ['count', 'followers_count', 'following_count', 'students']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.42ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.04ms)
 
 ### ✅ PASS `[SOCIAL-07]` Atomic Toggle Follow Peer Cadet (POST /social/toggle)
 - **Endpoint**: `POST /api/social/toggle/qa_target`
-- **Category**: `Social & OG` | **Latency**: `6.49ms`
+- **Category**: `Social & OG` | **Latency**: `6.28ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle']`
 - **Actual Response**: `Dict with keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle', 'message']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 6 schema keys present in response object (Latency: 6.49ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 6 schema keys present in response object (Latency: 6.28ms)
 
 ### ✅ PASS `[SOCIAL-08]` Atomic Toggle Unfollow Peer Cadet (POST /social/toggle second pass)
 - **Endpoint**: `POST /api/social/toggle/qa_target`
-- **Category**: `Social & OG` | **Latency**: `4.66ms`
+- **Category**: `Social & OG` | **Latency**: `4.34ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'is_following', 'followers_count', 'following_count']`
 - **Actual Response**: `Dict with keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle', 'message']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 4.66ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 4.34ms)
 
 ### ✅ PASS `[SOCIAL-09]` Atomic Toggle Self-Follow Rejection (400)
 - **Endpoint**: `POST /api/social/toggle/qa_organizer`
-- **Category**: `Social & OG` | **Latency**: `1.51ms`
+- **Category**: `Social & OG` | **Latency**: `1.42ms`
 - **Expected Status**: `HTTP 400` ➔ **Actual Status**: `HTTP 400`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.51ms)
+- **Assertion Result**: ✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.42ms)
 
 ### ✅ PASS `[V1-01]` v1 Metadata & System Probe
 - **Endpoint**: `GET /api/v1/meta`
-- **Category**: `Versioned v1 Gateway` | **Latency**: `30.7ms`
+- **Category**: `Versioned v1 Gateway` | **Latency**: `30.17ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['version', 'contest_model', 'assessment_duration_minutes']`
 - **Actual Response**: `Dict with keys: ['version', 'contest_model', 'assessment_window_hours', 'assessment_duration_minutes', 'finalist_seats']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 30.7ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 30.17ms)
 
 ### ✅ PASS `[V1-02]` v1 Contests Resource Gateway
 - **Endpoint**: `GET /api/v1/contests` `[Cache: HIT]`
-- **Category**: `Versioned v1 Gateway` | **Latency**: `1.38ms`
+- **Category**: `Versioned v1 Gateway` | **Latency**: `1.18ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['id', 'title', 'slug', 'status']`
 - **Actual Response**: `List [1 items]. First item keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.38ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.18ms)
 
 ### ✅ PASS `[V1-03]` v1 Leaderboard Resource Gateway
 - **Endpoint**: `GET /api/v1/leaderboard` `[Cache: HIT]`
-- **Category**: `Versioned v1 Gateway` | **Latency**: `0.89ms`
+- **Category**: `Versioned v1 Gateway` | **Latency**: `0.99ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['rank', 'handle', 'rating', 'department']`
 - **Actual Response**: `List [2 items]. First item keys: ['id', 'avatar_url', 'rank', 'university_rank', 'previous_rank', 'handle', 'full_name', 'prn']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 0.89ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 0.99ms)
 
 ### ✅ PASS `[DYNAMIC-01]` Launch Preset Contest (QA Weekly #999)
 - **Endpoint**: `POST /api/admin/contests/preset/launch`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `7.46ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `8.07ms`
 - **Expected Status**: `HTTP 201` ➔ **Actual Status**: `HTTP 201`
 - **Expected Schema**: `Keys: ['success', 'slug', 'contest_id']`
 - **Actual Response**: `Dict with keys: ['success', 'message', 'contest_id', 'slug', 'title', 'cadence', 'edition', 'status']`
-- **Assertion Result**: ✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 7.46ms)
+- **Assertion Result**: ✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 8.07ms)
 ```json
 // Request Body
 {
@@ -387,11 +387,11 @@
 
 ### ✅ PASS `[DYNAMIC-02]` Add Problem D Dynamically with Testcases
 - **Endpoint**: `POST /api/admin/contests/weekly-contest-999/problems`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `5.99ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `7.1ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'message', 'problem_count']`
 - **Actual Response**: `Dict with keys: ['success', 'message', 'problem_index', 'target', 'problem_count']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 5.99ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 7.1ms)
 ```json
 // Request Body
 {
@@ -418,11 +418,11 @@
 
 ### ✅ PASS `[DYNAMIC-03]` Update Contest Specifications & Max Seats
 - **Endpoint**: `PUT /api/admin/contests/weekly-contest-999`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `3.05ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `3.92ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'contest']`
 - **Actual Response**: `Dict with keys: ['success', 'message', 'contest']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.05ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.92ms)
 ```json
 // Request Body
 {
@@ -434,11 +434,11 @@
 
 ### ✅ PASS `[DYNAMIC-04]` Transition Contest Lifecycle (Upcoming -> Live)
 - **Endpoint**: `POST /api/admin/contests/weekly-contest-999/status`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `4.19ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `4.5ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'current_status']`
 - **Actual Response**: `Dict with keys: ['success', 'contest_slug', 'title', 'previous_status', 'current_status', 'top_30_qualification', 'rating_summary']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.19ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.5ms)
 ```json
 // Request Body
 {
@@ -448,52 +448,52 @@
 
 ### ✅ PASS `[DYNAMIC-05]` Clone Contest into Edition #2
 - **Endpoint**: `POST /api/admin/contests/weekly-contest-999/clone`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `5.59ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `6.57ms`
 - **Expected Status**: `HTTP 201` ➔ **Actual Status**: `HTTP 201`
 - **Expected Schema**: `Keys: ['success', 'slug', 'contest_id']`
 - **Actual Response**: `Dict with keys: ['success', 'message', 'contest_id', 'slug', 'title', 'cadence', 'edition', 'status']`
-- **Assertion Result**: ✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 5.59ms)
+- **Assertion Result**: ✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 6.57ms)
 ```json
 // Request Body
 {
   "new_title": "CCC Weekly Contest 999 \u2014 Edition 2",
   "new_slug": "weekly-contest-999-v2",
-  "starts_at": "2026-09-28T10:50:53.240892+00:00",
-  "ends_at": "2026-09-28T13:50:53.240901+00:00"
+  "starts_at": "2026-09-28T11:05:17.448787+00:00",
+  "ends_at": "2026-09-28T14:05:17.448796+00:00"
 }
 ```
 
 ### ✅ PASS `[DYNAMIC-06]` Cascade Delete QA Contests
 - **Endpoint**: `DELETE /api/admin/contests/weekly-contest-999`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `9.33ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `9.82ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'message']`
 - **Actual Response**: `Dict with keys: ['success', 'message']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 9.33ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 9.82ms)
 
 ### ✅ PASS `[DYNAMIC-07]` Cascade Delete Cloned QA Contest
 - **Endpoint**: `DELETE /api/admin/contests/weekly-contest-999-v2`
-- **Category**: `Dynamic Contest Engine` | **Latency**: `5.28ms`
+- **Category**: `Dynamic Contest Engine` | **Latency**: `5.73ms`
 - **Expected Status**: `HTTP 200` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Keys: ['success', 'message']`
 - **Actual Response**: `Dict with keys: ['success', 'message']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 5.28ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 5.73ms)
 
 ### ✅ PASS `[ASSESS-01]` Fetch Screening Assessment Status (weekly-contest-1)
 - **Endpoint**: `GET /api/assessment/weekly-contest-1`
-- **Category**: `Assessment Service` | **Latency**: `5.65ms`
+- **Category**: `Assessment Service` | **Latency**: `8.48ms`
 - **Expected Status**: `HTTP [200, 403, 404]` ➔ **Actual Status**: `HTTP 200`
 - **Expected Schema**: `Any valid response`
 - **Actual Response**: `Dict with keys: ['assessment', 'session', 'problems', 'submissions']`
-- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 5.65ms)
+- **Assertion Result**: ✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 8.48ms)
 
 ### ✅ PASS `[EDGE-01]` Admin Dynamic Create Payload Missing Required Fields (422)
 - **Endpoint**: `POST /api/admin/contests`
-- **Category**: `Validation & Edge Cases` | **Latency**: `3.13ms`
+- **Category**: `Validation & Edge Cases` | **Latency**: `1.88ms`
 - **Expected Status**: `HTTP 422` ➔ **Actual Status**: `HTTP 422`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 3.13ms)
+- **Assertion Result**: ✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 1.88ms)
 ```json
 // Request Body
 {
@@ -503,11 +503,11 @@
 
 ### ✅ PASS `[EDGE-02]` Contest Registration Without Auth (401 Rejection)
 - **Endpoint**: `POST /api/contests/weekly-contest-1/register`
-- **Category**: `Validation & Edge Cases` | **Latency**: `1.04ms`
+- **Category**: `Validation & Edge Cases` | **Latency**: `0.65ms`
 - **Expected Status**: `HTTP 401` ➔ **Actual Status**: `HTTP 401`
 - **Expected Schema**: `Keys: ['detail']`
 - **Actual Response**: `Dict with keys: ['detail']`
-- **Assertion Result**: ✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 1.04ms)
+- **Assertion Result**: ✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.65ms)
 
 ---
 

@@ -226,17 +226,17 @@ export function ContestOverviewPage() {
               <Button
                 asChild
                 size="lg"
-                className="rounded-md bg-lime-400 font-semibold text-xs text-black hover:bg-lime-300 shadow-lg shadow-lime-400/20 active:scale-[0.98] cursor-pointer"
+                className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black shadow-none active:scale-[0.98] cursor-pointer transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/arena`}>
-                  <Play className="mr-1.5 size-4 fill-black" /> Enter Contest Arena
+                  <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
                 </Link>
               </Button>
             ) : isFinished ? (
               <Button
                 asChild
                 size="lg"
-                className="rounded-md bg-lime-400 font-semibold text-xs text-black hover:bg-lime-300 active:scale-[0.98] cursor-pointer"
+                className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black active:scale-[0.98] cursor-pointer transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy className="mr-1.5 size-4" /> View Final Standings
@@ -269,7 +269,7 @@ export function ContestOverviewPage() {
                 onClick={handleRegister}
                 disabled={isRegistering}
                 size="lg"
-                className="rounded-md bg-lime-400 font-semibold text-xs text-black hover:bg-lime-300 active:scale-[0.98] cursor-pointer"
+                className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black active:scale-[0.98] cursor-pointer transition-colors"
               >
                 <Sparkles className="mr-1.5 size-4" />
                 {isRegistering ? "Registering..." : "Register for Contest"}
@@ -411,8 +411,7 @@ export function ContestOverviewPage() {
             </Table>
           </div>
 
-          <div className="pt-3 border-t border-white/8 flex items-center justify-between text-xs font-mono text-zinc-500">
-            <span>Runtime: CodeBox Judge Environment</span>
+          <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-mono text-zinc-500">
             <Link
               to={`/contests/${contestSlug}/results`}
               className="text-lime-400 hover:underline flex items-center gap-1"

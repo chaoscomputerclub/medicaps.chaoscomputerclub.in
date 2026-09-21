@@ -292,7 +292,7 @@ export function AssessmentWorkspacePage() {
                   navigate(`/contests/${contestSlug}`);
                 }
               }}
-              className="w-full py-2 px-4 rounded-md bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 transition-colors cursor-pointer"
+              className="w-full py-2 px-4 rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black transition-colors cursor-pointer"
             >
               Close Workspace
             </button>
@@ -345,7 +345,7 @@ export function AssessmentWorkspacePage() {
               if (window.opener) window.close();
               else navigate(`/contests/${contestSlug}`);
             }}
-            className="w-full bg-lime-400 text-black font-mono font-semibold text-xs rounded-md hover:bg-lime-300"
+            className="w-full bg-transparent text-lime-400 border border-lime-400 font-mono font-semibold text-xs rounded-md hover:bg-lime-400 hover:text-black transition-colors"
           >
             Close & Return
           </Button>
@@ -376,7 +376,7 @@ export function AssessmentWorkspacePage() {
           <div className="pt-2 flex flex-col gap-2">
             {isLifecycleErr && (
               <a href={`/contests/${contestSlug}/results`} className="w-full">
-                <Button className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md">
+                <Button className="w-full bg-transparent text-lime-400 border border-lime-400 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black rounded-md transition-colors">
                   <Trophy size={14} className="mr-1.5" /> View Standings
                 </Button>
               </a>
@@ -385,7 +385,7 @@ export function AssessmentWorkspacePage() {
               <Button
                 onClick={handleDirectRegister}
                 disabled={isRegistering}
-                className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md"
+                className="w-full bg-transparent text-lime-400 border border-lime-400 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black rounded-md transition-colors"
               >
                 <Users size={14} className="mr-1.5" />
                 {isRegistering ? "Registering..." : "Register Now & Enter"}
@@ -393,7 +393,7 @@ export function AssessmentWorkspacePage() {
             )}
             {isAuthErr && (
               <a href={`/auth?redirect=/assessments/${contestSlug}`} className="w-full">
-                <Button className="w-full bg-lime-400 text-black font-semibold font-mono text-xs hover:bg-lime-300 rounded-md">
+                <Button className="w-full bg-transparent text-lime-400 border border-lime-400 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black rounded-md transition-colors">
                   Sign In to Continue
                 </Button>
               </a>
@@ -528,7 +528,7 @@ export function AssessmentWorkspacePage() {
             size="sm"
             disabled={isRunning || isSubmitting}
             onClick={handleSubmit}
-            className="h-7 px-2.5 gap-1 text-xs font-mono bg-lime-400 text-black font-semibold hover:bg-lime-300 rounded-md"
+            className="h-7 px-2.5 gap-1 text-xs font-mono bg-transparent text-lime-400 border border-lime-400 font-semibold hover:bg-lime-400 hover:text-black rounded-md transition-colors"
           >
             <Send size={12} />
             <span>{isSubmitting ? "Judging..." : "Submit"}</span>

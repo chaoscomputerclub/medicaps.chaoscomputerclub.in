@@ -108,7 +108,7 @@ export function ContestLobbyPage() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               asChild
-              className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
+              className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black transition-colors"
             >
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
@@ -138,7 +138,7 @@ export function ContestLobbyPage() {
               You must register for this tournament round before accessing the proctored assessment terminal.
             </p>
           </div>
-          <Button asChild className="rounded-md font-mono text-xs font-semibold bg-lime-400 hover:bg-lime-300 text-black">
+          <Button asChild className="rounded-md font-mono text-xs font-semibold bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
             <Link to={`/contests/${contestSlug}`}>Register Slot</Link>
           </Button>
         </div>
@@ -253,10 +253,7 @@ export function ContestLobbyPage() {
             <div className="flex items-center justify-between border-b border-white/6 pb-2.5">
               <span className="text-[11px] font-semibold text-white flex items-center gap-2">
                 <Shield className="size-3.5 text-lime-400" />
-                Tournament Regulations & Fair Play Code
-              </span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                CCC PROCTOR v2.1
+                Tournament Guidelines
               </span>
             </div>
 
@@ -264,25 +261,25 @@ export function ContestLobbyPage() {
               <li className="flex items-start gap-2.5">
                 <span className="text-lime-400 font-semibold shrink-0">01.</span>
                 <span>
-                  <strong className="text-white">Strict Timer:</strong> Once launched, the {ASSESSMENT_DURATION_MINUTES}-minute countdown runs server-side. Closing the tab or refreshing does not pause it. Auto-submits at 00:00.
+                  <strong className="text-white">Continuous Timer:</strong> Once launched, the {ASSESSMENT_DURATION_MINUTES}-minute countdown runs server-side and auto-submits at 00:00.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-lime-400 font-semibold shrink-0">02.</span>
                 <span>
-                  <strong className="text-white">Full-Screen Focus:</strong> Leaving fullscreen or switching tabs logs an anti-cheat violation. Reaching 3 violations leads to automatic disqualification.
+                  <strong className="text-white">Supported Languages:</strong> Python, C++, Java, and JavaScript are supported in the workspace.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-lime-400 font-semibold shrink-0">03.</span>
                 <span>
-                  <strong className="text-white">Code Execution:</strong> Solutions run in isolated Docker sandboxes with 2.0s wall-clock time limit and 256MB memory cap.
+                  <strong className="text-white">Automated Judging:</strong> Submissions are tested against hidden test cases with 2.0s time limit and 256MB memory cap.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="text-lime-400 font-semibold shrink-0">04.</span>
                 <span>
-                  <strong className="text-white">Leaderboard & Rating:</strong> Official Elo ratings are computed and updated on the university leaderboard after the contest ends.
+                  <strong className="text-white">Leaderboard & Rating:</strong> Official Elo ratings update on the university leaderboard after the contest concludes.
                 </span>
               </li>
             </ul>
@@ -298,7 +295,7 @@ export function ContestLobbyPage() {
                     Active Attempt In Progress
                   </div>
                   <p className="text-zinc-400 leading-relaxed">
-                    You have an ongoing attempt. Warning count: {registration?.anti_cheat_violations || 1} / {registration?.max_violations || 3}. Resume immediately to avoid losing time.
+                    You have an ongoing attempt. Resume immediately to avoid losing time.
                   </p>
                 </div>
               </div>
@@ -306,10 +303,10 @@ export function ContestLobbyPage() {
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-md bg-amber-400 font-mono text-xs font-semibold text-black hover:bg-amber-300"
+                  className="rounded-md bg-transparent text-amber-400 border border-amber-400 font-mono text-xs font-semibold hover:bg-amber-400 hover:text-black transition-colors"
                 >
                   <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
-                    <Play className="mr-1.5 size-3.5 fill-black" /> Resume Assessment
+                    <Play className="mr-1.5 size-3.5 fill-current" /> Resume Assessment
                   </a>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
@@ -337,7 +334,7 @@ export function ContestLobbyPage() {
                   asChild
                   disabled={!ack || !canStart}
                   size="lg"
-                  className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300 disabled:opacity-30"
+                  className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black disabled:opacity-30 transition-colors"
                 >
                   <a
                     href={(!ack || !canStart) ? undefined : `/assessments/${contestSlug}`}
@@ -347,7 +344,7 @@ export function ContestLobbyPage() {
                       if (!ack || !canStart) e.preventDefault();
                     }}
                   >
-                    <Play className="mr-1.5 size-3.5 fill-black" /> Launch Workspace
+                    <Play className="mr-1.5 size-3.5 fill-current" /> Launch Workspace
                   </a>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
@@ -362,12 +359,6 @@ export function ContestLobbyPage() {
               )}
             </div>
           )}
-
-          {/* Telemetry Footer */}
-          <div className="flex items-center gap-2 pt-2 text-[11px] text-zinc-500 font-mono border-t border-white/6">
-            <ShieldCheck className="size-3.5 shrink-0 text-lime-400" />
-            <span>Telemetry Guard Active · Full-Screen Monitoring · Isolated Execution Sandbox</span>
-          </div>
         </div>
       )}
     </div>

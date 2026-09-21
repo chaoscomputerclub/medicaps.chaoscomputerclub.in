@@ -115,7 +115,7 @@ export function MyContestsPage() {
                 ? "You have not registered for any upcoming tournament rounds yet."
                 : "Participate in campus contests to establish your university ranking."}
             </p>
-            <Button asChild className="rounded-md bg-lime-400 text-black hover:bg-lime-300 text-xs font-mono font-semibold">
+            <Button asChild className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black text-xs font-mono font-semibold transition-colors">
               <Link to="/contests">Explore Contests</Link>
             </Button>
           </div>
@@ -262,10 +262,10 @@ export function MyContestsPage() {
                         <Button
                           asChild
                           size="sm"
-                          className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold"
+                          className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-semibold transition-colors"
                         >
                           <Link to={`/contests/${c.contest_slug}/lobby`}>
-                            <Play className="w-3 h-3 mr-1 fill-black" />
+                            <Play className="w-3 h-3 mr-1 fill-current" />
                             Assessment
                           </Link>
                         </Button>

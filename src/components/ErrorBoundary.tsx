@@ -117,7 +117,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
               <Button
                 type="button"
                 onClick={this.handleReset}
-                className="bg-lime-400 text-black hover:bg-lime-400 font-mono text-xs uppercase font-bold rounded-none h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
+                className="bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
               >
                 <RefreshCw size={13} />
                 <span>Reload Interface</span>

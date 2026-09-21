@@ -21,7 +21,7 @@ export function ScoreboardMatrix({
   if (!entries || entries.length === 0) {
     return (
       <div className="text-center py-10 text-[#666] font-mono text-xs border border-dashed border-[#222]">
-        No standings or telemetry recorded yet.
+        No standings recorded yet.
       </div>
     );
   }

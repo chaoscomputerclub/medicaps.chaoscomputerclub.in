@@ -273,7 +273,7 @@ export function ContestArenaPage() {
           <div className="flex flex-col gap-2 pt-2">
             <Button
               asChild
-              className="rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300"
+              className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black transition-colors"
             >
               <Link to={`/contests/${contestSlug}/qualified`}>
                 <QrCode className="mr-2 size-3.5" /> View Finalist Pass
@@ -337,14 +337,8 @@ export function ContestArenaPage() {
           </div>
         </div>
 
-        {/* Center: Proctor & Workstation Indicator */}
+        {/* Center: Rating Badge */}
         <div className="hidden lg:flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-zinc-950 text-xs font-mono">
-            <ShieldCheck className="size-3 text-lime-400" />
-            <span className="text-zinc-500">Proctors:</span>
-            <span className="text-zinc-300 font-medium">{arenaData?.chief_proctors?.length ? arenaData.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
-          </div>
-
           <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/8 bg-black text-xs font-mono">
             <span className="size-1.5 rounded-full bg-lime-400" />
             <span className="text-zinc-300 font-medium">Elo Rated</span>
@@ -749,7 +743,7 @@ export function ContestArenaPage() {
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleSubmitCode}
-                  className="font-mono text-xs font-semibold rounded-md bg-lime-400 hover:bg-lime-300 text-black disabled:opacity-30"
+                  className="font-mono text-xs font-semibold rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black disabled:opacity-30 transition-colors"
                 >
                   <Send className="size-3 mr-1" />
                   {isSubmittingCode ? "Judging…" : "Submit"}
@@ -763,32 +757,39 @@ export function ContestArenaPage() {
       {/* Contest Over Overlay */}
       {isContestOver && (
         <div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 bg-black/95 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 font-mono select-none"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="contest-ended-title"
         >
-          <div className="flex size-20 items-center justify-center rounded-lg border border-lime-400/40 bg-black">
-            <Trophy className="size-8 text-lime-400" />
-          </div>
-
-          <div className="space-y-2 text-center">
-            <p className="font-mono text-xs font-semibold uppercase tracking-widest text-lime-400">Contest Concluded</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-white">
-              Time's Up
-            </h2>
-            <p className="max-w-sm text-xs text-zinc-400 font-mono leading-relaxed">
-              All submissions are locked. Standings will be finalized.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
-              <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
+          <div className="max-w-md w-full p-8 rounded-lg border border-lime-400/40 bg-black text-center space-y-6">
+            <div className="flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 mx-auto text-lime-400">
+              <Trophy className="size-7" />
             </div>
-            <button
-              onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-              className="font-mono text-xs font-semibold uppercase text-lime-400 border border-lime-400/40 bg-lime-400/10 px-5 py-2 rounded-md hover:bg-lime-400/20 transition-colors"
-            >
-              View Final Results →
-            </button>
+
+            <div className="space-y-2">
+              <span className="text-[10px] uppercase tracking-widest text-lime-400 font-semibold block">
+                Official Contest Bell
+              </span>
+              <h2 id="contest-ended-title" className="text-2xl font-bold text-white tracking-tight">
+                Contest Concluded
+              </h2>
+              <p className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
+                The competition clock has expired. All submitted solutions are locked for final rating computation.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
+                <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
+              </div>
+              <button
+                onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
+                className="font-mono text-xs font-semibold uppercase text-lime-400 border border-lime-400 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black transition-colors cursor-pointer"
+              >
+                View Final Results →
+              </button>
+            </div>
           </div>
         </div>
       )}

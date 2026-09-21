@@ -235,9 +235,9 @@ export function ContestQualifiedPage() {
                         <span className="size-2 rounded-full bg-lime-400 animate-pulse" />
                         <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">Round 2 Is Live</span>
                       </div>
-                      <Button asChild size="sm" className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold">
+                      <Button asChild size="sm" className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-semibold transition-colors">
                         <Link to={`/contests/${contestSlug}/arena`}>
-                          <Play className="mr-1 size-3 fill-black" /> Enter Arena
+                          <Play className="mr-1 size-3 fill-current" /> Enter Arena
                         </Link>
                       </Button>
                     </div>
@@ -287,7 +287,7 @@ export function ContestQualifiedPage() {
             </p>
           </div>
           <div className="pt-2 flex justify-center gap-3">
-            <Button asChild className="rounded-md bg-lime-400 text-black font-semibold text-xs hover:bg-lime-300">
+            <Button asChild className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black transition-colors">
               <Link to={`/contests/${contestSlug}/results`}>View Standings</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-md border-white/10 bg-black text-zinc-300 text-xs hover:text-white">

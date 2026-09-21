@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-lime-400 text-black font-mono font-semibold uppercase text-xs tracking-wider hover:bg-lime-300 active:bg-lime-500 border border-lime-400 shadow-none",
+          "bg-transparent text-lime-400 font-mono font-semibold uppercase text-xs tracking-wider border border-lime-400 hover:bg-lime-400 hover:text-black active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         destructive:
           "bg-red-500 text-white font-mono font-semibold uppercase text-xs tracking-wider shadow-none hover:bg-red-600 active:bg-red-700 border border-red-500/30",
         outline:

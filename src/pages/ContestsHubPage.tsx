@@ -370,9 +370,9 @@ export function ContestsHubPage() {
                   <div className="flex flex-wrap items-center gap-3 pt-1">
                     {upcomingWeekly.status === "live" ? (
                       <>
-                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md shadow-lg shadow-lime-400/20">
+                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black px-6 py-2 rounded-md transition-colors">
                           <Link to={`/contests/${upcomingWeekly.slug}/arena`}>
-                            <Play className="mr-1.5 size-4 fill-black" /> Enter Contest Arena
+                            <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
                           </Link>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="text-xs">
@@ -394,7 +394,7 @@ export function ContestsHubPage() {
                         <Button
                           onClick={() => handleRegister(upcomingWeekly.slug)}
                           disabled={registeringSlug === upcomingWeekly.slug}
-                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md cursor-pointer"
+                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black px-6 py-2 rounded-md cursor-pointer transition-colors"
                         >
                           {registeringSlug === upcomingWeekly.slug ? "Registering..." : "Register for Contest"}
                         </Button>
@@ -427,9 +427,9 @@ export function ContestsHubPage() {
                     </div>
                     <div className="flex items-center gap-2 pt-1">
                       {isLive ? (
-                        <Button asChild className="flex-1 bg-lime-400 text-xs font-mono font-semibold uppercase text-black hover:bg-lime-300">
+                        <Button asChild className="flex-1 bg-transparent text-xs font-mono font-semibold uppercase text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
                           <Link to={`/contests/${contest.slug}/arena`}>
-                            <Play className="mr-1.5 size-4 fill-black" /> Enter Arena
+                            <Play className="mr-1.5 size-4 fill-current" /> Enter Arena
                           </Link>
                         </Button>
                       ) : isReg ? (
@@ -438,7 +438,7 @@ export function ContestsHubPage() {
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
-                          className="flex-1 text-xs font-mono font-semibold uppercase bg-lime-400 text-black hover:bg-lime-300 cursor-pointer">
+                          className="flex-1 text-xs font-mono font-semibold uppercase bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black cursor-pointer transition-colors">
                           {registeringSlug === contest.slug ? "Registering..." : "Register Now"}
                         </Button>
                       )}
@@ -551,7 +551,7 @@ export function ContestsHubPage() {
                   <p className="max-w-xs text-xs text-zinc-500">Register for an upcoming contest to build your competitive programming ledger.</p>
                   {upcomingContests.length > 0 && (
                     <Button onClick={() => handleRegister(upcomingContests[0].slug)} disabled={registeringSlug === upcomingContests[0].slug}
-                      className="mt-2 text-xs font-mono font-semibold uppercase bg-lime-400 text-black hover:bg-lime-300">
+                      className="mt-2 text-xs font-mono font-semibold uppercase bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
                       {registeringSlug === upcomingContests[0].slug ? "Registering..." : `Register for ${upcomingContests[0].title}`}
                     </Button>
                   )}
@@ -618,30 +618,6 @@ export function ContestsHubPage() {
               <Link to="/leaderboard" className="flex items-center justify-center gap-1.5 text-xs font-medium text-white transition-colors hover:text-lime-400 font-mono">
                 University Standings <ArrowRight className="size-3" />
               </Link>
-            </div>
-          </div>
-
-          {/* Tournament Protocol */}
-          <div className="rounded-lg border border-white/8 bg-black p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="size-4 text-lime-400" />
-              <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-white">Arena Protocol</h3>
-            </div>
-            <div className="space-y-2.5">
-              {[
-                { n: "01", title: "Automated Evaluation", desc: "Testcase verification via sovereign CodeBox sandbox." },
-                { n: "02", title: "Integrity Telemetry", desc: "Tab blur and switch event monitoring during assessment." },
-                { n: "03", title: "Single Session Lock", desc: "Concurrent logins during active rounds are rejected." },
-                { n: "04", title: "Elo Rating Impact", desc: "Official scores calculated and published immediately." },
-              ].map(({ n, title, desc }) => (
-                <div key={n} className="flex gap-2.5">
-                  <span className="font-mono text-xs font-bold text-lime-400 shrink-0">{n}</span>
-                  <div>
-                    <strong className="block text-xs text-white font-sans">{title}</strong>
-                    <span className="text-[11px] text-zinc-500 leading-normal">{desc}</span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </aside>

@@ -166,7 +166,7 @@ export function RegisterConfirmModal({
           <Button
             onClick={handleConfirmRegistration}
             disabled={isSubmitting || !agreed}
-            className="rounded-none bg-lime-400 text-black hover:bg-lime-400 font-mono text-xs font-bold uppercase tracking-wider px-5 shadow-lg shadow-lime-400/20 active:scale-[0.98] disabled:opacity-50"
+            className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-5 active:scale-[0.98] disabled:opacity-50 transition-colors"
           >
             {isSubmitting ? (
               <>

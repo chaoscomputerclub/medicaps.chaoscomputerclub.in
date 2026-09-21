@@ -134,7 +134,7 @@ export function ContestOfflinePage() {
             Seat: <strong className="text-lime-400">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </p>
         </div>
-        <Button asChild size="lg" className="rounded-md bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-semibold">
+        <Button asChild size="lg" className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-semibold transition-colors">
           <Link to={`/contests/${contestSlug}/arena`}>
             <Play className="size-3.5 fill-current mr-1.5" />
             Enter Arena
@@ -176,7 +176,7 @@ export function ContestOfflinePage() {
               <span className="text-white font-semibold">{pass?.seat ?? "Lab-04-WS-07"}</span>
             </div>
             <Button
-              className="w-full rounded-md bg-lime-400 font-mono text-xs font-semibold text-black hover:bg-lime-300 disabled:opacity-40"
+              className="w-full rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black disabled:opacity-40 transition-colors"
               disabled={checkedIn || isCheckingIn}
               onClick={handleCheckIn}
             >

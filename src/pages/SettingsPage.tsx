@@ -213,7 +213,7 @@ function SaveButton({
       size="sm"
       disabled={disabled || saving}
       onClick={onClick}
-      className="h-8 px-3.5 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 disabled:opacity-30 rounded-md cursor-pointer transition-colors"
+      className="h-8 px-3.5 text-xs font-semibold bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black disabled:opacity-30 rounded-md cursor-pointer transition-colors"
     >
       {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
@@ -801,7 +801,7 @@ export function SettingsPage() {
                         size="sm"
                         disabled={!isHandleChanged || handleInput.length < 3 || handleStatus !== "available" || fieldStatus["handle"] === "saving"}
                         onClick={saveHandle}
-                        className="h-9 px-3 text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 disabled:opacity-40 rounded-md cursor-pointer"
+                        className="h-9 px-3 text-xs font-semibold bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black disabled:opacity-40 rounded-md cursor-pointer transition-colors"
                       >
                         {fieldStatus["handle"] === "saving" ? <Loader2 size={12} className="animate-spin" /> : "Update"}
                       </Button>

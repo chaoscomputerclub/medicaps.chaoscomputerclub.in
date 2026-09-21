@@ -77,12 +77,8 @@ export function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Welcome back, {greetingName}. Verified Medi-Caps competitive programming operations.
+            Welcome back, {greetingName}. Medi-Caps competitive programming arena.
           </p>
-        </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-md border border-white/8 bg-black">
-          <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
-          <span className="font-mono text-xs text-zinc-300 uppercase tracking-wider">System Operational</span>
         </div>
       </div>
 
@@ -147,7 +143,7 @@ export function DashboardPage() {
               </div>
             </div>
             <div className="shrink-0">
-              <Button asChild className="w-full sm:w-auto font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-lime-400 text-black hover:bg-lime-300">
+              <Button asChild className="w-full sm:w-auto font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
                 <Link to={`/contests/${live.slug}`}>
                   Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
@@ -170,7 +166,7 @@ export function DashboardPage() {
               <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
               <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
             </div>
-            <Button asChild variant="outline" className="text-xs">
+            <Button asChild className="text-xs bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors font-mono">
               <Link to={`/contests/${next.slug}`}>
                 View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
@@ -179,55 +175,20 @@ export function DashboardPage() {
         </section>
       ) : null}
 
-      {/* Grid: Rating Analytics & Pass Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 p-5 rounded-lg border border-white/8 bg-black">
-          <SectionHeader
-            kicker="Rating Trajectory"
-            index="Telemetry"
-            title="University Elo Progression"
-            action={
-              <Link to="/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
-                Profile Dossier →
-              </Link>
-            }
-          />
-          <RatingChart data={history} />
-        </section>
-
-        <section className="p-5 rounded-lg border border-white/8 bg-black flex flex-col justify-between">
-          <div className="space-y-4">
-            <SectionHeader kicker="Platform" index="System" title="Tournament Engine" />
-            <div className="p-4 rounded-md border border-white/8 bg-black font-mono space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-zinc-300">CodeBox Engine</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 uppercase font-semibold">
-                  Online
-                </span>
-              </div>
-              <div className="space-y-1.5 text-xs text-zinc-400 pt-1 border-t border-white/8">
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Contest Access:</span>
-                  <span className="text-white font-medium">Open to All Students</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Evaluation:</span>
-                  <span className="text-white font-medium">Automated I/O Sandbox</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Leaderboard:</span>
-                  <span className="text-lime-400 font-medium">Elo Rated</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="pt-4">
-            <Button asChild variant="outline" className="w-full text-xs font-mono rounded-md border-white/10 hover:border-white/20">
-              <Link to="/contests">Browse Tournaments</Link>
-            </Button>
-          </div>
-        </section>
-      </div>
+      {/* Rating Analytics */}
+      <section className="p-5 rounded-lg border border-white/8 bg-black">
+        <SectionHeader
+          kicker="Rating Trajectory"
+          index="Progress"
+          title="University Elo Progression"
+          action={
+            <Link to="/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+              Profile Dossier →
+            </Link>
+          }
+        />
+        <RatingChart data={history} />
+      </section>
 
       {/* Campus Scoreboard Radar */}
       <section className="p-5 rounded-lg border border-white/8 bg-black">

@@ -116,7 +116,7 @@ export function VerifyProofPage() {
             </div>
             <Button
               type="submit"
-              className="h-11 px-6 rounded-md bg-lime-400 text-black font-semibold text-xs uppercase tracking-wider hover:bg-lime-300 active:scale-[0.98] cursor-pointer"
+              className="h-11 px-6 rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs uppercase tracking-wider hover:bg-lime-400 hover:text-black active:scale-[0.98] cursor-pointer transition-colors"
             >
               Verify Proof
             </Button>
