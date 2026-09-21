@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T15:16:07.601Z",
+  "timestamp": "2026-09-21T15:23:49.502Z",
   "totalElements": 248,
   "functionalCount": 248,
   "connectivityRate": "100.0%",
@@ -763,7 +763,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 482,
+      "line": 478,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleResetStarter}",
@@ -772,7 +772,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 561,
+      "line": 557,
       "tag": "<button>",
       "label": "{copiedKey === tc_${i} ? <Check cla...",
       "handler": "{() => copyToClipboard(st.stdin, `tc_${i}`)}",
@@ -781,7 +781,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 608,
+      "line": 604,
       "tag": "<button>",
       "label": "Testcases",
       "handler": "{() => setActiveConsoleTab(\"testcases\")}",
@@ -790,7 +790,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 619,
+      "line": 615,
       "tag": "<button>",
       "label": "{submitResult && (                   ...",
       "handler": "{() => setActiveConsoleTab(\"output\")}",
@@ -799,7 +799,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 653,
+      "line": 649,
       "tag": "<button>",
       "label": "Case {i + 1}",
       "handler": "{() => setActiveTestcaseIndex(i)}",
@@ -808,7 +808,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 666,
+      "line": 662,
       "tag": "<button>",
       "label": "Custom",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -817,7 +817,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 790,
+      "line": 786,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRunCode}",
@@ -826,7 +826,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 802,
+      "line": 798,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleSubmitCode}",
@@ -835,7 +835,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 847,
+      "line": 843,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",

@@ -412,10 +412,10 @@ export function ContestArenaPage() {
             asChild
             variant="outline"
             size="sm"
-            className="hidden sm:flex h-7 px-2.5 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors"
+            className="group flex items-center gap-1.5 h-7 px-2.5 text-xs font-mono border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors shrink-0"
           >
             <Link to={`/contests/${contestSlug}/results`} target="_blank" rel="noopener noreferrer">
-              <Trophy className="size-3 text-lime-400" />
+              <Trophy className="size-3.5 text-lime-400 group-hover:text-black transition-colors shrink-0" />
               <span>Scoreboard</span>
             </Link>
           </Button>
@@ -451,11 +451,7 @@ export function ContestArenaPage() {
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>
-                <span
-                  className={`text-[10px] px-1 py-0.2 rounded font-mono uppercase tabular-nums ${
-                    isActive ? "bg-black text-lime-400 font-semibold" : "bg-zinc-950 text-zinc-500"
-                  }`}
-                >
+                <span className="text-[10px] px-1 py-0.2 rounded font-mono uppercase bg-zinc-950 text-zinc-500">
                   {prob.points}p
                 </span>
                 {isSolved && <CheckCircle2 className="size-3 text-lime-400" />}
