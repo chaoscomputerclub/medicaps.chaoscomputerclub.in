@@ -25,6 +25,9 @@
   --color-accent-foreground: #000000;
   --color-destructive: #ff3344;
   --color-destructive-foreground: #ffffff;
+  --color-success: #10b981;
+  --color-success-foreground: #000000;
+  --color-signal-green: #00E676;
   --color-border: rgba(255, 255, 255, 0.08);
   --color-input: rgba(255, 255, 255, 0.12);
   --color-ring: #CCFF00;
@@ -171,5 +174,11 @@ textarea {
   }
   .metric {
     @apply p-4 rounded-lg border border-white/8 bg-black;
+  }
+  .signal-green-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-500/30;
+  }
+  .signal-green-banner {
+    @apply flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2 text-xs font-sans text-emerald-400;
   }
 }

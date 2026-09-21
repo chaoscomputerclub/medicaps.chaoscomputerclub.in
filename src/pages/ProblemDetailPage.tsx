@@ -105,8 +105,8 @@ export function ProblemDetailPage() {
           </pre>
         </div>
 
-        <div className="pt-4 border-t border-white/6 flex items-center gap-2 text-xs font-mono text-zinc-500">
-          <CheckCircle2 className="size-3.5 text-lime-400 shrink-0" />
+        <div className="pt-4 border-t border-white/6 flex items-center gap-2 text-xs font-sans text-zinc-500">
+          <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />
           <span>Solve metrics reconciled against official campus judge replay.</span>
         </div>
       </article>

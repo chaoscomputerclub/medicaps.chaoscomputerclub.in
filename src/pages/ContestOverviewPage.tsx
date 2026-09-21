@@ -244,11 +244,11 @@ export function ContestOverviewPage() {
               </Button>
             ) : isRegistered ? (
               <div className="flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold">
-                  <CheckCircle2 className="size-4 text-lime-400" />
-                  <span>You are Registered</span>
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-sans text-xs font-semibold">
+                  <CheckCircle2 className="size-4 text-emerald-400" />
+                  <span>You are Registered · Contest Opens at Start Time</span>
                 </div>
-                <span className="text-xs text-zinc-400 font-mono">
+                <span className="text-xs text-zinc-400 font-sans">
                   Arena unlocks automatically at start time
                 </span>
                 {isDevBypass && (

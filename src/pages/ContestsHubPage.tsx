@@ -381,11 +381,11 @@ export function ContestsHubPage() {
                       </>
                     ) : isWeeklyRegistered ? (
                       <>
-                        <div className="flex items-center gap-2 rounded-md border border-lime-400/30 bg-lime-400/8 px-3.5 py-2 text-xs font-mono text-lime-400">
-                          <CheckCircle2 className="size-4 text-lime-400" />
+                        <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2 text-xs font-sans text-emerald-400">
+                          <CheckCircle2 className="size-4 text-emerald-400" />
                           <span>Registered · Contest Opens at Start Time</span>
                         </div>
-                        <Button asChild variant="outline" size="sm" className="text-xs font-mono border-white/8">
+                        <Button asChild variant="outline" size="sm" className="text-xs font-sans border-white/8">
                           <Link to={`/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
                         </Button>
                       </>
@@ -394,7 +394,7 @@ export function ContestsHubPage() {
                         <Button
                           onClick={() => handleRegister(upcomingWeekly.slug)}
                           disabled={registeringSlug === upcomingWeekly.slug}
-                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
+                          className="text-xs font-sans font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
                         >
                           {registeringSlug === upcomingWeekly.slug ? "Registering..." : "Register for Contest"}
                         </Button>
@@ -416,25 +416,25 @@ export function ContestsHubPage() {
                 <div key={contest.slug} className="group relative overflow-hidden rounded-lg border border-white/8 bg-black p-5 transition-colors hover:border-white/20">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <span className="rounded border border-white/10 bg-black px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-zinc-400">{contest.cadence}</span>
-                      <span className="flex items-center gap-1 font-mono text-xs tabular-nums text-zinc-500"><Users className="size-3.5" /> {contest.registered_count}</span>
+                      <span className="rounded border border-white/10 bg-black px-2 py-0.5 font-sans text-[9px] font-semibold uppercase tracking-wider text-zinc-400">{contest.cadence}</span>
+                      <span className="flex items-center gap-1 font-sans text-xs tabular-nums text-zinc-500"><Users className="size-3.5" /> {contest.registered_count}</span>
                     </div>
                     <div>
                       <h3 className="font-semibold text-white transition-colors group-hover:text-lime-400 font-sans">{contest.title}</h3>
-                      <p className="mt-1 font-mono text-xs text-zinc-500">
+                      <p className="mt-1 font-sans text-xs text-zinc-500">
                         {new Date(contest.starts_at).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 pt-1">
                       {isLive ? (
-                        <Button asChild className="flex-1 bg-transparent text-xs font-mono font-semibold uppercase text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+                        <Button asChild className="flex-1 bg-transparent text-xs font-sans font-semibold uppercase text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
                           <Link to={`/contests/${contest.slug}/arena`}>
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Arena
                           </Link>
                         </Button>
                       ) : isReg ? (
-                        <Button asChild variant="outline" className="flex-1 text-xs text-lime-400 border-lime-400/30">
-                          <Link to={`/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5" /> Registered</Link>
+                        <Button asChild variant="outline" className="flex-1 text-xs text-emerald-400 border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-950/50 hover:text-emerald-300 font-sans">
+                          <Link to={`/contests/${contest.slug}`}><CheckCircle2 className="mr-1.5 size-3.5 text-emerald-400" /> Registered</Link>
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}

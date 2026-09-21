@@ -94,10 +94,10 @@ export function ContestLobbyPage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-lime-400/10 border border-lime-400/20 text-lime-400">
-                <CheckCircle2 className="size-5" />
+              <div className="p-2 rounded-md bg-emerald-950/40 border border-emerald-500/30 text-emerald-400">
+                <CheckCircle2 className="size-5 text-emerald-400" />
               </div>
-              <h1 className="text-xl font-semibold text-white tracking-tight">
+              <h1 className="text-xl font-semibold text-white tracking-tight font-sans">
                 Assessment Submitted
               </h1>
             </div>
@@ -159,9 +159,10 @@ export function ContestLobbyPage() {
                 Contest Arena Waiting Room
               </h1>
             </div>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Registration confirmed. The live contest arena unlocks when the competition begins:
-            </p>
+            <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2 text-xs font-sans text-emerald-400">
+              <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+              <span>Registered · Contest arena unlocks at start time</span>
+            </div>
             <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Starts at:</span>

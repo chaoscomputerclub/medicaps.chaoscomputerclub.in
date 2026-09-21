@@ -176,7 +176,11 @@ export function ContestOfflinePage() {
               <span className="text-white font-semibold">{pass?.seat ?? "Lab-04-WS-07"}</span>
             </div>
             <Button
-              className="w-full rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-40 transition-colors [&_svg]:transition-colors"
+              className={`w-full rounded-md font-sans text-xs font-semibold transition-colors [&_svg]:transition-colors ${
+                checkedIn
+                  ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-950/60"
+                  : "bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+              }`}
               disabled={checkedIn || isCheckingIn}
               onClick={handleCheckIn}
             >

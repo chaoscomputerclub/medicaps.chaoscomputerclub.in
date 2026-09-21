@@ -170,7 +170,8 @@ export function MyContestsPage() {
                           </span>
                         )}
                         {isUpcoming && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-amber-300 bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-500/30">
+                          <span className="inline-flex items-center gap-1 font-sans text-[9px] font-semibold uppercase text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+                            <CheckCircle2 size={10} className="text-emerald-400" />
                             Registered
                           </span>
                         )}

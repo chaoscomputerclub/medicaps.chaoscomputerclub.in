@@ -159,9 +159,9 @@ export function ContestQualifiedPage() {
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
                     Medi-Caps Campus Gate Pass
                   </span>
-                  <span className={`font-mono text-[10px] uppercase font-semibold rounded px-2 py-0.5 border ${
+                  <span className={`font-sans text-[10px] uppercase font-semibold rounded px-2 py-0.5 border ${
                     isCheckedIn
-                      ? "text-lime-400 border-lime-400/30 bg-lime-400/10"
+                      ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/40"
                       : "text-amber-400 border-amber-500/30 bg-black"
                   }`}>
                     ● {isCheckedIn ? "CHECKED IN · GATE VERIFIED" : "ISSUED · AWAITING SCAN"}

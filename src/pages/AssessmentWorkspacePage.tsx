@@ -738,14 +738,14 @@ export function AssessmentWorkspacePage() {
                   {runResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        runResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-red-400"
+                        runResult.verdict === "ACCEPTED" ? "bg-emerald-400" : "bg-red-400"
                       }`}
                     />
                   )}
                   {submitResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-red-400"
+                        submitResult.verdict === "ACCEPTED" ? "bg-emerald-400" : "bg-red-400"
                       }`}
                     />
                   )}
@@ -799,14 +799,14 @@ export function AssessmentWorkspacePage() {
                       <div className="flex items-center justify-between p-2.5 rounded bg-zinc-950 border border-white/8">
                         <div className="flex items-center gap-2">
                           {submitResult.verdict === "ACCEPTED" ? (
-                            <CheckCircle2 size={16} className="text-lime-400" />
+                            <CheckCircle2 size={16} className="text-emerald-400" />
                           ) : (
                             <XCircle size={16} className="text-red-400" />
                           )}
-                          <span className="font-semibold text-white uppercase">{submitResult.verdict}</span>
+                          <span className={`font-semibold uppercase ${submitResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-white"}`}>{submitResult.verdict}</span>
                         </div>
                         <div className="text-[11px] text-zinc-400">
-                          Passed: <strong className="text-white">{submitResult.passed_testcases} / {submitResult.total_testcases}</strong> · Score: <strong className="text-lime-400">{submitResult.score} pts</strong>
+                          Passed: <strong className="text-white">{submitResult.passed_testcases} / {submitResult.total_testcases}</strong> · Score: <strong className="text-emerald-400">{submitResult.score} pts</strong>
                         </div>
                       </div>
 
@@ -814,7 +814,7 @@ export function AssessmentWorkspacePage() {
                         <div key={i} className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-500">{tc.name || `Case ${i + 1}`}</span>
-                            <span className={tc.passed ? "text-lime-400 font-semibold" : "text-red-400 font-semibold"}>
+                            <span className={tc.passed ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold"}>
                               {tc.verdict}
                             </span>
                           </div>
@@ -831,11 +831,11 @@ export function AssessmentWorkspacePage() {
                       <div className="flex items-center justify-between p-2.5 rounded bg-zinc-950 border border-white/8">
                         <div className="flex items-center gap-2">
                           {runResult.verdict === "ACCEPTED" ? (
-                            <CheckCircle2 size={16} className="text-lime-400" />
+                            <CheckCircle2 size={16} className="text-emerald-400" />
                           ) : (
                             <AlertCircle size={16} className="text-amber-400" />
                           )}
-                          <span className="font-semibold text-white uppercase">{runResult.verdict}</span>
+                          <span className={`font-semibold uppercase ${runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-white"}`}>{runResult.verdict}</span>
                         </div>
                         <div className="text-[11px] text-zinc-400">
                           Passed: <strong className="text-white">{runResult.passed_testcases} / {runResult.total_testcases}</strong>
@@ -846,7 +846,7 @@ export function AssessmentWorkspacePage() {
                         <div key={i} className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-500">{tc.name || `Case ${i + 1}`}</span>
-                            <span className={tc.passed ? "text-lime-400 font-semibold" : "text-amber-400 font-semibold"}>
+                            <span className={tc.passed ? "text-emerald-400 font-semibold" : "text-amber-400 font-semibold"}>
                               {tc.verdict}
                             </span>
                           </div>

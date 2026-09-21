@@ -111,9 +111,9 @@ export function ContestResultsPage() {
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "rounded px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider",
+                      "rounded px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider",
                       isQualified
-                        ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
+                        ? "border border-emerald-500/30 bg-emerald-950/40 text-emerald-400"
                         : "border border-amber-500/30 bg-black text-amber-400"
                     )}
                   >

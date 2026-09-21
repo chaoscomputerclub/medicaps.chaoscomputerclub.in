@@ -654,32 +654,32 @@ export function ContestArenaPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         {submitResult.verdict === "ACCEPTED" ? (
-                          <div className="flex items-center gap-1.5 text-lime-400 font-semibold text-xs uppercase font-mono">
-                            <CheckCircle2 className="size-4" /> Accepted
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-semibold text-xs uppercase font-sans">
+                            <CheckCircle2 className="size-3.5 text-emerald-400" /> Accepted
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-red-400 font-semibold text-xs uppercase font-mono">
-                            <XCircle className="size-4" /> {submitResult.verdict}
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-red-500/30 bg-red-950/40 text-red-400 font-semibold text-xs uppercase font-sans">
+                            <XCircle className="size-3.5" /> {submitResult.verdict}
                           </div>
                         )}
                         <span className="text-zinc-600">·</span>
-                        <span className="text-white font-mono tabular-nums">
+                        <span className="text-white font-sans tabular-nums">
                           {submitResult.passed_testcases} / {submitResult.total_testcases} passed
                         </span>
                         {submitResult.points_awarded > 0 && (
-                          <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 rounded font-mono text-[10px] tabular-nums">
+                          <Badge className="bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 rounded font-sans text-[10px] tabular-nums">
                             +{submitResult.points_awarded} pts
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-400 font-mono">{submitResult.message}</p>
+                      <p className="text-xs text-zinc-400 font-sans">{submitResult.message}</p>
                     </div>
                   ) : runResult ? (
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 font-mono">
+                      <div className="flex items-center gap-2 font-sans">
                         <span
                           className={`font-semibold uppercase text-xs ${
-                            runResult.verdict === "ACCEPTED" ? "text-lime-400" : "text-amber-400"
+                            runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-amber-400"
                           }`}
                         >
                           Verdict: {runResult.verdict}
