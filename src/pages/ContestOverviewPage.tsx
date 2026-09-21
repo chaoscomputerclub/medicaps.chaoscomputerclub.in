@@ -59,7 +59,7 @@ function useCountdown(targetIsoDate: string | null | undefined) {
 export function ContestOverviewPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const dispatch = useAppDispatch();
-  const { currentContest: contest, registration, problems, isLoadingDetail } = useAppSelector(
+  const { currentContest: rawContest, registration: rawRegistration, problems, isLoadingDetail } = useAppSelector(
     (state) => state.contest
   );
   const [isRegistering, setIsRegistering] = useState(false);
@@ -82,6 +82,17 @@ export function ContestOverviewPage() {
       refreshDetail(true);
     }
   });
+
+  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
+  const cachedContest = !rawContest && contestSlug
+    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
+    : null;
+  const contest = rawContest ?? cachedContest;
+
+  const cachedRegistration = !rawRegistration && contestSlug
+    ? (globalSwrStore.get<any>(`contest:reg_status:${contestSlug}`)?.data ?? null)
+    : null;
+  const registration = rawRegistration ?? cachedRegistration;
 
   const isRegistered = Boolean(registration?.registered || contest?.registered);
   const isLive = contest?.status === "live";
@@ -108,13 +119,7 @@ export function ContestOverviewPage() {
     }
   };
 
-  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
-  const cachedContest = !contest && contestSlug
-    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
-    : null;
-  const resolvedContest = contest ?? cachedContest;
-
-  if (isLoadingDetail && !resolvedContest) return <ContestDetailSkeleton />;
+  if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
   if (!contest) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
@@ -235,7 +240,7 @@ export function ContestOverviewPage() {
                 size="lg"
                 className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
-                <Link to={`/contests/${contestSlug}/arena`}>
+                <Link to={`/contests/${contestSlug}/lobby`}>
                   <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
                 </Link>
               </Button>
@@ -265,7 +270,7 @@ export function ContestOverviewPage() {
                     size="sm"
                     className="rounded-md border-lime-400/30 bg-black text-lime-400 hover:bg-lime-400/10 text-xs font-mono"
                   >
-                    <Link to={`/contests/${contestSlug}/arena`}>
+                    <Link to={`/contests/${contestSlug}/lobby`}>
                       <Play className="mr-1.5 size-3.5 fill-current" /> Enter Arena (Dev Mode)
                     </Link>
                   </Button>

@@ -142,7 +142,7 @@ export function ContestOfflinePage() {
           </p>
         </div>
         <Button asChild size="lg" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
-          <Link to={`/contests/${contestSlug}/arena`}>
+          <Link to={`/contests/${contestSlug}/lobby`}>
             <Play className="size-3.5 fill-current mr-1.5" />
             Enter Arena
           </Link>

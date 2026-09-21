@@ -242,7 +242,7 @@ export function ContestQualifiedPage() {
                         <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">Round 2 Is Live</span>
                       </div>
                       <Button asChild size="sm" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
-                        <Link to={`/contests/${contestSlug}/arena`}>
+                        <Link to={`/contests/${contestSlug}/lobby`}>
                           <Play className="mr-1 size-3 fill-current" /> Enter Arena
                         </Link>
                       </Button>

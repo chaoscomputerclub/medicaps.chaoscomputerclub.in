@@ -371,7 +371,7 @@ export function ContestsHubPage() {
                     {upcomingWeekly.status === "live" ? (
                       <>
                         <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md transition-colors [&_svg]:transition-colors">
-                          <Link to={`/contests/${upcomingWeekly.slug}/arena`}>
+                          <Link to={`/contests/${upcomingWeekly.slug}/lobby`}>
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
                           </Link>
                         </Button>
@@ -428,7 +428,7 @@ export function ContestsHubPage() {
                     <div className="flex items-center gap-2 pt-1">
                       {isLive ? (
                         <Button asChild className="flex-1 bg-transparent text-xs font-sans font-semibold uppercase text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
-                          <Link to={`/contests/${contest.slug}/arena`}>
+                          <Link to={`/contests/${contest.slug}/lobby`}>
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Arena
                           </Link>
                         </Button>

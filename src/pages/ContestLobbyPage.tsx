@@ -51,6 +51,11 @@ export function ContestLobbyPage() {
     : null;
   const resolvedContest = contest ?? cachedContest;
 
+  const cachedRegistration = !registration && contestSlug
+    ? (globalSwrStore.get<any>(`contest:reg_status:${contestSlug}`)?.data ?? null)
+    : null;
+  const resolvedRegistration = registration ?? cachedRegistration;
+
   if (isLoadingDetail && !resolvedContest) {
     return <ContestLobbySkeleton />;
   }
@@ -63,24 +68,24 @@ export function ContestLobbyPage() {
     );
   }
 
-  const phase = contestPhase(resolvedContest, registration ?? null);
+  const phase = contestPhase(resolvedContest, resolvedRegistration ?? null);
   const isInProgress = Boolean(
-    registration?.can_resume_assessment ||
-    (registration?.assessment_status === "in_progress" && !registration?.assessment_taken)
+    resolvedRegistration?.can_resume_assessment ||
+    (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
   );
   const isAssessmentSubmitted = Boolean(
     !isInProgress && (
       phase === "assessment_submitted" ||
-      registration?.assessment_taken ||
-      registration?.assessment_status === "submitted"
+      resolvedRegistration?.assessment_taken ||
+      resolvedRegistration?.assessment_status === "submitted"
     )
   );
   const opensAt = assessmentOpensAt(resolvedContest);
-  const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
+  const isDevBypass = Boolean(resolvedRegistration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const notYetOpen = phase === "registration_open" && !isDevBypass;
   const canStart =
     !isAssessmentSubmitted &&
-    (Boolean(registration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
+    (Boolean(resolvedRegistration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
 
   return (
     <div className="flex min-h-[calc(100vh-140px)] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
@@ -89,7 +94,7 @@ export function ContestLobbyPage() {
         to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
       >
-        <ArrowLeft className="size-3.5" /> Back to {contest.title}
+        <ArrowLeft className="size-3.5" /> Back to {resolvedContest.title}
       </Link>
 
       {/* Submitted State */}
@@ -125,7 +130,7 @@ export function ContestLobbyPage() {
             </Button>
           </div>
         </div>
-      ) : !registration?.registered ? (
+      ) : (!resolvedRegistration?.registered && !isDevBypass) ? (
         /* Not Registered */
         <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
           <div className="space-y-3">
@@ -174,7 +179,7 @@ export function ContestLobbyPage() {
             <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Starts at:</span>
-                <span className="text-lime-400 font-semibold">{formatWhen(contest.starts_at)}</span>
+                <span className="text-lime-400 font-semibold">{formatWhen(resolvedContest.starts_at)}</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Duration:</span>
@@ -230,7 +235,7 @@ export function ContestLobbyPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-white">{contest.title}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-white">{resolvedContest.title}</h1>
             <p className="text-xs text-zinc-400 font-mono">
               Review the competition guidelines and regulations before entering.
             </p>
@@ -312,11 +317,11 @@ export function ContestLobbyPage() {
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-md bg-transparent text-amber-400 border border-amber-400 font-mono text-xs font-semibold hover:bg-amber-400 hover:text-black transition-colors"
+                  className="rounded-md bg-transparent text-amber-400 border border-amber-400 font-mono text-xs font-semibold hover:bg-amber-400 hover:text-black transition-colors cursor-pointer"
                 >
-                  <a href={`/assessments/${contestSlug}`} target="_blank" rel="noopener noreferrer">
-                    <Play className="mr-1.5 size-3.5 fill-current" /> Resume Assessment
-                  </a>
+                  <Link to={`/contests/${contestSlug}/arena`}>
+                    <Play className="mr-1.5 size-3.5 fill-current" /> Resume Contest
+                  </Link>
                 </Button>
                 <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
                   <Link to={`/contests/${contestSlug}`}>Back to Overview</Link>
@@ -331,7 +336,7 @@ export function ContestLobbyPage() {
                   type="checkbox"
                   checked={ack}
                   onChange={(e) => setAck(e.target.checked)}
-                  className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-black text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400"
+                  className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-black text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400 cursor-pointer"
                 />
                 <span className="text-xs font-mono text-zinc-300 leading-relaxed">
                   I understand that this is my single continuous attempt. The {ASSESSMENT_DURATION_MINUTES}-minute clock begins immediately and auto-submits on completion.
@@ -340,21 +345,20 @@ export function ContestLobbyPage() {
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Button
-                  asChild
+                  asChild={ack && canStart}
                   disabled={!ack || !canStart}
                   size="lg"
-                  className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 transition-colors [&_svg]:transition-colors"
+                  className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 disabled:pointer-events-none transition-colors [&_svg]:transition-colors cursor-pointer"
                 >
-                  <a
-                    href={(!ack || !canStart) ? undefined : `/assessments/${contestSlug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      if (!ack || !canStart) e.preventDefault();
-                    }}
-                  >
-                    <Play className="mr-1.5 size-3.5 fill-current" /> Launch Workspace
-                  </a>
+                  {ack && canStart ? (
+                    <Link to={`/contests/${contestSlug}/arena`}>
+                      <Play className="mr-1.5 size-3.5 fill-current" /> Start Contest
+                    </Link>
+                  ) : (
+                    <span>
+                      <Play className="mr-1.5 size-3.5 fill-current" /> Start Contest
+                    </span>
+                  )}
                 </Button>
                 <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
                   <Link to={`/contests/${contestSlug}`}>Not Now</Link>
@@ -363,7 +367,7 @@ export function ContestLobbyPage() {
 
               {!canStart && !notYetOpen && (
                 <p className="font-mono text-xs text-amber-400">
-                  {registration?.eligibility_message ?? "Assessment is currently closed."}
+                  {resolvedRegistration?.eligibility_message ?? "Assessment is currently closed."}
                 </p>
               )}
             </div>
