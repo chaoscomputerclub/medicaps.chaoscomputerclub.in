@@ -22,9 +22,9 @@ const buttonVariants = cva(
           "text-lime-400 font-sans underline-offset-4 hover:underline",
       },
       size: {
-        default: "min-h-[38px] px-4 py-2 text-xs rounded-md",
-        sm: "min-h-[32px] px-3 py-1.5 text-xs rounded-md",
-        lg: "min-h-[44px] px-6 py-2.5 text-sm rounded-md",
+        default: "min-h-[38px] px-4 py-2 text-xs rounded-md gap-2",
+        sm: "min-h-[32px] px-3 py-1.5 text-xs rounded-md gap-1.5",
+        lg: "min-h-[44px] px-6 py-2.5 text-sm rounded-md gap-2",
         icon: "h-9 w-9 min-h-[36px] min-w-[36px] p-0 rounded-md",
       },
     },

@@ -245,7 +245,8 @@ export function ContestOverviewPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
+                  <Play className="size-4 fill-current" />
+                  <span>Enter Contest Arena</span>
                 </a>
               </Button>
             ) : isFinished ? (
@@ -255,7 +256,8 @@ export function ContestOverviewPage() {
                 className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/results`}>
-                  <Trophy className="mr-1.5 size-4" /> View Final Standings
+                  <Trophy className="size-4" />
+                  <span>View Final Standings</span>
                 </Link>
               </Button>
             ) : isRegistered ? (
@@ -279,7 +281,8 @@ export function ContestOverviewPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Play className="mr-1.5 size-3.5 fill-current" /> Enter Arena (Dev Mode)
+                      <Play className="size-3.5 fill-current" />
+                      <span>Enter Arena (Dev Mode)</span>
                     </a>
                   </Button>
                 )}
@@ -291,8 +294,8 @@ export function ContestOverviewPage() {
                 size="lg"
                 className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
-                <Sparkles className="mr-1.5 size-4" />
-                {isRegistering ? "Registering..." : "Register for Contest"}
+                <Sparkles className="size-4" />
+                <span>{isRegistering ? "Registering..." : "Register for Contest"}</span>
               </Button>
             )}
           </div>

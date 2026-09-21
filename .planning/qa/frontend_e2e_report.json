@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T14:59:01.156Z",
+  "timestamp": "2026-09-21T15:06:03.439Z",
   "total": 18,
   "passed": 18,
   "failed": 0,
@@ -12,7 +12,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 908.7,
+      "latency": 943.2,
       "notes": "Redis: ok"
     },
     {
@@ -22,7 +22,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 245.2,
+      "latency": 249.5,
       "notes": "Asymmetric verification key available"
     },
     {
@@ -32,7 +32,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 248.7,
+      "latency": 253.3,
       "notes": "Validates auth subsystem without email dispatch"
     },
     {
@@ -42,7 +42,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 248.6,
+      "latency": 254.9,
       "notes": "Validates handle availability without email dispatch"
     },
     {
@@ -52,7 +52,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 245.9,
+      "latency": 267.4,
       "notes": "Loaded 2 ranked cadets"
     },
     {
@@ -62,7 +62,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 249.9,
+      "latency": 256.9,
       "notes": "Verified 1 departmental tiers"
     },
     {
@@ -72,7 +72,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 245.6,
+      "latency": 254.1,
       "notes": "Verified 29 rating buckets (No undefined attendance crash)"
     },
     {
@@ -82,7 +82,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 252.7,
+      "latency": 259,
       "notes": "Loaded 1 official sessions"
     },
     {
@@ -92,7 +92,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 256.4,
+      "latency": 280.1,
       "notes": "Loaded specifications for slug: weekly-contest-1"
     },
     {
@@ -102,7 +102,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 250,
+      "latency": 260.6,
       "notes": "Problem set query passed for weekly-contest-1"
     },
     {
@@ -112,7 +112,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 255.5,
+      "latency": 265.3,
       "notes": "Scoreboard matrix responsive"
     },
     {
@@ -122,7 +122,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 7298.3,
+      "latency": 1087.3,
       "notes": "Verified LeetCode-style profile view"
     },
     {
@@ -132,7 +132,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 2777.8,
+      "latency": 277.5,
       "notes": "Leading @ gracefully parsed without 404"
     },
     {
@@ -142,7 +142,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 857.9,
+      "latency": 265.5,
       "notes": "Followers tab: 0 cadets listed"
     },
     {
@@ -152,7 +152,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 785.6,
+      "latency": 267.3,
       "notes": "Following tab: 0 cadets listed"
     },
     {
@@ -162,7 +162,7 @@
       "expected": 401,
       "actual": 401,
       "passed": true,
-      "latency": 2029.7,
+      "latency": 250.9,
       "notes": "Strict 401 Unauthorized for guest follow clicks"
     },
     {
@@ -172,7 +172,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 773.6,
+      "latency": 270.4,
       "notes": "Verified 0 SHA-256 signatures"
     },
     {
@@ -182,7 +182,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 911.7,
+      "latency": 265.2,
       "notes": "Loaded 0 campus notices"
     }
   ]

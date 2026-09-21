@@ -276,7 +276,8 @@ export function ContestArenaPage() {
               className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
             >
               <Link to={`/contests/${contestSlug}/qualified`}>
-                <QrCode className="mr-2 size-3.5" /> View Finalist Pass
+                <QrCode className="size-3.5" />
+                <span>View Finalist Pass</span>
               </Link>
             </Button>
             <div className="flex gap-2">
@@ -285,7 +286,8 @@ export function ContestArenaPage() {
                 variant="outline"
                 className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
               >
-                <RotateCcw className="mr-1.5 size-3" /> Re-check Status
+                <RotateCcw className="size-3" />
+                <span>Re-check Status</span>
               </Button>
               <Button
                 asChild
@@ -323,8 +325,8 @@ export function ContestArenaPage() {
             }}
             className="h-7 px-2 text-zinc-400 hover:text-white rounded-md font-mono text-xs cursor-pointer flex items-center"
           >
-            <ArrowLeft className="size-3.5 mr-1" />
-            Exit
+            <ArrowLeft className="size-3.5" />
+            <span>Exit</span>
           </Button>
 
           <div className="h-3 w-px bg-white/10" />
@@ -740,8 +742,8 @@ export function ContestArenaPage() {
                   onClick={handleRunCode}
                   className="font-mono text-xs rounded-md border-white/10 bg-black text-white hover:bg-zinc-950 disabled:opacity-30"
                 >
-                  <Play className="size-3 mr-1 text-lime-400" />
-                  {isRunningCode ? "Running…" : "Run"}
+                  <Play className="size-3 text-lime-400" />
+                  <span>{isRunningCode ? "Running…" : "Run"}</span>
                 </Button>
 
                 <Button
@@ -750,8 +752,8 @@ export function ContestArenaPage() {
                   onClick={handleSubmitCode}
                   className="font-mono text-xs font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 transition-colors [&_svg]:transition-colors"
                 >
-                  <Send className="size-3 mr-1" />
-                  {isSubmittingCode ? "Judging…" : "Submit"}
+                  <Send className="size-3" />
+                  <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
                 </Button>
               </div>
             </div>

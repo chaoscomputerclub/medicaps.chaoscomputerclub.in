@@ -377,7 +377,8 @@ export function AssessmentWorkspacePage() {
             {isLifecycleErr && (
               <a href={`/contests/${contestSlug}/results`} className="w-full">
                 <Button className="w-full bg-transparent text-white border border-white/20 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors">
-                  <Trophy size={14} className="mr-1.5" /> View Standings
+                  <Trophy size={14} />
+                  <span>View Standings</span>
                 </Button>
               </a>
             )}
@@ -387,8 +388,8 @@ export function AssessmentWorkspacePage() {
                 disabled={isRegistering}
                 className="w-full bg-transparent text-white border border-white/20 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
               >
-                <Users size={14} className="mr-1.5" />
-                {isRegistering ? "Registering..." : "Register Now & Enter"}
+                <Users size={14} />
+                <span>{isRegistering ? "Registering..." : "Register Now & Enter"}</span>
               </Button>
             )}
             {isAuthErr && (
@@ -404,7 +405,7 @@ export function AssessmentWorkspacePage() {
                 if (window.opener) window.close();
                 else window.location.href = `/contests/${contestSlug}`;
               }}
-              className="w-full font-mono text-xs border-white/10 bg-black text-zinc-400 hover:text-white rounded-md"
+              className="w-full font-mono text-xs border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md"
             >
               Return to Contest Details
             </Button>

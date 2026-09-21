@@ -98,8 +98,8 @@ export function MyContestsPage() {
           />
           <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400">
             <Link to="/contests">
-              Browse Contests
-              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+              <span>Browse Contests</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </Button>
         </div>
@@ -266,8 +266,8 @@ export function MyContestsPage() {
                           className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors"
                         >
                           <Link to={`/contests/${c.contest_slug}/lobby`}>
-                            <Play className="w-3 h-3 mr-1 fill-current" />
-                            Assessment
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>Assessment</span>
                           </Link>
                         </Button>
                       ) : isUpcoming && !c.assessment_submitted ? (
@@ -278,8 +278,8 @@ export function MyContestsPage() {
                           className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs"
                         >
                           <Link to={`/contests/${c.contest_slug}`}>
-                            Details
-                            <ArrowRight className="w-3 h-3 ml-1" />
+                            <span>Details</span>
+                            <ArrowRight className="w-3 h-3" />
                           </Link>
                         </Button>
                       ) : (
@@ -290,8 +290,8 @@ export function MyContestsPage() {
                           className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs"
                         >
                           <Link to={`/contests/${c.contest_slug}/results`}>
-                            Standings
-                            <ArrowRight className="w-3 h-3 ml-1" />
+                            <span>Standings</span>
+                            <ArrowRight className="w-3 h-3" />
                           </Link>
                         </Button>
                       )}

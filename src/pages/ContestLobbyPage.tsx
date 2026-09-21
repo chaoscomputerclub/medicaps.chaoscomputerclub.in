@@ -144,7 +144,7 @@ export function ContestLobbyPage() {
                   navigate(`/contests/${contestSlug}`);
                 }
               }}
-              className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:text-white cursor-pointer"
+              className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
             >
               Contest Overview
             </Button>
@@ -211,7 +211,7 @@ export function ContestLobbyPage() {
               </div>
             </div>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
@@ -236,7 +236,7 @@ export function ContestLobbyPage() {
               The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
@@ -340,10 +340,11 @@ export function ContestLobbyPage() {
                   className="rounded-md bg-transparent text-amber-400 border border-amber-400 font-mono text-xs font-semibold hover:bg-amber-400 hover:text-black transition-colors cursor-pointer"
                 >
                   <Link to={`/contests/${contestSlug}/arena`}>
-                    <Play className="mr-1.5 size-3.5 fill-current" /> Resume Contest
+                    <Play className="size-3.5 fill-current" />
+                    <span>Resume Contest</span>
                   </Link>
                 </Button>
-                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:text-white">
+                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent">
                   <Link to={`/contests/${contestSlug}`}>Back to Overview</Link>
                 </Button>
               </div>
@@ -372,12 +373,14 @@ export function ContestLobbyPage() {
                 >
                   {ack && canStart ? (
                     <Link to={`/contests/${contestSlug}/arena`}>
-                      <Play className="mr-1.5 size-3.5 fill-current" /> Start Contest
+                      <Play className="size-3.5 fill-current" />
+                      <span>Start Contest</span>
                     </Link>
                   ) : (
-                    <span>
-                      <Play className="mr-1.5 size-3.5 fill-current" /> Start Contest
-                    </span>
+                    <>
+                      <Play className="size-3.5 fill-current" />
+                      <span>Start Contest</span>
+                    </>
                   )}
                 </Button>
                 <Button
@@ -390,7 +393,7 @@ export function ContestLobbyPage() {
                       navigate(`/contests/${contestSlug}`);
                     }
                   }}
-                  className="rounded-md font-mono text-xs text-zinc-500 hover:text-white cursor-pointer"
+                  className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
                 >
                   Not Now
                 </Button>
