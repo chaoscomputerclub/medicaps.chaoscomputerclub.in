@@ -238,6 +238,39 @@ export function SettingsPage() {
     raw && NAV_ITEMS.some((n) => n.id === raw) ? raw : "profile";
   const setActiveTab = (t: SettingsTab) => setSearchParams({ tab: t });
 
+  const settingsNavRef = useRef<HTMLElement | null>(null);
+  const settingsItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [settingsPillStyle, setSettingsPillStyle] = useState<{
+    top: number;
+    height: number;
+    opacity: number;
+    ready: boolean;
+  }>({ top: 0, height: 0, opacity: 0, ready: false });
+
+  useEffect(() => {
+    const updateSettingsPill = () => {
+      const navEl = settingsNavRef.current;
+      const activeEl = settingsItemRefs.current[activeTab];
+      if (navEl && activeEl) {
+        const navRect = navEl.getBoundingClientRect();
+        const activeRect = activeEl.getBoundingClientRect();
+        setSettingsPillStyle({
+          top: activeRect.top - navRect.top,
+          height: activeRect.height,
+          opacity: 1,
+          ready: true,
+        });
+      }
+    };
+    updateSettingsPill();
+    const raf = requestAnimationFrame(updateSettingsPill);
+    window.addEventListener("resize", updateSettingsPill);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updateSettingsPill);
+    };
+  }, [activeTab]);
+
   // ── Form state ──
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -465,29 +498,61 @@ export function SettingsPage() {
 
       <div className="flex gap-6 items-start">
         {/* ── Left sidebar nav ─────────────────────────────────────────────── */}
-        <nav className="hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black" aria-label="Settings navigation">
+        <nav
+          ref={settingsNavRef}
+          className="relative hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black"
+          aria-label="Settings navigation"
+        >
+          {/* Animated Active Sliding Indicator */}
+          <div
+            aria-hidden="true"
+            className={cn(
+              "absolute left-1 right-1 pointer-events-none rounded-md",
+              settingsPillStyle.ready
+                ? "transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                : "transition-none",
+              activeTab === "danger"
+                ? "bg-red-500/10 border border-red-500/30"
+                : "bg-white/10 border border-white/15"
+            )}
+            style={{
+              transform: `translateY(${Math.max(0, settingsPillStyle.top - 4)}px)`,
+              height: settingsPillStyle.height ? `${settingsPillStyle.height}px` : "36px",
+              opacity: settingsPillStyle.opacity,
+            }}
+          >
+            {activeTab !== "danger" && (
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-lime-400 rounded-r-full shadow-[0_0_6px_rgba(204,255,0,0.5)]" />
+            )}
+          </div>
+
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
             return (
               <button
                 key={item.id}
+                ref={(el) => {
+                  settingsItemRefs.current[item.id] = el;
+                }}
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-sans rounded-md transition-colors cursor-pointer",
+                  "relative z-10 flex items-center gap-2.5 w-full px-3 py-2 text-xs font-sans rounded-md transition-colors cursor-pointer select-none",
                   active
                     ? item.danger
-                      ? "bg-red-500/10 text-red-400 font-semibold"
-                      : "bg-white/10 text-white font-semibold"
+                      ? "text-red-400 font-semibold"
+                      : "text-white font-semibold"
                     : item.danger
                     ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/5"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-950"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                 )}
               >
-                <Icon size={13} />
+                <Icon size={13} className="shrink-0" />
                 <span>{item.label}</span>
-                {active && <span className="size-1.5 rounded-full bg-lime-400 ml-auto" />}
+                {active && !item.danger && (
+                  <span className="size-1.5 rounded-full bg-lime-400 ml-auto shadow-[0_0_6px_rgba(204,255,0,0.6)]" />
+                )}
               </button>
             );
           })}

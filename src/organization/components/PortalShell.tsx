@@ -13,7 +13,7 @@ import {
   List,
   X,
 } from "@phosphor-icons/react";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
@@ -116,6 +116,51 @@ export function PortalShell() {
   const cleanPath = pathname.replace(/\/+$/, "") || "/";
   const isFullscreenWorkspace = cleanPath.includes("/assessment") || cleanPath.includes("/arena");
 
+  const navRef = useRef<HTMLElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    top: number;
+    height: number;
+    opacity: number;
+    ready: boolean;
+  }>({ top: 0, height: 0, opacity: 0, ready: false });
+
+  useEffect(() => {
+    const activeItem = links.find((item) =>
+      item.exact
+        ? cleanPath === item.to
+        : cleanPath === item.to || cleanPath.startsWith(item.to + "/")
+    );
+
+    if (!activeItem) {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
+    const updateIndicator = () => {
+      const navEl = navRef.current;
+      const activeEl = itemRefs.current[activeItem.to];
+      if (navEl && activeEl) {
+        const navRect = navEl.getBoundingClientRect();
+        const activeRect = activeEl.getBoundingClientRect();
+        setIndicatorStyle({
+          top: activeRect.top - navRect.top,
+          height: activeRect.height,
+          opacity: 1,
+          ready: true,
+        });
+      }
+    };
+
+    updateIndicator();
+    const frameId = requestAnimationFrame(updateIndicator);
+    window.addEventListener("resize", updateIndicator);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", updateIndicator);
+    };
+  }, [cleanPath, open]);
+
   if (isFullscreenWorkspace) {
     return (
       <main className="min-h-screen bg-black text-white">
@@ -178,8 +223,30 @@ export function PortalShell() {
           </div>
         </Link>
 
-        {/* Navigation Links */}
-        <nav aria-label="Portal navigation" className="flex flex-col gap-0.5 my-1 flex-1">
+        {/* Navigation Links with Premium SaaS Sliding Active Pill */}
+        <nav
+          ref={navRef}
+          aria-label="Portal navigation"
+          className="relative flex flex-col gap-1 my-1 flex-1"
+        >
+          {/* Animated Active Sliding Indicator Pill */}
+          <div
+            aria-hidden="true"
+            className={`absolute left-0 right-0 pointer-events-none rounded-md bg-white/[0.06] border border-white/10 ${
+              indicatorStyle.ready
+                ? "transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                : "transition-none"
+            }`}
+            style={{
+              transform: `translateY(${indicatorStyle.top}px)`,
+              height: indicatorStyle.height ? `${indicatorStyle.height}px` : "36px",
+              opacity: indicatorStyle.opacity,
+            }}
+          >
+            {/* Subtle left accent marker in Electric Lime */}
+            <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] bg-lime-400 rounded-r-full shadow-[0_0_8px_rgba(204,255,0,0.6)]" />
+          </div>
+
           {links.map((item) => {
             const active = item.exact
               ? cleanPath === item.to
@@ -188,15 +255,24 @@ export function PortalShell() {
             return (
               <Link
                 key={item.to}
+                ref={(el) => {
+                  itemRefs.current[item.to] = el;
+                }}
                 to={item.to}
                 onClick={() => dispatch(setSidebarOpen(false))}
-                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-sans transition-colors duration-150 ${
+                className={`relative z-10 flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-sans select-none group transition-colors duration-150 ${
                   active
-                    ? "bg-lime-400/8 text-lime-400 border-l-2 border-lime-400 font-semibold"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900/50 font-medium"
+                    ? "text-white font-medium"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                 }`}
               >
-                <Icon size={16} weight={active ? "fill" : "regular"} className="shrink-0" />
+                <Icon
+                  size={16}
+                  weight="regular"
+                  className={`shrink-0 transition-colors duration-150 ${
+                    active ? "text-lime-400" : "text-zinc-400 group-hover:text-zinc-200"
+                  }`}
+                />
                 <span className="truncate">{item.label}</span>
               </Link>
             );
