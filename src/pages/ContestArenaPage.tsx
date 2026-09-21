@@ -1181,15 +1181,14 @@ export function ContestArenaPage() {
                         {/* Difficulty Badge */}
                         <span
                           className={`px-2 py-0.5 rounded font-mono text-[10px] uppercase font-semibold border ${
-                            activeProblem.difficulty === "HARD" || activeProblem.points > 5
+                            activeProblem.difficulty === "HARD"
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
-                              : activeProblem.difficulty === "MEDIUM" || activeProblem.points > 3
+                              : activeProblem.difficulty === "MEDIUM"
                               ? "bg-amber-400/10 text-amber-400 border-amber-400/30"
-                              : "bg-lime-400/10 text-lime-400 border-lime-400/30"
+                              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                           }`}
                         >
-                          {activeProblem.difficulty ||
-                            (activeProblem.points > 5 ? "Hard" : activeProblem.points > 3 ? "Medium" : "Easy")}
+                          {activeProblem.difficulty || "EASY"}
                         </span>
                         <span className="text-xs text-zinc-400 font-mono tabular-nums">
                           {activeProblem.points} Points
@@ -2303,9 +2302,9 @@ export function ContestArenaPage() {
               const isActive = idx === resolvedIndex;
               const isSolved = solvedProblemIds.has(prob.id);
 
-              const diffUpper = (prob.difficulty || "").toUpperCase();
-              const isHard = diffUpper === "HARD" || prob.points > 5;
-              const isMed = diffUpper === "MEDIUM" || (!isHard && prob.points > 3);
+              const diffUpper = (prob.difficulty || "EASY").toUpperCase();
+              const isHard = diffUpper === "HARD";
+              const isMed = diffUpper === "MEDIUM";
               const diffLabel = isHard ? "Hard" : isMed ? "Medium" : "Easy";
 
               return (

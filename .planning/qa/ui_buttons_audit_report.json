@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-21T21:56:15.401Z",
+  "timestamp": "2026-09-21T22:00:01.349Z",
   "totalElements": 300,
   "functionalCount": 300,
   "connectivityRate": "100.0%",
@@ -961,7 +961,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1240,
+      "line": 1239,
       "tag": "<button>",
       "label": "{copiedKey === tc_in_${i} ? (      ...",
       "handler": "{() => copyToClipboard(st.stdin, `tc_in_${i}`)}",
@@ -970,7 +970,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1402,
+      "line": 1401,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleResetStarter}",
@@ -979,7 +979,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1414,
+      "line": 1413,
       "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 className=...",
       "handler": "{toggleFullscreen}",
@@ -988,7 +988,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1496,
+      "line": 1495,
       "tag": "<button>",
       "label": "Testcase",
       "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
@@ -997,7 +997,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1510,
+      "line": 1509,
       "tag": "<button>",
       "label": "{submitResult && (                   ...",
       "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
@@ -1006,7 +1006,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1545,
+      "line": 1544,
       "tag": "<button>",
       "label": "setIsDrawerCollapsed(true)}\n         ...",
       "handler": "{() => setIsDrawerCollapsed(true)}",
@@ -1015,7 +1015,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1565,
+      "line": 1564,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(i)}",
@@ -1024,7 +1024,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1578,
+      "line": 1577,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -1033,7 +1033,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1698,
+      "line": 1697,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveSubmitCaseIndex(idx)}",
@@ -1042,7 +1042,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1829,
+      "line": 1828,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveRunCaseIndex(idx)}",
@@ -1051,7 +1051,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1937,
+      "line": 1936,
       "tag": "<button>",
       "label": "{isDrawerCollapsed ? (               ...",
       "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
@@ -1060,7 +1060,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1976,
+      "line": 1975,
       "tag": "<button>",
       "label": "Code Editor",
       "handler": "{() => setActiveSettingsTab(\"editor\")}",
@@ -1069,7 +1069,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1987,
+      "line": 1986,
       "tag": "<button>",
       "label": "Shortcuts",
       "handler": "{() => setActiveSettingsTab(\"shortcuts\")}",
@@ -1078,7 +1078,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1998,
+      "line": 1997,
       "tag": "<button>",
       "label": "Contest Clock",
       "handler": "{() => setActiveSettingsTab(\"timer\")}",
@@ -1087,7 +1087,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2022,
+      "line": 2021,
       "tag": "<button>",
       "label": "{size}",
       "handler": "{() => {\n                          setEditorFontSize(size);\n                    ",
@@ -1096,7 +1096,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2049,
+      "line": 2048,
       "tag": "<button>",
       "label": "{editorWordWrap ? Enabled : Disabl...",
       "handler": "{() => {\n                      const next = !editorWordWrap;\n                   ",
@@ -1105,7 +1105,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2076,
+      "line": 2075,
       "tag": "<button>",
       "label": "{spaces} Spaces",
       "handler": "{() => {\n                          setEditorTabSize(spaces);\n                   ",
@@ -1114,7 +1114,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2142,
+      "line": 2141,
       "tag": "<Button>",
       "label": "Done",
       "handler": "{() => setShowSettingsModal(false)}",
@@ -1123,7 +1123,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2192,
+      "line": 2191,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
@@ -1132,7 +1132,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2205,
+      "line": 2204,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => setIsProblemListOpen(false)}",
@@ -1141,7 +1141,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2231,
+      "line": 2230,
       "tag": "<Button>",
       "label": "setIsProblemListOpen(false)}\n        ...",
       "handler": "{() => setIsProblemListOpen(false)}",
@@ -1150,7 +1150,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2247,
+      "line": 2246,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setProblemListTab(\"problems\")}",
@@ -1159,7 +1159,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2259,
+      "line": 2258,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setProblemListTab(\"ranking\")}",
@@ -1168,7 +1168,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2312,
+      "line": 2311,
       "tag": "<button>",
       "label": "{isActive && (                     <d...",
       "handler": "{() => {\n                    navigate(`/contests/${contestSlug}/problems/${pSlug",
@@ -1177,7 +1177,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2443,
+      "line": 2442,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1186,7 +1186,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2447,
+      "line": 2446,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -1195,7 +1195,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2500,
+      "line": 2499,
       "tag": "<Button>",
       "label": "Continue Solving",
       "handler": "{() => setShowExitModal(false)}",
@@ -1204,7 +1204,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2508,
+      "line": 2507,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                setShowExitModal(false);\n                navigate(`/con",
