@@ -52,6 +52,10 @@ export default defineConfig({
     target: "esnext",
     sourcemap: false,
     chunkSizeWarningLimit: 600,
+    // Disable modulepreload — Vite injects <link rel="modulepreload"> for every lazy chunk,
+    // which tells the browser to fetch ALL route JS files immediately, defeating code splitting.
+    // With this off, chunks load only when the route is actually navigated to.
+    modulePreload: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
