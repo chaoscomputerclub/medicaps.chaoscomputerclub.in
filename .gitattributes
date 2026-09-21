@@ -1,0 +1,14 @@
+# GitHub Linguist Overrides
+# Exclude agent workflows, tooling, and internal scripts from language stats
+.agents/** linguist-vendored
+.planning/** linguist-documentation
+scripts/** linguist-vendored
+
+# Exclude compiled distribution and build outputs from language stats
+dist/** linguist-generated
+dist-admin/** linguist-generated
+.output/** linguist-generated
+
+# Exclude lockfiles and migration snapshots
+*-lock.json linguist-generated
+drizzle/migrations/meta/** linguist-generated
