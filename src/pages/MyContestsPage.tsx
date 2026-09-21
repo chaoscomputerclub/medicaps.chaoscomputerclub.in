@@ -96,7 +96,7 @@ export function MyContestsPage() {
             kicker="Contest History"
             title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:bg-zinc-900 hover:text-white hover:border-white/20">
+          <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400">
             <Link to="/contests">
               Browse Contests
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -275,7 +275,7 @@ export function MyContestsPage() {
                           variant="outline"
                           size="sm"
                           asChild
-                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 font-mono text-xs"
+                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs"
                         >
                           <Link to={`/contests/${c.contest_slug}`}>
                             Details
@@ -287,7 +287,7 @@ export function MyContestsPage() {
                           variant="outline"
                           size="sm"
                           asChild
-                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 font-mono text-xs"
+                          className="rounded-md border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs"
                         >
                           <Link to={`/contests/${c.contest_slug}/results`}>
                             Standings

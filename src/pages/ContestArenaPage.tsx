@@ -283,14 +283,14 @@ export function ContestArenaPage() {
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
                 variant="outline"
-                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20"
+                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
               >
                 <RotateCcw className="mr-1.5 size-3" /> Re-check Status
               </Button>
               <Button
                 asChild
                 variant="ghost"
-                className="rounded-md font-mono text-xs text-zinc-500 hover:bg-zinc-900 hover:text-white"
+                className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black"
               >
                 <Link to={`/contests/${contestSlug}`}>
                   Exit Lobby

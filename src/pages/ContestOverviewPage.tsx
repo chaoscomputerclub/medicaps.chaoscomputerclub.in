@@ -417,7 +417,7 @@ export function ContestOverviewPage() {
                           asChild
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20"
+                          className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
                         >
                           <Link to={`/contests/${contestSlug}/arena`}>
                             Solve →
