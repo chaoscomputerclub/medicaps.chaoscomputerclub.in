@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-21T21:39:08.057Z",
-  "totalElements": 294,
-  "functionalCount": 294,
+  "timestamp": "2026-09-21T21:45:04.351Z",
+  "totalElements": 292,
+  "functionalCount": 292,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 35,
+    "backendMutations": 33,
     "backendQueries": 9,
     "routingNavigation": 175,
     "clientUiState": 54,
@@ -961,7 +961,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1397,
+      "line": 1385,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleResetStarter}",
@@ -970,7 +970,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1409,
+      "line": 1397,
       "tag": "<Button>",
       "label": "{isFullscreen ? <Minimize2 className=...",
       "handler": "{toggleFullscreen}",
@@ -979,7 +979,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1491,
+      "line": 1479,
       "tag": "<button>",
       "label": "Testcase",
       "handler": "{() => {\n                    setActiveConsoleTab(\"testcases\");\n                 ",
@@ -988,7 +988,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1505,
+      "line": 1493,
       "tag": "<button>",
       "label": "{submitResult && (                   ...",
       "handler": "{() => {\n                    setActiveConsoleTab(\"output\");\n                    ",
@@ -997,7 +997,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1540,
+      "line": 1528,
       "tag": "<button>",
       "label": "setIsDrawerCollapsed(true)}\n         ...",
       "handler": "{() => setIsDrawerCollapsed(true)}",
@@ -1006,7 +1006,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1560,
+      "line": 1548,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(i)}",
@@ -1015,7 +1015,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1573,
+      "line": 1561,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveTestcaseIndex(-1)}",
@@ -1024,7 +1024,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1693,
+      "line": 1681,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveSubmitCaseIndex(idx)}",
@@ -1033,7 +1033,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1824,
+      "line": 1812,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => setActiveRunCaseIndex(idx)}",
@@ -1042,7 +1042,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1932,
+      "line": 1920,
       "tag": "<button>",
       "label": "{isDrawerCollapsed ? (               ...",
       "handler": "{() => setIsDrawerCollapsed((prev) => !prev)}",
@@ -1051,25 +1051,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1954,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "{handleRunCode}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1966,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "{handleSubmitCode}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestArenaPage.tsx",
-      "line": 1996,
+      "line": 1959,
       "tag": "<button>",
       "label": "Code Editor",
       "handler": "{() => setActiveSettingsTab(\"editor\")}",
@@ -1078,7 +1060,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2007,
+      "line": 1970,
       "tag": "<button>",
       "label": "Shortcuts",
       "handler": "{() => setActiveSettingsTab(\"shortcuts\")}",
@@ -1087,7 +1069,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2018,
+      "line": 1981,
       "tag": "<button>",
       "label": "Contest Clock",
       "handler": "{() => setActiveSettingsTab(\"timer\")}",
@@ -1096,7 +1078,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2042,
+      "line": 2005,
       "tag": "<button>",
       "label": "{size}",
       "handler": "{() => {\n                          setEditorFontSize(size);\n                    ",
@@ -1105,7 +1087,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2069,
+      "line": 2032,
       "tag": "<button>",
       "label": "{editorWordWrap ? Enabled : Disabl...",
       "handler": "{() => {\n                      const next = !editorWordWrap;\n                   ",
@@ -1114,7 +1096,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2096,
+      "line": 2059,
       "tag": "<button>",
       "label": "{spaces} Spaces",
       "handler": "{() => {\n                          setEditorTabSize(spaces);\n                   ",
@@ -1123,7 +1105,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2162,
+      "line": 2125,
       "tag": "<Button>",
       "label": "Done",
       "handler": "{() => setShowSettingsModal(false)}",
@@ -1132,7 +1114,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2212,
+      "line": 2175,
       "tag": "<button>",
       "label": "View Final Results →",
       "handler": "{() => navigate(`/contests/${contestSlug}/final-results`)}",
@@ -1141,7 +1123,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2261,
+      "line": 2224,
       "tag": "<Button>",
       "label": "Continue Solving",
       "handler": "{() => setShowExitModal(false)}",
@@ -1150,7 +1132,7 @@
     },
     {
       "file": "src/pages/ContestArenaPage.tsx",
-      "line": 2269,
+      "line": 2232,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => {\n                setShowExitModal(false);\n                navigate(`/con",

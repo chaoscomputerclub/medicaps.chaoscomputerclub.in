@@ -1266,18 +1266,6 @@ export function ContestArenaPage() {
                         </pre>
                       </div>
                     )}
-
-                    {/* Acceptance Statistics Footer */}
-                    <div className="border-t border-white/8 pt-3 text-xs font-mono text-zinc-400 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span>Users Accepted:</span>
-                        <span className="text-zinc-200 tabular-nums">24,826 / 26.9K (92.3%)</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Total Accepted:</span>
-                        <span className="text-zinc-200 tabular-nums">27,201 / 47.1K (57.7%)</span>
-                      </div>
-                    </div>
                   </>
                 ) : (
                   <div className="text-zinc-500 font-mono text-xs">Select a question to begin.</div>
@@ -1587,13 +1575,13 @@ export function ContestArenaPage() {
                     {activeTestcaseIndex === -1 ? (
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
-                          <span>Custom Function Arguments</span>
-                          <span className="text-[10px] text-zinc-500">e.g. intervals = [[1,3],[2,6]]</span>
+                          <span>Custom Arguments</span>
+                          <span className="text-[10px] text-zinc-500">Standard input</span>
                         </div>
                         <textarea
                           value={customStdin}
                           onChange={(e) => setCustomStdin(e.target.value)}
-                          placeholder={activeProblem?.sample_testcases?.[0]?.stdin || 'intervals = [[1,3],[2,6]]'}
+                          placeholder={activeProblem?.sample_testcases?.[0]?.stdin || "Enter custom test inputs..."}
                           className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-xs font-mono text-white resize-none focus:outline-none focus:border-lime-400/60"
                         />
                       </div>
@@ -1948,31 +1936,6 @@ export function ContestArenaPage() {
                 <span className={`size-1.5 rounded-full ${isContestOver ? "bg-red-500" : "bg-lime-400"}`} />
                 <span>{isContestOver ? "Contest locked" : "Workstation online"}</span>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isRunningCode || isSubmittingCode || isContestOver}
-                onClick={handleRunCode}
-                className="font-mono text-xs font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors"
-              >
-                <Play className="size-3 fill-current" />
-                <span>Run</span>
-              </Button>
-
-              <Button
-                type="button"
-                size="sm"
-                disabled={isRunningCode || isSubmittingCode || isContestOver}
-                onClick={handleSubmitCode}
-                className="font-mono text-xs font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)]"
-              >
-                <Send className="size-3 fill-current" />
-                <span>Submit</span>
-              </Button>
             </div>
           </div>
         </div>
