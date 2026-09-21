@@ -137,7 +137,7 @@ export function ContestResultsPage() {
                 </Link>
               </Button>
             ) : (
-              <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white shrink-0">
+              <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 shrink-0">
                 <Link to="/leaderboard">University Leaderboard →</Link>
               </Button>
             )}
@@ -257,10 +257,10 @@ export function ContestResultsPage() {
             </Link>
           </Button>
         )}
-        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
+        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
           <Link to={`/contests/${contestSlug}`}>Contest Details</Link>
         </Button>
-        <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:text-white">
+        <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-500 hover:bg-zinc-900 hover:text-white">
           <Link to="/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>

@@ -96,7 +96,7 @@ export function MyContestsPage() {
             kicker="Contest History"
             title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:text-white">
+          <Button variant="outline" size="sm" asChild className="rounded-md font-mono text-xs text-zinc-300 border-white/10 bg-black hover:bg-zinc-900 hover:text-white hover:border-white/20">
             <Link to="/contests">
               Browse Contests
               <ArrowRight className="w-3.5 h-3.5 ml-1.5" />

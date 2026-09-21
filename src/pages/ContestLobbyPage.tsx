@@ -211,7 +211,7 @@ export function ContestLobbyPage() {
               </div>
             </div>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
@@ -236,7 +236,7 @@ export function ContestLobbyPage() {
               The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:text-white">
+          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>

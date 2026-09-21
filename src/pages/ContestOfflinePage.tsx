@@ -100,7 +100,7 @@ export function ContestOfflinePage() {
               {registration?.eligibility_message ??
                 `This workstation portal is accessible only to Top ${FINALIST_SEATS} verified qualifiers.`}
             </p>
-            <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white mt-2">
+            <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 mt-2">
               <Link to={`/contests/${contestSlug}/results`}>
                 View Round 1 Standings
                 <ArrowRight className="ml-1.5 size-3" />
@@ -225,7 +225,7 @@ export function ContestOfflinePage() {
           <h2 className="font-mono text-xs uppercase tracking-wider text-zinc-400">
             Final Problem Set
           </h2>
-          <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:text-white">
+          <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
             <Link to={`/contests/${contestSlug}/arena`}>
               <Play className="size-3 mr-1 text-lime-400" /> Open in Arena
             </Link>
