@@ -108,7 +108,7 @@ export function ContestLobbyPage() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               asChild
-              className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black transition-colors"
+              className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
             >
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
@@ -138,7 +138,7 @@ export function ContestLobbyPage() {
               You must register for this tournament round before accessing the proctored assessment terminal.
             </p>
           </div>
-          <Button asChild className="rounded-md font-mono text-xs font-semibold bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
+          <Button asChild className="rounded-md font-mono text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
             <Link to={`/contests/${contestSlug}`}>Register Slot</Link>
           </Button>
         </div>
@@ -334,7 +334,7 @@ export function ContestLobbyPage() {
                   asChild
                   disabled={!ack || !canStart}
                   size="lg"
-                  className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black disabled:opacity-30 transition-colors"
+                  className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 transition-colors [&_svg]:transition-colors"
                 >
                   <a
                     href={(!ack || !canStart) ? undefined : `/assessments/${contestSlug}`}

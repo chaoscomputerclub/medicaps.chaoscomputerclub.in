@@ -158,7 +158,7 @@ export function RegisterConfirmModal({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
-            className="rounded-none text-zinc-300 border-white/10 font-mono text-xs font-semibold uppercase hover:border-white/20 hover:text-white active:scale-[0.98]"
+            className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold uppercase active:scale-[0.98] transition-colors [&_svg]:transition-colors"
           >
             Cancel
           </Button>
@@ -166,7 +166,7 @@ export function RegisterConfirmModal({
           <Button
             onClick={handleConfirmRegistration}
             disabled={isSubmitting || !agreed}
-            className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-bold uppercase tracking-wider px-5 active:scale-[0.98] disabled:opacity-50 transition-colors"
+            className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-bold uppercase tracking-wider px-5 active:scale-[0.98] disabled:opacity-50 transition-colors [&_svg]:transition-colors"
           >
             {isSubmitting ? (
               <>

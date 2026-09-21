@@ -93,7 +93,7 @@ export function FirstContestExplainer() {
           </Button>
           <Button
             onClick={() => (isLast ? dismiss() : setStep(step + 1))}
-            className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-bold uppercase tracking-wider hover:bg-lime-400 hover:text-black active:scale-[0.98] transition-colors"
+            className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-bold uppercase tracking-wider hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] transition-colors [&_svg]:transition-colors"
           >
             {isLast ? (
               <>

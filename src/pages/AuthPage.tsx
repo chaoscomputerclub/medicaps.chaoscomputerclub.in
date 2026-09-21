@@ -351,7 +351,7 @@ export function AuthPage() {
             )}
 
             <Button
-              className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black cursor-pointer disabled:opacity-50 transition-colors"
+              className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer disabled:opacity-50 transition-colors [&_svg]:transition-colors"
               disabled={pending || isInvalidDomain}
               type="submit"
             >
@@ -449,7 +449,7 @@ export function AuthPage() {
           )}
 
           <Button
-            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black cursor-pointer disabled:opacity-50 transition-colors"
+            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer disabled:opacity-50 transition-colors [&_svg]:transition-colors"
             disabled={pending || otp.length < 6}
             type="submit"
           >
@@ -558,7 +558,7 @@ export function AuthPage() {
           )}
 
           <Button
-            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black cursor-pointer disabled:opacity-50 transition-colors"
+            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer disabled:opacity-50 transition-colors [&_svg]:transition-colors"
             disabled={
               pending ||
               !name.trim() ||

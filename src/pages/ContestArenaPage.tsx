@@ -273,7 +273,7 @@ export function ContestArenaPage() {
           <div className="flex flex-col gap-2 pt-2">
             <Button
               asChild
-              className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black transition-colors"
+              className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
             >
               <Link to={`/contests/${contestSlug}/qualified`}>
                 <QrCode className="mr-2 size-3.5" /> View Finalist Pass
@@ -743,7 +743,7 @@ export function ContestArenaPage() {
                   size="sm"
                   disabled={isRunningCode || isSubmittingCode || isContestOver}
                   onClick={handleSubmitCode}
-                  className="font-mono text-xs font-semibold rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black disabled:opacity-30 transition-colors"
+                  className="font-mono text-xs font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 transition-colors [&_svg]:transition-colors"
                 >
                   <Send className="size-3 mr-1" />
                   {isSubmittingCode ? "Judging…" : "Submit"}
@@ -785,7 +785,7 @@ export function ContestArenaPage() {
               </div>
               <button
                 onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-                className="font-mono text-xs font-semibold uppercase text-lime-400 border border-lime-400 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black transition-colors cursor-pointer"
+                className="font-mono text-xs font-semibold uppercase text-white border border-white/20 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer [&_svg]:transition-colors"
               >
                 View Final Results →
               </button>

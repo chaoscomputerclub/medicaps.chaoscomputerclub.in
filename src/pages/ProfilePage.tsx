@@ -338,7 +338,7 @@ export function ProfilePage() {
                     onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
                     disabled={isUploadingAvatar}
                     size="sm"
-                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-lime-400 bg-transparent border border-lime-400 hover:bg-lime-400 hover:text-black rounded-md font-semibold transition-colors [&_svg]:transition-colors"
+                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-white bg-transparent border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-semibold transition-colors [&_svg]:transition-colors"
                   >
                     {isUploadingAvatar ? <Loader2 size={11} className="animate-spin" /> : <Camera size={11} />}
                     <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
@@ -348,9 +348,9 @@ export function ProfilePage() {
                     <Button
                       type="button"
                       onClick={handleAvatarRemove}
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
-                      className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-zinc-400 hover:text-white border-white/10 bg-black rounded-md"
+                      className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-red-400 hover:text-white border border-red-500/30 bg-transparent hover:bg-red-600 rounded-md transition-colors"
                     >
                       <Trash2 size={10} />
                       <span>Remove</span>
@@ -360,7 +360,7 @@ export function ProfilePage() {
                   <Button
                     asChild
                     size="sm"
-                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-lime-400 bg-transparent border border-lime-400 hover:bg-lime-400 hover:text-black rounded-md font-semibold transition-colors [&_svg]:transition-colors"
+                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-white bg-transparent border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-semibold transition-colors [&_svg]:transition-colors"
                   >
                     <Link to="/settings">
                       <Edit3 size={11} />
@@ -378,8 +378,8 @@ export function ProfilePage() {
                     className={cn(
                       "h-7 inline-flex items-center gap-1.5 px-3 font-mono text-xs rounded-md transition-colors",
                       isFollowing
-                        ? "bg-black text-zinc-300 border border-white/10 hover:text-white"
-                        : "bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-semibold"
+                        ? "bg-transparent text-zinc-400 border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+                        : "bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-semibold"
                     )}
                   >
                     {isFollowing ? (
@@ -399,7 +399,7 @@ export function ProfilePage() {
                     onClick={handleCopyLink}
                     variant="outline"
                     size="sm"
-                    className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-zinc-400 border border-white/10 bg-black hover:text-white rounded-md"
+                    className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-white border border-white/20 bg-transparent hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors"
                   >
                     {copied ? <Check size={11} className="text-lime-400" /> : <Share2 size={11} />}
                   </Button>

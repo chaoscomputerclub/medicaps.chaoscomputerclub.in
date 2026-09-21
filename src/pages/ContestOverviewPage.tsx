@@ -226,7 +226,7 @@ export function ContestOverviewPage() {
               <Button
                 asChild
                 size="lg"
-                className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black shadow-none active:scale-[0.98] cursor-pointer transition-colors"
+                className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/arena`}>
                   <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
@@ -236,7 +236,7 @@ export function ContestOverviewPage() {
               <Button
                 asChild
                 size="lg"
-                className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black active:scale-[0.98] cursor-pointer transition-colors"
+                className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy className="mr-1.5 size-4" /> View Final Standings
@@ -269,7 +269,7 @@ export function ContestOverviewPage() {
                 onClick={handleRegister}
                 disabled={isRegistering}
                 size="lg"
-                className="rounded-md bg-transparent text-lime-400 border border-lime-400 font-semibold text-xs hover:bg-lime-400 hover:text-black active:scale-[0.98] cursor-pointer transition-colors"
+                className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
                 <Sparkles className="mr-1.5 size-4" />
                 {isRegistering ? "Registering..." : "Register for Contest"}

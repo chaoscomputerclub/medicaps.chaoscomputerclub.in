@@ -370,7 +370,7 @@ export function ContestsHubPage() {
                   <div className="flex flex-wrap items-center gap-3 pt-1">
                     {upcomingWeekly.status === "live" ? (
                       <>
-                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black px-6 py-2 rounded-md transition-colors">
+                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md transition-colors [&_svg]:transition-colors">
                           <Link to={`/contests/${upcomingWeekly.slug}/arena`}>
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Contest Arena
                           </Link>
@@ -394,7 +394,7 @@ export function ContestsHubPage() {
                         <Button
                           onClick={() => handleRegister(upcomingWeekly.slug)}
                           disabled={registeringSlug === upcomingWeekly.slug}
-                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black px-6 py-2 rounded-md cursor-pointer transition-colors"
+                          className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
                         >
                           {registeringSlug === upcomingWeekly.slug ? "Registering..." : "Register for Contest"}
                         </Button>
@@ -427,7 +427,7 @@ export function ContestsHubPage() {
                     </div>
                     <div className="flex items-center gap-2 pt-1">
                       {isLive ? (
-                        <Button asChild className="flex-1 bg-transparent text-xs font-mono font-semibold uppercase text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
+                        <Button asChild className="flex-1 bg-transparent text-xs font-mono font-semibold uppercase text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
                           <Link to={`/contests/${contest.slug}/arena`}>
                             <Play className="mr-1.5 size-4 fill-current" /> Enter Arena
                           </Link>
@@ -438,7 +438,7 @@ export function ContestsHubPage() {
                         </Button>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
-                          className="flex-1 text-xs font-mono font-semibold uppercase bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black cursor-pointer transition-colors">
+                          className="flex-1 text-xs font-mono font-semibold uppercase bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer transition-colors [&_svg]:transition-colors">
                           {registeringSlug === contest.slug ? "Registering..." : "Register Now"}
                         </Button>
                       )}
@@ -551,7 +551,7 @@ export function ContestsHubPage() {
                   <p className="max-w-xs text-xs text-zinc-500">Register for an upcoming contest to build your competitive programming ledger.</p>
                   {upcomingContests.length > 0 && (
                     <Button onClick={() => handleRegister(upcomingContests[0].slug)} disabled={registeringSlug === upcomingContests[0].slug}
-                      className="mt-2 text-xs font-mono font-semibold uppercase bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black transition-colors">
+                      className="mt-2 text-xs font-mono font-semibold uppercase bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
                       {registeringSlug === upcomingContests[0].slug ? "Registering..." : `Register for ${upcomingContests[0].title}`}
                     </Button>
                   )}

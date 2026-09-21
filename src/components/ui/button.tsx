@@ -9,17 +9,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-transparent text-lime-400 font-mono font-semibold uppercase text-xs tracking-wider border border-lime-400 hover:bg-lime-400 hover:text-black active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
+          "bg-transparent text-white font-sans font-semibold uppercase text-xs tracking-wider border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         destructive:
-          "bg-red-500 text-white font-mono font-semibold uppercase text-xs tracking-wider shadow-none hover:bg-red-600 active:bg-red-700 border border-red-500/30",
+          "bg-transparent text-red-400 font-sans font-semibold uppercase text-xs tracking-wider border border-red-500/40 hover:bg-red-500 hover:text-white hover:border-red-500 active:bg-red-600 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         outline:
-          "border border-white/12 bg-black font-mono text-xs uppercase tracking-wider text-zinc-300 hover:border-white/25 hover:text-white hover:bg-zinc-900/50 shadow-none",
+          "bg-transparent text-white font-sans font-semibold uppercase text-xs tracking-wider border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         secondary:
-          "bg-black text-zinc-300 font-mono text-xs uppercase tracking-wider hover:bg-zinc-900/60 hover:text-white border border-white/10 shadow-none",
+          "bg-transparent text-white font-sans font-semibold uppercase text-xs tracking-wider border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         ghost:
-          "text-zinc-400 hover:bg-zinc-900/50 hover:text-white font-mono text-xs uppercase tracking-wider",
+          "bg-transparent text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent font-sans text-xs uppercase tracking-wider transition-colors duration-150 [&_svg]:transition-colors",
         link:
-          "text-lime-400 font-mono underline-offset-4 hover:underline",
+          "text-lime-400 font-sans underline-offset-4 hover:underline",
       },
       size: {
         default: "min-h-[38px] px-4 py-2 text-xs rounded-md",

@@ -117,7 +117,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
               <Button
                 type="button"
                 onClick={this.handleReset}
-                className="bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
+                className="bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors [&_svg]:transition-colors"
               >
                 <RefreshCw size={13} />
                 <span>Reload Interface</span>
@@ -129,7 +129,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                 onClick={() => {
                   window.location.href = "/";
                 }}
-                className="border-white/10 bg-zinc-900/70 hover:bg-zinc-800 hover:text-white text-zinc-200 font-mono text-xs uppercase font-bold rounded-none h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors"
+                className="bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors [&_svg]:transition-colors"
               >
                 <Home size={13} />
                 <span>Return to Arena</span>

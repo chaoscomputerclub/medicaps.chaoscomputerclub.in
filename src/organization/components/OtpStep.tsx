@@ -71,7 +71,7 @@ export function OtpStep({
       <Button
         type="submit"
         disabled={pending || code.length < 6}
-        className="w-full rounded-md bg-transparent text-lime-400 border border-lime-400 font-mono text-xs tracking-wider font-bold uppercase hover:bg-lime-400 hover:text-black h-11 transition-colors cursor-pointer disabled:opacity-50"
+        className="w-full rounded-md bg-transparent text-white border border-white/20 font-mono text-xs tracking-wider font-bold uppercase hover:bg-lime-400 hover:text-black hover:border-lime-400 h-11 transition-colors cursor-pointer disabled:opacity-50 [&_svg]:transition-colors"
       >
         {pending ? "Checking…" : submitLabel}
       </Button>

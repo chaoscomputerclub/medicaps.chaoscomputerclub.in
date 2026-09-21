@@ -184,7 +184,7 @@ function SaveIndicator({ status }: { status: "idle" | "saving" | "saved" | "erro
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-[11px] font-mono ml-2 transition-opacity",
+        "inline-flex items-center gap-1 text-[11px] font-sans ml-2 transition-opacity",
         status === "saving" && "text-zinc-400",
         status === "saved" && "text-lime-400",
         status === "error" && "text-red-400"
@@ -213,7 +213,7 @@ function SaveButton({
       size="sm"
       disabled={disabled || saving}
       onClick={onClick}
-      className="h-8 px-3.5 text-xs font-semibold bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black disabled:opacity-30 rounded-md cursor-pointer transition-colors"
+      className="h-8 px-3.5 text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
     >
       {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
@@ -441,12 +441,12 @@ export function SettingsPage() {
       <div className="flex items-center justify-between mb-6 pb-5 border-b border-white/8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
+            <span className="font-sans text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
               Configuration
             </span>
           </div>
           <h1 className="text-xl font-semibold text-white tracking-tight">Settings</h1>
-          <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+          <p className="text-xs text-zinc-400 mt-0.5 font-sans">
             Manage your competitive identity, security, and account preferences.
           </p>
         </div>
@@ -454,7 +454,7 @@ export function SettingsPage() {
           asChild
           variant="outline"
           size="sm"
-          className="hidden sm:flex text-xs border-white/10 bg-black hover:bg-zinc-950 text-zinc-300 hover:text-white rounded-md gap-1.5 font-mono"
+          className="hidden sm:flex text-xs border-white/10 bg-black hover:bg-zinc-950 text-zinc-300 hover:text-white rounded-md gap-1.5 font-sans"
         >
           <Link to="/profile">
             View profile
@@ -475,7 +475,7 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-mono rounded-md transition-colors cursor-pointer",
+                  "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-sans rounded-md transition-colors cursor-pointer",
                   active
                     ? item.danger
                       ? "bg-red-500/10 text-red-400 font-semibold"
@@ -504,7 +504,7 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono whitespace-nowrap rounded-md border transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-sans whitespace-nowrap rounded-md border transition-colors",
                   active
                     ? item.danger
                       ? "bg-red-500/10 text-red-400 border-red-500/30"
@@ -538,7 +538,7 @@ export function SettingsPage() {
                     {avatarUrl ? (
                       <AvatarImage src={resolveAvatarUrl(avatarUrl)} alt={fullName} className="object-cover rounded-lg" />
                     ) : null}
-                    <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-mono font-semibold text-xl">
+                    <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-sans font-semibold text-xl">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -558,17 +558,17 @@ export function SettingsPage() {
                       )}
                     >
                       {isUploadingAvatar ? (
-                        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs font-mono">
+                        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs font-sans">
                           <Loader2 size={13} className="animate-spin text-lime-400" />
                           <span>Uploading…</span>
                         </div>
                       ) : (
                         <>
                           <Upload size={16} className="mx-auto text-zinc-500 mb-2" />
-                          <p className="text-xs text-zinc-400 font-mono">
+                          <p className="text-xs text-zinc-400 font-sans">
                             <span className="text-lime-400 font-semibold">Click to upload</span> or drag &amp; drop
                           </p>
-                          <p className="text-[11px] text-zinc-600 mt-0.5 font-mono">PNG, JPG, WebP, GIF (max 10 MB)</p>
+                          <p className="text-[11px] text-zinc-600 mt-0.5 font-sans">PNG, JPG, WebP, GIF (max 10 MB)</p>
                         </>
                       )}
                     </div>
@@ -584,7 +584,7 @@ export function SettingsPage() {
                       <button
                         type="button"
                         onClick={removeAvatar}
-                        className="text-[11px] font-mono text-red-400 hover:text-red-300 cursor-pointer underline underline-offset-2 transition-colors"
+                        className="text-[11px] font-sans text-red-400 hover:text-red-300 cursor-pointer underline underline-offset-2 transition-colors"
                       >
                         Remove photo
                       </button>
@@ -610,7 +610,7 @@ export function SettingsPage() {
                       onChange={(e) => setFullName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })}
                       placeholder="Full Name"
-                      className="h-9 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                      className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                     />
                     <SaveButton
                       onClick={() => saveField("full_name", { full_name: fullName.trim() })}
@@ -630,9 +630,9 @@ export function SettingsPage() {
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
                       placeholder="Competitive programmer, building expertise in algorithms…"
-                      className="text-xs font-mono resize-none bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                      className="text-xs font-sans resize-none bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                     />
-                    <div className="flex items-center justify-between font-mono">
+                    <div className="flex items-center justify-between font-sans">
                       <span className="text-[11px] text-zinc-500 tabular-nums">{bio.length}/500</span>
                       <div className="flex items-center gap-1">
                         <SaveButton
@@ -651,10 +651,10 @@ export function SettingsPage() {
                     value={department}
                     onValueChange={(v) => { setDepartment(v); saveField("department", { department: v }); }}
                   >
-                    <SelectTrigger id="s-dept" className="h-9 text-xs font-mono bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
+                    <SelectTrigger id="s-dept" className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-black border-white/10 text-white font-mono rounded-md">
+                    <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
                       {DEPARTMENTS.map((d) => (
                         <SelectItem key={d.value} value={d.value} className="text-xs">{d.label}</SelectItem>
                       ))}
@@ -667,10 +667,10 @@ export function SettingsPage() {
                     value={batch}
                     onValueChange={(v) => { setBatch(v); saveField("batch", { batch: v }); }}
                   >
-                    <SelectTrigger id="s-batch" className="h-9 text-xs font-mono bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
+                    <SelectTrigger id="s-batch" className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-black border-white/10 text-white font-mono rounded-md">
+                    <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
                       {BATCHES.map((b) => (
                         <SelectItem key={b} value={b} className="text-xs">{b}</SelectItem>
                       ))}
@@ -694,7 +694,7 @@ export function SettingsPage() {
                         onChange={(e) => setGithub(e.target.value.replace(/^@/, ""))}
                         onKeyDown={(e) => e.key === "Enter" && saveField("github", { github_username: github.trim() })}
                         placeholder="octocat"
-                        className="h-9 pl-8 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                        className="h-9 pl-8 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                       />
                     </div>
                     <SaveButton
@@ -709,7 +709,7 @@ export function SettingsPage() {
                       href={`https://github.com/${github}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-sans text-zinc-500 hover:text-zinc-300 transition-colors"
                     >
                       <ExternalLink size={10} />
                       github.com/{github}
@@ -727,7 +727,7 @@ export function SettingsPage() {
                         onChange={(e) => setLinkedin(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && saveField("linkedin", { linkedin_url: linkedin.trim() })}
                         placeholder="https://linkedin.com/in/username"
-                        className="h-9 pl-8 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                        className="h-9 pl-8 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                       />
                     </div>
                     <SaveButton
@@ -750,7 +750,7 @@ export function SettingsPage() {
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Lock size={11} /> Enrollment Number
                     </Label>
-                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-mono text-xs select-all">
+                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-sans text-xs select-all">
                       {member.prn && member.prn !== "N/A" && member.prn !== "—"
                         ? member.prn
                         : member.email?.includes("@")
@@ -762,7 +762,7 @@ export function SettingsPage() {
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Lock size={11} /> Institutional Email
                     </Label>
-                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-mono text-xs truncate select-all">
+                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-sans text-xs truncate select-all">
                       {member.email}
                     </div>
                   </div>
@@ -782,13 +782,13 @@ export function SettingsPage() {
                   <div className="space-y-2 max-w-xs">
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-xs">@</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-sans text-xs">@</span>
                         <Input
                           id="acc-handle"
                           value={handleInput}
                           onChange={(e) => setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                           className={cn(
-                            "h-9 pl-7 text-xs font-mono bg-black border-white/10 text-white rounded-md focus-visible:ring-0",
+                            "h-9 pl-7 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:ring-0",
                             isHandleChanged && handleStatus === "available" && "border-emerald-500/60 focus-visible:border-emerald-500",
                             isHandleChanged && handleStatus === "taken" && "border-red-500/60 focus-visible:border-red-500",
                             (!isHandleChanged || handleStatus === "idle") && "focus-visible:border-lime-400"
@@ -801,13 +801,13 @@ export function SettingsPage() {
                         size="sm"
                         disabled={!isHandleChanged || handleInput.length < 3 || handleStatus !== "available" || fieldStatus["handle"] === "saving"}
                         onClick={saveHandle}
-                        className="h-9 px-3 text-xs font-semibold bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black disabled:opacity-40 rounded-md cursor-pointer transition-colors"
+                        className="h-9 px-3 text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-40 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
                       >
                         {fieldStatus["handle"] === "saving" ? <Loader2 size={12} className="animate-spin" /> : "Update"}
                       </Button>
                     </div>
                     <div className="h-4 flex items-center">
-                      {!isHandleChanged && <span className="text-[11px] text-zinc-600">Current handle: <strong className="text-zinc-400 font-mono">@{member.handle}</strong></span>}
+                      {!isHandleChanged && <span className="text-[11px] text-zinc-600">Current handle: <strong className="text-zinc-400 font-sans">@{member.handle}</strong></span>}
                       {isHandleChanged && handleStatus === "checking" && (
                         <span className="flex items-center gap-1 text-[11px] text-zinc-500">
                           <Loader2 size={10} className="animate-spin" /> Checking availability…
@@ -840,10 +840,10 @@ export function SettingsPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">Google Workspace SSO</p>
-                      <p className="text-[11px] text-zinc-500 font-mono mt-0.5">{member.email}</p>
+                      <p className="text-[11px] text-zinc-500 font-sans mt-0.5">{member.email}</p>
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-emerald-500/40 bg-emerald-950/20 text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 rounded">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-emerald-500/40 bg-emerald-950/20 text-[11px] font-sans font-bold uppercase tracking-wider text-emerald-400 rounded">
                     <span className="size-1.5 rounded-full bg-emerald-400" /> Connected
                   </span>
                 </div>
@@ -943,7 +943,7 @@ export function SettingsPage() {
                       <p className="text-[11px] text-zinc-500 mt-0.5">
                         Stateless HMAC-SHA256 JWT · Session storage
                       </p>
-                      <span className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-mono text-emerald-400">
+                      <span className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-sans text-emerald-400">
                         <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         Active now
                       </span>
@@ -1024,7 +1024,7 @@ export function SettingsPage() {
                           and all associated records including contest history, rating certificates, and standings.
                         </p>
                         <p>
-                          Type <code className="font-mono text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">{member.handle}</code> to confirm:
+                          Type <code className="font-sans text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">{member.handle}</code> to confirm:
                         </p>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -1033,7 +1033,7 @@ export function SettingsPage() {
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
                         placeholder={member.handle || "handle"}
-                        className="font-mono text-sm bg-black border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
+                        className="font-sans text-sm bg-black border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
                       />
                     </div>
                     <AlertDialogFooter>

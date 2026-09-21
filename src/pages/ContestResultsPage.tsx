@@ -131,7 +131,7 @@ export function ContestResultsPage() {
 
             {/* CTA */}
             {isQualified ? (
-              <Button asChild className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-semibold shrink-0 transition-colors">
+              <Button asChild className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold shrink-0 transition-colors [&_svg]:transition-colors">
                 <Link to={`/contests/${contestSlug}/qualified`}>
                   <QrCode className="mr-1.5 size-3.5" /> View Campus Pass
                 </Link>
@@ -251,7 +251,7 @@ export function ContestResultsPage() {
       {/* Bottom Actions */}
       <div className="flex flex-wrap items-center gap-3 pt-2">
         {isQualified && (
-          <Button asChild className="rounded-md bg-transparent text-lime-400 border border-lime-400 hover:bg-lime-400 hover:text-black font-mono text-xs font-semibold transition-colors">
+          <Button asChild className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors">
             <Link to={`/contests/${contestSlug}/qualified`}>
               <QrCode className="mr-1.5 size-3.5" /> View Campus Pass
             </Link>
