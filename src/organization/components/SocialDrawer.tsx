@@ -37,7 +37,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, resolveAvatarUrl } from "@/lib/utils";
 
 export function SocialDrawer() {
   const dispatch = useAppDispatch();
@@ -94,17 +94,23 @@ export function SocialDrawer() {
         if (!open) dispatch(closeSocialDrawer());
       }}
     >
-      <SheetContent side="right" className="w-full max-w-md bg-zinc-950 border-l border-white/10 text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md">
+      <SheetContent side="right" className="w-full max-w-md bg-black border-l border-white/[0.08] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md shadow-[0_0_80px_rgba(0,0,0,0.95)]">
+        {/* Top ambient accent highlight */}
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-lime-400/50 to-transparent pointer-events-none z-20" />
+
         {/* Header Section */}
-        <SheetHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md text-left space-y-0">
+        <SheetHeader className="p-4 sm:p-5 border-b border-white/[0.08] bg-black/90 backdrop-blur-xl text-left space-y-0 relative z-10">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
+              <span className="relative flex size-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75" />
+                <span className="relative inline-flex rounded-full size-2 bg-lime-400" />
+              </span>
               <div>
-                <p className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
+                <p className="font-sans text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
                   (05 // Peer Network)
                 </p>
-                <SheetTitle className="font-mono text-sm font-bold text-white uppercase tracking-tight">
+                <SheetTitle className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight mt-0.5">
                   {drawerTargetName || `@${drawerTargetHandle}`}
                 </SheetTitle>
               </div>
@@ -112,70 +118,68 @@ export function SocialDrawer() {
           </div>
 
           {/* Segmented Tab Switcher */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-zinc-900 border border-white/10 rounded-none">
-            <Button
+          <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-white/[0.03] border border-white/[0.08] rounded-xl">
+            <button
               type="button"
-              variant="ghost"
               onClick={() => dispatch(setDrawerType("followers"))}
               className={cn(
-                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer",
+                "h-9 px-3 text-xs font-sans font-semibold uppercase rounded-lg flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98]",
                 drawerType === "followers"
-                  ? "bg-lime-400 text-black shadow-sm hover:bg-lime-400 hover:text-black"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5",
+                  ? "bg-lime-400 text-black shadow-[0_0_18px_rgba(163,230,53,0.3)] font-bold"
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.05]",
               )}
             >
               <Users size={12} />
               <span>Followers</span>
               <span
                 className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-none font-mono tabular-nums",
+                  "text-[10px] px-1.5 py-0.5 rounded-md font-sans tabular-nums font-semibold transition-colors duration-150",
                   drawerType === "followers"
                     ? "bg-black/20 text-black font-bold"
-                    : "bg-zinc-800 text-zinc-400 border border-white/10",
+                    : "bg-white/[0.05] text-zinc-400 border border-white/[0.08]",
                 )}
               >
                 {displayedFollowersTabCount}
               </span>
-            </Button>
+            </button>
 
-            <Button
+            <button
               type="button"
-              variant="ghost"
               onClick={() => dispatch(setDrawerType("following"))}
               className={cn(
-                "h-auto py-1.5 text-xs font-mono font-bold uppercase rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer",
+                "h-9 px-3 text-xs font-sans font-semibold uppercase rounded-lg flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98]",
                 drawerType === "following"
-                  ? "bg-lime-400 text-black shadow-sm hover:bg-lime-400 hover:text-black"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5",
+                  ? "bg-lime-400 text-black shadow-[0_0_18px_rgba(163,230,53,0.3)] font-bold"
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.05]",
               )}
             >
               <UserCheck size={12} />
               <span>Following</span>
               <span
                 className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-none font-mono tabular-nums",
+                  "text-[10px] px-1.5 py-0.5 rounded-md font-sans tabular-nums font-semibold transition-colors duration-150",
                   drawerType === "following"
                     ? "bg-black/20 text-black font-bold"
-                    : "bg-zinc-800 text-zinc-400 border border-white/10",
+                    : "bg-white/[0.05] text-zinc-400 border border-white/[0.08]",
                 )}
               >
                 {displayedFollowingTabCount}
               </span>
-            </Button>
+            </button>
           </div>
 
-          {/* Monospace Filter Input */}
+          {/* Filter Input */}
           <div className="relative mt-3">
             <Search
               size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none transition-colors duration-150"
             />
             <Input
               type="text"
               value={searchQuery}
               onChange={(e) => dispatch(setSocialSearchQuery(e.target.value))}
               placeholder="Search handle, name, or department..."
-              className="h-9 pl-8 pr-8 text-xs font-mono bg-zinc-900 border border-white/10 rounded-none text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60 transition-colors"
+              className="h-9 pl-8.5 pr-8 text-xs font-sans bg-black/80 border border-white/[0.08] rounded-xl text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60 focus-visible:ring-1 focus-visible:ring-lime-400/30 transition-[border-color,box-shadow] duration-150"
             />
             {searchQuery && (
               <Button
@@ -183,7 +187,7 @@ export function SocialDrawer() {
                 variant="ghost"
                 size="icon"
                 onClick={() => dispatch(setSocialSearchQuery(""))}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-500 hover:text-white"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-colors duration-150"
               >
                 <X size={12} />
               </Button>
@@ -198,29 +202,29 @@ export function SocialDrawer() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-3.5 border border-white/10 bg-zinc-900/50 rounded-none"
+                  className="flex items-center justify-between p-3.5 border border-white/[0.08] bg-black/40 rounded-xl"
                 >
                   <div className="flex items-center gap-3">
-                    <Skeleton className="w-10 h-10 bg-zinc-800 rounded-none" />
+                    <Skeleton className="w-10 h-10 bg-zinc-900 rounded-lg" />
                     <div className="space-y-1.5">
-                      <Skeleton className="h-3 w-24 bg-zinc-800" />
-                      <Skeleton className="h-2.5 w-32 bg-zinc-800" />
-                      <Skeleton className="h-2 w-16 bg-zinc-800" />
+                      <Skeleton className="h-3 w-24 bg-zinc-900" />
+                      <Skeleton className="h-2.5 w-32 bg-zinc-900" />
+                      <Skeleton className="h-2 w-16 bg-zinc-900" />
                     </div>
                   </div>
-                  <Skeleton className="h-7 w-20 bg-zinc-800 rounded-none" />
+                  <Skeleton className="h-7 w-20 bg-zinc-900 rounded-lg" />
                 </div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="w-12 h-12 rounded-none border border-white/10 bg-zinc-900 text-zinc-500 flex items-center justify-center mx-auto mb-3">
-                <Users size={20} />
+              <div className="size-14 rounded-full border border-lime-400/20 bg-lime-400/5 text-lime-400 flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(163,230,53,0.1)]">
+                <Users size={22} />
               </div>
-              <h3 className="font-mono text-xs font-bold text-white uppercase tracking-wider">
+              <h3 className="font-sans text-xs font-bold text-white uppercase tracking-wider">
                 {searchQuery ? "No matching peers" : "No connections recorded"}
               </h3>
-              <p className="text-[11px] text-zinc-400 font-mono mt-1 max-w-[240px] mx-auto leading-relaxed">
+              <p className="text-[11px] text-zinc-400 font-sans mt-1.5 max-w-[240px] mx-auto leading-relaxed">
                 {searchQuery
                   ? `No students found matching "${searchQuery}". Try searching by handle or department.`
                   : drawerType === "followers"
@@ -251,48 +255,48 @@ export function SocialDrawer() {
               return (
                 <article
                   key={student.id}
-                  className="flex items-center justify-between p-3.5 border border-white/10 bg-zinc-900/50 hover:border-white/20 hover:bg-zinc-900/80 transition-all rounded-none shadow-sm"
+                  className="group flex items-center justify-between p-3 sm:p-3.5 border border-white/[0.08] bg-black/40 hover:bg-white/[0.03] hover:border-lime-400/35 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Link
                       to={`/profile/${student.handle}`}
                       onClick={() => dispatch(closeSocialDrawer())}
-                      className="cursor-pointer"
+                      className="cursor-pointer shrink-0"
                     >
-                      <Avatar className="w-10 h-10 rounded-none border border-white/10 bg-zinc-800 hover:border-lime-400/50 transition-colors">
+                      <Avatar className="size-10 rounded-lg border border-white/10 bg-black group-hover:border-lime-400/40 transition-[border-color] duration-150 overflow-hidden">
                         {student.avatar_url ? (
                           <AvatarImage
-                            src={student.avatar_url}
+                            src={resolveAvatarUrl(student.avatar_url)}
                             alt={student.full_name || student.handle}
                             className="object-cover"
                           />
                         ) : null}
-                        <AvatarFallback className="rounded-none bg-zinc-800 text-lime-400 font-mono text-xs font-bold">
+                        <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-sans text-xs font-bold">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
                     </Link>
 
-                    <div className="min-w-0">
+                    <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/profile/${student.handle}`}
                           onClick={() => dispatch(closeSocialDrawer())}
-                          className="text-xs font-mono text-white truncate tracking-tight hover:text-lime-400 transition-colors font-semibold"
+                          className="text-xs font-sans text-white truncate tracking-tight hover:text-lime-400 transition-colors font-semibold"
                         >
                           @{student.handle}
                         </Link>
-                        <span className="text-[10px] text-lime-400 font-mono font-bold tabular-nums">
+                        <span className="text-[10px] text-lime-400 font-sans font-bold tabular-nums bg-lime-400/10 border border-lime-400/20 px-1.5 py-0.5 rounded-md">
                           {student.rating}
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-zinc-400 truncate font-sans mt-0.5">
+                      <p className="text-[11px] text-zinc-400 truncate font-sans">
                         {student.full_name || `@${student.handle}`}
                       </p>
 
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[9px] font-mono uppercase bg-zinc-800/80 border border-white/10 text-zinc-400 px-1.5 py-0.5 rounded-none">
+                      <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+                        <span className="text-[9px] font-sans uppercase bg-white/[0.03] border border-white/[0.08] text-zinc-400 px-1.5 py-0.5 rounded-md">
                           {student.department} · {student.batch}
                         </span>
                         <TierBadge>{student.tier}</TierBadge>
@@ -301,7 +305,7 @@ export function SocialDrawer() {
                   </div>
 
                   {student.is_self ? (
-                    <span className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase bg-zinc-800/80 text-zinc-400 border border-white/10 rounded-none">
+                    <span className="px-2.5 py-1 text-[10px] font-sans font-semibold uppercase bg-white/[0.04] text-zinc-400 border border-white/[0.08] rounded-lg shrink-0">
                       You
                     </span>
                   ) : (
@@ -328,12 +332,12 @@ export function SocialDrawer() {
                         }
                       }}
                       className={cn(
-                        "font-mono text-[10px] font-bold uppercase px-3 py-1.5 border rounded-none flex items-center gap-1.5 transition-all flex-shrink-0 cursor-pointer h-auto active:scale-[0.98]",
+                        "font-sans text-[11px] font-semibold uppercase px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-[transform,background-color,border-color,color,box-shadow] duration-150 flex-shrink-0 cursor-pointer h-auto active:scale-95",
                         isFollowing
                           ? isHovered
-                            ? "bg-rose-500/10 border-rose-500/40 text-rose-400 hover:bg-rose-500/20"
-                            : "bg-zinc-800/60 border-white/10 text-zinc-300 hover:text-white"
-                          : "bg-lime-400/10 border-lime-400/40 text-lime-400 hover:bg-lime-400 hover:text-black shadow-sm",
+                            ? "bg-white/[0.08] border border-white/30 text-white"
+                            : "bg-black border border-white/15 text-zinc-300 hover:text-white hover:border-white/25"
+                          : "bg-transparent border border-lime-400/40 text-lime-400 hover:bg-lime-400 hover:text-black font-semibold hover:shadow-[0_0_15px_rgba(163,230,53,0.25)]",
                       )}
                     >
                       {isPending ? (
@@ -341,12 +345,12 @@ export function SocialDrawer() {
                       ) : isFollowing ? (
                         isHovered ? (
                           <>
-                            <UserMinus size={11} />
+                            <UserMinus size={11} className="text-zinc-300" />
                             <span>Unfollow</span>
                           </>
                         ) : (
                           <>
-                            <Check size={11} />
+                            <Check size={11} className="text-lime-400" />
                             <span>Following</span>
                           </>
                         )
@@ -365,8 +369,8 @@ export function SocialDrawer() {
         </div>
 
         {/* Footer */}
-        <footer className="p-3 border-t border-white/10 bg-zinc-950/90 backdrop-blur-md text-center">
-          <p className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest">
+        <footer className="p-3.5 border-t border-white/[0.08] bg-black/90 backdrop-blur-md text-center">
+          <p className="text-[9px] text-zinc-500 font-sans uppercase tracking-widest">
             AUTHENTICATED CAMPUS SOCIAL GRAPH • MEDI-CAPS CHAPTER
           </p>
         </footer>
