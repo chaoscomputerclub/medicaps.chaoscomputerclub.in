@@ -124,10 +124,10 @@ export function ContestsHubPage() {
     }
   }, [dispatch, member]);
 
-  // Instant push: only subscribe to persistent SSE stream if active/upcoming contests exist,
-  // preventing holding an idle HTTP streaming socket that delays Network Finish
+  // Instant push: only subscribe to persistent SSE stream if a contest is actively LIVE,
+  // preventing holding an idle HTTP streaming socket during general browsing
   const hasLiveContests = useMemo(
-    () => contests.some((c) => c.status === "live" || c.status === "upcoming"),
+    () => contests.some((c) => c.status === "live"),
     [contests]
   );
 

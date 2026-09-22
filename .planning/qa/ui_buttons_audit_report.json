@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T08:17:17.582Z",
+  "timestamp": "2026-09-22T08:26:06.494Z",
   "totalElements": 304,
   "functionalCount": 304,
   "connectivityRate": "100.0%",
@@ -1519,7 +1519,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 146,
+      "line": 153,
       "tag": "<Link>",
       "label": "Back to Contests Hub",
       "handler": "\"/contests\"",
@@ -1528,7 +1528,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 239,
+      "line": 246,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1537,7 +1537,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 244,
+      "line": 251,
       "tag": "<a>",
       "label": "[href={/contests/${contestSlug}/lobb...",
       "handler": "{`/contests/${contestSlug}/lobby`}",
@@ -1546,7 +1546,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 254,
+      "line": 261,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1555,7 +1555,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 259,
+      "line": 266,
       "tag": "<Link>",
       "label": "[to={/contests/${contestSlug}/result...",
       "handler": "{`/contests/${contestSlug}/results`}",
@@ -1564,7 +1564,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 274,
+      "line": 281,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1573,7 +1573,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 280,
+      "line": 287,
       "tag": "<a>",
       "label": "[href={/contests/${contestSlug}/lobb...",
       "handler": "{`/contests/${contestSlug}/lobby`}",
@@ -1582,7 +1582,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 292,
+      "line": 299,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleRegister}",
@@ -1591,7 +1591,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 420,
+      "line": 427,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1600,7 +1600,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 426,
+      "line": 433,
       "tag": "<Link>",
       "label": "Solve →",
       "handler": "{`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`",
@@ -1609,7 +1609,7 @@
     },
     {
       "file": "src/pages/ContestOverviewPage.tsx",
-      "line": 439,
+      "line": 446,
       "tag": "<Link>",
       "label": "View Standings →",
       "handler": "{`/contests/${contestSlug}/results`}",

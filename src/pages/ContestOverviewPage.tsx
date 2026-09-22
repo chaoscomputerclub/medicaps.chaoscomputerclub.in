@@ -78,12 +78,6 @@ export function ContestOverviewPage() {
     refreshDetail(false);
   }, [refreshDetail]);
 
-  useRealtimeEvents(contestSlug, (event) => {
-    if (event.event === "contest_status_changed") {
-      refreshDetail(true);
-    }
-  });
-
   // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
   const cachedContest = !rawContest && contestSlug
     ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
@@ -102,6 +96,19 @@ export function ContestOverviewPage() {
   const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
 
   const countdown = useCountdown(isLive ? contest?.ends_at : contest?.starts_at);
+  const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
+
+  // Real-time status update: only stream when contest is actively live or within 5m waiting lobby
+  useRealtimeEvents(
+    contestSlug,
+    (event) => {
+      if (event.event === "contest_status_changed") {
+        refreshDetail(true);
+      }
+    },
+    undefined,
+    Boolean(contestSlug && (isLive || isWaitingRoom))
+  );
 
   const handleRegister = async () => {
     try {
