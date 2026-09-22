@@ -25,7 +25,7 @@ export function RatingDistributionCard({
   const hasAttended = attendanceCount > 0;
 
   let percentileDisplay = "—";
-  if (hasAttended && member?.university_rank) {
+  if (member?.university_rank) {
     const cohortTotal = Math.max(distribution?.total || (member as any)?.active_members || 1, 1);
     const rank = Math.max(1, member.university_rank || 1);
     const pct = (rank / cohortTotal) * 100;

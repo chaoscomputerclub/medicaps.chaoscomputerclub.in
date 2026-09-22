@@ -270,7 +270,7 @@ export function ProfilePage() {
     : (displayHandle.slice(0, 2) || "CC").toUpperCase();
 
   const effectiveAvatar = isSelfUser
-    ? (currentMember?.avatar_url ?? m.avatar_url)
+    ? (m.avatar_url || currentMember?.avatar_url)
     : m.avatar_url;
   const resolvedAvatar = resolveAvatarUrl(effectiveAvatar);
 
@@ -583,8 +583,8 @@ export function ProfilePage() {
         <Metric label="Rating" value={m.rating} detail={`Peak: ${m.peak_rating}`} />
         <Metric
           label="Rank"
-          value={(m.attendance_count ?? 0) > 0 ? `#${m.university_rank}` : "#—"}
-          detail={(m.attendance_count ?? 0) > 0 ? `of ${m.active_members}` : "Unranked"}
+          value={m.university_rank ? `#${m.university_rank}` : "#—"}
+          detail={m.university_rank ? `of ${m.active_members || 4} cadets` : ((m.attendance_count ?? 0) > 0 ? "Ranked" : "Unranked")}
         />
         <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />
         <Metric

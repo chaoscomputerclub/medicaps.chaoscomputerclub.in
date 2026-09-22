@@ -772,6 +772,7 @@ class AuthController:
                 "peak_rating": current_member.peak_rating,
                 "peak_contest": "Chaos Arena 2026",
                 "university_rank": (ranked or 0) + 1,
+                "percentile": round((1.0 - (((ranked or 0) + 1) / max(1, all_members_count or 1))) * 100, 1),
                 "active_members": all_members_count or 0,
                 "attendance_count": attended or 0,
                 "attendance_total": total_contests or 0,
@@ -825,12 +826,9 @@ class AuthController:
         )
 
         clean_target = handle_or_id.lstrip("@").strip()
-        handle_aliases = {"santush01": "santusht"}
-        target_handle = handle_aliases.get(clean_target.lower(), clean_target.lower())
         # Find target member
         stmt = select(MemberProfile).where(
             or_(
-                func.lower(MemberProfile.handle) == target_handle,
                 func.lower(MemberProfile.handle) == clean_target.lower(),
                 MemberProfile.id == clean_target,
             )
@@ -1090,9 +1088,9 @@ class AuthController:
                 "earned": True,
             })
 
-        # Mask student PRN
+        # Student PRN (unmasked for self, masked for peers)
         prn_str = student.prn or ""
-        masked_prn = f"{prn_str[:6]}****{prn_str[-2:]}" if len(prn_str) >= 10 else (prn_str or "—")
+        masked_prn = prn_str if is_self else (f"{prn_str[:6]}****{prn_str[-2:]}" if len(prn_str) >= 10 else (prn_str or "—"))
 
         payload = {
             "member": {
