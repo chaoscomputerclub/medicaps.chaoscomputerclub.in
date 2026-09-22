@@ -42,9 +42,6 @@ async def purge_all_contest_data(db: AsyncSession) -> dict:
     """
     logger.warning("Initiating strict purge of all contest and assessment data...")
 
-    from app.core.db import init_db
-    await init_db()
-
     tables = [
         AssessmentSubmission,
         AssessmentSession,
