@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Response
 from pydantic import BaseModel
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -645,6 +645,68 @@ class ContestController:
             "status": "confirmed",
             "registered": True,
             "message": f"Registration confirmed for {contest.title}. Workstation seat reserved and assessment round unlocked.",
+            "venue": contest.venue,
+            "registered_count": contest.registered_count,
+            "capacity": contest.seat_capacity,
+        }
+
+    @staticmethod
+    async def unregister_from_contest(
+        slug: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> Dict[str, Any]:
+        """Cancel registration for a contest, release workstation seat, and invalidate pass."""
+        c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+        contest = c_res.scalars().first()
+        if not contest:
+            raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+        if contest.status not in ("upcoming", "live"):
+            raise HTTPException(
+                status_code=400,
+                detail="You cannot unregister from a concluded or archived contest.",
+            )
+
+        existing_reg = await db.execute(
+            select(ContestRegistration).where(
+                ContestRegistration.contest_id == contest.id,
+                ContestRegistration.member_id == current_member.id,
+            )
+        )
+        reg_record = existing_reg.scalars().first()
+        if not reg_record:
+            return {
+                "status": "not_registered",
+                "registered": False,
+                "message": f"You are not registered for {contest.title}.",
+                "registered_count": contest.registered_count,
+            }
+
+        # Delete the registration record
+        await db.delete(reg_record)
+
+        # Delete any associated campus pass
+        await db.execute(
+            delete(CampusPass).where(
+                CampusPass.contest_id == contest.id,
+                CampusPass.member_id == current_member.id,
+            )
+        )
+
+        # Decrement participant count
+        contest.registered_count = max(0, contest.registered_count - 1)
+        await db.commit()
+
+        # Invalidate related cache keys
+        await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern(f"cache:*:{current_member.id}:*")
+        await delete_cache_pattern("cache:passes*")
+
+        return {
+            "status": "unregistered",
+            "registered": False,
+            "message": f"Successfully unregistered from {contest.title}.",
             "venue": contest.venue,
             "registered_count": contest.registered_count,
             "capacity": contest.seat_capacity,

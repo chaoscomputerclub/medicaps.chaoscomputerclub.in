@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestDetailThunk, registerContestThunk } from "@/store/slices/contestSlice";
+import { fetchContestDetailThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
@@ -122,6 +122,23 @@ export function ContestOverviewPage() {
       }
     } catch (e: any) {
       toast.error(e.message || "Registration failed");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handleUnregister = async () => {
+    try {
+      setIsRegistering(true);
+      const res = await dispatch(unregisterContestThunk(contestSlug));
+      if (unregisterContestThunk.fulfilled.match(res)) {
+        toast.success("Successfully unregistered from the contest.");
+        refreshDetail(true);
+      } else {
+        toast.error(String(res.payload || "Failed to unregister"));
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to unregister");
     } finally {
       setIsRegistering(false);
     }
@@ -274,6 +291,15 @@ export function ContestOverviewPage() {
                   <CheckCircle2 className="size-4 text-emerald-400" />
                   <span>You are Registered · Contest Opens at Start Time</span>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUnregister}
+                  disabled={isRegistering}
+                  className="rounded-md border-rose-500/30 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 text-xs font-sans font-semibold cursor-pointer transition-colors"
+                >
+                  {isRegistering ? "Unregistering..." : "Unregister from Contest"}
+                </Button>
                 <span className="text-xs text-zinc-400 font-sans">
                   Arena unlocks automatically at start time
                 </span>

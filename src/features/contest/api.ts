@@ -234,6 +234,19 @@ export const contestApi = {
     invalidateSwrCache("contests:*");
     invalidateSwrCache(`contest:*:${slug}*`);
     invalidateSwrCache("portal:*");
+    invalidateSwrCache("passes:*");
+    return res;
+  },
+
+  async unregister(slug: string) {
+    const res = await request<{ registered: boolean; message: string; registered_count: number }>(
+      `/contests/${encodeURIComponent(slug)}/unregister`,
+      { method: "POST" }
+    );
+    invalidateSwrCache("contests:*");
+    invalidateSwrCache(`contest:*:${slug}*`);
+    invalidateSwrCache("portal:*");
+    invalidateSwrCache("passes:*");
     return res;
   },
 

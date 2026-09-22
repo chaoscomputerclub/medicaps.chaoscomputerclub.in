@@ -144,6 +144,20 @@ async def register_for_contest(
     )
 
 
+@router.post("/{slug}/unregister")
+async def unregister_for_contest(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: MemberProfile = Depends(get_current_member),
+):
+    """Cancel contest registration and release reserved workstation seat."""
+    return await ContestController.unregister_from_contest(
+        slug=slug,
+        current_member=current_member,
+        db=db,
+    )
+
+
 @router.post("/{slug}/check-in")
 async def check_in_contest(
     slug: str,

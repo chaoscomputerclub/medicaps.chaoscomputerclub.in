@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestsThunk, registerContestThunk } from "@/store/slices/contestSlice";
+import { fetchContestsThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
 import { contestApi } from "@/features/contest/api";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
@@ -290,6 +290,20 @@ export function ContestsHubPage() {
     }
   };
 
+  const handleUnregister = async (slug: string) => {
+    if (!member) { toast.error("Please login."); return; }
+    try {
+      setRegisteringSlug(slug);
+      await dispatch(unregisterContestThunk(slug)).unwrap();
+      toast.success("Successfully unregistered from the contest.");
+      refreshHubData(true);
+    } catch (err: any) {
+      toast.error(err || "Failed to unregister");
+    } finally {
+      setRegisteringSlug(null);
+    }
+  };
+
   if (isLoading && contests.length === 0) return <ContestsHubSkeleton />;
 
   return (
@@ -399,6 +413,15 @@ export function ContestsHubPage() {
                           <CheckCircle2 className="size-4 text-emerald-400" />
                           <span>Registered · Contest Opens at Start Time</span>
                         </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnregister(upcomingWeekly.slug)}
+                          disabled={registeringSlug === upcomingWeekly.slug}
+                          className="text-xs font-sans text-zinc-300 hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-950/20 border-white/10 transition-colors cursor-pointer"
+                        >
+                          {registeringSlug === upcomingWeekly.slug ? "Updating..." : "Unregister"}
+                        </Button>
                         <Button asChild variant="outline" size="sm" className="text-xs font-sans border-white/8">
                           <Link to={`/contests/${upcomingWeekly.slug}`}>Contest Details</Link>
                         </Button>
@@ -448,12 +471,24 @@ export function ContestsHubPage() {
                           </a>
                         </Button>
                       ) : isReg ? (
-                        <Button asChild variant="outline" className="flex-1 text-xs text-emerald-400 border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-950/50 hover:text-emerald-300 font-sans">
-                          <Link to={`/contests/${contest.slug}`}>
-                            <CheckCircle2 className="size-3.5 text-emerald-400" />
-                            <span>Registered</span>
-                          </Link>
-                        </Button>
+                        <div className="flex items-center gap-1.5 flex-1">
+                          <Button asChild variant="outline" className="flex-1 text-xs text-emerald-400 border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-950/50 hover:text-emerald-300 font-sans">
+                            <Link to={`/contests/${contest.slug}`}>
+                              <CheckCircle2 className="size-3.5 text-emerald-400" />
+                              <span>Registered</span>
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUnregister(contest.slug)}
+                            disabled={registeringSlug === contest.slug}
+                            className="text-xs font-mono text-zinc-300 hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-950/20 border-white/10 px-2.5 cursor-pointer"
+                            title="Unregister from contest"
+                          >
+                            {registeringSlug === contest.slug ? "..." : "Unregister"}
+                          </Button>
+                        </div>
                       ) : (
                         <Button onClick={() => handleRegister(contest.slug)} disabled={registeringSlug === contest.slug}
                           className="flex-1 text-xs font-mono font-semibold uppercase bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer transition-colors [&_svg]:transition-colors">

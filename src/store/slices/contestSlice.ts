@@ -112,6 +112,19 @@ export const registerContestThunk = createAsyncThunk(
   }
 );
 
+export const unregisterContestThunk = createAsyncThunk(
+  "contest/unregister",
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const result = await contestApi.unregister(slug);
+      const reg = await contestApi.registrationStatus(slug, true);
+      return { result, registration: reg };
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to unregister from contest");
+    }
+  }
+);
+
 export const checkInContestThunk = createAsyncThunk(
   "contest/checkIn",
   async (slug: string, { rejectWithValue }) => {
@@ -235,6 +248,21 @@ export const contestSlice = createSlice({
       if (contestInList) {
         contestInList.registered = true;
         contestInList.registered_count = (action.payload.result as any)?.registered_count ?? (contestInList.registered_count + 1);
+      }
+    });
+
+    // Unregister
+    builder.addCase(unregisterContestThunk.fulfilled, (state, action) => {
+      state.registration = action.payload.registration;
+      const slug = action.meta.arg;
+      if (state.currentContest && state.currentContest.slug === slug) {
+        state.currentContest.registered = false;
+        state.currentContest.registered_count = (action.payload.result as any)?.registered_count ?? Math.max(0, state.currentContest.registered_count - 1);
+      }
+      const contestInList = state.contests.find((c) => c.slug === slug);
+      if (contestInList) {
+        contestInList.registered = false;
+        contestInList.registered_count = (action.payload.result as any)?.registered_count ?? Math.max(0, contestInList.registered_count - 1);
       }
     });
 
