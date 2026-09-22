@@ -48,7 +48,7 @@ export function ProblemArchivePage() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {complete.flatMap((c) =>
+            {complete.flatMap((c: any) =>
               (c.problems || []).map((p: any) => {
                 const pIndex = p.problem_index || p.index || "—";
                 const pSlug = (pIndex === "—" ? "" : pIndex).toLowerCase();

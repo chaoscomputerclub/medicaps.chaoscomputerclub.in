@@ -8,6 +8,8 @@ import {
 } from "@/lib/auth";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 
+export type SupportedLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "typescript";
+
 export interface AssessmentProblemData {
   id: string;
   problem_index: string;
@@ -246,6 +248,7 @@ export const assessmentSlice = createSlice({
         const starters = p.starter_codes || {};
         for (const lang of ["python", "cpp", "c", "java", "javascript", "typescript"] as const) {
           const key = `${p.id}_${lang}`;
+          const current = state.codeMap[key];
           const isLegacy =
             current &&
             (current.includes("TODO: Calculate valid mirror pairs") ||
