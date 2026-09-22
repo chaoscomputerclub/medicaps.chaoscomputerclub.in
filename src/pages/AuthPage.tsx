@@ -106,7 +106,6 @@ export function AuthPage() {
     handle,
     pending,
     message,
-    devOtp,
     isAuthenticated: authed,
     handleStatus,
   } = useAppSelector((s) => s.auth);
@@ -432,24 +431,6 @@ export function AuthPage() {
               </button>
             )}
           </div>
-
-          {/* Dev OTP quick-fill chip (discreet dev utility) */}
-          {devOtp && (
-            <div className="mt-6 pt-3 border-t border-white/[0.04] flex items-center justify-center gap-2 text-[11px] text-zinc-500 font-mono">
-              <span>DEV CODE:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  dispatch(setOtp(devOtp));
-                  void triggerVerify(devOtp);
-                }}
-                className="text-[#CCFF00] font-semibold hover:underline bg-[#CCFF00]/10 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
-                title="Click to fill & verify"
-              >
-                {devOtp}
-              </button>
-            </div>
-          )}
         </div>
       )}
 

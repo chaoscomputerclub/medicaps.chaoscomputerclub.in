@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-22T09:35:21.218Z",
-  "totalElements": 304,
-  "functionalCount": 304,
+  "timestamp": "2026-09-22T09:38:35.567Z",
+  "totalElements": 303,
+  "functionalCount": 303,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 30,
     "backendQueries": 9,
     "routingNavigation": 184,
-    "clientUiState": 60,
+    "clientUiState": 59,
     "conditionalLocked": 15,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
@@ -610,7 +610,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 253,
+      "line": 252,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => {\n          setNavDirection(\"backward\");\n          dispatch(setStep(\"emai",
@@ -619,7 +619,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 292,
+      "line": 291,
       "tag": "<form>",
       "label": "{isInvalidDomain && (               <...",
       "handler": "{handleEmailSubmit}",
@@ -628,7 +628,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 328,
+      "line": 327,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
@@ -637,7 +637,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 351,
+      "line": 350,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => { window.location.href = getGoogleLoginURL(); }}",
@@ -646,7 +646,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 425,
+      "line": 424,
       "tag": "<button>",
       "label": "Resend code",
       "handler": "{handleResendOtp}",
@@ -655,16 +655,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 440,
-      "tag": "<button>",
-      "label": "{devOtp}",
-      "handler": "{() => {\n                  dispatch(setOtp(devOtp));\n                  void trig",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 460,
+      "line": 441,
       "tag": "<form>",
       "label": "{message && (             <p classNam...",
       "handler": "{handleOnboardingSubmit}",
@@ -673,7 +664,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 529,
+      "line": 510,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
