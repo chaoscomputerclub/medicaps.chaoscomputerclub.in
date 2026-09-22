@@ -274,8 +274,8 @@ export function SettingsPage() {
   // ── Form state ──
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
-  const [department, setDepartment] = useState("CSE");
-  const [batch, setBatch] = useState("2023-27");
+  const [department, setDepartment] = useState("");
+  const [batch, setBatch] = useState("");
   const [github, setGithub] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -306,8 +306,8 @@ export function SettingsPage() {
     setFullName(member.full_name || "");
     setHandleInput(member.handle || "");
     setBio(member.bio || "");
-    setDepartment(member.department || "CSE");
-    setBatch(member.batch || "2023-27");
+    setDepartment(member.department || "");
+    setBatch(member.batch || "");
     setGithub(member.github_username || "");
     setLinkedin(member.linkedin_url || "");
     const url = member.avatar_url || "";
@@ -713,13 +713,18 @@ export function SettingsPage() {
 
                 <SettingRow label="Department" htmlFor="s-dept">
                   <Select
-                    value={department}
-                    onValueChange={(v) => { setDepartment(v); saveField("department", { department: v }); }}
+                    value={department || undefined}
+                    onValueChange={(v) => {
+                      const finalVal = v === "unspecified" ? "" : v;
+                      setDepartment(finalVal);
+                      saveField("department", { department: finalVal });
+                    }}
                   >
                     <SelectTrigger id="s-dept" className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Department…" />
                     </SelectTrigger>
                     <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
+                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">Not Specified</SelectItem>
                       {DEPARTMENTS.map((d) => (
                         <SelectItem key={d.value} value={d.value} className="text-xs">{d.label}</SelectItem>
                       ))}
@@ -729,13 +734,18 @@ export function SettingsPage() {
 
                 <SettingRow label="Graduation Batch" htmlFor="s-batch" borderless>
                   <Select
-                    value={batch}
-                    onValueChange={(v) => { setBatch(v); saveField("batch", { batch: v }); }}
+                    value={batch || undefined}
+                    onValueChange={(v) => {
+                      const finalVal = v === "unspecified" ? "" : v;
+                      setBatch(finalVal);
+                      saveField("batch", { batch: finalVal });
+                    }}
                   >
                     <SelectTrigger id="s-batch" className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Graduation Batch…" />
                     </SelectTrigger>
                     <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
+                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">Not Specified</SelectItem>
                       {BATCHES.map((b) => (
                         <SelectItem key={b} value={b} className="text-xs">{b}</SelectItem>
                       ))}

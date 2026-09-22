@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T11:29:53.911Z",
+  "timestamp": "2026-09-22T11:37:30.645Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -2482,7 +2482,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 501,
+      "line": 509,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2491,7 +2491,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 520,
+      "line": 528,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2500,7 +2500,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 540,
+      "line": 548,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2509,7 +2509,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 551,
+      "line": 559,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2518,7 +2518,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 681,
+      "line": 689,
       "tag": "<Link>",
       "label": "Open Verification Console",
       "handler": "{`/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",
@@ -2608,7 +2608,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 765,
+      "line": 775,
       "tag": "<SaveButton>",
       "label": "SaveButton",
       "handler": "{() => saveField(\"github\", { github_username: github.trim() })}",
@@ -2617,7 +2617,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 773,
+      "line": 783,
       "tag": "<a>",
       "label": "github.com/ {github}",
       "handler": "{`https://github.com/${github}`}",
@@ -2626,7 +2626,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 798,
+      "line": 808,
       "tag": "<SaveButton>",
       "label": "SaveButton",
       "handler": "{() => saveField(\"linkedin\", { linkedin_url: linkedin.trim() })}",
@@ -2635,7 +2635,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 864,
+      "line": 874,
       "tag": "<Button>",
       "label": "{fieldStatus[handle] === saving ?...",
       "handler": "{saveHandle}",
@@ -2644,7 +2644,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 926,
+      "line": 936,
       "tag": "<Button>",
       "label": "Export",
       "handler": "{handleExport}",
@@ -2653,7 +2653,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1017,
+      "line": 1027,
       "tag": "<Button>",
       "label": "Sign out",
       "handler": "{() => logout()}",
@@ -2662,7 +2662,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1042,
+      "line": 1052,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2671,7 +2671,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1043,
+      "line": 1053,
       "tag": "<Link>",
       "label": "View my proof certificates",
       "handler": "\"/verify\"",
@@ -2680,7 +2680,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1071,
+      "line": 1081,
       "tag": "<Button>",
       "label": "Delete account",
       "handler": "none",
@@ -2689,7 +2689,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1105,
+      "line": 1115,
       "tag": "<AlertDialogCancel>",
       "label": "Cancel",
       "handler": "{() => setDeleteConfirmText(\"\")}",
@@ -2698,7 +2698,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1111,
+      "line": 1121,
       "tag": "<AlertDialogAction>",
       "label": "{isDeleting ? <Loader2 className=ani...",
       "handler": "{handleDelete}",

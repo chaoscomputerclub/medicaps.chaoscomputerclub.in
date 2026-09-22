@@ -482,10 +482,18 @@ export function ProfilePage() {
 
             <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
               <TierBadge>{m.tier || "1★ Explorer"}</TierBadge>
-              <span>·</span>
-              <span className="text-zinc-300">{m.department || currentMember?.department || "CSE"}</span>
-              <span>·</span>
-              <span className="text-zinc-500">{m.batch || currentMember?.batch || "2023-27"}</span>
+              {(m.department || (isSelfUser ? currentMember?.department : null)) ? (
+                <>
+                  <span>·</span>
+                  <span className="text-zinc-300">{m.department || currentMember?.department}</span>
+                </>
+              ) : null}
+              {(m.batch || (isSelfUser ? currentMember?.batch : null)) ? (
+                <>
+                  <span>·</span>
+                  <span className="text-zinc-500">{m.batch || currentMember?.batch}</span>
+                </>
+              ) : null}
               <span>·</span>
               <span className="text-lime-400">@{displayHandle || "cadet"}</span>
             </div>

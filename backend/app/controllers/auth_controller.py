@@ -359,13 +359,11 @@ class AuthController:
 
         if payload.department is not None:
             dept = payload.department.strip()
-            if dept:
-                current_member.department = dept
+            current_member.department = None if dept in ("", "None", "unspecified") else dept
 
         if payload.batch is not None:
             batch = payload.batch.strip()
-            if batch:
-                current_member.batch = batch
+            current_member.batch = None if batch in ("", "None", "unspecified") else batch
 
         if payload.bio is not None:
             current_member.bio = payload.bio.strip()
@@ -766,8 +764,8 @@ class AuthController:
                 "prn": enrollment_val or "N/A",
                 "enrollment_number": enrollment_val or "—",
                 "enrollment_no": enrollment_val or "—",
-                "department": current_member.department or "CSE",
-                "batch": current_member.batch or "2023-27",
+                "department": current_member.department,
+                "batch": current_member.batch,
                 "rating": current_member.rating,
                 "peak_rating": current_member.peak_rating,
                 "peak_contest": "Chaos Arena 2026",
@@ -1101,8 +1099,8 @@ class AuthController:
                 "prn": masked_prn,
                 "enrollment_number": masked_prn,
                 "enrollment_no": masked_prn,
-                "department": student.department or "CSE",
-                "batch": student.batch or "2024-28",
+                "department": student.department,
+                "batch": student.batch,
                 "rating": student.rating,
                 "peak_rating": student.peak_rating or student.rating,
                 "peak_contest": "Chaos Arena",
