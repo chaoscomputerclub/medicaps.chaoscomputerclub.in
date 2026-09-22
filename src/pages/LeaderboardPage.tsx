@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
-import { LeaderboardRowSkeleton } from "@/organization/components/skeletons";
+import { LeaderboardSkeleton, LeaderboardRowSkeleton } from "@/organization/components/skeletons";
 import { PageHeader } from "@/organization/components/ui";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { useChunkedList } from "@/hooks/useChunkedList";
@@ -42,6 +42,10 @@ export function LeaderboardPage() {
   );
   const data = rawData || [];
   const currentMemberId = useAppSelector((s) => s.auth.member?.id);
+
+  if (loading && (!rawData || rawData.length === 0)) {
+    return <LeaderboardSkeleton />;
+  }
 
   const totalCount = data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));

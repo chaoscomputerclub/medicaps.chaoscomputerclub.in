@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T11:49:11.600Z",
+  "timestamp": "2026-09-22T12:05:08.684Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -16,7 +16,7 @@
   "elements": [
     {
       "file": "src/AppRoutes.tsx",
-      "line": 50,
+      "line": 68,
       "tag": "<Navigate>",
       "label": "[to={/profile/${handle ? encodeURICo...",
       "handler": "{`/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 55,
+      "line": 73,
       "tag": "<Navigate>",
       "label": "[to={/contests/${contestSlug ? encod...",
       "handler": "{`/contests/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}`}",
@@ -34,7 +34,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 61,
+      "line": 79,
       "tag": "<Navigate>",
       "label": "[to={${target}${location.search}${lo...",
       "handler": "{`${target}${location.search}${location.hash}`}",
@@ -43,7 +43,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 73,
+      "line": 98,
       "tag": "<Navigate>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -52,7 +52,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 135,
+      "line": 293,
       "tag": "<Navigate>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -277,7 +277,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 177,
+      "line": 204,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -286,7 +286,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 184,
+      "line": 211,
       "tag": "<button>",
       "label": "{open ? <X size={20} /> : <Menu size=...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -295,7 +295,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 196,
+      "line": 223,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -304,7 +304,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 209,
+      "line": 236,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 255,
+      "line": 282,
       "tag": "<Link>",
       "label": "[to={item.to}]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -322,7 +322,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 285,
+      "line": 312,
       "tag": "<Link>",
       "label": "[to=/profile]",
       "handler": "\"/profile\"",
@@ -331,7 +331,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 310,
+      "line": 337,
       "tag": "<button>",
       "label": "dispatch(logout())}\n            aria-...",
       "handler": "{() => dispatch(logout())}",
@@ -2248,7 +2248,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 166,
+      "line": 170,
       "tag": "<Link>",
       "label": "@ {x.handle}",
       "handler": "{`/profile/${x.handle}`}",
@@ -2257,7 +2257,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 222,
+      "line": 226,
       "tag": "<button>",
       "label": "{size}",
       "handler": "{() => handlePageSizeChange(size)}",
@@ -2266,7 +2266,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 239,
+      "line": 243,
       "tag": "<button>",
       "label": "button",
       "handler": "{handlePrevPage}",
@@ -2275,7 +2275,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 252,
+      "line": 256,
       "tag": "<button>",
       "label": "= totalPages - 1}\n                ari...",
       "handler": "{handleNextPage}",

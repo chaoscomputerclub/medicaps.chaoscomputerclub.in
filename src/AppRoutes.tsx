@@ -1,12 +1,30 @@
 import React, { Suspense } from "react";
 import { Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
-import { AppShellSkeleton } from "@/components/TacticalRouteFallback";
-import { DashboardSkeleton } from "@/organization/components/skeletons";
+import {
+  DashboardSkeleton,
+  ContestsHubSkeleton,
+  ContestDetailSkeleton,
+  ContestLobbySkeleton,
+  AssessmentStudioSkeleton,
+  ContestSummarySkeleton,
+  ContestResultsSkeleton,
+  ContestFinalResultsSkeleton,
+  MyContestsSkeleton,
+  LeaderboardSkeleton,
+  ProblemArchiveSkeleton,
+  ProblemDetailSkeleton,
+  VerifyProofSkeleton,
+  ProfileSkeleton,
+  SettingsSkeleton,
+  AuthSkeleton,
+} from "@/organization/components/skeletons";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
+import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthPage } from "./pages/AuthPage";
 
-export const PortalShell = lazyWithRetry(() => import("@/organization/components/PortalShell"), "PortalShell");
+export { PortalShell };
+
 export const DashboardPage = lazyWithRetry(() => import("./pages/DashboardPage"), "DashboardPage");
 export const ContestsHubPage = lazyWithRetry(() => import("./pages/ContestsHubPage"), "ContestsHubPage");
 export const ContestOverviewPage = lazyWithRetry(() => import("./pages/ContestOverviewPage"), "ContestOverviewPage");
@@ -66,7 +84,14 @@ export function AppRoutes() {
     <Routes>
       {/* Guest-only Authentication Route — immediate, zero secondary network waterfall */}
       <Route element={<GuestGuard />}>
-        <Route path="/auth" element={<AuthPage />} />
+        <Route
+          path="/auth"
+          element={
+            <Suspense fallback={<AuthSkeleton />}>
+              <AuthPage />
+            </Suspense>
+          }
+        />
       </Route>
 
       {/* Backward-Compatible Redirects for /portal */}
@@ -78,61 +103,194 @@ export function AppRoutes() {
         {/* Assessment Workspace route redirected to contest flow */}
         <Route path="/assessments/:contestSlug" element={<ContestRedirect />} />
 
-        {/* Root Shell Routes */}
-        <Route
-          path="/"
-          element={
-            <Suspense fallback={<AppShellSkeleton />}>
-              <PortalShell />
-            </Suspense>
-          }
-        >
+        {/* Root Shell Route — Statically mounted shell with independent route suspenses */}
+        <Route path="/" element={<PortalShell />}>
           {/* Dashboard index */}
-          <Route index element={<DashboardPage />} />
+          <Route
+            index
+            element={
+              <Suspense fallback={<DashboardSkeleton />}>
+                <DashboardPage />
+              </Suspense>
+            }
+          />
 
-            {/* Contests Hub & Details */}
-            <Route path="contests" element={<ContestsHubPage />} />
-            <Route path="contests/:contestSlug" element={<ContestOverviewPage />} />
-            <Route path="contests/:contestSlug/lobby" element={<ContestLobbyPage />} />
-            <Route path="contests/:contestSlug/problems/:problemSlug" element={<ContestArenaPage />} />
-            <Route path="contests/:contestSlug/problems" element={<ContestArenaPage />} />
-            <Route path="contests/:contestSlug/arena" element={<ContestArenaPage />} />
-            <Route path="contests/:contestSlug/summary" element={<ContestSummaryPage />} />
-            <Route path="contests/:contestSlug/submit" element={<ContestSummaryPage />} />
-            <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
-            <Route path="contests/:contestSlug/offline" element={<ContestRedirect />} />
-            <Route path="contests/:contestSlug/qualified" element={<ContestRedirect />} />
-            <Route path="contests/:contestSlug/results" element={<ContestResultsPage />} />
-            <Route path="contests/:contestSlug/final-results" element={<ContestFinalResultsPage />} />
+          {/* Contests Hub & Details */}
+          <Route
+            path="contests"
+            element={
+              <Suspense fallback={<ContestsHubSkeleton />}>
+                <ContestsHubPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug"
+            element={
+              <Suspense fallback={<ContestDetailSkeleton />}>
+                <ContestOverviewPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/lobby"
+            element={
+              <Suspense fallback={<ContestLobbySkeleton />}>
+                <ContestLobbyPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/problems/:problemSlug"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <ContestArenaPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/problems"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <ContestArenaPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/arena"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <ContestArenaPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/summary"
+            element={
+              <Suspense fallback={<ContestSummarySkeleton />}>
+                <ContestSummaryPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/submit"
+            element={
+              <Suspense fallback={<ContestSummarySkeleton />}>
+                <ContestSummaryPage />
+              </Suspense>
+            }
+          />
+          <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
+          <Route path="contests/:contestSlug/offline" element={<ContestRedirect />} />
+          <Route path="contests/:contestSlug/qualified" element={<ContestRedirect />} />
+          <Route
+            path="contests/:contestSlug/results"
+            element={
+              <Suspense fallback={<ContestResultsSkeleton />}>
+                <ContestResultsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/final-results"
+            element={
+              <Suspense fallback={<ContestFinalResultsSkeleton />}>
+                <ContestFinalResultsPage />
+              </Suspense>
+            }
+          />
 
-            {/* My Contests Ledger */}
-            <Route path="my-contests" element={<MyContestsPage />} />
+          {/* My Contests Ledger */}
+          <Route
+            path="my-contests"
+            element={
+              <Suspense fallback={<MyContestsSkeleton />}>
+                <MyContestsPage />
+              </Suspense>
+            }
+          />
 
-            {/* University Leaderboard */}
-            <Route path="leaderboard" element={<LeaderboardPage />} />
+          {/* University Leaderboard */}
+          <Route
+            path="leaderboard"
+            element={
+              <Suspense fallback={<LeaderboardSkeleton />}>
+                <LeaderboardPage />
+              </Suspense>
+            }
+          />
 
-            {/* Problem Archive & Editorials */}
-            <Route path="problems" element={<ProblemArchivePage />} />
-            <Route path="problems/:problemSlug" element={<ProblemDetailPage />} />
+          {/* Problem Archive & Editorials */}
+          <Route
+            path="problems"
+            element={
+              <Suspense fallback={<ProblemArchiveSkeleton />}>
+                <ProblemArchivePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="problems/:problemSlug"
+            element={
+              <Suspense fallback={<ProblemDetailSkeleton />}>
+                <ProblemDetailPage />
+              </Suspense>
+            }
+          />
 
-            {/* Cryptographic Result Verification */}
-            <Route path="verify" element={<VerifyProofPage />} />
+          {/* Cryptographic Result Verification */}
+          <Route
+            path="verify"
+            element={
+              <Suspense fallback={<VerifyProofSkeleton />}>
+                <VerifyProofPage />
+              </Suspense>
+            }
+          />
 
-            {/* Member & Student Profiles */}
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="profile/:handle" element={<ProfilePage />} />
-            <Route path="u/:handle" element={<ProfilePage />} />
+          {/* Member & Student Profiles */}
+          <Route
+            path="profile"
+            element={
+              <Suspense fallback={<ProfileSkeleton />}>
+                <ProfilePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="profile/:handle"
+            element={
+              <Suspense fallback={<ProfileSkeleton />}>
+                <ProfilePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="u/:handle"
+            element={
+              <Suspense fallback={<ProfileSkeleton />}>
+                <ProfilePage />
+              </Suspense>
+            }
+          />
 
-            {/* Account & Security Settings */}
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
+          {/* Account & Security Settings */}
+          <Route
+            path="settings"
+            element={
+              <Suspense fallback={<SettingsSkeleton />}>
+                <SettingsPage />
+              </Suspense>
+            }
+          />
         </Route>
+      </Route>
 
-        {/* Direct Shortlink for Profiles: /u/:handle */}
-        <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
+      {/* Direct Shortlink for Profiles: /u/:handle */}
+      <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
 
-        {/* Catch-all fallback to root */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      {/* Catch-all fallback to root */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

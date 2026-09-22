@@ -24,6 +24,10 @@ import { formatFullName, resolveAvatarUrl } from "@/lib/utils";
 import {
   ContestsHubSkeleton,
   ContestDetailSkeleton,
+  ContestLobbySkeleton,
+  ContestSummarySkeleton,
+  ContestResultsSkeleton,
+  ContestFinalResultsSkeleton,
   LeaderboardSkeleton,
   MyContestsSkeleton,
   ProblemArchiveSkeleton,
@@ -51,6 +55,21 @@ function PortalRouteSkeleton() {
 
   if (cleanPath === "/contests") {
     return <ContestsHubSkeleton />;
+  }
+  if (cleanPath.includes("/summary") || cleanPath.includes("/submit")) {
+    return <ContestSummarySkeleton />;
+  }
+  if (cleanPath.includes("/lobby")) {
+    return <ContestLobbySkeleton />;
+  }
+  if (cleanPath.includes("/arena") || cleanPath.includes("/problems/")) {
+    return <AssessmentStudioSkeleton />;
+  }
+  if (cleanPath.includes("/final-results")) {
+    return <ContestFinalResultsSkeleton />;
+  }
+  if (cleanPath.includes("/results")) {
+    return <ContestResultsSkeleton />;
   }
   if (cleanPath.startsWith("/contests/")) {
     return <ContestDetailSkeleton />;
@@ -161,9 +180,17 @@ export function PortalShell() {
   }, [cleanPath, open]);
 
   if (isFullscreenWorkspace) {
+    const isSummary = cleanPath.includes("/summary") || cleanPath.includes("/submit");
+    const isLobby = cleanPath.includes("/lobby");
+    const workspaceFallback = isSummary
+      ? <ContestSummarySkeleton />
+      : isLobby
+      ? <ContestLobbySkeleton />
+      : <AssessmentStudioSkeleton />;
+
     return (
       <main className="min-h-screen bg-black text-white">
-        <Suspense fallback={<AssessmentStudioSkeleton />}>
+        <Suspense fallback={workspaceFallback}>
           <Outlet />
         </Suspense>
       </main>

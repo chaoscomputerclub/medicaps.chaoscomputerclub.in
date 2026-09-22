@@ -40,7 +40,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestArenaThunk, fetchContestDetailThunk } from "@/store/slices/contestSlice";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
-import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
+import { ContestSummarySkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
 import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
@@ -190,7 +190,7 @@ export function ContestSummaryPage() {
   };
 
   if (isLoadingArena && !arenaData) {
-    return <AssessmentStudioSkeleton />;
+    return <ContestSummarySkeleton />;
   }
 
   const contestTitle = arenaData?.title || currentContest?.title || "Live Contest Arena";

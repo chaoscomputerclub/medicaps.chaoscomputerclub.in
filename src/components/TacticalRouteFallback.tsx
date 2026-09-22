@@ -1,12 +1,70 @@
 /**
- * CCC Medi-Caps Portal — High-End SaaS Application Shell Skeleton
- * Replaces tactical matrix loaders with a sovereign, pitch-black Strix AI-grade skeleton shell.
+ * CCC Medi-Caps Portal — Dynamic Route-Aware Application Shell Skeleton
+ * Resolves the exact page skeleton matching the active route, eliminating generic dashboard mocks.
  */
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DashboardSkeleton,
+  ContestsHubSkeleton,
+  ContestDetailSkeleton,
+  ContestLobbySkeleton,
+  AssessmentStudioSkeleton,
+  ContestSummarySkeleton,
+  ContestResultsSkeleton,
+  ContestFinalResultsSkeleton,
+  LeaderboardSkeleton,
+  MyContestsSkeleton,
+  ProblemArchiveSkeleton,
+  ProblemDetailSkeleton,
+  ProfileSkeleton,
+  SettingsSkeleton,
+  VerifyProofSkeleton,
+  AuthSkeleton,
+} from "@/organization/components/skeletons";
 
 export function AppShellSkeleton() {
+  const path = typeof window !== "undefined" ? window.location.pathname.replace(/\/+$/, "") || "/" : "/";
+
+  if (path === "/auth") {
+    return <AuthSkeleton />;
+  }
+
+  const isFullscreen =
+    path.includes("/assessment") ||
+    path.includes("/arena") ||
+    path.includes("/lobby") ||
+    path.includes("/summary") ||
+    path.includes("/submit") ||
+    (path.includes("/contests/") && (
+      path.includes("/problems") ||
+      path.includes("/summary") ||
+      path.includes("/submit")
+    ));
+
+  const renderContentSkeleton = () => {
+    if (path === "/contests") return <ContestsHubSkeleton />;
+    if (path.includes("/summary") || path.includes("/submit")) return <ContestSummarySkeleton />;
+    if (path.includes("/lobby")) return <ContestLobbySkeleton />;
+    if (path.includes("/arena") || path.includes("/problems/")) return <AssessmentStudioSkeleton />;
+    if (path.includes("/final-results")) return <ContestFinalResultsSkeleton />;
+    if (path.includes("/results")) return <ContestResultsSkeleton />;
+    if (path.startsWith("/contests/")) return <ContestDetailSkeleton />;
+    if (path.startsWith("/my-contests")) return <MyContestsSkeleton />;
+    if (path.startsWith("/leaderboard")) return <LeaderboardSkeleton />;
+    if (path === "/problems") return <ProblemArchiveSkeleton />;
+    if (path.startsWith("/problems/")) return <ProblemDetailSkeleton />;
+    if (path.startsWith("/settings")) return <SettingsSkeleton />;
+    if (path.startsWith("/profile") || path.startsWith("/u/")) return <ProfileSkeleton />;
+    if (path.startsWith("/verify")) return <VerifyProofSkeleton />;
+    return <DashboardSkeleton />;
+  };
+
+  if (isFullscreen) {
+    return <main className="min-h-screen bg-black text-white">{renderContentSkeleton()}</main>;
+  }
+
   return (
     <div
       role="status"
@@ -60,52 +118,9 @@ export function AppShellSkeleton() {
         </div>
       </aside>
 
-      {/* Main Content Viewport Skeleton */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8 space-y-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header Row */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6">
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-3.5 w-96 max-w-full" />
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-9 w-28 rounded-md" />
-              <Skeleton className="h-9 w-28 rounded-md" />
-            </div>
-          </div>
-
-          {/* Metrics Bento Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="p-4 rounded-lg border border-white/8 bg-black space-y-2">
-                <Skeleton className="h-2.5 w-20" />
-                <Skeleton className="h-7 w-28" />
-                <Skeleton className="h-2.5 w-16" />
-              </div>
-            ))}
-          </div>
-
-          {/* Content Cards Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="p-6 rounded-xl border border-white/8 bg-black space-y-4">
-                <div className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-3 w-16" />
-                </div>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-3.5 w-full" />
-                <Skeleton className="h-3.5 w-4/5" />
-                <div className="pt-2 flex gap-3">
-                  <Skeleton className="h-9 flex-1 rounded-md" />
-                  <Skeleton className="h-9 w-24 rounded-md" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Main Content Viewport Skeleton with Route-Specific Content */}
+      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8">
+        {renderContentSkeleton()}
       </main>
     </div>
   );

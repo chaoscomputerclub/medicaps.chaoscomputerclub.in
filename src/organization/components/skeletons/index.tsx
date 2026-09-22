@@ -799,6 +799,120 @@ export function ContestDetailSkeleton() {
 export const ContestOverviewSkeleton = ContestDetailSkeleton;
 
 /**
+ * ContestSummarySkeleton:
+ * Contest submission review console layout with summary metrics, challenge checklist table,
+ * and final submission action bar.
+ */
+export function ContestSummarySkeleton() {
+  return (
+    <div className="min-h-[100dvh] w-full bg-black text-white font-sans flex flex-col animate-in fade-in duration-200">
+      {/* Top Microservice Header */}
+      <header className="sticky top-0 z-30 border-b border-white/8 bg-black px-4 sm:px-6 h-14 flex items-center justify-between gap-4 shrink-0">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-7 rounded" />
+            <div className="hidden md:flex flex-col gap-1">
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-2 w-24" />
+            </div>
+          </div>
+          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-44" />
+            <Skeleton className="h-4 w-28 rounded" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <Skeleton className="h-8 w-28 rounded-md" />
+          <Skeleton className="h-8 w-24 rounded-md" />
+          <div className="hidden md:flex items-center gap-2">
+            <Skeleton className="size-7 rounded-full" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          <Skeleton className="h-8 w-32 rounded-md" />
+        </div>
+      </header>
+
+      {/* Microservice Sub-bar */}
+      <div className="border-b border-white/6 bg-zinc-950/80 px-4 sm:px-8 py-2 flex items-center justify-between text-[11px] shrink-0">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-3 w-48" />
+          <Skeleton className="h-3 w-32 hidden sm:block" />
+        </div>
+        <Skeleton className="h-3 w-36" />
+      </div>
+
+      {/* Main Content Area */}
+      <main className="max-w-5xl mx-auto w-full px-4 sm:px-8 py-8 space-y-8 flex-1">
+        {/* Title Header */}
+        <div className="space-y-2 border-b border-white/8 pb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-36" />
+              <Skeleton className="h-8 w-64" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-7 w-32 rounded" />
+              <Skeleton className="h-7 w-36 rounded" />
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Metric Bento Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="p-4 rounded-lg border border-white/8 bg-zinc-950 space-y-2">
+              <Skeleton className="h-2.5 w-24" />
+              <Skeleton className="h-7 w-16" />
+              <Skeleton className="h-2.5 w-20" />
+            </div>
+          ))}
+        </div>
+
+        {/* Problem Checklist Card */}
+        <div className="rounded-xl border border-white/8 bg-zinc-950 overflow-hidden space-y-4 p-5">
+          <div className="flex items-center justify-between pb-3 border-b border-white/8">
+            <div className="space-y-1">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-64" />
+            </div>
+            <Skeleton className="h-7 w-28 rounded-md" />
+          </div>
+
+          <div className="divide-y divide-white/8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="py-3.5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="size-8 rounded-md shrink-0" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-8 w-24 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Final Submission Card */}
+        <div className="rounded-xl border border-white/8 bg-zinc-950 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1.5 flex-1">
+            <Skeleton className="h-4 w-52" />
+            <Skeleton className="h-3 w-96 max-w-full" />
+          </div>
+          <Skeleton className="h-10 w-44 rounded-md" />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+
+/**
  * ContestResultsSkeleton: Round 1 ranking leaderboard.
  */
 export function ContestResultsSkeleton() {
