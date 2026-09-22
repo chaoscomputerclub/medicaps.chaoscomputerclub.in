@@ -15,14 +15,9 @@ export function getApiBase(): string {
   }
 
   if (typeof window !== "undefined") {
-    // 1. Localhost development fallback (connect directly to official live backend)
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      return "https://medicaps.chaoscomputerclub.in/api";
-    }
-
-    // 2. Production: Always use relative /api on current origin
-    // Nginx reverse-proxies /api/ directly to FastAPI backend, preventing CORS or stale domain issues
-    return `${window.location.origin}/api`;
+    // Both dev (via Vite dev proxy) and production (via Nginx proxy) use relative /api.
+    // This completely eliminates CORS preflight OPTIONS requests, SSL overhead, and 520 dropouts.
+    return "/api";
   }
 
   return "https://medicaps.chaoscomputerclub.in/api";
@@ -185,31 +180,58 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  try {
-    const res = await fetch(`${apiBase}${path}`, { ...init, headers });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: "Request failed" }));
-      let msg = "Request failed";
-      if (typeof err.detail === "string") {
-        msg = err.detail;
-      } else if (Array.isArray(err.detail) && err.detail.length > 0) {
-        msg =
-          err.detail[0]?.msg?.replace(/^Value error,\s*/i, "") ||
-          err.detail[0]?.msg ||
-          "Validation error";
-      } else if (err.message) {
-        msg = err.message;
+  const makeAttempt = async (targetBase: string) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    try {
+      const res = await fetch(`${targetBase}${path}`, {
+        ...init,
+        headers,
+        signal: init?.signal || controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Request failed" }));
+        let msg = "Request failed";
+        if (typeof err.detail === "string") {
+          msg = err.detail;
+        } else if (Array.isArray(err.detail) && err.detail.length > 0) {
+          msg =
+            err.detail[0]?.msg?.replace(/^Value error,\s*/i, "") ||
+            err.detail[0]?.msg ||
+            "Validation error";
+        } else if (err.message) {
+          msg = err.message;
+        }
+        throw new ApiError(msg, res.status, err);
       }
-      throw new ApiError(msg, res.status, err);
+      return res.json();
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      throw err;
     }
-    return res.json();
+  };
+
+  try {
+    return await makeAttempt(apiBase);
   } catch (err: any) {
     if (err instanceof ApiError) {
       throw err;
     }
+    // If primary relative /api failed due to proxy glitch, attempt direct failover
+    if (apiBase === "/api" && typeof window !== "undefined") {
+      try {
+        return await makeAttempt("https://medicaps-api.chaoscomputerclub.in/api");
+      } catch {
+        // Fall through to standard error handling
+      }
+    }
+    if (err?.name === "AbortError") {
+      throw new ApiError("Request timed out. Please check your connection and try again.", 408, err);
+    }
     if (err?.message === "Failed to fetch" || err?.name === "TypeError") {
       throw new ApiError(
-        `Unable to connect to authentication server (${apiBase}). Please check server status.`,
+        `Unable to connect to authentication server. Please check server status.`,
         0,
         err,
       );
@@ -254,7 +276,11 @@ export async function verifyOTP(
 // ── Google OAuth ───────────────────────────────────────────────────────────
 
 export function getGoogleLoginURL(): string {
-  return `${getApiBase()}/auth/google/login`;
+  const base = getApiBase();
+  if (base.startsWith("/")) {
+    return `${typeof window !== "undefined" ? window.location.origin : ""}${base}/auth/google/login`;
+  }
+  return `${base}/auth/google/login`;
 }
 
 // ── Onboarding ─────────────────────────────────────────────────────────────

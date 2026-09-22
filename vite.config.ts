@@ -33,6 +33,13 @@ export default defineConfig({
   server: {
     port: 8081,
     host: true,
+    proxy: {
+      "/api": {
+        target: "https://medicaps.chaoscomputerclub.in",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   optimizeDeps: {
     include: [

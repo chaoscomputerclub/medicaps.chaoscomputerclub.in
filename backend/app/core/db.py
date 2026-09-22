@@ -26,6 +26,17 @@ engine = create_async_engine(
     connect_args={"check_same_thread": False} if "sqlite" in db_url else {}
 )
 
+from sqlalchemy import event
+
+if "sqlite" in db_url:
+    @event.listens_for(engine.sync_engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.close()
+
 # Async session factory
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
