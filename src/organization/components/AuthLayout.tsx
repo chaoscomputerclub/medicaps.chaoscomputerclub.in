@@ -32,12 +32,17 @@ export function AuthLayout({
       {/* ── Centered auth shell ── */}
       <div className="flex w-full flex-1 flex-col items-center justify-center">
 
-        {/* Brand wordmark */}
+        {/* Brand Logo — Standalone CCC Emblem */}
         <Link
           to="/"
-          className="mb-6 text-2xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+          className="mb-6 inline-flex transition-opacity hover:opacity-80"
+          aria-label="Chaos Computer Club Home"
         >
-          CCC Medi-Caps
+          <img
+            src="/logo.webp"
+            alt="Chaos Computer Club"
+            className="h-10 w-10 object-contain"
+          />
         </Link>
 
         {/* Page title */}

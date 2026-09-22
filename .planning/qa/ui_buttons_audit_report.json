@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-22T08:49:38.515Z",
-  "totalElements": 308,
-  "functionalCount": 308,
+  "timestamp": "2026-09-22T08:56:21.298Z",
+  "totalElements": 305,
+  "functionalCount": 305,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 33,
     "backendQueries": 9,
-    "routingNavigation": 185,
-    "clientUiState": 60,
+    "routingNavigation": 184,
+    "clientUiState": 58,
     "conditionalLocked": 15,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
@@ -225,14 +225,14 @@
       "file": "src/organization/components/AuthLayout.tsx",
       "line": 36,
       "tag": "<Link>",
-      "label": "CCC Medi-Caps",
+      "label": "[to=/]",
       "handler": "\"/\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 65,
+      "line": 70,
       "tag": "<Link>",
       "label": "Terms of Service",
       "handler": "\"/terms\"",
@@ -610,7 +610,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 273,
+      "line": 266,
       "tag": "<form>",
       "label": "{isInvalidDomain && (               <...",
       "handler": "{handleEmailSubmit}",
@@ -619,7 +619,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 309,
+      "line": 302,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
@@ -628,7 +628,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 332,
+      "line": 325,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => { window.location.href = getGoogleLoginURL(); }}",
@@ -638,33 +638,6 @@
     {
       "file": "src/pages/AuthPage.tsx",
       "line": 342,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{() => toast.info(\"GitHub SSO is for CCC Campus Officers. Use email or Google.\")",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 358,
-      "tag": "<button>",
-      "label": "Sign in",
-      "handler": "{() => { setIsSignUp(false); if (message) dispatch(setMessage(null)); }}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 369,
-      "tag": "<button>",
-      "label": "Sign up",
-      "handler": "{() => { setIsSignUp(true); if (message) dispatch(setMessage(null)); }}",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 386,
       "tag": "<form>",
       "label": "{devOtp && (             <p className...",
       "handler": "{handleVerifySubmit}",
@@ -673,7 +646,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 429,
+      "line": 385,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
@@ -682,7 +655,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 441,
+      "line": 397,
       "tag": "<button>",
       "label": "Resend",
       "handler": "{handleResendOtp}",
@@ -691,7 +664,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 450,
+      "line": 406,
       "tag": "<button>",
       "label": "← Change email",
       "handler": "{() => {\n                dispatch(setStep(\"email\"));\n                dispatch(se",
@@ -700,7 +673,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 469,
+      "line": 425,
       "tag": "<form>",
       "label": "{message && (             <p classNam...",
       "handler": "{handleOnboardingSubmit}",
@@ -709,7 +682,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 538,
+      "line": 494,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",

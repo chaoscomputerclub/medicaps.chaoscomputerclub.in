@@ -10,7 +10,7 @@
 
 import { preloadFullProfile } from "@/organization/data/queries";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Loader2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -49,13 +49,7 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
   );
 }
 
-function GitHubIcon({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-    </svg>
-  );
-}
+
 
 // ─────────────────────────────────────────────
 // Shared input style (recessed dark)
@@ -102,7 +96,6 @@ function checkIsMedicapsEmail(email: string): boolean {
 export function AuthPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [isSignUp, setIsSignUp] = useState(false);
 
   const {
     step,
@@ -258,7 +251,7 @@ export function AuthPage() {
     layoutTitle = "Complete your profile";
     layoutSubtitle = "Choose your display name and campus handle.";
   } else {
-    layoutTitle = isSignUp ? "Sign up" : "Sign in";
+    layoutTitle = "Sign in";
     layoutSubtitle = undefined;
   }
 
@@ -327,8 +320,8 @@ export function AuthPage() {
             </div>
           </div>
 
-          {/* OAuth buttons */}
-          <div className="space-y-2.5">
+          {/* OAuth button */}
+          <div>
             <button
               type="button"
               onClick={() => { window.location.href = getGoogleLoginURL(); }}
@@ -338,44 +331,7 @@ export function AuthPage() {
               <GoogleIcon className="size-4 shrink-0" />
               <span>Continue with Google</span>
             </button>
-
-            <button
-              type="button"
-              onClick={() => toast.info("GitHub SSO is for CCC Campus Officers. Use email or Google.")}
-              disabled={pending}
-              className={BTN_SECONDARY}
-            >
-              <GitHubIcon className="size-4 shrink-0 text-zinc-300" />
-              <span>Continue with GitHub</span>
-            </button>
           </div>
-
-          {/* Sign in / Sign up toggle */}
-          <p className="mt-6 text-center text-xs text-zinc-500 sm:text-sm">
-            {isSignUp ? (
-              <>
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => { setIsSignUp(false); if (message) dispatch(setMessage(null)); }}
-                  className="font-medium text-[#CCFF00] hover:text-[#b8e600] transition-colors cursor-pointer"
-                >
-                  Sign in
-                </button>
-              </>
-            ) : (
-              <>
-                Don't have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => { setIsSignUp(true); if (message) dispatch(setMessage(null)); }}
-                  className="font-medium text-[#CCFF00] hover:text-[#b8e600] transition-colors cursor-pointer"
-                >
-                  Sign up
-                </button>
-              </>
-            )}
-          </p>
         </div>
       )}
 
