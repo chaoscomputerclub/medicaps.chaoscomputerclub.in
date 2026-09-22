@@ -2,6 +2,7 @@
  * Chaos Computer Club India — Medi-Caps Chapter
  * medicaps.chaoscomputerclub.in
  *
+ * Strix-inspired Minimalist Login Experience.
  * Strict Redux Toolkit global state management.
  * Copyright (c) 2026 Chaos Computer Club India
  * Licensed under the MIT License. See LICENSE in the project root for license information.
@@ -9,20 +10,12 @@
 
 import { preloadFullProfile } from "@/organization/data/queries";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { Loader2, Mail, ArrowLeft, ShieldAlert, AlertTriangle, Check, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AuthLayout } from "@/organization/components/AuthLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -30,9 +23,6 @@ import {
   setOtp,
   setName,
   setHandle,
-  setPrn,
-  setDepartment,
-  setBatch,
   setStep,
   setMessage,
   setTokenDirect,
@@ -43,7 +33,7 @@ import {
   checkHandleThunk,
   setHandleStatus,
 } from "@/store/slices/authSlice";
-import { getGoogleLoginURL, isMedicapsEmail } from "@/lib/auth";
+import { getGoogleLoginURL } from "@/lib/auth";
 
 function GoogleIcon({ className = "size-4" }: { className?: string }) {
   return (
@@ -68,6 +58,17 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
   );
 }
 
+function GitHubIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+      />
+    </svg>
+  );
+}
 
 function checkIsMedicapsEmail(email: string): boolean {
   if (!email || !email.includes("@")) return false;
@@ -78,8 +79,9 @@ function checkIsMedicapsEmail(email: string): boolean {
 export function AuthPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [isSignUp, setIsSignUp] = useState(false);
 
-  // Strict Redux Toolkit state selectors
+  // Redux Toolkit state selectors
   const {
     step,
     email,
@@ -87,9 +89,6 @@ export function AuthPage() {
     otp,
     name,
     handle,
-    prn,
-    department,
-    batch,
     pending,
     message,
     devOtp,
@@ -119,8 +118,8 @@ export function AuthPage() {
         dispatch(
           setMessage(
             rejectedEmail
-              ? `Access restricted: ${rejectedEmail} is not a Medi-Caps institutional account. Only official @medicaps.ac.in organization emails are permitted. Gmail and external companies are strictly blocked.`
-              : "Access restricted: Only official @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are not allowed.",
+              ? `Access restricted: ${rejectedEmail} is not a Medi-Caps account. Only official @medicaps.ac.in emails are permitted.`
+              : "Access restricted: Only official @medicaps.ac.in organization emails are permitted.",
           ),
         );
       } else if (errorParam === "google_cancelled") {
@@ -190,7 +189,7 @@ export function AuthPage() {
     return () => clearTimeout(timer);
   }, [handle, step, dispatch]);
 
-  // Step 1: Send OTP via Redux Thunk (Restricted strictly to @medicaps.ac.in)
+  // Step 1: Send OTP via Redux Thunk
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     const clean = email.trim().toLowerCase();
@@ -201,7 +200,7 @@ export function AuthPage() {
     if (!checkIsMedicapsEmail(clean)) {
       dispatch(
         setMessage(
-          "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail, Yahoo, and personal accounts are strictly prohibited.",
+          "Only @medicaps.ac.in organization emails are permitted.",
         ),
       );
       return;
@@ -240,9 +239,10 @@ export function AuthPage() {
       return;
     }
     await dispatch(sendOtpThunk(clean));
+    toast.success("Verification code resent to your inbox.");
   }
 
-  // Step 3: Complete Onboarding via Redux Thunk (minimal 2-field registration)
+  // Step 3: Complete Onboarding via Redux Thunk
   async function handleOnboardingSubmit(e: React.FormEvent) {
     e.preventDefault();
     const fallbackHandle = email.split("@")[0] || "user";
@@ -278,122 +278,160 @@ export function AuthPage() {
     window.location.href = getGoogleLoginURL();
   }
 
-  let kicker = "Identity Gate";
-  let index = "Credential Entry";
-  let title: React.ReactNode = "Sign In to CCC Arena";
-  let description: React.ReactNode = "Enter your Medi-Caps institutional email to access tournament operations.";
+  function handleGitHub() {
+    toast.info("GitHub SSO is reserved for CCC Campus Officers. Please continue with email or Google.");
+  }
+
+  // Configure layout header
+  let title = isSignUp ? "Sign up" : "Sign in";
+  let description: React.ReactNode = null;
 
   if (step === "otp") {
-    kicker = "Security Verification";
-    index = "Step 2 of 2";
-    title = "Enter Verification Code";
-    description = `We sent a 6-digit verification code to ${email}.`;
+    title = "Enter verification code";
+    description = (
+      <span>
+        We sent a 6-digit code to <strong className="text-white font-medium">{email}</strong>
+      </span>
+    );
   } else if (step === "onboarding") {
-    kicker = "Cadet Onboarding";
-    index = "Profile Setup";
-    title = "Complete Your Profile";
-    description = "Set your display name and campus alias to initialize your arena credentials.";
+    title = "Complete your profile";
+    description = "Choose your public name and campus alias to finish.";
   }
 
   return (
-    <AuthLayout kicker={kicker} index={index} title={title} description={description}>
+    <AuthLayout title={title} description={description}>
       {step === "email" && (
-        <>
-          <form className="auth-form space-y-4" onSubmit={handleEmailSubmit}>
-            <div>
-              <Label
-                htmlFor="email"
-                className="font-mono text-[0.6875rem] uppercase tracking-wider text-muted-foreground block mb-1.5"
-              >
-                Email address
-              </Label>
-              <div className="input-icon">
-                <Mail className="size-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    dispatch(setEmail(e.target.value));
-                    if (message) dispatch(setMessage(null));
-                  }}
-                  placeholder="name@medicaps.ac.in"
-                  required
-                  autoFocus
-                  className={cn(
-                    "font-mono text-sm h-10",
-                    isInvalidDomain &&
-                      "border-amber-500/80 focus-visible:ring-amber-500 text-amber-200 bg-amber-950/10",
-                  )}
-                />
-              </div>
-            </div>
+        <div>
+          <form onSubmit={handleEmailSubmit}>
+            <Label
+              htmlFor="email"
+              className="text-xs font-medium text-zinc-300 block mb-2"
+            >
+              Email
+            </Label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                dispatch(setEmail(e.target.value));
+                if (message) dispatch(setMessage(null));
+              }}
+              placeholder="Your email address"
+              required
+              autoFocus
+              className={cn(
+                "w-full h-11 px-3.5 bg-[#0e0e10] border border-white/10 rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors",
+                isInvalidDomain && "border-amber-500/70 focus:border-amber-500 focus:ring-amber-500",
+              )}
+            />
 
-            {/* Realtime Live Domain Warning */}
+            {/* Validation & Error Messages */}
             {isInvalidDomain && (
-              <div className="p-3 border border-amber-500/30 bg-black text-xs leading-relaxed flex items-start gap-2.5 rounded-md">
-                <AlertTriangle className="size-4 text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-300 leading-relaxed font-mono">
-                  Please use your official <strong className="text-white">@medicaps.ac.in</strong> email address.
-                </p>
-              </div>
+              <p className="mt-2 text-xs text-amber-400 font-medium">
+                Please use your official @medicaps.ac.in email address.
+              </p>
             )}
 
-            {/* General Rejection / Auth Message Banner */}
             {message && !isInvalidDomain && (
-              <div className="p-3 border border-red-500/30 bg-black text-red-400 font-mono text-xs leading-relaxed space-y-1 rounded-md">
-                <div className="flex items-center gap-1.5 font-semibold tracking-wider uppercase text-[10px]">
-                  <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                  <span>Access Restriction</span>
-                </div>
-                <p className="text-xs text-red-300 leading-relaxed">{message}</p>
-              </div>
+              <p className="mt-2 text-xs text-red-400 font-medium leading-normal">
+                {message}
+              </p>
             )}
 
-            <Button
-              className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer disabled:opacity-50 transition-colors [&_svg]:transition-colors"
-              disabled={pending || isInvalidDomain}
+            <button
               type="submit"
+              disabled={pending || isInvalidDomain}
+              className="w-full h-11 mt-3.5 bg-white hover:bg-zinc-200 text-black font-medium text-sm rounded-lg transition-colors flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {pending ? (
-                <Loader2 className="animate-spin size-4" />
+                <Loader2 className="size-4 animate-spin text-black" />
               ) : (
-                "Continue with Email OTP"
+                "Continue with email"
               )}
-            </Button>
+            </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/8" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 select-none">
-              or
-            </span>
-            <div className="h-px flex-1 bg-white/8" />
+          {/* OR Divider */}
+          <div className="relative my-6 text-center">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-white/[0.08]" />
+            </div>
+            <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+              <span className="bg-[#161618] px-2.5 text-zinc-500 font-medium select-none">
+                OR
+              </span>
+            </div>
           </div>
 
-          <button
-            type="button"
-            className="w-full h-10 px-4 font-mono text-xs font-medium border border-white/12 bg-black hover:bg-zinc-900/50 hover:border-white/25 text-white transition-all flex items-center justify-center gap-2.5 rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleGoogle}
-            disabled={pending}
-          >
-            <GoogleIcon className="size-4 shrink-0" />
-            <span className="tracking-wider uppercase">Continue with Google</span>
-          </button>
-        </>
+          {/* OAuth Buttons */}
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={handleGoogle}
+              disabled={pending}
+              className="w-full h-11 px-4 bg-transparent hover:bg-white/[0.04] border border-white/10 hover:border-white/20 rounded-lg text-sm font-medium text-zinc-200 transition-colors flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+            >
+              <GoogleIcon className="size-4 shrink-0" />
+              <span>Continue with Google</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleGitHub}
+              disabled={pending}
+              className="w-full h-11 px-4 bg-transparent hover:bg-white/[0.04] border border-white/10 hover:border-white/20 rounded-lg text-sm font-medium text-zinc-200 transition-colors flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+            >
+              <GitHubIcon className="size-4 shrink-0 text-white" />
+              <span>Continue with GitHub</span>
+            </button>
+          </div>
+
+          {/* Bottom Prompt / Toggle */}
+          <div className="mt-6 text-center text-xs sm:text-sm text-zinc-400">
+            {isSignUp ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(false);
+                    if (message) dispatch(setMessage(null));
+                  }}
+                  className="text-[#818cf8] hover:text-[#93c5fd] font-medium hover:underline cursor-pointer transition-colors"
+                >
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(true);
+                    if (message) dispatch(setMessage(null));
+                  }}
+                  className="text-[#818cf8] hover:text-[#93c5fd] font-medium hover:underline cursor-pointer transition-colors"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       {step === "otp" && (
-        <form className="auth-form space-y-4" onSubmit={handleVerifyOtpSubmit}>
-          <div>
+        <form onSubmit={handleVerifyOtpSubmit}>
+          <div className="text-center mb-5">
             <Label
               htmlFor="otp"
-              className="font-mono text-[10px] uppercase tracking-wider text-zinc-400"
+              className="text-xs font-medium text-zinc-400 block"
             >
-              Authentication code
+              Verification code
             </Label>
-            <div className="mt-3 flex justify-center">
+            <div className="mt-4 flex justify-center">
               <InputOTP
                 id="otp"
                 maxLength={6}
@@ -413,76 +451,74 @@ export function AuthPage() {
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="size-11 rounded-md border border-white/12 bg-black font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
+                      className="size-11 sm:size-12 rounded-lg border border-white/10 bg-[#0e0e10] font-mono text-base tabular-nums focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 text-white text-center"
                     />
                   ))}
                 </InputOTPGroup>
               </InputOTP>
             </div>
-            <div className="mt-3 flex items-center justify-between font-mono text-xs text-zinc-500">
-              <span>6 digits · Valid 15m</span>
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                disabled={pending}
-                className="hover:text-lime-400 transition-colors cursor-pointer"
-              >
-                Resend code
-              </button>
-            </div>
           </div>
 
           {devOtp && (
-            <div className="border border-dashed border-lime-400/40 bg-lime-400/8 px-3 py-2 text-center font-mono text-xs text-lime-400 rounded-md">
-              <span>[DEV OTP] {devOtp}</span>
+            <div className="mb-4 text-center">
+              <span className="inline-block px-2.5 py-1 rounded bg-zinc-800/80 border border-white/10 text-[11px] font-mono text-zinc-300">
+                Dev Code: {devOtp}
+              </span>
             </div>
           )}
 
           {message && (
-            <div className="p-3 border border-red-500/30 bg-black text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-md">
-              <div className="flex items-center gap-1.5 text-red-400 font-semibold tracking-wider uppercase text-[10px]">
-                <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                <span>Verification Failed</span>
-              </div>
-              <p className="text-xs text-red-200 leading-relaxed">{message}</p>
-            </div>
+            <p className="mb-4 text-center text-xs text-red-400 font-medium">
+              {message}
+            </p>
           )}
 
-          <Button
-            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer disabled:opacity-50 transition-colors [&_svg]:transition-colors"
-            disabled={pending || otp.length < 6}
-            type="submit"
-          >
-            {pending ? <Loader2 className="animate-spin size-4" /> : "Verify & Continue"}
-          </Button>
-
           <button
-            type="button"
-            onClick={() => {
-              dispatch(setStep("email"));
-              dispatch(setOtp(""));
-              dispatch(setMessage(null));
-            }}
-            className="flex items-center justify-center gap-1.5 w-full text-center font-mono text-xs tracking-wider text-zinc-500 uppercase transition-colors hover:text-white cursor-pointer pt-1"
+            type="submit"
+            disabled={pending || otp.length < 6}
+            className="w-full h-11 bg-white hover:bg-zinc-200 text-black font-medium text-sm rounded-lg transition-colors cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ArrowLeft className="size-3" /> Back to email
+            {pending ? (
+              <Loader2 className="size-4 animate-spin text-black" />
+            ) : (
+              "Verify and continue"
+            )}
           </button>
+
+          <div className="mt-5 flex items-center justify-between text-xs text-zinc-400">
+            <button
+              type="button"
+              onClick={() => {
+                dispatch(setStep("email"));
+                dispatch(setOtp(""));
+                dispatch(setMessage(null));
+              }}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              ← Back to email
+            </button>
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              disabled={pending}
+              className="text-[#818cf8] hover:text-[#93c5fd] hover:underline transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Resend code
+            </button>
+          </div>
         </form>
       )}
 
       {step === "onboarding" && (
-        <form
-          className="auth-form space-y-4 animate-in fade-in-50 slide-in-from-bottom-2 duration-300 ease-out"
-          onSubmit={handleOnboardingSubmit}
-        >
+        <form onSubmit={handleOnboardingSubmit} className="space-y-4">
           <div>
             <Label
               htmlFor="ob-name"
-              className="font-mono text-[10px] uppercase tracking-wider text-zinc-400 block mb-1.5"
+              className="text-xs font-medium text-zinc-300 block mb-2"
             >
               Full name
             </Label>
-            <Input
+            <input
               id="ob-name"
               value={name}
               onChange={(e) => {
@@ -492,73 +528,66 @@ export function AuthPage() {
               placeholder="Ada Lovelace"
               required
               autoFocus
-              className="font-mono text-xs h-10 rounded-md"
+              className="w-full h-11 px-3.5 bg-[#0e0e10] border border-white/10 rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <Label
                 htmlFor="ob-handle"
-                className="font-mono text-[10px] uppercase tracking-wider text-zinc-400"
+                className="text-xs font-medium text-zinc-300"
               >
-                Campus Handle / Alias
+                Campus handle
               </Label>
               <div className="flex items-center h-4">
                 {handleStatus === "checking" && (
-                  <span className="inline-flex items-center gap-1 text-xs text-lime-400 font-mono transition-opacity animate-pulse">
-                    <Loader2 className="animate-spin size-3" /> checking…
+                  <span className="inline-flex items-center gap-1 text-xs text-zinc-400">
+                    <Loader2 className="size-3 animate-spin" /> checking…
                   </span>
                 )}
                 {handleStatus === "available" && (
-                  <span className="inline-flex items-center gap-1 text-xs text-lime-400 font-mono font-medium transition-all">
+                  <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-medium">
                     <Check size={12} /> available
                   </span>
                 )}
                 {handleStatus === "taken" && (
-                  <span className="inline-flex items-center gap-1 text-xs text-red-400 font-mono font-medium transition-all">
+                  <span className="inline-flex items-center gap-1 text-xs text-red-400 font-medium">
                     <X size={12} /> taken
                   </span>
                 )}
               </div>
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-zinc-500">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-zinc-500 select-none">
                 @
               </span>
-              <Input
+              <input
                 id="ob-handle"
                 value={handle}
                 onChange={(e) => {
                   dispatch(setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "")));
                   if (message) dispatch(setMessage(null));
                 }}
-                placeholder="adalovelace"
+                placeholder="handle"
                 required
                 className={cn(
-                  "font-mono text-xs pl-8 h-10 rounded-md",
-                  handleStatus === "available" && "border-lime-400/70 focus-visible:ring-lime-400 text-white",
-                  handleStatus === "taken" && "border-red-500/70 focus-visible:ring-red-500 text-red-200",
+                  "w-full h-11 pl-8 pr-3.5 bg-[#0e0e10] border border-white/10 rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors",
+                  handleStatus === "available" && "border-emerald-500/60 focus:border-emerald-500",
+                  handleStatus === "taken" && "border-red-500/60 focus:border-red-500",
                 )}
               />
             </div>
-            <p className="mt-1.5 font-mono text-[10px] text-zinc-500">
-              Letters, numbers, and underscores only. Permanent university alias.
-            </p>
           </div>
 
           {message && (
-            <div className="p-3 border border-red-500/30 bg-black text-red-300 font-mono text-xs leading-relaxed space-y-1 rounded-md">
-              <div className="flex items-center gap-1.5 text-red-400 font-semibold tracking-wider uppercase text-[10px]">
-                <ShieldAlert className="size-3.5 text-red-400 shrink-0" />
-                <span>Registration Error</span>
-              </div>
-              <p className="text-xs text-red-200 leading-relaxed">{message}</p>
-            </div>
+            <p className="text-xs text-red-400 font-medium">
+              {message}
+            </p>
           )}
 
-          <Button
-            className="w-full h-10 font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer disabled:opacity-50 transition-colors [&_svg]:transition-colors"
+          <button
+            type="submit"
             disabled={
               pending ||
               !name.trim() ||
@@ -566,10 +595,14 @@ export function AuthPage() {
               handleStatus === "taken" ||
               handleStatus === "checking"
             }
-            type="submit"
+            className="w-full h-11 mt-6 bg-white hover:bg-zinc-200 text-black font-medium text-sm rounded-lg transition-colors cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {pending ? <Loader2 className="animate-spin size-4" /> : "Complete Registration →"}
-          </Button>
+            {pending ? (
+              <Loader2 className="size-4 animate-spin text-black" />
+            ) : (
+              "Enter CCC Arena"
+            )}
+          </button>
         </form>
       )}
     </AuthLayout>

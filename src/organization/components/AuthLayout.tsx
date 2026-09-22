@@ -2,6 +2,7 @@
  * Chaos Computer Club India — Medi-Caps Chapter
  * medicaps.chaoscomputerclub.in
  *
+ * Strix-inspired Minimalist Auth Layout.
  * Copyright (c) 2026 Chaos Computer Club India
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
@@ -10,12 +11,10 @@ import { Link } from "react-router-dom";
 import { type ReactNode } from "react";
 
 export function AuthLayout({
-  kicker = "Access Gate",
-  index,
   title,
   description,
   children,
-  footer,
+  brand,
 }: {
   kicker?: string;
   index?: string;
@@ -23,50 +22,51 @@ export function AuthLayout({
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  brand?: ReactNode;
 }) {
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center bg-black px-4 py-12 antialiased">
-      <div className="w-full max-w-md">
-        {/* Minimalist Logo & Title */}
-        <div className="mb-6 flex items-center justify-center gap-2.5">
-          <img src="/logo.webp" alt="Chaos Computer Club" className="w-8 h-8 object-contain" />
-          <Link to="/" className="font-mono text-sm font-bold tracking-wider text-white">
-            CCC MEDI-CAPS
-          </Link>
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased selection:bg-zinc-800 selection:text-white">
+      {/* Centered Auth Shell */}
+      <div className="w-full flex-1 flex flex-col items-center justify-center my-auto">
+        {/* Brand & Title Block */}
+        <div className="mb-7 flex flex-col items-center text-center">
+          {brand ? (
+            brand
+          ) : (
+            <Link
+              to="/"
+              className="text-2xl sm:text-[28px] font-bold tracking-tight text-white hover:opacity-90 transition-opacity"
+            >
+              CCC Medi-Caps
+            </Link>
+          )}
+
+          <h1 className="mt-5 text-xl sm:text-[22px] font-medium tracking-tight text-white">
+            {title}
+          </h1>
+
+          {description && (
+            <p className="mt-2 max-w-sm text-xs sm:text-sm text-zinc-400">
+              {description}
+            </p>
+          )}
         </div>
 
-        {/* Pure Black Card */}
-        <div className="w-full rounded-xl border border-white/10 bg-black overflow-hidden shadow-none">
-          <div className="border-b border-white/8 px-6 py-5 text-left">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
-                {kicker}
-              </span>
-              {index && (
-                <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 tabular-nums">
-                  · {index}
-                </span>
-              )}
-            </div>
-            <h1 className="font-sans font-semibold tracking-tight text-white text-xl">
-              {title}
-            </h1>
-            {description ? (
-              <p className="mt-1 font-sans text-xs text-zinc-400 leading-normal">
-                {description}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="p-6">{children}</div>
-
-          {footer ? (
-            <div className="border-t border-white/8 px-6 py-3.5 font-mono text-xs text-zinc-500 text-center">
-              {footer}
-            </div>
-          ) : null}
+        {/* Obsidian Card Container */}
+        <div className="w-full max-w-[400px] rounded-2xl bg-[#161618] border border-white/[0.08] shadow-2xl shadow-black/80 p-7 sm:p-8">
+          {children}
         </div>
       </div>
+
+      {/* Viewport Bottom Footer */}
+      <footer className="mt-12 text-center">
+        <Link
+          to="/terms"
+          className="text-xs text-zinc-500 hover:text-zinc-400 transition-colors"
+        >
+          Terms of Service
+        </Link>
+      </footer>
     </main>
   );
 }

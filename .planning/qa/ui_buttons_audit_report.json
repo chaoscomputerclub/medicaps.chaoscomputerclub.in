@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-09-22T08:26:06.494Z",
-  "totalElements": 304,
-  "functionalCount": 304,
+  "timestamp": "2026-09-22T08:44:47.576Z",
+  "totalElements": 308,
+  "functionalCount": 308,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 34,
+    "backendMutations": 33,
     "backendQueries": 9,
-    "routingNavigation": 182,
-    "clientUiState": 58,
-    "conditionalLocked": 15,
+    "routingNavigation": 183,
+    "clientUiState": 60,
+    "conditionalLocked": 17,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
   },
@@ -223,10 +223,19 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 33,
+      "line": 36,
       "tag": "<Link>",
-      "label": "CCC MEDI-CAPS",
+      "label": "CCC Medi-Caps",
       "handler": "\"/\"",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/organization/components/AuthLayout.tsx",
+      "line": 63,
+      "tag": "<Link>",
+      "label": "Terms of Service",
+      "handler": "\"/terms\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
@@ -601,7 +610,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 302,
+      "line": 305,
       "tag": "<form>",
       "label": "{isInvalidDomain && (               <...",
       "handler": "{handleEmailSubmit}",
@@ -610,8 +619,8 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 353,
-      "tag": "<Button>",
+      "line": 342,
+      "tag": "<button>",
       "label": "{pending ? (                 <Loader2...",
       "handler": "\"submit\"",
       "category": "LIVE_BACKEND_MUTATION",
@@ -619,16 +628,43 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 375,
+      "line": 369,
       "tag": "<button>",
       "label": "button",
       "handler": "{handleGoogle}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
+      "category": "CONDITIONALLY_LOCKED",
+      "description": "Disabled conditional gate / status lock"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 388,
+      "line": 379,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{handleGitHub}",
+      "category": "CONDITIONALLY_LOCKED",
+      "description": "Disabled conditional gate / status lock"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 395,
+      "tag": "<button>",
+      "label": "Sign in",
+      "handler": "{() => {\n                    setIsSignUp(false);\n                    if (message",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 409,
+      "tag": "<button>",
+      "label": "Sign up",
+      "handler": "{() => {\n                    setIsSignUp(true);\n                    if (message)",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 426,
       "tag": "<form>",
       "label": "{devOtp && (             <div classNa...",
       "handler": "{handleVerifyOtpSubmit}",
@@ -637,7 +673,25 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 424,
+      "line": 476,
+      "tag": "<button>",
+      "label": "{pending ? (               <Loader2 c...",
+      "handler": "\"submit\"",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 489,
+      "tag": "<button>",
+      "label": "← Back to email",
+      "handler": "{() => {\n                dispatch(setStep(\"email\"));\n                dispatch(se",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 500,
       "tag": "<button>",
       "label": "Resend code",
       "handler": "{handleResendOtp}",
@@ -646,36 +700,18 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 451,
-      "tag": "<Button>",
-      "label": "{pending ? <Loader2 className=animat...",
-      "handler": "\"submit\"",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 459,
-      "tag": "<button>",
-      "label": "Back to email",
-      "handler": "{() => {\n              dispatch(setStep(\"email\"));\n              dispatch(setOtp",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 474,
+      "line": 513,
       "tag": "<form>",
-      "label": "{message && (             <div classN...",
+      "label": "{message && (             <p classNam...",
       "handler": "{handleOnboardingSubmit}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 560,
-      "tag": "<Button>",
-      "label": "{pending ? <Loader2 className=animat...",
+      "line": 589,
+      "tag": "<button>",
+      "label": "{pending ? (               <Loader2 c...",
       "handler": "\"submit\"",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
