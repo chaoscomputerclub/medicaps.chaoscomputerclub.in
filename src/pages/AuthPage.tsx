@@ -200,7 +200,6 @@ export function AuthPage() {
     if (!checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted.")); return;
     }
-    setNavDirection("forward");
     await dispatch(sendOtpThunk(clean));
   }
 
@@ -288,7 +287,7 @@ export function AuthPage() {
       {step === "email" && (
         <div
           key="auth-email-step"
-          className={navDirection === "backward" ? "auth-transition-backward" : "auth-transition-forward"}
+          className={navDirection === "backward" ? "auth-transition-backward" : ""}
         >
           <form onSubmit={handleEmailSubmit} noValidate>
             {/* Email field */}
@@ -368,7 +367,7 @@ export function AuthPage() {
       {step === "otp" && (
         <div
           key="auth-otp-step"
-          className={navDirection === "forward" ? "auth-transition-forward" : "auth-transition-backward"}
+          className="auth-transition-forward"
         >
           {/* Email target info inside the card at top */}
           <div className="text-center mb-7">
@@ -376,7 +375,7 @@ export function AuthPage() {
             <p className="text-[14px] font-medium text-white mt-1 break-all">{email}</p>
           </div>
 
-          {/* OTP slot grid — centered with stagger animation */}
+          {/* OTP slot grid — centered */}
           <div className="flex justify-center mb-7">
             <InputOTP
               id="auth-otp"
@@ -394,8 +393,7 @@ export function AuthPage() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    style={{ animationDelay: `${i * 24}ms` }}
-                    className="auth-slot-stagger w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
+                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
                     activeClassName="!border-[#CCFF00] !shadow-[0_0_0_1px_rgba(204,255,0,0.20),0_0_18px_rgba(204,255,0,0.18)]"
                   />
                 ))}
@@ -459,7 +457,7 @@ export function AuthPage() {
           STEP 3 — Profile onboarding
           ════════════════════════════════════════════ */}
       {step === "onboarding" && (
-        <form onSubmit={handleOnboardingSubmit} className="space-y-4">
+        <form onSubmit={handleOnboardingSubmit} className="auth-transition-forward space-y-4">
           {/* Full name */}
           <div>
             <label htmlFor="ob-name" className={LABEL}>

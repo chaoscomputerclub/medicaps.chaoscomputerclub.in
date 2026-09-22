@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T09:14:41.320Z",
+  "timestamp": "2026-09-22T09:23:04.492Z",
   "totalElements": 304,
   "functionalCount": 304,
   "connectivityRate": "100.0%",
@@ -223,7 +223,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 39,
+      "line": 65,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -232,7 +232,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 83,
+      "line": 125,
       "tag": "<Link>",
       "label": "Terms of Service",
       "handler": "\"/terms\"",
@@ -610,7 +610,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 254,
+      "line": 253,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => {\n          setNavDirection(\"backward\");\n          dispatch(setStep(\"emai",
@@ -619,7 +619,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 293,
+      "line": 292,
       "tag": "<form>",
       "label": "{isInvalidDomain && (               <...",
       "handler": "{handleEmailSubmit}",
@@ -628,7 +628,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 329,
+      "line": 328,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
@@ -637,7 +637,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 352,
+      "line": 351,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => { window.location.href = getGoogleLoginURL(); }}",
@@ -646,7 +646,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 427,
+      "line": 425,
       "tag": "<button>",
       "label": "Resend code",
       "handler": "{handleResendOtp}",
@@ -655,7 +655,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 442,
+      "line": 440,
       "tag": "<button>",
       "label": "{devOtp}",
       "handler": "{() => {\n                  dispatch(setOtp(devOtp));\n                  void trig",
@@ -664,7 +664,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 462,
+      "line": 460,
       "tag": "<form>",
       "label": "{message && (             <p classNam...",
       "handler": "{handleOnboardingSubmit}",
@@ -673,7 +673,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 531,
+      "line": 529,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
