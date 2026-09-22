@@ -42,6 +42,7 @@ class MemberProfile(Base):
     github_username = Column(String(100), nullable=True)                       # GitHub handle
     linkedin_url = Column(String(200), nullable=True)                          # LinkedIn profile / handle
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=now_utc, onupdate=now_utc, nullable=True)
 
     # Relationships
     rating_history = relationship("RatingHistory", back_populates="member", cascade="all, delete-orphan")

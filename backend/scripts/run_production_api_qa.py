@@ -22,6 +22,7 @@ PLANNING_QA_DIR = PROJECT_ROOT / ".planning" / "qa"
 PLANNING_QA_SUMMARY = PROJECT_ROOT / ".planning" / "QA.md"
 
 from app.services.qa_test_service import ProductionQAService
+from app.core.db import init_db
 
 
 async def main():
@@ -45,7 +46,10 @@ async def main():
     print(f"    Target URL: {args.url or 'In-Process ASGI Test Engine'}")
     print("=" * 80)
 
-    # 1. Run full QA audit
+    # 1. Initialize schema and run migrations
+    await init_db()
+
+    # 2. Run full QA audit
     report = await ProductionQAService.run_full_qa_audit(
         base_url=args.url,
         custom_token=args.token,

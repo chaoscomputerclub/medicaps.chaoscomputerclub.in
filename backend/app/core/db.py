@@ -108,11 +108,17 @@ async def init_db():
                     "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS hidden_testcases JSON DEFAULT '[]';",
                     "ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS is_top_30_qualified BOOLEAN DEFAULT FALSE;",
                     "ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS anti_cheat_violations INTEGER DEFAULT 0;",
+                    "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();",
                 ]
                 for sql in migration_sqls:
                     try:
                         await conn.execute(text(sql))
                     except Exception as col_err:
                         pass
+            elif "sqlite" in settings.DATABASE_URL:
+                try:
+                    await conn.execute(text("ALTER TABLE member_profiles ADD COLUMN updated_at TIMESTAMP;"))
+                except Exception:
+                    pass
     except Exception as e:
         print(f"Notice during init_db (tables already created or concurrency race handled): {e}")
