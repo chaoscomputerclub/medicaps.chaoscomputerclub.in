@@ -567,10 +567,10 @@ export function ContestsHubPage() {
                   <Trophy className="size-8 text-zinc-600" />
                   <h4 className="font-semibold text-white font-sans">No contest history yet</h4>
                   <p className="max-w-xs text-xs text-zinc-500">Register for an upcoming contest to build your competitive programming ledger.</p>
-                  {upcomingContests.length > 0 && (
-                    <Button onClick={() => handleRegister(upcomingContests[0].slug)} disabled={registeringSlug === upcomingContests[0].slug}
+                  {upcomingContests[0] && (
+                    <Button onClick={() => handleRegister(upcomingContests[0]!.slug)} disabled={registeringSlug === upcomingContests[0]!.slug}
                       className="mt-2 text-xs font-mono font-semibold uppercase bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
-                      {registeringSlug === upcomingContests[0].slug ? "Registering..." : `Register for ${upcomingContests[0].title}`}
+                      {registeringSlug === upcomingContests[0]!.slug ? "Registering..." : `Register for ${upcomingContests[0]!.title}`}
                     </Button>
                   )}
                 </div>
@@ -584,7 +584,7 @@ export function ContestsHubPage() {
                         <span>·</span>
                         <span>{record.score || 0} Points</span>
                         <span>·</span>
-                        <span className="text-lime-400">{record.rating_change ? (record.rating_change > 0 ? `+${record.rating_change}` : record.rating_change) : "--"} Elo</span>
+                        <span className="text-lime-400">{(record.rating_change ?? record.rating_delta) ? ((record.rating_change ?? record.rating_delta)! > 0 ? `+${record.rating_change ?? record.rating_delta}` : (record.rating_change ?? record.rating_delta)) : "--"} Elo</span>
                       </div>
                     </div>
                     <Button asChild size="sm" variant="outline" className="text-xs shrink-0">

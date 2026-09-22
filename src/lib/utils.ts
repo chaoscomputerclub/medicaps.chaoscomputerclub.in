@@ -37,7 +37,7 @@ export function formatFullName(...parts: (string | null | undefined)[]): string 
  */
 export function getFirstName(name?: string | null, fallback?: string | null): string {
   const formatted = formatFullName(name);
-  if (formatted) return formatted.split(" ")[0];
+  if (formatted) return formatted.split(" ")[0] ?? formatted;
   if (fallback && typeof fallback === "string" && fallback.trim().toLowerCase() !== "cadet") {
     const clean = fallback.trim().replace(/^@/, "");
     if (!isEnrollmentId(clean)) {

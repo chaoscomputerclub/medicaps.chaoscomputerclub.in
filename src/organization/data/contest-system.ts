@@ -115,6 +115,8 @@ export type ContestHistoryItem = {
   participants: number;
   outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending";
   offline_result: string | null;
+  assessment_submitted?: boolean;
+  assessment_score?: number | null;
 };
 
 export type AccountSettings = {

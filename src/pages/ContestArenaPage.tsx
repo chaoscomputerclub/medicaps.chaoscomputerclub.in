@@ -175,8 +175,11 @@ export function ContestArenaPage() {
   // Auto-redirect to first problem's slug if URL is generic /arena or /problems
   useEffect(() => {
     if (problems.length > 0 && !problemSlug && contestSlug) {
-      const firstSlug = slugifyProblem(problems[0].title, problems[0].problem_index);
-      navigate(`/contests/${contestSlug}/problems/${firstSlug}`, { replace: true });
+      const firstProblem = problems[0];
+      if (firstProblem) {
+        const firstSlug = slugifyProblem(firstProblem.title, firstProblem.problem_index);
+        navigate(`/contests/${contestSlug}/problems/${firstSlug}`, { replace: true });
+      }
     }
   }, [problems, problemSlug, contestSlug, navigate]);
 
@@ -265,16 +268,20 @@ export function ContestArenaPage() {
   const handlePrevProblem = useCallback(() => {
     if (resolvedIndex > 0) {
       const prev = problems[resolvedIndex - 1];
-      const pSlug = slugifyProblem(prev.title, prev.problem_index);
-      navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+      if (prev) {
+        const pSlug = slugifyProblem(prev.title, prev.problem_index);
+        navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+      }
     }
   }, [resolvedIndex, problems, contestSlug, navigate]);
 
   const handleNextProblem = useCallback(() => {
     if (resolvedIndex < problems.length - 1) {
       const next = problems[resolvedIndex + 1];
-      const pSlug = slugifyProblem(next.title, next.problem_index);
-      navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+      if (next) {
+        const pSlug = slugifyProblem(next.title, next.problem_index);
+        navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+      }
     }
   }, [resolvedIndex, problems, contestSlug, navigate]);
 
@@ -1464,7 +1471,7 @@ export function ContestArenaPage() {
                 fontSize={editorFontSize}
                 wordWrap={editorWordWrap ? "on" : "off"}
                 tabSize={editorTabSize}
-                onCursorChange={(ln, col) => setCursorPos({ ln, col })}
+                onCursorChange={(line, col) => setCursorPos({ line, col })}
               />
             </Suspense>
           </div>
@@ -1477,7 +1484,7 @@ export function ContestArenaPage() {
             </div>
             <div className="flex items-center gap-3 tabular-nums">
               <span>
-                Ln {cursorPos.ln}, Col {cursorPos.col}
+                Ln {cursorPos.line}, Col {cursorPos.col}
               </span>
               <span>{selectedLanguage.toUpperCase()}</span>
             </div>
@@ -2136,19 +2143,19 @@ export function ContestArenaPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      const next = !editorWordWrap;
+                      const next = editorWordWrap === "on" ? "off" : "on";
                       setEditorWordWrap(next);
                       try {
-                        localStorage.setItem("ccc_editor_word_wrap", String(next));
+                        localStorage.setItem("ccc_editor_wordwrap", next);
                       } catch {}
                     }}
                     className={`px-3 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
-                      editorWordWrap
+                      editorWordWrap === "on"
                         ? "bg-lime-400/20 text-lime-400 border border-lime-400/40 font-semibold"
                         : "bg-black text-zinc-500 border border-white/10"
                     }`}
                   >
-                    {editorWordWrap ? "Enabled" : "Disabled"}
+                    {editorWordWrap === "on" ? "Enabled" : "Disabled"}
                   </button>
                 </div>
 

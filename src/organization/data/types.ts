@@ -90,6 +90,7 @@ export type CampusPass = {
   venue: string;
   check_in_opens_at: string;
   status: "issued" | "checked_in" | "expired";
+  check_in_status?: string;
 };
 export type AnnouncementFeedItem = {
   id: string;
@@ -134,6 +135,7 @@ export type MemberProfile = {
   github_username?: string | null;
   linkedin_url?: string | null;
   avatar_url?: string | null;
+  percentile?: number;
 };
 export type LeaderboardEntry = MemberProfile & { previous_rank: number; ratings: number[] };
 export type Achievement = { name: string; description: string; earned: boolean; code: string };
