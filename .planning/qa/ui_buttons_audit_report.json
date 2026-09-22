@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T11:37:30.645Z",
+  "timestamp": "2026-09-22T11:49:11.600Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -2419,7 +2419,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 366,
+      "line": 369,
       "tag": "<button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2428,7 +2428,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 409,
+      "line": 412,
       "tag": "<Button>",
       "label": "{isUploadingAvatar ? <Loader2 size={1...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2437,7 +2437,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 421,
+      "line": 424,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handleAvatarRemove}",
@@ -2446,7 +2446,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 433,
+      "line": 436,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2455,7 +2455,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 438,
+      "line": 441,
       "tag": "<Link>",
       "label": "[to=/settings]",
       "handler": "\"/settings\"",
@@ -2464,7 +2464,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 446,
+      "line": 449,
       "tag": "<Button>",
       "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
@@ -2473,7 +2473,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 470,
+      "line": 473,
       "tag": "<Button>",
       "label": "{copied ? <Check size={11} className=...",
       "handler": "{handleCopyLink}",
@@ -2482,7 +2482,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 509,
+      "line": 512,
       "tag": "<button>",
       "label": "Followers",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2491,7 +2491,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 528,
+      "line": 531,
       "tag": "<button>",
       "label": "Following",
       "handler": "{() =>\n                  dispatch(\n                    openSocialDrawer({\n      ",
@@ -2500,7 +2500,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 548,
+      "line": 551,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2509,7 +2509,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 559,
+      "line": 562,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2518,7 +2518,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 689,
+      "line": 696,
       "tag": "<Link>",
       "label": "Open Verification Console",
       "handler": "{`/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? \"\")}`}",

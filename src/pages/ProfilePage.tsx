@@ -248,15 +248,18 @@ export function ProfilePage() {
     (m.enrollment_no && m.enrollment_no !== "—" && m.enrollment_no !== "N/A" ? m.enrollment_no : null) ||
     (m.enrollment && m.enrollment !== "—" && m.enrollment !== "N/A" ? m.enrollment : null) ||
     (m.prn && m.prn !== "N/A" && m.prn !== "—" ? m.prn : null) ||
-    (currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "—" ? currentMember.prn : null) ||
-    (m.email && m.email.includes("@") && /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
+    (isSelfUser && currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "—" ? currentMember.prn : null) ||
+    (isSelfUser && m.email && m.email.includes("@") && /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
       ? m.email.split("@")[0].toUpperCase()
       : null);
   const enrollmentNo = rawEnrollment || "—";
 
-  const rawFullName = m.full_name || (m.first_name ? `${m.first_name} ${m.last_name || ""}`.trim() : "") || (currentMember?.full_name ?? "");
+  const rawFullName =
+    m.full_name ||
+    (m.first_name ? `${m.first_name} ${m.last_name || ""}`.trim() : "") ||
+    (isSelfUser ? (currentMember?.full_name ?? "") : "");
   const formattedFullName = formatFullName(rawFullName);
-  const displayHandle = m.handle || currentMember?.handle || "";
+  const displayHandle = m.handle || (isSelfUser ? (currentMember?.handle || "") : "");
   const displayName = formattedFullName || (displayHandle ? `@${displayHandle}` : "Cadet");
 
   const initials = formattedFullName
@@ -581,7 +584,11 @@ export function ProfilePage() {
           </div>
           <div>
             <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Email</dt>
-            <dd className="text-zinc-300">{m.email || currentMember?.email || "—"}</dd>
+            <dd className="text-zinc-300">
+              {isSelfUser
+                ? (m.email || currentMember?.email || "—")
+                : (m.email || "Protected (Campus Only)")}
+            </dd>
           </div>
         </dl>
       </header>
