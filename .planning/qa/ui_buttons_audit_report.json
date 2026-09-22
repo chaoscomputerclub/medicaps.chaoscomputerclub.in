@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T09:23:04.492Z",
+  "timestamp": "2026-09-22T09:27:25.043Z",
   "totalElements": 304,
   "functionalCount": 304,
   "connectivityRate": "100.0%",
@@ -223,7 +223,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 65,
+      "line": 43,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -232,7 +232,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 125,
+      "line": 92,
       "tag": "<Link>",
       "label": "Terms of Service",
       "handler": "\"/terms\"",

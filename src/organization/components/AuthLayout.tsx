@@ -8,7 +8,7 @@
  */
 
 import { Link } from "react-router-dom";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function AuthLayout({
@@ -34,28 +34,6 @@ export function AuthLayout({
   cardMaxWidth?: string;
   children: ReactNode;
 }) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState<number | undefined>(undefined);
-  const [hasMeasured, setHasMeasured] = useState(false);
-
-  useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-
-    const ro = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const h = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
-        if (h > 0) {
-          setContentHeight(Math.round(h));
-          setHasMeasured(true);
-        }
-      }
-    });
-
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased selection:bg-[#CCFF00]/30 selection:text-white">
       {/* ── Centered auth shell ── */}
@@ -91,25 +69,14 @@ export function AuthLayout({
 
         {!subtitle && <div className="mb-7" />}
 
-        {/* Obsidian card — Sleek Rectangle Geometry with Smooth Dynamic Height & Width Morph */}
+        {/* Obsidian card — Sleek Rectangle Geometry without clipping */}
         <div
           className={cn(
             "w-full rounded-[24px] border border-white/[0.08] border-t-white/[0.15] bg-gradient-to-b from-[#1a1a1d] to-[#141416] p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.03)] sm:p-9",
-            "transition-[max-width,width] duration-320 ease-[cubic-bezier(0.2,0,0,1)]",
             cardMaxWidth,
           )}
         >
-          <div
-            style={{ height: contentHeight !== undefined ? `${contentHeight}px` : "auto" }}
-            className={cn(
-              "overflow-hidden",
-              hasMeasured && "transition-[height] duration-320 ease-[cubic-bezier(0.2,0,0,1)]",
-            )}
-          >
-            <div ref={contentRef}>
-              {children}
-            </div>
-          </div>
+          {children}
         </div>
 
         {/* Action outside & below the card */}

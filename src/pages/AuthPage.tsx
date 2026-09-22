@@ -54,7 +54,7 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
 // ─────────────────────────────────────────────
 const INPUT_BASE =
   "w-full h-11 rounded-xl border border-white/[0.08] bg-[#121214] px-3.5 text-[14px] text-white placeholder:text-zinc-600 " +
-  "focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/40 transition-all duration-150";
+  "focus:outline-none focus:border-[#CCFF00] focus:ring-0 transition-colors duration-150";
 
 // ─────────────────────────────────────────────
 // Shared label style
@@ -308,7 +308,7 @@ export function AuthPage() {
               autoComplete="email"
               className={cn(
                 INPUT_BASE,
-                isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-amber-500/20",
+                isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
               )}
             />
 
@@ -394,7 +394,7 @@ export function AuthPage() {
                     key={i}
                     index={i}
                     className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
-                    activeClassName="!border-[#CCFF00] !shadow-[0_0_0_1px_rgba(204,255,0,0.20),0_0_18px_rgba(204,255,0,0.18)]"
+                    activeClassName="!border-[#CCFF00] !shadow-[0_0_14px_rgba(204,255,0,0.25)]"
                   />
                 ))}
               </InputOTPGroup>
