@@ -203,7 +203,7 @@ class AuthController:
                 rating=1200,
                 peak_rating=1200,
                 is_onboarded=False,
-                is_core_member=is_privileged_test_member(email) or "santusht" in email or "en23cs301927" in email,
+                is_core_member=is_privileged_test_member(email),
             )
             db.add(member)
             await db.commit()
@@ -262,7 +262,19 @@ class AuthController:
 
         current_member.handle = payload.handle
         current_member.full_name = clean_name
+        # Institutional PRN / Enrollment uniqueness check
         if payload.prn:
+            existing_prn = await db.execute(
+                select(MemberProfile).where(
+                    MemberProfile.prn == payload.prn,
+                    MemberProfile.id != current_member.id,
+                )
+            )
+            if existing_prn.scalars().first():
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Enrollment number '{payload.prn}' is already linked to another cadet profile.",
+                )
             current_member.prn = payload.prn
         if payload.department:
             current_member.department = payload.department

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T13:08:00.065Z",
+  "timestamp": "2026-09-22T13:20:13.768Z",
   "total": 18,
   "passed": 18,
   "failed": 0,
@@ -12,7 +12,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 1695.8,
+      "latency": 4414.5,
       "notes": "Redis: ok"
     },
     {
@@ -22,7 +22,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 1207.6,
+      "latency": 407.1,
       "notes": "Asymmetric verification key available"
     },
     {
@@ -32,7 +32,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 1158.2,
+      "latency": 419.9,
       "notes": "Validates auth subsystem without email dispatch"
     },
     {
@@ -42,7 +42,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 5945.4,
+      "latency": 1209.9,
       "notes": "Validates handle availability without email dispatch"
     },
     {
@@ -52,8 +52,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 1670.2,
-      "notes": "Loaded 3 ranked cadets"
+      "latency": 396.6,
+      "notes": "Loaded 2 ranked cadets"
     },
     {
       "id": "UI-LEAD-02",
@@ -62,7 +62,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 1013.9,
+      "latency": 389.4,
       "notes": "Verified 2 departmental tiers"
     },
     {
@@ -72,7 +72,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 2109.1,
+      "latency": 395.8,
       "notes": "Verified 29 rating buckets (No undefined attendance crash)"
     },
     {
@@ -82,7 +82,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 399.4,
+      "latency": 409.8,
       "notes": "Loaded 2 official sessions"
     },
     {
@@ -92,7 +92,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 950.2,
+      "latency": 1023.1,
       "notes": "Loaded specifications for slug: biweekly-contest-1"
     },
     {
@@ -102,7 +102,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 963.9,
+      "latency": 394.5,
       "notes": "Problem set query passed for biweekly-contest-1"
     },
     {
@@ -112,7 +112,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 2611.8,
+      "latency": 390.9,
       "notes": "Scoreboard matrix responsive"
     },
     {
@@ -122,7 +122,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 950.2,
+      "latency": 930,
       "notes": "Verified LeetCode-style profile view"
     },
     {
@@ -132,7 +132,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 374.6,
+      "latency": 396.4,
       "notes": "Leading @ gracefully parsed without 404"
     },
     {
@@ -142,8 +142,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 388,
-      "notes": "Followers tab: 0 cadets listed"
+      "latency": 1600.5,
+      "notes": "Followers tab: 1 cadets listed"
     },
     {
       "id": "UI-SOC-04",
@@ -152,8 +152,8 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 4564,
-      "notes": "Following tab: 0 cadets listed"
+      "latency": 957.7,
+      "notes": "Following tab: 1 cadets listed"
     },
     {
       "id": "UI-SOC-05",
@@ -162,7 +162,7 @@
       "expected": 401,
       "actual": 401,
       "passed": true,
-      "latency": 920.1,
+      "latency": 381.7,
       "notes": "Strict 401 Unauthorized for guest follow clicks"
     },
     {
@@ -172,7 +172,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 2261.4,
+      "latency": 300.2,
       "notes": "Verified 0 SHA-256 signatures"
     },
     {
@@ -182,7 +182,7 @@
       "expected": 200,
       "actual": 200,
       "passed": true,
-      "latency": 881.5,
+      "latency": 380.6,
       "notes": "Loaded 0 campus notices"
     }
   ]

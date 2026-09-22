@@ -46,10 +46,14 @@ class LeaderboardController:
             return cached
 
         stmt = select(MemberProfile).where(
+            MemberProfile.is_onboarded.is_(True),
+            MemberProfile.handle.isnot(None),
             ~MemberProfile.email.like("qa.%"),
             ~MemberProfile.handle.like("qa_%"),
         )
         count_stmt = select(func.count(MemberProfile.id)).where(
+            MemberProfile.is_onboarded.is_(True),
+            MemberProfile.handle.isnot(None),
             ~MemberProfile.email.like("qa.%"),
             ~MemberProfile.handle.like("qa_%"),
         )
@@ -177,6 +181,8 @@ class LeaderboardController:
 
         result = await db.execute(
             select(MemberProfile.rating).where(
+                MemberProfile.is_onboarded.is_(True),
+                MemberProfile.handle.isnot(None),
                 ~MemberProfile.email.like("qa.%"),
                 ~MemberProfile.handle.like("qa_%"),
             )
@@ -222,6 +228,8 @@ class LeaderboardController:
                 func.max(MemberProfile.rating).label("top_rating"),
             )
             .where(
+                MemberProfile.is_onboarded.is_(True),
+                MemberProfile.handle.isnot(None),
                 ~MemberProfile.email.like("qa.%"),
                 ~MemberProfile.handle.like("qa_%"),
             )

@@ -46,8 +46,9 @@ async def main():
     print(f"    Target URL: {args.url or 'In-Process ASGI Test Engine'}")
     print("=" * 80)
 
-    # 1. Initialize schema and run migrations
-    await init_db()
+    # 1. Initialize schema and run migrations (only if in-process)
+    if not args.url:
+        await init_db()
 
     # 2. Run full QA audit
     report = await ProductionQAService.run_full_qa_audit(

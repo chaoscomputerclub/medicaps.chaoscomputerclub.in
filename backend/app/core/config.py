@@ -23,10 +23,10 @@ class Settings(BaseSettings):
     HOST: str = os.getenv("HOST", "0.0.0.0")
     PORT: int = int(os.getenv("PORT", 8000))
 
-    # Database
+    # Database (PostgreSQL 16+ via asyncpg)
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        f"sqlite+aiosqlite:///{BASE_DIR}/ccc_medicaps.db"
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps"
     )
 
     # JWT Authentication (RSA 256 / RS256 Asymmetric Cryptography)
