@@ -614,7 +614,7 @@ export function AssessmentWorkspacePage() {
       {/* Main 2-Pane Split View */}
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT PANE: Problem Statement */}
-        <div className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-6 bg-black">
+        <div className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-6 bg-black" data-problem-panel>
           {activeProblem ? (
             <div className="space-y-6">
               {/* Problem Title & Points */}
@@ -636,7 +636,7 @@ export function AssessmentWorkspacePage() {
               </div>
 
               {/* Description */}
-              <div className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-line">
+              <div className="text-xs font-sans text-zinc-300 leading-relaxed whitespace-pre-line">
                 {activeProblem.description}
               </div>
 

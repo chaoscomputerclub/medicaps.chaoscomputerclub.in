@@ -1197,7 +1197,7 @@ export function ContestArenaPage() {
             </div>
 
             {/* Panel Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6 text-zinc-200">
+            <div className="flex-1 overflow-y-auto p-5 space-y-6 text-zinc-200" data-problem-panel>
               {activeProblemTab === "description" ? (
                 activeProblem ? (
                   <>
