@@ -112,10 +112,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global focus-visible rings in Electric Lime */
+/* Global focus-visible rings in Electric Lime (for interactive buttons, links, controls) */
 :focus-visible {
   outline: 2px solid #CCFF00 !important;
   outline-offset: 2px !important;
+}
+
+/* Inputs, textareas, and OTP slots own their focused border — suppress duplicate outer focus outlines */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+[data-input-otp],
+[data-input-otp]:focus,
+[data-input-otp]:focus-visible,
+[data-input-otp-placeholder],
+[data-active="true"] {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Selection in Electric Lime for general UI */

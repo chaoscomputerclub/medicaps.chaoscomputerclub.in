@@ -394,7 +394,7 @@ export function AuthPage() {
                     key={i}
                     index={i}
                     className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
-                    activeClassName="!border-[#CCFF00] !shadow-[0_0_14px_rgba(204,255,0,0.25)]"
+                    activeClassName="!border-[#CCFF00]"
                   />
                 ))}
               </InputOTPGroup>
