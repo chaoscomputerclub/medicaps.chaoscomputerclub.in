@@ -218,23 +218,39 @@ textarea {
    Strix Auth Flow Micro-Transitions
    Hardware-accelerated (transform, opacity only)
    ───────────────────────────────────────────── */
+
+/* Kill the input-otp library's hidden input focus ring — our slot border owns the active state */
+[data-input-otp] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+[data-input-otp-placeholder] {
+  outline: none !important;
+}
+
 @keyframes auth-fade-slide-forward {
-  from {
+  0% {
     opacity: 0;
-    transform: translate3d(14px, 0, 0);
+    transform: translate3d(24px, 4px, 0);
   }
-  to {
+  60% {
+    opacity: 1;
+  }
+  100% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes auth-fade-slide-backward {
-  from {
+  0% {
     opacity: 0;
-    transform: translate3d(-14px, 0, 0);
+    transform: translate3d(-24px, 4px, 0);
   }
-  to {
+  60% {
+    opacity: 1;
+  }
+  100% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
@@ -243,7 +259,7 @@ textarea {
 @keyframes auth-title-fade {
   from {
     opacity: 0;
-    transform: translate3d(0, 6px, 0);
+    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
@@ -254,11 +270,11 @@ textarea {
 @keyframes auth-slot-pop {
   0% {
     opacity: 0;
-    transform: translate3d(0, 8px, 0) scale(0.92);
+    transform: translate3d(0, 12px, 0) scale(0.88);
   }
-  65% {
+  55% {
     opacity: 1;
-    transform: translate3d(0, -1px, 0) scale(1.02);
+    transform: translate3d(0, -2px, 0) scale(1.03);
   }
   100% {
     opacity: 1;
@@ -267,22 +283,22 @@ textarea {
 }
 
 .auth-transition-forward {
-  animation: auth-fade-slide-forward 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: auth-fade-slide-forward 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   will-change: transform, opacity;
 }
 
 .auth-transition-backward {
-  animation: auth-fade-slide-backward 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: auth-fade-slide-backward 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   will-change: transform, opacity;
 }
 
 .auth-title-transition {
-  animation: auth-title-fade 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: auth-title-fade 280ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   will-change: transform, opacity;
 }
 
 .auth-slot-stagger {
-  animation: auth-slot-pop 260ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: auth-slot-pop 340ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   will-change: transform, opacity;
 }
 

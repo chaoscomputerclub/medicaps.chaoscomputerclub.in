@@ -44,9 +44,9 @@ const InputOTPSlot = React.forwardRef<
       ref={ref}
       data-active={isActive ? "true" : undefined}
       className={cn(
-        "relative flex items-center justify-center text-sm transition-all",
-        isActive && "z-10",
-        isActive && activeClassName,
+        // Reset all default Shadcn borders — we own the full active state
+        "relative flex items-center justify-center text-sm transition-[border-color,box-shadow] duration-150",
+        isActive ? ["z-10", activeClassName] : "ring-0 outline-none",
         className,
       )}
       {...props}
@@ -54,7 +54,7 @@ const InputOTPSlot = React.forwardRef<
       {char}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-5 w-[2px] rounded-full animate-caret-blink bg-[#CCFF00] duration-1000 shadow-[0_0_8px_#CCFF00]" />
+          <div className="h-[18px] w-[2px] rounded-full animate-caret-blink bg-[#CCFF00] duration-1000 shadow-[0_0_6px_#CCFF00]" />
         </div>
       )}
     </div>
