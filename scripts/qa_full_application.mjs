@@ -41,7 +41,7 @@ async function request(endpoint, options = {}, retries = 2) {
           ...(options.headers || {}),
         },
       });
-      if (res.status >= 520 && res.status <= 530 && attempt < retries) {
+      if (res.status >= 500 && res.status <= 599 && attempt < retries) {
         await new Promise((r) => setTimeout(r, 750));
         continue;
       }
