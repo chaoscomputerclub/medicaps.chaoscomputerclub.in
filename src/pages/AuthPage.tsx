@@ -10,8 +10,8 @@
 
 import { preloadFullProfile } from "@/organization/data/queries";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { Loader2, Check, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Check, X, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AuthLayout } from "@/organization/components/AuthLayout";
@@ -49,26 +49,24 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
   );
 }
 
-
-
 // ─────────────────────────────────────────────
 // Shared input style (recessed dark)
 // ─────────────────────────────────────────────
 const INPUT_BASE =
-  "w-full h-11 rounded-lg border border-white/[0.09] bg-[#0d0d0f] px-3.5 text-sm text-white placeholder:text-zinc-600 " +
-  "focus:outline-none focus:border-[#CCFF00]/60 focus:ring-2 focus:ring-[#CCFF00]/20 transition-all duration-150";
+  "w-full h-11 rounded-xl border border-white/[0.08] bg-[#121214] px-3.5 text-[14px] text-white placeholder:text-zinc-600 " +
+  "focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/40 transition-all duration-150";
 
 // ─────────────────────────────────────────────
 // Shared label style
 // ─────────────────────────────────────────────
-const LABEL = "block text-xs font-medium text-zinc-400 mb-2";
+const LABEL = "block text-[13px] font-normal text-zinc-300 mb-2";
 
 // ─────────────────────────────────────────────
 // Lime primary button
 // ─────────────────────────────────────────────
 const BTN_PRIMARY =
-  "w-full h-11 rounded-lg bg-[#CCFF00] text-black text-sm font-semibold " +
-  "hover:bg-[#b8e600] active:scale-[0.99] transition-all duration-150 " +
+  "w-full h-11 rounded-xl bg-[#CCFF00] text-black text-[14px] font-medium " +
+  "hover:bg-[#d4ff1a] active:scale-[0.99] transition-all duration-150 " +
   "flex items-center justify-center cursor-pointer " +
   "disabled:opacity-40 disabled:cursor-not-allowed";
 
@@ -76,8 +74,8 @@ const BTN_PRIMARY =
 // Secondary (OAuth / outline) button
 // ─────────────────────────────────────────────
 const BTN_SECONDARY =
-  "w-full h-11 rounded-lg border border-white/[0.09] bg-transparent text-sm font-medium text-zinc-300 " +
-  "hover:bg-white/[0.04] hover:border-white/20 transition-all duration-150 " +
+  "w-full h-11 rounded-xl border border-white/[0.08] bg-transparent text-[14px] font-normal text-zinc-200 " +
+  "hover:bg-white/[0.03] hover:border-white/20 transition-all duration-150 " +
   "flex items-center justify-center gap-2.5 cursor-pointer " +
   "disabled:opacity-40 disabled:cursor-not-allowed";
 
@@ -96,6 +94,7 @@ function checkIsMedicapsEmail(email: string): boolean {
 export function AuthPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [countdown, setCountdown] = useState(30);
 
   const {
     step,
@@ -115,6 +114,16 @@ export function AuthPage() {
   const hasAt = cleanEmail.includes("@");
   const typedDomain = hasAt ? cleanEmail.split("@")[1] || "" : "";
   const isInvalidDomain = hasAt && typedDomain.length > 0 && !checkIsMedicapsEmail(cleanEmail);
+
+  // ── OTP Resend countdown ticker ───────────────────────────────────
+  useEffect(() => {
+    if (step !== "otp") return;
+    setCountdown(30);
+    const timer = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [step]);
 
   // ── Google OAuth callback & session rehydration ──────────────────
   useEffect(() => {
@@ -206,17 +215,13 @@ export function AuthPage() {
     }
   }
 
-  function handleVerifySubmit(e: React.FormEvent) {
-    e.preventDefault();
-    void triggerVerify(otp);
-  }
-
   async function handleResendOtp() {
     const clean = email.trim().toLowerCase();
     if (!clean || !checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in emails are permitted.")); return;
     }
     await dispatch(sendOtpThunk(clean));
+    setCountdown(30);
     toast.success("New code sent to your inbox.");
   }
 
@@ -238,28 +243,44 @@ export function AuthPage() {
   // ── Derive layout props ──────────────────────────────────────────
   let layoutTitle: string;
   let layoutSubtitle: React.ReactNode | undefined;
+  let bottomAction: React.ReactNode | undefined;
 
   if (step === "otp") {
     layoutTitle = "Check your email";
-    layoutSubtitle = (
-      <>
-        Enter the code sent to{" "}
-        <span className="font-medium text-white">{email}</span>
-      </>
+    layoutSubtitle = undefined;
+    bottomAction = (
+      <button
+        type="button"
+        onClick={() => {
+          dispatch(setStep("email"));
+          dispatch(setOtp(""));
+          dispatch(setMessage(null));
+        }}
+        className="inline-flex items-center gap-1.5 text-[13px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+      >
+        <ChevronLeft className="size-3.5" />
+        <span>Change email</span>
+      </button>
     );
   } else if (step === "onboarding") {
     layoutTitle = "Complete your profile";
     layoutSubtitle = "Choose your display name and campus handle.";
+    bottomAction = undefined;
   } else {
     layoutTitle = "Sign in";
     layoutSubtitle = undefined;
+    bottomAction = undefined;
   }
 
   return (
-    <AuthLayout title={layoutTitle} subtitle={layoutSubtitle}>
+    <AuthLayout
+      title={layoutTitle}
+      subtitle={layoutSubtitle}
+      bottomAction={bottomAction}
+    >
 
       {/* ════════════════════════════════════════════
-          STEP 1 — Email + OAuth
+          STEP 1 — Email + OAuth (Strix Minimalist)
           ════════════════════════════════════════════ */}
       {step === "email" && (
         <div>
@@ -301,20 +322,20 @@ export function AuthPage() {
             {/* Primary CTA — lime */}
             <button
               type="submit"
-              disabled={pending || isInvalidDomain}
-              className={cn(BTN_PRIMARY, "mt-3.5")}
+              disabled={pending || isInvalidDomain || !email.trim()}
+              className={cn(BTN_PRIMARY, "mt-4")}
             >
               {pending ? <Loader2 className="size-4 animate-spin" /> : "Continue with email"}
             </button>
           </form>
 
           {/* OR hairline divider */}
-          <div className="relative my-5">
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.07]" />
+              <div className="w-full border-t border-white/[0.08]" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-[#161618] px-3 text-[11px] font-medium uppercase tracking-widest text-zinc-600 select-none">
+              <span className="bg-[#191919] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
                 or
               </span>
             </div>
@@ -336,12 +357,18 @@ export function AuthPage() {
       )}
 
       {/* ════════════════════════════════════════════
-          STEP 2 — OTP verification
+          STEP 2 — OTP verification (Strix Pure Flow)
           ════════════════════════════════════════════ */}
       {step === "otp" && (
-        <form onSubmit={handleVerifySubmit}>
+        <div>
+          {/* Email target info inside the card at top */}
+          <div className="text-center mb-7">
+            <p className="text-[13px] text-zinc-400 font-normal">Enter the code sent to</p>
+            <p className="text-[14px] font-medium text-white mt-1 break-all">{email}</p>
+          </div>
+
           {/* OTP slot grid — centered */}
-          <div className="flex justify-center">
+          <div className="flex justify-center mb-7">
             <InputOTP
               id="auth-otp"
               maxLength={6}
@@ -351,71 +378,71 @@ export function AuthPage() {
                 if (val.length === 6) setTimeout(() => void triggerVerify(val), 50);
               }}
               autoFocus
+              disabled={pending}
             >
-              <InputOTPGroup className="gap-2.5">
+              <InputOTPGroup className="gap-2 sm:gap-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className={cn(
-                      "size-11 rounded-xl border border-white/[0.09] bg-[#0d0d0f]",
-                      "font-mono text-base tabular-nums text-white",
-                      "transition-all duration-150",
-                      "data-[active=true]:border-[#CCFF00]/70 data-[active=true]:ring-2 data-[active=true]:ring-[#CCFF00]/20",
-                    )}
+                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
+                    activeClassName="!border-[#CCFF00] !ring-2 !ring-[#CCFF00]/25 !shadow-[0_0_20px_rgba(204,255,0,0.18)]"
                   />
                 ))}
               </InputOTPGroup>
             </InputOTP>
           </div>
 
-          {/* Dev OTP hint */}
-          {devOtp && (
-            <p className="mt-4 text-center font-mono text-xs text-[#CCFF00]/70">
-              Dev code: <span className="text-[#CCFF00] font-semibold">{devOtp}</span>
-            </p>
+          {/* Verifying loader */}
+          {pending && (
+            <div className="flex items-center justify-center gap-2 mb-4 text-xs text-zinc-400">
+              <Loader2 className="size-3.5 animate-spin text-[#CCFF00]" />
+              <span>Verifying code…</span>
+            </div>
           )}
 
           {/* Error */}
-          {message && (
-            <p className="mt-3 text-center text-xs text-red-400">{message}</p>
+          {message && !pending && (
+            <p className="mb-4 text-center text-xs text-red-400 leading-relaxed">{message}</p>
           )}
 
-          {/* Verify — lime */}
-          <button
-            type="submit"
-            disabled={pending || otp.length < 6}
-            className={cn(BTN_PRIMARY, "mt-5")}
-          >
-            {pending ? <Loader2 className="size-4 animate-spin" /> : "Verify and continue"}
-          </button>
-
-          {/* Didn't receive / back */}
-          <div className="mt-5 text-center space-y-1.5">
-            <p className="text-xs text-zinc-500">
-              Didn't receive a code?{" "}
+          {/* Resend section — Strix exact pattern */}
+          <div className="text-center space-y-1">
+            <p className="text-[13px] text-zinc-400">Didn't receive a code?</p>
+            {countdown > 0 ? (
+              <p className="text-[13px] text-zinc-500 tabular-nums">
+                You can request a new one in {countdown}
+              </p>
+            ) : (
               <button
                 type="button"
                 onClick={handleResendOtp}
                 disabled={pending}
-                className="font-medium text-[#CCFF00] hover:text-[#b8e600] transition-colors cursor-pointer disabled:opacity-40"
+                className="text-[13px] font-medium text-[#CCFF00] hover:text-[#d4ff1a] transition-colors cursor-pointer disabled:opacity-40"
               >
-                Resend
+                Resend code
               </button>
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                dispatch(setStep("email"));
-                dispatch(setOtp(""));
-                dispatch(setMessage(null));
-              }}
-              className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors cursor-pointer"
-            >
-              ← Change email
-            </button>
+            )}
           </div>
-        </form>
+
+          {/* Dev OTP quick-fill chip (discreet dev utility) */}
+          {devOtp && (
+            <div className="mt-6 pt-3 border-t border-white/[0.04] flex items-center justify-center gap-2 text-[11px] text-zinc-500 font-mono">
+              <span>DEV CODE:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  dispatch(setOtp(devOtp));
+                  void triggerVerify(devOtp);
+                }}
+                className="text-[#CCFF00] font-semibold hover:underline bg-[#CCFF00]/10 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                title="Click to fill & verify"
+              >
+                {devOtp}
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* ════════════════════════════════════════════
@@ -442,7 +469,7 @@ export function AuthPage() {
           {/* Campus handle */}
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label htmlFor="ob-handle" className="text-xs font-medium text-zinc-400">
+              <label htmlFor="ob-handle" className={LABEL}>
                 Campus handle
               </label>
               <span className="flex items-center gap-1 text-xs">
@@ -478,7 +505,7 @@ export function AuthPage() {
                 required
                 className={cn(
                   INPUT_BASE, "pl-8",
-                  handleStatus === "available" && "border-[#CCFF00]/40 focus:border-[#CCFF00]/70",
+                  handleStatus === "available" && "border-[#CCFF00]/40 focus:border-[#CCFF00]",
                   handleStatus === "taken" && "border-red-500/40 focus:border-red-500/70 focus:ring-red-500/20",
                 )}
               />
@@ -497,7 +524,7 @@ export function AuthPage() {
               pending || !name.trim() || handle.trim().length < 3 ||
               handleStatus === "taken" || handleStatus === "checking"
             }
-            className={cn(BTN_PRIMARY, "mt-2")}
+            className={cn(BTN_PRIMARY, "mt-4")}
           >
             {pending ? <Loader2 className="size-4 animate-spin" /> : "Enter CCC Arena"}
           </button>

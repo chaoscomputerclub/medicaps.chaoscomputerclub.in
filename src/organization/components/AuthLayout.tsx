@@ -13,9 +13,10 @@ import { type ReactNode } from "react";
 export function AuthLayout({
   title,
   subtitle,
+  bottomAction,
   children,
 }: {
-  /** Legacy prop — ignored, kept for backward compat */
+  /** Legacy props — ignored, kept for backward compat */
   kicker?: string;
   index?: string;
   footer?: ReactNode;
@@ -23,12 +24,14 @@ export function AuthLayout({
   description?: ReactNode;
   /** Primary heading rendered above the card */
   title: ReactNode;
-  /** Secondary subtitle rendered above the card (below title) */
+  /** Secondary subtitle rendered above the card (if any) */
   subtitle?: ReactNode;
+  /** Action rendered outside and below the card (e.g. Change email) */
+  bottomAction?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased">
+    <main className="flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased selection:bg-[#CCFF00]/30 selection:text-white">
       {/* ── Centered auth shell ── */}
       <div className="flex w-full flex-1 flex-col items-center justify-center">
 
@@ -41,35 +44,42 @@ export function AuthLayout({
           <img
             src="/logo.webp"
             alt="Chaos Computer Club"
-            className="h-10 w-10 object-contain"
+            className="h-9 w-9 object-contain"
           />
         </Link>
 
         {/* Page title */}
-        <h1 className="mb-1.5 text-[22px] font-semibold tracking-tight text-white">
+        <h1 className="mb-2 text-[24px] font-semibold tracking-tight text-white">
           {title}
         </h1>
 
-        {/* Subtitle (e.g. "We sent a 6-digit code to…") */}
+        {/* Subtitle (only rendered if provided) */}
         {subtitle && (
-          <p className="mb-7 max-w-xs text-center text-sm leading-snug text-zinc-400">
+          <p className="mb-7 max-w-xs text-center text-[13px] leading-snug text-zinc-400">
             {subtitle}
           </p>
         )}
 
         {!subtitle && <div className="mb-7" />}
 
-        {/* Obsidian card */}
-        <div className="w-full max-w-[400px] rounded-2xl border border-white/[0.07] bg-[#161618] p-7 shadow-2xl shadow-black/70 sm:p-8">
+        {/* Obsidian card — Sleek Rectangle Geometry */}
+        <div className="w-full max-w-[440px] rounded-[24px] border border-white/[0.08] border-t-white/[0.15] bg-gradient-to-b from-[#1a1a1d] to-[#141416] p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.03)] sm:p-9">
           {children}
         </div>
+
+        {/* Action outside & below the card */}
+        {bottomAction && (
+          <div className="mt-6 text-center">
+            {bottomAction}
+          </div>
+        )}
       </div>
 
       {/* ── Viewport bottom footer ── */}
       <footer className="mt-10">
         <Link
           to="/terms"
-          className="text-xs text-zinc-600 transition-colors hover:text-zinc-400"
+          className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
         >
           Terms of Service
         </Link>

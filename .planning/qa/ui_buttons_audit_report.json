@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-22T08:56:21.298Z",
-  "totalElements": 305,
-  "functionalCount": 305,
+  "timestamp": "2026-09-22T09:04:18.583Z",
+  "totalElements": 304,
+  "functionalCount": 304,
   "connectivityRate": "100.0%",
   "breakdown": {
-    "backendMutations": 33,
+    "backendMutations": 30,
     "backendQueries": 9,
     "routingNavigation": 184,
-    "clientUiState": 58,
+    "clientUiState": 60,
     "conditionalLocked": 15,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
@@ -223,7 +223,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 36,
+      "line": 39,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -232,7 +232,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 70,
+      "line": 80,
       "tag": "<Link>",
       "label": "Terms of Service",
       "handler": "\"/terms\"",
@@ -610,7 +610,16 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 266,
+      "line": 252,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => {\n          dispatch(setStep(\"email\"));\n          dispatch(setOtp(\"\"));\n ",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 287,
       "tag": "<form>",
       "label": "{isInvalidDomain && (               <...",
       "handler": "{handleEmailSubmit}",
@@ -619,7 +628,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 302,
+      "line": 323,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
@@ -628,7 +637,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 325,
+      "line": 346,
       "tag": "<button>",
       "label": "button",
       "handler": "{() => { window.location.href = getGoogleLoginURL(); }}",
@@ -637,43 +646,25 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 342,
-      "tag": "<form>",
-      "label": "{devOtp && (             <p className...",
-      "handler": "{handleVerifySubmit}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 385,
+      "line": 417,
       "tag": "<button>",
-      "label": "{pending ? <Loader2 className=size-4...",
-      "handler": "\"submit\"",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 397,
-      "tag": "<button>",
-      "label": "Resend",
+      "label": "Resend code",
       "handler": "{handleResendOtp}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 406,
+      "line": 432,
       "tag": "<button>",
-      "label": "← Change email",
-      "handler": "{() => {\n                dispatch(setStep(\"email\"));\n                dispatch(se",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
+      "label": "{devOtp}",
+      "handler": "{() => {\n                  dispatch(setOtp(devOtp));\n                  void trig",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 425,
+      "line": 452,
       "tag": "<form>",
       "label": "{message && (             <p classNam...",
       "handler": "{handleOnboardingSubmit}",
@@ -682,7 +673,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 494,
+      "line": 521,
       "tag": "<button>",
       "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",

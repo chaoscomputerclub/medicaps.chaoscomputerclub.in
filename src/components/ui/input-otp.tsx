@@ -30,8 +30,8 @@ InputOTPGroup.displayName = "InputOTPGroup";
 
 const InputOTPSlot = React.forwardRef<
   React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div"> & { index: number }
->(({ index, className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"div"> & { index: number; activeClassName?: string }
+>(({ index, className, activeClassName, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext);
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index] ?? {
     char: null,
@@ -42,9 +42,11 @@ const InputOTPSlot = React.forwardRef<
   return (
     <div
       ref={ref}
+      data-active={isActive ? "true" : undefined}
       className={cn(
-        "relative flex h-9 w-9 items-center justify-center border-y border-r border-input text-sm shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-        isActive && "z-10 ring-1 ring-ring",
+        "relative flex items-center justify-center text-sm transition-all",
+        isActive && "z-10",
+        isActive && activeClassName,
         className,
       )}
       {...props}
@@ -52,7 +54,7 @@ const InputOTPSlot = React.forwardRef<
       {char}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
+          <div className="h-5 w-[2px] rounded-full animate-caret-blink bg-[#CCFF00] duration-1000 shadow-[0_0_8px_#CCFF00]" />
         </div>
       )}
     </div>
