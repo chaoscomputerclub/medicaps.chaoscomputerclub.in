@@ -48,14 +48,17 @@ export function AuthLayout({
           />
         </Link>
 
-        {/* Page title */}
-        <h1 className="mb-2 text-[24px] font-semibold tracking-tight text-white">
+        {/* Page title with smooth cross-fade */}
+        <h1
+          key={typeof title === "string" ? title : "auth-title"}
+          className="auth-title-transition mb-2 text-[24px] font-semibold tracking-tight text-white"
+        >
           {title}
         </h1>
 
         {/* Subtitle (only rendered if provided) */}
         {subtitle && (
-          <p className="mb-7 max-w-xs text-center text-[13px] leading-snug text-zinc-400">
+          <p className="auth-title-transition mb-7 max-w-xs text-center text-[13px] leading-snug text-zinc-400">
             {subtitle}
           </p>
         )}
@@ -63,7 +66,7 @@ export function AuthLayout({
         {!subtitle && <div className="mb-7" />}
 
         {/* Obsidian card — Sleek Rectangle Geometry */}
-        <div className="w-full max-w-[440px] rounded-[24px] border border-white/[0.08] border-t-white/[0.15] bg-gradient-to-b from-[#1a1a1d] to-[#141416] p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.03)] sm:p-9">
+        <div className="w-full max-w-[440px] overflow-hidden rounded-[24px] border border-white/[0.08] border-t-white/[0.15] bg-gradient-to-b from-[#1a1a1d] to-[#141416] p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.03)] sm:p-9">
           {children}
         </div>
 

@@ -28,28 +28,38 @@ const GRAY = "\x1b[90m";
 
 const API_BASE = process.env.API_BASE || "https://medicaps.chaoscomputerclub.in/api";
 
-async function request(endpoint, options = {}) {
+async function request(endpoint, options = {}, retries = 2) {
   const url = endpoint.startsWith("http") ? endpoint : `${API_BASE}${endpoint}`;
   const start = performance.now();
-  try {
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-    });
-    const latency = performance.now() - start;
-    let body = null;
+  for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      body = await res.json();
-    } catch {
-      body = null;
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+        },
+      });
+      if (res.status >= 520 && res.status <= 530 && attempt < retries) {
+        await new Promise((r) => setTimeout(r, 750));
+        continue;
+      }
+      const latency = performance.now() - start;
+      let body = null;
+      try {
+        body = await res.json();
+      } catch {
+        body = null;
+      }
+      return { status: res.status, ok: res.ok, body, latency };
+    } catch (err) {
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 750));
+        continue;
+      }
+      const latency = performance.now() - start;
+      return { status: 0, ok: false, error: err.message, body: null, latency };
     }
-    return { status: res.status, ok: res.ok, body, latency };
-  } catch (err) {
-    const latency = performance.now() - start;
-    return { status: 0, ok: false, error: err.message, body: null, latency };
   }
 }
 

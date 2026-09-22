@@ -95,6 +95,7 @@ export function AuthPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [countdown, setCountdown] = useState(30);
+  const [navDirection, setNavDirection] = useState<"forward" | "backward">("forward");
 
   const {
     step,
@@ -199,6 +200,7 @@ export function AuthPage() {
     if (!checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted.")); return;
     }
+    setNavDirection("forward");
     await dispatch(sendOtpThunk(clean));
   }
 
@@ -252,11 +254,12 @@ export function AuthPage() {
       <button
         type="button"
         onClick={() => {
+          setNavDirection("backward");
           dispatch(setStep("email"));
           dispatch(setOtp(""));
           dispatch(setMessage(null));
         }}
-        className="inline-flex items-center gap-1.5 text-[13px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+        className="auth-title-transition inline-flex items-center gap-1.5 text-[13px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
       >
         <ChevronLeft className="size-3.5" />
         <span>Change email</span>
@@ -283,7 +286,10 @@ export function AuthPage() {
           STEP 1 — Email + OAuth (Strix Minimalist)
           ════════════════════════════════════════════ */}
       {step === "email" && (
-        <div>
+        <div
+          key="auth-email-step"
+          className={navDirection === "backward" ? "auth-transition-backward" : "auth-transition-forward"}
+        >
           <form onSubmit={handleEmailSubmit} noValidate>
             {/* Email field */}
             <label htmlFor="auth-email" className={LABEL}>
@@ -360,14 +366,17 @@ export function AuthPage() {
           STEP 2 — OTP verification (Strix Pure Flow)
           ════════════════════════════════════════════ */}
       {step === "otp" && (
-        <div>
+        <div
+          key="auth-otp-step"
+          className={navDirection === "forward" ? "auth-transition-forward" : "auth-transition-backward"}
+        >
           {/* Email target info inside the card at top */}
           <div className="text-center mb-7">
             <p className="text-[13px] text-zinc-400 font-normal">Enter the code sent to</p>
             <p className="text-[14px] font-medium text-white mt-1 break-all">{email}</p>
           </div>
 
-          {/* OTP slot grid — centered */}
+          {/* OTP slot grid — centered with stagger animation */}
           <div className="flex justify-center mb-7">
             <InputOTP
               id="auth-otp"
@@ -385,7 +394,8 @@ export function AuthPage() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
+                    style={{ animationDelay: `${i * 24}ms` }}
+                    className="auth-slot-stagger w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
                     activeClassName="!border-[#CCFF00] !ring-2 !ring-[#CCFF00]/25 !shadow-[0_0_20px_rgba(204,255,0,0.18)]"
                   />
                 ))}
