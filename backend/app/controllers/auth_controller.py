@@ -769,8 +769,8 @@ class AuthController:
                 "rating": current_member.rating,
                 "peak_rating": current_member.peak_rating,
                 "peak_contest": "Chaos Arena 2026",
-                "university_rank": (ranked or 0) + 1,
-                "percentile": round((1.0 - (((ranked or 0) + 1) / max(1, all_members_count or 1))) * 100, 1),
+                "university_rank": ((ranked or 0) + 1) if (attended or 0) > 0 else None,
+                "percentile": round((1.0 - (((ranked or 0) + 1) / max(1, all_members_count or 1))) * 100, 1) if (attended or 0) > 0 else None,
                 "active_members": all_members_count or 0,
                 "attendance_count": attended or 0,
                 "attendance_total": total_contests or 0,
@@ -867,20 +867,20 @@ class AuthController:
                 )
                 is_following = bool(rel_check)
 
-        # University ranking
-        all_members_count = await db.scalar(select(func.count(MemberProfile.id))) or 0
-        higher_rated = await db.scalar(
-            select(func.count(MemberProfile.id)).where(MemberProfile.rating > student.rating)
-        ) or 0
-        university_rank = higher_rated + 1
-        percentile = round((1.0 - (university_rank / max(1, all_members_count))) * 100, 1)
-
         # Total contests and attendance
         total_contests = await db.scalar(select(func.count(OfflineContest.id))) or 0
         attended = await db.scalar(
             select(func.count(ScoreboardEntry.id)).where(ScoreboardEntry.member_id == student.id)
         ) or 0
         attendance_rate = round((attended / total_contests * 100), 1) if total_contests > 0 else 0.0
+
+        # University ranking — only cadets who have attended official tournaments receive an official rank
+        all_members_count = await db.scalar(select(func.count(MemberProfile.id))) or 0
+        higher_rated = await db.scalar(
+            select(func.count(MemberProfile.id)).where(MemberProfile.rating > student.rating)
+        ) or 0
+        university_rank = (higher_rated + 1) if (attended or 0) > 0 else None
+        percentile = round((1.0 - (university_rank / max(1, all_members_count))) * 100, 1) if ((attended or 0) > 0 and university_rank) else None
 
         # Tier calculation
         tier = "5★ Grandmaster" if student.rating >= 2200 else (
