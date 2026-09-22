@@ -28,13 +28,14 @@ export type RealtimeEventHandler = (event: RealtimeEvent) => void;
 export function useRealtimeEvents(
   contestSlug?: string | null,
   onEvent?: RealtimeEventHandler,
-  eventFilter?: string[]
+  eventFilter?: string[],
+  enabled: boolean = true
 ) {
   const handlerRef = useRef(onEvent);
   handlerRef.current = onEvent;
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !enabled) return;
 
     const base = getApiBase();
     const endpoint = contestSlug

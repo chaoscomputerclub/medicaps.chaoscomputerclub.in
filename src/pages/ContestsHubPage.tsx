@@ -124,16 +124,27 @@ export function ContestsHubPage() {
     }
   }, [dispatch, member]);
 
-  // Instant global push: updates list when any contest changes status or qualifiers are published
-  useRealtimeEvents(null, (event) => {
-    if (
-      event.event === "contest_status_changed" ||
-      event.event === "top30_qualified" ||
-      event.event === "pass_checked_in"
-    ) {
-      refreshHubData(true);
-    }
-  });
+  // Instant push: only subscribe to persistent SSE stream if active/upcoming contests exist,
+  // preventing holding an idle HTTP streaming socket that delays Network Finish
+  const hasLiveContests = useMemo(
+    () => contests.some((c) => c.status === "live" || c.status === "upcoming"),
+    [contests]
+  );
+
+  useRealtimeEvents(
+    null,
+    (event) => {
+      if (
+        event.event === "contest_status_changed" ||
+        event.event === "top30_qualified" ||
+        event.event === "pass_checked_in"
+      ) {
+        refreshHubData(true);
+      }
+    },
+    undefined,
+    hasLiveContests
+  );
 
   useEffect(() => {
     const handleSync = () => {

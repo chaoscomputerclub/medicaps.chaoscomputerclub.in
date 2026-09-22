@@ -68,14 +68,35 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Vite runtime helpers (e.g. \0vite/preload-helper) MUST be in vendor-common,
+          // never attached to heavy lazy chunks like vendor-monaco
+          if (id.includes("preload-helper") || id.includes("vite/") || id.includes("\0vite")) {
+            return "vendor-common";
+          }
+
           if (id.includes("node_modules")) {
-            // React core — always needed, split first
+            // React core — strictly React, React-DOM, React-Router, React-Is, Scheduler
             if (
-              id.includes("react-dom") ||
-              id.includes("/react/") ||
-              id.includes("react-router-dom")
+              id.includes("/node_modules/react/") ||
+              id.includes("/node_modules/react-dom/") ||
+              id.includes("/node_modules/react-router/") ||
+              id.includes("/node_modules/react-router-dom/") ||
+              id.includes("/node_modules/react-is/") ||
+              id.includes("/node_modules/scheduler/")
             ) {
               return "vendor-react";
+            }
+            // Monaco — only Monaco editor runtime & wrappers
+            if (id.includes("monaco") || id.includes("@monaco-editor")) {
+              return "vendor-monaco";
+            }
+            // QR code — only used on CampusPassCard
+            if (id.includes("qrcode") || id.includes("html5-qrcode")) {
+              return "vendor-qr";
+            }
+            // Date handling
+            if (id.includes("date-fns")) {
+              return "vendor-dates";
             }
             // State management
             if (id.includes("@reduxjs/toolkit") || id.includes("react-redux")) {
@@ -85,25 +106,9 @@ export default defineConfig({
             if (id.includes("@radix-ui")) {
               return "vendor-radix";
             }
-            // Monaco — workers are in public/monacoeditorwork, runtime wrapper is tiny
-            if (id.includes("@monaco-editor") || id.includes("monaco-editor")) {
-              return "vendor-monaco";
-            }
             // Icons
-            if (id.includes("lucide-react")) {
+            if (id.includes("lucide-react") || id.includes("@phosphor-icons")) {
               return "vendor-icons";
-            }
-            // Charts — only used on Profile + Dashboard, lazy loaded
-            if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-")) {
-              return "vendor-charts";
-            }
-            // QR code — only used on CampusPassCard
-            if (id.includes("qrcode")) {
-              return "vendor-qr";
-            }
-            // Date handling
-            if (id.includes("date-fns")) {
-              return "vendor-dates";
             }
             // Everything else
             return "vendor-common";

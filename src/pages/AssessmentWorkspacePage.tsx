@@ -5,7 +5,7 @@
  */
 
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import {
   CheckCircle2,
   Clock,
@@ -40,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MonacoEditor } from "@/organization/components/MonacoEditor";
+const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchAssessmentThunk,
@@ -735,20 +735,28 @@ export function AssessmentWorkspacePage() {
         <div className="w-1/2 flex flex-col bg-black">
           {/* Editor Container */}
           <div className="flex-1 relative overflow-hidden bg-black">
-            <MonacoEditor
-              value={currentCode}
-              language={selectedLanguage}
-              onChange={(code) => {
-                if (!activeProblem) return;
-                dispatch(
-                  setCode({
-                    problemId: activeProblem.id,
-                    language: selectedLanguage,
-                    code,
-                  }),
-                );
-              }}
-            />
+            <Suspense
+              fallback={
+                <div className="h-full w-full flex items-center justify-center text-xs font-mono text-zinc-500 animate-pulse">
+                  Initializing terminal code editor…
+                </div>
+              }
+            >
+              <MonacoEditor
+                value={currentCode}
+                language={selectedLanguage}
+                onChange={(code) => {
+                  if (!activeProblem) return;
+                  dispatch(
+                    setCode({
+                      problemId: activeProblem.id,
+                      language: selectedLanguage,
+                      code,
+                    }),
+                  );
+                }}
+              />
+            </Suspense>
             <button
               type="button"
               onClick={() => {

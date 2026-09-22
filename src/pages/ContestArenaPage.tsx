@@ -5,7 +5,7 @@
  */
 
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -72,7 +72,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MonacoEditor } from "@/organization/components/MonacoEditor";
+const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchContestArenaThunk,
@@ -1450,15 +1450,23 @@ export function ContestArenaPage() {
 
           {/* Monaco Editor Pane */}
           <div className="flex-1 relative overflow-hidden bg-black min-h-0">
-            <MonacoEditor
-              value={currentCode}
-              language={selectedLanguage}
-              onChange={handleCodeChange}
-              fontSize={editorFontSize}
-              wordWrap={editorWordWrap ? "on" : "off"}
-              tabSize={editorTabSize}
-              onCursorChange={(ln, col) => setCursorPos({ ln, col })}
-            />
+            <Suspense
+              fallback={
+                <div className="h-full w-full flex items-center justify-center text-xs font-mono text-zinc-500 animate-pulse">
+                  Initializing terminal code editor…
+                </div>
+              }
+            >
+              <MonacoEditor
+                value={currentCode}
+                language={selectedLanguage}
+                onChange={handleCodeChange}
+                fontSize={editorFontSize}
+                wordWrap={editorWordWrap ? "on" : "off"}
+                tabSize={editorTabSize}
+                onCursorChange={(ln, col) => setCursorPos({ ln, col })}
+              />
+            </Suspense>
           </div>
 
           {/* Editor Status Bar */}

@@ -136,22 +136,7 @@ export function PortalShell() {
     ready: boolean;
   }>({ top: 0, height: 36, opacity: 0, ready: false });
 
-  // Idle background prefetch of core route chunks for instant navigation
-  useEffect(() => {
-    const warmup = () => {
-      prefetchRoute("/contests");
-      prefetchRoute("/leaderboard");
-      prefetchRoute("/problems");
-      prefetchRoute("/my-contests");
-      prefetchRoute("/settings");
-    };
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      (window as any).requestIdleCallback(warmup);
-    } else {
-      setTimeout(warmup, 1000);
-    }
-  }, []);
-
+  // Active indicator positioning
   useEffect(() => {
     const activeItem = links.find((item) =>
       item.exact
