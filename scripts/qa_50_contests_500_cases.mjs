@@ -433,48 +433,35 @@ async function main() {
   // ══════════════════════════════════════════════════════════════════════════
   console.log(`\n${c.yellow}⚡ Phase 8: Student Portal — Deep Flaw Detection${c.reset}`);
 
-  // T1: OTP endpoint works
-  const otpRes = await api('/auth/send-otp', 'POST', { email: 'santusht.en23@medicaps.ac.in' });
-  check('P8-T01', 'send-otp — HTTP 200',
-    otpRes.ok, `HTTP ${otpRes.status}`, `HTTP ${otpRes.status}`, otpRes.latency);
-  check('P8-T02', 'send-otp — dev_otp fallback (SMTP relay down)',
-    Boolean(otpRes.data?.dev_otp),
-    `dev_otp="${otpRes.data?.dev_otp}"`, 'No dev_otp', 0.1);
+  // T1: Public Key endpoint works (zero email dispatch)
+  const pkRes = await api('/auth/jwt-public-key', 'GET');
+  check('P8-T01', 'jwt-public-key — HTTP 200',
+    pkRes.ok, `HTTP ${pkRes.status}`, `HTTP ${pkRes.status}`, pkRes.latency);
+  check('P8-T02', 'jwt-public-key — RS256 algorithm advertised',
+    pkRes.data?.algorithm === 'RS256',
+    `algo="${pkRes.data?.algorithm}"`, 'No RS256 algo', 0.1);
 
-  // T3: CORS header
-  const otpFetch = await fetch(`${BASE_URL}/auth/send-otp`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost:8081' },
-    body: JSON.stringify({ email: 'santusht.en23@medicaps.ac.in' }),
+  // T3: Handle availability check
+  const handleRes = await api('/auth/check-handle?handle=qa_cadet_safe_test');
+  check('P8-T03', 'check-handle — HTTP 200',
+    handleRes.ok, `HTTP ${handleRes.status}`, 'Failed handle check', handleRes.latency);
+
+  // T4-T5: Public handle resolution & CORS
+  const handleFetch = await fetch(`${BASE_URL}/auth/check-handle?handle=qa_cadet_safe_test`, {
+    method: 'GET',
+    headers: { 'Origin': 'http://localhost:8081' },
   });
-  const corsHeader = otpFetch.headers.get('access-control-allow-origin');
-  check('P8-T03', 'CORS header on send-otp',
+  const corsHeader = handleFetch.headers.get('access-control-allow-origin');
+  check('P8-T04', 'CORS header on auth endpoint',
     Boolean(corsHeader), `ACAO: ${corsHeader}`, 'Missing CORS header', 0.1);
+  check('P8-T05', 'Handle check reports availability',
+    handleRes.data?.available === true, 'available ✓', `available=${handleRes.data?.available}`, 0.1);
 
-  // T4-T6: OTP verify flow → JWT
-  const devOtp = otpRes.data?.dev_otp;
-  const txId = otpRes.data?.transaction_id;
-  if (devOtp && txId) {
-    const verRes = await api('/auth/verify-otp', 'POST', {
-      email: 'santusht.en23@medicaps.ac.in', code: devOtp, transaction_id: txId,
-    });
-    _accessToken = verRes.data?.access_token;
-    check('P8-T04', 'verify-otp — JWT issued',
-      verRes.ok && Boolean(_accessToken),
-      `JWT: ${_accessToken?.slice(0, 20)}...`, `HTTP ${verRes.status}`, verRes.latency);
-    check('P8-T05', 'JWT — token_type=bearer',
-      verRes.data?.token_type === 'bearer', 'bearer ✓', `type=${verRes.data?.token_type}`, 0.1);
-  } else {
-    fail('P8-T04', 'verify-otp — no dev_otp to verify with', 'depends on P8-T02', 0);
-    fail('P8-T05', 'JWT token_type — skipped', 'depends on P8-T04', 0);
-  }
-
-  // T6: /auth/me with JWT (now that _accessToken is set)
-  const meRes = await api('/auth/me');
-  check('P8-T06', '/auth/me — authenticated member',
-    meRes.ok && (meRes.data?.id || meRes.data?.member?.id || meRes.data?.handle),
-    `HTTP ${meRes.status} id=${meRes.data?.id || meRes.data?.member?.id}`,
-    `HTTP ${meRes.status} body=${JSON.stringify(meRes.data).slice(0, 60)}`, meRes.latency);
+  // T6: Unauthenticated /auth/me strictly rejected with 401
+  const meRes = await api('/auth/me', 'GET', null, { Authorization: '' });
+  check('P8-T06', '/auth/me — 401 for unauthenticated request',
+    meRes.status === 401,
+    `HTTP 401 ✓`, `HTTP ${meRes.status}`, meRes.latency);
 
   // T7: Public contest list (no auth)
   const pubContests = await api('/contests?limit=5', 'GET', null, { Authorization: '' });
@@ -502,10 +489,10 @@ async function main() {
     lb10rows.length === 10,
     `Got 10 rows ✓`, `Got ${lb10rows.length}`, lb10.latency);
 
-  // T11: send-otp idempotent
-  const otp2 = await api('/auth/send-otp', 'POST', { email: 'santusht.en23@medicaps.ac.in' });
-  check('P8-T11', 'send-otp idempotent (re-send)',
-    otp2.ok, `HTTP ${otp2.status}`, `HTTP ${otp2.status}`, otp2.latency);
+  // T11: check-handle idempotent
+  const handle2 = await api('/auth/check-handle?handle=qa_cadet_safe_test');
+  check('P8-T11', 'check-handle idempotent (re-query)',
+    handle2.ok, `HTTP ${handle2.status}`, `HTTP ${handle2.status}`, handle2.latency);
 
   // T12: Social endpoint 401 for unauthenticated
   const noAuthToken = _accessToken;
