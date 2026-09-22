@@ -73,6 +73,11 @@ function ContestRedirect() {
   return <Navigate to={`/contests/${contestSlug ? encodeURIComponent(contestSlug) : ""}`} replace />;
 }
 
+function ContestResultsRedirect() {
+  const { contestSlug } = useParams<{ contestSlug: string }>();
+  return <Navigate to={`/contests/${contestSlug ? encodeURIComponent(contestSlug) : ""}/results`} replace />;
+}
+
 function PortalLegacyRedirect() {
   const location = useLocation();
   const target = location.pathname.replace(/^\/portal/, "") || "/";
@@ -181,21 +186,14 @@ export function AppRoutes() {
             }
           />
           <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
-          <Route path="contests/:contestSlug/offline" element={<ContestRedirect />} />
-          <Route path="contests/:contestSlug/qualified" element={<ContestRedirect />} />
+          <Route path="contests/:contestSlug/offline" element={<ContestResultsRedirect />} />
+          <Route path="contests/:contestSlug/qualified" element={<ContestResultsRedirect />} />
+          <Route path="contests/:contestSlug/final-results" element={<ContestResultsRedirect />} />
           <Route
             path="contests/:contestSlug/results"
             element={
               <Suspense fallback={<ContestResultsSkeleton />}>
                 <ContestResultsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="contests/:contestSlug/final-results"
-            element={
-              <Suspense fallback={<ContestFinalResultsSkeleton />}>
-                <ContestFinalResultsPage />
               </Suspense>
             }
           />

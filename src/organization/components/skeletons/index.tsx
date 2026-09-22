@@ -73,47 +73,97 @@ export function RatingChartSkeleton() {
   );
 }
 
+export function RatingDistributionSkeleton() {
+  return (
+    <div className="flex flex-col justify-between h-full rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+      {/* Top Percentile Display */}
+      <div className="space-y-1">
+        <Skeleton className="h-2.5 w-24" />
+        <Skeleton className="h-7 w-28" />
+      </div>
+
+      {/* Histogram Bar Chart */}
+      <div className="my-4">
+        <div
+          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[80px] w-full"
+          aria-hidden="true"
+        >
+          {[
+            12, 18, 25, 38, 50, 68, 80, 95, 88, 76, 62, 55, 45, 38, 30, 25,
+            20, 18, 15, 12, 10, 8, 7, 5, 4, 3, 3, 2,
+          ].map((pct, idx) => (
+            <div
+              key={idx}
+              className="flex-1 rounded-t-sm"
+              style={{ height: `${pct}%` }}
+            >
+              <Skeleton
+                className={cn(
+                  "w-full h-full rounded-t-sm",
+                  idx === 7 ? "bg-lime-400/25" : "bg-white/[0.06]"
+                )}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Standing Info */}
+      <div className="flex justify-between items-center pt-3 border-t border-white/8">
+        <div className="space-y-1">
+          <Skeleton className="h-2 w-16" />
+          <Skeleton className="h-3.5 w-20" />
+        </div>
+        <div className="space-y-1 text-right">
+          <Skeleton className="h-2 w-20 ml-auto" />
+          <Skeleton className="h-3.5 w-16 ml-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function CampusPassSkeleton() {
   return (
-    <article className="rounded-xl border border-white/8 bg-black p-6 space-y-5">
+    <article className="rounded-xl border border-white/8 bg-black p-5 sm:p-6 space-y-5 overflow-hidden">
       <header className="flex justify-between items-center pb-4 border-b border-white/8">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-3 w-36" />
       </header>
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 py-2">
-        <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 py-2 min-w-0">
+        <div className="space-y-4 min-w-0 flex-1 w-full">
           <div>
             <Skeleton className="h-2.5 w-24 mb-2" />
-            <Skeleton className="h-6 w-48 mb-2" />
-            <Skeleton className="h-3 w-36" />
+            <Skeleton className="h-6 w-40 max-w-full mb-2" />
+            <Skeleton className="h-3 w-32 max-w-full" />
           </div>
-          <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-2 gap-3 pt-2">
             <div>
-              <Skeleton className="h-2 w-14 mb-1.5" />
-              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-2 w-12 mb-1.5" />
+              <Skeleton className="h-4 w-20 max-w-full" />
             </div>
             <div>
               <Skeleton className="h-2 w-12 mb-1.5" />
-              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-16 max-w-full" />
             </div>
             <div>
-              <Skeleton className="h-2 w-14 mb-1.5" />
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-2 w-12 mb-1.5" />
+              <Skeleton className="h-4 w-20 max-w-full" />
             </div>
             <div>
-              <Skeleton className="h-2 w-20 mb-1.5" />
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-2 w-16 mb-1.5" />
+              <Skeleton className="h-4 w-24 max-w-full" />
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center p-3 rounded-lg border border-white/8 bg-white/[0.02]">
-          <Skeleton className="w-[110px] h-[110px] rounded-md" />
-          <Skeleton className="h-2.5 w-20 mt-2" />
+        <div className="flex flex-col items-center justify-center p-3 rounded-lg border border-white/8 bg-white/[0.02] shrink-0 self-center sm:self-auto">
+          <Skeleton className="w-[100px] h-[100px] rounded-md" />
+          <Skeleton className="h-2.5 w-16 mt-2" />
         </div>
       </div>
       <footer className="flex justify-between items-center pt-4 border-t border-white/8">
-        <Skeleton className="h-3 w-32" />
         <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-3 w-24" />
       </footer>
     </article>
   );
@@ -277,6 +327,23 @@ export function AnnouncementFeedSkeleton() {
           <Skeleton className="h-3 w-full mb-1" />
           <Skeleton className="h-3 w-3/4 mb-3" />
           <Skeleton className="h-2.5 w-28" />
+        </article>
+      ))}
+    </div>
+  );
+}
+
+export function ContestActivityFeedSkeleton({ limit = 6 }: { limit?: number }) {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: limit }).map((_, i) => (
+        <article key={i} className="border-b border-white/10 pb-3 last:border-b-0">
+          <Skeleton className="h-2.5 w-16 mb-2" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-3.5 h-3.5 rounded shrink-0" />
+            <Skeleton className="h-3.5 w-48" />
+          </div>
+          <Skeleton className="h-2.5 w-3/4 mt-2 ml-5" />
         </article>
       ))}
     </div>
@@ -517,30 +584,33 @@ export function ContestsHubSkeleton() {
  */
 export function LeaderboardSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6">
         <div className="space-y-2">
-          <Skeleton className="h-3 w-36" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-24 rounded" />
+            <Skeleton className="h-4 w-32 rounded" />
+          </div>
           <Skeleton className="h-8 w-60" />
           <Skeleton className="h-3.5 w-96 max-w-full" />
         </div>
-        <div className="p-3 rounded-lg border border-white/8 bg-black space-y-1">
+        <div className="p-4 rounded-lg border border-white/8 bg-black space-y-1.5 min-w-[180px]">
           <Skeleton className="h-2.5 w-24" />
           <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-28" />
         </div>
       </header>
 
-      <div className="overflow-x-auto rounded-xl border border-white/8 bg-black">
+      <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
         <table className="w-full text-left font-mono text-xs">
           <thead>
             <tr className="border-b border-white/8 bg-white/[0.02]">
-              <th className="p-4 text-left font-mono text-xs uppercase font-bold text-neutral-400">Rank</th>
-              <th className="p-4 text-left font-mono text-xs uppercase font-bold text-neutral-400">Member</th>
-              <th className="p-4 text-left font-mono text-xs uppercase font-bold text-neutral-400">Trend</th>
-              <th className="p-4 text-left font-mono text-xs uppercase font-bold text-neutral-400">Rating</th>
-              <th className="p-4 text-left font-mono text-xs uppercase font-bold text-neutral-400">Peak</th>
-              <th className="p-4 text-left font-mono text-xs uppercase font-bold text-neutral-400">Attended</th>
+              <th className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-500">Rank</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Cadet / Handle</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Trend</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Rating</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Peak</th>
+              <th className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-500">Attendance</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
@@ -557,7 +627,7 @@ export function LeaderboardSkeleton() {
  */
 export function MyContestsSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto space-y-6 px-4 py-8 sm:px-6 animate-in fade-in duration-200">
       {/* Header with 3 quick stat boxes */}
       <header className="flex flex-col justify-between gap-5 border-b border-white/8 pb-6 md:flex-row md:items-end">
         <div className="space-y-2">
@@ -568,15 +638,15 @@ export function MyContestsSkeleton() {
         <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
           <div className="border-l-2 border-lime-400 pl-3 space-y-1">
             <Skeleton className="h-6 w-8" />
+            <Skeleton className="h-2 w-16" />
+          </div>
+          <div className="border-l-2 border-white/20 pl-3 space-y-1">
+            <Skeleton className="h-6 w-8" />
             <Skeleton className="h-2 w-20" />
           </div>
-          <div className="border-l-2 border-yellow-500 pl-3 space-y-1">
+          <div className="border-l-2 border-lime-400/40 pl-3 space-y-1">
             <Skeleton className="h-6 w-8" />
-            <Skeleton className="h-2 w-24" />
-          </div>
-          <div className="border-l-2 border-emerald-500 pl-3 space-y-1">
-            <Skeleton className="h-6 w-8" />
-            <Skeleton className="h-2 w-28" />
+            <Skeleton className="h-2 w-20" />
           </div>
         </div>
       </header>
@@ -642,36 +712,41 @@ export function MyContestsSkeleton() {
  */
 export function ProblemArchiveSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6">
         <div className="space-y-2">
-          <Skeleton className="h-3 w-48" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-28 rounded" />
+            <Skeleton className="h-4 w-32 rounded" />
+          </div>
           <Skeleton className="h-8 w-56" />
           <Skeleton className="h-3.5 w-96 max-w-full" />
         </div>
-        <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+        <div className="flex size-12 items-center justify-center rounded-lg border border-white/8 bg-black">
+          <Skeleton className="size-6 rounded" />
+        </div>
       </header>
 
-      <section className="rounded-xl border border-white/8 bg-black p-6 space-y-6">
+      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-5">
         <div className="space-y-1">
           <Skeleton className="h-2.5 w-24" />
           <Skeleton className="h-5 w-48" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <article key={i} className="flex items-center justify-between p-4 rounded-lg border border-white/8 bg-white/[0.02]">
-              <div className="flex items-center gap-4 flex-1">
-                <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
-                <div className="space-y-1.5 flex-1">
+            <article key={i} className="flex items-center justify-between p-4 rounded-lg border border-white/8 bg-black">
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <Skeleton className="w-7 h-5 rounded shrink-0" />
+                <div className="min-w-0 space-y-1 flex-1">
+                  <Skeleton className="h-2 w-24" />
+                  <Skeleton className="h-4 w-44" />
                   <Skeleton className="h-2.5 w-32" />
-                  <Skeleton className="h-4 w-48" />
-                  <Skeleton className="h-3 w-36" />
                 </div>
               </div>
-              <div className="flex items-center gap-4 shrink-0">
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-8 w-8 rounded-md" />
+              <div className="flex items-center gap-3 shrink-0 pl-3">
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="size-8 rounded-md" />
               </div>
             </article>
           ))}
@@ -991,7 +1066,7 @@ export function ContestResultsSkeleton() {
  */
 export function ContestFinalResultsSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
       <Skeleton className="h-4 w-32" />
 
       <header className="space-y-2 border-b border-white/8 pb-6">
@@ -1003,8 +1078,8 @@ export function ContestFinalResultsSkeleton() {
       {/* Top 3 Finalists Podium */}
       <section className="grid gap-4 sm:grid-cols-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-xl border border-white/8 bg-black p-5 space-y-3">
-            <Skeleton className="w-6 h-6 rounded" />
+          <div key={i} className="rounded-lg border border-white/8 bg-black p-5 space-y-3">
+            <Skeleton className="size-5 rounded" />
             <Skeleton className="h-2.5 w-16" />
             <Skeleton className="h-5 w-36" />
             <Skeleton className="h-3 w-28" />
@@ -1014,7 +1089,7 @@ export function ContestFinalResultsSkeleton() {
       </section>
 
       {/* Full Matrix Table */}
-      <div className="overflow-x-auto rounded-xl border border-white/8 bg-black">
+      <div className="overflow-x-auto rounded-lg border border-white/8 bg-black">
         <table className="w-full text-left font-mono text-xs">
           <thead>
             <tr className="border-b border-white/8 bg-white/[0.02]">
@@ -1068,7 +1143,7 @@ export function ContestFinalResultsSkeleton() {
  */
 export function ContestOfflineSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-in fade-in duration-200">
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 animate-in fade-in duration-200">
       <Skeleton className="h-4 w-32" />
 
       <header className="space-y-2 border-b border-white/8 pb-6">
@@ -1077,24 +1152,44 @@ export function ContestOfflineSkeleton() {
         <Skeleton className="h-3.5 w-96 max-w-full" />
       </header>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <CampusPassSkeleton />
+      {/* Hero Live Arena Launcher */}
+      <div className="p-5 border border-lime-400/30 bg-black rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-3 w-64" />
+        </div>
+        <Skeleton className="h-9 w-32 rounded-md" />
+      </div>
 
-        {/* Venue Briefing */}
-        <div className="rounded-xl border border-white/8 bg-black p-6 space-y-5">
-          <div className="space-y-1">
-            <Skeleton className="h-2.5 w-28" />
-            <Skeleton className="h-5 w-48" />
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Countdown */}
+        <div className="rounded-lg border border-white/8 bg-black p-5 space-y-3">
+          <Skeleton className="h-2.5 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+
+        {/* Gate Pass */}
+        <div className="rounded-lg border border-white/8 bg-black p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-4 rounded" />
+            <Skeleton className="h-4 w-20" />
           </div>
-          <div className="space-y-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex gap-3 items-center">
-                <Skeleton className="w-5 h-5 rounded shrink-0" />
-                <Skeleton className="h-3.5 w-full" />
-              </div>
-            ))}
+          <Skeleton className="size-24 rounded mx-auto" />
+          <div className="space-y-1 pt-1">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-full" />
           </div>
-          <Skeleton className="h-10 w-full rounded-md pt-2" />
+          <Skeleton className="h-8 w-full rounded-md" />
+        </div>
+
+        {/* Workstation Lab Info */}
+        <div className="rounded-lg border border-white/8 bg-black p-5 space-y-3">
+          <Skeleton className="h-4 w-28" />
+          <div className="space-y-2 pt-1">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-4/5" />
+            <Skeleton className="h-3 w-full" />
+          </div>
         </div>
       </div>
     </div>
@@ -1191,71 +1286,153 @@ export const VerifySkeleton = VerifyProofSkeleton;
  */
 export function ProfileSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
-      {/* Profile Header */}
-      <header className="rounded-xl border border-white/8 bg-black p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-5">
-          <Skeleton className="w-20 h-20 rounded-full shrink-0" />
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
+      {/* Profile Header Card */}
+      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-lg border border-white/8 bg-black p-6 sm:p-7">
+        <div className="flex items-start gap-5">
+          {/* Avatar Container */}
+          <Skeleton className="size-16 sm:size-20 rounded-lg shrink-0" />
+
           <div className="space-y-2">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-8 w-56" />
-            <Skeleton className="h-3.5 w-44" />
-            <Skeleton className="h-3 w-32" />
+            <Skeleton className="h-2.5 w-24" />
+            <div className="flex items-center gap-3 flex-wrap">
+              <Skeleton className="h-7 w-48" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-7 w-20 rounded-md" />
+                <Skeleton className="h-7 w-24 rounded-md" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap pt-0.5">
+              <Skeleton className="h-5 w-24 rounded" />
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+
+            <Skeleton className="h-3 w-80 max-w-full pt-0.5" />
+
+            {/* Social Pills */}
+            <div className="flex items-center gap-2 flex-wrap pt-2">
+              <Skeleton className="h-6 w-24 rounded" />
+              <Skeleton className="h-6 w-24 rounded" />
+              <Skeleton className="h-6 w-20 rounded" />
+              <Skeleton className="h-6 w-20 rounded" />
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-white/8">
-          <div className="space-y-1 text-right">
-            <Skeleton className="h-2.5 w-16 ml-auto" />
-            <Skeleton className="h-7 w-20 ml-auto" />
-            <Skeleton className="h-2.5 w-24 ml-auto" />
+        <dl className="flex sm:flex-col gap-3 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6 shrink-0">
+          <div className="space-y-1">
+            <Skeleton className="h-2 w-20" />
+            <Skeleton className="h-4 w-28" />
           </div>
-          <div className="space-y-1 text-right">
-            <Skeleton className="h-2.5 w-20 ml-auto" />
-            <Skeleton className="h-7 w-24 ml-auto" />
-            <Skeleton className="h-2.5 w-16 ml-auto" />
+          <div className="space-y-1">
+            <Skeleton className="h-2 w-12" />
+            <Skeleton className="h-4 w-36" />
           </div>
-        </div>
+        </dl>
       </header>
 
-      {/* Metrics */}
-      <MetricsGridSkeleton />
-
-      {/* Rating Chart + Hardware Pass */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <RatingChartSkeleton />
-        </div>
-        <CampusPassSkeleton />
-      </div>
-
-      {/* Battle History */}
-      <section className="rounded-xl border border-white/8 bg-black p-6 space-y-4">
-        <div className="space-y-1">
-          <Skeleton className="h-2.5 w-24" />
-          <Skeleton className="h-5 w-40" />
-        </div>
-        <BattleHistorySkeleton />
+      {/* 4 Metric Bento Strip */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { labelW: "w-14", valW: "w-20", subW: "w-24" },
+          { labelW: "w-12", valW: "w-16", subW: "w-28" },
+          { labelW: "w-16", valW: "w-12", subW: "w-24" },
+          { labelW: "w-16", valW: "w-20", subW: "w-24" },
+        ].map((item, idx) => (
+          <div key={idx} className="p-4 rounded-lg border border-white/8 bg-black space-y-1.5">
+            <Skeleton className={cn("h-2.5", item.labelW)} />
+            <Skeleton className={cn("h-7", item.valW)} />
+            <Skeleton className={cn("h-2.5", item.subW)} />
+          </div>
+        ))}
       </section>
 
-      {/* Achievements + Cryptographic Proof */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-xl border border-white/8 bg-black p-6 space-y-4">
-          <div className="space-y-1">
-            <Skeleton className="h-2.5 w-24" />
-            <Skeleton className="h-5 w-36" />
+      {/* Trajectory & Distribution */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+          <div className="flex justify-between items-center border-b border-white/8 pb-3">
+            <div className="space-y-1">
+              <Skeleton className="h-2 w-24" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+            <Skeleton className="h-3 w-16" />
           </div>
-          <AchievementGridSkeleton />
-        </section>
+          <RatingChartSkeleton />
+        </div>
+        <div>
+          <RatingDistributionSkeleton />
+        </div>
+      </section>
 
-        <section className="rounded-xl border border-white/8 bg-black p-6 space-y-4">
+      {/* Contest Battle Logs */}
+      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+        <div className="flex justify-between items-center border-b border-white/8 pb-3">
           <div className="space-y-1">
-            <Skeleton className="h-2.5 w-24" />
-            <Skeleton className="h-5 w-44" />
+            <Skeleton className="h-2 w-20" />
+            <Skeleton className="h-4 w-40" />
           </div>
-          <ProofBadgeSkeleton />
-        </section>
-      </div>
+        </div>
+        <div className="divide-y divide-white/6 font-mono text-xs">
+          {[1, 2, 3].map((i) => (
+            <article key={i} className="py-3 flex items-center justify-between flex-wrap gap-3">
+              <Skeleton className="h-3 w-20" />
+              <div className="space-y-1">
+                <Skeleton className="h-3.5 w-44" />
+                <Skeleton className="h-2.5 w-28" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-3 w-10" />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Achievements & Proof */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+          <div className="flex justify-between items-center border-b border-white/8 pb-3">
+            <div className="space-y-1">
+              <Skeleton className="h-2 w-24" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+            {[1, 2, 3, 4].map((i) => (
+              <article key={i} className="p-3.5 rounded-lg border border-white/8 bg-black space-y-2">
+                <div className="flex items-center gap-1.5">
+                  <Skeleton className="size-3.5 rounded" />
+                  <Skeleton className="h-2 w-12" />
+                </div>
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-3 w-full" />
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+          <div className="flex justify-between items-center border-b border-white/8 pb-3">
+            <div className="space-y-1">
+              <Skeleton className="h-2 w-24" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+          </div>
+          <ProofBadgeSkeleton compact />
+          <Skeleton className="h-3 w-44 pt-1" />
+        </div>
+      </section>
+
+      {/* Trust Footer */}
+      <footer className="flex items-center gap-2.5 p-4 rounded-lg border border-white/8 bg-black text-zinc-500 font-mono text-xs">
+        <Skeleton className="size-3.5 rounded shrink-0" />
+        <Skeleton className="h-3 w-3/4 max-w-md" />
+      </footer>
     </div>
   );
 }
@@ -1265,56 +1442,93 @@ export function ProfileSkeleton() {
  */
 export function SettingsSkeleton() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-200">
-      <header className="border-b border-white/8 pb-6 space-y-2">
-        <Skeleton className="h-3 w-40" />
-        <Skeleton className="h-8 w-56" />
-        <Skeleton className="h-3.5 w-80 max-w-full" />
-      </header>
-
-      {/* Tabs */}
-      <div className="flex gap-2 rounded-lg border border-white/8 bg-black p-1 w-fit">
-        <Skeleton className="h-8 w-32 rounded" />
-        <Skeleton className="h-8 w-36 rounded" />
-        <Skeleton className="h-8 w-32 rounded" />
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 animate-in fade-in duration-200">
+      {/* Page Title Header */}
+      <div className="flex items-center justify-between mb-6 pb-5 border-b border-white/8">
+        <div className="space-y-1.5">
+          <Skeleton className="h-2.5 w-24" />
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-3 w-80 max-w-full" />
+        </div>
+        <Skeleton className="h-8 w-28 rounded-md hidden sm:block" />
       </div>
 
-      {/* Form Card */}
-      <div className="rounded-xl border border-white/8 bg-black p-6 md:p-8 space-y-6">
-        <div className="flex items-center gap-5 border-b border-white/8 pb-6">
-          <Skeleton className="w-16 h-16 rounded-full shrink-0" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-8 w-36" />
-          </div>
-        </div>
+      <div className="flex flex-col md:flex-row gap-6 items-start">
+        {/* Left sidebar nav */}
+        <nav
+          className="relative hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black"
+          aria-label="Settings navigation skeleton"
+        >
+          {[
+            { w: "w-28" },
+            { w: "w-20" },
+            { w: "w-24" },
+            { w: "w-32" },
+            { w: "w-24" },
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2.5 px-3 py-2 rounded-md">
+              <Skeleton className="size-4 rounded shrink-0" />
+              <Skeleton className={cn("h-3", item.w)} />
+            </div>
+          ))}
+        </nav>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-10 w-full rounded-md" />
+        {/* Right Main Content Sections */}
+        <div className="flex-1 min-w-0 space-y-6 w-full">
+          {/* Avatar Section */}
+          <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-5">
+            <div className="space-y-1 pb-3 border-b border-white/8">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-64 max-w-full" />
+            </div>
+            <div className="flex items-center gap-5">
+              <Skeleton className="size-16 sm:size-20 rounded-lg shrink-0" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-28 rounded-md" />
+                <Skeleton className="h-2.5 w-44" />
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-28" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-        </div>
 
-        <div className="space-y-2 pt-2">
-          <Skeleton className="h-3 w-16" />
-          <Skeleton className="h-24 w-full rounded-md" />
-        </div>
+          {/* Basic Profile Section */}
+          <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-5">
+            <div className="space-y-1 pb-3 border-b border-white/8">
+              <Skeleton className="h-4 w-36" />
+              <Skeleton className="h-3 w-72 max-w-full" />
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+            </div>
+            <div className="space-y-2 pt-1">
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-20 w-full rounded-md" />
+            </div>
+          </div>
 
-        <div className="flex justify-end pt-4 border-t border-white/8">
-          <Skeleton className="h-10 w-36 rounded-md" />
+          {/* Academic Details Section */}
+          <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-5">
+            <div className="space-y-1 pb-3 border-b border-white/8">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-64 max-w-full" />
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1326,66 +1540,87 @@ export function SettingsSkeleton() {
  */
 export function DashboardSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6 mb-8">
-        <div className="space-y-2">
-          <Skeleton className="h-3 w-36" />
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-3.5 w-80 max-w-full" />
-        </div>
-        <div className="p-3 rounded-lg border border-white/8 bg-black space-y-1">
-          <Skeleton className="h-2.5 w-24" />
-          <Skeleton className="h-7 w-28" />
-          <Skeleton className="h-3 w-20" />
-        </div>
-      </header>
-
-      {/* Live Command Banner */}
-      <div className="rounded-xl border border-white/8 bg-black p-6 flex flex-col lg:flex-row justify-between gap-6">
-        <div className="space-y-3 flex-1">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-4 w-20 rounded" />
-            <Skeleton className="h-3 w-32" />
-          </div>
-          <Skeleton className="h-6 w-3/4" />
-          <Skeleton className="h-3.5 w-5/6" />
-          <div className="flex items-center gap-2 pt-2">
-            <Skeleton className="h-8 w-36 rounded-md" />
-            <Skeleton className="h-8 w-28 rounded-md" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6">
-          <div className="space-y-1">
-            <Skeleton className="h-2.5 w-24" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-          <div className="space-y-1">
-            <Skeleton className="h-2.5 w-20" />
-            <Skeleton className="h-6 w-20" />
-          </div>
-          <div className="space-y-1">
-            <Skeleton className="h-2.5 w-24" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-        </div>
-      </div>
-
-      <MetricsGridSkeleton />
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <RatingChartSkeleton />
-        </div>
-        <CampusPassSkeleton />
-      </div>
-
-      <section className="rounded-xl border border-white/8 bg-black p-6 space-y-4">
+    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
         <div className="space-y-1">
-          <Skeleton className="h-2.5 w-24" />
-          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-7 w-36" />
+          <Skeleton className="h-3 w-80 max-w-full" />
+        </div>
+      </div>
+
+      {/* Telemetry Bento Strip (4 Columns) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { labelW: "w-28", valW: "w-16", subW: "w-24" },
+          { labelW: "w-24", valW: "w-20", subW: "w-20" },
+          { labelW: "w-24", valW: "w-12", subW: "w-28" },
+          { labelW: "w-28", valW: "w-12", subW: "w-24" },
+        ].map((item, idx) => (
+          <div key={idx} className="p-4 rounded-lg border border-white/8 bg-black space-y-1.5">
+            <Skeleton className={cn("h-2.5", item.labelW)} />
+            <Skeleton className={cn("h-7", item.valW)} />
+            <Skeleton className={cn("h-2.5", item.subW)} />
+          </div>
+        ))}
+      </div>
+
+      {/* Live Contest Banner / Next Contest Alert */}
+      <section className="rounded-lg border border-lime-400/20 bg-black p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2.5 flex-1">
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-2 rounded-full" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+            <Skeleton className="h-6 w-3/4 max-w-md" />
+            <Skeleton className="h-3.5 w-5/6 max-w-xl" />
+            <div className="flex flex-wrap items-center gap-4 pt-1">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-36" />
+            </div>
+          </div>
+          <div className="shrink-0">
+            <Skeleton className="h-9 w-36 rounded-md" />
+          </div>
+        </div>
+      </section>
+
+      {/* Rating Analytics */}
+      <section className="p-5 rounded-lg border border-white/8 bg-black space-y-4">
+        <div className="flex justify-between items-center border-b border-white/8 pb-3">
+          <div className="space-y-1">
+            <Skeleton className="h-2 w-28" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-3 w-24" />
+        </div>
+        <RatingChartSkeleton />
+      </section>
+
+      {/* Campus Scoreboard Radar */}
+      <section className="p-5 rounded-lg border border-white/8 bg-black space-y-4">
+        <div className="flex justify-between items-center border-b border-white/8 pb-3">
+          <div className="space-y-1">
+            <Skeleton className="h-2 w-24" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+          <Skeleton className="h-3 w-24" />
         </div>
         <ScoreboardMatrixSkeleton />
+      </section>
+
+      {/* Live Campus Activity Stream */}
+      <section className="p-5 rounded-lg border border-white/8 bg-black space-y-4">
+        <div className="flex justify-between items-center border-b border-white/8 pb-3">
+          <div className="space-y-1">
+            <Skeleton className="h-2 w-24" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+          <Skeleton className="h-3 w-24" />
+        </div>
+        <ContestActivityFeedSkeleton limit={6} />
       </section>
     </div>
   );

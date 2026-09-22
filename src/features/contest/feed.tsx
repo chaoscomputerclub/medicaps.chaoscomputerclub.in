@@ -12,6 +12,7 @@ import {
   formatWhen,
 } from "./lifecycle";
 import type { ContestSummary } from "./types";
+import { ContestActivityFeedSkeleton } from "@/organization/components/skeletons";
 
 type FeedEvent = {
   key: string;
@@ -104,11 +105,7 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
     .slice(0, limit);
 
   if (loading) {
-    return (
-      <p className="py-8 text-center font-mono text-xs text-zinc-500 animate-pulse">
-        Loading contest activity…
-      </p>
-    );
+    return <ContestActivityFeedSkeleton limit={limit} />;
   }
 
   if (events.length === 0) {

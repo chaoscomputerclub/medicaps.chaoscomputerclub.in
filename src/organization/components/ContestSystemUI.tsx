@@ -24,7 +24,7 @@ export function StatePanel({ icon, kicker, title, children, actions }: { icon: R
 }
 
 export function ResultSummary({ result, state }: { result: RankingEntry; state: "qualified" | "not-qualified" | "pending" }) {
-  return <section className={cn("result-summary", state)}><div><p className="kicker">Your assessment result</p><h2>{state === "pending" ? "Results are being verified" : state === "qualified" ? "You qualified for Round 2" : "Your round ends here"}</h2><p>{state === "pending" ? "Scores are sealed while tie-breaks and integrity checks complete." : state === "qualified" ? "Your result is inside the Top 30 cutoff. Offline access is now available." : "You completed the assessment and earned a verified result. The Top 30 continue to the offline round."}</p></div><dl><div><dt>Rank</dt><dd>{state === "pending" ? "—" : `#${result.rank}`}</dd></div><div><dt>Score</dt><dd>{state === "pending" ? "—" : `${result.score}/100`}</dd></div><div><dt>Cutoff</dt><dd>Top 30</dd></div></dl></section>;
+  return <section className={cn("result-summary", state)}><div><p className="kicker">Your contest standing</p><h2>{state === "pending" ? "Results are being verified" : "Performance Recorded"}</h2><p>{state === "pending" ? "Scores are sealed while final grading completes." : "You completed the algorithmic contest and earned an official university standing."}</p></div><dl><div><dt>Rank</dt><dd>{state === "pending" ? "—" : `#${result.rank}`}</dd></div><div><dt>Score</dt><dd>{state === "pending" ? "—" : `${result.score}/100`}</dd></div><div><dt>Status</dt><dd>Official</dd></div></dl></section>;
 }
 
 export function Timeline({ contest }: { contest: ContestRecord }) {

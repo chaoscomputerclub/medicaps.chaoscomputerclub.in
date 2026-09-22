@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { MemberProfile } from "../data/types";
 import type { RatingDistribution } from "../data/portal.functions";
 import { cn } from "@/lib/utils";
+import { RatingDistributionSkeleton } from "./skeletons";
 
 /**
  * RatingDistributionCard
@@ -19,6 +20,10 @@ export function RatingDistributionCard({
   userRating?: number;
   loading?: boolean;
 }) {
+  if (loading && !distribution) {
+    return <RatingDistributionSkeleton />;
+  }
+
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const attendanceCount = member?.attendance_count ?? 0;

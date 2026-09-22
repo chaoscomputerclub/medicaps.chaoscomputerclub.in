@@ -113,6 +113,14 @@ async def main():
     print(f"  - Markdown Report: {md_path}")
     print(f"  - GSD Summary: {PLANNING_QA_SUMMARY}")
 
+    # 4. Clean up transient test bot accounts to prevent database pollution
+    try:
+        from app.core.db import AsyncSessionLocal
+        async with AsyncSessionLocal() as session:
+            await ProductionQAService.cleanup_qa_data(session)
+    except Exception as e:
+        print(f"Notice on QA cleanup: {e}")
+
     if report.failed_tests > 0:
         print(f"\n⚠ Warning: {report.failed_tests} tests failed assertion checks. Review report details above.")
         sys.exit(1)

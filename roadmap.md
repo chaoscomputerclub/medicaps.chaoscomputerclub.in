@@ -1,49 +1,43 @@
-# CCC Medi-Caps — Contest Core Rebuild
+# CCC Medi-Caps — Competitive Programming Platform Roadmap
 
-## Done
+## 🎯 Architecture Modernization (v3.0.0 — Completed)
 
-- Adopted the uploaded project version as the working codebase (theme untouched).
-- Added a same-origin `/api/*` gateway so previews talk to the FastAPI contest service
-  without CORS or a second origin.
-- New contest feature layer (`src/features/contest/`): typed API client, query options,
-  lifecycle rules (24h Round 1 window, immutable 2h session, Top 30 cut), shared UI.
-- Rebuilt with consistent shadcn primitives:
-  - Contests hub: featured next edition, weekly/biweekly/upcoming/past views, past table.
-  - Contest overview: phase-aware call to action, contest clock, rounds timeline, rules,
-    problem set, registration dialog.
-  - Round 1 ranking: search, qualified/eliminated views, Top 30 cut-off divider, pinned
-    own standing.
-  - Qualification & QR campus pass page.
-  - Final contest room: check-in, workstation, sealed problem set, proctors.
-  - Legacy `/assessment` link now redirects into the full-screen Monaco workspace.
-  - Pre-assessment lobby with the unmissable non-pausable timer warning and rules
-    acknowledgement, plus a skippable first-contest explainer.
-  - Final results / winners page, and a final-results link from a completed contest.
-  - Dashboard "What's happening" panel is now a contest-derived activity feed
-    (registration open, Round 1 window, Top 30 announced, final live/complete).
-- Backend: versioned `/api/v1` surface with a single aggregation point plus `/api/v1/meta`;
-  new `contest_lifecycle_service` owning the funnel rules; assessment router now enforces
-  the 24-hour window and anchors the 2-hour timer to the server-recorded start.
-- Backend scale/architecture:
-  - Pluggable judge providers (`app/engine/providers`): local sandbox by default,
-    Judge0-compatible external service via `JUDGE_PROVIDER=judge0` + `JUDGE0_KEY`.
-  - `judge_queue_service`: async worker pool so judging never blocks a request;
-    same interface a Redis/Celery queue would use later.
-  - `ranking_service`: cached ranking with invalidation on submit/finish, and the
-    sealed-until-window-closes policy for Round 1 ranking (frontend renders the
-    sealed state with the publish time).
+### 1. Platform & Contest Core
+- [x] **Direct Contest Arena Architecture**: Deprecated the 2-phase qualifier/screening/turnstile gate model in favor of a direct, single-stage competitive programming tournament model (LeetCode/ICPC style).
+- [x] **Monaco IDE Contest Studio**: Full-screen contest studio with dark-terminal aesthetic (`DESIGN.md`), syntax highlighting, custom testcase execution, and direct solution submission.
+- [x] **Official Standings & Scoring**:
+  - Pure competitive standings page based on Total Score (Points) and Penalty Minutes.
+  - Eliminated arbitrary cutoffs, elimination badges, and physical campus pass barriers.
+  - Added podium medals (🥇 Gold, 🥈 Silver, 🥉 Bronze) and department telemetry badges.
+- [x] **Sanitized University Leaderboards**:
+  - Test runner bot (`qa_organizer`) automatically purged post-test with automated cleanup hooks.
+  - Student baseline ratings locked at 1200 Elo with 5-star ranking progression tiers (1★ to 5★).
+  - Production database reset and synchronized on PostgreSQL 16.
 
-## Open
+### 2. Execution & Judge Tier
+- [x] **CodeBox Sandboxed Judge Engine**: High-speed Node.js microservice + Docker / cgroup isolation.
+- [x] **Multi-Language Runtimes**: Standardized runtime matrix for Python 3, C, C++, Java, JavaScript, and TypeScript.
+- [x] **Asynchronous Execution**: Worker queue processing with BullMQ and Redis for sub-second grading response times.
 
-- Authenticated screens (assessment workspace, ranking with own row, QR pass, final room)
-  are not browser-verified here: sign-in needs an email code that only the mail inbox sees.
-- Backend changes take effect after the FastAPI server is redeployed.
+### 3. Comprehensive Documentation Specifications
+- [x] **Technical Requirements Document (`TRD.md`)**: Version 3.0.0 published covering system topology, sequence diagrams, sandboxed execution, and PostgreSQL schema.
+- [x] **Product Requirements Document (`PRD.md`)**: Version 3.0.0 published covering product tenets, role permissions, contest lifecycles, and Elo progression.
+- [x] **System Architecture & README (`README.md`)**: Updated with modern architecture matrix, Mermaid topology diagrams, API references, and quick-start guides.
 
-## Contest UX redesign
+---
 
-- [x] Apply selected Modernist Grid Hub with real contest rows and phase-aware countdowns.
-- [x] Simplify overview actions, status labels, and schedule presentation.
-- [x] Rebuild the hub in the selected CCC cyber-glass direction with contest visuals, top contestants, compact history, and a beginner-readable two-round path.
-- [x] Carry the rounded glass hierarchy and simpler language into contest details, rankings, and My Contests.
-- [x] Redesign contest details with a focused action area, milestone countdown, two-step journey, compact rules, and cleaner problem list.
-- [ ] Validate signed-in screens: blocked by external email-code authentication.
+## 🚀 Active & Upcoming Milestones (Q4 2026 - Q1 2027)
+
+### Milestone 1: Enhanced Live Contest Telemetry
+- [ ] **Real-Time Standings SSE Broadcast**: Implement server-sent events for real-time rank adjustments during live contest rounds without manual refresh.
+- [ ] **Scoreboard Freezing Window**: Configurable freeze period (e.g., final 15 minutes) during rated rounds to build suspense prior to final unfreezing.
+- [ ] **Live Anti-Cheat Focus Tracker**: Proctor dashboard telemetry highlighting window blurs, tab switches, and abnormal paste velocity.
+
+### Milestone 2: Editorial & Post-Contest Analytics
+- [ ] **Official Editorial & Solution Breakdown**: Markdown-based problem editorials with time/space complexity analysis unlocked immediately after contest conclusion.
+- [ ] **Cadet Performance Dossier**: In-depth personal contest report detailing time spent per problem, submission attempts, and delta graph of rating changes.
+- [ ] **Virtual Contest Simulation**: Allow cadets who missed a live contest to participate in a simulated timed round with historical ranking benchmarks.
+
+### Milestone 3: Department & Batch Battles
+- [ ] **Inter-Department Championship**: Automated aggregations for CSE, IT, AI/DS, and ECE department scoreboards.
+- [ ] **Batch Year Showdowns**: Cohort-based filtering and tournaments (e.g., 2023 vs 2024 batch).

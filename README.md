@@ -2,17 +2,18 @@
 
 [![Production Status](https://img.shields.io/badge/Production-Live-success?style=flat-square&logo=nginx&logoColor=white)](https://medicaps.chaoscomputerclub.in)
 [![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%7C%20TypeScript%20%7C%20Vite%20%7C%20Tailwind%20v4-blue?style=flat-square&logo=react)](https://medicaps.chaoscomputerclub.in)
-[![Backend API](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://medicaps.chaoscomputerclub.in/api/docs)
-[![Code Execution](https://img.shields.io/badge/Judge%20Engine-CodeBox%20%7C%20Docker%20%7C%20Isolate-orange?style=flat-square&logo=docker&logoColor=white)](https://medicaps.chaoscomputerclub.in)
+[![Backend API](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.12-009688?style=flat-square&logo=fastapi&logoColor=white)](https://medicaps.chaoscomputerclub.in/api/docs)
+[![Judge Engine](https://img.shields.io/badge/Judge%20Engine-CodeBox%20%7C%20Docker%20%7C%20cgroups-orange?style=flat-square&logo=docker&logoColor=white)](https://medicaps.chaoscomputerclub.in)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL%2016%20%7C%20Redis%207-336791?style=flat-square&logo=postgresql&logoColor=white)](https://medicaps.chaoscomputerclub.in)
 [![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](./LICENSE)
 
 ---
 
 ## 📌 Overview
 
-The **CCC Medi-Caps Chapter Platform** is a full-stack, enterprise-grade competitive programming arena, member portal, and offline tournament management ecosystem designed for the **Chaos Computer Club (CCC) Chapter at Medi-Caps University**.
+The **CCC Medi-Caps Chapter Platform** is a full-stack, enterprise-grade competitive programming arena, member intelligence hub, and tournament execution platform engineered exclusively for the **Chaos Computer Club (CCC) Chapter at Medi-Caps University, Indore**.
 
-Engineered for ultra-low latency, air-gapped lab resilience, and anti-cheat enforcement, the platform powers end-to-end university coding competitions—from **Phase 1 Online Qualifiers** and **Automated Top 30 Cutoffs** to **Phase 2 On-Campus Offline Finals** with cryptographic trust-of-proof verification.
+Engineered for zero-friction access, low-latency live judging, and campus-wide competitive growth, the platform powers live university algorithmic tournaments (Weekly, Biweekly, and Special Invitationals) featuring direct Monaco IDE contest arenas, asynchronous sandboxed code execution via the **CodeBox Engine**, real-time ICPC/LeetCode-style standings, and a campus-wide 5-tier Star Elo rating ladder.
 
 ---
 
@@ -20,47 +21,48 @@ Engineered for ultra-low latency, air-gapped lab resilience, and anti-cheat enfo
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            CCC PLATFORM CAPABILITIES                        │
+│                       CCC PLATFORM ARCHITECTURE MATRIX                      │
 ├──────────────────────┬──────────────────────┬───────────────────────────────┤
-│ 🏆 Contest Lifecycle │ ⚡ Sandboxed Judge   │ 🔐 Cryptographic Proofs       │
-│ • Phase 1 Qualifiers │ • CodeBox Engine     │ • HMAC/Ed25519 Result Signing │
-│ • Automated Cutoffs  │ • Docker / Isolate   │ • Verifiable QR Campus Passes │
-│ • Phase 2 Lab Finals │ • Sub-second Exec    │ • Tamper-proof Public Ledger  │
+│ 🏆 Contest Arena     │ ⚡ Sandboxed Judge   │ 📊 Rating & Standings         │
+│ • Direct Arena Entry │ • CodeBox Engine     │ • Official Points & Penalty   │
+│ • Weekly / Biweekly  │ • Docker / cgroups   │ • 5-Tier Star Elo Ladder      │
+│ • Monaco Code Studio │ • Sub-second Exec    │ • Live Podium Leaderboard     │
 ├──────────────────────┼──────────────────────┼───────────────────────────────┤
-│ 📊 Division Ratings  │ 🌐 External Telemetry│ 🛡️ Built-in QA & Simulation   │
-│ • Div 1 / 2 / 3 Ranks│ • LeetCode Sync      │ • E2E Contest Simulation      │
-│ • Frozen Scoreboards │ • CodeChef Telemetry │ • Zero-Mock Automated Testing │
-│ • Live Time-Penalty  │ • GitHub Activity    │ • Resilience Health Probes    │
+│ 🛡️ Integrity Layer   │ 🌐 Member Dossier    │ 🔄 Production Automation      │
+│ • Blur/Tab Telemetry │ • LeetCode Sync      │ • Zero-Mock Architecture      │
+│ • Rate Limiting      │ • CodeChef Sync      │ • GSD Continuous Sync         │
+│ • Institutional Auth │ • GitHub Heatmaps    │ • Automated Health Probes     │
 └──────────────────────┴──────────────────────┴───────────────────────────────┘
 ```
 
-### 1. 🏆 Multi-Stage Tournament Management
-- **Phase 1 (Online Qualifier)**: Timed online rounds with randomized problem sets, live penalty tracking, and anti-cheat blur/tab detection.
-- **Automated Cutoff Resolution**: Instantaneous determination and promotion of the **Top 30 Qualifiers** to offline rounds.
-- **Phase 2 (Offline Lab Finals)**: Air-gapped offline arena with local judge fallback, supervisor controls, and workstation IP locks.
-- **Dynamic Contest States**: Full lifecycle states (`UPCOMING`, `REGISTRATION_OPEN`, `LOBBY`, `RUNNING`, `FROZEN`, `COMPLETED`, `ARCHIVED`).
+### 1. 🏆 Live Contest Arena & Tournament Lifecycle
+- **Direct Tournament Access**: Every registered student with a valid university email (`@medicaps.ac.in`) competes directly in live rounds.
+- **Full Contest Lifecycle**: Automated state management (`UPCOMING` → `REGISTRATION_OPEN` → `LOBBY` → `RUNNING` → `COMPLETED` → `ARCHIVED`).
+- **Monaco Code Studio**: Rich, dark-mode competitive programming IDE supporting syntax highlighting, bracket matching, inline diagnostics, and custom input execution.
+- **Sample vs Hidden Grading**: Instant feedback on sample testcases followed by full testcase grading upon formal submission.
 
-### 2. ⚡ High-Performance Sandboxed Judge (CodeBox Engine)
-- **Multi-Language Support**: Isolated execution for **C, C++, Python, JavaScript, TypeScript, and Java**.
-- **Defense-in-Depth Isolation**: Linux cgroups, memory caps, CPU time quotas, and disabled network access.
-- **Multi-Provider Fallback Matrix**:
-  1. `CodeBox Engine` (Microservice worker queue with Redis & BullMQ)
-  2. `Docker Container Pool` (Pre-warmed local containers for sub-100ms spin-up)
-  3. `Interleet Engine` / `Judge0 API` (Distributed cloud judge)
-  4. `Local Subprocess Isolation` (Local execution fallback)
+### 2. ⚡ Sandboxed Code Execution Cluster (CodeBox Engine)
+- **Multi-Language Support**: Secure execution for **C, C++, Python, JavaScript, TypeScript, and Java**.
+- **Defense-in-Depth Isolation**: Linux kernel namespaces, cgroups, memory limits (256 MB), and CPU quotas (2.0s) with strict network disconnection (`--net=none`).
+- **Resilient Fallback Matrix**:
+  1. `CodeBox Engine` (High-throughput Node.js microservice with BullMQ queue)
+  2. `Docker Container Pool` (Pre-warmed execution sandboxes)
+  3. `Judge0 Cloud API` (External distributed fallback)
+  4. `Local Isolated Subprocess` (Air-gapped development fallback)
 
-### 3. 🔐 Cryptographic Proof of Merit & Campus Passes
-- **Trust-of-Proof Verification**: Every submission result, leaderboard ranking, and certificate is signed using asymmetric cryptographic tokens (HMAC-SHA256 / Ed25519).
-- **Public Proof Explorer**: Anyone can verify student scores and certificate authenticity at `/portal/verify`.
-- **Digital & Printable Campus Passes**: Generates dynamic QR passes for student entry into physical university labs during offline contest phases.
+### 3. 📈 Official Contest Standings & Elo Rating Ladder
+- **LeetCode / ICPC Scoring Model**: Standings dynamically ranked by total solved problem points, with tie-breaking determined by submission elapsed time plus 5-minute penalties per incorrect attempt.
+- **5-Tier Star Rating Ladder**:
+  - `1★ Explorer` (< 1400)
+  - `2★ Specialist` (1400 – 1599)
+  - `3★ Knight` (1600 – 1799)
+  - `4★ Master` (1800 – 1999)
+  - `5★ Grandmaster` (2000+)
+- **Live Podium View**: High-density podium display (🥇 Gold, 🥈 Silver, 🥉 Bronze) with department performance telemetry.
 
-### 4. 📈 University Rating Ladder & Leaderboards
-- **Division System**: Automated rank categorization into **Division 1 (Grandmasters)**, **Division 2 (Specialists)**, and **Division 3 (Novices)** based on competitive performance.
-- **Real-Time Scoreboards**: Live scoreboards with configurable scoreboard freezing during final contest windows to heighten suspense.
-
-### 5. 🌐 Member Profiles & External Telemetry
-- **Unified Coder Profile**: Aggregates external competitive coding statistics from **LeetCode**, **CodeChef**, and **GitHub**.
-- **Activity & Submission Heatmaps**: Visualizes member consistency, problem-solving streaks, and badge milestones.
+### 4. 🌐 Member Intelligence & External Profiles
+- **Unified Coder Portfolio**: Automatically syncs and aggregates external competitive coding statistics from **LeetCode**, **CodeChef**, and **GitHub**.
+- **Activity Heatmaps**: Monospace calendar heatmaps visualizing student consistency, contest attendance streaks, and problem-solving velocity.
 
 ---
 
@@ -72,56 +74,56 @@ Engineered for ultra-low latency, air-gapped lab resilience, and anti-cheat enfo
   'themeVariables': {
     'primaryColor': '#18181b',
     'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#f97316',
-    'lineColor': '#f97316',
+    'primaryBorderColor': '#ccff00',
+    'lineColor': '#ccff00',
     'secondaryColor': '#27272a',
     'tertiaryColor': '#09090b',
     'edgeLabelBackground': '#18181b',
     'clusterBkg': '#0f0f11',
-    'clusterBorder': '#f97316'
+    'clusterBorder': '#ccff00'
   }
 }}%%
 flowchart TB
     subgraph Client_Tier ["🌐 Client Presentation Tier"]
         CadetPortal["💻 Cadet Web Portal\n(medicaps.chaoscomputerclub.in)\nReact 19 + TypeScript + Vite"]
         AdminConsole["🛡️ Admin & Proctor Command Console\n(admin.chaoscomputerclub.in)\nReact 19 + Vite Standalone"]
-        TurnstileScanner["📷 Hardware Gate Scanner / Turnstile\nLaser Barcode & Direct REST Ingestion"]
     end
 
     subgraph Edge_Tier ["⚡ Edge & Reverse Proxy Layer"]
         Cloudflare["☁️ Cloudflare Global Anycast DNS\nWAF + DDoS Mitigation + SSL Offload"]
-        Nginx["🔒 Production Nginx 1.24+ Reverse Proxy\nSSL Termination + Real-Time SSE Buffering Off"]
+        Nginx["🔒 Production Nginx 1.24+ Reverse Proxy\nSSL Termination + Real-Time Reverse Proxy"]
     end
 
     subgraph App_Tier ["⚙️ FastAPI Application Core"]
         FastAPICore["🚀 FastAPI High-Throughput Core (Python 3.12)\nUvicorn Multi-Worker (Port 8002) • AsyncIO Loop"]
-        GateMiddleware["🔐 Contest Eligibility Middleware\nPhysical Gate Lock • Lab 04 Workstation Binding"]
-        SSEBroadcaster["📡 Event Broadcaster & Telemetry Engine\nReal-Time SSE Streams • OpenAPI 3.1.0 Webhooks"]
+        ContestEngine["⏱️ Contest Lifecycle & Timer Engine\nState Transitions & Penalty Calculation"]
+        RatingService["📈 Elo Rating & Division Calculator\nPost-Contest Rating Adjustments"]
+        SSEBroadcaster["📡 Live Standings & Telemetry Engine\nReal-Time Updates & Invalidation"]
     end
 
     subgraph Judge_Cluster ["⚡ Sandboxed Execution Cluster"]
         JudgeDispatch["🎯 Judge Engine Dispatcher\nDynamic Provider Matrix (CodeBox / Docker)"]
         subgraph Sandbox_Runtimes ["📦 Isolated Sandboxes (cgroups)"]
             CodeBoxService["⚡ CodeBox Microservice (Node.js 20 LTS)\nBullMQ Worker + Dockerode (Port 3000)"]
-            DockerPool["🐳 Pre-Warmed Docker Container Pool\n2.0s CPU Quota • 256MB RAM • No Network"]
+            DockerPool["🐳 Pre-Warmed Container Pool\n2.0s CPU Quota • 256MB RAM • No Network"]
         end
     end
 
     subgraph Persistence_Tier ["🗄️ Persistence & Telemetry Tier"]
-        Database[("💾 SQLite AsyncIO / PostgreSQL\nSQLAlchemy 2.0 Async Session DB")]
+        Database[("🐘 PostgreSQL 16 AsyncIO DB\nccc_medicaps (127.0.0.1:5432)")]
         RedisCache[("⚡ Redis 7.0 In-Memory Store\nBullMQ Queues • SWR Caching • Rate Limits")]
     end
 
     CadetPortal -->|HTTPS / WSS| Cloudflare
     AdminConsole -->|HTTPS / WSS| Cloudflare
-    TurnstileScanner -->|HTTPS POST| Cloudflare
 
     Cloudflare -->|Proxy SSL| Nginx
     Nginx -->|Static Cadet Bundle| CadetPortal
     Nginx -->|Static Admin Bundle| AdminConsole
     Nginx -->|API Reverse Proxy :8002| FastAPICore
 
-    FastAPICore --> GateMiddleware
+    FastAPICore --> ContestEngine
+    FastAPICore --> RatingService
     FastAPICore --> SSEBroadcaster
     FastAPICore --> JudgeDispatch
 
@@ -135,7 +137,7 @@ flowchart TB
 
 ---
 
-## 🔄 Request Flow
+## 🔄 Contest Submission & Grading Flow
 
 ```mermaid
 %%{init: {
@@ -143,44 +145,42 @@ flowchart TB
   'themeVariables': {
     'primaryColor': '#18181b',
     'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#f97316',
-    'lineColor': '#f97316',
+    'primaryBorderColor': '#ccff00',
+    'lineColor': '#ccff00',
     'secondaryColor': '#27272a',
     'tertiaryColor': '#09090b',
-    'noteBkgColor': '#ea580c',
+    'noteBkgColor': '#18181b',
     'noteTextColor': '#ffffff',
-    'noteBorderColor': '#f97316',
+    'noteBorderColor': '#ccff00',
     'actorBkg': '#18181b',
-    'actorBorder': '#f97316',
+    'actorBorder': '#ccff00',
     'actorTextColor': '#ffffff',
-    'actorLineColor': '#f97316',
-    'signalColor': '#f97316',
+    'actorLineColor': '#ccff00',
+    'signalColor': '#ccff00',
     'signalTextColor': '#ffffff',
     'labelBoxBkgColor': '#18181b',
-    'labelBoxBorderColor': '#f97316',
+    'labelBoxBorderColor': '#ccff00',
     'labelTextColor': '#ffffff'
   }
 }}%%
 sequenceDiagram
-    actor User as 👤 User
-    participant Auth as 🔐 Auth Service
+    actor Cadet as 👤 Cadet
     participant API as ⚙️ FastAPI Backend
     participant Judge as ⚡ CodeBox Sandbox Engine
-    participant DB as 🗄️ Redis + Database
+    participant DB as 🐘 PostgreSQL 16
+    participant Redis as ⚡ Redis 7
 
-    User->>Auth: University PRN / Email-OTP verification
-    Auth-->>User: JWT session created (RS256)
-    User->>API: Start contest assessment (role, track, slug)
-    API->>Judge: Dispatch submission (cgroups, 2.0s limit)
-    Judge-->>API: Testcase execution output
-    API-->>User: Stream execution verdict (AC / WA / TLE)
-    User->>API: Submit final solution code
-    API->>Judge: Evaluate against hidden testcases
-    Judge-->>API: Score calculation + runtime telemetry
-    API->>DB: Persist contest state & submissions
-    Note over API,DB: Repeats until contest or assessment completes
-    API->>DB: Generate & store final report / rating deltas
-    API-->>User: Comprehensive report & verified Campus Pass
+    Cadet->>API: POST /api/contests/{slug}/submit (code, language_id, problem_id)
+    API->>DB: Record submission (status: PENDING)
+    API->>Judge: Enqueue job (cgroups isolation, 2.0s limit, 256MB)
+    Judge-->>API: Stream testcase outputs & runtime stats
+    API->>DB: Update submission verdict (ACCEPTED / WRONG_ANSWER / TLE)
+    API->>Redis: Invalidate contest standings cache
+    API-->>Cadet: Return grading verdict & runtime telemetry
+    Note over API,DB: When contest round officially concludes:
+    API->>DB: Compute final official standings (Points + Penalty)
+    API->>DB: Apply Elo rating changes across participants
+    API-->>Cadet: View updated official standings & rating profile
 ```
 
 ---
@@ -189,11 +189,11 @@ sequenceDiagram
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | React 19, TypeScript 5.8, Vite 8, Tailwind CSS v4, Radix UI Primitives, Monaco Editor, Lucide Icons, Recharts, React Router v7, Redux Toolkit |
-| **Backend API** | FastAPI, Python 3.11+, Pydantic v2, SQLAlchemy 2.0 (AsyncIO), `aiosqlite` / `asyncpg`, Uvicorn |
-| **Execution Engine** | `codebox-engine` (Node.js microservice), BullMQ, Docker Engine SDK, Linux Isolate, Caddy |
-| **Data & Cache** | SQLite (Air-gapped) / PostgreSQL (Cloud), Redis 7+ for execution queues and telemetry cache |
-| **Security & Auth** | JWT with asymmetric signatures, BCrypt password hashing, OTP generation, CORS regex enforcement |
+| **Frontend** | React 19, TypeScript 5.8, Vite 8, Tailwind CSS v4, Radix UI Primitives, Monaco Editor, Lucide Icons, Recharts, React Router v7 |
+| **Backend API** | FastAPI, Python 3.12, Pydantic v2, SQLAlchemy 2.0 (AsyncIO), `asyncpg` / `aiosqlite`, Uvicorn |
+| **Execution Engine** | `codebox-engine` (Node.js microservice), BullMQ, Docker Engine SDK, Linux cgroups, Isolate |
+| **Persistence & Cache** | PostgreSQL 16 (Cloud Production), Redis 7.0 for BullMQ queues and SWR caching |
+| **Security & Auth** | Passwordless institutional email verification (`@medicaps.ac.in` + OTP), JWT Bearer tokens, CORS regex |
 | **Deployment** | Systemd, Nginx, GSD Deployment Protocol, DigitalOcean Cloud droplet (`143.198.38.205`) |
 
 ---
@@ -204,12 +204,16 @@ sequenceDiagram
 medicaps.chaoscomputerclub.in/
 ├── src/                               # ⚛️ Frontend Single Page Application (React 19)
 │   ├── components/                    # Reusable UI component library (Radix primitives)
-│   ├── organization/                  # CCC Portal shell, navigation, header, status badges
-│   ├── pages/                         # Core view pages (Arena, Contests, Leaderboard, Verify, etc.)
+│   ├── features/                      # Domain features (contest client, lifecycle, queries)
+│   ├── organization/                  # CCC Portal shell, header, status badges, telemetry
+│   ├── pages/                         # Core pages (Arena, Contests Hub, Results, Standings)
 │   ├── services/                      # Frontend API clients and backend communication layer
-│   ├── types/                         # TypeScript domain types and API contract schemas
+│   ├── types/                         # TypeScript domain models and API contracts
 │   ├── AppRoutes.tsx                  # Client-side route declarations & route guards
 │   └── main.tsx                       # React application bootstrap
+│
+├── admin/                             # 🛡️ Standalone Admin Command Console (Port 8082)
+│   └── src/                           # Contest creation, proctoring, live ops
 │
 ├── backend/                           # 🐍 High-Throughput REST API (FastAPI)
 │   ├── app/
@@ -218,12 +222,12 @@ medicaps.chaoscomputerclub.in/
 │   │   ├── engine/                    # Judge Engine abstraction layer
 │   │   │   ├── docker/                # Prewarmed Docker container pools
 │   │   │   └── providers/             # CodeBox, Docker, Interleet, Judge0, Local providers
-│   │   ├── middleware/                # Contest eligibility and security middleware
+│   │   ├── middleware/                # Security, rate limiting, and contest guards
 │   │   ├── models/                    # SQLAlchemy async ORM models & database schemas
 │   │   ├── routers/                   # Modular API controllers (auth, contests, leaderboard, etc.)
 │   │   ├── schemas/                   # Pydantic validation schemas
-│   │   └── services/                  # Business logic (Contest lifecycle, QA tests, Passes, Rating)
-│   ├── keys/                          # Asymmetric signature keys & cryptography assets
+│   │   └── services/                  # Business logic (Contest lifecycle, QA tests, Elo rating)
+│   ├── keys/                          # Cryptographic token signing assets
 │   ├── main.py                        # FastAPI entrypoint, lifespan manager & health probes
 │   └── requirements.txt               # Backend dependencies
 │
@@ -236,10 +240,12 @@ medicaps.chaoscomputerclub.in/
 │   ├── docker-compose.yml             # Sandbox container stack definitions
 │   └── Caddyfile                      # Internal secure proxy configuration
 │
-├── drizzle/                           # 🗄️ Database migration metadata & snapshots
 ├── scripts/                           # 🛠️ DevOps, verification & sync automation scripts
-│   └── gsd_sync.sh                    # Production GSD push-and-pull continuous deployment pipeline
-├── .env.example                       # Root environment variable template
+│   ├── gsd_sync.sh                    # Production GSD push-and-pull continuous deployment pipeline
+│   └── gsd_qa_gate.sh                 # Full-stack automated verification test harness
+├── TRD.md                             # Technical Requirements Document v3.0.0
+├── PRD.md                             # Product Requirements Document v3.0.0
+├── DESIGN.md                          # Visual standards & Obsidian UI aesthetic guidelines
 ├── AGENTS.md                          # Repository operating principles & deployment rules
 └── package.json                       # Frontend dependencies and Vite build scripts
 ```
@@ -250,9 +256,9 @@ medicaps.chaoscomputerclub.in/
 
 ### Prerequisites
 - **Node.js**: `v20.x` or `v22.x` ([Download](https://nodejs.org/))
-- **Python**: `3.11+` ([Download](https://www.python.org/))
-- **Docker Engine**: (Optional, required for sandboxed local code execution)
-- **Redis**: (Optional, required for CodeBox worker queues)
+- **Python**: `3.11+` or `3.12` ([Download](https://www.python.org/))
+- **Docker Engine**: (Optional, required for local sandboxed code execution)
+- **PostgreSQL / SQLite**: SQLite enabled by default for local development; PostgreSQL 16 on production.
 
 ---
 
@@ -266,7 +272,7 @@ cd medicaps.chaoscomputerclub.in
 
 ### Step 2: Set Up & Run Backend
 
-1. Navigate to the backend directory and create a virtual environment:
+1. Navigate to the backend directory and activate the virtual environment:
 ```bash
 cd backend
 python3 -m venv .venv
@@ -302,12 +308,7 @@ The API and interactive Swagger documentation will be available at:
 npm install
 ```
 
-2. Configure environment variables:
-```bash
-cp .env.example .env
-```
-
-3. Launch the Vite development server:
+2. Launch the Vite development server:
 ```bash
 npm run dev
 ```
@@ -340,46 +341,38 @@ npm run dev
 | :--- | :--- | :--- |
 | `PROJECT_NAME` | Name of the FastAPI application | `CCC Medi-Caps Arena API` |
 | `HOST` | Server host binding | `0.0.0.0` |
-| `PORT` | Server listening port | `8000` |
-| `SECRET_KEY` | 32+ character key for JWT token signing | *(Set a secure random secret)* |
+| `PORT` | Server listening port | `8000` (8002 in prod) |
+| `SECRET_KEY` | 32+ character key for JWT token signing | *(Secure random secret)* |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Lifetime of authentication sessions | `10080` (7 days) |
 | `DATABASE_URL` | SQLAlchemy async connection URI | `sqlite+aiosqlite:///./ccc_medicaps.db` |
 | `FRONTEND_URL` | Base URL of the client for CORS validation | `http://localhost:8081` |
-| `JUDGE_PROVIDER` | Execution backend (`codebox`, `docker`, `local`, `interleet`, `judge0`) | `codebox` |
+| `JUDGE_PROVIDER` | Execution backend (`codebox`, `docker`, `local`, `judge0`) | `codebox` |
 | `CODEBOX_URL` | Microservice URL for the CodeBox Engine | `http://127.0.0.1:3000` |
-| `DEV_MODE` | Enables developer bypasses and rapid testing | `true` (in local) / `false` (in prod) |
+| `DEV_MODE` | Enables developer bypasses and rapid testing | `true` (local) / `false` (prod) |
 
 ---
 
 ## 🔌 API Endpoints Reference
-
-The backend provides both root `/api` and versioned `/api/v1` routes:
 
 ### Core Endpoints
 
 ```
 Authentication & Users
 POST   /api/auth/register              # Register new student / member
-POST   /api/auth/login                 # Obtain JWT access token
-GET    /api/auth/me                    # Current authenticated profile
+POST   /api/auth/login                 # Obtain JWT access token via email OTP
+GET    /api/auth/me                    # Current authenticated cadet profile
 
 Contests & Arena
 GET    /api/contests                   # List all active, upcoming & past contests
 GET    /api/contests/{slug}            # Contest overview & metadata
 GET    /api/contests/{slug}/problems   # Contest problem list
-POST   /api/contests/{slug}/submit     # Submit solution for grading
-GET    /api/contests/{slug}/results    # Top rankings & participant results
-GET    /api/contests/{slug}/qualifiers # Top 30 qualified list for Phase 2
-
-Campus Passes & Cryptographic Proofs
-GET    /api/passes/my-passes           # User's generated campus entry passes
-GET    /api/passes/verify/{token}      # Gate coordinator pass scanner validation
-GET    /api/verify/{proof_id}          # Cryptographic proof-of-result verification
+POST   /api/contests/{slug}/submit     # Submit solution for sandboxed grading
+GET    /api/contests/{slug}/results    # Official contest standings (Rank, Score, Penalty)
 
 Leaderboard & Ratings
-GET    /api/leaderboard/university     # University-wide competitive programming ladder
-GET    /api/leaderboard/division/{div} # Filtered by Division 1, 2, or 3
-GET    /api/leaderboard/batch/{year}   # Filtered by graduation year
+GET    /api/leaderboard                # University rating ladder (supports ?department=, ?batch=, ?tier=)
+GET    /api/leaderboard/departments    # Inter-department performance metrics
+GET    /api/leaderboard/distribution   # Rating distribution histogram
 
 System & Health
 GET    /api/health                     # Production readiness probe & judge status
@@ -389,64 +382,33 @@ GET    /api/health                     # Production readiness probe & judge stat
 
 ## 🚢 Production Deployment & GSD Sync Protocol
 
-All production code updates follow the strict **GET SHIT DONE (GSD)** sync pipeline:
+All production code updates follow the strict **GET SHIT DONE (GSD)** continuous sync pipeline:
 
 ```bash
 ./scripts/gsd_sync.sh "feat: describe your change here"
 ```
 
-### What the Sync Script Automates:
-1. **Local Verification**: Executes `npm run build` locally to ensure zero TypeScript or bundling errors.
-2. **Atomic Git Push**: Commits and pushes changes directly to `origin/main`.
+### What the Sync Pipeline Automates:
+1. **Local Verification**: Executes `npm run build` locally to guarantee zero TypeScript or bundling defects.
+2. **Atomic Git Push**: Pushes verified changes directly to `origin/main`.
 3. **Server Auto-Pull**: Connects over SSH to the production server (`root@143.198.38.205`) and syncs repository state.
 4. **Zero-Downtime Service Reload**:
-   - Synchronizes updated backend code and restarts `ccc-medicaps-api.service`.
+   - Synchronizes backend code and restarts `ccc-medicaps-api.service`.
    - Rsyncs production frontend assets to `/var/www/ccc-medicaps/.output/public/`.
    - Reloads Nginx reverse proxy configurations.
-5. **Live Health Verification**: Pings production probes and verifies HTTP `200 OK` status on the live platform.
-
----
-
-## 🧪 Testing & Quality Assurance
-
-### Frontend Build & Lint Checks
-```bash
-# Type check and build verification
-npm run build
-
-# Code style linting
-npm run lint
-```
-
-### Backend E2E Contest Simulation Harness
-The backend includes a comprehensive test suite that simulates end-to-end user registration, submission grading, leaderboard freezing, and cutoff resolution:
-```bash
-cd backend
-source .venv/bin/activate
-python scripts/test_contest_funnel.py
-```
+5. **Live Verification Probes**: Pings production endpoints and asserts HTTP `200 OK` health status.
 
 ---
 
 ## 🛡️ Security & Sandbox Isolation Guarantees
 
-- **Code Isolation**: All untrusted user code runs in unprivileged sandbox containers with strict seccomp filters.
-- **Resource Limits**:
+- **Code Isolation**: All untrusted student code executes in unprivileged sandbox containers with strict seccomp profiles.
+- **Resource Constraints**:
   - Max CPU Time: `2.0 seconds`
   - Max Memory: `256 MB`
   - Network: Fully air-gapped (`--net=none`)
   - File System: Read-only root with ephemeral `tmpfs` mounts
 - **Anti-Cheat Telemetry**: Blur events, tab switches, and clipboard paste payloads are recorded and correlated with submission timestamps.
-- **HMAC Signatures**: Contest results and pass tokens are cryptographically sealed against tampering.
-
----
-
-## 🤝 Contributing
-
-1. Create a feature branch (`git checkout -b feature/amazing-feature`).
-2. Verify all builds and tests pass locally (`npm run build`).
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`).
-4. Push to your branch and open a Pull Request.
 
 ---
 

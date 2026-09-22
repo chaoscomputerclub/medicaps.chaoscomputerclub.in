@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import httpx
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -92,8 +92,8 @@ class ProductionQAService:
                 prn="0801CS211000",
                 department="CSE",
                 batch="2022-26",
-                rating=1950,
-                peak_rating=2050,
+                rating=1200,
+                peak_rating=1200,
                 is_onboarded=True,
                 is_core_member=True,
             )
@@ -106,6 +106,34 @@ class ProductionQAService:
             await db.commit()
             await db.refresh(member)
         return member
+
+    @classmethod
+    async def cleanup_qa_data(cls, db: AsyncSession):
+        """Purge test bot profiles and associated transient data created during test runs."""
+        try:
+            from app.models.db_models import StudentFollow
+            await db.execute(
+                delete(StudentFollow).where(
+                    StudentFollow.follower_id.in_(
+                        select(MemberProfile.id).where(MemberProfile.email.like("qa.%"))
+                    ) | StudentFollow.following_id.in_(
+                        select(MemberProfile.id).where(MemberProfile.email.like("qa.%"))
+                    )
+                )
+            )
+            await db.execute(
+                delete(MemberProfile).where(
+                    (MemberProfile.email.like("qa.%")) | (MemberProfile.handle.like("qa_%"))
+                )
+            )
+            await db.commit()
+            try:
+                from app.core.cache import delete_cache_pattern
+                await delete_cache_pattern("cache:*")
+            except Exception:
+                pass
+        except Exception as e:
+            logger.warning(f"QA cleanup notice: {e}")
 
     @classmethod
     def generate_qa_jwt(cls, member_id: str) -> str:

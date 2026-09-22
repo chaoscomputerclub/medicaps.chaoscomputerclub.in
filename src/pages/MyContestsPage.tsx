@@ -64,8 +64,8 @@ export function MyContestsPage() {
               <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Upcoming</span>
             </div>
             <div className="flex flex-col border-l border-lime-400/40 pl-3">
-              <strong className="font-mono tabular-nums text-xl font-semibold text-lime-400">{qualifiedCount}</strong>
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Ranked</span>
+              <strong className="font-mono tabular-nums text-xl font-semibold text-lime-400">{completedCount}</strong>
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Completed</span>
             </div>
           </div>
         }
@@ -250,9 +250,9 @@ export function MyContestsPage() {
                         </div>
                       ) : isUpcoming ? (
                         <div>
-                          <dt className="text-[9px] text-zinc-500 uppercase">Workstation</dt>
+                          <dt className="text-[9px] text-zinc-500 uppercase">Status</dt>
                           <dd className="text-xs font-semibold text-white">
-                            Reserved
+                            Registered
                           </dd>
                         </div>
                       ) : null}

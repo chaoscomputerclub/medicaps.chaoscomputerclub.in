@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-22T12:30:26.116Z",
-  "totalElements": 303,
-  "functionalCount": 303,
+  "timestamp": "2026-09-22T13:00:35.041Z",
+  "totalElements": 301,
+  "functionalCount": 301,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 30,
     "backendQueries": 9,
-    "routingNavigation": 184,
-    "clientUiState": 59,
+    "routingNavigation": 181,
+    "clientUiState": 60,
     "conditionalLocked": 15,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
@@ -34,7 +34,16 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 79,
+      "line": 78,
+      "tag": "<Navigate>",
+      "label": "[to={/contests/${contestSlug ? encod...",
+      "handler": "{`/contests/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}/results`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/AppRoutes.tsx",
+      "line": 84,
       "tag": "<Navigate>",
       "label": "[to={${target}${location.search}${lo...",
       "handler": "{`${target}${location.search}${location.hash}`}",
@@ -43,7 +52,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 98,
+      "line": 103,
       "tag": "<Navigate>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -52,7 +61,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 293,
+      "line": 291,
       "tag": "<Navigate>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -196,7 +205,7 @@
     },
     {
       "file": "src/features/contest/feed.tsx",
-      "line": 132,
+      "line": 129,
       "tag": "<Link>",
       "label": "{event.title}",
       "handler": "{`/contests/${event.slug}`}",
@@ -1681,7 +1690,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 77,
+      "line": 76,
       "tag": "<Link>",
       "label": "Back to {contest?.title ?? Contest}",
       "handler": "{`/contests/${contestSlug}`}",
@@ -1690,7 +1699,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 134,
+      "line": 121,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1699,25 +1708,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 135,
-      "tag": "<Link>",
-      "label": "View Campus Pass",
-      "handler": "{`/contests/${contestSlug}/qualified`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestResultsPage.tsx",
-      "line": 140,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestResultsPage.tsx",
-      "line": 141,
+      "line": 122,
       "tag": "<Link>",
       "label": "University Leaderboard →",
       "handler": "\"/leaderboard\"",
@@ -1726,16 +1717,25 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 184,
+      "line": 166,
       "tag": "<button>",
-      "label": "{key}",
-      "handler": "{() => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set(\"f",
+      "label": "All",
+      "handler": "{() => setDeptFilter(\"all\")}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 254,
+      "line": 178,
+      "tag": "<button>",
+      "label": "{dept}",
+      "handler": "{() => setDeptFilter(dept)}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
+    },
+    {
+      "file": "src/pages/ContestResultsPage.tsx",
+      "line": 245,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1744,25 +1744,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 255,
-      "tag": "<Link>",
-      "label": "View Campus Pass",
-      "handler": "{`/contests/${contestSlug}/qualified`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestResultsPage.tsx",
-      "line": 260,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestResultsPage.tsx",
-      "line": 261,
+      "line": 246,
       "tag": "<Link>",
       "label": "Contest Details",
       "handler": "{`/contests/${contestSlug}`}",
@@ -1771,7 +1753,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 263,
+      "line": 248,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1780,7 +1762,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 264,
+      "line": 249,
       "tag": "<Link>",
       "label": "University Leaderboard →",
       "handler": "\"/leaderboard\"",
@@ -1789,7 +1771,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 295,
+      "line": 281,
       "tag": "<Link>",
       "label": "{row.full_name}",
       "handler": "{`/profile/${row.handle}`}",

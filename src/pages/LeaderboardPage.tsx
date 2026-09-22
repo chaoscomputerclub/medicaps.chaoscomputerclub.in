@@ -43,10 +43,6 @@ export function LeaderboardPage() {
   const data = rawData || [];
   const currentMemberId = useAppSelector((s) => s.auth.member?.id);
 
-  if (loading && (!rawData || rawData.length === 0)) {
-    return <LeaderboardSkeleton />;
-  }
-
   const totalCount = data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -60,6 +56,10 @@ export function LeaderboardPage() {
     chunkSize: 25,
     delayMs: 16,
   });
+
+  if (loading && (!rawData || rawData.length === 0)) {
+    return <LeaderboardSkeleton />;
+  }
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);

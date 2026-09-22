@@ -19,12 +19,20 @@ if "sqlite" in db_url and "///./" in db_url:
     db_url = f"sqlite+aiosqlite:///{backend_db}"
 
 # Engine configuration
-engine = create_async_engine(
-    db_url,
-    echo=False,
-    future=True,
-    connect_args={"check_same_thread": False} if "sqlite" in db_url else {}
-)
+engine_kwargs = {
+    "echo": False,
+    "future": True,
+}
+if "sqlite" in db_url:
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    engine_kwargs["pool_size"] = 20
+    engine_kwargs["max_overflow"] = 30
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_recycle"] = 1800
+    engine_kwargs["pool_timeout"] = 10
+
+engine = create_async_engine(db_url, **engine_kwargs)
 
 from sqlalchemy import event
 
@@ -64,61 +72,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db():
-    """Create all database tables on initial startup and apply non-destructive column migrations."""
+    """Create all database tables on initial startup."""
     import app.models.db_models  # noqa: F401
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-
-            # Non-destructive migrations for existing PostgreSQL databases
-            if "postgresql" in settings.DATABASE_URL or "postgres" in settings.DATABASE_URL:
-                migration_sqls = [
-                    "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS cadence VARCHAR(20) DEFAULT 'weekly';",
-                    "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS edition INTEGER;",
-                    "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS banner_url VARCHAR(500);",
-                    "ALTER TABLE campus_passes ADD COLUMN IF NOT EXISTS checked_in_at TIMESTAMP WITH TIME ZONE;",
-                    "ALTER TABLE campus_passes ADD COLUMN IF NOT EXISTS checked_in_by VARCHAR(100);",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS checked_in_at TIMESTAMP WITH TIME ZONE;",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS seat_assigned VARCHAR(20);",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS campus_pass_code VARCHAR(50);",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS is_top_30_qualified BOOLEAN DEFAULT FALSE;",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS assessment_taken BOOLEAN DEFAULT FALSE;",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS assessment_score FLOAT;",
-                    "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS assessment_rank INTEGER;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS difficulty VARCHAR(20) DEFAULT 'MEDIUM';",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS description TEXT;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS input_format TEXT;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS output_format TEXT;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS constraints TEXT;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS time_limit FLOAT DEFAULT 2.0;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS memory_limit INTEGER DEFAULT 256;",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS starter_codes JSON DEFAULT '{}';",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS sample_testcases JSON DEFAULT '[]';",
-                    "ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS hidden_testcases JSON DEFAULT '[]';",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS difficulty VARCHAR(20) DEFAULT 'MEDIUM';",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS description TEXT;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS input_format TEXT;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS output_format TEXT;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS constraints TEXT;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 100;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS time_limit FLOAT DEFAULT 2.0;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS memory_limit INTEGER DEFAULT 256;",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS starter_codes JSON DEFAULT '{}';",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS sample_testcases JSON DEFAULT '[]';",
-                    "ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS hidden_testcases JSON DEFAULT '[]';",
-                    "ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS is_top_30_qualified BOOLEAN DEFAULT FALSE;",
-                    "ALTER TABLE assessment_sessions ADD COLUMN IF NOT EXISTS anti_cheat_violations INTEGER DEFAULT 0;",
-                    "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();",
-                ]
-                for sql in migration_sqls:
-                    try:
-                        await conn.execute(text(sql))
-                    except Exception as col_err:
-                        pass
-            elif "sqlite" in settings.DATABASE_URL:
-                try:
-                    await conn.execute(text("ALTER TABLE member_profiles ADD COLUMN updated_at TIMESTAMP;"))
-                except Exception:
-                    pass
     except Exception as e:
         print(f"Notice during init_db (tables already created or concurrency race handled): {e}")

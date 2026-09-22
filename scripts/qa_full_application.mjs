@@ -34,6 +34,7 @@ async function request(endpoint, options = {}, retries = 2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const res = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
         ...options,
         headers: {
           "Content-Type": "application/json",

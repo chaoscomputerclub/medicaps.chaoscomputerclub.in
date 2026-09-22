@@ -45,8 +45,14 @@ class LeaderboardController:
                 return cached
             return cached
 
-        stmt = select(MemberProfile)
-        count_stmt = select(func.count(MemberProfile.id))
+        stmt = select(MemberProfile).where(
+            ~MemberProfile.email.like("qa.%"),
+            ~MemberProfile.handle.like("qa_%"),
+        )
+        count_stmt = select(func.count(MemberProfile.id)).where(
+            ~MemberProfile.email.like("qa.%"),
+            ~MemberProfile.handle.like("qa_%"),
+        )
 
         if department:
             stmt = stmt.where(MemberProfile.department == department)
@@ -169,7 +175,12 @@ class LeaderboardController:
             response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
             return cached
 
-        result = await db.execute(select(MemberProfile.rating))
+        result = await db.execute(
+            select(MemberProfile.rating).where(
+                ~MemberProfile.email.like("qa.%"),
+                ~MemberProfile.handle.like("qa_%"),
+            )
+        )
         ratings = [r for (r,) in result.all() if r is not None]
 
         buckets = []
@@ -203,12 +214,19 @@ class LeaderboardController:
             response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
             return cached
 
-        stmt = select(
-            MemberProfile.department,
-            func.count(MemberProfile.id).label("total_members"),
-            func.avg(MemberProfile.rating).label("avg_rating"),
-            func.max(MemberProfile.rating).label("top_rating"),
-        ).group_by(MemberProfile.department)
+        stmt = (
+            select(
+                MemberProfile.department,
+                func.count(MemberProfile.id).label("total_members"),
+                func.avg(MemberProfile.rating).label("avg_rating"),
+                func.max(MemberProfile.rating).label("top_rating"),
+            )
+            .where(
+                ~MemberProfile.email.like("qa.%"),
+                ~MemberProfile.handle.like("qa_%"),
+            )
+            .group_by(MemberProfile.department)
+        )
 
         result = await db.execute(stmt)
         rows = result.all()
