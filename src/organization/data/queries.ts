@@ -111,13 +111,17 @@ export async function fetchFullProfileData(force = false): Promise<FullProfilePa
 
     const apiBase = getApiBase();
     fullProfilePromise = (async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
       try {
         const res = await fetch(`${apiBase}/auth/profile/full`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          signal: controller.signal,
         });
+        clearTimeout(timer);
         if (res.ok) {
           const data = await res.json();
           const payload: FullProfilePayload = {

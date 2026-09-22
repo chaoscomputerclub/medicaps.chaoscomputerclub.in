@@ -1,11 +1,12 @@
 import React, { Suspense } from "react";
 import { Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
-import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 import { AppShellSkeleton } from "@/components/TacticalRouteFallback";
+import { DashboardSkeleton } from "@/organization/components/skeletons";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
+import { AuthPage } from "./pages/AuthPage";
 
-export const AuthPage = lazyWithRetry(() => import("./pages/AuthPage"), "AuthPage");
+export const PortalShell = lazyWithRetry(() => import("@/organization/components/PortalShell"), "PortalShell");
 export const DashboardPage = lazyWithRetry(() => import("./pages/DashboardPage"), "DashboardPage");
 export const ContestsHubPage = lazyWithRetry(() => import("./pages/ContestsHubPage"), "ContestsHubPage");
 export const ContestOverviewPage = lazyWithRetry(() => import("./pages/ContestOverviewPage"), "ContestOverviewPage");
@@ -62,26 +63,32 @@ function PortalLegacyRedirect() {
 
 export function AppRoutes() {
   return (
-    <Suspense fallback={<AppShellSkeleton />}>
-      <Routes>
-        {/* Guest-only Authentication Route */}
-        <Route element={<GuestGuard />}>
-          <Route path="/auth" element={<AuthPage />} />
-        </Route>
+    <Routes>
+      {/* Guest-only Authentication Route — immediate, zero secondary network waterfall */}
+      <Route element={<GuestGuard />}>
+        <Route path="/auth" element={<AuthPage />} />
+      </Route>
 
-        {/* Backward-Compatible Redirects for /portal */}
-        <Route path="/portal" element={<Navigate to="/" replace />} />
-        <Route path="/portal/*" element={<PortalLegacyRedirect />} />
+      {/* Backward-Compatible Redirects for /portal */}
+      <Route path="/portal" element={<Navigate to="/" replace />} />
+      <Route path="/portal/*" element={<PortalLegacyRedirect />} />
 
-        {/* Strictly Protected Inner Platform Routes Mounted on Root (/) */}
-        <Route element={<AuthGuard />}>
-          {/* Assessment Workspace route redirected to contest flow */}
-          <Route path="/assessments/:contestSlug" element={<ContestRedirect />} />
+      {/* Strictly Protected Inner Platform Routes Mounted on Root (/) */}
+      <Route element={<AuthGuard />}>
+        {/* Assessment Workspace route redirected to contest flow */}
+        <Route path="/assessments/:contestSlug" element={<ContestRedirect />} />
 
-          {/* Root Shell Routes */}
-          <Route path="/" element={<PortalShell />}>
-            {/* Dashboard index */}
-            <Route index element={<DashboardPage />} />
+        {/* Root Shell Routes */}
+        <Route
+          path="/"
+          element={
+            <Suspense fallback={<AppShellSkeleton />}>
+              <PortalShell />
+            </Suspense>
+          }
+        >
+          {/* Dashboard index */}
+          <Route index element={<DashboardPage />} />
 
             {/* Contests Hub & Details */}
             <Route path="contests" element={<ContestsHubPage />} />
@@ -127,6 +134,5 @@ export function AppRoutes() {
         {/* Catch-all fallback to root */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Suspense>
   );
 }

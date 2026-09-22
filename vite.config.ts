@@ -109,6 +109,10 @@ export default defineConfig({
             if (id.includes("@reduxjs/toolkit") || id.includes("react-redux")) {
               return "vendor-redux";
             }
+            // Charts & Data Visualization — lazy loaded on demand for Dashboard / Ratings
+            if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor")) {
+              return "vendor-charts";
+            }
             // Radix UI primitives
             if (id.includes("@radix-ui")) {
               return "vendor-radix";

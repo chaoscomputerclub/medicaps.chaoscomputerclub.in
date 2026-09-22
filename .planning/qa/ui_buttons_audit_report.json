@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T10:35:55.616Z",
+  "timestamp": "2026-09-22T10:49:51.514Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -16,7 +16,7 @@
   "elements": [
     {
       "file": "src/AppRoutes.tsx",
-      "line": 49,
+      "line": 50,
       "tag": "<Navigate>",
       "label": "[to={/profile/${handle ? encodeURICo...",
       "handler": "{`/profile/${handle ? encodeURIComponent(handle) : \"\"}`}",
@@ -25,7 +25,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 54,
+      "line": 55,
       "tag": "<Navigate>",
       "label": "[to={/contests/${contestSlug ? encod...",
       "handler": "{`/contests/${contestSlug ? encodeURIComponent(contestSlug) : \"\"}`}",
@@ -34,7 +34,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 60,
+      "line": 61,
       "tag": "<Navigate>",
       "label": "[to={${target}${location.search}${lo...",
       "handler": "{`${target}${location.search}${location.hash}`}",
@@ -52,7 +52,7 @@
     },
     {
       "file": "src/AppRoutes.tsx",
-      "line": 128,
+      "line": 135,
       "tag": "<Navigate>",
       "label": "[to=/]",
       "handler": "\"/\"",

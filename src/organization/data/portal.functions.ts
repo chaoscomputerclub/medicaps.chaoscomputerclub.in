@@ -11,6 +11,16 @@ import type {
   LeaderboardEntry,
 } from "./types";
 
+async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = 5000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /**
  * Real-time public contest, scoreboard, announcement, and verification proofs.
  * Cached in memory with SWR background revalidation.
@@ -22,20 +32,20 @@ export async function getPublicPortalData(force = false) {
       const backendUrl = getApiBase();
 
       const [apiContests, apiAnnouncements, apiProofs] = await Promise.all([
-        fetch(`${backendUrl}/contests`)
+        fetchWithTimeout(`${backendUrl}/contests`)
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
-        fetch(`${backendUrl}/feed/announcements`)
+        fetchWithTimeout(`${backendUrl}/feed/announcements`)
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
-        fetch(`${backendUrl}/verify/proofs`)
+        fetchWithTimeout(`${backendUrl}/verify/proofs`)
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
       ]);
 
       const firstSlug = apiContests && apiContests.length > 0 ? apiContests[0].slug : null;
       const standings = firstSlug
-        ? await fetch(`${backendUrl}/scoreboards/${firstSlug}`)
+        ? await fetchWithTimeout(`${backendUrl}/scoreboards/${firstSlug}`)
             .then((r) => (r.ok ? r.json() : []))
             .catch(() => [])
         : [];
