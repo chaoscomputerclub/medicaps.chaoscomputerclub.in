@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-09-22T08:44:47.576Z",
+  "timestamp": "2026-09-22T08:49:38.515Z",
   "totalElements": 308,
   "functionalCount": 308,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 33,
     "backendQueries": 9,
-    "routingNavigation": 183,
+    "routingNavigation": 185,
     "clientUiState": 60,
-    "conditionalLocked": 17,
+    "conditionalLocked": 15,
     "uiPrimitiveWrappers": 6,
     "staticDummyNoop": 0
   },
@@ -232,7 +232,7 @@
     },
     {
       "file": "src/organization/components/AuthLayout.tsx",
-      "line": 63,
+      "line": 65,
       "tag": "<Link>",
       "label": "Terms of Service",
       "handler": "\"/terms\"",
@@ -610,7 +610,7 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 305,
+      "line": 273,
       "tag": "<form>",
       "label": "{isInvalidDomain && (               <...",
       "handler": "{handleEmailSubmit}",
@@ -619,88 +619,88 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 342,
+      "line": 309,
       "tag": "<button>",
-      "label": "{pending ? (                 <Loader2...",
+      "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 332,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => { window.location.href = getGoogleLoginURL(); }}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 342,
+      "tag": "<button>",
+      "label": "button",
+      "handler": "{() => toast.info(\"GitHub SSO is for CCC Campus Officers. Use email or Google.\")",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 358,
+      "tag": "<button>",
+      "label": "Sign in",
+      "handler": "{() => { setIsSignUp(false); if (message) dispatch(setMessage(null)); }}",
+      "category": "CLIENT_UI_STATE",
+      "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/AuthPage.tsx",
       "line": 369,
       "tag": "<button>",
-      "label": "button",
-      "handler": "{handleGoogle}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 379,
-      "tag": "<button>",
-      "label": "button",
-      "handler": "{handleGitHub}",
-      "category": "CONDITIONALLY_LOCKED",
-      "description": "Disabled conditional gate / status lock"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 395,
-      "tag": "<button>",
-      "label": "Sign in",
-      "handler": "{() => {\n                    setIsSignUp(false);\n                    if (message",
-      "category": "CLIENT_UI_STATE",
-      "description": "Controls modal, drawer, tab, or local UI state"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 409,
-      "tag": "<button>",
       "label": "Sign up",
-      "handler": "{() => {\n                    setIsSignUp(true);\n                    if (message)",
+      "handler": "{() => { setIsSignUp(true); if (message) dispatch(setMessage(null)); }}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 426,
+      "line": 386,
       "tag": "<form>",
-      "label": "{devOtp && (             <div classNa...",
-      "handler": "{handleVerifyOtpSubmit}",
+      "label": "{devOtp && (             <p className...",
+      "handler": "{handleVerifySubmit}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 476,
+      "line": 429,
       "tag": "<button>",
-      "label": "{pending ? (               <Loader2 c...",
+      "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 489,
+      "line": 441,
       "tag": "<button>",
-      "label": "← Back to email",
-      "handler": "{() => {\n                dispatch(setStep(\"email\"));\n                dispatch(se",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/AuthPage.tsx",
-      "line": 500,
-      "tag": "<button>",
-      "label": "Resend code",
+      "label": "Resend",
       "handler": "{handleResendOtp}",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 513,
+      "line": 450,
+      "tag": "<button>",
+      "label": "← Change email",
+      "handler": "{() => {\n                dispatch(setStep(\"email\"));\n                dispatch(se",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/AuthPage.tsx",
+      "line": 469,
       "tag": "<form>",
       "label": "{message && (             <p classNam...",
       "handler": "{handleOnboardingSubmit}",
@@ -709,9 +709,9 @@
     },
     {
       "file": "src/pages/AuthPage.tsx",
-      "line": 589,
+      "line": 538,
       "tag": "<button>",
-      "label": "{pending ? (               <Loader2 c...",
+      "label": "{pending ? <Loader2 className=size-4...",
       "handler": "\"submit\"",
       "category": "LIVE_BACKEND_MUTATION",
       "description": "Triggers backend API mutation / Redux transaction"

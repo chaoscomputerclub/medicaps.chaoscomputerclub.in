@@ -2,7 +2,7 @@
  * Chaos Computer Club India — Medi-Caps Chapter
  * medicaps.chaoscomputerclub.in
  *
- * Strix-inspired Minimalist Auth Layout.
+ * Strix-inspired Minimalist Auth Layout — CCC Lime Edition.
  * Copyright (c) 2026 Chaos Computer Club India
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
@@ -12,57 +12,59 @@ import { type ReactNode } from "react";
 
 export function AuthLayout({
   title,
-  description,
+  subtitle,
   children,
-  brand,
 }: {
+  /** Legacy prop — ignored, kept for backward compat */
   kicker?: string;
   index?: string;
-  title: ReactNode;
-  description?: ReactNode;
-  children: ReactNode;
   footer?: ReactNode;
   brand?: ReactNode;
+  description?: ReactNode;
+  /** Primary heading rendered above the card */
+  title: ReactNode;
+  /** Secondary subtitle rendered above the card (below title) */
+  subtitle?: ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased selection:bg-zinc-800 selection:text-white">
-      {/* Centered Auth Shell */}
-      <div className="w-full flex-1 flex flex-col items-center justify-center my-auto">
-        {/* Brand & Title Block */}
-        <div className="mb-7 flex flex-col items-center text-center">
-          {brand ? (
-            brand
-          ) : (
-            <Link
-              to="/"
-              className="text-2xl sm:text-[28px] font-bold tracking-tight text-white hover:opacity-90 transition-opacity"
-            >
-              CCC Medi-Caps
-            </Link>
-          )}
+    <main className="flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased">
+      {/* ── Centered auth shell ── */}
+      <div className="flex w-full flex-1 flex-col items-center justify-center">
 
-          <h1 className="mt-5 text-xl sm:text-[22px] font-medium tracking-tight text-white">
-            {title}
-          </h1>
+        {/* Brand wordmark */}
+        <Link
+          to="/"
+          className="mb-6 text-2xl font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+        >
+          CCC Medi-Caps
+        </Link>
 
-          {description && (
-            <p className="mt-2 max-w-sm text-xs sm:text-sm text-zinc-400">
-              {description}
-            </p>
-          )}
-        </div>
+        {/* Page title */}
+        <h1 className="mb-1.5 text-[22px] font-semibold tracking-tight text-white">
+          {title}
+        </h1>
 
-        {/* Obsidian Card Container */}
-        <div className="w-full max-w-[400px] rounded-2xl bg-[#161618] border border-white/[0.08] shadow-2xl shadow-black/80 p-7 sm:p-8">
+        {/* Subtitle (e.g. "We sent a 6-digit code to…") */}
+        {subtitle && (
+          <p className="mb-7 max-w-xs text-center text-sm leading-snug text-zinc-400">
+            {subtitle}
+          </p>
+        )}
+
+        {!subtitle && <div className="mb-7" />}
+
+        {/* Obsidian card */}
+        <div className="w-full max-w-[400px] rounded-2xl border border-white/[0.07] bg-[#161618] p-7 shadow-2xl shadow-black/70 sm:p-8">
           {children}
         </div>
       </div>
 
-      {/* Viewport Bottom Footer */}
-      <footer className="mt-12 text-center">
+      {/* ── Viewport bottom footer ── */}
+      <footer className="mt-10">
         <Link
           to="/terms"
-          className="text-xs text-zinc-500 hover:text-zinc-400 transition-colors"
+          className="text-xs text-zinc-600 transition-colors hover:text-zinc-400"
         >
           Terms of Service
         </Link>
