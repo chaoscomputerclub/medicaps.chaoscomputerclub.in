@@ -19,7 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
-import { getToken, decodeJwtPayload } from "@/lib/auth";
+import { getToken, clearToken, decodeJwtPayload } from "@/lib/auth";
 import { formatFullName, resolveAvatarUrl } from "@/lib/utils";
 import {
   ContestsHubSkeleton,
@@ -108,15 +108,28 @@ export function PortalShell() {
   const location = useLocation();
   const pathname = location.pathname;
 
+  const handleLogout = () => {
+    dispatch(logout());
+    clearToken();
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("ccc_auth_token");
+        localStorage.removeItem("ccc_member_profile");
+        sessionStorage.clear();
+      } catch {}
+      window.location.replace("/auth");
+    }
+  };
+
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      navigate("/auth");
+      window.location.replace("/auth");
       return;
     }
     dispatch(fetchMyFollowingIdsThunk());
     dispatch(fetchCurrentUserThunk());
-  }, [dispatch, navigate]);
+  }, [dispatch, location.pathname]);
 
   const token = getToken();
   const tokenPayload = token ? decodeJwtPayload(token) : null;
@@ -336,8 +349,9 @@ export function PortalShell() {
           </Link>
           <button
             type="button"
-            onClick={() => dispatch(logout())}
+            onClick={handleLogout}
             aria-label="Sign out"
+            title="Sign out of CCC Portal"
             className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
           >
             <LogOut size={16} />

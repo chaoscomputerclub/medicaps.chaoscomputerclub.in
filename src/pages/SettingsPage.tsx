@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, resolveAvatarUrl, formatFullName } from "@/lib/utils";
-import { isAuthenticated, logout } from "@/lib/auth";
+import { isAuthenticated, getToken, clearToken, logout } from "@/lib/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   checkHandleThunk,
@@ -43,6 +43,7 @@ import {
   updateProfileThunk,
   uploadAvatarThunk,
   removeAvatarThunk,
+  logout as logoutAction,
 } from "@/store/slices/authSlice";
 import { uploadMedia } from "@/lib/storage";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
@@ -237,6 +238,19 @@ export function SettingsPage() {
   const activeTab: SettingsTab =
     raw && NAV_ITEMS.some((n) => n.id === raw) ? raw : "profile";
   const setActiveTab = (t: SettingsTab) => setSearchParams({ tab: t });
+
+  const handleLogout = () => {
+    dispatch(logoutAction());
+    clearToken();
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("ccc_auth_token");
+        localStorage.removeItem("ccc_member_profile");
+        sessionStorage.clear();
+      } catch {}
+      window.location.replace("/auth");
+    }
+  };
 
   const settingsNavRef = useRef<HTMLElement | null>(null);
   const settingsItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -1028,7 +1042,7 @@ export function SettingsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => logout()}
+                    onClick={handleLogout}
                     className="text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 hover:text-red-400 hover:border-red-500/40 rounded-md gap-1.5 cursor-pointer"
                   >
                     <LogOut size={12} />

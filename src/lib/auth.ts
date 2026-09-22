@@ -346,7 +346,14 @@ export async function deleteAccount(): Promise<{ success: boolean; message: stri
 
 export function logout(): void {
   clearToken();
-  window.location.href = "/auth";
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem("ccc_auth_token");
+      localStorage.removeItem("ccc_member_profile");
+      sessionStorage.clear();
+    } catch {}
+    window.location.replace("/auth");
+  }
 }
 
 // ── Assessment APIs (Powered by Interleet Engine) ──────────────────────────

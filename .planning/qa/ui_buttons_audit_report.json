@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T12:12:46.891Z",
+  "timestamp": "2026-09-22T12:26:19.063Z",
   "totalElements": 303,
   "functionalCount": 303,
   "connectivityRate": "100.0%",
@@ -205,7 +205,7 @@
     },
     {
       "file": "src/lib/guards/AuthGuard.tsx",
-      "line": 17,
+      "line": 20,
       "tag": "<Navigate>",
       "label": "[to=/auth]",
       "handler": "\"/auth\"",
@@ -214,7 +214,7 @@
     },
     {
       "file": "src/lib/guards/AuthGuard.tsx",
-      "line": 29,
+      "line": 34,
       "tag": "<Navigate>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -277,7 +277,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 204,
+      "line": 217,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -286,7 +286,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 211,
+      "line": 224,
       "tag": "<button>",
       "label": "{open ? <X size={20} /> : <Menu size=...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -295,7 +295,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 223,
+      "line": 236,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -304,7 +304,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 236,
+      "line": 249,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -313,7 +313,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 282,
+      "line": 295,
       "tag": "<Link>",
       "label": "[to={item.to}]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -322,7 +322,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 312,
+      "line": 325,
       "tag": "<Link>",
       "label": "[to=/profile]",
       "handler": "\"/profile\"",
@@ -331,10 +331,10 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 337,
+      "line": 350,
       "tag": "<button>",
-      "label": "dispatch(logout())}\n            aria-...",
-      "handler": "{() => dispatch(logout())}",
+      "label": "button",
+      "handler": "{handleLogout}",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
@@ -2527,7 +2527,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 211,
+      "line": 212,
       "tag": "<Button>",
       "label": "{saving ? <Loader2 size={12} classNam...",
       "handler": "{onClick}",
@@ -2536,7 +2536,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 486,
+      "line": 500,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2545,7 +2545,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 492,
+      "line": 506,
       "tag": "<Link>",
       "label": "View profile",
       "handler": "\"/profile\"",
@@ -2554,7 +2554,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 533,
+      "line": 547,
       "tag": "<button>",
       "label": "{active && !item.danger && (         ...",
       "handler": "{() => setActiveTab(item.id)}",
@@ -2563,7 +2563,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 567,
+      "line": 581,
       "tag": "<button>",
       "label": "{item.label}",
       "handler": "{() => setActiveTab(item.id)}",
@@ -2572,7 +2572,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 613,
+      "line": 627,
       "tag": "<div>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && fileInputRef.current?.click()}",
@@ -2581,7 +2581,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 649,
+      "line": 663,
       "tag": "<button>",
       "label": "Remove photo",
       "handler": "{removeAvatar}",
@@ -2590,7 +2590,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 680,
+      "line": 694,
       "tag": "<SaveButton>",
       "label": "SaveButton",
       "handler": "{() => saveField(\"full_name\", { full_name: fullName.trim() })}",
@@ -2599,7 +2599,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 703,
+      "line": 717,
       "tag": "<SaveButton>",
       "label": "SaveButton",
       "handler": "{() => saveField(\"bio\", { bio: bio.trim() })}",
@@ -2608,7 +2608,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 775,
+      "line": 789,
       "tag": "<SaveButton>",
       "label": "SaveButton",
       "handler": "{() => saveField(\"github\", { github_username: github.trim() })}",
@@ -2617,7 +2617,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 783,
+      "line": 797,
       "tag": "<a>",
       "label": "github.com/ {github}",
       "handler": "{`https://github.com/${github}`}",
@@ -2626,7 +2626,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 808,
+      "line": 822,
       "tag": "<SaveButton>",
       "label": "SaveButton",
       "handler": "{() => saveField(\"linkedin\", { linkedin_url: linkedin.trim() })}",
@@ -2635,7 +2635,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 874,
+      "line": 888,
       "tag": "<Button>",
       "label": "{fieldStatus[handle] === saving ?...",
       "handler": "{saveHandle}",
@@ -2644,7 +2644,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 936,
+      "line": 950,
       "tag": "<Button>",
       "label": "Export",
       "handler": "{handleExport}",
@@ -2653,16 +2653,16 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1027,
+      "line": 1041,
       "tag": "<Button>",
       "label": "Sign out",
-      "handler": "{() => logout()}",
+      "handler": "{handleLogout}",
       "category": "CLIENT_UI_STATE",
       "description": "Controls modal, drawer, tab, or local UI state"
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1052,
+      "line": 1066,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2671,7 +2671,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1053,
+      "line": 1067,
       "tag": "<Link>",
       "label": "View my proof certificates",
       "handler": "\"/verify\"",
@@ -2680,7 +2680,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1081,
+      "line": 1095,
       "tag": "<Button>",
       "label": "Delete account",
       "handler": "none",
@@ -2689,7 +2689,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1115,
+      "line": 1129,
       "tag": "<AlertDialogCancel>",
       "label": "Cancel",
       "handler": "{() => setDeleteConfirmText(\"\")}",
@@ -2698,7 +2698,7 @@
     },
     {
       "file": "src/pages/SettingsPage.tsx",
-      "line": 1121,
+      "line": 1135,
       "tag": "<AlertDialogAction>",
       "label": "{isDeleting ? <Loader2 className=ani...",
       "handler": "{handleDelete}",
