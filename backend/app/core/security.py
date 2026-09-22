@@ -79,29 +79,10 @@ def decode_access_token(token: str) -> Optional[dict]:
 
 def is_privileged_test_member(member: Optional[object]) -> bool:
     """
-    Checks if a member has privileged TEST mode enabled.
-    Privileged test members can:
-    - Attempt assessments at any time (bypasses window restrictions, countdowns, expiration)
-    - Reattempt or reset assessments at any time
-    - Enter contest arenas at any time (bypasses status check, Top 30 restriction, and physical QR check-in)
-    - Run and submit code at any time
+    Returns True only for members whose is_core_member flag is explicitly set
+    by an admin in the database. No hardcoded user identifiers — every student,
+    including chapter leads, goes through the same eligibility gates.
     """
     if not member:
         return False
-    if getattr(member, "is_core_member", False):
-        return True
-
-    handle = (getattr(member, "handle", None) or "").strip().lower()
-    email = (getattr(member, "email", None) or "").strip().lower()
-    prn = (getattr(member, "prn", None) or "").strip().upper()
-
-    # User-specific identifiers for Santusht Kotai & chapter core leads
-    if (
-        handle in ("santusht", "santush01")
-        or "santusht" in email
-        or "en23cs301927" in email
-        or prn == "EN23CS301927"
-    ):
-        return True
-
-    return False
+    return bool(getattr(member, "is_core_member", False))

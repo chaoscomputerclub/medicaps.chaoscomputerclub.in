@@ -512,13 +512,9 @@ class ContestController:
             is_top_30_qualified = True
             is_checked_in = True
             check_in_status = "checked_in"
-            can_enter_live_contest = (contest_status == "live" and is_registered) or is_test_user
+            can_enter_live_contest = (contest_status == "live" and is_registered)
 
-            if is_test_user:
-                is_registered = True
-                can_enter_live_contest = True
-                eligibility_message = "Test mode active: full arena access unlocked."
-            elif contest_status == "upcoming":
+            if contest_status == "upcoming":
                 if not is_registered:
                     eligibility_message = "Registration is open. Register to participate in the contest."
                 else:
@@ -528,19 +524,6 @@ class ContestController:
                 eligibility_message = "Contest is live! Enter the arena now to start solving."
             else:
                 eligibility_message = "This contest has officially concluded."
-        elif is_test_user or is_dev_contest:
-            is_registered = True
-            is_top_30_qualified = True
-            is_checked_in = True
-            can_enter_live_contest = True
-            can_take_assessment = True
-            assessment_window_open = True
-            is_dev_bypass = True
-            eligibility_message = "⚡ TEST MODE ACTIVE: Full assessment & contest arena access unlocked for your account."
-        elif is_dev_bypass:
-            is_registered = True
-            can_take_assessment = not (assessment_taken or assessment_session_status in ("submitted", "disqualified"))
-            eligibility_message = "⚡ DEV BYPASS ACTIVE: Unrestricted development testing mode enabled."
         elif can_resume_assessment:
             mins_left = remaining_seconds // 60
             eligibility_message = f"⚠️ Assessment in progress ({mins_left}m remaining, Warning {anti_cheat_violations} of {max_violations}). Click 'Resume Contest' to continue."

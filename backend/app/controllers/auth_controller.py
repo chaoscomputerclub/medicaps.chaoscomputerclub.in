@@ -38,7 +38,6 @@ from app.schemas.auth import (
 logger = logging.getLogger(__name__)
 
 
-from app.core.security import is_privileged_test_member
 
 def _to_member_public(member: MemberProfile) -> MemberPublic:
     enrollment = member.prn
@@ -51,7 +50,7 @@ def _to_member_public(member: MemberProfile) -> MemberPublic:
                 match = re.search(r"(EN\d{2}[A-Z0-9]+)", prefix)
                 enrollment = match.group(1) if match else prefix
 
-    is_core = bool(getattr(member, "is_core_member", False) or is_privileged_test_member(member))
+    is_core = bool(getattr(member, "is_core_member", False))
 
     return MemberPublic(
         id=member.id,
@@ -203,15 +202,14 @@ class AuthController:
                 rating=1200,
                 peak_rating=1200,
                 is_onboarded=False,
-                is_core_member=is_privileged_test_member(email),
+                is_core_member=False,
             )
             db.add(member)
             await db.commit()
             await db.refresh(member)
             logger.info("New member created for %s", email)
         else:
-            if is_privileged_test_member(member) and not getattr(member, "is_core_member", False):
-                member.is_core_member = True
+            # is_core_member can only be granted by an admin — no auto-elevation here
             # Update last seen via ORM assignment
             member.updated_at = datetime.now(timezone.utc)
             await db.commit()
