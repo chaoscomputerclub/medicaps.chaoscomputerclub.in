@@ -47,7 +47,7 @@ async def chunked_in_query(
 ) -> List[Any]:
     """
     Query rows matching `column.in_(values)` by chunking `values` into slices of `chunk_size`.
-    Prevents SQL parser query length exhaustion (e.g. SQLite / Postgres variable limits).
+    Prevents SQL parser query length exhaustion (e.g. Postgres bind parameter limits).
     """
     if not values:
         return []

@@ -190,7 +190,7 @@ sequenceDiagram
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | React 19, TypeScript 5.8, Vite 8, Tailwind CSS v4, Radix UI Primitives, Monaco Editor, Lucide Icons, Recharts, React Router v7 |
-| **Backend API** | FastAPI, Python 3.12, Pydantic v2, SQLAlchemy 2.0 (AsyncIO), `asyncpg` / `aiosqlite`, Uvicorn |
+| **Backend API** | FastAPI, Python 3.12, Pydantic v2, SQLAlchemy 2.0 (AsyncIO), `asyncpg`, Uvicorn |
 | **Execution Engine** | `codebox-engine` (Node.js microservice), BullMQ, Docker Engine SDK, Linux cgroups, Isolate |
 | **Persistence & Cache** | PostgreSQL 16 (Cloud Production), Redis 7.0 for BullMQ queues and SWR caching |
 | **Security & Auth** | Passwordless institutional email verification (`@medicaps.ac.in` + OTP), JWT Bearer tokens, CORS regex |
@@ -257,8 +257,7 @@ medicaps.chaoscomputerclub.in/
 ### Prerequisites
 - **Node.js**: `v20.x` or `v22.x` ([Download](https://nodejs.org/))
 - **Python**: `3.11+` or `3.12` ([Download](https://www.python.org/))
-- **Docker Engine**: (Optional, required for local sandboxed code execution)
-- **PostgreSQL / SQLite**: SQLite enabled by default for local development; PostgreSQL 16 on production.
+- **Docker Engine / PostgreSQL 16**: PostgreSQL 16 is strictly required (run locally or via `docker run --name ccc-postgres -p 5432:5432 -e POSTGRES_DB=ccc_medicaps -e POSTGRES_PASSWORD=postgres -d postgres:16-alpine`).
 
 ---
 
@@ -344,7 +343,7 @@ npm run dev
 | `PORT` | Server listening port | `8000` (8002 in prod) |
 | `SECRET_KEY` | 32+ character key for JWT token signing | *(Secure random secret)* |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Lifetime of authentication sessions | `10080` (7 days) |
-| `DATABASE_URL` | SQLAlchemy async connection URI | `sqlite+aiosqlite:///./ccc_medicaps.db` |
+| `DATABASE_URL` | SQLAlchemy async connection URI (PostgreSQL 16+) | `postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps` |
 | `FRONTEND_URL` | Base URL of the client for CORS validation | `http://localhost:8081` |
 | `JUDGE_PROVIDER` | Execution backend (`codebox`, `docker`, `local`, `judge0`) | `codebox` |
 | `CODEBOX_URL` | Microservice URL for the CodeBox Engine | `http://127.0.0.1:3000` |

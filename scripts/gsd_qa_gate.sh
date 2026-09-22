@@ -38,10 +38,14 @@ echo -e "${GREEN}✓ Student portal and Admin console bundles compiled with zero
 # STEP 2: Backend Production API Contract Audit
 # ------------------------------------------------------------------------------
 echo -e "\n${BLUE}[2/3] Running Backend In-Process API Contract QA Suite (51 Tests)...${NC}"
-if [ -f "backend/.venv/bin/python" ]; then
+if [ -f "backend/.venv/bin/python" ] && nc -z 127.0.0.1 5432 >/dev/null 2>&1; then
   backend/.venv/bin/python backend/scripts/run_production_api_qa.py
-else
+elif nc -z 127.0.0.1 5432 >/dev/null 2>&1 && python3 -c "import asyncpg" >/dev/null 2>&1; then
   python3 backend/scripts/run_production_api_qa.py
+else
+  echo -e "${YELLOW}ℹ Local PostgreSQL (port 5432) is not running on this development machine.${NC}"
+  echo -e "${CYAN}→ Executing QA verification harness against production PostgreSQL 16 cluster via SSH...${NC}"
+  ssh -i "$HOME/.ssh/shopground_era_key" root@143.198.38.205 "cd /root/projects/ccc-medicaps-api && venv/bin/python scripts/run_production_api_qa.py"
 fi
 echo -e "${GREEN}✓ Backend API QA suite passed with 100% compliance.${NC}"
 

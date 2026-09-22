@@ -292,9 +292,8 @@ class TournamentQAService:
 
         logger.info("✓ [TOURNAMENT SIM] 110 cadet profiles confirmed and ready.")
 
-        # Clean existing test records for tournament isolation
-        # SQLite does NOT cascade FK deletes without PRAGMA foreign_keys = ON.
-        # Explicitly delete all child tables before deleting OfflineContest.
+        # Clean existing test records for tournament isolation.
+        # Explicitly delete all child tables in topological order before deleting OfflineContest.
         cadet_ids = [c.id for c in cadets]
         old_contest_res = await db.execute(
             select(OfflineContest.id).where(OfflineContest.slug.like("ccc-arena-contest-%"))

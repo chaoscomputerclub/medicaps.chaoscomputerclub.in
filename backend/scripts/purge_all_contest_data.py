@@ -2,7 +2,7 @@
 Chaos Computer Club India — Medi-Caps Chapter
 Standalone Database Purge Script
 Strictly purges all contest, problem, submission, scoreboard, and assessment records
-from the active database (PostgreSQL on production, SQLite on local).
+from the active PostgreSQL database.
 """
 
 import asyncio

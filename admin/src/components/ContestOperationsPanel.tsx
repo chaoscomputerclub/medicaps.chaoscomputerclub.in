@@ -652,7 +652,7 @@ export function ContestOperationsPanel({
                 <Server className="w-3 h-3 text-emerald-400" /> Host: 143.198.38.205
               </span>
               <span className="flex items-center gap-1">
-                <Database className="w-3 h-3 text-cyan-400" /> SQLite WAL Synced
+                <Database className="w-3 h-3 text-cyan-400" /> PostgreSQL 16 Active
               </span>
             </div>
             <button

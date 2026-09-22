@@ -137,5 +137,5 @@ The platform establishes clean, explicit permission tiers:
 
 - **Performance:** Sub-100ms API response latency on cached endpoints; sub-2.5s code sandbox execution cycle.
 - **Aesthetics & Anti-Slop:** Strict compliance with `DESIGN.md` (Obsidian palette, electric lime accents, tabular monospace numerals, zero generic AI placeholders).
-- **Resilience:** Automatic failover between primary PostgreSQL and local SQLite databases; Redis SWR caching with graceful degradation.
+- **Resilience:** High-throughput PostgreSQL 16 connection pooling with pre-ping validation; Redis SWR caching with graceful degradation.
 - **Automated Verification:** All code modifications must pass the 4-stage automated QA gatekeeper (`./scripts/gsd_qa_gate.sh`) prior to production deployment.

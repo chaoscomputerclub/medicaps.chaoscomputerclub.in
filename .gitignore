@@ -35,9 +35,9 @@ dist-ssr
 .venv/
 __pycache__/
 *.pyc
-*.db
+*.db*
 backend/.venv/
-backend/*.db
+backend/*.db*
 backend/__pycache__/
 backend/*/__pycache__/
 backend/*/*/__pycache__/

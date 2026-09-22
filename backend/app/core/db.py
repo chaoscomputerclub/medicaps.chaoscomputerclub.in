@@ -12,38 +12,43 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import declarative_base
 from app.core.config import settings, BASE_DIR
 
-db_url = settings.DATABASE_URL
-if "sqlite" in db_url and "///./" in db_url:
-    rel_path = db_url.split("///./")[-1]
-    backend_db = BASE_DIR / rel_path
-    db_url = f"sqlite+aiosqlite:///{backend_db}"
+db_url = settings.DATABASE_URL.strip()
 
-# Engine configuration
-engine_kwargs = {
-    "echo": False,
-    "future": True,
-}
-if "sqlite" in db_url:
-    engine_kwargs["connect_args"] = {"check_same_thread": False}
-else:
-    engine_kwargs["pool_size"] = 20
-    engine_kwargs["max_overflow"] = 30
-    engine_kwargs["pool_pre_ping"] = True
-    engine_kwargs["pool_recycle"] = 1800
-    engine_kwargs["pool_timeout"] = 10
+# Validate and normalize PostgreSQL connection URI
+if "sqlite" in db_url.lower():
+    raise RuntimeError(
+        "\n" + "=" * 80 + "\n"
+        "❌ SQLITE HAS BEEN REMOVED — POSTGRESQL 16+ REQUIRED\n"
+        "Chaos Computer Club Medi-Caps Chapter backend strictly uses PostgreSQL 16+.\n\n"
+        "Please configure a valid PostgreSQL async URI in backend/.env:\n"
+        "  DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps\n\n"
+        "To quickly spin up a local PostgreSQL 16 container with Docker:\n"
+        "  docker run --name ccc-postgres -p 5432:5432 -e POSTGRES_DB=ccc_medicaps -e POSTGRES_PASSWORD=postgres -d postgres:16-alpine\n"
+        + "=" * 80 + "\n"
+    )
 
-engine = create_async_engine(db_url, **engine_kwargs)
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
-from sqlalchemy import event
+if not db_url.startswith("postgresql+asyncpg://"):
+    raise RuntimeError(
+        f"Invalid DATABASE_URL scheme '{db_url.split('://')[0]}'. "
+        "CCC Medi-Caps backend requires 'postgresql+asyncpg://...' (PostgreSQL 16+ with asyncpg)."
+    )
 
-if "sqlite" in db_url:
-    @event.listens_for(engine.sync_engine, "connect")
-    def set_sqlite_pragma(dbapi_connection, connection_record):
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL")
-        cursor.execute("PRAGMA synchronous=NORMAL")
-        cursor.execute("PRAGMA busy_timeout=30000")
-        cursor.close()
+# High-concurrency connection pool tuned for PostgreSQL 16
+engine = create_async_engine(
+    db_url,
+    echo=False,
+    future=True,
+    pool_size=20,
+    max_overflow=30,
+    pool_pre_ping=True,
+    pool_recycle=1800,
+    pool_timeout=10,
+)
 
 # Async session factory
 AsyncSessionLocal = async_sessionmaker(
