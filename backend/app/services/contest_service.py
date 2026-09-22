@@ -140,7 +140,7 @@ class ContestService:
                     "assessment_score": reg.assessment_score,
                     "assessment_rank": reg.assessment_rank,
                     "is_top_30_qualified": reg.is_top_30_qualified,
-                    "can_enter_live_contest": reg.is_top_30_qualified or contest.status == "live",
+                    "can_enter_live_contest": contest.status == "live",
                     "seat_assigned": reg.seat_assigned or (c_pass.seat_number if c_pass else None),
                     "campus_pass_code": reg.campus_pass_code or (c_pass.pass_code if c_pass else None),
                     "checked_in_at": reg.checked_in_at.isoformat() if reg.checked_in_at else None,

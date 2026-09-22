@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { contestApi } from "@/features/contest/api";
 import { useSwrData } from "@/lib/cache/swrCache";
-import { ArrowLeft, Award, Crown, Lock, Search, Trophy } from "lucide-react";
+import { ArrowLeft, Award, Crown, Search, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -135,29 +135,10 @@ export function ContestResultsPage() {
             </span>
           }
           title={contest ? `${contest.title} Standings` : "Contest Standings"}
-          description="Verified algorithmic tournament rankings. Ranked by total points, then penalty time."
+          description="Official contest standings. Ranked by total points, then penalty time."
         />
       )}
 
-      {/* Sealed Notice */}
-      {!ranking.released && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-black p-4 font-mono">
-          <Lock className="mt-0.5 size-4 shrink-0 text-amber-400" />
-          <div className="space-y-0.5">
-            <p className="text-xs font-semibold text-white uppercase tracking-wider">
-              Scoreboard Sealed
-            </p>
-            <p className="text-xs text-zinc-400">
-              {ranking.message ?? "Standings are being verified while live contest evaluations finalize."}
-            </p>
-            {ranking.releases_at && (
-              <p className="text-xs text-lime-400 pt-1">
-                Publishes: {new Date(ranking.releases_at).toLocaleString("en-IN")}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Filters + Search */}
       <div className="flex flex-wrap items-center gap-3">

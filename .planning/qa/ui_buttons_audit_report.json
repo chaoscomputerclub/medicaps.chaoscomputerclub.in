@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T15:43:33.776Z",
+  "timestamp": "2026-09-22T15:52:27.345Z",
   "totalElements": 304,
   "functionalCount": 304,
   "connectivityRate": "100.0%",
@@ -1726,7 +1726,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 166,
+      "line": 147,
       "tag": "<button>",
       "label": "All",
       "handler": "{() => setDeptFilter(\"all\")}",
@@ -1735,7 +1735,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 178,
+      "line": 159,
       "tag": "<button>",
       "label": "{dept}",
       "handler": "{() => setDeptFilter(dept)}",
@@ -1744,7 +1744,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 245,
+      "line": 226,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1753,7 +1753,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 246,
+      "line": 227,
       "tag": "<Link>",
       "label": "Contest Details",
       "handler": "{`/contests/${contestSlug}`}",
@@ -1762,7 +1762,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 248,
+      "line": 229,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1771,7 +1771,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 249,
+      "line": 230,
       "tag": "<Link>",
       "label": "University Leaderboard →",
       "handler": "\"/leaderboard\"",
@@ -1780,7 +1780,7 @@
     },
     {
       "file": "src/pages/ContestResultsPage.tsx",
-      "line": 281,
+      "line": 262,
       "tag": "<Link>",
       "label": "{row.full_name}",
       "handler": "{`/profile/${row.handle}`}",
