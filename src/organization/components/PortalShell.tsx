@@ -135,6 +135,7 @@ export function PortalShell() {
   const tokenPayload = token ? decodeJwtPayload(token) : null;
   const fallbackHandle = tokenPayload?.handle || (tokenPayload?.email ? tokenPayload.email.split("@")[0] : "Cadet");
   const displayHandle = member?.handle || fallbackHandle;
+  const displayEmail = member?.email || tokenPayload?.email || (tokenPayload?.sub && String(tokenPayload.sub).includes("@") ? String(tokenPayload.sub) : "");
   const formattedName = formatFullName(member?.full_name);
   const initials = formattedName
     ? formattedName
@@ -342,8 +343,11 @@ export function PortalShell() {
               <span className="block font-sans text-xs font-medium text-white truncate">
                 {formattedName || displayHandle}
               </span>
-              <span className="block font-sans text-[10px] text-lime-400 truncate tabular-nums">
-                {member?.rating ? `${member.rating} Elo` : "@" + displayHandle}
+              <span
+                className="block font-sans text-[10px] text-zinc-400 truncate"
+                title={displayEmail || `@${displayHandle}`}
+              >
+                {displayEmail || `@${displayHandle}`}
               </span>
             </div>
           </Link>
