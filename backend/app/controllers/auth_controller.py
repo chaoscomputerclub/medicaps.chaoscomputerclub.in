@@ -44,7 +44,12 @@ def _to_member_public(member: MemberProfile) -> MemberPublic:
     enrollment = member.prn
     if not enrollment or enrollment in ("N/A", "—"):
         if member.email and "@" in member.email:
-            enrollment = member.email.split("@")[0].upper()
+            prefix = member.email.split("@")[0].upper()
+            if prefix.startswith("EN") or prefix.startswith("0827"):
+                enrollment = prefix
+            elif "EN23" in prefix or "EN22" in prefix or "EN24" in prefix or "EN25" in prefix:
+                match = re.search(r"(EN\d{2}[A-Z0-9]+)", prefix)
+                enrollment = match.group(1) if match else prefix
 
     is_core = bool(getattr(member, "is_core_member", False) or is_privileged_test_member(member))
 
@@ -556,6 +561,9 @@ class AuthController:
                 prefix = current_member.email.split("@")[0].upper()
                 if prefix.startswith("EN") or prefix.startswith("0827"):
                     enrollment_val = prefix
+                elif "EN23" in prefix or "EN22" in prefix or "EN24" in prefix or "EN25" in prefix:
+                    match = re.search(r"(EN\d{2}[A-Z0-9]+)", prefix)
+                    enrollment_val = match.group(1) if match else prefix
 
         # Query attended scoreboards / battles
         sb_rows = await db.execute(

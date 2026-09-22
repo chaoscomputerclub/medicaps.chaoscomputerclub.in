@@ -59,9 +59,15 @@ export function getStoredMember(): Member | null {
 }
 
 export function setToken(token: string, member?: Member | null): void {
+  if (typeof window === "undefined") return;
   localStorage.setItem(TOKEN_KEY, token);
   if (member) {
     localStorage.setItem(MEMBER_KEY, JSON.stringify(member));
+  }
+  try {
+    sessionStorage.removeItem("__ccc_swr_cache__");
+  } catch {
+    // Ignore storage issues
   }
 }
 
@@ -75,8 +81,14 @@ export function setStoredMember(member: Member | null): void {
 }
 
 export function clearToken(): void {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(MEMBER_KEY);
+  try {
+    sessionStorage.removeItem("__ccc_swr_cache__");
+  } catch {
+    // Ignore storage issues
+  }
 }
 
 /**

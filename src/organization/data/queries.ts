@@ -87,6 +87,11 @@ let publicRecordsCache: { data: any; timestamp: number } | null = null;
 
 export async function fetchFullProfileData(force = false): Promise<FullProfilePayload> {
   if (typeof window !== "undefined") {
+    if (force) {
+      fullProfileCache = null;
+      fullProfilePromise = null;
+    }
+
     // 1. Check in-memory memoized cache
     if (!force && fullProfileCache && Date.now() - fullProfileCache.timestamp < CACHE_TTL) {
       return fullProfileCache.data;
@@ -112,7 +117,7 @@ export async function fetchFullProfileData(force = false): Promise<FullProfilePa
     const apiBase = getApiBase();
     fullProfilePromise = (async () => {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
+      const timer = setTimeout(() => controller.abort(), 10000);
       try {
         const res = await fetch(`${apiBase}/auth/profile/full`, {
           headers: {
@@ -393,7 +398,8 @@ export const portalQueries = {
 
 export function invalidateFullProfileCache(): void {
   fullProfileCache = null;
-  invalidateSwrCache("member:profile:full");
+  fullProfilePromise = null;
+  invalidateSwrCache("member:profile:*");
   invalidateSwrCache("student:profile:*");
   invalidateSwrCache("leaderboard:*");
 }

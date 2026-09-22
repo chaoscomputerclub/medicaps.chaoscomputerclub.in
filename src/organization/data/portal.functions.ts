@@ -96,22 +96,26 @@ export async function getPublicPortalData(force = false) {
  */
 export async function getMemberProfileData(force = false) {
   const token = getToken();
-  const cacheKey = "member:profile:full";
+  if (!token) {
+    return {
+      member: null,
+      ratingHistory: [],
+      history: [],
+      recentBattles: [],
+      battles: [],
+      campusPass: null,
+      proofs: [],
+      achievements: [],
+    };
+  }
 
+  const cacheKey = "member:profile:full";
   return swrFetch(
     cacheKey,
     async () => {
       const backendUrl = getApiBase();
-      if (!token) {
-        return {
-          member: null,
-          ratingHistory: [],
-          recentBattles: [],
-          campusPass: null,
-          proofs: [],
-          achievements: [],
-        };
-      }
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
 
       try {
         const res = await fetch(`${backendUrl}/auth/profile/full`, {
@@ -119,7 +123,9 @@ export async function getMemberProfileData(force = false) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          signal: controller.signal,
         });
+        clearTimeout(timer);
         if (res.status === 401) {
           clearToken();
           if (typeof window !== "undefined") {
@@ -154,7 +160,7 @@ export async function getMemberProfileData(force = false) {
           };
         }
       } catch {
-        // Fallback on network failure
+        clearTimeout(timer);
       }
 
       return {
@@ -169,10 +175,10 @@ export async function getMemberProfileData(force = false) {
       };
     },
     {
-      staleTime: 20000, // 20 seconds
+      staleTime: 30000,
       ttl: 300000,
       forceRefresh: force,
-      persistSession: true,
+      persistSession: false,
     }
   );
 }

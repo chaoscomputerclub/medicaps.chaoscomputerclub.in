@@ -281,6 +281,7 @@ export const authSlice = createSlice({
       state.token = action.payload;
       state.isAuthenticated = true;
       persistToken(action.payload);
+      invalidateFullProfileCache();
     },
     logout(state) {
       removePersistedToken();
@@ -292,6 +293,7 @@ export const authSlice = createSlice({
       state.otp = "";
       state.message = null;
       state.devOtp = null;
+      invalidateFullProfileCache();
     },
   },
   extraReducers: (builder) => {
@@ -344,6 +346,7 @@ export const authSlice = createSlice({
           state.name = "";
         }
       }
+      invalidateFullProfileCache();
       state.message = null;
     });
     builder.addCase(verifyOtpThunk.rejected, (state, action) => {

@@ -17,13 +17,16 @@ export function isEnrollmentId(name?: string | null): boolean {
 
 /**
  * Gracefully formats user full name into Title Case, handling mixed casing (e.g. "santusht Kotai" -> "Santusht Kotai").
+ * Accepts single or multiple name parts (e.g. formatFullName(first, last) or formatFullName(fullName)).
  * Strictly rejects enrollment IDs, placeholders, and cadet fallbacks.
  */
-export function formatFullName(name?: string | null): string {
-  if (!name || typeof name !== "string") return "";
-  const trimmed = name.trim();
-  if (!trimmed || trimmed.toLowerCase() === "cadet" || isEnrollmentId(trimmed)) return "";
-  return trimmed
+export function formatFullName(...parts: (string | null | undefined)[]): string {
+  const combined = parts
+    .filter((p): p is string => Boolean(p && typeof p === "string" && p.trim()))
+    .join(" ")
+    .trim();
+  if (!combined || combined.toLowerCase() === "cadet" || isEnrollmentId(combined)) return "";
+  return combined
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");

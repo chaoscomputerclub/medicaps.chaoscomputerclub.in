@@ -23,10 +23,11 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const currentMember = useAppSelector((s) => s.auth.member);
 
+  const authed = isAuthenticated();
   const { data: profile, loading: profileLoading } = useSwrData<FullProfilePayload | null>(
-    "member:profile:full",
+    authed ? "member:profile:full" : null,
     () => fetchFullProfileData(),
-    { ttl: 5 * 60 * 1000 }
+    { ttl: 5 * 60 * 1000, enabled: authed }
   );
 
   const { data: publicDataRaw, loading: publicLoading } = useSwrData<{

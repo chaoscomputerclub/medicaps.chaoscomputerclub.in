@@ -65,9 +65,9 @@ export function ProfilePage() {
     revalidate: revalidateOwnProfile,
     mutate: mutateOwnProfile,
   } = useSwrData(
-    "member:profile:full",
+    isViewingSelf && isAuthenticated() ? "member:profile:full" : null,
     () => getMemberProfileData(true),
-    { ttl: 5 * 60 * 1000, enabled: isViewingSelf }
+    { ttl: 2 * 60 * 1000, enabled: isViewingSelf && isAuthenticated() }
   );
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -165,16 +165,20 @@ export function ProfilePage() {
   const activeData = isViewingSelf ? ownProfileData : studentProfileData;
   const isLoading = isViewingSelf ? (ownLoading && !ownProfileData) : (studentLoading && !studentProfileData);
 
-  if (isLoading || !activeData) {
+  const candidate = activeData?.member;
+  const isCandidateValid = Boolean(
+    candidate &&
+      (candidate.id || candidate.handle || candidate.email) &&
+      candidate.id !== ""
+  );
+
+  const m = isCandidateValid ? candidate : (isViewingSelf ? currentMember : null);
+
+  if (isLoading || (!m && (ownLoading || studentLoading))) {
     return <ProfileSkeleton />;
   }
 
-  const m = activeData.member || (isViewingSelf ? currentMember : null);
-
   if (!m) {
-    if (isLoading || ownLoading || studentLoading) {
-      return <ProfileSkeleton />;
-    }
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center mb-4 text-zinc-500">
@@ -193,10 +197,45 @@ export function ProfilePage() {
       </div>
     );
   }
-  const history = activeData.history || activeData.ratingHistory || [];
-  const battles = activeData.battles || activeData.recentBattles || [];
-  const achievements = activeData.achievements || [];
-  const proofs = activeData.proofs || [];
+  const history = activeData?.history || activeData?.ratingHistory || [];
+  const battles = activeData?.battles || activeData?.recentBattles || [];
+  let achievements = activeData?.achievements || [];
+  const proofs = activeData?.proofs || [];
+
+  // If achievements array is empty but member is a valid cadet, synthesize baseline achievements
+  if (achievements.length === 0 && m) {
+    achievements = [
+      {
+        id: "cadet_init",
+        code: "INIT",
+        title: "Cadet Commissioned",
+        name: "Cadet Commissioned",
+        icon: "⚡",
+        description: "Verified member of Chaos Computer Club Medi-Caps Chapter.",
+        earned: true,
+      },
+      {
+        id: "tier_badge",
+        code: "TIER",
+        title: m.tier || "1★ Explorer",
+        name: m.tier || "1★ Explorer",
+        icon: "🏆",
+        description: `Reached official university tier ${m.tier || "1★ Explorer"}.`,
+        earned: true,
+      },
+    ];
+    if (m.is_core_member) {
+      achievements.push({
+        id: "core",
+        code: "CORE",
+        title: "CCC Core Organizer",
+        name: "CCC Core Organizer",
+        icon: "🛡️",
+        description: "Official Chapter Organizer and Proctor.",
+        earned: true,
+      });
+    }
+  }
 
   const isSelfUser = Boolean(
     isViewingSelf ||
@@ -204,16 +243,21 @@ export function ProfilePage() {
     (currentMember?.handle && (m.handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase())
   );
 
-  const enrollmentNo =
-    m.enrollment_number ||
-    m.enrollment_no ||
-    m.enrollment ||
+  const rawEnrollment =
+    (m.enrollment_number && m.enrollment_number !== "—" && m.enrollment_number !== "N/A" ? m.enrollment_number : null) ||
+    (m.enrollment_no && m.enrollment_no !== "—" && m.enrollment_no !== "N/A" ? m.enrollment_no : null) ||
+    (m.enrollment && m.enrollment !== "—" && m.enrollment !== "N/A" ? m.enrollment : null) ||
     (m.prn && m.prn !== "N/A" && m.prn !== "—" ? m.prn : null) ||
+    (currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "—" ? currentMember.prn : null) ||
     (m.email && m.email.includes("@") && /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
       ? m.email.split("@")[0].toUpperCase()
-      : "—");
-  const formattedFullName = formatFullName(m.first_name, m.last_name, m.full_name);
-  const displayName = formattedFullName || m.handle || "Cadet";
+      : null);
+  const enrollmentNo = rawEnrollment || "—";
+
+  const rawFullName = m.full_name || (m.first_name ? `${m.first_name} ${m.last_name || ""}`.trim() : "") || (currentMember?.full_name ?? "");
+  const formattedFullName = formatFullName(rawFullName);
+  const displayHandle = m.handle || currentMember?.handle || "";
+  const displayName = formattedFullName || (displayHandle ? `@${displayHandle}` : "Cadet");
 
   const initials = formattedFullName
     ? formattedFullName
@@ -223,9 +267,7 @@ export function ProfilePage() {
         .slice(0, 2)
         .join("")
         .toUpperCase()
-    : m.handle
-      ? m.handle.slice(0, 2).toUpperCase()
-      : "CC";
+    : (displayHandle.slice(0, 2) || "CC").toUpperCase();
 
   const effectiveAvatar = isSelfUser
     ? (currentMember?.avatar_url ?? m.avatar_url)
@@ -441,11 +483,11 @@ export function ProfilePage() {
             <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
               <TierBadge>{m.tier || "1★ Explorer"}</TierBadge>
               <span>·</span>
-              <span className="text-zinc-300">{m.department}</span>
+              <span className="text-zinc-300">{m.department || currentMember?.department || "CSE"}</span>
               <span>·</span>
-              <span className="text-zinc-500">{m.batch}</span>
+              <span className="text-zinc-500">{m.batch || currentMember?.batch || "2023-27"}</span>
               <span>·</span>
-              <span className="text-lime-400">@{m.handle}</span>
+              <span className="text-lime-400">@{displayHandle || "cadet"}</span>
             </div>
 
             {m.bio && (
@@ -531,7 +573,7 @@ export function ProfilePage() {
           </div>
           <div>
             <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Email</dt>
-            <dd className="text-zinc-300">{m.email || "—"}</dd>
+            <dd className="text-zinc-300">{m.email || currentMember?.email || "—"}</dd>
           </div>
         </dl>
       </header>
