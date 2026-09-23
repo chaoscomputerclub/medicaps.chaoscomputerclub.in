@@ -33,6 +33,7 @@ import { ContestsHubSkeleton, Skeleton } from "@/organization/components/skeleto
 import { PageHeader, SectionHeader } from "@/organization/components/ui";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
+import LightRays from './LightRays';
 
 function useCountdown(
   targetIsoDate: string | null | undefined,
@@ -333,7 +334,31 @@ export function ContestsHubPage() {
   if (isLoading && contests.length === 0) return <ContestsHubSkeleton />;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+    <div className="relative min-h-screen">
+      {/* ─── CONTEST ROOT PAGE BACKGROUND (LIGHT RAYS) ─── */}
+      <div
+        className="pointer-events-none absolute inset-x-0 -top-8 flex justify-center overflow-hidden z-0"
+        style={{ width: "100%", height: "600px", position: "absolute" }}
+        aria-hidden="true"
+      >
+        <div style={{ width: "100%", height: "600px", position: "relative" }}>
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#CBFF00"
+            raysSpeed={0.5}
+            lightSpread={0.8}
+            rayLength={1.3}
+            followMouse={true}
+            mouseInfluence={0}
+            noiseAmount={0.1}
+            distortion={0.05}
+            className="custom-rays opacity-60"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black pointer-events-none" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
 
       {/* ─── HERO HEADER ─────────────────────────────── */}
       <PageHeader
@@ -709,5 +734,6 @@ export function ContestsHubPage() {
         </aside>
       </div>
     </div>
+  </div>
   );
 }
