@@ -5,10 +5,4 @@
   pointer-events: none;
   z-index: 3;
   overflow: hidden;
-  background-color: transparent !important;
-}
-
-.light-rays-container canvas {
-  background-color: transparent !important;
-  pointer-events: none !important;
 }
