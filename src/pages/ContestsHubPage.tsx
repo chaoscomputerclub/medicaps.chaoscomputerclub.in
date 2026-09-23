@@ -345,14 +345,14 @@ export function ContestsHubPage() {
           <LightRays
             raysOrigin="top-center"
             raysColor="#CBFF00"
-            raysSpeed={0.5}
+            raysSpeed={2}
             lightSpread={0.8}
-            rayLength={1.3}
+            rayLength={1.2}
             followMouse={true}
             mouseInfluence={0}
             noiseAmount={0.1}
             distortion={0.05}
-            className="custom-rays opacity-60"
+            className="custom-rays"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black pointer-events-none" />
