@@ -31,6 +31,13 @@ REMOTE_ADMIN_DIR="/var/www/ccc-medicaps-admin"
 
 COMMIT_MSG="${1:-feat: sync latest changes and deploy via GSD framework}"
 
+if [ "${ALLOW_GSD_SYNC:-0}" != "1" ]; then
+  echo -e "${YELLOW}🛑 GSD Pipeline is currently TURNED OFF.${NC}"
+  echo -e "Automatic pushes and remote server deployments are disabled."
+  echo -e "To explicitly run this pipeline, execute: ALLOW_GSD_SYNC=1 ./scripts/gsd_sync.sh \"$COMMIT_MSG\""
+  exit 0
+fi
+
 echo -e "${CYAN}================================================================${NC}"
 echo -e "${CYAN}   🚀 CCC MEDI-CAPS — GET SHIT DONE (GSD) SYNC PIPELINE        ${NC}"
 echo -e "${CYAN}================================================================${NC}"

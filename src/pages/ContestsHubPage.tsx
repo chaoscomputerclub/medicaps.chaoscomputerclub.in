@@ -328,9 +328,9 @@ export function ContestsHubPage() {
           <LightRays
             raysOrigin="top-center"
             raysColor="#CBFF00"
-            raysSpeed={0.5}
+            raysSpeed={2}
             lightSpread={0.8}
-            rayLength={1.3}
+            rayLength={1.2}
             followMouse={true}
             mouseInfluence={0}
             noiseAmount={0.1}
@@ -338,6 +338,7 @@ export function ContestsHubPage() {
             className="custom-rays"
           />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black pointer-events-none" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-10">

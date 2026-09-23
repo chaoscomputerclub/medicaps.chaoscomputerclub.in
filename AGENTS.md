@@ -11,18 +11,19 @@
 
 <!-- LOVABLE:END -->
 
-# ⚡ GET SHIT DONE (GSD) PROTOCOL & GITHUB CONTINUOUS SYNC
+# ⚡ DEVELOPMENT PROTOCOL (GSD PIPELINE DISABLED)
 
-## 1. Always Push to GitHub & Pull to Server
-All code modifications MUST be pushed to GitHub (`origin/main`) and pulled to the production server (`root@143.198.38.205`) using:
-```bash
-./scripts/gsd_sync.sh "commit message"
-```
+## 1. Local Development Only (Sync Pipeline OFF)
+The automated GSD continuous sync pipeline (`./scripts/gsd_sync.sh`, auto-pushing to `origin/main`, and auto-pulling/deploying to production server `root@143.198.38.205`) is **TURNED OFF**.
+- DO NOT automatically commit or push code changes to GitHub.
+- DO NOT automatically SSH or deploy to the production server.
+- All development, verification, and testing must remain strictly local.
+- Code pushes and deployments should only occur when explicitly instructed by the user.
 
-## 2. Core GSD Principles
+## 2. Core Engineering Principles
 - **Bias for Action**: Directly investigate root causes and fix them completely.
 - **Production Standard**: Zero placeholders, zero TODOs in user paths, resilient error handling.
-- **Verification**: Run `npm run build` locally and verify live endpoints after deployment.
+- **Verification**: Run `npm run build` or relevant tests locally to verify code correctness.
 
 ## 3. Mandatory Frontend Standards: Anti-Slop & Web Interface Guidelines
 
