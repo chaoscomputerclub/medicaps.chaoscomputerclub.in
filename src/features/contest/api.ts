@@ -122,11 +122,12 @@ export const contestApi = {
           raw = [];
         }
 
-        // Filter out obsolete standalone screening or dev records
+        // Filter out obsolete standalone screening, dev records, and deprecated biweekly
         const filtered = raw.filter((r) => {
           const slug = String(r["slug"] ?? "").toLowerCase();
           const title = String(r["title"] ?? "").toLowerCase();
           if (slug === "dev-assessment-round" || slug === "dev-offline-final") return false;
+          if (slug === "biweekly-contest-1") return false; // deprecated
           if (title.startsWith("[dev] round 1") || title.startsWith("[dev] round 2")) return false;
           return true;
         });

@@ -346,21 +346,25 @@ async def launch_contests(force: bool = False):
     await init_db()
 
     async with AsyncSessionLocal() as db:
-        # Check if canonical weekly-contest-1 and biweekly-contest-1 already exist
+        # Check if canonical weekly-contest-1 already exists
         weekly_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == "weekly-contest-1"))
         existing_weekly = weekly_res.scalars().first()
 
-        biweekly_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == "biweekly-contest-1"))
-        existing_biweekly = biweekly_res.scalars().first()
+        # Remove any lingering biweekly contest (deprecated)
+        bw_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == "biweekly-contest-1"))
+        existing_biweekly = bw_res.scalars().first()
+        if existing_biweekly:
+            await db.execute(delete(OfflineContest).where(OfflineContest.slug == "biweekly-contest-1"))
+            await db.commit()
+            print("\n🗑️  Removed deprecated Biweekly Contest 1 from production DB.")
 
         now = datetime.now(timezone.utc)
 
-        # If both canonical contests exist, are in the future, and force is False, keep them
-        if existing_weekly and existing_biweekly and not force:
-            if existing_weekly.ends_at > now and existing_biweekly.ends_at > now:
-                print("\n🔒 [IMMUTABLE TIMERS ACTIVE]")
-                print(f"  ✓ Weekly:   {existing_weekly.title} (Starts: {existing_weekly.starts_at})")
-                print(f"  ✓ Biweekly: {existing_biweekly.title} (Starts: {existing_biweekly.starts_at})")
+        # If canonical weekly contest already exists and is upcoming/live, preserve it
+        if existing_weekly and not force:
+            if existing_weekly.ends_at > now:
+                print("\n🔒 [IMMUTABLE TIMER ACTIVE]")
+                print(f"  ✓ Weekly: {existing_weekly.title} (Starts: {existing_weekly.starts_at})")
                 return
 
         print("\n🔹 Purging legacy contest records for clean canonical schedule...")
@@ -368,11 +372,11 @@ async def launch_contests(force: bool = False):
         print("  ✓ Old contest data purged cleanly.")
 
         # =====================================================================
-        # 1. WEEKLY CONTEST 1 (Wednesday 3:00 PM – 4:30 PM IST)
+        # WEEKLY CONTEST 1 (Wednesday 3:00 PM – 4:30 PM IST)
         # =====================================================================
         weekly_starts, weekly_ends, weekly_checkin, w_assess_opens, w_assess_closes = get_next_wednesday_schedule()
 
-        print("\n🔹 [1/2] Creating Weekly Contest 1 (Canonical Wednesday Schedule)...")
+        print("\n🔹 [1/1] Creating Weekly Contest 1 (Canonical Wednesday Schedule)...")
         print(f"  Starts at (UTC): {weekly_starts.isoformat()} (Wednesday 3:00 PM IST)")
         print(f"  Ends at (UTC):   {weekly_ends.isoformat()} (Wednesday 4:30 PM IST)")
 
@@ -465,104 +469,6 @@ async def launch_contests(force: bool = False):
 
         print("  ✓ Weekly Contest 1 and 4 LeetCode-style problems created.")
 
-        # =====================================================================
-        # 2. BIWEEKLY CONTEST 1 (Saturday 8:00 PM – 10:00 PM IST)
-        # =====================================================================
-        bw_starts, bw_ends, bw_checkin, bw_assess_opens, bw_assess_closes = get_next_saturday_schedule()
-
-        print("\n🔹 [2/2] Creating Biweekly Contest 1 (Saturday 8:00 PM IST)...")
-        print(f"  Starts at (UTC): {bw_starts.isoformat()} (Saturday 8:00 PM IST)")
-        print(f"  Ends at (UTC):   {bw_ends.isoformat()} (Saturday 10:00 PM IST)")
-
-        biweekly_contest = OfflineContest(
-            slug="biweekly-contest-1",
-            title="CCC Biweekly Contest 1",
-            season="Season 2026",
-            status="upcoming",
-            division="open",
-            cadence="biweekly",
-            edition=1,
-            starts_at=bw_starts,
-            ends_at=bw_ends,
-            check_in_opens_at=bw_checkin,
-            venue="Online Arena · Open to All Students",
-            seat_capacity=1000,
-            registered_count=0,
-            problem_count=4,
-            environment="Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
-            chief_proctors=["Dr. Ratnesh Litoriya (Chief Proctor)", "Prof. Sanjeev Sharma", "Prof. Amit Shrivastava"],
-            prize_pool="₹25,000 Cash Prize + Merit Badges",
-            sponsor="Chaos Computer Club Medi-Caps Chapter",
-            summary="Saturday night algorithmic clash. Biweekly #1 featuring 4 competitive challenges designed by the CCC competitive wing for Medi-Caps university cadets.",
-            rules=[
-                "Schedule: Saturday from 8:00 PM to 10:00 PM IST in the online arena.",
-                "Format: 4 algorithmic problems ranging from Easy to Hard in a 120-minute live session.",
-                "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
-                "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
-                "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
-            ],
-            created_at=now_utc(),
-        )
-        db.add(biweekly_contest)
-        await db.flush()
-
-        biweekly_assessment = Assessment(
-            contest_id=biweekly_contest.id,
-            slug="biweekly-contest-1",
-            title="Biweekly Contest 1 — Live Algorithmic Arena",
-            summary="Official biweekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 120 minutes.",
-            duration_minutes=120,
-            starts_at=bw_assess_opens,
-            ends_at=bw_assess_closes,
-            is_active=True,
-            max_violations=3,
-            created_at=now_utc(),
-        )
-        db.add(biweekly_assessment)
-        await db.flush()
-
-        for p_data in OFFICIAL_BIWEEKLY_PROBLEMS:
-            ap = AssessmentProblem(
-                assessment_id=biweekly_assessment.id,
-                problem_index=p_data["index"],
-                title=p_data["title"],
-                difficulty=p_data["difficulty"],
-                points=p_data["points"],
-                description=p_data["description"],
-                input_format=p_data["input_format"],
-                output_format=p_data["output_format"],
-                constraints=p_data["constraints"],
-                time_limit=p_data["time_limit"],
-                memory_limit=p_data["memory_limit"],
-                starter_codes=p_data["starter_codes"],
-                sample_testcases=p_data["sample_testcases"],
-                hidden_testcases=p_data["hidden_testcases"],
-                created_at=now_utc(),
-            )
-            db.add(ap)
-
-            cp = ContestProblem(
-                contest_id=biweekly_contest.id,
-                problem_index=p_data["index"],
-                title=p_data["title"],
-                topic=p_data["topic"],
-                points=p_data["points"],
-                solved_count=0,
-                difficulty=p_data["difficulty"],
-                description=p_data["description"],
-                input_format=p_data["input_format"],
-                output_format=p_data["output_format"],
-                constraints=p_data["constraints"],
-                time_limit=p_data["time_limit"],
-                memory_limit=p_data["memory_limit"],
-                starter_codes=p_data["starter_codes"],
-                sample_testcases=p_data["sample_testcases"],
-                hidden_testcases=p_data["hidden_testcases"],
-            )
-            db.add(cp)
-
-        print("  ✓ Biweekly Contest 1 and 4 LeetCode-style problems created.")
-
         await db.commit()
 
         try:
@@ -572,7 +478,7 @@ async def launch_contests(force: bool = False):
             print("Notice on cache delete:", e)
 
     print("\n" + "=" * 70)
-    print("✨ CANONICAL CONTESTS (WEEKLY #1 & BIWEEKLY #1) SUCCESSFULLY LAUNCHED!")
+    print("✨ CANONICAL WEEKLY CONTEST 1 SUCCESSFULLY LAUNCHED!")
     print("=" * 70)
 
 
@@ -581,3 +487,4 @@ if __name__ == "__main__":
     parser.add_argument("--force", action="store_true", help="Force wipe and recreate contests with canonical timers")
     args = parser.parse_args()
     asyncio.run(launch_contests(force=args.force))
+
