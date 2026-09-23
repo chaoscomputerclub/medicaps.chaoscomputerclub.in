@@ -344,8 +344,8 @@ export function ContestsHubPage() {
           <div className="relative">
             <img
               src="/trophy.png"
-              alt="Contest Trophy"
-              className="w-20 h-20 sm:w-24 sm:h-24 object-contain filter drop-shadow-[0_10px_25px_rgba(203,255,0,0.2)] select-none pointer-events-none transition-transform hover:scale-105 duration-300"
+              alt="Medi-Caps Contest Trophy"
+              className="w-24 h-28 sm:w-28 sm:h-32 object-contain filter drop-shadow-[0_12px_30px_rgba(203,255,0,0.22)] select-none pointer-events-none transition-transform hover:scale-105 duration-300"
             />
           </div>
 
@@ -356,6 +356,10 @@ export function ContestsHubPage() {
             <p className="text-xs sm:text-sm text-zinc-400 font-sans max-w-md mx-auto">
               Contest every week. Compete, solve algorithmic problems, and see your ranking!
             </p>
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 bg-white/[0.03] border border-white/8 rounded-full px-3 py-1 mt-1">
+              <Trophy className="size-3 text-lime-400" />
+              <span>Official Medi-Caps Chapter Championship Trophy</span>
+            </div>
           </div>
 
           {/* ─── UPCOMING CONTEST HERO CARDS ───────────── */}
@@ -945,6 +949,16 @@ export function ContestsHubPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* ─── ABOUT THE CHAMPIONSHIP TROPHY ─────────────── */}
+        <div className="rounded-2xl border border-white/8 bg-zinc-950/60 backdrop-blur-md p-6 text-center max-w-2xl mx-auto space-y-2 mt-8">
+          <div className="inline-flex items-center gap-2 text-xs font-mono font-bold text-lime-400 uppercase tracking-widest">
+            <Trophy className="size-4" /> About the Medi-Caps Chapter Trophy
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+            The Chaos Computer Club Championship Trophy is awarded to the highest-ranking cadet at Medi-Caps University across rated competitive programming rounds. It recognizes campus leadership in algorithms, data structures, and speed.
+          </p>
         </div>
       </div>
     </div>
