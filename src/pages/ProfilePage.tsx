@@ -834,7 +834,7 @@ export function ProfilePage() {
       {/* Achievements & Proof */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="03 // Milestones" index="HONORS" title="Achievement Ledger" />
+          <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
             {achievements.length === 0 ? (
               <div className="text-center py-8 text-zinc-600 col-span-2">
@@ -861,7 +861,7 @@ export function ProfilePage() {
         </div>
 
         <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="04 // Verification" index="CRYPTOGRAPHIC" title="Latest Proof" />
+          <SectionHeader kicker="05 // Verification" index="CRYPTOGRAPHIC" title="Latest Proof" />
           {proofs[0] ? (
             <>
               <ProofBadge proof={proofs[0]} />
