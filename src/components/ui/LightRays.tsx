@@ -84,6 +84,7 @@ export const LightRays: FC<LightRaysProps> = ({
   className = ''
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const uniformsRef = useRef<any>(null);
   const rendererRef = useRef<Renderer | null>(null);
   const meshRef = useRef<Mesh | null>(null);
@@ -113,14 +114,15 @@ export const LightRays: FC<LightRaysProps> = ({
     };
   }, []);
 
-  // 2. WebGL Lifecycle: Initialized ONCE when visible, cleanly destroyed on unmount
+  // 2. WebGL Lifecycle: Uses React-managed canvas ref (ZERO appendChild/removeChild)
   useEffect(() => {
-    if (!isVisible || !containerRef.current) return;
+    if (!isVisible || !containerRef.current || !canvasRef.current) return;
 
     let isMounted = true;
     let animationId: number | null = null;
     let renderer: Renderer | null = null;
     const container = containerRef.current;
+    const canvas = canvasRef.current;
 
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
@@ -128,6 +130,7 @@ export const LightRays: FC<LightRaysProps> = ({
 
     try {
       renderer = new Renderer({
+        canvas,
         dpr: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2),
         alpha: true,
         powerPreference: 'low-power'
@@ -139,16 +142,7 @@ export const LightRays: FC<LightRaysProps> = ({
 
     rendererRef.current = renderer;
     const gl = renderer.gl;
-    if (!gl || !gl.canvas) return;
-
-    gl.canvas.style.display = 'block';
-    gl.canvas.style.width = '100%';
-    gl.canvas.style.height = '100%';
-
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
-    container.appendChild(gl.canvas);
+    if (!gl) return;
 
     const vert = `
 attribute vec2 position;
@@ -269,7 +263,7 @@ void main() {
     const geometry = new Triangle(gl);
     const uniforms = {
       iTime: { value: 0 },
-      iResolution: { value: [gl.canvas.width, gl.canvas.height] },
+      iResolution: { value: [canvas.width, canvas.height] },
       rayPos: { value: [0, 0] },
       rayDir: { value: [0, 1] },
       raysColor: { value: hexToRgb(raysColor) },
@@ -297,11 +291,11 @@ void main() {
     meshRef.current = mesh;
 
     const updatePlacement = () => {
-      if (!container || !renderer) return;
+      if (!container || !renderer || !isMounted) return;
       const wCSS = container.clientWidth || 300;
       const hCSS = container.clientHeight || 300;
       renderer.setSize(wCSS, hCSS);
-      uniforms.iResolution.value = [gl.canvas.width, gl.canvas.height];
+      uniforms.iResolution.value = [canvas.width, canvas.height];
       const dpr = renderer.dpr;
       const { anchor, dir } = getAnchorAndDir(raysOrigin, wCSS * dpr, hCSS * dpr);
       uniforms.rayPos.value = anchor;
@@ -349,16 +343,13 @@ void main() {
           if (loseContext) loseContext.loseContext();
         } catch {}
       }
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
       rendererRef.current = null;
       uniformsRef.current = null;
       meshRef.current = null;
     };
   }, [isVisible]);
 
-  // 3. Dynamic Uniform Updates without tearing down the WebGL context
+  // 3. Dynamic Uniform Updates without tearing down WebGL
   useEffect(() => {
     const u = uniformsRef.current;
     const r = rendererRef.current;
@@ -399,7 +390,6 @@ void main() {
   ]);
 
   // 4. Mouse Move Listener: Only attached if followMouse=true AND mouseInfluence > 0
-  // Throttled using requestAnimationFrame to prevent synchronous layout recalculation
   useEffect(() => {
     if (!followMouse || mouseInfluence <= 0) return;
 
@@ -424,7 +414,19 @@ void main() {
     };
   }, [followMouse, mouseInfluence]);
 
-  return <div ref={containerRef} className={`light-rays-container ${className}`.trim()} />;
+  return (
+    <div ref={containerRef} className={`light-rays-container ${className}`.trim()}>
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'block',
+          pointerEvents: 'none'
+        }}
+      />
+    </div>
+  );
 };
 
 export default LightRays;

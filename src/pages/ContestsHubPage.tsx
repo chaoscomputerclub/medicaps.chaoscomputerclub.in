@@ -58,6 +58,10 @@ function useCountdown(
   });
 
   const firedRef = useRef(false);
+  const onExpireRef = useRef(onExpire);
+  useEffect(() => {
+    onExpireRef.current = onExpire;
+  });
 
   useEffect(() => {
     firedRef.current = false;
@@ -79,15 +83,15 @@ function useCountdown(
         isExpired: expired,
         totalSeconds,
       });
-      if (expired && !firedRef.current && onExpire) {
+      if (expired && !firedRef.current && onExpireRef.current) {
         firedRef.current = true;
-        onExpire();
+        onExpireRef.current();
       }
     };
     calc();
     const interval = setInterval(calc, 1000);
     return () => clearInterval(interval);
-  }, [targetIsoDate, onExpire]);
+  }, [targetIsoDate]);
 
   return timeLeft;
 }
