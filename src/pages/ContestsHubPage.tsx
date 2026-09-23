@@ -320,25 +320,22 @@ export function ContestsHubPage() {
     <div className="relative min-h-screen text-zinc-100 pb-16">
       {/* ─── CONTEST ROOT PAGE BACKGROUND (LIGHT RAYS) ─── */}
       <div
-        className="pointer-events-none absolute inset-x-0 -top-8 flex justify-center overflow-hidden z-0"
-        style={{ width: "100%", height: "600px", position: "absolute" }}
+        className="pointer-events-none absolute inset-0 w-full h-full overflow-hidden z-0"
         aria-hidden="true"
       >
-        <div style={{ width: "100%", height: "600px", position: "relative" }}>
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#CBFF00"
-            raysSpeed={2}
-            lightSpread={0.8}
-            rayLength={1.2}
-            followMouse={true}
-            mouseInfluence={0}
-            noiseAmount={0.1}
-            distortion={0.05}
-            className="custom-rays"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black pointer-events-none" />
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#CBFF00"
+          raysSpeed={2}
+          lightSpread={0.8}
+          rayLength={1.6}
+          followMouse={true}
+          mouseInfluence={0}
+          noiseAmount={0.1}
+          distortion={0.05}
+          className="custom-rays w-full h-full"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-50% to-[#09090b] pointer-events-none" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-10">

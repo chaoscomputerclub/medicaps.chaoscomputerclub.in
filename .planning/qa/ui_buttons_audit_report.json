@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-23T14:09:37.729Z",
+  "timestamp": "2026-09-23T14:15:52.279Z",
   "totalElements": 295,
   "functionalCount": 295,
   "connectivityRate": "100.0%",
@@ -1897,7 +1897,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 378,
+      "line": 375,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1906,7 +1906,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 379,
+      "line": 376,
       "tag": "<Link>",
       "label": "Problem Archive",
       "handler": "\"/problems\"",
@@ -1915,7 +1915,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 484,
+      "line": 481,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1924,7 +1924,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 489,
+      "line": 486,
       "tag": "<Link>",
       "label": "Enter Live",
       "handler": "{`/contests/${contest.slug}/lobby`}",
@@ -1933,7 +1933,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 498,
+      "line": 495,
       "tag": "<button>",
       "label": "{registeringSlug === contest.slug ? ...",
       "handler": "{() => handleUnregister(contest.slug)}",
@@ -1942,7 +1942,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 509,
+      "line": 506,
       "tag": "<Button>",
       "label": "{registeringSlug === contest.slug    ...",
       "handler": "{() => handleRegister(contest.slug)}",
@@ -1951,7 +1951,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 553,
+      "line": 550,
       "tag": "<button>",
       "label": "CAMPUS",
       "handler": "{() => setLeaderboardScope(\"campus\")}",
@@ -1960,7 +1960,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 564,
+      "line": 561,
       "tag": "<button>",
       "label": "GLOBAL",
       "handler": "{() => {\n                    setLeaderboardScope(\"global\");\n                    ",
@@ -1969,7 +1969,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 703,
+      "line": 700,
       "tag": "<Link>",
       "label": "[to=/leaderboard]",
       "handler": "\"/leaderboard\"",
@@ -1978,7 +1978,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 719,
+      "line": 716,
       "tag": "<button>",
       "label": "Past Contests",
       "handler": "{() => {\n                    setSearchParams({ tab: \"past\" });\n                 ",
@@ -1987,7 +1987,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 733,
+      "line": 730,
       "tag": "<button>",
       "label": "My Contests { } {myParticipations.l...",
       "handler": "{() => {\n                    setSearchParams({ tab: \"my\" });\n                   ",
@@ -1996,7 +1996,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 782,
+      "line": 779,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2005,7 +2005,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 783,
+      "line": 780,
       "tag": "<Link>",
       "label": "Explore Problem Archive",
       "handler": "\"/problems\"",
@@ -2014,7 +2014,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 812,
+      "line": 809,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/contests/${contest.slug}`}",
@@ -2023,7 +2023,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 836,
+      "line": 833,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2032,7 +2032,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 842,
+      "line": 839,
       "tag": "<Link>",
       "label": "Virtual",
       "handler": "{`/contests/${contest.slug}`}",
@@ -2041,7 +2041,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 863,
+      "line": 860,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2050,7 +2050,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 864,
+      "line": 861,
       "tag": "<Link>",
       "label": "Sign In",
       "handler": "\"/auth\"",
@@ -2059,7 +2059,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 881,
+      "line": 878,
       "tag": "<Link>",
       "label": "{record.contest_title}",
       "handler": "{`/contests/${record.contest_slug}`}",
@@ -2068,7 +2068,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 898,
+      "line": 895,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2077,7 +2077,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 904,
+      "line": 901,
       "tag": "<Link>",
       "label": "Results",
       "handler": "{`/contests/${record.contest_slug}`}",
@@ -2086,7 +2086,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 918,
+      "line": 915,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => setCurrentPage((p) => Math.max(1, p - 1))}",
@@ -2095,7 +2095,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 929,
+      "line": 926,
       "tag": "<Button>",
       "label": "{pg}",
       "handler": "{() => setCurrentPage(pg)}",
@@ -2104,7 +2104,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 944,
+      "line": 941,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{() => setCurrentPage((p) => Math.min(totalPages, p + 1))}",
