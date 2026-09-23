@@ -70,16 +70,16 @@ const getAnchorAndDir = (
 export const LightRays: FC<LightRaysProps> = ({
   raysOrigin = 'top-center',
   raysColor = DEFAULT_COLOR,
-  raysSpeed = 1,
-  lightSpread = 1,
-  rayLength = 2,
+  raysSpeed = 0.5,
+  lightSpread = 0.8,
+  rayLength = 1.3,
   pulsating = false,
   fadeDistance = 1.0,
   saturation = 1.0,
   followMouse = false,
   mouseInfluence = 0,
-  noiseAmount = 0.0,
-  distortion = 0.0,
+  noiseAmount = 0.1,
+  distortion = 0.05,
   lightMode = false,
   className = ''
 }) => {
@@ -90,7 +90,8 @@ export const LightRays: FC<LightRaysProps> = ({
   const meshRef = useRef<Mesh | null>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
-  const [isVisible, setIsVisible] = useState(false);
+  // Start visible immediately so WebGL initializes on mount
+  const [isVisible, setIsVisible] = useState(true);
 
   // 1. Intersection Observer to halt rendering when off-screen
   useEffect(() => {
@@ -105,7 +106,7 @@ export const LightRays: FC<LightRaysProps> = ({
         const entry = entries[0];
         setIsVisible(Boolean(entry?.isIntersecting));
       },
-      { threshold: 0.05 }
+      { threshold: 0.01 }
     );
 
     observer.observe(el);
@@ -114,7 +115,7 @@ export const LightRays: FC<LightRaysProps> = ({
     };
   }, []);
 
-  // 2. WebGL Lifecycle: Uses React-managed canvas ref (ZERO appendChild/removeChild)
+  // 2. WebGL Lifecycle: Uses React-managed canvas ref (zero appendChild/removeChild)
   useEffect(() => {
     if (!isVisible || !containerRef.current || !canvasRef.current) return;
 
@@ -133,6 +134,7 @@ export const LightRays: FC<LightRaysProps> = ({
         canvas,
         dpr: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2),
         alpha: true,
+        premultipliedAlpha: false,
         powerPreference: 'low-power'
       });
     } catch (err) {
@@ -232,7 +234,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   fragColor.y *= 0.3 + brightness * 0.6;
   fragColor.z *= 0.5 + brightness * 0.5;
 
-  if (lightColor(raysColor) > 0.0) {
+  if ((raysColor.r + raysColor.g + raysColor.b) > 0.0) {
     fragColor.rgb *= raysColor;
   }
 
@@ -246,12 +248,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor.rgb = 1.0 - fragColor.rgb;
     fragColor.a = alpha;
   } else {
-    fragColor.a = (fragColor.r + fragColor.g + fragColor.b) / 3.0;
+    fragColor.a = clamp((fragColor.r + fragColor.g + fragColor.b) * 0.8, 0.0, 1.0);
   }
-}
-
-bool lightColor(vec3 color) {
-  return (color.r + color.g + color.b) > 0.0;
 }
 
 void main() {
@@ -263,7 +261,7 @@ void main() {
     const geometry = new Triangle(gl);
     const uniforms = {
       iTime: { value: 0 },
-      iResolution: { value: [canvas.width, canvas.height] },
+      iResolution: { value: [canvas.width || 300, canvas.height || 300] },
       rayPos: { value: [0, 0] },
       rayDir: { value: [0, 1] },
       raysColor: { value: hexToRgb(raysColor) },
