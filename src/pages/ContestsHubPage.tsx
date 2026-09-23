@@ -342,11 +342,17 @@ export function ContestsHubPage() {
         {/* ─── HERO SECTION ─────────────────────────────── */}
         <div className="flex flex-col items-center text-center space-y-3 pt-2 pb-4">
           <div className="relative">
-            <img
-              src="/trophy.png"
-              alt="Medi-Caps Contest Trophy"
-              className="w-24 h-28 sm:w-28 sm:h-32 object-contain filter drop-shadow-[0_12px_30px_rgba(203,255,0,0.22)] select-none pointer-events-none transition-transform hover:scale-105 duration-300"
-            />
+            <picture>
+              <source srcSet="/trophy.webp" type="image/webp" />
+              <img
+                src="/trophy.png"
+                alt="Medi-Caps Contest Trophy"
+                width="112"
+                height="128"
+                loading="eager"
+                className="w-24 h-28 sm:w-28 sm:h-32 object-contain filter drop-shadow-[0_12px_30px_rgba(203,255,0,0.22)] select-none pointer-events-none transition-transform hover:scale-105 duration-300"
+              />
+            </picture>
           </div>
 
           <div className="space-y-1.5">

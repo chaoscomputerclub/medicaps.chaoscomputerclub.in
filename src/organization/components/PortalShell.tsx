@@ -129,7 +129,7 @@ export function PortalShell() {
     }
     dispatch(fetchMyFollowingIdsThunk());
     dispatch(fetchCurrentUserThunk());
-  }, [dispatch, location.pathname]);
+  }, [dispatch]);
 
   const token = getToken();
   const tokenPayload = token ? decodeJwtPayload(token) : null;
@@ -302,7 +302,9 @@ export function PortalShell() {
                 onMouseEnter={() => prefetchRoute(item.to)}
                 onFocus={() => prefetchRoute(item.to)}
                 onTouchStart={() => prefetchRoute(item.to)}
-                onClick={() => dispatch(setSidebarOpen(false))}
+                onClick={() => {
+                  if (open) dispatch(setSidebarOpen(false));
+                }}
                 className={`relative z-10 flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-sans select-none group transition-colors duration-150 ${
                   active
                     ? "text-white font-medium"
