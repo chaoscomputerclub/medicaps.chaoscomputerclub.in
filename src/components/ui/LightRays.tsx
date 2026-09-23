@@ -34,7 +34,7 @@ const DEFAULT_COLOR = '#CBFF00';
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-  return m
+  return m && m[1] && m[2] && m[3]
     ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255]
     : [0.796, 1.0, 0.0];
 };
