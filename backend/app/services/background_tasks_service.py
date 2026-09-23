@@ -298,12 +298,94 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                 except Exception:
                     pass
 
+                # Broadcast SSE so connected frontends move contest to history
+                try:
+                    from app.services.event_broadcaster import broadcast_event as _broadcast
+                    await _broadcast(
+                        "contest_status_changed",
+                        {"slug": slug, "status": "finished", "title": contest.title},
+                        contest_slug=slug,
+                    )
+                except Exception:
+                    pass
+
                 logger.info(
                     "auto-finish: '%s' done — %d participants rated", slug, len(entries)
                 )
 
         except Exception as exc:
             logger.exception("auto-finish error: %s", exc)
+            await db.rollback()
+
+
+async def auto_start_loop(session_factory: async_sessionmaker, interval: int = 30) -> None:
+    logger.info("auto-start contest loop started (interval=%ds)", interval)
+    while True:
+        await asyncio.sleep(interval)
+        await _auto_start_contests(session_factory)
+
+
+# ─── Task 4: Auto-Start Upcoming Contests ────────────────────────────────────
+
+async def _auto_start_contests(session_factory: async_sessionmaker) -> None:
+    """
+    Transitions UPCOMING contests to 'live' when starts_at has arrived.
+    This is the LeetCode-style auto-start: no admin action required.
+    Broadcasts 'contest_status_changed' SSE so frontend reacts in real-time.
+    Idempotent: each contest slug is only processed once per process lifetime.
+    """
+    from app.models.db_models import OfflineContest
+    from app.services.event_broadcaster import broadcast_event
+    from app.core.cache import delete_cache_pattern
+
+    now = _utcnow()
+
+    async with session_factory() as db:
+        try:
+            upcoming_res = await db.execute(
+                select(OfflineContest).where(OfflineContest.status == "upcoming")
+            )
+            upcoming_contests = upcoming_res.scalars().all()
+
+            for contest in upcoming_contests:
+                slug = contest.slug
+                starts_at = contest.starts_at
+                if starts_at is None:
+                    continue
+                if starts_at.tzinfo is None:
+                    starts_at = starts_at.replace(tzinfo=timezone.utc)
+
+                if now < starts_at:
+                    continue  # Not yet time to start
+
+                logger.info(
+                    "auto-start: '%s' starts_at=%s — transitioning to live",
+                    slug, starts_at.isoformat(),
+                )
+
+                contest.status = "live"
+                await db.commit()
+
+                # Bust all caches so the UI picks up the new status immediately
+                try:
+                    await delete_cache_pattern("cache:contest*")
+                except Exception:
+                    pass
+
+                # Broadcast SSE so connected frontends update without polling
+                try:
+                    await broadcast_event(
+                        "contest_status_changed",
+                        {"slug": slug, "status": "live", "title": contest.title},
+                        contest_slug=slug,
+                    )
+                except Exception:
+                    pass
+
+                logger.info("auto-start: '%s' → live", slug)
+
+        except Exception as exc:
+            logger.exception("auto-start error: %s", exc)
             await db.rollback()
 
 
@@ -318,8 +400,14 @@ async def auto_finish_loop(session_factory: async_sessionmaker, interval: int = 
 
 def start_background_tasks(session_factory: async_sessionmaker) -> list[asyncio.Task]:
     """
-    Spawn all three production background tasks.
+    Spawn all four production background tasks.
     Returns task handles for clean cancellation in the lifespan shutdown hook.
+
+    Task schedule:
+      1. session_expiry_sweeper  — every 60s  (auto-submit expired assessment sessions)
+      2. auto_qualify_top30      — every 120s (qualify top-30 after Round 1 window closes)
+      3. auto_start_contest      — every 30s  (upcoming → live at starts_at)
+      4. auto_finish_contest     — every 60s  (live → finished at ends_at, ELO rating)
     """
     loop = asyncio.get_event_loop()
     tasks = [
@@ -330,6 +418,10 @@ def start_background_tasks(session_factory: async_sessionmaker) -> list[asyncio.
         loop.create_task(
             auto_qualify_loop(session_factory, interval=120),
             name="ccc.auto_qualify_top30",
+        ),
+        loop.create_task(
+            auto_start_loop(session_factory, interval=30),
+            name="ccc.auto_start_contest",
         ),
         loop.create_task(
             auto_finish_loop(session_factory, interval=60),

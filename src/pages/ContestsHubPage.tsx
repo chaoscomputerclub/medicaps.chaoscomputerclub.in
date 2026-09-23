@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Trophy,
@@ -34,11 +34,20 @@ import { PageHeader, SectionHeader } from "@/organization/components/ui";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
 
-function useCountdown(targetIsoDate: string | null | undefined) {
+function useCountdown(
+  targetIsoDate: string | null | undefined,
+  onExpire?: () => void,
+) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number; hours: number; minutes: number; seconds: number;
     isExpired: boolean; totalSeconds: number;
   }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, totalSeconds: 0 });
+
+  const firedRef = useRef(false);
+
+  useEffect(() => {
+    firedRef.current = false;
+  }, [targetIsoDate]);
 
   useEffect(() => {
     if (!targetIsoDate) return;
@@ -47,18 +56,25 @@ function useCountdown(targetIsoDate: string | null | undefined) {
       const now = Date.now();
       const diff = Math.max(0, target - now);
       const totalSeconds = Math.floor(diff / 1000);
+      const expired = totalSeconds <= 0;
       setTimeLeft({
         days: Math.floor(totalSeconds / 86400),
         hours: Math.floor((totalSeconds % 86400) / 3600),
         minutes: Math.floor((totalSeconds % 3600) / 60),
         seconds: totalSeconds % 60,
-        isExpired: totalSeconds <= 0,
+        isExpired: expired,
         totalSeconds,
       });
+      // Fire onExpire once when the countdown crosses zero
+      if (expired && !firedRef.current && onExpire) {
+        firedRef.current = true;
+        onExpire();
+      }
     };
     calc();
     const interval = setInterval(calc, 1000);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetIsoDate]);
 
   return timeLeft;
@@ -182,7 +198,17 @@ export function ContestsHubPage() {
     [upcomingContests]
   );
 
-  const weeklyCountdown = useCountdown(upcomingWeekly?.starts_at);
+  const weeklyCountdown = useCountdown(
+    upcomingWeekly?.starts_at,
+    () => refreshHubData(true), // fires once when starts_at expires → contest goes live
+  );
+
+  // Also watch ends_at for live contests so we auto-archive when time runs out
+  const liveContest = useMemo(() => contests.find((c) => c.status === "live") ?? null, [contests]);
+  useCountdown(
+    liveContest?.ends_at ?? null,
+    () => refreshHubData(true), // fires once when ends_at expires → contest finishes
+  );
 
   const isContestAssessmentInProgress = (contest: ContestSummary | null | undefined): boolean => {
     if (!contest) return false;
@@ -368,7 +394,7 @@ export function ContestsHubPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="rounded border border-lime-400/25 bg-lime-400/8 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
-                        WEEKLY CONTEST
+                        {upcomingWeekly.status === "live" ? "🔴 LIVE NOW" : "WEEKLY CONTEST"}
                       </span>
                       <span className="font-mono text-xs text-zinc-500">#{upcomingWeekly.edition ?? "--"}</span>
                     </div>
@@ -391,16 +417,22 @@ export function ContestsHubPage() {
                     <span className="flex items-center gap-1.5"><Code2 className="size-3" /> {upcomingWeekly.problem_count || 4} Problems</span>
                     <span className="flex items-center gap-1.5 text-lime-400"><TrendingUp className="size-3" /> Rating Rated</span>
                   </div>
-                  <div className="max-w-md">
-                    <CountdownDisplay days={weeklyCountdown.days} hours={weeklyCountdown.hours} minutes={weeklyCountdown.minutes} seconds={weeklyCountdown.seconds} accentSec />
-                  </div>
+
+                  {/* Countdown — only show while upcoming */}
+                  {upcomingWeekly.status !== "live" && (
+                    <div className="max-w-md">
+                      <CountdownDisplay days={weeklyCountdown.days} hours={weeklyCountdown.hours} minutes={weeklyCountdown.minutes} seconds={weeklyCountdown.seconds} accentSec />
+                    </div>
+                  )}
+
+                  {/* CTA — pure status-driven, LeetCode-style */}
                   <div className="flex flex-wrap items-center gap-3 pt-1">
                     {upcomingWeekly.status === "live" ? (
                       <>
-                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 px-6 py-2 rounded-md transition-colors [&_svg]:transition-colors cursor-pointer">
+                        <Button asChild className="text-xs font-mono font-semibold uppercase tracking-wider bg-lime-400 text-black hover:bg-lime-300 px-6 py-2 rounded-md transition-colors cursor-pointer">
                           <a href={`/contests/${upcomingWeekly.slug}/lobby`} target="_blank" rel="noopener noreferrer">
                             <Play className="size-4 fill-current" />
-                            <span>Enter Contest Arena</span>
+                            <span>Enter Contest Now</span>
                           </a>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="text-xs">
@@ -411,7 +443,7 @@ export function ContestsHubPage() {
                       <>
                         <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2 text-xs font-sans text-emerald-400">
                           <CheckCircle2 className="size-4 text-emerald-400" />
-                          <span>Registered · Contest Opens at Start Time</span>
+                          <span>Registered · Starts when countdown ends</span>
                         </div>
                         <Button
                           variant="outline"
@@ -444,6 +476,7 @@ export function ContestsHubPage() {
                 </div>
               </div>
             )}
+
 
             {/* ── OTHER UPCOMING ── */}
             {otherUpcomingContests.map((contest) => {

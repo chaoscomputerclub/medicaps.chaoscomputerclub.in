@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T15:52:27.345Z",
+  "timestamp": "2026-09-23T11:19:08.148Z",
   "totalElements": 304,
   "functionalCount": 304,
   "connectivityRate": "100.0%",
@@ -1897,7 +1897,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 357,
+      "line": 383,
       "tag": "<Button>",
       "label": "Problem Archive",
       "handler": "asChild",
@@ -1906,7 +1906,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 357,
+      "line": 383,
       "tag": "<Link>",
       "label": "Problem Archive",
       "handler": "\"/problems\"",
@@ -1915,7 +1915,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 358,
+      "line": 384,
       "tag": "<Button>",
       "label": "Leaderboard",
       "handler": "asChild",
@@ -1924,7 +1924,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 358,
+      "line": 384,
       "tag": "<Link>",
       "label": "Leaderboard",
       "handler": "\"/leaderboard\"",
@@ -1933,7 +1933,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 400,
+      "line": 432,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -1942,7 +1942,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 401,
+      "line": 433,
       "tag": "<a>",
       "label": "[href={/contests/${upcomingWeekly.sl...",
       "handler": "{`/contests/${upcomingWeekly.slug}/lobby`}",
@@ -1951,66 +1951,12 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 406,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 407,
-      "tag": "<Link>",
-      "label": "Contest Details",
-      "handler": "{`/contests/${upcomingWeekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 416,
-      "tag": "<Button>",
-      "label": "{registeringSlug === upcomingWeekly.s...",
-      "handler": "{() => handleUnregister(upcomingWeekly.slug)}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 425,
-      "tag": "<Button>",
-      "label": "Button",
-      "handler": "asChild",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 426,
-      "tag": "<Link>",
-      "label": "Contest Details",
-      "handler": "{`/contests/${upcomingWeekly.slug}`}",
-      "category": "ROUTING_NAVIGATION",
-      "description": "Routes client across platform views via React Router"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
-      "line": 431,
-      "tag": "<Button>",
-      "label": "{registeringSlug === upcomingWeekly.s...",
-      "handler": "{() => handleRegister(upcomingWeekly.slug)}",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
-    },
-    {
-      "file": "src/pages/ContestsHubPage.tsx",
       "line": 438,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
-      "category": "LIVE_BACKEND_MUTATION",
-      "description": "Triggers backend API mutation / Redux transaction"
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
@@ -2023,7 +1969,16 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 467,
+      "line": 448,
+      "tag": "<Button>",
+      "label": "{registeringSlug === upcomingWeekly.s...",
+      "handler": "{() => handleUnregister(upcomingWeekly.slug)}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 457,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2032,7 +1987,52 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 468,
+      "line": 458,
+      "tag": "<Link>",
+      "label": "Contest Details",
+      "handler": "{`/contests/${upcomingWeekly.slug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 463,
+      "tag": "<Button>",
+      "label": "{registeringSlug === upcomingWeekly.s...",
+      "handler": "{() => handleRegister(upcomingWeekly.slug)}",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 470,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "LIVE_BACKEND_MUTATION",
+      "description": "Triggers backend API mutation / Redux transaction"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 471,
+      "tag": "<Link>",
+      "label": "Contest Details",
+      "handler": "{`/contests/${upcomingWeekly.slug}`}",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 500,
+      "tag": "<Button>",
+      "label": "Button",
+      "handler": "asChild",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/ContestsHubPage.tsx",
+      "line": 501,
       "tag": "<a>",
       "label": "[href={/contests/${contest.slug}/lob...",
       "handler": "{`/contests/${contest.slug}/lobby`}",
@@ -2041,7 +2041,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 475,
+      "line": 508,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2050,7 +2050,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 476,
+      "line": 509,
       "tag": "<Link>",
       "label": "[to={/contests/${contest.slug}}]",
       "handler": "{`/contests/${contest.slug}`}",
@@ -2059,7 +2059,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 481,
+      "line": 514,
       "tag": "<Button>",
       "label": "{registeringSlug === contest.slug ? ...",
       "handler": "{() => handleUnregister(contest.slug)}",
@@ -2068,7 +2068,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 493,
+      "line": 526,
       "tag": "<Button>",
       "label": "{registeringSlug === contest.slug ? ...",
       "handler": "{() => handleRegister(contest.slug)}",
@@ -2077,7 +2077,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 498,
+      "line": 531,
       "tag": "<Button>",
       "label": "Details",
       "handler": "asChild",
@@ -2086,7 +2086,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 498,
+      "line": 531,
       "tag": "<Link>",
       "label": "Details",
       "handler": "{`/contests/${contest.slug}`}",
@@ -2095,7 +2095,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 520,
+      "line": 553,
       "tag": "<button>",
       "label": "{label}",
       "handler": "{() => setSearchParams({ tab: key })}",
@@ -2104,7 +2104,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 571,
+      "line": 604,
       "tag": "<Link>",
       "label": "{contest.title}",
       "handler": "{`/contests/${contest.slug}`}",
@@ -2113,7 +2113,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 580,
+      "line": 613,
       "tag": "<Button>",
       "label": "Overview",
       "handler": "asChild",
@@ -2122,7 +2122,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 580,
+      "line": 613,
       "tag": "<Link>",
       "label": "Overview",
       "handler": "{`/contests/${contest.slug}`}",
@@ -2131,7 +2131,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 581,
+      "line": 614,
       "tag": "<Button>",
       "label": "Scoreboard",
       "handler": "asChild",
@@ -2140,7 +2140,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 581,
+      "line": 614,
       "tag": "<Link>",
       "label": "Scoreboard",
       "handler": "{`/contests/${contest.slug}/final-results`}",
@@ -2149,7 +2149,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 606,
+      "line": 639,
       "tag": "<Button>",
       "label": "{registeringSlug === upcomingContests...",
       "handler": "{() => handleRegister(upcomingContests[0].slug)}",
@@ -2158,7 +2158,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 625,
+      "line": 658,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2167,7 +2167,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 626,
+      "line": 659,
       "tag": "<Link>",
       "label": "View Summary",
       "handler": "{`/contests/${record.contest_slug}`}",
@@ -2176,7 +2176,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 644,
+      "line": 677,
       "tag": "<Link>",
       "label": "Full",
       "handler": "\"/leaderboard\"",
@@ -2185,7 +2185,7 @@
     },
     {
       "file": "src/pages/ContestsHubPage.tsx",
-      "line": 671,
+      "line": 704,
       "tag": "<Link>",
       "label": "University Standings",
       "handler": "\"/leaderboard\"",
