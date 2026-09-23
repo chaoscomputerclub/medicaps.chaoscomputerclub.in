@@ -113,7 +113,8 @@ const LightRays = ({
 
       const renderer = new Renderer({
         dpr: Math.min(window.devicePixelRatio, 2),
-        alpha: true
+        alpha: true,
+        premultipliedAlpha: true
       });
       rendererRef.current = renderer;
 
@@ -122,6 +123,7 @@ const LightRays = ({
       gl.canvas.style.height = '100%';
       gl.canvas.style.display = 'block';
       gl.canvas.style.backgroundColor = 'transparent';
+      gl.canvas.style.pointerEvents = 'none';
 
       while (containerRef.current.firstChild) {
         containerRef.current.removeChild(containerRef.current.firstChild);
@@ -329,17 +331,8 @@ void main() {
         if (renderer) {
           try {
             const canvas = renderer.gl?.canvas;
-            if (canvas) {
-              canvas.style.opacity = '0';
-              canvas.style.display = 'none';
-              if (canvas.parentNode) {
-                canvas.parentNode.removeChild(canvas);
-              }
-            }
-
-            const loseContextExt = renderer.gl?.getExtension('WEBGL_lose_context');
-            if (loseContextExt) {
-              loseContextExt.loseContext();
+            if (canvas && canvas.parentNode) {
+              canvas.parentNode.removeChild(canvas);
             }
           } catch (error) {
             console.warn('Error during WebGL cleanup:', error);
