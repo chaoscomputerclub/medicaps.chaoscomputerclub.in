@@ -323,10 +323,11 @@ export function isMedicapsEmail(email: string): boolean {
 
 export async function sendOTP(
   email: string,
+  turnstileToken?: string,
 ): Promise<{ sent: boolean; email: string; transaction_id?: string; dev_otp?: string }> {
   return apiFetch("/auth/send-otp", {
     method: "POST",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, turnstile_token: turnstileToken || undefined }),
   });
 }
 

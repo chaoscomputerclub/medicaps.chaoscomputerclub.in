@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.middleware.auth import get_current_member, get_current_member_optional, require_onboarded
+from app.middleware.rate_limit import ip_rate_limit
 from app.models.db_models import MemberProfile
 from app.schemas.auth import (
     SendOTPRequest,
@@ -41,8 +42,12 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/send-otp", summary="Request OTP verification email")
-async def send_otp(payload: SendOTPRequest):
-    return await AuthController.send_otp(payload)
+async def send_otp(
+    payload: SendOTPRequest,
+    request: Request,
+    _rl: None = Depends(ip_rate_limit("auth:send_otp", max_calls=10, window_seconds=60)),
+):
+    return await AuthController.send_otp(payload, request=request)
 
 
 @router.post("/verify-otp", summary="Verify OTP and receive access token + set auth cookies")

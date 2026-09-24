@@ -34,6 +34,7 @@ import {
   setHandleStatus,
 } from "@/store/slices/authSlice";
 import { getGoogleLoginURL } from "@/lib/auth";
+import { CloudflareTurnstile } from "@/components/auth/CloudflareTurnstile";
 
 // ─────────────────────────────────────────────
 // SVG icons
@@ -80,6 +81,7 @@ export function AuthPage() {
   const dispatch = useAppDispatch();
   const [countdown, setCountdown] = useState(30);
   const [navDirection, setNavDirection] = useState<"forward" | "backward">("forward");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const {
     step,
@@ -128,6 +130,8 @@ export function AuthPage() {
         ));
       } else if (errorParam === "google_cancelled") {
         dispatch(setMessage("Google sign-in was cancelled."));
+      } else if (errorParam === "state_mismatch") {
+        dispatch(setMessage("Security verification failed (state mismatch). Please try again."));
       } else {
         dispatch(setMessage("Google authentication failed. Please try again."));
       }
@@ -146,6 +150,27 @@ export function AuthPage() {
       } else {
         dispatch(setStep("onboarding"));
       }
+      return;
+    }
+
+    // Google OAuth redirect with HttpOnly cookie session
+    const isGoogleSuccess = params.get("google_success") === "1";
+    if (isGoogleSuccess) {
+      if (emailParam) dispatch(setEmail(emailParam));
+      window.history.replaceState({}, document.title, window.location.pathname);
+      dispatch(fetchCurrentUserThunk())
+        .unwrap()
+        .then((m) => {
+          if (m.is_onboarded) {
+            navigate("/");
+          } else {
+            if (m.email) dispatch(setEmail(m.email));
+            if (m.full_name) dispatch(setName(m.full_name));
+            if (m.handle) dispatch(setHandle(m.handle));
+            dispatch(setStep("onboarding"));
+          }
+        })
+        .catch(() => {});
       return;
     }
 
@@ -183,7 +208,7 @@ export function AuthPage() {
     if (!checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted.")); return;
     }
-    await dispatch(sendOtpThunk(clean));
+    await dispatch(sendOtpThunk({ email: clean, turnstileToken: turnstileToken || undefined }));
   }
 
   // ── Step 2: verify OTP ───────────────────────────────────────────
@@ -204,7 +229,7 @@ export function AuthPage() {
     if (!clean || !checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in emails are permitted.")); return;
     }
-    await dispatch(sendOtpThunk(clean));
+    await dispatch(sendOtpThunk({ email: clean, turnstileToken: turnstileToken || undefined }));
     setCountdown(30);
     toast.success("New code sent to your inbox.");
   }
@@ -254,8 +279,8 @@ export function AuthPage() {
     layoutSubtitle = "Choose your display name and campus handle.";
     bottomAction = undefined;
   } else {
-    layoutTitle = "Sign in";
-    layoutSubtitle = undefined;
+    layoutTitle = "Sign in to Arena";
+    layoutSubtitle = "Medi-Caps University competitive programming portal";
     bottomAction = undefined;
   }
 
@@ -267,86 +292,104 @@ export function AuthPage() {
     >
 
       {/* ════════════════════════════════════════════
-          STEP 1 — Email + OAuth (Strix Minimalist)
+          STEP 1 — Primary Google SSO + Cloudflare Email OTP
           ════════════════════════════════════════════ */}
       {step === "email" && (
         <div
           key="auth-email-step"
-          className={navDirection === "backward" ? "auth-transition-backward" : ""}
+          className={navDirection === "backward" ? "auth-transition-backward" : "space-y-5"}
         >
-          <form onSubmit={handleEmailSubmit} noValidate>
-            {/* Email field */}
-            <label htmlFor="auth-email" className={LABEL}>
-              Email
-            </label>
-            <input
-              id="auth-email"
-              type="email"
-              value={email}
-              onChange={(e) => {
-                dispatch(setEmail(e.target.value));
-                if (message) dispatch(setMessage(null));
-              }}
-              placeholder="Your email address"
-              required
-              autoFocus
-              autoComplete="email"
-              className={cn(
-                INPUT_BASE,
-                isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
-              )}
-            />
-
-            {/* Domain warning */}
-            {isInvalidDomain && (
-              <p className="mt-2 text-xs text-amber-400">
-                Please use your official <span className="font-medium text-amber-300">@medicaps.ac.in</span> email.
-              </p>
-            )}
-
-            {/* General error */}
-            {message && !isInvalidDomain && (
-              <p className="mt-2 text-xs text-red-400 leading-relaxed">{message}</p>
-            )}
-
-            {/* Primary CTA — lime */}
-            <Button
-              type="submit"
-              variant="default"
-              size="lg"
-              disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full mt-4 h-11 text-[14px] rounded-xl"
-            >
-              {pending ? <Loader2 className="size-4 animate-spin" /> : "Continue with email"}
-            </Button>
-          </form>
-
-          {/* OR hairline divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.08]" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-[#191919] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
-                or
-              </span>
-            </div>
-          </div>
-
-          {/* OAuth button */}
-          <div>
+          {/* PRIMARY ACTION: Institutional Google Workspace SSO */}
+          <div className="space-y-2.5">
             <Button
               type="button"
               variant="outline"
               size="lg"
               onClick={() => { window.location.href = getGoogleLoginURL(); }}
               disabled={pending}
-              className="w-full h-11 text-[14px] text-zinc-200 border-white/[0.08] hover:bg-white/[0.03] hover:border-white/20 gap-2.5 font-normal rounded-xl"
+              className="w-full h-12 text-[14px] text-white bg-white/[0.04] border border-white/15 hover:bg-white/[0.08] hover:border-white/30 gap-3 font-medium rounded-xl shadow-md transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white/20 cursor-pointer"
             >
               <GoogleIcon className="size-4 shrink-0" />
-              <span>Continue with Google</span>
+              <span>Continue with Google Workspace</span>
             </Button>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 font-mono">
+              <span className="inline-block size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>One-click SSO restricted to @medicaps.ac.in cadets</span>
+            </div>
           </div>
+
+          {/* OR hairline divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/[0.08]" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-[#191919] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
+                or sign in with email OTP
+              </span>
+            </div>
+          </div>
+
+          {/* SECONDARY ACTION: Email OTP with Cloudflare Client Security */}
+          <form onSubmit={handleEmailSubmit} noValidate className="space-y-3">
+            <div>
+              <label htmlFor="auth-email" className={LABEL}>
+                University Email Address
+              </label>
+              <input
+                id="auth-email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  dispatch(setEmail(e.target.value));
+                  if (message) dispatch(setMessage(null));
+                }}
+                placeholder="enrollment@medicaps.ac.in"
+                required
+                autoComplete="email"
+                className={cn(
+                  INPUT_BASE,
+                  isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
+                )}
+              />
+            </div>
+
+            {/* Domain warning */}
+            {isInvalidDomain && (
+              <p className="text-xs text-amber-400">
+                Please use your official <span className="font-medium text-amber-300">@medicaps.ac.in</span> email.
+              </p>
+            )}
+
+            {/* General error */}
+            {message && !isInvalidDomain && (
+              <p className="text-xs text-red-400 leading-relaxed">{message}</p>
+            )}
+
+            {/* Cloudflare Turnstile Bot Protection */}
+            <CloudflareTurnstile
+              onSuccess={(token) => {
+                setTurnstileToken(token);
+              }}
+              onError={() => {
+                setTurnstileToken(null);
+              }}
+              onExpire={() => {
+                setTurnstileToken(null);
+              }}
+            />
+
+            {/* Submit CTA — Lime theme */}
+            <Button
+              type="submit"
+              variant="default"
+              size="lg"
+              disabled={pending || isInvalidDomain || !email.trim()}
+              className="w-full h-11 text-[14px] rounded-xl font-medium"
+            >
+              {pending ? <Loader2 className="size-4 animate-spin" /> : "Send verification code"}
+            </Button>
+          </form>
         </div>
       )}
 

@@ -50,6 +50,17 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REDIRECT_URI: Union[str, None] = os.getenv("GOOGLE_REDIRECT_URI", None)
 
+    # Cloudflare Client Security & Turnstile
+    CLOUDFLARE_TURNSTILE_SECRET_KEY: str = os.getenv(
+        "CLOUDFLARE_TURNSTILE_SECRET_KEY", "1x0000000000000000000000000000000AA"
+    )
+    CLOUDFLARE_TURNSTILE_SITE_KEY: str = os.getenv(
+        "CLOUDFLARE_TURNSTILE_SITE_KEY", "1x00000000000000000000AA"
+    )
+    CLOUDFLARE_TURNSTILE_ENABLED: bool = os.getenv(
+        "CLOUDFLARE_TURNSTILE_ENABLED", "false"
+    ).lower() in ("true", "1", "yes")
+
     # Email (SMTP) for OTP
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.hostinger.com")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "465"))

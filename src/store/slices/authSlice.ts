@@ -83,11 +83,13 @@ const initialState: AuthState = {
 // Async Thunks
 export const sendOtpThunk = createAsyncThunk<
   { sent: boolean; email: string; transaction_id?: string; dev_otp?: string },
-  string,
+  { email: string; turnstileToken?: string | null | undefined } | string,
   { rejectValue: string }
->("auth/sendOtp", async (email, { rejectWithValue }) => {
+>("auth/sendOtp", async (arg, { rejectWithValue }) => {
+  const email = typeof arg === "string" ? arg : arg.email;
+  const turnstileToken = typeof arg === "string" ? undefined : (arg.turnstileToken || undefined);
   try {
-    return await sendOTP(email.trim().toLowerCase());
+    return await sendOTP(email.trim().toLowerCase(), turnstileToken);
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to send verification code.");
   }

@@ -1,4 +1,5 @@
 from app.middleware.contest_eligibility import ContestEligibilityMiddleware
+from app.middleware.cloudflare_security import CloudflareSecurityMiddleware
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 FastAPI Main Application Entrypoint
@@ -63,7 +64,9 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS Middleware
+# Cloudflare Edge & Client Security (Real IP, HSTS, COOP, Permissions, CF-Ray)
+app.add_middleware(CloudflareSecurityMiddleware)
+
 # Live Contest Eligibility Middleware (Enforces Top 30 restriction on live finals)
 app.add_middleware(ContestEligibilityMiddleware)
 
