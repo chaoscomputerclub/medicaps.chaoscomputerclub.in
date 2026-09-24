@@ -334,8 +334,20 @@ export function AuthPage() {
               <p className="mt-2 text-xs text-red-400 leading-relaxed">{message}</p>
             )}
 
+            {/* Primary CTA — lime */}
+            <Button
+              type="submit"
+              variant="default"
+              size="lg"
+              disabled={pending || isInvalidDomain || !email.trim()}
+              className="w-full mt-4 h-11 text-[14px] rounded-xl"
+            >
+              {pending ? <Loader2 className="size-4 animate-spin" /> : "Continue with email"}
+            </Button>
+
             {/* Cloudflare Client Security */}
             <CloudflareTurnstile
+              className="mt-3.5"
               onSuccess={(token) => {
                 setTurnstileToken(token);
               }}
@@ -346,17 +358,6 @@ export function AuthPage() {
                 setTurnstileToken(null);
               }}
             />
-
-            {/* Primary CTA — lime */}
-            <Button
-              type="submit"
-              variant="default"
-              size="lg"
-              disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full mt-3 h-11 text-[14px] rounded-xl"
-            >
-              {pending ? <Loader2 className="size-4 animate-spin" /> : "Continue with email"}
-            </Button>
           </form>
 
           {/* OR hairline divider */}

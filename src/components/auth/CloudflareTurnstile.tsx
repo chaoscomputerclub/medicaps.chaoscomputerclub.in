@@ -2,12 +2,18 @@
  * Chaos Computer Club India — Medi-Caps Chapter
  * src/components/auth/CloudflareTurnstile.tsx
  *
- * Production Cloudflare Turnstile Bot Verification Component.
- * Integrates Cloudflare Client Security Challenge with the CCC dark terminal aesthetic.
+ * The real Cloudflare Turnstile widget (shows "Success!" + Cloudflare mark),
+ * fitted to the auth form: full width, rounded-xl, theme-matched border.
+ *
+ * Notes:
+ * - Turnstile renders inside a cross-origin iframe, so its inner colours and
+ *   height (65px) are fixed by Cloudflare. We control the frame around it.
+ * - The iframe ships with a 1px square border. We clip it with a rounded,
+ *   overflow-hidden shell and draw our own border on the shell instead.
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 declare global {
@@ -27,7 +33,6 @@ declare global {
       reset: (widgetId: string) => void;
       remove: (widgetId: string) => void;
     };
-    onloadTurnstileCallback?: () => void;
   }
 }
 
@@ -39,6 +44,11 @@ interface CloudflareTurnstileProps {
   className?: string;
 }
 
+type Status = "loading" | "idle" | "verified" | "error";
+
+const SCRIPT_ID = "cf-turnstile-script";
+const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
 export function CloudflareTurnstile({
   siteKey,
   onSuccess,
@@ -48,114 +58,118 @@ export function CloudflareTurnstile({
 }: CloudflareTurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [status, setStatus] = useState<Status>("loading");
 
-  // Cloudflare official testing sitekey (always passes) used as fallback if not provisioned in env
+  // Latest callbacks live in a ref so inline arrow functions from the parent
+  // don't destroy and re-create the widget on every render.
+  const callbacksRef = useRef({ onSuccess, onError, onExpire });
+  callbacksRef.current = { onSuccess, onError, onExpire };
+
+  // Read strictly from environment variable — zero hardcoded credentials
   const activeSiteKey =
     siteKey ||
     (import.meta.env["VITE_CLOUDFLARE_TURNSTILE_SITE_KEY"] as string | undefined) ||
-    "1x00000000000000000000AA";
+    "";
 
   useEffect(() => {
     let isMounted = true;
+    let scriptEl: HTMLElement | null = null;
 
-    function renderWidget() {
-      if (!isMounted || !containerRef.current || !window.turnstile) return;
-
-      // Clean up previous widget if existing
-      if (widgetIdRef.current) {
-        try {
-          window.turnstile.remove(widgetIdRef.current);
-        } catch {
-          // ignore cleanup error
-        }
-        widgetIdRef.current = null;
-      }
-
-      try {
-        const id = window.turnstile.render(containerRef.current, {
-          sitekey: activeSiteKey,
-          theme: "dark",
-          size: "normal",
-          callback: (token: string) => {
-            if (isMounted) {
-              setHasError(false);
-              onSuccess(token);
-            }
-          },
-          "error-callback": (err: any) => {
-            if (isMounted) {
-              setHasError(true);
-              onError?.(err);
-            }
-          },
-          "expired-callback": () => {
-            if (isMounted) {
-              onExpire?.();
-            }
-          },
-        });
-        widgetIdRef.current = id;
-        setIsReady(true);
-      } catch (err) {
-        if (isMounted) {
-          setHasError(true);
-          onError?.(err);
-        }
-      }
-    }
-
-    if (window.turnstile) {
-      renderWidget();
-    } else {
-      const existingScript = document.getElementById("cf-turnstile-script");
-      if (!existingScript) {
-        const script = document.createElement("script");
-        script.id = "cf-turnstile-script";
-        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-          if (isMounted) renderWidget();
-        };
-        script.onerror = (e) => {
-          if (isMounted) {
-            setHasError(true);
-            onError?.(e);
-          }
-        };
-        document.head.appendChild(script);
-      } else {
-        existingScript.addEventListener("load", renderWidget);
-      }
-    }
-
-    return () => {
-      isMounted = false;
+    function removeWidget() {
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch {
           // ignore
         }
-        widgetIdRef.current = null;
       }
+      widgetIdRef.current = null;
+    }
+
+    function renderWidget() {
+      if (!isMounted || !containerRef.current || !window.turnstile) return;
+      removeWidget();
+      setStatus("idle");
+
+      try {
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
+          sitekey: activeSiteKey,
+          theme: "dark",
+          size: "flexible", // fills the container width instead of fixed 300px
+          callback: (token) => {
+            if (!isMounted) return;
+            setStatus("verified");
+            callbacksRef.current.onSuccess(token);
+          },
+          "error-callback": (err) => {
+            if (!isMounted) return;
+            setStatus("error");
+            callbacksRef.current.onError?.(err);
+          },
+          "expired-callback": () => {
+            if (!isMounted) return;
+            setStatus("idle");
+            callbacksRef.current.onExpire?.();
+          },
+        });
+      } catch (err) {
+        if (!isMounted) return;
+        setStatus("error");
+        callbacksRef.current.onError?.(err);
+      }
+    }
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      scriptEl = document.getElementById(SCRIPT_ID);
+      if (!scriptEl) {
+        const script = document.createElement("script");
+        script.id = SCRIPT_ID;
+        script.src = SCRIPT_SRC;
+        script.async = true;
+        script.defer = true;
+        script.onerror = (e) => {
+          if (!isMounted) return;
+          setStatus("error");
+          callbacksRef.current.onError?.(e);
+        };
+        document.head.appendChild(script);
+        scriptEl = script;
+      }
+      scriptEl.addEventListener("load", renderWidget);
+    }
+
+    return () => {
+      isMounted = false;
+      scriptEl?.removeEventListener("load", renderWidget);
+      removeWidget();
     };
-  }, [activeSiteKey, onSuccess, onError, onExpire]);
+  }, [activeSiteKey]);
 
   return (
-    <div className={cn("w-full flex flex-col items-center justify-center my-2", className)}>
+    <div
+      className={cn(
+        // Shell: fixed 65px = Turnstile's height, so nothing shifts on load.
+        "relative h-[65px] w-full overflow-hidden rounded-xl border bg-[#232323]",
+        "transition-colors duration-200",
+        status === "error"
+          ? "border-amber-500/40"
+          : "border-white/[0.08] hover:border-white/15",
+        className,
+      )}
+    >
+      {/* Loader sits behind the iframe and is covered once the widget paints */}
+      <div className="absolute inset-0 flex items-center justify-center gap-2 text-[12px] text-zinc-500">
+        <Loader2 className="size-3.5 animate-spin" />
+        <span>Loading security check…</span>
+      </div>
+
+      {/* -1px offsets push the iframe's own square border outside the clip */}
       <div
         ref={containerRef}
-        className="flex items-center justify-center min-h-[65px] transition-opacity duration-200"
+        className="relative -m-px w-[calc(100%+2px)]"
       />
-      {hasError && (
-        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-amber-400 font-mono">
-          <ShieldAlert className="size-3" />
-          <span>Security check challenge failed. Please retry.</span>
-        </div>
-      )}
     </div>
   );
 }
