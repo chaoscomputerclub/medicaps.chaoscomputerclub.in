@@ -77,7 +77,7 @@ export function CloudflareTurnstile({
         const id = window.turnstile.render(containerRef.current, {
           sitekey: activeSiteKey,
           theme: "dark",
-          size: "flexible",
+          size: "normal",
           callback: (token: string) => {
             if (isMounted) {
               setHasError(false);
@@ -145,24 +145,17 @@ export function CloudflareTurnstile({
   }, [activeSiteKey, onSuccess, onError, onExpire]);
 
   return (
-    <div className={cn("w-full flex flex-col items-center justify-center my-3", className)}>
+    <div className={cn("w-full flex flex-col items-center justify-center my-2", className)}>
       <div
         ref={containerRef}
-        className="w-full min-h-[65px] flex items-center justify-center rounded-xl overflow-hidden bg-black/40 border border-white/[0.08]"
+        className="flex items-center justify-center min-h-[65px] transition-opacity duration-200"
       />
-      <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-zinc-500 font-mono">
-        {hasError ? (
-          <>
-            <ShieldAlert className="size-3 text-amber-500" />
-            <span className="text-amber-500/90">Cloudflare verification issue — retry</span>
-          </>
-        ) : (
-          <>
-            <ShieldCheck className="size-3 text-emerald-500" />
-            <span>Protected by Cloudflare Client Security</span>
-          </>
-        )}
-      </div>
+      {hasError && (
+        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-amber-400 font-mono">
+          <ShieldAlert className="size-3" />
+          <span>Security check challenge failed. Please retry.</span>
+        </div>
+      )}
     </div>
   );
 }

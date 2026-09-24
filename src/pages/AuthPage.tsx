@@ -279,8 +279,8 @@ export function AuthPage() {
     layoutSubtitle = "Choose your display name and campus handle.";
     bottomAction = undefined;
   } else {
-    layoutTitle = "Sign in to Arena";
-    layoutSubtitle = "Medi-Caps University competitive programming portal";
+    layoutTitle = "Sign in";
+    layoutSubtitle = undefined;
     bottomAction = undefined;
   }
 
@@ -292,81 +292,49 @@ export function AuthPage() {
     >
 
       {/* ════════════════════════════════════════════
-          STEP 1 — Primary Google SSO + Cloudflare Email OTP
+          STEP 1 — Email + OAuth (Strix Minimalist)
           ════════════════════════════════════════════ */}
       {step === "email" && (
         <div
           key="auth-email-step"
-          className={navDirection === "backward" ? "auth-transition-backward" : "space-y-5"}
+          className={navDirection === "backward" ? "auth-transition-backward" : ""}
         >
-          {/* PRIMARY ACTION: Institutional Google Workspace SSO */}
-          <div className="space-y-2.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              onClick={() => { window.location.href = getGoogleLoginURL(); }}
-              disabled={pending}
-              className="w-full h-12 text-[14px] text-white bg-white/[0.04] border border-white/15 hover:bg-white/[0.08] hover:border-white/30 gap-3 font-medium rounded-xl shadow-md transition-all duration-150 focus-visible:ring-2 focus-visible:ring-white/20 cursor-pointer"
-            >
-              <GoogleIcon className="size-4 shrink-0" />
-              <span>Continue with Google Workspace</span>
-            </Button>
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 font-mono">
-              <span className="inline-block size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>One-click SSO restricted to @medicaps.ac.in cadets</span>
-            </div>
-          </div>
-
-          {/* OR hairline divider */}
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.08]" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-[#191919] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
-                or sign in with email OTP
-              </span>
-            </div>
-          </div>
-
-          {/* SECONDARY ACTION: Email OTP with Cloudflare Client Security */}
-          <form onSubmit={handleEmailSubmit} noValidate className="space-y-3">
-            <div>
-              <label htmlFor="auth-email" className={LABEL}>
-                University Email Address
-              </label>
-              <input
-                id="auth-email"
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  dispatch(setEmail(e.target.value));
-                  if (message) dispatch(setMessage(null));
-                }}
-                placeholder="enrollment@medicaps.ac.in"
-                required
-                autoComplete="email"
-                className={cn(
-                  INPUT_BASE,
-                  isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
-                )}
-              />
-            </div>
+          <form onSubmit={handleEmailSubmit} noValidate>
+            {/* Email field */}
+            <label htmlFor="auth-email" className={LABEL}>
+              Email
+            </label>
+            <input
+              id="auth-email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                dispatch(setEmail(e.target.value));
+                if (message) dispatch(setMessage(null));
+              }}
+              placeholder="Your email address"
+              required
+              autoFocus
+              autoComplete="email"
+              className={cn(
+                INPUT_BASE,
+                isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
+              )}
+            />
 
             {/* Domain warning */}
             {isInvalidDomain && (
-              <p className="text-xs text-amber-400">
+              <p className="mt-2 text-xs text-amber-400">
                 Please use your official <span className="font-medium text-amber-300">@medicaps.ac.in</span> email.
               </p>
             )}
 
             {/* General error */}
             {message && !isInvalidDomain && (
-              <p className="text-xs text-red-400 leading-relaxed">{message}</p>
+              <p className="mt-2 text-xs text-red-400 leading-relaxed">{message}</p>
             )}
 
-            {/* Cloudflare Turnstile Bot Protection */}
+            {/* Cloudflare Client Security */}
             <CloudflareTurnstile
               onSuccess={(token) => {
                 setTurnstileToken(token);
@@ -379,17 +347,44 @@ export function AuthPage() {
               }}
             />
 
-            {/* Submit CTA — Lime theme */}
+            {/* Primary CTA — lime */}
             <Button
               type="submit"
               variant="default"
               size="lg"
               disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full h-11 text-[14px] rounded-xl font-medium"
+              className="w-full mt-3 h-11 text-[14px] rounded-xl"
             >
-              {pending ? <Loader2 className="size-4 animate-spin" /> : "Send verification code"}
+              {pending ? <Loader2 className="size-4 animate-spin" /> : "Continue with email"}
             </Button>
           </form>
+
+          {/* OR hairline divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/[0.08]" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-[#191919] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
+                or
+              </span>
+            </div>
+          </div>
+
+          {/* OAuth button */}
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => { window.location.href = getGoogleLoginURL(); }}
+              disabled={pending}
+              className="w-full h-11 text-[14px] text-zinc-200 border-white/[0.08] hover:bg-white/[0.03] hover:border-white/20 gap-2.5 font-normal rounded-xl"
+            >
+              <GoogleIcon className="size-4 shrink-0" />
+              <span>Continue with Google</span>
+            </Button>
+          </div>
         </div>
       )}
 
