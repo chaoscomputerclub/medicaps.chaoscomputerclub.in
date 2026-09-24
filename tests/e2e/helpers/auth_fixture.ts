@@ -51,6 +51,43 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
     });
   });
 
+  await page.route('**/auth/refresh', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        access_token: token,
+        member,
+      }),
+    });
+  });
+
+  await page.route('**/auth/profile', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        member,
+        ratingHistory: [],
+        recentBattles: [],
+      }),
+    });
+  });
+
+  await page.route('**/social/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        following_ids: [],
+        followers: [],
+        following: [],
+        students: [],
+      }),
+    });
+  });
+
   await page.addInitScript(
     ({ t, m }) => {
       window.localStorage.setItem('ccc_medicaps_token', t);
