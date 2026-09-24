@@ -30,10 +30,10 @@ const getIcon = (
 
 const getNextTheme = (
   effective: ThemeSelection,
-  modes: ThemeSelection[],
+  modes: ThemeSelection[] = ['dark', 'light'],
 ): ThemeSelection => {
   const i = modes.indexOf(effective);
-  if (i === -1) return modes[0];
+  if (i === -1) return modes[0] || 'dark';
   return modes[(i + 1) % modes.length];
 };
 
@@ -45,7 +45,7 @@ interface ThemeTogglerButtonProps
 }
 
 function ThemeTogglerButton({
-  modes = ['light', 'dark', 'system'],
+  modes = ['dark', 'light'],
   direction = 'ltr',
   onImmediateChange,
   onClick,

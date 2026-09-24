@@ -63,9 +63,18 @@ function ThemeToggler({
     effective: ThemeSelection;
     resolved: Resolved;
   }>({
-    effective: theme,
-    resolved: resolvedTheme,
+    effective: theme || 'dark',
+    resolved: resolvedTheme || 'dark',
   });
+
+  React.useEffect(() => {
+    if (theme && resolvedTheme) {
+      setCurrent({
+        effective: theme,
+        resolved: resolvedTheme,
+      });
+    }
+  }, [theme, resolvedTheme]);
 
   React.useEffect(() => {
     if (
@@ -80,49 +89,50 @@ function ThemeToggler({
   const [fromClip, toClip] = getClipKeyframes(direction);
 
   const toggleTheme = React.useCallback(
-    async (theme: ThemeSelection) => {
-      const resolved = theme === 'system' ? getSystemEffective() : theme;
+    async (newTheme: ThemeSelection) => {
+      const resolved = newTheme === 'system' ? getSystemEffective() : newTheme;
 
-      setCurrent({ effective: theme, resolved });
-      onImmediateChange?.(theme);
+      setCurrent({ effective: newTheme, resolved });
+      onImmediateChange?.(newTheme);
 
-      if (theme === 'system' && resolved === resolvedTheme) {
-        setTheme(theme);
-        return;
-      }
+      const applyThemeToDom = () => {
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(resolved);
+        document.documentElement.style.colorScheme = resolved;
+      };
 
       if (!document.startViewTransition) {
         flushSync(() => {
-          setPreview({ effective: theme, resolved });
+          setPreview({ effective: newTheme, resolved });
+          applyThemeToDom();
         });
-        setTheme(theme);
+        setTheme(newTheme);
         return;
       }
 
-      await document.startViewTransition(() => {
+      const transition = document.startViewTransition(() => {
         flushSync(() => {
-          setPreview({ effective: theme, resolved });
-          document.documentElement.classList.toggle(
-            'dark',
-            resolved === 'dark',
-          );
+          setPreview({ effective: newTheme, resolved });
+          applyThemeToDom();
         });
-      }).ready;
+      });
+
+      await transition.ready;
 
       document.documentElement
         .animate(
           { clipPath: [fromClip, toClip] },
           {
-            duration: 700,
-            easing: 'ease-in-out',
+            duration: 450,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
             pseudoElement: '::view-transition-new(root)',
           },
         )
         .finished.finally(() => {
-          setTheme(theme);
+          setTheme(newTheme);
         });
     },
-    [onImmediateChange, resolvedTheme, fromClip, toClip, setTheme],
+    [onImmediateChange, fromClip, toClip, setTheme],
   );
 
   return (

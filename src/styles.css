@@ -108,7 +108,7 @@ html {
 
 html.light {
   color-scheme: light;
-  --background: #fcfcfc;
+  --background: #f8f9fa;
   --foreground: #09090b;
   --bg: #f4f4f5;
   --surface: #ffffff;
@@ -118,7 +118,7 @@ html.light {
   --line: rgba(0, 0, 0, 0.08);
   --line-strong: rgba(0, 0, 0, 0.16);
   --muted: #71717a;
-  background-color: #fcfcfc;
+  background-color: #f8f9fa;
   color: #09090b;
 }
 
@@ -133,8 +133,166 @@ body {
 }
 
 html.light body {
-  background-color: #fcfcfc;
+  background-color: #f8f9fa;
   color: #09090b;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Light Theme Transformations
+   Gradual theme toggler mappings when <html class="light"> is active
+   ───────────────────────────────────────────────────────────── */
+
+/* Viewport & Page Shell */
+html.light div.min-h-screen.bg-black,
+html.light main.bg-black,
+html.light main.min-h-screen {
+  background-color: #f8f9fa !important;
+}
+
+/* Surfaces & Containers */
+html.light .bg-black {
+  background-color: #ffffff !important;
+}
+
+html.light aside.bg-black,
+html.light header.bg-black {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-zinc-950 {
+  background-color: #f4f4f5 !important;
+}
+
+html.light .bg-zinc-900 {
+  background-color: #e4e4e7 !important;
+}
+
+html.light .bg-zinc-900\/60,
+html.light .bg-zinc-950\/60,
+html.light .bg-zinc-950\/40 {
+  background-color: rgba(244, 244, 245, 0.8) !important;
+}
+
+html.light .bg-white\/\[0\.06\],
+html.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Typography Hierarchy */
+html.light .text-white {
+  color: #09090b !important;
+}
+
+html.light .text-zinc-100,
+html.light .text-zinc-200 {
+  color: #18181b !important;
+}
+
+html.light .text-zinc-300 {
+  color: #27272a !important;
+}
+
+html.light .text-zinc-400 {
+  color: #52525b !important;
+}
+
+html.light .text-zinc-500 {
+  color: #71717a !important;
+}
+
+html.light .text-zinc-600 {
+  color: #a1a1aa !important;
+}
+
+/* Hairline Borders */
+html.light .border-white\/6,
+html.light .border-white\/8,
+html.light .border-white\/10,
+html.light .border-white\/12,
+html.light .border-white\/15,
+html.light .border-white\/18,
+html.light .border-white\/20,
+html.light .border-white\/25,
+html.light .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+html.light .divide-white\/8 > :not([hidden]) ~ :not([hidden]),
+html.light .divide-white\/10 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Hover & Interactive States */
+html.light .hover\:text-white:hover {
+  color: #000000 !important;
+}
+
+html.light .hover\:bg-zinc-900:hover,
+html.light .hover\:bg-zinc-950:hover {
+  background-color: #ebebef !important;
+}
+
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-white\/\[0\.02\]:hover,
+html.light .hover\:bg-white\/\[0\.06\]:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .hover\:border-white\/25:hover,
+html.light .hover\:border-white\/30:hover {
+  border-color: rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Accessible High-Contrast Brand Accents in Light Mode */
+html.light .text-lime-400 {
+  color: #4d7c0f !important;
+}
+
+html.light .bg-lime-400\/10,
+html.light .bg-lime-400\/8,
+html.light .bg-lime-400\/5 {
+  background-color: rgba(101, 163, 13, 0.12) !important;
+}
+
+html.light .border-lime-400\/25,
+html.light .border-lime-400\/30 {
+  border-color: rgba(101, 163, 13, 0.35) !important;
+}
+
+/* Form Controls & Tags */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .mono-tag {
+  background-color: #f4f4f5 !important;
+  color: #27272a !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .panel,
+html.light .metric,
+html.light [data-slot="card"] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f4f4f5 !important;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18) !important;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #65a30d !important;
 }
 
 /* View Transitions for Animate UI Theme Toggler gradual sweeping effect */
