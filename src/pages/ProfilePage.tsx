@@ -38,6 +38,18 @@ import {
 import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
+import {
+  AlertDialog,
+  AlertDialogPopup,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogPortal,
+  AlertDialogBackdrop,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/animate-ui/primitives/base/alert-dialog";
 
 export function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -50,6 +62,7 @@ export function ProfilePage() {
 
   const [copied, setCopied] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [showRemoveAvatarModal, setShowRemoveAvatarModal] = useState(false);
 
   // Determine if viewing own profile or another student's profile
   const isViewingSelf =
@@ -115,7 +128,7 @@ export function ProfilePage() {
   };
 
   const handleAvatarRemove = async () => {
-    if (!confirm("Remove your custom profile picture?")) return;
+    setShowRemoveAvatarModal(false);
     const tid = toast.loading("Removing photo…");
     try {
       await dispatch(removeAvatarThunk()).unwrap();
@@ -424,7 +437,7 @@ export function ProfilePage() {
                   {resolvedAvatar && (
                     <Button
                       type="button"
-                      onClick={handleAvatarRemove}
+                      onClick={() => setShowRemoveAvatarModal(true)}
                       variant="destructive"
                       size="sm"
                       className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-red-400 hover:text-white border border-red-500/30 bg-transparent hover:bg-red-600 rounded-md transition-colors"
@@ -887,6 +900,38 @@ export function ProfilePage() {
           Ratings and achievements derive exclusively from physically proctored campus tournaments.
         </p>
       </footer>
+
+      {/* Remove Avatar Confirmation Modal */}
+      <AlertDialog open={showRemoveAvatarModal} onOpenChange={setShowRemoveAvatarModal}>
+        <AlertDialogPortal>
+          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
+          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+            <AlertDialogHeader className="space-y-2 text-left">
+              <AlertDialogTitle className="text-base font-semibold text-white">
+                Remove profile photo?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+                Are you sure you want to remove your custom profile photo? This will revert your avatar to your initials placeholder.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+              <AlertDialogCancel
+                onClick={() => setShowRemoveAvatarModal(false)}
+                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleAvatarRemove}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Remove Photo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogPopup>
+        </AlertDialogPortal>
+      </AlertDialog>
     </div>
   );
 }
