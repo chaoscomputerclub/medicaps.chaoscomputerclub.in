@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Trophy,
   Calendar,
@@ -20,6 +20,7 @@ import {
   Medal,
   Play,
   RotateCcw,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +98,7 @@ function useCountdown(
 }
 
 export function ContestsHubPage() {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { contests, isLoading } = useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
@@ -320,24 +322,25 @@ export function ContestsHubPage() {
     <div className="relative min-h-screen text-zinc-100 pb-16">
       {/* ─── CONTEST ROOT PAGE BACKGROUND (LIGHT RAYS) ─── */}
       <div
-        className="pointer-events-none absolute inset-x-0 -top-8 flex justify-center overflow-hidden z-0"
-        style={{ width: "100%", height: "600px", position: "absolute" }}
+        className="pointer-events-none absolute -top-4 md:-top-8 -left-4 md:-left-8 w-[calc(100%+2rem)] md:w-[calc(100%+4rem)] h-[520px] overflow-hidden z-0"
+        style={{
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0) 100%)'
+        }}
         aria-hidden="true"
       >
-        <div style={{ width: "100%", height: "600px", position: "relative" }}>
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#CBFF00"
-            raysSpeed={2}
-            lightSpread={0.8}
-            rayLength={1.2}
-            followMouse={true}
-            mouseInfluence={0}
-            noiseAmount={0.1}
-            distortion={0.05}
-            className="custom-rays"
-          />
-        </div>
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#CBFF00"
+          raysSpeed={1.0}
+          lightSpread={2.4}
+          rayLength={1.1}
+          followMouse={true}
+          mouseInfluence={0}
+          noiseAmount={0.08}
+          distortion={0.04}
+          className="custom-rays w-full h-full"
+        />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-10">
@@ -407,7 +410,16 @@ export function ContestsHubPage() {
                   return (
                     <div
                       key={contest.slug}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.06)]"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/contests/${contest.slug}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          navigate(`/contests/${contest.slug}`);
+                        }
+                      }}
+                      className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.06)] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
                     >
                       {/* Top Tactical Banner Area */}
                       <div className="relative h-44 w-full p-5 flex flex-col justify-between bg-gradient-to-br from-zinc-900 via-black to-zinc-950 overflow-hidden border-b border-white/8">
@@ -477,39 +489,54 @@ export function ContestsHubPage() {
                           </span>
                         </div>
 
-                        {/* Action CTA */}
-                        <div className="shrink-0">
+                        {/* Action CTA: Single Toggle Button (isolated from card click) */}
+                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {isLive ? (
                             <Button
                               asChild
                               size="sm"
-                              className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold px-4 rounded-xl shadow-lg shadow-lime-400/20"
+                              className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold px-4 rounded-xl shadow-lg shadow-lime-400/20 active:scale-95 transition-all"
                             >
                               <Link to={`/contests/${contest.slug}/lobby`}>
                                 <Play className="size-3.5 mr-1 fill-black" /> Enter Live
                               </Link>
                             </Button>
                           ) : isRegistered ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-lime-400/30 bg-lime-400/10 font-mono text-xs font-semibold text-lime-400">
-                                <Check className="size-3.5 stroke-[2.5]" /> Registered
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleUnregister(contest.slug)}
-                                disabled={registeringSlug === contest.slug}
-                                title="Cancel registration"
-                                className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors p-1"
-                              >
-                                {registeringSlug === contest.slug ? "..." : "Cancel"}
-                              </button>
-                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUnregister(contest.slug);
+                              }}
+                              disabled={registeringSlug === contest.slug}
+                              className="group/btn border-lime-400/30 bg-lime-400/10 text-lime-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 font-mono text-xs font-semibold px-3.5 py-1.5 rounded-xl transition-all cursor-pointer active:scale-95 shadow-sm"
+                              title="Click to cancel registration"
+                            >
+                              {registeringSlug === contest.slug ? (
+                                "Canceling..."
+                              ) : (
+                                <>
+                                  <span className="flex items-center gap-1.5 group-hover/btn:hidden">
+                                    <Check className="size-3.5 stroke-[2.5]" /> Registered
+                                  </span>
+                                  <span className="hidden items-center gap-1.5 group-hover/btn:flex text-red-400">
+                                    <X className="size-3.5 stroke-[2.5]" /> Cancel
+                                  </span>
+                                </>
+                              )}
+                            </Button>
                           ) : (
                             <Button
+                              type="button"
                               size="sm"
-                              onClick={() => handleRegister(contest.slug)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRegister(contest.slug);
+                              }}
                               disabled={registeringSlug === contest.slug}
-                              className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold px-4 rounded-xl shadow-lg shadow-lime-400/20 active:scale-95 transition-all"
+                              className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs font-bold px-4 rounded-xl shadow-lg shadow-lime-400/20 active:scale-95 transition-all cursor-pointer"
                             >
                               <Bell className="size-3.5 mr-1.5" />
                               {registeringSlug === contest.slug

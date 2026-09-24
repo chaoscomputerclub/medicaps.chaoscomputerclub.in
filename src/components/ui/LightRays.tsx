@@ -44,7 +44,7 @@ const getAnchorAndDir = (
   w: number,
   h: number
 ): { anchor: [number, number]; dir: [number, number] } => {
-  const outside = 0.2;
+  const outside = 0.35;
   switch (origin) {
     case 'top-left':
       return { anchor: [0, -outside * h], dir: [0, 1] };
@@ -194,13 +194,13 @@ float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord,
   float cosAngle = dot(dirNorm, rayRefDirection);
 
   float distortedAngle = cosAngle + distortion * sin(iTime * 2.0 + length(sourceToCoord) * 0.01) * 0.2;
-  float spreadFactor = pow(max(distortedAngle, 0.0), 1.0 / max(lightSpread, 0.001));
+  float spreadFactor = pow(clamp(distortedAngle * 0.7 + 0.3, 0.0, 1.0), 1.0 / max(lightSpread, 0.001));
 
   float distance = length(sourceToCoord);
   float maxDistance = iResolution.x * rayLength;
   float lengthFalloff = clamp((maxDistance - distance) / maxDistance, 0.0, 1.0);
   
-  float fadeFalloff = clamp((iResolution.x * fadeDistance - distance) / (iResolution.x * fadeDistance), 0.5, 1.0);
+  float fadeFalloff = clamp((iResolution.x * fadeDistance - distance) / (iResolution.x * fadeDistance), 0.0, 1.0);
   float pulse = pulsating > 0.5 ? (0.8 + 0.2 * sin(iTime * speed * 3.0)) : 1.0;
 
   float baseStrength = clamp(
@@ -229,14 +229,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
                rayStrength(rayPos, finalRayDir, coord, 22.3991, 18.0234,
                            1.1 * raysSpeed);
 
-  fragColor = rays1 * 0.5 + rays2 * 0.4;
+  fragColor = rays1 * 0.32 + rays2 * 0.24;
 
   if (noiseAmount > 0.0) {
     float n = noise(coord * 0.01 + iTime * 0.1);
     fragColor.rgb *= (1.0 - noiseAmount + noiseAmount * n);
   }
 
-  float brightness = 1.0 - (coord.y / iResolution.y);
+  float brightness = clamp(1.0 - (coord.y / (iResolution.y * 0.85)), 0.0, 1.0);
   fragColor.x *= 0.1 + brightness * 0.8;
   fragColor.y *= 0.3 + brightness * 0.6;
   fragColor.z *= 0.5 + brightness * 0.5;
@@ -260,7 +260,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 void main() {
   vec4 color;
   mainImage(color, gl_FragCoord.xy);
-  gl_FragColor = color;
+  float a = clamp(max(color.r, max(color.g, color.b)), 0.0, 1.0);
+  gl_FragColor = vec4(color.rgb, a);
 }`;
 
       const effectiveSpeed = prefersReducedMotion ? 0 : raysSpeed;

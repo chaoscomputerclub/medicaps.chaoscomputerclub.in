@@ -366,7 +366,7 @@ export function PortalShell() {
       </aside>
 
       {/* Main Viewport */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8 relative">
+      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8 relative overflow-x-clip">
         <Suspense fallback={<PortalRouteSkeleton />}>
           <Outlet />
         </Suspense>
