@@ -16,7 +16,7 @@
 ## 1. Automated GitHub Actions CI/CD Pipeline
 The production deployment pipeline is managed by **GitHub Actions** (`.github/workflows/deploy.yml`):
 - Pushing to `origin/main` automatically triggers GitHub CI/CD:
-  - Compiles the Student Portal (`npm run build`) and Admin Console (`npm run build:admin`).
+  - Compiles the Student Portal (`npm run build`).
   - Connects to the production server via SSH, pulls updates, syncs backend code, and restarts services.
   - Deploys production web bundles, reloads Nginx, and validates live health endpoints.
 - Agents and developers do **NOT** have to run slow local SSH deploys or wait on `./scripts/gsd_sync.sh`. Simply push commits to `main` when instructed, and GitHub handles the deployment asynchronously in the cloud.

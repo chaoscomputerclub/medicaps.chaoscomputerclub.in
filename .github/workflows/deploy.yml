@@ -32,9 +32,6 @@ jobs:
       - name: 🏗️ Build Student Portal Frontend
         run: npm run build
 
-      - name: 🛠️ Build Admin Console Frontend
-        run: npm run build:admin
-
       - name: 🔑 Configure SSH Key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -85,10 +82,6 @@ jobs:
         run: |
           echo "→ Deploying verified Student Portal..."
           rsync -avz dist/ production:/var/www/ccc-medicaps/.output/public/
-
-          echo "→ Deploying verified Admin Console..."
-          ssh production "mkdir -p /var/www/ccc-medicaps-admin"
-          rsync -avz dist-admin/ production:/var/www/ccc-medicaps-admin/
 
           echo "→ Reloading Nginx web server..."
           ssh production "systemctl reload nginx"

@@ -54,3 +54,12 @@ backend/.env.*
 # RSA Private Keys
 backend/keys/jwt_private_key.pem
 *.pem
+
+# Test Results & Reports
+playwright-report/
+test-results/
+
+# Private Admin Portal (Localhost Only - Not Open Sourced)
+admin/
+dist-admin/
+vite.admin.config.ts
