@@ -4,6 +4,7 @@ Configuration settings
 """
 
 import os
+from functools import cached_property
 from pathlib import Path
 from typing import List, Union, Optional
 from pydantic_settings import BaseSettings
@@ -95,32 +96,16 @@ class Settings(BaseSettings):
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
 
-    # CORS (strictly loaded via environment variables)
-    CORS_ORIGINS: Union[List[str], str] = []
+    # CORS (strictly loaded via environment variables in O(1))
+    CORS_ORIGINS: Optional[Union[List[str], str]] = None
 
-    @property
-    def cors_origins_list(self) -> List[str]:
-        """Parsed list of allowed CORS origins strictly from environment."""
-        origins: List[str] = []
-        raw_list = self.CORS_ORIGINS if isinstance(self.CORS_ORIGINS, list) else [self.CORS_ORIGINS]
-        for item in raw_list:
-            if isinstance(item, str) and item.strip():
-                for sub in item.split(","):
-                    clean = sub.strip()
-                    if clean and clean not in origins:
-                        origins.append(clean)
-
-        env_origins = os.getenv("CORS_ORIGINS", "")
-        if env_origins:
-            for o in env_origins.split(","):
-                clean = o.strip()
-                if clean and clean not in origins:
-                    origins.append(clean)
-
-        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
-            origins.append(self.FRONTEND_URL)
-
-        return origins
+    @cached_property
+    def cors_origins_list(self) -> Optional[List[str]]:
+        if not self.CORS_ORIGINS:
+            return None
+        if isinstance(self.CORS_ORIGINS, list):
+            return self.CORS_ORIGINS
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
 
     # MinIO / S3 Object Storage
