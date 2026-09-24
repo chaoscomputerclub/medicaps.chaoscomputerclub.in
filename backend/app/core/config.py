@@ -14,7 +14,7 @@ load_dotenv(BASE_DIR / ".env", override=True)
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "CCC Medi-Caps Arena API"
+    PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     # Database (PostgreSQL 16+ via asyncpg)
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps"
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/arena_dev"
     )
 
     # JWT Authentication (RSA 256 / RS256 Asymmetric Cryptography)
@@ -57,12 +57,12 @@ class Settings(BaseSettings):
     ).lower() in ("true", "1", "yes")
 
     # Email (SMTP) for OTP
-    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.hostinger.com")
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "localhost")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "465"))
     SMTP_USER: str = os.getenv("SMTP_USER") or os.getenv("SMTP_USERNAME", "")
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
     SMTP_FROM: str = os.getenv("SMTP_FROM") or os.getenv("SMTP_FROM_EMAIL", "")
-    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Chaos Computer Club")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Arena Auth")
 
     # URLs
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:8081")
@@ -113,11 +113,11 @@ class Settings(BaseSettings):
     MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "127.0.0.1:9002")
     MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "")
     MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "")
-    MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "ccc-medicaps-media")
+    MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "arena-media")
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
-    MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "https://medicaps.chaoscomputerclub.in/media")
+    MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "")
 
-    # CORS
+    # CORS (Production domains must strictly be loaded via CORS_ORIGINS in .env)
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:8080",
         "http://localhost:8081",
@@ -135,10 +135,6 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8085",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
-        "https://medicaps.chaoscomputerclub.in",
-        "https://chaoscomputerclub.in",
-        "https://www.chaoscomputerclub.in",
-        "https://medicaps-api.chaoscomputerclub.in",
     ]
 
     class Config:
