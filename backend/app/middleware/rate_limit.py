@@ -33,8 +33,18 @@ logger = logging.getLogger("ccc.rate_limit")
 
 
 def _member_id_from_request(request: Request) -> str | None:
-    """Extract member_id from the JWT state stored in request.state by the auth middleware."""
-    return getattr(getattr(request, "state", None), "member_id", None)
+    """Extract member_id from request.state or from JWT in HttpOnly cookie / Bearer token."""
+    state_id = getattr(getattr(request, "state", None), "member_id", None)
+    if state_id:
+        return state_id
+    from app.middleware.auth import extract_access_token
+    from app.core.security import decode_access_token
+    token = extract_access_token(request)
+    if token:
+        payload = decode_access_token(token)
+        if payload:
+            return payload.get("sub")
+    return None
 
 
 def rate_limit(scope: str, max_calls: int, window_seconds: int) -> Callable:
