@@ -22,10 +22,8 @@ import {
   Lock,
   LogOut,
   Monitor,
-  Moon,
   ShieldAlert,
   ShieldCheck,
-  Sun,
   Trash2,
   Upload,
   User,
@@ -33,12 +31,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useTheme } from "next-themes";
-import {
-  ThemeTogglerDemo,
-  type Direction,
-  type ThemeSelection,
-} from "@/components/animate-ui/components/buttons/theme-toggler";
 import { toast } from "sonner";
 import { cn, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { isAuthenticated, getToken, clearToken, logout } from "@/lib/auth";
@@ -95,14 +87,13 @@ const DEPARTMENTS = [
 
 const BATCHES = ["2022-26", "2023-27", "2024-28", "2025-29", "Alumni / Special"];
 
-type SettingsTab = "profile" | "account" | "appearance" | "notifications" | "security" | "danger";
+type SettingsTab = "profile" | "account" | "notifications" | "security" | "danger";
 
 // ─── Nav definition ───────────────────────────────────────────────────────────
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType; danger?: boolean }[] = [
   { id: "profile",       label: "Public Profile",    icon: UserRound },
   { id: "account",       label: "Account",           icon: AtSign },
-  { id: "appearance",    label: "Appearance & Theme",icon: Sun },
   { id: "notifications", label: "Notifications",     icon: Bell },
   { id: "security",      label: "Security & Session", icon: ShieldCheck },
   { id: "danger",        label: "Danger Zone",       icon: AlertTriangle, danger: true },
@@ -228,136 +219,6 @@ function SaveButton({
       {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
     </Button>
-  );
-}
-
-function AppearanceSettingsSection() {
-  const { theme, resolvedTheme, setTheme } = useTheme();
-  const [direction, setDirection] = useState<Direction>("ltr");
-
-  return (
-    <>
-      <SettingSection
-        title="Theme & Atmosphere"
-        description="Configure your portal aesthetic with Animate UI gradual transition effects."
-      >
-        <div className="space-y-6">
-          {/* Visual Theme Picker */}
-          <div>
-            <span className="text-xs font-medium text-zinc-200 block mb-3">
-              Color Theme
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                {
-                  id: "dark" as ThemeSelection,
-                  label: "Dark",
-                  desc: "Pitch black & Electric Lime",
-                  icon: Moon,
-                  previewBg: "bg-black border-white/20",
-                  previewAccent: "bg-[#CCFF00]",
-                },
-                {
-                  id: "light" as ThemeSelection,
-                  label: "Light",
-                  desc: "Clean high-contrast daytime",
-                  icon: Sun,
-                  previewBg: "bg-zinc-100 border-zinc-300",
-                  previewAccent: "bg-[#65a30d]",
-                },
-                {
-                  id: "system" as ThemeSelection,
-                  label: "System",
-                  desc: "Syncs with OS preferences",
-                  icon: Monitor,
-                  previewBg: "bg-gradient-to-r from-zinc-900 to-zinc-200 border-white/10",
-                  previewAccent: "bg-[#CCFF00]",
-                },
-              ].map((item) => {
-                const isSelected = theme === item.id;
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setTheme(item.id)}
-                    className={cn(
-                      "flex flex-col p-4 rounded-lg border text-left transition-all cursor-pointer select-none",
-                      isSelected
-                        ? "border-lime-400 bg-lime-400/5 ring-1 ring-lime-400"
-                        : "border-white/10 bg-black hover:border-white/25 hover:bg-zinc-950"
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className={cn("size-6 rounded-md border flex items-center justify-center p-1", item.previewBg)}>
-                        <span className={cn("size-2 rounded-full", item.previewAccent)} />
-                      </div>
-                      {isSelected ? (
-                        <span className="size-2 rounded-full bg-lime-400 shadow-[0_0_6px_rgba(204,255,0,0.6)]" />
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Icon size={14} className={isSelected ? "text-lime-400" : "text-zinc-400"} />
-                      <span className={cn("text-sm font-semibold", isSelected ? "text-white" : "text-zinc-300")}>
-                        {item.label}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-500 mt-1">{item.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Animate UI Transition Direction */}
-          <div className="pt-4 border-t border-white/8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-medium text-zinc-200">Sweep Animation Direction</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Direction of the gradual View Transition clip-path sweep.
-                </p>
-              </div>
-              <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-md border border-white/10">
-                {(["ltr", "rtl", "ttb", "btt"] as Direction[]).map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setDirection(d)}
-                    className={cn(
-                      "px-2.5 py-1 text-[11px] font-mono uppercase rounded transition-colors cursor-pointer",
-                      direction === d
-                        ? "bg-lime-400 text-black font-bold"
-                        : "text-zinc-400 hover:text-white"
-                    )}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Live Demo */}
-          <div className="pt-4 border-t border-white/8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-950/60 p-4 rounded-lg border border-white/6">
-            <div>
-              <p className="text-xs font-semibold text-white">Animate UI Theme Toggler Demo</p>
-              <p className="text-[11px] text-zinc-400 mt-0.5">
-                Click the interactive toggler to preview the gradual animation sweep.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] font-mono text-zinc-400">
-                Current: <strong className="text-lime-400 capitalize">{theme}</strong> ({resolvedTheme})
-              </span>
-              <div className="p-1 rounded-md border border-white/15 bg-black">
-                <ThemeTogglerDemo direction={direction} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </SettingSection>
-    </>
   );
 }
 
@@ -1099,11 +960,6 @@ export function SettingsPage() {
                 </div>
               </SettingSection>
             </>
-          )}
-
-          {/* ═══════════════════ TAB: APPEARANCE & THEME ════════════════════ */}
-          {activeTab === "appearance" && (
-            <AppearanceSettingsSection />
           )}
 
           {/* ═══════════════════ TAB: NOTIFICATIONS ═════════════════════════ */}

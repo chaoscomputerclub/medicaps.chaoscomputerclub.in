@@ -15,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, useRef, Suspense } from "react";
-import { ThemeTogglerButton } from "@/components/animate-ui/components/buttons/theme-toggler";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
@@ -223,17 +222,14 @@ export function PortalShell() {
             <span className="font-sans text-[8px] text-zinc-500 tracking-widest mt-0.5">TOURNAMENT ARENA</span>
           </div>
         </Link>
-        <div className="flex items-center gap-1">
-          <ThemeTogglerButton className="text-zinc-400 hover:text-white p-1.5 rounded-md hover:bg-zinc-900 transition-colors" />
-          <button
-            type="button"
-            className="text-zinc-400 hover:text-white p-1.5 rounded-md hover:bg-zinc-900 transition-colors cursor-pointer"
-            onClick={() => dispatch(toggleSidebar())}
-            aria-label="Toggle navigation"
-          >
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="text-zinc-400 hover:text-white p-1.5 rounded-md hover:bg-zinc-900 transition-colors"
+          onClick={() => dispatch(toggleSidebar())}
+          aria-label="Toggle navigation"
+        >
+          {open ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </header>
 
       {/* Backdrop overlay for mobile drawer */}
@@ -357,18 +353,15 @@ export function PortalShell() {
               </span>
             </div>
           </Link>
-          <div className="flex items-center gap-1">
-            <ThemeTogglerButton className="text-zinc-500 hover:text-white p-1.5 rounded-md hover:bg-zinc-900 transition-colors" />
-            <button
-              type="button"
-              onClick={handleLogout}
-              aria-label="Sign out"
-              title="Sign out of CCC Portal"
-              className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            aria-label="Sign out"
+            title="Sign out of CCC Portal"
+            className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </aside>
 
