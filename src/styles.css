@@ -106,6 +106,22 @@ html {
   font-family: var(--font-sans);
 }
 
+html.light {
+  color-scheme: light;
+  --background: #fcfcfc;
+  --foreground: #09090b;
+  --bg: #f4f4f5;
+  --surface: #ffffff;
+  --surface-1: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-3: #e4e4e7;
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.16);
+  --muted: #71717a;
+  background-color: #fcfcfc;
+  color: #09090b;
+}
+
 body {
   margin: 0;
   background-color: #000000;
@@ -114,6 +130,18 @@ body {
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.light body {
+  background-color: #fcfcfc;
+  color: #09090b;
+}
+
+/* View Transitions for Animate UI Theme Toggler gradual sweeping effect */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* Global focus-visible rings in Electric Lime (for interactive buttons, links, controls) */
