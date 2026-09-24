@@ -9,7 +9,6 @@ import {
   Share2,
   Check,
   Github,
-  Linkedin,
   Award,
   ExternalLink,
   LockKeyhole,
@@ -30,6 +29,8 @@ import { RatingChart } from "@/organization/components/RatingChart";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
+import { FaLinkedinIn } from "react-icons/fa";
+
 import {
   getMemberProfileData,
   getStudentProfileData,
@@ -599,6 +600,7 @@ export function ProfilePage() {
               {m.linkedin_url && (
                 <a
                   href={
+                    
                     m.linkedin_url.startsWith("http")
                       ? m.linkedin_url
                       : `https://linkedin.com/in/${m.linkedin_url}`
@@ -607,7 +609,7 @@ export function ProfilePage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded"
                 >
-                  <Linkedin size={11} />
+                  <FaLinkedinIn size={11} />
                   <span>LinkedIn</span>
                 </a>
               )}
