@@ -40,6 +40,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -942,31 +950,38 @@ export function AssessmentWorkspacePage() {
         </div>
       </div>
 
-      {/* Anti-cheat Telemetry Warning Dialog */}
-      {antiCheatWarningOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full p-6 rounded-lg bg-black border border-amber-500/40 text-center space-y-4 shadow-2xl">
+      {/* Anti-cheat Telemetry Warning Dialog using official shadcn Dialog */}
+      <Dialog
+        open={antiCheatWarningOpen}
+        onOpenChange={(open) => {
+          if (!open) dispatch(dismissAntiCheatWarning());
+        }}
+      >
+        <DialogContent className="max-w-md rounded-lg bg-zinc-950 border border-amber-500/40 text-center p-6 space-y-4 shadow-2xl">
+          <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="size-11 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
               <ShieldAlert size={22} />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold font-mono text-white uppercase tracking-wider">Proctored Session Warning</h3>
-              <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-mono text-xs tabular-nums">
-                Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
-              </div>
+            <DialogTitle className="text-sm font-semibold font-mono text-white uppercase tracking-wider text-center">
+              Proctored Session Warning
+            </DialogTitle>
+            <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-mono text-xs tabular-nums">
+              Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
             </div>
-            <p className="text-xs text-zinc-400 font-mono leading-relaxed px-2">
+            <DialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed px-2 text-center">
               {antiCheatWarningMessage || "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
-            </p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
             <Button
               onClick={() => dispatch(dismissAntiCheatWarning())}
               className="w-full rounded-md bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs font-semibold"
             >
               Acknowledge & Continue
             </Button>
-          </div>
-        </div>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

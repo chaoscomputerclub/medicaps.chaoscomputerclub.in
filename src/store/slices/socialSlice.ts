@@ -52,6 +52,7 @@ export const fetchMyFollowingIdsThunk = createAsyncThunk<string[]>(
       if (!token) return [];
       const apiBase = getApiBase();
       const res = await fetch(`${apiBase}/social/my-following-ids`, {
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -77,6 +78,7 @@ export const fetchFollowersThunk = createAsyncThunk<
     const token = getToken();
     const apiBase = getApiBase();
     const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/followers`, {
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -105,6 +107,7 @@ export const fetchFollowingThunk = createAsyncThunk<
     const token = getToken();
     const apiBase = getApiBase();
     const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/following`, {
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -146,6 +149,7 @@ export const toggleFollowThunk = createAsyncThunk<
     const apiBase = getApiBase();
     const res = await fetch(`${apiBase}/social/toggle/${encodeURIComponent(cleanTarget)}`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

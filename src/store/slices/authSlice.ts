@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import {
+  getApiBase,
   getToken,
   getStoredMember,
   setStoredMember,
@@ -294,6 +295,14 @@ export const authSlice = createSlice({
       state.message = null;
       state.devOtp = null;
       invalidateFullProfileCache();
+      try {
+        const apiBase = getApiBase();
+        fetch(`${apiBase}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }).catch(() => {});
+      } catch {}
     },
   },
   extraReducers: (builder) => {

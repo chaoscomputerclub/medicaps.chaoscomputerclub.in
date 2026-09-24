@@ -2254,45 +2254,40 @@ export function ContestArenaPage() {
         />
       )}
 
-      {/* Contest Over Overlay */}
-      {isContestOver && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 font-mono select-none"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="contest-ended-title"
-        >
-          <div className="max-w-md w-full p-8 rounded-lg border border-lime-400/40 bg-black text-center space-y-6">
+      {/* Contest Over Modal using official shadcn Dialog */}
+      <Dialog open={isContestOver}>
+        <DialogContent className="max-w-md rounded-lg border border-lime-400/40 bg-zinc-950 p-8 text-center space-y-6 shadow-2xl [&>button]:hidden">
+          <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 mx-auto text-lime-400">
               <Trophy className="size-7" />
             </div>
 
-            <div className="space-y-2">
-              <span className="text-[10px] uppercase tracking-widest text-lime-400 font-semibold block">
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase tracking-widest text-lime-400 font-semibold block font-mono">
                 Official Contest Bell
               </span>
-              <h2 id="contest-ended-title" className="text-2xl font-bold text-white tracking-tight">
+              <DialogTitle className="text-2xl font-bold text-white tracking-tight font-sans">
                 Contest Concluded
-              </h2>
-              <p className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
+              </DialogTitle>
+              <DialogDescription className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
                 The competition clock has expired. All submitted solutions are locked for final rating computation.
-              </p>
+              </DialogDescription>
             </div>
+          </DialogHeader>
 
-            <div className="flex flex-col items-center gap-3">
-              <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
-                <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
-              </div>
-              <button
-                onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-                className="font-mono text-xs font-semibold uppercase text-white border border-white/20 bg-transparent px-5 py-2 rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer [&_svg]:transition-colors"
-              >
-                View Final Results →
-              </button>
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
+              <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
             </div>
+            <Button
+              onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
+              className="font-mono text-xs font-semibold uppercase text-black bg-lime-400 border border-lime-400 hover:bg-lime-300 px-5 py-2 rounded-md"
+            >
+              View Final Results →
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Slide-out Problem List Drawer (Strix AI Theme: Pitch Black × Electric Lime) */}
       {isProblemListOpen && (

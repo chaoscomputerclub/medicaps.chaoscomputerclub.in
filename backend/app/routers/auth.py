@@ -13,7 +13,7 @@ Flow:
   POST /auth/logout           → client-side token drop (stateless JWT)
 """
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, Request, UploadFile, File
+from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -45,9 +45,23 @@ async def send_otp(payload: SendOTPRequest):
     return await AuthController.send_otp(payload)
 
 
-@router.post("/verify-otp", summary="Verify OTP and receive access token")
-async def verify_otp(payload: VerifyOTPRequest, db: AsyncSession = Depends(get_db)):
-    return await AuthController.verify_otp(payload, db)
+@router.post("/verify-otp", summary="Verify OTP and receive access token + set auth cookies")
+async def verify_otp(
+    payload: VerifyOTPRequest,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.verify_otp(payload, db, request=request, response=response)
+
+
+@router.post("/refresh", summary="Rotate and refresh access token via HttpOnly refresh cookie")
+async def refresh_tokens(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.refresh_tokens(request, response, db)
 
 
 @router.post("/complete-onboarding", summary="Complete new member profile setup")
@@ -142,9 +156,13 @@ async def delete_account(
     return await AuthController.delete_account(current_member, db)
 
 
-@router.post("/logout", summary="Invalidate current session (client-side)")
-async def logout(current_member: MemberProfile = Depends(get_current_member)):
-    return {"success": True, "message": "Logged out. Delete your local token."}
+@router.post("/logout", summary="Invalidate session, revoke refresh token, and clear auth cookies")
+async def logout(
+    request: Request,
+    response: Response,
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
+    return await AuthController.logout(request, response, current_member)
 
 
 @router.get("/jwt-public-key", summary="Get RSA 256 public key for asymmetric token verification")

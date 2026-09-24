@@ -107,6 +107,33 @@ export class DeadUIDetector {
       };
     }
 
+    const isSelfLink = await element.evaluate((el) => {
+      if (el.tagName.toLowerCase() === 'a') {
+        const href = el.getAttribute('href');
+        if (!href) return false;
+        const currentPath = window.location.pathname;
+        return href === currentPath || href === window.location.href;
+      }
+      return false;
+    }).catch(() => false);
+
+    if (isSelfLink) {
+      return {
+        isDead: false,
+        confidenceScore: 0.0,
+        classification: 'EXPECTED_NOOP',
+        reason: 'Element is an active navigation link targeting the current page',
+        diffDetails: {
+          urlChanged: false,
+          domMutated: false,
+          networkTriggered: false,
+          storageMutated: false,
+          dialogToggled: false,
+          ariaStateToggled: false,
+        },
+      };
+    }
+
     let networkRequestsDispatched = 0;
     const requestListener = () => {
       networkRequestsDispatched++;

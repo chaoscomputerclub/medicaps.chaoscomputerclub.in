@@ -16,11 +16,19 @@ Routers call these; controllers call utils/lib/models.
 from typing import Optional, Dict, List, Any
 import logging
 from datetime import datetime, timezone
-from fastapi import HTTPException, status, UploadFile
+from fastapi import HTTPException, status, UploadFile, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import create_access_token
+from app.core.security import (
+    create_access_token,
+    generate_refresh_token,
+    store_refresh_token,
+    verify_and_revoke_refresh_token,
+    revoke_refresh_token,
+    set_auth_cookies,
+    clear_auth_cookies,
+)
 from app.lib.otp import generate_otp
 from app.utils.otp_store import send_otp as redis_send_otp, verify_otp as redis_verify_otp
 from app.utils.email import send_otp_email
@@ -152,12 +160,18 @@ class AuthController:
         )
 
     @staticmethod
-    async def verify_otp(payload: VerifyOTPRequest, db: AsyncSession) -> AuthTokenResponse:
+    async def verify_otp(
+        payload: VerifyOTPRequest,
+        db: AsyncSession,
+        request: Optional[Request] = None,
+        response: Optional[Response] = None,
+    ) -> AuthTokenResponse:
         """
         Step 2 — OTP Verification.
         Verifies against Redis (SHA-256, 5-attempt rate limit).
         Accepts either transaction_id + otp OR email + code.
-        Finds or creates member. Issues JWT.
+        Finds or creates member. Issues JWT Access Token & Redis Refresh Token.
+        Sets strict HttpOnly Secure cookies on response.
         """
         otp_code = payload.otp or payload.code
         identifier = payload.transaction_id or payload.email
@@ -215,6 +229,17 @@ class AuthController:
             await db.commit()
 
         token = create_access_token({"sub": member.id, "email": member.email})
+        refresh_token = generate_refresh_token()
+        await store_refresh_token(refresh_token, member.id, member.email)
+
+        if response is not None:
+            set_auth_cookies(
+                response=response,
+                access_token=token,
+                refresh_token=refresh_token,
+                request=request,
+            )
+
         return AuthTokenResponse(
             access_token=token,
             token_type="bearer",
@@ -1330,8 +1355,107 @@ class AuthController:
             await db.refresh(member)
 
         jwt_token = create_access_token({"sub": member.id, "email": member.email})
+        refresh_token = generate_refresh_token()
+        await store_refresh_token(refresh_token, member.id, member.email)
+
         needs_onboarding = is_new or not member.is_onboarded
-        return RedirectResponse(
+        redirect_res = RedirectResponse(
             url=f"{frontend_url}/auth?token={jwt_token}&is_onboarded={'false' if needs_onboarding else 'true'}&onboarding={'1' if needs_onboarding else '0'}&email={member.email}"
         )
+        set_auth_cookies(
+            response=redirect_res,
+            access_token=jwt_token,
+            refresh_token=refresh_token,
+            request=request,
+        )
+        return redirect_res
+
+    @staticmethod
+    async def refresh_tokens(
+        request: Request,
+        response: Response,
+        db: AsyncSession,
+    ) -> dict:
+        """
+        Refresh Token Rotation (RTR).
+        Reads HttpOnly refresh_token cookie (or header fallback),
+        validates and revokes in Redis, issues new short-lived access token
+        and new long-lived refresh token, sets both cookies, and returns user session.
+        """
+        token_candidate = (
+            request.cookies.get("refresh_token")
+            or request.headers.get("X-Refresh-Token")
+            or request.headers.get("x-refresh-token")
+        )
+        if not token_candidate:
+            clear_auth_cookies(response, request)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token required. Please sign in again.",
+            )
+
+        payload = await verify_and_revoke_refresh_token(token_candidate.strip())
+        if not payload:
+            clear_auth_cookies(response, request)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token expired or revoked. Please sign in again.",
+            )
+
+        member_id = payload.get("member_id")
+        email = payload.get("email")
+
+        member = None
+        if member_id:
+            row = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
+            member = row.scalars().first()
+        if not member and email:
+            row = await db.execute(select(MemberProfile).where(MemberProfile.email == email))
+            member = row.scalars().first()
+
+        if not member:
+            clear_auth_cookies(response, request)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Member account no longer exists. Please sign in again.",
+            )
+
+        new_access_token = create_access_token({"sub": member.id, "email": member.email})
+        new_refresh_token = generate_refresh_token()
+        await store_refresh_token(new_refresh_token, member.id, member.email)
+
+        set_auth_cookies(
+            response=response,
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            request=request,
+        )
+
+        return {
+            "success": True,
+            "access_token": new_access_token,
+            "token_type": "bearer",
+            "member": _to_member_public(member),
+        }
+
+    @staticmethod
+    async def logout(
+        request: Request,
+        response: Response,
+        current_member: Optional[MemberProfile] = None,
+    ) -> dict:
+        """
+        Production logout: Revokes refresh token in Redis and clears HttpOnly auth cookies.
+        """
+        token_candidate = (
+            request.cookies.get("refresh_token")
+            or request.headers.get("X-Refresh-Token")
+            or request.headers.get("x-refresh-token")
+        )
+        if token_candidate:
+            await revoke_refresh_token(token_candidate.strip())
+
+        clear_auth_cookies(response, request)
+        return {"success": True, "message": "Logged out successfully."}
+
 

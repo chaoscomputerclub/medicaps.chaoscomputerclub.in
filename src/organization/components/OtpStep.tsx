@@ -52,7 +52,7 @@ export function OtpStep({
               <InputOTPSlot
                 key={i}
                 index={i}
-                className="size-11 rounded-none border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
+                className="size-11 rounded-md border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
               />
             ))}
           </InputOTPGroup>
@@ -70,27 +70,31 @@ export function OtpStep({
 
       <Button
         type="submit"
+        variant="default"
+        size="lg"
         disabled={pending || code.length < 6}
-        className="w-full rounded-md bg-transparent text-white border border-white/20 font-mono text-xs tracking-wider font-bold uppercase hover:bg-lime-400 hover:text-black hover:border-lime-400 h-11 transition-colors cursor-pointer disabled:opacity-50 [&_svg]:transition-colors"
+        className="w-full h-11 font-mono text-xs tracking-wider font-bold uppercase rounded-md"
       >
         {pending ? "Checking…" : submitLabel}
       </Button>
 
       <div className="flex flex-wrap items-center gap-4">
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={onResend}
-          className="font-mono text-xs tracking-wider text-zinc-400 uppercase underline-offset-4 transition-colors duration-150 hover:text-lime-400 hover:underline cursor-pointer"
+          className="font-mono text-xs tracking-wider text-zinc-400 uppercase hover:text-lime-400 h-auto p-0"
         >
           Resend code
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="link"
           onClick={onChangeEmail}
-          className="font-mono text-xs tracking-wider text-zinc-400 uppercase underline-offset-4 transition-colors duration-150 hover:text-lime-400 hover:underline cursor-pointer"
+          className="font-mono text-xs tracking-wider text-zinc-400 uppercase hover:text-lime-400 h-auto p-0"
         >
           Use another email
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -5,7 +5,7 @@ Configuration settings
 
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Optional
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -37,7 +37,13 @@ class Settings(BaseSettings):
     )
     JWT_PRIVATE_KEY: str = os.getenv("JWT_PRIVATE_KEY", "")
     JWT_PUBLIC_KEY: str = os.getenv("JWT_PUBLIC_KEY", "")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 30)))  # 30 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))  # 15 min short-lived access
+    REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
+
+    # Cookie Security Settings
+    COOKIE_DOMAIN: Optional[str] = os.getenv("COOKIE_DOMAIN", None)
+    COOKIE_SECURE: Optional[bool] = None if os.getenv("COOKIE_SECURE") is None else os.getenv("COOKIE_SECURE", "false").lower() in ("true", "1", "yes")
+    COOKIE_SAMESITE: str = os.getenv("COOKIE_SAMESITE", "lax")
 
     # Google OAuth
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")

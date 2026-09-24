@@ -4,7 +4,7 @@
  * in-flight request deduplication, and immediate synchronous state returns.
  */
 
-import { getApiBase, getToken, clearToken } from "@/lib/auth";
+import { getApiBase, getToken, clearToken, silentRefreshToken } from "@/lib/auth";
 import { swrFetch, invalidateSwrCache } from "@/lib/cache/swrCache";
 import type {
   AnnouncementFeedItem,
@@ -15,7 +15,7 @@ async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = 500
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await fetch(url, { ...init, credentials: "include", signal: controller.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -118,13 +118,30 @@ export async function getMemberProfileData(force = false) {
       const timer = setTimeout(() => controller.abort(), 10000);
 
       try {
-        const res = await fetch(`${backendUrl}/auth/profile/full`, {
-          headers: {
+        const makeProfileCall = async () => {
+          const currentToken = getToken();
+          const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          signal: controller.signal,
-        });
+          };
+          if (currentToken) {
+            headers["Authorization"] = `Bearer ${currentToken}`;
+          }
+          return await fetch(`${backendUrl}/auth/profile/full`, {
+            headers,
+            credentials: "include",
+            signal: controller.signal,
+          });
+        };
+
+        let res = await makeProfileCall();
+
+        if (res.status === 401) {
+          const refreshed = await silentRefreshToken();
+          if (refreshed) {
+            res = await makeProfileCall();
+          }
+        }
+
         clearTimeout(timer);
         if (res.status === 401) {
           clearToken();
@@ -274,6 +291,7 @@ export async function getStudentProfileData(handle: string, force = false) {
       try {
         const res = await fetch(`${backendUrl}/auth/profile/${encodeURIComponent(cleanHandle)}`, {
           headers,
+          credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();

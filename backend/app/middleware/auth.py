@@ -28,15 +28,38 @@ _UNAUTHORIZED = HTTPException(
 )
 
 
+def extract_access_token(request: Request, bearer_token: Optional[str] = None) -> Optional[str]:
+    """
+    Extract access token honoring security priority:
+    1. HttpOnly 'access_token' cookie (browser clients)
+    2. Authorization header / OAuth2 Bearer scheme (CLI, cURL, automated tests)
+    3. Query parameter '?token=...' (SSE streams or media downloads)
+    """
+    cookie_token = request.cookies.get("access_token")
+    if cookie_token and cookie_token.strip():
+        return cookie_token.strip()
+    if bearer_token and bearer_token.strip():
+        return bearer_token.strip()
+    auth_hdr = request.headers.get("Authorization") or request.headers.get("authorization")
+    if auth_hdr and auth_hdr.lower().startswith("bearer "):
+        return auth_hdr[7:].strip()
+    query_token = request.query_params.get("token")
+    if query_token and query_token.strip():
+        return query_token.strip()
+    return None
+
+
 async def get_current_member(
+    request: Request,
     token: Optional[str] = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> MemberProfile:
-    """Strict auth dependency — raises 401 if token missing or invalid."""
-    if not token:
+    """Strict auth dependency — checks HttpOnly cookie first, then Bearer token. Raises 401 if missing or invalid."""
+    raw_token = extract_access_token(request, token)
+    if not raw_token:
         raise _UNAUTHORIZED
 
-    payload = decode_access_token(token)
+    payload = decode_access_token(raw_token)
     if not payload:
         raise _UNAUTHORIZED
 
@@ -82,15 +105,18 @@ async def require_onboarded(
         )
     return member
 
+
 async def get_current_member_optional(
+    request: Request,
     token: Optional[str] = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> Optional[MemberProfile]:
     """Optional auth dependency — returns None if token missing or invalid."""
-    if not token:
+    raw_token = extract_access_token(request, token)
+    if not raw_token:
         return None
     try:
-        payload = decode_access_token(token)
+        payload = decode_access_token(raw_token)
         if not payload:
             return None
         member_id: Optional[str] = payload.get("sub")

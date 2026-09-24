@@ -126,6 +126,7 @@ export async function triggerWebhookGateScan(
 
   const res = await fetch(`${base}/webhooks/gate-scan`, {
     method: "POST",
+    credentials: "include",
     headers,
     body: JSON.stringify({
       pass_code_or_qr: passCodeOrQr,
@@ -157,6 +158,7 @@ export async function triggerWebhookContestEvent(
 
   const res = await fetch(`${base}/webhooks/contest-event`, {
     method: "POST",
+    credentials: "include",
     headers,
     body: JSON.stringify({
       slug,

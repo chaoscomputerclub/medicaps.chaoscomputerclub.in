@@ -256,7 +256,7 @@ export const contestSystemService = {
           const headers: Record<string, string> = {};
           if (token) headers["Authorization"] = `Bearer ${token}`;
 
-          const res = await fetch(`${apiBase}/contests`, { headers });
+          const res = await fetch(`${apiBase}/contests`, { credentials: "include", headers });
           if (res.ok) {
             const apiContests = await res.json();
             if (Array.isArray(apiContests)) {
@@ -282,10 +282,10 @@ export const contestSystemService = {
           const headers: Record<string, string> = {};
           if (token) headers["Authorization"] = `Bearer ${token}`;
 
-          const res = await fetch(`${apiBase}/contests/${slug}`, { headers });
+          const res = await fetch(`${apiBase}/contests/${slug}`, { credentials: "include", headers });
           if (res.ok) {
             const c = await res.json();
-            const sbRes = await fetch(`${apiBase}/scoreboards/${slug}`, { headers }).catch(() => null);
+            const sbRes = await fetch(`${apiBase}/scoreboards/${slug}`, { credentials: "include", headers }).catch(() => null);
             const standings = sbRes && sbRes.ok ? await sbRes.json() : [];
             return mapBackendContestToRecord(c, standings);
           }
@@ -309,6 +309,7 @@ export const contestSystemService = {
 
           // 1. Fetch comprehensive participated & registered contests
           const res = await fetch(`${apiBase}/contests/my/participated`, {
+            credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
@@ -341,6 +342,7 @@ export const contestSystemService = {
 
           // 2. Fallback to /auth/profile/full
           const profileRes = await fetch(`${apiBase}/auth/profile/full`, {
+            credentials: "include",
             headers: { Authorization: `Bearer ${token}` },
           });
           if (profileRes.ok) {
@@ -388,6 +390,7 @@ export const contestSystemService = {
     try {
       const apiBase = getApiBase();
       const res = await fetch(`${apiBase}/auth/me`, {
+        credentials: "include",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -410,7 +413,9 @@ export const contestSystemService = {
   async checkUsername(username: string): Promise<{ available: boolean }> {
     try {
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/auth/check-handle?handle=${encodeURIComponent(username)}`);
+      const res = await fetch(`${apiBase}/auth/check-handle?handle=${encodeURIComponent(username)}`, {
+        credentials: "include",
+      });
       if (res.ok) {
         const d = await res.json();
         return { available: Boolean(d.available) };

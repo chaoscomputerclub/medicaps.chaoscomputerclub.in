@@ -192,7 +192,45 @@ export interface AuthResult {
   member: Member;
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * Silently refreshes access token using the HttpOnly refresh_token cookie.
+ * Request deduplication ensures only one refresh call is made concurrently.
+ */
+export async function silentRefreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
+          setToken(data.access_token, data.member || undefined);
+          return true;
+        }
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+export const refreshToken = silentRefreshToken;
+
+export async function apiFetch<T>(path: string, init?: RequestInit, isRetry = false): Promise<T> {
   const apiBase = getApiBase();
   const token = getToken();
   const headers: Record<string, string> = {
@@ -207,10 +245,32 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const res = await fetch(`${targetBase}${path}`, {
         ...init,
+        credentials: "include",
         headers,
         signal: init?.signal || controller.signal,
       });
       clearTimeout(timeoutId);
+
+      // Silent Refresh Trigger on 401 Unauthorized
+      const isAuthEndpoint =
+        path.startsWith("/auth/send-otp") ||
+        path.startsWith("/auth/verify-otp") ||
+        path.startsWith("/auth/refresh") ||
+        path.startsWith("/auth/logout") ||
+        path.startsWith("/auth/check-handle");
+
+      if (res.status === 401 && !isRetry && !isAuthEndpoint) {
+        const refreshed = await silentRefreshToken();
+        if (refreshed) {
+          return await apiFetch<T>(path, init, true);
+        } else {
+          clearToken();
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+          }
+        }
+      }
+
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Request failed" }));
         let msg = "Request failed";
@@ -345,15 +405,26 @@ export async function deleteAccount(): Promise<{ success: boolean; message: stri
   });
 }
 
-export function logout(): void {
-  clearToken();
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.removeItem("ccc_auth_token");
-      localStorage.removeItem("ccc_member_profile");
-      sessionStorage.clear();
-    } catch {}
-    window.location.replace("/auth");
+export async function logout(): Promise<void> {
+  try {
+    const apiBase = getApiBase();
+    await fetch(`${apiBase}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+  } catch {
+    // Ignore network errors during logout
+  } finally {
+    clearToken();
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("ccc_auth_token");
+        localStorage.removeItem("ccc_member_profile");
+        sessionStorage.clear();
+      } catch {}
+      window.location.replace("/auth");
+    }
   }
 }
 

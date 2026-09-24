@@ -120,6 +120,7 @@ export async function fetchFullProfileData(force = false): Promise<FullProfilePa
       const timer = setTimeout(() => controller.abort(), 10000);
       try {
         const res = await fetch(`${apiBase}/auth/profile/full`, {
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
