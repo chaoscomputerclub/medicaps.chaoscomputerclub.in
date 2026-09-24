@@ -43,6 +43,7 @@ export const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDeta
 export const VerifyProofPage = lazyWithRetry(() => import("./pages/VerifyProofPage"), "VerifyProofPage");
 export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
 export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
+export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "TermsPage");
 
 export const routePreloaders: Record<string, () => Promise<any>> = {
   "/": () => DashboardPage.preload(),
@@ -98,6 +99,16 @@ export function AppRoutes() {
           }
         />
       </Route>
+
+      {/* Standalone Legal & Governance Pages (No navbar, no shell) */}
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <TermsPage />
+          </Suspense>
+        }
+      />
 
       {/* Backward-Compatible Redirects for /portal */}
       <Route path="/portal" element={<Navigate to="/" replace />} />
