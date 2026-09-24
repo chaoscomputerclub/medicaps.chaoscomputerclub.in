@@ -4,7 +4,20 @@
  * Dynamically resolves API base URL for ultra-flexible multi-domain deployment.
  */
 
+/**
+ * Dynamic API Base Resolution
+ * Priority:
+ *  1. Runtime window injection: window.__ENV__?.VITE_API_URL
+ *  2. Build-time environment variable: import.meta.env.VITE_API_URL
+ *  3. Default: relative "/api" (proxied same-origin via Nginx / Vite dev server)
+ * 
+ * Never hardcodes or exposes backend domains directly to the client bundle.
+ */
 export function getApiBase(): string {
+  if (typeof window !== "undefined" && (window as any).__ENV__?.VITE_API_URL) {
+    return String((window as any).__ENV__.VITE_API_URL).trim().replace(/\/+$/, "");
+  }
+
   const envUrl =
     typeof import.meta !== "undefined" && import.meta.env
       ? (import.meta.env as Record<string, string>)["VITE_API_URL"]
@@ -14,7 +27,7 @@ export function getApiBase(): string {
     return envUrl.trim().replace(/\/+$/, "");
   }
 
-  return "https://medicaps-api.chaoscomputerclub.in/api";
+  return "/api";
 }
 
 export class ApiError extends Error {
@@ -225,14 +238,6 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   } catch (err: any) {
     if (err instanceof ApiError) {
       throw err;
-    }
-    // If primary relative /api failed due to proxy glitch, attempt direct failover
-    if (apiBase === "/api" && typeof window !== "undefined") {
-      try {
-        return await makeAttempt("https://medicaps-api.chaoscomputerclub.in/api");
-      } catch {
-        // Fall through to standard error handling
-      }
     }
     if (err?.name === "AbortError") {
       throw new ApiError("Request timed out. Please check your connection and try again.", 408, err);

@@ -57,13 +57,10 @@ export function resolveAvatarUrl(url?: string | null): string | undefined {
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:")) {
     return trimmed;
   }
-  if (trimmed.startsWith("/media/")) {
-    return `https://medicaps.chaoscomputerclub.in${trimmed}`;
-  }
   if (trimmed.startsWith("/")) {
-    return `https://medicaps.chaoscomputerclub.in${trimmed}`;
+    return trimmed;
   }
-  return trimmed;
+  return `/${trimmed}`;
 }
 
 /**
