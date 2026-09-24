@@ -380,7 +380,7 @@ export function AuthPage() {
               size="lg"
               onClick={() => { window.location.href = getGoogleLoginURL(); }}
               disabled={pending}
-              className="w-full h-11 text-[14px] text-zinc-200 border-white/[0.08] hover:bg-white/[0.03] hover:border-white/20 gap-2.5 font-normal rounded-xl"
+              className="w-full h-11 text-[14px] text-zinc-200 hover:text-white [&_span]:hover:text-white border-white/[0.08] hover:bg-white/[0.04] hover:border-white/20 gap-2.5 font-normal rounded-xl transition-colors duration-150"
             >
               <GoogleIcon className="size-4 shrink-0" />
               <span>Continue with Google</span>
