@@ -126,7 +126,7 @@ class Settings(BaseSettings):
         "https://medicaps.chaoscomputerclub.in",
         "https://chaoscomputerclub.in",
         "https://www.chaoscomputerclub.in",
-        "https://api.medicaps.chaoscomputerclub.in",
+        "https://medicaps-api.chaoscomputerclub.in",
     ]
 
     class Config:

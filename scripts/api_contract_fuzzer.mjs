@@ -10,7 +10,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const TARGET_API_BASE = process.env.API_BASE_URL || 'https://medicaps.chaoscomputerclub.in/api';
+const TARGET_API_BASE = process.env.API_BASE_URL || 'https://medicaps-api.chaoscomputerclub.in/api';
 
 console.log('='.repeat(80));
 console.log(' 🛡️  CCC AUTONOMOUS API CONTRACT & RBAC MATRIX AUDITOR');

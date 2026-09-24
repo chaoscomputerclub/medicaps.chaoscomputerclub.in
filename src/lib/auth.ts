@@ -10,17 +10,11 @@ export function getApiBase(): string {
       ? (import.meta.env as Record<string, string>)["VITE_API_URL"]
       : undefined;
 
-  if (envUrl && envUrl.trim() && !envUrl.includes("medicaps-api.chaoscomputerclub.in")) {
+  if (envUrl && envUrl.trim()) {
     return envUrl.trim().replace(/\/+$/, "");
   }
 
-  if (typeof window !== "undefined") {
-    // Both dev (via Vite dev proxy) and production (via Nginx proxy) use relative /api.
-    // This completely eliminates CORS preflight OPTIONS requests, SSL overhead, and 520 dropouts.
-    return "/api";
-  }
-
-  return "https://medicaps.chaoscomputerclub.in/api";
+  return "https://medicaps-api.chaoscomputerclub.in/api";
 }
 
 export class ApiError extends Error {

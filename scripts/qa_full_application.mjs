@@ -26,7 +26,7 @@ const RED = "\x1b[31m";
 const CYAN = "\x1b[36m";
 const GRAY = "\x1b[90m";
 
-const API_BASE = process.env.API_BASE || "https://medicaps.chaoscomputerclub.in/api";
+const API_BASE = process.env.API_BASE || "https://medicaps-api.chaoscomputerclub.in/api";
 
 async function request(endpoint, options = {}, retries = 2) {
   const url = endpoint.startsWith("http") ? endpoint : `${API_BASE}${endpoint}`;
