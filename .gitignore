@@ -51,9 +51,12 @@ backend/.env
 backend/.env.*
 !backend/.env.example
 
-# RSA Private Keys
-backend/keys/jwt_private_key.pem
+# Cryptographic Keys & Certificates
+backend/keys/
+keys/
 *.pem
+*.key
+*.pub
 
 # Test Results & Reports
 playwright-report/

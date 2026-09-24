@@ -31,12 +31,11 @@ class Settings(BaseSettings):
 
     # JWT Authentication (RSA 256 / RS256 Asymmetric Cryptography)
     ALGORITHM: str = os.getenv("ALGORITHM", "RS256")
-    SECRET_KEY: str = os.getenv(
-        "SECRET_KEY",
-        "ccc-medicaps-in-person-contest-security-key-2026-sha256-verified"
-    )
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     JWT_PRIVATE_KEY: str = os.getenv("JWT_PRIVATE_KEY", "")
     JWT_PUBLIC_KEY: str = os.getenv("JWT_PUBLIC_KEY", "")
+    JWT_PRIVATE_KEY_PATH: Optional[str] = os.getenv("JWT_PRIVATE_KEY_PATH", None)
+    JWT_PUBLIC_KEY_PATH: Optional[str] = os.getenv("JWT_PUBLIC_KEY_PATH", None)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))  # 15 min short-lived access
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
 
@@ -112,8 +111,8 @@ class Settings(BaseSettings):
 
     # MinIO / S3 Object Storage
     MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "127.0.0.1:9002")
-    MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-    MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "minioadminsecret")
+    MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "")
+    MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "")
     MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "ccc-medicaps-media")
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
     MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "https://medicaps.chaoscomputerclub.in/media")
@@ -148,13 +147,18 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Automatically load RSA keys from backend/keys/ if not supplied via env
-if not settings.JWT_PRIVATE_KEY or not settings.JWT_PUBLIC_KEY:
-    keys_dir = BASE_DIR / "keys"
-    priv_file = keys_dir / "jwt_private_key.pem"
-    pub_file = keys_dir / "jwt_public_key.pem"
-    if priv_file.exists():
-        settings.JWT_PRIVATE_KEY = priv_file.read_text().strip()
-    if pub_file.exists():
-        settings.JWT_PUBLIC_KEY = pub_file.read_text().strip()
+# Only load key files if paths are explicitly specified in environment variables
+if not settings.JWT_PRIVATE_KEY and settings.JWT_PRIVATE_KEY_PATH:
+    priv_path = Path(settings.JWT_PRIVATE_KEY_PATH)
+    if not priv_path.is_absolute():
+        priv_path = BASE_DIR / priv_path
+    if priv_path.exists():
+        settings.JWT_PRIVATE_KEY = priv_path.read_text().strip()
+
+if not settings.JWT_PUBLIC_KEY and settings.JWT_PUBLIC_KEY_PATH:
+    pub_path = Path(settings.JWT_PUBLIC_KEY_PATH)
+    if not pub_path.is_absolute():
+        pub_path = BASE_DIR / pub_path
+    if pub_path.exists():
+        settings.JWT_PUBLIC_KEY = pub_path.read_text().strip()
 
