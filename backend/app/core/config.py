@@ -95,17 +95,31 @@ class Settings(BaseSettings):
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
 
+    # CORS (strictly loaded via environment variables)
+    CORS_ORIGINS: Union[List[str], str] = []
+
     @property
     def cors_origins_list(self) -> List[str]:
+        """Parsed list of allowed CORS origins strictly from environment."""
+        origins: List[str] = []
+        raw_list = self.CORS_ORIGINS if isinstance(self.CORS_ORIGINS, list) else [self.CORS_ORIGINS]
+        for item in raw_list:
+            if isinstance(item, str) and item.strip():
+                for sub in item.split(","):
+                    clean = sub.strip()
+                    if clean and clean not in origins:
+                        origins.append(clean)
+
         env_origins = os.getenv("CORS_ORIGINS", "")
-        origins = list(self.CORS_ORIGINS)
         if env_origins:
             for o in env_origins.split(","):
                 clean = o.strip()
                 if clean and clean not in origins:
                     origins.append(clean)
+
         if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
             origins.append(self.FRONTEND_URL)
+
         return origins
 
 
@@ -116,26 +130,6 @@ class Settings(BaseSettings):
     MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "arena-media")
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
     MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "")
-
-    # CORS (Production domains must strictly be loaded via CORS_ORIGINS in .env)
-    CORS_ORIGINS: Union[List[str], str] = [
-        "http://localhost:8080",
-        "http://localhost:8081",
-        "http://localhost:8082",
-        "http://localhost:8083",
-        "http://localhost:8084",
-        "http://localhost:8085",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:8081",
-        "http://127.0.0.1:8082",
-        "http://127.0.0.1:8083",
-        "http://127.0.0.1:8084",
-        "http://127.0.0.1:8085",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ]
 
     class Config:
         case_sensitive = True
