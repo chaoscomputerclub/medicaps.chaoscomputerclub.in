@@ -727,7 +727,7 @@ export function SettingsPage() {
 
                 <SettingRow label="Department" htmlFor="s-dept">
                   <Select
-                    value={department || undefined}
+                    value={department || "unspecified"}
                     onValueChange={(v) => {
                       const finalVal = v === "unspecified" ? "" : v;
                       setDepartment(finalVal);
@@ -748,7 +748,7 @@ export function SettingsPage() {
 
                 <SettingRow label="Graduation Batch" htmlFor="s-batch" borderless>
                   <Select
-                    value={batch || undefined}
+                    value={batch || "unspecified"}
                     onValueChange={(v) => {
                       const finalVal = v === "unspecified" ? "" : v;
                       setBatch(finalVal);
@@ -843,7 +843,7 @@ export function SettingsPage() {
                       {member.prn && member.prn !== "N/A" && member.prn !== "—"
                         ? member.prn
                         : member.email?.includes("@")
-                          ? member.email.split("@")[0].toUpperCase()
+                          ? member.email.split("@")[0]?.toUpperCase() || "—"
                           : member.handle?.toUpperCase() || "—"}
                     </div>
                   </div>

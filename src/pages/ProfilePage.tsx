@@ -17,6 +17,7 @@ import {
   Loader2,
   Camera,
   Trash2,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
@@ -507,8 +508,9 @@ export function ProfilePage() {
               </p>
             )}
 
-            {/* Social Pills */}
-            <div className="flex items-center gap-2 flex-wrap pt-2">
+            {/* Campus Social & Peer Telemetry */}
+            <div className="flex items-center gap-2.5 flex-wrap pt-2.5">
+              {/* Followers Pod */}
               <button
                 type="button"
                 onClick={() =>
@@ -523,11 +525,23 @@ export function ProfilePage() {
                     })
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-mono rounded bg-zinc-950 hover:bg-zinc-900 text-zinc-400 hover:text-white border border-white/8 transition-colors cursor-pointer"
+                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
               >
-                <Users size={11} className="text-lime-400" />
-                <strong className="text-white tabular-nums">{displayedFollowers}</strong> Followers
+                <div className="size-5 rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400 group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150">
+                  <Users size={11} />
+                </div>
+                <div className="flex items-baseline gap-1.5 font-sans text-xs">
+                  <strong className="font-bold text-white text-sm tabular-nums tracking-tight group-hover:text-lime-400 transition-colors">
+                    {displayedFollowers}
+                  </strong>
+                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
+                    Followers
+                  </span>
+                </div>
+                <span className="size-1 rounded-full bg-lime-400/40 group-hover:bg-lime-400 transition-colors" />
               </button>
+
+              {/* Following Pod */}
               <button
                 type="button"
                 onClick={() =>
@@ -542,11 +556,22 @@ export function ProfilePage() {
                     })
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-mono rounded bg-zinc-950 hover:bg-zinc-900 text-zinc-400 hover:text-white border border-white/8 transition-colors cursor-pointer"
+                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
               >
-                <UserCheck size={11} className="text-lime-400" />
-                <strong className="text-white tabular-nums">{displayedFollowing}</strong> Following
+                <div className="size-5 rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400 group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150">
+                  <UserCheck size={11} />
+                </div>
+                <div className="flex items-baseline gap-1.5 font-sans text-xs">
+                  <strong className="font-bold text-white text-sm tabular-nums tracking-tight group-hover:text-lime-400 transition-colors">
+                    {displayedFollowing}
+                  </strong>
+                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
+                    Following
+                  </span>
+                </div>
+                <span className="size-1 rounded-full bg-lime-400/40 group-hover:bg-lime-400 transition-colors" />
               </button>
+
               {m.github_username && (
                 <a
                   href={`https://github.com/${m.github_username}`}
@@ -659,10 +684,157 @@ export function ProfilePage() {
         </div>
       </section>
 
+      {/* Campus Peer Network Section */}
+      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
+          <SectionHeader
+            kicker="03 // Social Graph"
+            index="PEER NETWORK"
+            title="Campus Peer Ledger"
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                dispatch(
+                  openSocialDrawer({
+                    targetId: m.id,
+                    targetHandle: m.handle,
+                    targetName: m.full_name || m.handle,
+                    followersCount: displayedFollowers,
+                    followingCount: displayedFollowing,
+                    type: "followers",
+                  })
+                )
+              }
+              className="h-8 text-xs font-sans font-semibold bg-transparent text-white border border-white/10 hover:border-lime-400/40 hover:bg-lime-400/10 hover:text-lime-400 rounded-lg transition-[transform,background-color,border-color] duration-150 active:scale-[0.97]"
+            >
+              <Users size={12} />
+              <span>Explore Network</span>
+              <ArrowRight size={12} />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          {/* Followers Card */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() =>
+              dispatch(
+                openSocialDrawer({
+                  targetId: m.id,
+                  targetHandle: m.handle,
+                  targetName: m.full_name || m.handle,
+                  followersCount: displayedFollowers,
+                  followingCount: displayedFollowing,
+                  type: "followers",
+                })
+              )
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                dispatch(
+                  openSocialDrawer({
+                    targetId: m.id,
+                    targetHandle: m.handle,
+                    targetName: m.full_name || m.handle,
+                    followersCount: displayedFollowers,
+                    followingCount: displayedFollowing,
+                    type: "followers",
+                  })
+                );
+              }
+            }}
+            className="group relative p-4 rounded-xl border border-white/[0.08] bg-white/[0.015] hover:bg-white/[0.035] hover:border-lime-400/40 transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.98] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.8),0_0_1px_1px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <span className="font-sans text-[10px] text-zinc-500 uppercase tracking-widest font-semibold flex items-center gap-1.5">
+                  <Users size={12} className="text-lime-400" />
+                  Cadets Following
+                </span>
+                <div className="flex items-baseline gap-2 pt-1">
+                  <strong className="font-sans text-2xl sm:text-3xl font-bold text-white tabular-nums group-hover:text-lime-400 transition-colors">
+                    {displayedFollowers}
+                  </strong>
+                  <span className="text-xs font-sans text-zinc-500 font-medium">cadets</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 font-sans pt-1">
+                  Peers monitoring this cadet&apos;s competitive ratings and contest submissions.
+                </p>
+              </div>
+              <div className="size-8 rounded-lg bg-lime-400/10 border border-lime-400/20 text-lime-400 flex items-center justify-center group-hover:bg-lime-400 group-hover:text-black group-hover:border-lime-400 transition-[background-color,border-color,color] duration-150 shrink-0">
+                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-150" />
+              </div>
+            </div>
+          </div>
+
+          {/* Following Card */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() =>
+              dispatch(
+                openSocialDrawer({
+                  targetId: m.id,
+                  targetHandle: m.handle,
+                  targetName: m.full_name || m.handle,
+                  followersCount: displayedFollowers,
+                  followingCount: displayedFollowing,
+                  type: "following",
+                })
+              )
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                dispatch(
+                  openSocialDrawer({
+                    targetId: m.id,
+                    targetHandle: m.handle,
+                    targetName: m.full_name || m.handle,
+                    followersCount: displayedFollowers,
+                    followingCount: displayedFollowing,
+                    type: "following",
+                  })
+                );
+              }
+            }}
+            className="group relative p-4 rounded-xl border border-white/[0.08] bg-white/[0.015] hover:bg-white/[0.035] hover:border-lime-400/40 transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.98] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.8),0_0_1px_1px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <span className="font-sans text-[10px] text-zinc-500 uppercase tracking-widest font-semibold flex items-center gap-1.5">
+                  <UserCheck size={12} className="text-lime-400" />
+                  Cadets Followed
+                </span>
+                <div className="flex items-baseline gap-2 pt-1">
+                  <strong className="font-sans text-2xl sm:text-3xl font-bold text-white tabular-nums group-hover:text-lime-400 transition-colors">
+                    {displayedFollowing}
+                  </strong>
+                  <span className="text-xs font-sans text-zinc-500 font-medium">cadets</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 font-sans pt-1">
+                  Fellow programmers whose tournament rankings and solutions are tracked.
+                </p>
+              </div>
+              <div className="size-8 rounded-lg bg-lime-400/10 border border-lime-400/20 text-lime-400 flex items-center justify-center group-hover:bg-lime-400 group-hover:text-black group-hover:border-lime-400 transition-[background-color,border-color,color] duration-150 shrink-0">
+                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-150" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Achievements & Proof */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="03 // Milestones" index="HONORS" title="Achievement Ledger" />
+          <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
             {achievements.length === 0 ? (
               <div className="text-center py-8 text-zinc-600 col-span-2">
@@ -689,7 +861,7 @@ export function ProfilePage() {
         </div>
 
         <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="04 // Verification" index="CRYPTOGRAPHIC" title="Latest Proof" />
+          <SectionHeader kicker="05 // Verification" index="CRYPTOGRAPHIC" title="Latest Proof" />
           {proofs[0] ? (
             <>
               <ProofBadge proof={proofs[0]} />

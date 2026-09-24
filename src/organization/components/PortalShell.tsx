@@ -133,9 +133,9 @@ export function PortalShell() {
 
   const token = getToken();
   const tokenPayload = token ? decodeJwtPayload(token) : null;
-  const fallbackHandle = tokenPayload?.handle || (tokenPayload?.email ? tokenPayload.email.split("@")[0] : "Cadet");
+  const fallbackHandle = tokenPayload?.["handle"] || (tokenPayload?.["email"] ? tokenPayload["email"].split("@")[0] || "Cadet" : "Cadet");
   const displayHandle = member?.handle || fallbackHandle;
-  const displayEmail = member?.email || tokenPayload?.email || (tokenPayload?.sub && String(tokenPayload.sub).includes("@") ? String(tokenPayload.sub) : "");
+  const displayEmail = member?.email || tokenPayload?.["email"] || (tokenPayload?.["sub"] && String(tokenPayload["sub"]).includes("@") ? String(tokenPayload["sub"]) : "");
   const formattedName = formatFullName(member?.full_name);
   const initials = formattedName
     ? formattedName

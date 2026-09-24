@@ -103,6 +103,8 @@ export type FinalStandingRow = {
   solved: number;
   penalty_minutes: number;
   rating_delta: number | null;
+  total_score?: number;
+  seat?: string;
 };
 
 export type CampusPass = {
@@ -115,6 +117,7 @@ export type CampusPass = {
   venue: string;
   check_in_opens_at: string;
   status: "issued" | "checked_in" | "expired";
+  check_in_status?: string;
 };
 
 export type ParticipationRecord = {
@@ -129,6 +132,7 @@ export type ParticipationRecord = {
   score: number | null;
   rank: number | null;
   rating_delta?: number | null;
+  rating_change?: number | null;
   participants: number;
   outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending" | "submitted";
   assessment_submitted?: boolean;
@@ -218,6 +222,7 @@ export type ArenaSubmitResult = {
   total_testcases: number;
   points_awarded: number;
   execution_time?: number;
+  time?: number;
   memory?: number;
   message: string;
   compile_output?: string;

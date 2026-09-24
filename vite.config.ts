@@ -124,6 +124,7 @@ export default defineConfig({
             // Everything else
             return "vendor-common";
           }
+          return undefined;
         },
       },
     },

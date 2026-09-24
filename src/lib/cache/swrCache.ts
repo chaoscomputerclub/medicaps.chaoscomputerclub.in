@@ -13,6 +13,8 @@ export interface SwrCacheOptions {
   ttl?: number;
   /** If true, ignores existing cache and forces a fresh network call */
   forceRefresh?: boolean;
+  /** Alias for forceRefresh */
+  force?: boolean;
   /** Optional persistence to sessionStorage for persistence across page reloads */
   persistSession?: boolean;
   /** If false, disables automatic fetching and subscriber attachment */
@@ -157,7 +159,7 @@ export async function swrFetch<T>(
   const {
     staleTime = 30000, // 30s stale window
     ttl = 300000, // 5m total TTL
-    forceRefresh = false,
+    forceRefresh = Boolean(options.forceRefresh || options.force),
     persistSession = false,
   } = options;
 
