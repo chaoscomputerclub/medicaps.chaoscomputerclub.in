@@ -1,8 +1,6 @@
 /**
- * Chaos Computer Club India — Medi-Caps Chapter
- * medicaps.chaoscomputerclub.in
- *
- * Terms of Service — Production Legal Specification.
+ * Chaos Computer Club India
+ * Terms of Service — Production Specification.
  * Minimalist, high-density editorial layout without navigation or decorative graphics.
  * Copyright (c) 2026 Chaos Computer Club India
  */
@@ -35,12 +33,12 @@ export function TermsPage() {
             Terms of Service
           </h1>
           <p className="mt-3 text-sm text-zinc-400">
-            Chaos Computer Club India — Medi-Caps University Chapter
+            Chaos Computer Club India — Platform Standards &amp; Member Agreement
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400">
             <span>Effective Date: September 2026</span>
             <span>•</span>
-            <span>Applies to: medicaps.chaoscomputerclub.in</span>
+            <span>Applies to all Chaos Computer Club services</span>
           </div>
         </header>
 
@@ -52,40 +50,42 @@ export function TermsPage() {
               1. Purpose and Acceptance
             </h2>
             <p className="mt-3">
-              These Terms of Service (&ldquo;Terms&rdquo;) govern access to and use of the competitive programming,
-              cybersecurity challenge, and skill assessment platform hosted at{" "}
-              <span className="font-mono text-xs text-zinc-200">medicaps.chaoscomputerclub.in</span>,
-              operated by Chaos Computer Club India (&ldquo;CCC&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;).
+              These Terms of Service (&ldquo;Terms&rdquo;) govern access to and use of all software, competitive programming
+              arenas, cybersecurity challenges, and community infrastructure operated by{" "}
+              <strong className="font-medium text-white">Chaos Computer Club India</strong> (&ldquo;CCC&rdquo;, &ldquo;the Club&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;).
             </p>
             <p className="mt-3">
-              By accessing the platform, creating an account via email OTP, or signing in through Google OAuth,
-              you agree to be bound by these Terms. If you do not agree, you must discontinue using the platform immediately.
+              By accessing our platform, authenticating an account, submitting code, or participating in club events,
+              you agree to adhere to these Terms and uphold the Hacker Ethic. If you do not agree, you must discontinue
+              use of our services immediately.
             </p>
           </section>
 
           {/* Section 2 */}
           <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              2. Eligibility &amp; Organization Scope
+              2. The Hacker Ethic &amp; Community Principles
             </h2>
             <p className="mt-3">
-              Access to official competitions, ratings, leaderboards, and qualified arena rounds is strictly restricted
-              to enrolled students, faculty, and authorized proctors of{" "}
-              <strong className="font-medium text-white">Medi-Caps University, Indore</strong>.
+              Chaos Computer Club is rooted in curiosity, technological autonomy, and constructive exploration. Every member
+              and participant commits to the fundamental tenets of the Hacker Ethic:
             </p>
             <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
               <li>
-                <strong className="text-zinc-200">Organization Email:</strong> Account registration and OAuth
-                authentication require a verified university email address ending in{" "}
-                <span className="font-mono text-xs text-zinc-200">@medicaps.ac.in</span>.
+                <strong className="text-zinc-200">The Hands-On Imperative:</strong> Access to computers and tools that teach
+                how the world works should be open, experiential, and unrestricted.
               </li>
               <li>
-                <strong className="text-zinc-200">Single Account Policy:</strong> Each student is permitted exactly
-                one individual account associated with their unique Enrollment Number / PRN.
+                <strong className="text-zinc-200">Meritocracy of Skill:</strong> Hackers and engineers are evaluated solely by
+                their craft, insight, and problem-solving ability — never by age, background, credentials, or status.
               </li>
               <li>
-                <strong className="text-zinc-200">Account Security:</strong> You are responsible for safeguarding your
-                authentication sessions. Impersonating another student or sharing credentials is strictly prohibited.
+                <strong className="text-zinc-200">Information Freedom &amp; Privacy:</strong> Public data should be transparent
+                and accessible; personal and private data must always be fiercely protected.
+              </li>
+              <li>
+                <strong className="text-zinc-200">Constructive Creation:</strong> Computing is a medium for art, beauty,
+                and societal empowerment. We create, optimize, and share.
               </li>
             </ul>
           </section>
@@ -93,115 +93,139 @@ export function TermsPage() {
           {/* Section 3 */}
           <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              3. Competition Integrity &amp; Code of Conduct
+              3. Member Accounts &amp; Authentication
             </h2>
             <p className="mt-3">
-              The platform evaluates algorithmic proficiency and security problem-solving. To maintain institutional
-              standards and fair evaluation, participants must adhere to the following rules:
+              To participate in rated contests, track telemetry, and access engineering challenges, you must authenticate through
+              an authorized credential provider.
             </p>
-            <div className="mt-4 rounded-xl border border-white/[0.08] bg-[#121214] p-5">
-              <h3 className="text-sm font-medium text-white">Prohibited Actions:</h3>
-              <ul className="mt-2.5 list-inside list-disc space-y-2 text-xs leading-normal text-zinc-400">
-                <li>
-                  <strong className="text-zinc-300">Collusion &amp; Plagiarism:</strong> Sharing source code, solutions,
-                  or approach hints with other participants during active contest windows.
-                </li>
-                <li>
-                  <strong className="text-zinc-300">Generative AI Assistance:</strong> Utilizing automated AI assistance,
-                  copilots, or external code generators during restricted contest modes unless explicitly authorized.
-                </li>
-                <li>
-                  <strong className="text-zinc-300">Multiple Submissions Abuse:</strong> Flooding the judge queue with
-                  denial-of-service attempts or automated submission scripts.
-                </li>
-                <li>
-                  <strong className="text-zinc-300">Sybil Attacks:</strong> Registering alternate handles to test edge
-                  cases, reserve ranking slots, or manipulate rating algorithms.
-                </li>
-              </ul>
-            </div>
-            <p className="mt-3 text-sm text-zinc-400">
-              All submissions are subject to automated similarity detection algorithms and post-contest telemetry audits.
-            </p>
+            <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
+              <li>
+                <strong className="text-zinc-200">Identity Integrity:</strong> Each participant is permitted exactly one
+                account. Multi-accounting, bot registration, and Sybil manipulations to distort rankings or ratings are strictly prohibited.
+              </li>
+              <li>
+                <strong className="text-zinc-200">Credential Safeguarding:</strong> You are responsible for preserving the
+                confidentiality of your authentication sessions and tokens. You may not share, sell, or delegate access to your account.
+              </li>
+              <li>
+                <strong className="text-zinc-200">Accurate Handles:</strong> Member handles must not be deceptive, impersonate
+                others, or infringe upon trademarks. Offensive or abusive handles will be renamed or suspended.
+              </li>
+            </ul>
           </section>
 
           {/* Section 4 */}
           <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              4. Code Execution &amp; Sandbox Security
+              4. Arena Integrity &amp; Fair Play
             </h2>
             <p className="mt-3">
-              Code submitted through the Monaco Web IDE is compiled and executed within isolated, resource-constrained
-              container sandboxes. You expressly agree not to:
+              Our competitive arena is designed to measure genuine problem-solving ability. To maintain fairness across the community:
             </p>
-            <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
-              <li>Attempt to escape or probe containerized namespaces, cgroups, or virtual file systems.</li>
-              <li>Spawn background daemons, fork bombs, or cryptomining processes.</li>
-              <li>Initiate unauthorized outbound network connections from inside the judge execution runtime.</li>
-              <li>Exfiltrate test cases, judge binaries, or system environment configurations.</li>
-            </ul>
+            <div className="mt-4 rounded-xl border border-white/[0.08] bg-[#121214] p-5">
+              <h3 className="text-sm font-medium text-white">Strictly Prohibited During Contests:</h3>
+              <ul className="mt-2.5 list-inside list-disc space-y-2 text-xs leading-normal text-zinc-400">
+                <li>
+                  <strong className="text-zinc-300">Collusion:</strong> Sharing source code, solution approaches, or hints
+                  with other contestants while a challenge window is active.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Unauthorized AI Assistance:</strong> Using generative AI agents, copilots,
+                  or automated code generators during restricted evaluation rounds unless explicitly permitted by challenge rules.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Queue Flooding:</strong> Launching automated rapid-fire submissions designed
+                  to overwhelm the compilation engine or degrade service for other members.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Plagiarism:</strong> Submitting pre-existing third-party code without
+                  independent authorship or proper attribution when permitted.
+                </li>
+              </ul>
+            </div>
             <p className="mt-3 text-sm text-zinc-400">
-              Security vulnerability research must be conducted responsibly under CCC disclosure guidelines; unauthorized
-              destructive exploitation will result in immediate disqualification and academic reporting.
+              Submissions undergo automated syntactic similarity checks, execution telemetry auditing, and peer verification.
             </p>
           </section>
 
           {/* Section 5 */}
           <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              5. Intellectual Property &amp; Submissions
+              5. Automated Code Execution &amp; Sandbox Security
             </h2>
             <p className="mt-3">
-              You retain ownership of the source code and algorithms you write. By submitting solutions through the platform,
-              you grant Chaos Computer Club India a non-exclusive, royalty-free, perpetual license to store, compile, run,
-              and analyze your code solely for judging, plagiarism evaluation, and archival purposes.
+              User code is compiled and evaluated in ephemeral, isolated sandboxes. Respect for infrastructure is a core club standard:
             </p>
-            <p className="mt-3">
-              Problem statements, editorial analyses, platform source code, and branding assets remain the exclusive
-              intellectual property of Chaos Computer Club India and respective challenge authors.
+            <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
+              <li>Do not attempt to escape containerized environments, cgroups, or kernel namespaces.</li>
+              <li>Do not spawn malicious background threads, fork bombs, or cryptocurrency miners.</li>
+              <li>Do not open unauthorized outbound network connections from within sandbox runners.</li>
+              <li>Do not attempt to tamper with or exfiltrate test cases, test runners, or backend configurations.</li>
+            </ul>
+            <p className="mt-3 text-sm text-zinc-400">
+              Responsible security research is welcomed. If you identify an infrastructure vulnerability, report it privately
+              under our Responsible Disclosure policy rather than exploiting it destructively.
             </p>
           </section>
 
           {/* Section 6 */}
           <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              6. Disciplinary Enforcement &amp; Termination
+              6. Intellectual Property &amp; Open Source
             </h2>
             <p className="mt-3">
-              We reserve the right to investigate suspicious activity and take immediate corrective measures at our sole
-              discretion, including:
+              You retain full ownership of the original algorithms and source code you author and submit to the platform.
+              By submitting solutions, you grant the Club a non-exclusive, worldwide, royalty-free license to execute, compile,
+              and analyze your submissions for judging, plagiarism verification, and archival leaderboards.
             </p>
-            <ul className="mt-3 list-inside list-disc space-y-1.5 text-zinc-400">
-              <li>Disqualification from current and upcoming competitive contests.</li>
-              <li>Rating resets or permanent exclusion from leaderboard indices.</li>
-              <li>Revocation of platform authentication tokens and account suspension.</li>
-              <li>Referral to the university academic disciplinary committee for ethical violations.</li>
-            </ul>
+            <p className="mt-3">
+              Problem statements, challenge designs, benchmark suites, platform code, and Chaos Computer Club branding remain
+              the property of the Club and respective authors, governed by their respective open-source or creative licenses.
+            </p>
           </section>
 
           {/* Section 7 */}
           <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              7. Service Availability &amp; Disclaimer
+              7. Disciplinary Actions &amp; Account Status
             </h2>
             <p className="mt-3">
-              The platform is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis without warranties of
-              any kind. While we strive for 99.9% uptime during contest windows, we are not liable for client-side network
-              instabilities, local browser errors, or unscheduled upstream cloud interruptions.
+              To preserve a healthy technical community, the Club reserves the right to take proportionate corrective actions
+              for policy violations, including:
             </p>
+            <ul className="mt-3 list-inside list-disc space-y-1.5 text-zinc-400">
+              <li>Disqualification from active contests or hackathons.</li>
+              <li>Rating penalties, rollbacks, or leaderboard exclusion.</li>
+              <li>Temporary or permanent revocation of platform access.</li>
+              <li>Termination of Chaos Computer Club membership standing.</li>
+            </ul>
           </section>
 
           {/* Section 8 */}
-          <section className="border-t border-white/[0.08] pt-8">
+          <section>
             <h2 className="text-lg font-semibold tracking-tight text-white">
-              8. Contact &amp; Governance
+              8. Service Availability &amp; Disclaimers
             </h2>
             <p className="mt-3">
-              Questions regarding these Terms, contest rules, or appeals may be directed to the Chapter Administration:
+              Club infrastructure is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis. While we strive
+              for resilient, high-performance service during events, Chaos Computer Club India makes no express warranties
+              regarding uninterrupted operation, zero latency, or third-party upstream connectivity.
+            </p>
+          </section>
+
+          {/* Section 9 */}
+          <section className="border-t border-white/[0.08] pt-8">
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              9. Governance &amp; Contact
+            </h2>
+            <p className="mt-3">
+              These Terms are administered by the core technical committee of Chaos Computer Club India. For questions,
+              disputes, appeals, or responsible disclosures, reach out through official club channels:
             </p>
             <div className="mt-4 rounded-xl border border-white/[0.08] bg-[#121214] p-5 text-sm text-zinc-300">
-              <p className="font-medium text-white">Chaos Computer Club India — Medi-Caps Chapter</p>
-              <p className="mt-1 text-zinc-400">Faculty Coordinator &amp; Student Technical Lead</p>
+              <p className="font-medium text-white">Chaos Computer Club India</p>
+              <p className="mt-1 text-zinc-400">Technical Steering Committee &amp; Core Operations</p>
               <p className="mt-2 font-mono text-xs text-lime-400">
                 Email: info@chaoscomputerclub.in
               </p>
