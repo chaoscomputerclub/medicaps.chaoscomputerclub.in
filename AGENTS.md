@@ -11,14 +11,16 @@
 
 <!-- LOVABLE:END -->
 
-# ⚡ DEVELOPMENT PROTOCOL (GSD PIPELINE DISABLED)
+# ⚡ DEVELOPMENT & DEPLOYMENT PROTOCOL (GITHUB CI/CD)
 
-## 1. Local Development Only (Sync Pipeline OFF)
-The automated GSD continuous sync pipeline (`./scripts/gsd_sync.sh`, auto-pushing to `origin/main`, and auto-pulling/deploying to production server `root@143.198.38.205`) is **TURNED OFF**.
-- DO NOT automatically commit or push code changes to GitHub.
-- DO NOT automatically SSH or deploy to the production server.
-- All development, verification, and testing must remain strictly local.
-- Code pushes and deployments should only occur when explicitly instructed by the user.
+## 1. Automated GitHub Actions CI/CD Pipeline
+The production deployment pipeline is managed by **GitHub Actions** (`.github/workflows/deploy.yml`):
+- Pushing to `origin/main` automatically triggers GitHub CI/CD:
+  - Compiles the Student Portal (`npm run build`) and Admin Console (`npm run build:admin`).
+  - Connects to the production server via SSH, pulls updates, syncs backend code, and restarts services.
+  - Deploys production web bundles, reloads Nginx, and validates live health endpoints.
+- Agents and developers do **NOT** have to run slow local SSH deploys or wait on `./scripts/gsd_sync.sh`. Simply push commits to `main` when instructed, and GitHub handles the deployment asynchronously in the cloud.
+- Push only when instructed by the user or when features are tested and verified locally.
 
 ## 2. Core Engineering Principles
 - **Bias for Action**: Directly investigate root causes and fix them completely.
