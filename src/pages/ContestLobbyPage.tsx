@@ -249,11 +249,6 @@ export function ContestLobbyPage() {
               <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
                 Live Contest Arena Lobby
               </span>
-              {isDevBypass && (
-                <span className="px-1.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 font-mono text-[9px] uppercase tracking-wider text-lime-400 font-semibold">
-                  Dev Bypass
-                </span>
-              )}
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-white">{resolvedContest.title}</h1>
             <p className="text-xs text-zinc-400 font-mono">

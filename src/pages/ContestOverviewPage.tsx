@@ -93,7 +93,6 @@ export function ContestOverviewPage() {
   const isLive = contest?.status === "live";
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
-  const isDevBypass = Boolean(registration?.is_dev_bypass || contestSlug.startsWith("dev-"));
 
   const countdown = useCountdown(isLive ? contest?.ends_at : contest?.starts_at);
   const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
@@ -303,23 +302,6 @@ export function ContestOverviewPage() {
                 <span className="text-xs text-zinc-400 font-sans">
                   Arena unlocks automatically at start time
                 </span>
-                {isDevBypass && (
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="rounded-md border-lime-400/30 bg-black text-lime-400 hover:bg-lime-400/10 text-xs font-mono cursor-pointer"
-                  >
-                    <a
-                      href={`/contests/${contestSlug}/lobby`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Play className="size-3.5 fill-current" />
-                      <span>Enter Arena (Dev Mode)</span>
-                    </a>
-                  </Button>
-                )}
               </div>
             ) : (
               <Button
@@ -413,7 +395,7 @@ export function ContestOverviewPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isUpcoming && !isDevBypass ? (
+                {isUpcoming ? (
                   [1, 2, 3, 4].map((idx) => (
                     <TableRow key={idx} className="border-white/4">
                       <TableCell className="font-mono text-xs font-bold text-zinc-500">
