@@ -4,7 +4,7 @@
  */
 
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { getApiBase, getToken } from "@/lib/auth";
+import { getApiBase, getToken, apiFetch } from "@/lib/auth";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
 import type { StudentFollowItem } from "@/organization/data/types";
@@ -50,16 +50,7 @@ export const fetchMyFollowingIdsThunk = createAsyncThunk<string[]>(
     try {
       const token = getToken();
       if (!token) return [];
-      const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/social/my-following-ids`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) return [];
-      const data = await res.json();
+      const data = await apiFetch<{ following_ids: string[] }>("/social/my-following-ids");
       return Array.isArray(data.following_ids) ? Array.from(new Set(data.following_ids)) : [];
     } catch {
       return rejectWithValue("Failed to load following list.");
@@ -75,17 +66,7 @@ export const fetchFollowersThunk = createAsyncThunk<
   try {
     const cleanTarget = target.replace(/^@+/, "").trim();
     if (!cleanTarget) return { students: [], followersCount: 0, followingCount: 0 };
-    const token = getToken();
-    const apiBase = getApiBase();
-    const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/followers`, {
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-    if (!res.ok) throw new Error("Failed to fetch followers");
-    const data = await res.json();
+    const data = await apiFetch<any>(`/social/${encodeURIComponent(cleanTarget)}/followers`);
     return {
       students: data.students || [],
       followersCount: data.followers_count ?? data.count ?? (data.students || []).length,
@@ -104,17 +85,7 @@ export const fetchFollowingThunk = createAsyncThunk<
   try {
     const cleanTarget = target.replace(/^@+/, "").trim();
     if (!cleanTarget) return { students: [], followersCount: 0, followingCount: 0 };
-    const token = getToken();
-    const apiBase = getApiBase();
-    const res = await fetch(`${apiBase}/social/${encodeURIComponent(cleanTarget)}/following`, {
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-    if (!res.ok) throw new Error("Failed to fetch following");
-    const data = await res.json();
+    const data = await apiFetch<any>(`/social/${encodeURIComponent(cleanTarget)}/following`);
     return {
       students: data.students || [],
       followersCount: data.followers_count ?? 0,
@@ -139,29 +110,16 @@ export const toggleFollowThunk = createAsyncThunk<
   try {
     const token = getToken();
     if (!token) {
-      window.location.href = "/auth";
       return rejectWithValue("Authentication required");
     }
     const target = typeof arg === "string" ? arg : (arg.targetId || arg.targetHandle || "");
     const cleanTarget = target.replace(/^@+/, "").trim();
     if (!cleanTarget) return rejectWithValue("Target student handle is required.");
 
-    const apiBase = getApiBase();
-    const res = await fetch(`${apiBase}/social/toggle/${encodeURIComponent(cleanTarget)}`, {
+    const data = await apiFetch<any>(`/social/toggle/${encodeURIComponent(cleanTarget)}`, {
       method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: "Action failed" }));
-      return rejectWithValue(err.detail || "Action failed");
-    }
-
-    const data = await res.json();
     invalidateSwrCache("member:profile:full");
     invalidateSwrCache("student:profile:*");
     invalidateFullProfileCache();

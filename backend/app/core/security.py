@@ -66,14 +66,15 @@ def decode_access_token(token: str) -> Optional[dict]:
             try:
                 return jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=["RS256"])
             except JWTError:
-                if settings.SECRET_KEY:
-                    try:
-                        return jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-                    except JWTError:
-                        pass
-                raise
+                pass
 
-        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM, "HS256"])
+        if settings.SECRET_KEY:
+            algs = ["HS256"]
+            if settings.ALGORITHM == "HS256":
+                algs = ["HS256"]
+            return jwt.decode(token, settings.SECRET_KEY, algorithms=algs)
+
+        return None
     except JWTError:
         return None
 

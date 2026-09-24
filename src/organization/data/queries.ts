@@ -6,7 +6,7 @@
 export function queryOptions<T extends Record<string, any>>(opts: T): T {
   return opts;
 }
-import { getToken, getApiBase, clearToken, isAuthenticated } from "@/lib/auth";
+import { getToken, getApiBase, clearToken, isAuthenticated, silentRefreshToken } from "@/lib/auth";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
   getPublicPortalData,
@@ -142,12 +142,28 @@ export async function fetchFullProfileData(force = false): Promise<FullProfilePa
           return payload;
         }
         if (res.status === 401) {
-          const authed = isAuthenticated();
-          if (!authed) {
-            clearToken();
-            fullProfileCache = null;
-            if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
-              window.location.href = "/auth";
+          const refreshed = await silentRefreshToken();
+          if (refreshed) {
+            const retryToken = getToken();
+            const retryRes = await fetch(`${apiBase}/auth/me`, {
+              headers: {
+                Authorization: `Bearer ${retryToken}`,
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+            });
+            if (retryRes.ok) {
+              const retryData = await retryRes.json();
+              const payload: FullProfilePayload = {
+                member: { ...defaultMemberProfile, ...(retryData.member || {}) },
+                ratingHistory: Array.isArray(retryData.ratingHistory) ? retryData.ratingHistory : [],
+                recentBattles: Array.isArray(retryData.recentBattles) ? retryData.recentBattles : [],
+                campusPass: retryData.campusPass || defaultCampusPass,
+                proofs: Array.isArray(retryData.proofs) ? retryData.proofs : [],
+                achievements: Array.isArray(retryData.achievements) ? retryData.achievements : [],
+              };
+              fullProfileCache = { data: payload, timestamp: Date.now() };
+              return payload;
             }
           }
         }

@@ -124,7 +124,6 @@ export function PortalShell() {
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      window.location.replace("/auth");
       return;
     }
     dispatch(fetchMyFollowingIdsThunk());

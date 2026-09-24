@@ -214,6 +214,13 @@ export async function silentRefreshToken(): Promise<boolean> {
         const data = await res.json();
         if (data.access_token) {
           setToken(data.access_token, data.member || undefined);
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("ccc:token-refreshed", {
+                detail: { token: data.access_token, member: data.member },
+              }),
+            );
+          }
           return true;
         }
       }
@@ -229,6 +236,69 @@ export async function silentRefreshToken(): Promise<boolean> {
 }
 
 export const refreshToken = silentRefreshToken;
+
+/**
+ * Returns number of seconds remaining until current JWT access token expires.
+ * Returns null if token is missing or malformed.
+ */
+export function getTokenRemainingSeconds(): number | null {
+  const token = getToken();
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  if (!payload || typeof payload["exp"] !== "number") return null;
+  const now = Math.floor(Date.now() / 1000);
+  return payload["exp"] - now;
+}
+
+let keepaliveInitialized = false;
+
+/**
+ * Initializes proactive background session keepalive.
+ * Periodically verifies access token freshness and silently refreshes before expiry.
+ * Also checks when the browser tab regains visibility or focus (e.g. waking from sleep).
+ */
+export function initAuthKeepalive(): () => void {
+  if (typeof window === "undefined" || keepaliveInitialized) {
+    return () => {};
+  }
+  keepaliveInitialized = true;
+
+  const checkAndRefresh = async () => {
+    const remaining = getTokenRemainingSeconds();
+    // Proactively refresh if token expires within 24 hours (86,400s) or has already expired
+    if (remaining !== null && remaining < 86400) {
+      await silentRefreshToken();
+    } else if (remaining === null && (getToken() || getStoredMember())) {
+      await silentRefreshToken();
+    }
+  };
+
+  // Run initial check
+  void checkAndRefresh();
+
+  // Check every 10 minutes
+  const intervalId = setInterval(checkAndRefresh, 10 * 60 * 1000);
+
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      void checkAndRefresh();
+    }
+  };
+
+  const onFocus = () => {
+    void checkAndRefresh();
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("focus", onFocus);
+
+  return () => {
+    clearInterval(intervalId);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    window.removeEventListener("focus", onFocus);
+    keepaliveInitialized = false;
+  };
+}
 
 export async function apiFetch<T>(path: string, init?: RequestInit, isRetry = false): Promise<T> {
   const apiBase = getApiBase();

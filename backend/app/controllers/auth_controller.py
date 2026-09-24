@@ -85,6 +85,39 @@ def _to_member_public(member: MemberProfile) -> MemberPublic:
 
 from app.core.config import settings
 
+
+def _extract_minio_avatar_object(avatar_url: Optional[str]) -> Optional[str]:
+    """
+    Extracts the relative MinIO S3 object key (e.g., 'avatars/uuid_filename.png')
+    from a stored avatar_url string. Returns None for external OAuth avatars (Google, GitHub, Gravatar)
+    or invalid/empty URLs.
+    """
+    if not avatar_url or not isinstance(avatar_url, str):
+        return None
+
+    # Exclude external OAuth profile picture CDNs
+    external_domains = (
+        "googleusercontent.com",
+        "githubusercontent.com",
+        "gravatar.com",
+        "avatars.github.com",
+    )
+    if any(domain in avatar_url for domain in external_domains):
+        return None
+
+    # MinIO avatar assets are stored under the "avatars/" key prefix
+    if "avatars/" not in avatar_url:
+        return None
+
+    try:
+        after_prefix = avatar_url.split("avatars/", 1)[1].split("?")[0].split("#")[0].strip("/")
+        if after_prefix:
+            return f"avatars/{after_prefix}"
+    except Exception:
+        pass
+    return None
+
+
 def is_allowed_organization_email(email: str) -> bool:
     if not email or "@" not in email:
         return False
@@ -505,6 +538,16 @@ class AuthController:
                 detail="Failed to store avatar in MinIO object storage.",
             )
 
+        # Clean up superseded MinIO avatar if one existed previously
+        old_avatar = current_member.avatar_url
+        old_object_key = _extract_minio_avatar_object(old_avatar)
+        if old_object_key:
+            try:
+                storage_service.delete_file(old_object_key)
+                logger.info("Deleted superseded MinIO avatar %s for member %s", old_object_key, current_member.id)
+            except Exception as e:
+                logger.warning("Could not delete previous MinIO avatar %s: %s", old_object_key, e)
+
         public_url = result.get("public_url")
         current_member.avatar_url = public_url
         current_member.updated_at = datetime.now(timezone.utc)
@@ -530,7 +573,17 @@ class AuthController:
         current_member: MemberProfile,
         db: AsyncSession,
     ) -> dict:
-        """Removes the member's custom avatar and reverts to initials."""
+        """Removes the member's custom avatar, purges the MinIO object, and reverts to initials."""
+        old_avatar = current_member.avatar_url
+        old_object_key = _extract_minio_avatar_object(old_avatar)
+        if old_object_key:
+            try:
+                from app.core.storage import storage_service
+                storage_service.delete_file(old_object_key)
+                logger.info("Purged MinIO avatar %s on remove_avatar for member %s", old_object_key, current_member.id)
+            except Exception as e:
+                logger.warning("Could not purge MinIO avatar %s: %s", old_object_key, e)
+
         current_member.avatar_url = None
         current_member.updated_at = datetime.now(timezone.utc)
         await db.commit()
@@ -1216,32 +1269,75 @@ class AuthController:
         return {"available": not taken, "handle": clean}
 
     @staticmethod
-    async def delete_account(current_member: MemberProfile, db: AsyncSession) -> dict:
+    async def delete_account(
+        current_member: MemberProfile,
+        db: AsyncSession,
+        request: Optional[Request] = None,
+        response: Optional[Response] = None,
+    ) -> dict:
         """
         Permanently delete the authenticated member's account and all associated data.
-        This action is irreversible.
+        Purges MinIO custom avatars, revokes Redis session tokens, clears auth cookies,
+        invalidates caches, and removes database records. This action is irreversible.
         """
         from app.models.db_models import StudentFollow, CampusPass
         from sqlalchemy import delete as sql_delete
 
         member_id = current_member.id
+        member_email = current_member.email
+        member_handle = current_member.handle
+        avatar_url = current_member.avatar_url
 
-        # Remove follow relationships
+        # 1. Purge user avatar from MinIO object storage if custom avatar exists
+        minio_object_key = _extract_minio_avatar_object(avatar_url)
+        if minio_object_key:
+            try:
+                from app.core.storage import storage_service
+                storage_service.delete_file(minio_object_key)
+                logger.info("Purged MinIO avatar %s for deleted account %s (%s)", minio_object_key, member_email, member_id)
+            except Exception as e:
+                # Do not block account deletion if MinIO is unreachable or file was already missing
+                logger.warning("Could not delete MinIO avatar %s for member %s: %s", minio_object_key, member_id, e)
+
+        # 2. Revoke active refresh token in Redis
+        if request:
+            token_candidate = (
+                request.cookies.get("refresh_token")
+                or request.headers.get("X-Refresh-Token")
+                or request.headers.get("x-refresh-token")
+            )
+            if token_candidate:
+                try:
+                    await revoke_refresh_token(token_candidate.strip())
+                except Exception as e:
+                    logger.warning("Could not revoke refresh token during account deletion: %s", e)
+
+        # 3. Clear auth cookies on response
+        if response and request:
+            try:
+                clear_auth_cookies(response, request)
+            except Exception as e:
+                logger.warning("Could not clear auth cookies during account deletion: %s", e)
+
+        # 4. Remove follow relationships
         await db.execute(sql_delete(StudentFollow).where(
             (StudentFollow.follower_id == member_id) | (StudentFollow.following_id == member_id)
         ))
-        # Remove campus passes
+        # 5. Remove campus passes
         await db.execute(sql_delete(CampusPass).where(CampusPass.member_id == member_id))
 
-        # Remove profile caches
+        # 6. Remove profile and leaderboard caches in Redis
         await delete_cache(f"cache:profile:{member_id}")
+        await delete_cache_pattern(f"cache:student:profile:{member_id}:*")
+        if member_handle:
+            await delete_cache_pattern(f"cache:student:profile:{member_handle.lower()}:*")
         await delete_cache_pattern("cache:leaderboard:*")
 
-        # Delete the member record
+        # 7. Delete the member record
         await db.delete(current_member)
         await db.commit()
 
-        logger.info("Account permanently deleted: %s (%s)", current_member.email, member_id)
+        logger.info("Account permanently deleted: %s (%s)", member_email, member_id)
         return {"success": True, "message": "Account permanently deleted."}
 
     @staticmethod

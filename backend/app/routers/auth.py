@@ -164,10 +164,17 @@ async def check_handle(
 
 @router.delete("/me", summary="Permanently delete authenticated member account")
 async def delete_account(
+    request: Request,
+    response: Response,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    return await AuthController.delete_account(current_member, db)
+    return await AuthController.delete_account(
+        current_member=current_member,
+        db=db,
+        request=request,
+        response=response,
+    )
 
 
 @router.post("/logout", summary="Invalidate session, revoke refresh token, and clear auth cookies")
