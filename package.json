@@ -12,7 +12,13 @@
     "preview": "vite preview --port 8081",
     "preview:admin": "vite preview --config vite.admin.config.ts --port 8082",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
+    "test:dead-ui": "playwright test tests/e2e/dead_ui_and_interactions.spec.ts",
+    "test:api": "node scripts/api_contract_fuzzer.mjs",
+    "test:qa": "node scripts/run_unified_qa.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -80,7 +86,9 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

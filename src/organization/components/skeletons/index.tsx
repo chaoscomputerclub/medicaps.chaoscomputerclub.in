@@ -605,12 +605,12 @@ export function LeaderboardSkeleton() {
         <table className="w-full text-left font-mono text-xs">
           <thead>
             <tr className="border-b border-white/8 bg-white/[0.02]">
-              <th className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-500">Rank</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Cadet / Handle</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Trend</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Rating</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Peak</th>
-              <th className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-500">Attendance</th>
+              <th className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rank</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Cadet / Handle</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Trend</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rating</th>
+              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Peak</th>
+              <th className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Attendance</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">

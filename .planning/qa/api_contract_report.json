@@ -1,0 +1,118 @@
+{
+  "timestamp": "2026-09-24T08:21:05.766Z",
+  "total": 11,
+  "passed": 11,
+  "failed": 0,
+  "auditResults": [
+    {
+      "testType": "CANONICAL_CONTRACT",
+      "name": "System Health",
+      "endpoint": "/health",
+      "method": "GET",
+      "status": 200,
+      "latency": 8352.4,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "CANONICAL_CONTRACT",
+      "name": "Public Key Handshake",
+      "endpoint": "/auth/jwt-public-key",
+      "method": "GET",
+      "status": 200,
+      "latency": 617.5,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "CANONICAL_CONTRACT",
+      "name": "Official Contests Stream",
+      "endpoint": "/contests",
+      "method": "GET",
+      "status": 200,
+      "latency": 839.1,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "CANONICAL_CONTRACT",
+      "name": "University Leaderboard",
+      "endpoint": "/leaderboard",
+      "method": "GET",
+      "status": 200,
+      "latency": 335.7,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "CANONICAL_CONTRACT",
+      "name": "Rating Distribution Histogram",
+      "endpoint": "/leaderboard/distribution",
+      "method": "GET",
+      "status": 200,
+      "latency": 331.3,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "RBAC_SECURITY_GATE",
+      "name": "Contest Registration (Unauthenticated)",
+      "endpoint": "/contests/weekly-1/register",
+      "method": "POST",
+      "status": 401,
+      "latency": 327.2,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "RBAC_SECURITY_GATE",
+      "name": "Cadet Profile Follow (Unauthenticated)",
+      "endpoint": "/profile/follow",
+      "method": "POST",
+      "status": 404,
+      "latency": 606.6,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "RBAC_SECURITY_GATE",
+      "name": "Admin Force Sync (Unauthenticated)",
+      "endpoint": "/admin/sync-contests",
+      "method": "POST",
+      "status": 404,
+      "latency": 644.8,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "NEGATIVE_FUZZ_BOUNDARY",
+      "name": "SQL Injection Probe in Query Param",
+      "endpoint": "/leaderboard?department=%27%20OR%201=1;%20--",
+      "method": "GET",
+      "status": 200,
+      "latency": 387.2,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "NEGATIVE_FUZZ_BOUNDARY",
+      "name": "Type Inversion in Auth Handle Probe",
+      "endpoint": "/auth/check-handle?handle=123456789",
+      "method": "GET",
+      "status": 200,
+      "latency": 362,
+      "passed": true,
+      "violation": null
+    },
+    {
+      "testType": "NEGATIVE_FUZZ_BOUNDARY",
+      "name": "Excessive Payload String Buffer Fuzz",
+      "endpoint": "/auth/check-handle?handle=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "method": "GET",
+      "status": 422,
+      "latency": 351.8,
+      "passed": true,
+      "violation": null
+    }
+  ]
+}

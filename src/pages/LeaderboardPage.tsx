@@ -105,12 +105,12 @@ export function LeaderboardPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-white/8 hover:bg-transparent">
-                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-500">Rank</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Cadet / Handle</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Trend</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Rating</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500">Peak</TableHead>
-                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-500">Attendance</TableHead>
+                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rank</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Cadet / Handle</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Trend</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rating</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Peak</TableHead>
+                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Attendance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

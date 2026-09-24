@@ -14,13 +14,19 @@
 # ⚡ DEVELOPMENT & DEPLOYMENT PROTOCOL (GITHUB CI/CD)
 
 ## 1. Automated GitHub Actions CI/CD Pipeline
-The production deployment pipeline is managed by **GitHub Actions** (`.github/workflows/deploy.yml`):
-- Pushing to `origin/main` automatically triggers GitHub CI/CD:
-  - Compiles the Student Portal (`npm run build`).
-  - Connects to the production server via SSH, pulls updates, syncs backend code, and restarts services.
-  - Deploys production web bundles, reloads Nginx, and validates live health endpoints.
-- Agents and developers do **NOT** have to run slow local SSH deploys or wait on `./scripts/gsd_sync.sh`. Simply push commits to `main` when instructed, and GitHub handles the deployment asynchronously in the cloud.
-- Push only when instructed by the user or when features are tested and verified locally.
+- **Pull Request Quality Gate (`.github/workflows/pr_check.yml`)**:
+  - Automatically triggered on all PRs targeting `main` and on `workflow_dispatch`.
+  - Runs 3 parallel verification gates:
+    1. **Frontend Gate**: TypeScript type check (`tsc --noEmit`), Vite production build (`npm run build`), and 100% interactive button & backend connectivity audit.
+    2. **Playwright E2E & A11y Gate**: Headless Chromium running all 11 E2E tests, WCAG 2.2 AA accessibility audits, and runtime error boundary sentinel. Reports uploaded as job artifacts.
+    3. **Backend QA & Contract Gate**: Ephemeral PostgreSQL 16 & Redis 7 service containers executing the 51-endpoint API contract QA suite, dynamic contest lifecycle tests, webhook/SSE pub-sub tests, and strict QR gate security tests.
+- **Production Deployment Pipeline (`.github/workflows/deploy.yml`)**:
+  - Pushing to `origin/main` automatically triggers GitHub CI/CD:
+    - Compiles the Student Portal (`npm run build`).
+    - Connects to the production server via SSH, pulls updates, syncs backend code, and restarts services.
+    - Deploys production web bundles, reloads Nginx, and validates live health endpoints.
+  - Agents and developers do **NOT** have to run slow local SSH deploys or wait on `./scripts/gsd_sync.sh`. Simply push commits to `main` when instructed, and GitHub handles the deployment asynchronously in the cloud.
+  - Push only when instructed by the user or when features are tested and verified locally.
 
 ## 2. Core Engineering Principles
 - **Bias for Action**: Directly investigate root causes and fix them completely.
