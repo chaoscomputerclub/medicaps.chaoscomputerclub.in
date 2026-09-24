@@ -16,6 +16,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.db import get_db
 from app.middleware.auth import get_current_member, get_current_member_optional, require_onboarded
 from app.middleware.rate_limit import ip_rate_limit
@@ -29,6 +30,14 @@ from app.schemas.auth import (
 from app.controllers.auth_controller import AuthController
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+@router.get("/security-config", summary="Public security configuration for client verification")
+async def security_config():
+    return {
+        "turnstile_enabled": settings.CLOUDFLARE_TURNSTILE_ENABLED,
+        "turnstile_site_key": settings.CLOUDFLARE_TURNSTILE_SITE_KEY,
+    }
 
 
 @router.get("/google/login", summary="Initiate Google OAuth flow restricted to @medicaps.ac.in")

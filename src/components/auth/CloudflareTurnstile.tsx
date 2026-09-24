@@ -59,21 +59,65 @@ export function CloudflareTurnstile({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [status, setStatus] = useState<Status>("loading");
+  const [activeSiteKey, setActiveSiteKey] = useState<string>(
+    siteKey ||
+    (import.meta.env["VITE_CLOUDFLARE_TURNSTILE_SITE_KEY"] as string | undefined) ||
+    ""
+  );
+  const [retryCount, setRetryCount] = useState(0);
 
   // Latest callbacks live in a ref so inline arrow functions from the parent
   // don't destroy and re-create the widget on every render.
   const callbacksRef = useRef({ onSuccess, onError, onExpire });
   callbacksRef.current = { onSuccess, onError, onExpire };
 
-  // Read strictly from environment variable — zero hardcoded credentials
-  const activeSiteKey =
-    siteKey ||
-    (import.meta.env["VITE_CLOUDFLARE_TURNSTILE_SITE_KEY"] as string | undefined) ||
-    "";
+  // Dynamically fetch public Turnstile site key from backend if not baked at build-time
+  useEffect(() => {
+    if (activeSiteKey) return;
+    let isCancelled = false;
+
+    fetch("/api/auth/security-config")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch security config");
+        return res.json();
+      })
+      .then((data) => {
+        if (isCancelled) return;
+        if (data.turnstile_enabled === false) {
+          setStatus("verified");
+          callbacksRef.current.onSuccess("dev-bypass");
+          return;
+        }
+        if (data.turnstile_site_key) {
+          setActiveSiteKey(data.turnstile_site_key);
+        } else {
+          setStatus("error");
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setStatus("error");
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeSiteKey, retryCount]);
 
   useEffect(() => {
+    if (!activeSiteKey) return;
+
     let isMounted = true;
     let scriptEl: HTMLElement | null = null;
+
+    // Safety timeout: if widget hangs in "loading" state for > 6s, fail gracefully
+    const timeoutId = setTimeout(() => {
+      if (isMounted && status === "loading") {
+        setStatus("error");
+        callbacksRef.current.onError?.(new Error("Turnstile load timeout"));
+      }
+    }, 6000);
 
     function removeWidget() {
       if (widgetIdRef.current && window.turnstile) {
@@ -98,11 +142,13 @@ export function CloudflareTurnstile({
           size: "flexible", // fills the container width instead of fixed 300px
           callback: (token) => {
             if (!isMounted) return;
+            clearTimeout(timeoutId);
             setStatus("verified");
             callbacksRef.current.onSuccess(token);
           },
           "error-callback": (err) => {
             if (!isMounted) return;
+            clearTimeout(timeoutId);
             setStatus("error");
             callbacksRef.current.onError?.(err);
           },
@@ -114,6 +160,7 @@ export function CloudflareTurnstile({
         });
       } catch (err) {
         if (!isMounted) return;
+        clearTimeout(timeoutId);
         setStatus("error");
         callbacksRef.current.onError?.(err);
       }
@@ -131,6 +178,7 @@ export function CloudflareTurnstile({
         script.defer = true;
         script.onerror = (e) => {
           if (!isMounted) return;
+          clearTimeout(timeoutId);
           setStatus("error");
           callbacksRef.current.onError?.(e);
         };
@@ -142,10 +190,11 @@ export function CloudflareTurnstile({
 
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
       scriptEl?.removeEventListener("load", renderWidget);
       removeWidget();
     };
-  }, [activeSiteKey]);
+  }, [activeSiteKey, retryCount]);
 
   return (
     <div
@@ -160,10 +209,30 @@ export function CloudflareTurnstile({
       )}
     >
       {/* Loader sits behind the iframe and is covered once the widget paints */}
-      <div className="absolute inset-0 flex items-center justify-center gap-2 text-[12px] text-zinc-500">
-        <Loader2 className="size-3.5 animate-spin" />
-        <span>Loading security check…</span>
-      </div>
+      {status === "loading" && (
+        <div className="absolute inset-0 flex items-center justify-center gap-2 text-[12px] text-zinc-500">
+          <Loader2 className="size-3.5 animate-spin" />
+          <span>Verifying security…</span>
+        </div>
+      )}
+
+      {/* Error state with retry action */}
+      {status === "error" && (
+        <div className="absolute inset-0 flex items-center justify-between px-4 text-[12px] text-zinc-400">
+          <span>Security check unavailable</span>
+          <button
+            type="button"
+            onClick={() => {
+              setStatus("loading");
+              setActiveSiteKey("");
+              setRetryCount((c) => c + 1);
+            }}
+            className="text-[12px] font-medium text-lime-400 hover:underline cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* -1px offsets push the iframe's own square border outside the clip */}
       <div

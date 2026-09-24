@@ -61,3 +61,15 @@ async def test_turnstile_disabled_allows_all():
     settings.CLOUDFLARE_TURNSTILE_ENABLED = False
     result = await verify_turnstile_token(None)
     assert result is True
+
+
+@pytest.mark.asyncio
+async def test_auth_security_config_endpoint():
+    from httpx import AsyncClient, ASGITransport
+    from main import app
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        res = await ac.get("/api/auth/security-config")
+        assert res.status_code == 200
+        data = res.json()
+        assert "turnstile_enabled" in data
+        assert "turnstile_site_key" in data

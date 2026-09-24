@@ -30,6 +30,8 @@ jobs:
         run: npm ci
 
       - name: 🏗️ Build Student Portal Frontend
+        env:
+          VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: ${{ secrets.CLOUDFLARE_TURNSTILE_SITE_KEY || secrets.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}
         run: npm run build
 
       - name: 🔑 Configure SSH Key
