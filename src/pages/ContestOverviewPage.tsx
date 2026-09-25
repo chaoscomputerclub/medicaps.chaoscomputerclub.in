@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
   ArrowLeft,
@@ -17,7 +17,6 @@ import {
   Users,
   ShieldCheck,
   Flame,
-  Award,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -55,6 +54,22 @@ function useCountdown(targetIsoDate: string | null | undefined) {
   }, [targetIsoDate]);
 
   return timeLeft;
+}
+
+/** Compute human-readable duration from two ISO datetime strings. */
+function contestDuration(startsAt: string, endsAt: string): string {
+  try {
+    const diffMs = new Date(endsAt).getTime() - new Date(startsAt).getTime();
+    if (isNaN(diffMs) || diffMs <= 0) return "—";
+    const totalMinutes = Math.round(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (hours === 0) return `${mins} Min`;
+    if (mins === 0) return `${hours} Hr${hours > 1 ? "s" : ""}`;
+    return `${hours} Hr${hours > 1 ? "s" : ""} ${mins} Min`;
+  } catch {
+    return "—";
+  }
 }
 
 export function ContestOverviewPage() {
@@ -162,6 +177,15 @@ export function ContestOverviewPage() {
     timeZoneName: "short",
   });
 
+  // Derive duration dynamically from API timestamps — never hardcoded
+  const durationLabel = contestDuration(contest.starts_at, contest.ends_at);
+
+  // Use real problem_count from API; fall back to problems array length
+  const problemCount = contest.problem_count || problems.length || 4;
+
+  // Sealed placeholder rows — length from real API problem_count
+  const sealedRows = Array.from({ length: problemCount }, (_, i) => i + 1);
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       {/* Back Navigation */}
@@ -212,15 +236,15 @@ export function ContestOverviewPage() {
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock className="size-3.5 text-lime-400" />
-                90 Minutes
+                {durationLabel}
               </span>
               <span className="flex items-center gap-1.5">
                 <Code2 className="size-3.5 text-lime-400" />
-                {contest.problem_count || problems.length || 4} Problems
+                {problemCount} Problem{problemCount !== 1 ? "s" : ""}
               </span>
               <span className="flex items-center gap-1.5 text-zinc-300">
                 <Users className="size-3.5 text-lime-400" />
-                {contest.registered_count} Registered
+                <span className="tabular-nums">{contest.registered_count.toLocaleString()}</span>&nbsp;Registered
               </span>
             </div>
           </div>
@@ -381,7 +405,7 @@ export function ContestOverviewPage() {
                 Problem Set
               </h2>
               <span className="text-[11px] font-mono text-zinc-500">
-                {problems.length || contest.problem_count || 4} Challenges
+                {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
               </span>
             </div>
 
@@ -396,20 +420,21 @@ export function ContestOverviewPage() {
               </TableHeader>
               <TableBody>
                 {isUpcoming ? (
-                  [1, 2, 3, 4].map((idx) => (
+                  /* Sealed: use real problem_count from API; never reveal titles */
+                  sealedRows.map((idx) => (
                     <TableRow key={idx} className="border-white/4">
                       <TableCell className="font-mono text-xs font-bold text-zinc-500">
                         {String.fromCharCode(64 + idx)}
                       </TableCell>
                       <TableCell className="text-xs font-mono text-zinc-500 flex items-center gap-2 py-3.5">
-                        <Lock className="size-3 text-zinc-600" />
-                        <span>Problem {String.fromCharCode(64 + idx)} (Sealed until contest starts)</span>
+                        <Lock className="size-3 text-zinc-600 shrink-0" />
+                        <span>Problem {String.fromCharCode(64 + idx)} — sealed until contest starts</span>
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-zinc-500 tabular-nums">
-                        {idx * 100} pts
+                      <TableCell className="font-mono text-xs text-zinc-600 tabular-nums">
+                        —
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs text-zinc-600">
-                        Locked
+                        Sealed
                       </TableCell>
                     </TableRow>
                   ))
@@ -450,14 +475,17 @@ export function ContestOverviewPage() {
             </Table>
           </div>
 
-          <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-mono text-zinc-500">
-            <Link
-              to={`/contests/${contestSlug}/results`}
-              className="text-lime-400 hover:underline flex items-center gap-1"
-            >
-              View Standings →
-            </Link>
-          </div>
+          {/* View Standings — only available once contest is live or finished */}
+          {(isLive || isFinished) && (
+            <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-mono text-zinc-500">
+              <Link
+                to={`/contests/${contestSlug}/results`}
+                className="text-lime-400 hover:underline flex items-center gap-1"
+              >
+                View Standings →
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
