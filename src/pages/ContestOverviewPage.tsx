@@ -120,9 +120,13 @@ export function ContestOverviewPage() {
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
 
+  const onCountdownExpire = useCallback(() => {
+    refreshDetail(true);
+  }, [refreshDetail]);
+
   const countdown = useCountdown(
     isLive ? contest?.ends_at : contest?.starts_at,
-    () => refreshDetail(true)
+    onCountdownExpire
   );
   const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
 
