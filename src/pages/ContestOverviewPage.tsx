@@ -5,18 +5,23 @@ import { useEffect, useState, useCallback } from "react";
 import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
   ArrowLeft,
+  ArrowRight,
   Calendar,
   CheckCircle2,
   Clock,
   Code2,
+  Cpu,
+  Flame,
+  Gauge,
   Lock,
   Play,
+  ShieldAlert,
+  ShieldCheck,
   Sparkles,
+  Terminal,
   TrendingUp,
   Trophy,
   Users,
-  ShieldCheck,
-  Flame,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -191,9 +196,6 @@ export function ContestOverviewPage() {
 
   // Use real problem_count from API; fall back to problems array length
   const problemCount = contest.problem_count || problems.length || 4;
-
-  // Sealed placeholder rows — length from real API problem_count
-  const sealedRows = Array.from({ length: problemCount }, (_, i) => i + 1);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -402,93 +404,178 @@ export function ContestOverviewPage() {
           </ol>
         </div>
 
-        {/* Right Column: Problem Set Table */}
+        {/* Right Column: Arena Specifications (when upcoming) or Problem Set Table (when live/finished) */}
         <div className="lg:col-span-7 rounded-lg border border-white/8 bg-black p-6 space-y-4 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-white/8 pb-3">
-              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
-                Problem Set
-              </h2>
-              <span className="text-[11px] font-mono text-zinc-500">
-                {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
-              </span>
-            </div>
+          {isUpcoming ? (
+            /* Upcoming: Authentic Arena Specifications & Technical Readiness */
+            <div className="space-y-4 flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-white/8 pb-3">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
+                      Arena Specifications
+                    </h2>
+                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                      <Lock className="size-3 text-amber-400" /> Vault Sealed
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-mono text-zinc-500">
+                    {problemCount} Challenge{problemCount !== 1 ? "s" : ""} Scheduled
+                  </span>
+                </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow className="border-white/8 hover:bg-transparent">
-                  <TableHead className="w-12 font-mono text-[10px] uppercase text-zinc-500">#</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Title</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Score</TableHead>
-                  <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isUpcoming ? (
-                  /* Sealed: use real problem_count from API; never reveal titles */
-                  sealedRows.map((idx) => (
-                    <TableRow key={idx} className="border-white/4">
-                      <TableCell className="font-mono text-xs font-bold text-zinc-500">
-                        {String.fromCharCode(64 + idx)}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono text-zinc-500 flex items-center gap-2 py-3.5">
-                        <Lock className="size-3 text-zinc-600 shrink-0" />
-                        <span>Problem {String.fromCharCode(64 + idx)} — sealed until contest starts</span>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-zinc-600 tabular-nums">
-                        —
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-xs text-zinc-600">
-                        Sealed
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : problems.length === 0 ? (
-                  <TableRow className="border-white/4">
-                    <TableCell colSpan={4} className="py-10 text-center font-mono text-xs text-zinc-500">
-                      Problems will appear here once contest opens.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  problems.map((p) => (
-                    <TableRow key={p.problem_index} className="border-white/4 hover:bg-white/5">
-                      <TableCell className="font-mono text-xs font-bold text-lime-400">
-                        {p.problem_index}
-                      </TableCell>
-                      <TableCell className="text-xs font-medium text-white">
-                        {p.title}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-zinc-400 tabular-nums">
-                        {p.points} pts
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
-                        >
-                          <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
-                            Solve →
-                          </Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                {/* Vault Gating Banner */}
+                <div className="rounded-md border border-white/10 bg-zinc-950/80 p-3.5 space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <ShieldAlert className="size-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1 text-xs font-mono">
+                      <div className="text-zinc-200 font-semibold">
+                        Cryptographic Challenge Vault
+                      </div>
+                      <p className="text-zinc-400 leading-relaxed text-[11px]">
+                        Problem statements, constraints, and judge test suites are cryptographically sealed in the backend engine. All challenges unlock simultaneously across all workstations at contest launch.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Bento Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {/* Languages & Compilers */}
+                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                      <Terminal className="size-3.5 text-lime-400" />
+                      <span className="font-semibold uppercase tracking-wider text-[11px]">Compilers</span>
+                    </div>
+                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
+                      GCC 14 (C++23) · Clang 18 · Python 3.12 · OpenJDK 21 LTS
+                    </p>
+                  </div>
+
+                  {/* Sandbox Execution */}
+                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                      <Cpu className="size-3.5 text-lime-400" />
+                      <span className="font-semibold uppercase tracking-wider text-[11px]">Sandbox Limits</span>
+                    </div>
+                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
+                      2.0s / 256 MB (C++) · 4.0s / 512 MB (Python) · Isolated micro-containers
+                    </p>
+                  </div>
+
+                  {/* Evaluation Precision */}
+                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                      <Gauge className="size-3.5 text-lime-400" />
+                      <span className="font-semibold uppercase tracking-wider text-[11px]">Judge System</span>
+                    </div>
+                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
+                      Sub-millisecond precision · Trimmed token match · +10m penalty per WA
+                    </p>
+                  </div>
+
+                  {/* Prize & Rating */}
+                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                      <Trophy className="size-3.5 text-lime-400" />
+                      <span className="font-semibold uppercase tracking-wider text-[11px]">Prizes & Rating</span>
+                    </div>
+                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
+                      {contest.prize_pool || "Official Elo Rating + Merit Badges"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Chief Proctors (if available) */}
+                {contest.chief_proctors && contest.chief_proctors.length > 0 && (
+                  <div className="rounded-md border border-white/6 bg-white/[0.02] px-3 py-2 text-[11px] font-mono text-zinc-400 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-zinc-500 uppercase text-[10px] font-semibold">Proctoring Desk:</span>
+                    <span>{contest.chief_proctors.join(" · ")}</span>
+                  </div>
                 )}
-              </TableBody>
-            </Table>
-          </div>
+              </div>
 
-          {/* View Standings — only available once contest is live or finished */}
-          {(isLive || isFinished) && (
-            <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-mono text-zinc-500">
-              <Link
-                to={`/contests/${contestSlug}/results`}
-                className="text-lime-400 hover:underline flex items-center gap-1"
-              >
-                View Standings →
-              </Link>
+              {/* Lobby Quick Navigation Strip */}
+              <div className="pt-3 border-t border-white/8 flex items-center justify-between text-xs font-mono">
+                <span className="text-zinc-500">
+                  Waiting room open with synced clock
+                </span>
+                <Link
+                  to={`/contests/${contestSlug}/lobby`}
+                  className="inline-flex items-center gap-1.5 text-lime-400 hover:text-lime-300 transition-colors font-semibold"
+                >
+                  <span>Enter Waiting Room</span>
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              </div>
+            </div>
+          ) : (
+            /* Live / Concluded: Problem Set Table with Solve Links */
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-white/8 pb-3">
+                <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
+                  Problem Set
+                </h2>
+                <span className="text-[11px] font-mono text-zinc-500">
+                  {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/8 hover:bg-transparent">
+                    <TableHead className="w-12 font-mono text-[10px] uppercase text-zinc-500">#</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Title</TableHead>
+                    <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Score</TableHead>
+                    <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {problems.length === 0 ? (
+                    <TableRow className="border-white/4">
+                      <TableCell colSpan={4} className="py-10 text-center font-mono text-xs text-zinc-500">
+                        Problems will appear here once contest opens.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    problems.map((p) => (
+                      <TableRow key={p.problem_index} className="border-white/4 hover:bg-white/5">
+                        <TableCell className="font-mono text-xs font-bold text-lime-400">
+                          {p.problem_index}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium text-white">
+                          {p.title}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-zinc-400 tabular-nums">
+                          {p.points} pts
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+                          >
+                            <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
+                              Solve →
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+
+              {/* View Standings — only available once contest is live or finished */}
+              <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-mono text-zinc-500">
+                <Link
+                  to={`/contests/${contestSlug}/results`}
+                  className="text-lime-400 hover:underline flex items-center gap-1"
+                >
+                  View Standings →
+                </Link>
+              </div>
             </div>
           )}
         </div>
