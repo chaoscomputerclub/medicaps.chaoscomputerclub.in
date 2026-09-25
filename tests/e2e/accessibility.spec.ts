@@ -8,6 +8,7 @@ test.describe('WCAG 2.2 AA Accessibility Audits', () => {
   });
   test('Home Page meets core accessibility standards', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
     const runner = new AccessibilityRunner(page);
 
     const report = await runner.audit();
@@ -21,6 +22,7 @@ test.describe('WCAG 2.2 AA Accessibility Audits', () => {
 
   test('Contests Hub Page meets core accessibility standards', async ({ page }) => {
     await page.goto('/contests', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
     const runner = new AccessibilityRunner(page);
 
     const report = await runner.audit();
@@ -34,6 +36,7 @@ test.describe('WCAG 2.2 AA Accessibility Audits', () => {
 
   test('Leaderboard Page meets core accessibility standards', async ({ page }) => {
     await page.goto('/leaderboard', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
     const runner = new AccessibilityRunner(page);
 
     const report = await runner.audit();

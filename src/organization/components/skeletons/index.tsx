@@ -216,18 +216,18 @@ export function ScoreboardMatrixSkeleton({ compact = false }: { compact?: boolea
   return (
     <div className="overflow-x-auto rounded-xl border border-white/8 bg-black">
       <table className="w-full text-left font-mono text-xs">
-        <thead>
+        <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
           <tr className="border-b border-white/8 bg-white/[0.02]">
-            <th className="p-3.5 w-12">#</th>
-            <th className="p-3.5">Contestant</th>
-            {!compact && <th className="p-3.5">Dept.</th>}
-            <th className="p-3.5 text-center">A</th>
-            <th className="p-3.5 text-center">B</th>
-            <th className="p-3.5 text-center">C</th>
-            <th className="p-3.5 text-center">D</th>
-            <th className="p-3.5 text-center">Solved</th>
-            <th className="p-3.5 text-center">Penalty</th>
-            <th className="p-3.5 text-center">Δ</th>
+            <th className="p-3.5 w-12 text-zinc-300">#</th>
+            <th className="p-3.5 text-zinc-300">Contestant</th>
+            {!compact && <th className="p-3.5 text-zinc-300">Dept.</th>}
+            <th className="p-3.5 text-center text-zinc-300">A</th>
+            <th className="p-3.5 text-center text-zinc-300">B</th>
+            <th className="p-3.5 text-center text-zinc-300">C</th>
+            <th className="p-3.5 text-center text-zinc-300">D</th>
+            <th className="p-3.5 text-center text-zinc-300">Solved</th>
+            <th className="p-3.5 text-center text-zinc-300">Penalty</th>
+            <th className="p-3.5 text-center text-zinc-300">Δ</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/8">
@@ -603,7 +603,7 @@ export function LeaderboardSkeleton() {
 
       <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
         <table className="w-full text-left font-mono text-xs">
-          <thead>
+          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider">
             <tr className="border-b border-white/8 bg-white/[0.02]">
               <th className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rank</th>
               <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Cadet / Handle</th>
@@ -1014,15 +1014,15 @@ export function ContestResultsSkeleton() {
       {/* Standings Table */}
       <div className="overflow-x-auto rounded-xl border border-white/8 bg-black">
         <table className="w-full text-left font-mono text-xs">
-          <thead>
+          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
             <tr className="border-b border-white/8 bg-white/[0.02]">
-              <th className="p-3">Rank</th>
-              <th className="p-3">Candidate</th>
-              <th className="p-3">Dept</th>
-              <th className="p-3 text-right">Score</th>
-              <th className="p-3 text-right">Solved</th>
-              <th className="p-3 text-right">Penalty</th>
-              <th className="p-3">Status</th>
+              <th className="p-3 text-zinc-300">Rank</th>
+              <th className="p-3 text-zinc-300">Candidate</th>
+              <th className="p-3 text-zinc-300">Dept</th>
+              <th className="p-3 text-right text-zinc-300">Score</th>
+              <th className="p-3 text-right text-zinc-300">Solved</th>
+              <th className="p-3 text-right text-zinc-300">Penalty</th>
+              <th className="p-3 text-zinc-300">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
@@ -1091,15 +1091,15 @@ export function ContestFinalResultsSkeleton() {
       {/* Full Matrix Table */}
       <div className="overflow-x-auto rounded-lg border border-white/8 bg-black">
         <table className="w-full text-left font-mono text-xs">
-          <thead>
+          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
             <tr className="border-b border-white/8 bg-white/[0.02]">
-              <th className="p-3">Rank</th>
-              <th className="p-3">Finalist</th>
-              <th className="p-3">Division</th>
-              <th className="p-3 text-right">Solved</th>
-              <th className="p-3 text-right">Score</th>
-              <th className="p-3 text-right">Penalty</th>
-              <th className="p-3 text-right">Rating Δ</th>
+              <th className="p-3 text-zinc-300">Rank</th>
+              <th className="p-3 text-zinc-300">Finalist</th>
+              <th className="p-3 text-zinc-300">Division</th>
+              <th className="p-3 text-right text-zinc-300">Solved</th>
+              <th className="p-3 text-right text-zinc-300">Score</th>
+              <th className="p-3 text-right text-zinc-300">Penalty</th>
+              <th className="p-3 text-right text-zinc-300">Rating Δ</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
@@ -1730,16 +1730,16 @@ export function AssessmentLeaderboardSkeleton() {
       </div>
       <div className="overflow-x-auto rounded-xl border border-white/8 bg-black">
         <table className="w-full text-left font-mono text-xs">
-          <thead>
+          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
             <tr className="border-b border-white/8 bg-white/[0.02]">
-              <th className="p-3">Rank</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Handle</th>
-              <th className="p-3">Full Name</th>
-              <th className="p-3">Dept</th>
-              <th className="p-3">Score</th>
-              <th className="p-3">Solved</th>
-              <th className="p-3">Penalty</th>
+              <th className="p-3 text-zinc-300">Rank</th>
+              <th className="p-3 text-zinc-300">Status</th>
+              <th className="p-3 text-zinc-300">Handle</th>
+              <th className="p-3 text-zinc-300">Full Name</th>
+              <th className="p-3 text-zinc-300">Dept</th>
+              <th className="p-3 text-zinc-300">Score</th>
+              <th className="p-3 text-zinc-300">Solved</th>
+              <th className="p-3 text-zinc-300">Penalty</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">

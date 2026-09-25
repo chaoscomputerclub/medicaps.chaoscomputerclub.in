@@ -1,6 +1,9 @@
 name: Pull Request Quality Gate
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -92,6 +95,7 @@ jobs:
           echo "| \`tests/e2e/dead_ui_and_interactions.spec.ts\` | Dead-UI & Interaction Triggers | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| \`tests/e2e/accessibility.spec.ts\` | WCAG 2.2 AA Compliance Audit | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| \`tests/e2e/runtime_telemetry.spec.ts\` | Error Boundary & 5xx Sentinel | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`tests/e2e/inter_navigation.spec.ts\` | Full Platform Inter-Page & Subpage Navigation | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
 
   # ─── JOB 3: BACKEND API QA & CONTRACT VERIFICATION ───────────────────────────
   backend-qa-gate:

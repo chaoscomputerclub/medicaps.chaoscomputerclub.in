@@ -14,11 +14,11 @@
 # ⚡ DEVELOPMENT & DEPLOYMENT PROTOCOL (GITHUB CI/CD)
 
 ## 1. Automated GitHub Actions CI/CD Pipeline
-- **Pull Request Quality Gate (`.github/workflows/pr_check.yml`)**:
-  - Automatically triggered on all PRs targeting `main` and on `workflow_dispatch`.
+- **Pull Request & CI Quality Gate (`.github/workflows/pr_check.yml`)**:
+  - Automatically triggered on all pushes and PRs targeting `main` and on `workflow_dispatch`.
   - Runs 3 parallel verification gates:
     1. **Frontend Gate**: TypeScript type check (`tsc --noEmit`), Vite production build (`npm run build`), and 100% interactive button & backend connectivity audit.
-    2. **Playwright E2E & A11y Gate**: Headless Chromium running all 11 E2E tests, WCAG 2.2 AA accessibility audits, and runtime error boundary sentinel. Reports uploaded as job artifacts.
+    2. **Playwright E2E & A11y Gate**: Headless Chromium running all 17 E2E tests (including full platform inter-navigation suite), WCAG 2.2 AA accessibility audits, and runtime error boundary sentinel. Reports uploaded as job artifacts.
     3. **Backend QA & Contract Gate**: Ephemeral PostgreSQL 16 & Redis 7 service containers executing the 51-endpoint API contract QA suite, dynamic contest lifecycle tests, webhook/SSE pub-sub tests, and strict QR gate security tests.
 - **Production Deployment Pipeline (`.github/workflows/deploy.yml`)**:
   - Pushing to `origin/main` automatically triggers GitHub CI/CD:
