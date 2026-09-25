@@ -41,7 +41,7 @@ function parsePrefetchIntent(href: string): void {
 
   // ── Static top-level routes ─────────────────────────────────────────────
   // Dashboard, Contests Hub, Leaderboard, My Contests, Problems, Settings…
-  const staticRoutes = ["/", "/contests", "/my-contests", "/leaderboard", "/problems", "/verify", "/profile", "/settings"];
+  const staticRoutes = ["/", "/contests", "/my-contests", "/leaderboard", "/problems", "/profile", "/settings"];
   if (staticRoutes.includes(clean)) {
     prefetchRoute(clean);
     return;

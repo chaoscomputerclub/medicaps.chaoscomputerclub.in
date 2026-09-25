@@ -20,7 +20,6 @@ import {
   ProblemDetailSkeleton,
   ProfileSkeleton,
   SettingsSkeleton,
-  VerifyProofSkeleton,
   AuthSkeleton,
 } from "@/organization/components/skeletons";
 
@@ -57,7 +56,6 @@ export function AppShellSkeleton() {
     if (path.startsWith("/problems/")) return <ProblemDetailSkeleton />;
     if (path.startsWith("/settings")) return <SettingsSkeleton />;
     if (path.startsWith("/profile") || path.startsWith("/u/")) return <ProfileSkeleton />;
-    if (path.startsWith("/verify")) return <VerifyProofSkeleton />;
     return <DashboardSkeleton />;
   };
 

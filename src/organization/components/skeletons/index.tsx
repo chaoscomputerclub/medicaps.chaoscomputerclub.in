@@ -1393,38 +1393,25 @@ export function ProfileSkeleton() {
         </div>
       </section>
 
-      {/* Achievements & Proof */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <div className="flex justify-between items-center border-b border-white/8 pb-3">
-            <div className="space-y-1">
-              <Skeleton className="h-2 w-24" />
-              <Skeleton className="h-4 w-36" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
-            {[1, 2, 3, 4].map((i) => (
-              <article key={i} className="p-3.5 rounded-lg border border-white/8 bg-black space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <Skeleton className="size-3.5 rounded" />
-                  <Skeleton className="h-2 w-12" />
-                </div>
-                <Skeleton className="h-4 w-36" />
-                <Skeleton className="h-3 w-full" />
-              </article>
-            ))}
+      {/* Achievements Ledger */}
+      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+        <div className="flex justify-between items-center border-b border-white/8 pb-3">
+          <div className="space-y-1">
+            <Skeleton className="h-2 w-24" />
+            <Skeleton className="h-4 w-36" />
           </div>
         </div>
-
-        <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <div className="flex justify-between items-center border-b border-white/8 pb-3">
-            <div className="space-y-1">
-              <Skeleton className="h-2 w-24" />
-              <Skeleton className="h-4 w-28" />
-            </div>
-          </div>
-          <ProofBadgeSkeleton compact />
-          <Skeleton className="h-3 w-44 pt-1" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <article key={i} className="p-3.5 rounded-lg border border-white/8 bg-black space-y-2">
+              <div className="flex items-center gap-1.5">
+                <Skeleton className="size-3.5 rounded" />
+                <Skeleton className="h-2 w-12" />
+              </div>
+              <Skeleton className="h-4 w-36" />
+              <Skeleton className="h-3 w-full" />
+            </article>
+          ))}
         </div>
       </section>
 

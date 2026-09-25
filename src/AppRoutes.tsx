@@ -17,7 +17,6 @@ import {
   LeaderboardSkeleton,
   ProblemArchiveSkeleton,
   ProblemDetailSkeleton,
-  VerifyProofSkeleton,
   ProfileSkeleton,
   SettingsSkeleton,
   AuthSkeleton,
@@ -43,7 +42,6 @@ export const MyContestsPage = lazyWithRetry(() => import("./pages/MyContestsPage
 export const LeaderboardPage = lazyWithRetry(() => import("./pages/LeaderboardPage"), "LeaderboardPage");
 export const ProblemArchivePage = lazyWithRetry(() => import("./pages/ProblemArchivePage"), "ProblemArchivePage");
 export const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDetailPage"), "ProblemDetailPage");
-export const VerifyProofPage = lazyWithRetry(() => import("./pages/VerifyProofPage"), "VerifyProofPage");
 export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
 export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
 export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "TermsPage");
@@ -54,7 +52,6 @@ export const routePreloaders: Record<string, () => Promise<any>> = {
   "/my-contests": () => MyContestsPage.preload(),
   "/leaderboard": () => LeaderboardPage.preload(),
   "/problems": () => ProblemArchivePage.preload(),
-  "/verify": () => VerifyProofPage.preload(),
   "/profile": () => ProfilePage.preload(),
   "/settings": () => SettingsPage.preload(),
 };
@@ -319,15 +316,8 @@ export function AppRoutes() {
             }
           />
 
-          {/* Cryptographic Result Verification */}
-          <Route
-            path="verify"
-            element={
-              <Suspense fallback={<VerifyProofSkeleton />}>
-                <VerifyProofPage />
-              </Suspense>
-            }
-          />
+          {/* Deprecated Proof Verification route redirects to Dashboard */}
+          <Route path="verify" element={<Navigate to="/" replace />} />
 
           {/* Member & Student Profiles */}
           <Route

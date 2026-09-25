@@ -45,21 +45,16 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
     await expect(page).toHaveURL(/.*\/problems$/);
     await expect(page.locator('h1, h2, h3').filter({ hasText: /Problems|Archive|Challenges/i }).first()).toBeVisible({ timeout: 10000 });
 
-    // 6. Navigate to Verify Proof (/verify)
-    await page.locator('aside nav a[href="/verify"]').click();
-    await expect(page).toHaveURL(/.*\/verify$/);
-    await expect(page.locator('h1, h2, h3').filter({ hasText: /Verify|Cryptographic|Proof/i }).first()).toBeVisible({ timeout: 10000 });
-
-    // 7. Navigate to Settings (/settings)
+    // 6. Navigate to Settings (/settings)
     await page.locator('aside nav a[href="/settings"]').click();
     await expect(page).toHaveURL(/.*\/settings$/);
     await expect(page.locator('h1, h2, h3').filter({ hasText: /Settings|Profile|Account/i }).first()).toBeVisible({ timeout: 10000 });
 
-    // 8. Navigate to Profile (/profile) via sidebar footer link
+    // 7. Navigate to Profile (/profile) via sidebar footer link
     await page.locator('aside a[href="/profile"]').click();
     await expect(page).toHaveURL(/.*\/profile/);
 
-    // 9. Navigate back to Dashboard (/) via Brand Header
+    // 8. Navigate back to Dashboard (/) via Brand Header
     await page.locator('aside a[href="/"]').first().click();
     await expect(page).toHaveURL(/.*\/$/);
 
@@ -192,18 +187,11 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
       await page.goBack();
     }
 
-    // 4. Click "Verify Proofs →" action link
-    const verifyLink = page.locator('a:has-text("Verify Proofs →")');
-    if (await verifyLink.isVisible()) {
-      await verifyLink.click();
-      await expect(page).toHaveURL(/.*\/verify$/);
-    }
-
     const fatalErrors = consoleErrors.filter((e) => !e.includes('ResizeObserver'));
     expect(fatalErrors).toEqual([]);
   });
 
-  test('Contest Standings & Verification Inter-Navigation', async ({ page }) => {
+  test('Contest Standings & Leaderboard Inter-Navigation', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('pageerror', (err) => consoleErrors.push(`[PAGEERROR] ${err.message}`));
 
@@ -222,10 +210,6 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
     await expect(leadBtn).toBeVisible();
     await leadBtn.click();
     await expect(page).toHaveURL(/.*\/leaderboard$/);
-
-    // 4. Visit Verify Proof Page and verify prefill via query param
-    await page.goto('/verify?proof=CCC-MCU-2026-001', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('input#verifyTerm')).toHaveValue('CCC-MCU-2026-001');
 
     const fatalErrors = consoleErrors.filter((e) => !e.includes('ResizeObserver'));
     expect(fatalErrors).toEqual([]);

@@ -10,7 +10,6 @@ import {
   Check,
   Github,
   Award,
-  ExternalLink,
   LockKeyhole,
   Zap,
   Loader2,
@@ -24,7 +23,6 @@ import { openSocialDrawer, fetchMyFollowingIdsThunk, toggleFollowThunk } from "@
 import { uploadAvatarThunk, removeAvatarThunk, fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
-import { ProofBadge } from "@/organization/components/ProofBadge";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -696,13 +694,9 @@ export function ProfilePage() {
                     <h3 className="font-semibold text-white">{b.contest}</h3>
                   )}
                   {b.certificate_id ? (
-                    <Link
-                      to={`/verify?proof=${encodeURIComponent(b.certificate_id)}`}
-                      className="text-[10px] text-zinc-500 hover:text-lime-400 font-mono transition-colors block"
-                      title="Verify this certificate"
-                    >
+                    <span className="text-[10px] text-zinc-500 font-mono block">
                       {b.certificate_id}
-                    </Link>
+                    </span>
                   ) : null}
                 </div>
                 <div className="flex items-center gap-3">
@@ -718,53 +712,30 @@ export function ProfilePage() {
         </div>
       </section>
 
-
-
-      {/* Achievements & Proof */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
-            {achievements.length === 0 ? (
-              <div className="text-center py-8 text-zinc-600 col-span-2">
-                No achievements unlocked yet.
-              </div>
-            ) : (
-              achievements.map((a: any) => (
-                <article
-                  key={a.code || a.id || a.name || a.title}
-                  className={`p-3.5 rounded-lg border ${
-                    a.earned !== false ? "border-lime-400/30 bg-black" : "border-white/6 bg-black opacity-40"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    {a.earned !== false ? <Award className="size-3.5 text-lime-400" /> : <LockKeyhole className="size-3.5 text-zinc-500" />}
-                    <span className="text-[9px] uppercase tracking-wider text-zinc-500">{a.code || a.id || "ACH"}</span>
-                  </div>
-                  <h3 className="font-semibold text-white">{a.name || a.title}</h3>
-                  <p className="text-zinc-400 text-[11px] mt-0.5 leading-relaxed">{a.description}</p>
-                </article>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="05 // Verification" index="CRYPTOGRAPHIC" title="Latest Proof" />
-          {proofs[0] ? (
-            <>
-              <ProofBadge proof={proofs[0]} />
-              <Link
-                to={`/verify?proof=${encodeURIComponent(proofs[0].certificate_id ?? "")}`}
-                className="inline-flex items-center gap-1 font-mono text-xs text-lime-400 hover:underline pt-2"
-              >
-                Open Verification Console <ExternalLink className="size-3" />
-              </Link>
-            </>
-          ) : (
-            <div className="py-8 text-center text-zinc-600 font-mono text-xs">
-              No cryptographic proofs generated yet.
+      {/* Achievements Ledger */}
+      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+        <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+          {achievements.length === 0 ? (
+            <div className="text-center py-8 text-zinc-600 col-span-full">
+              No achievements unlocked yet.
             </div>
+          ) : (
+            achievements.map((a: any) => (
+              <article
+                key={a.code || a.id || a.name || a.title}
+                className={`p-3.5 rounded-lg border ${
+                  a.earned !== false ? "border-lime-400/30 bg-black" : "border-white/6 bg-black opacity-40"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  {a.earned !== false ? <Award className="size-3.5 text-lime-400" /> : <LockKeyhole className="size-3.5 text-zinc-500" />}
+                  <span className="text-[9px] uppercase tracking-wider text-zinc-500">{a.code || a.id || "ACH"}</span>
+                </div>
+                <h3 className="font-semibold text-white">{a.name || a.title}</h3>
+                <p className="text-zinc-400 text-[11px] mt-0.5 leading-relaxed">{a.description}</p>
+              </article>
+            ))
           )}
         </div>
       </section>

@@ -8,7 +8,6 @@ import {
   Bookmark,
   BarChart2,
   Code2,
-  ShieldCheck,
   Settings,
   LogOut,
   Menu,
@@ -34,7 +33,6 @@ import {
   ProblemDetailSkeleton,
   ProfileSkeleton,
   SettingsSkeleton,
-  VerifyProofSkeleton,
   DashboardSkeleton,
   AssessmentStudioSkeleton,
 } from "./skeletons";
@@ -45,7 +43,6 @@ const links = [
   { to: "/my-contests", label: "My Contests", icon: Bookmark, exact: false },
   { to: "/leaderboard", label: "Leaderboard", icon: BarChart2, exact: true },
   { to: "/problems", label: "Problems", icon: Code2, exact: false },
-  { to: "/verify", label: "Verify Proof", icon: ShieldCheck, exact: false },
   { to: "/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
 
@@ -91,9 +88,6 @@ function PortalRouteSkeleton() {
   }
   if (cleanPath.startsWith("/profile") || cleanPath.startsWith("/u/")) {
     return <ProfileSkeleton />;
-  }
-  if (cleanPath.startsWith("/verify")) {
-    return <VerifyProofSkeleton />;
   }
   return <DashboardSkeleton />;
 }

@@ -31,14 +31,11 @@ export async function getPublicPortalData(force = false) {
     async () => {
       const backendUrl = getApiBase();
 
-      const [apiContests, apiAnnouncements, apiProofs] = await Promise.all([
+      const [apiContests, apiAnnouncements] = await Promise.all([
         fetchWithTimeout(`${backendUrl}/contests`)
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
         fetchWithTimeout(`${backendUrl}/feed/announcements`)
-          .then((r) => (r.ok ? r.json() : []))
-          .catch(() => []),
-        fetchWithTimeout(`${backendUrl}/verify/proofs`)
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => []),
       ]);
@@ -78,7 +75,7 @@ export async function getPublicPortalData(force = false) {
         problems: problems || [],
         standings: (standings || []) as any[],
         announcements: (apiAnnouncements || []) as AnnouncementFeedItem[],
-        proofs: (apiProofs || []) as any[],
+        proofs: [],
       };
     },
     {

@@ -10,8 +10,6 @@ export interface PortalState {
   leaderboardSearch: string;
   leaderboardDept: string;
   leaderboardBatch: string;
-  verifyTerm: string;
-  verifySubmitted: string;
 }
 
 const initialBookmarks: string[] = (() => {
@@ -34,8 +32,6 @@ const initialState: PortalState = {
   leaderboardSearch: "",
   leaderboardDept: "all",
   leaderboardBatch: "all",
-  verifyTerm: "",
-  verifySubmitted: "",
 };
 
 export const portalSlice = createSlice({
@@ -80,12 +76,6 @@ export const portalSlice = createSlice({
     setLeaderboardBatch(state, action: PayloadAction<string>) {
       state.leaderboardBatch = action.payload;
     },
-    setVerifyTerm(state, action: PayloadAction<string>) {
-      state.verifyTerm = action.payload;
-    },
-    setVerifySubmitted(state, action: PayloadAction<string>) {
-      state.verifySubmitted = action.payload;
-    },
   },
 });
 
@@ -99,8 +89,6 @@ export const {
   setLeaderboardSearch,
   setLeaderboardDept,
   setLeaderboardBatch,
-  setVerifyTerm,
-  setVerifySubmitted,
 } = portalSlice.actions;
 
 export default portalSlice.reducer;

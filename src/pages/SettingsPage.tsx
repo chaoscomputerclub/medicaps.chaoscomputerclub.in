@@ -1054,28 +1054,6 @@ export function SettingsPage() {
                   </Button>
                 </div>
               </SettingSection>
-
-              <SettingSection
-                title="Cryptographic Proof Certificates"
-                description="Your contest participation is anchored to HMAC-SHA256 sealed proof certificates."
-              >
-                <div className="p-4 bg-black border border-white/8 rounded-lg flex items-start gap-3">
-                  <Zap size={15} className="text-lime-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-zinc-300">Proof certificates are immutable</p>
-                    <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
-                      Each contest you participate in generates a cryptographic proof sealed with your Enrollment Number and timestamp.
-                      These certificates are permanently anchored to your institutional identity and cannot be revoked or altered.
-                    </p>
-                    <Button asChild variant="outline" size="sm" className="mt-3 text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 rounded-md gap-1.5 cursor-pointer">
-                      <Link to="/verify">
-                        View my proof certificates
-                        <ChevronRight size={12} />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </SettingSection>
             </>
           )}
 

@@ -212,11 +212,6 @@ export function DashboardPage() {
           kicker="Network Feed"
           index="Telemetry"
           title="Live Activity Stream"
-          action={
-            <Link to="/verify" className="text-xs font-mono font-medium text-lime-400 hover:underline">
-              Verify Proofs →
-            </Link>
-          }
         />
         <ContestActivityFeed limit={6} />
       </section>
