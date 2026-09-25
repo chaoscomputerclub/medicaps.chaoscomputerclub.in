@@ -4,22 +4,26 @@ import { fetchContestDetailThunk, registerContestThunk, unregisterContestThunk }
 import { useEffect, useState, useCallback } from "react";
 import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  Ban,
+  Bot,
   Calendar,
   CheckCircle2,
   Clock,
   Code2,
-  Cpu,
   Flame,
-  Gauge,
+  Flag,
   Loader2,
   Lock,
+  Megaphone,
   Play,
+  Scale,
+  Shield,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
-  Terminal,
   TrendingUp,
   Trophy,
   Users,
@@ -387,238 +391,366 @@ export function ContestOverviewPage() {
         </div>
       </div>
 
-      {/* ── CONTEST DETAILS & PROBLEM SET ── */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left Column: Rules & Regulations */}
-        <div className="lg:col-span-5 rounded-lg border border-white/8 bg-black p-6 space-y-4">
+      {/* ── OFFICIAL ANNOUNCEMENTS BANNER ── */}
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.04] p-4 flex items-start gap-3.5">
+        <div className="size-8 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5 text-amber-400">
+          <Megaphone className="size-4" />
+        </div>
+        <div className="space-y-1 text-sm font-sans flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-white">📢 Official Announcements</span>
+            <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 uppercase tracking-wide">
+              Mandatory Notice
+            </span>
+          </div>
+          <p className="text-zinc-400 leading-relaxed text-xs">
+            Users must register prior to start to participate. The waiting lobby unlocks before contest launch with synchronized server time. All challenges unlock simultaneously across all workstations. We hope you enjoy this contest!
+          </p>
+        </div>
+      </div>
+
+      {/* ── LIVE / FINISHED PROBLEM SET TABLE ── */}
+      {!isUpcoming && (
+        <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/8 pb-3">
-            <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
-              Contest Rules
-            </h2>
-            <span className="text-[11px] font-mono text-zinc-500">Standard CP</span>
+            <div className="flex items-center gap-2">
+              <Code2 className="size-4 text-lime-400" />
+              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                Problem Set
+              </h2>
+            </div>
+            <span className="text-xs font-sans text-zinc-500">
+              {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
+            </span>
           </div>
 
-          <ol className="space-y-3.5 font-mono text-xs leading-relaxed text-zinc-400">
-            <li className="flex gap-3">
-              <span className="text-lime-400 font-bold shrink-0">01</span>
-              <span>
-                <strong className="text-white">Scoring:</strong> Each problem has an assigned point value. Solved problems grant full score upon passing all testcases.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-lime-400 font-bold shrink-0">02</span>
-              <span>
-                <strong className="text-white">Penalty:</strong> A 10-minute penalty is added for each incorrect submission, applicable only if the problem is eventually solved.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-lime-400 font-bold shrink-0">03</span>
-              <span>
-                <strong className="text-white">Standings:</strong> Participants are ranked primarily by total score, and secondarily by lowest total penalty time.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-lime-400 font-bold shrink-0">04</span>
-              <span>
-                <strong className="text-white">Rating Impact:</strong> This is an officially rated contest. Performance directly adjusts your Elo rating and rank on the University Leaderboard.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-lime-400 font-bold shrink-0">05</span>
-              <span>
-                <strong className="text-white">Integrity:</strong> All code submitted must be written solely by you. External assistance or code sharing will result in disqualification.
-              </span>
-            </li>
-          </ol>
-        </div>
-
-        {/* Right Column: Arena Specifications (when upcoming) or Problem Set Table (when live/finished) */}
-        <div className="lg:col-span-7 rounded-lg border border-white/8 bg-black p-6 space-y-4 flex flex-col justify-between">
-          {isUpcoming ? (
-            /* Upcoming: Authentic Arena Specifications & Technical Readiness */
-            <div className="space-y-4 flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-white/8 pb-3">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
-                      Arena Specifications
-                    </h2>
-                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
-                      <Lock className="size-3 text-amber-400" /> Vault Sealed
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-mono text-zinc-500">
-                    {problemCount} Challenge{problemCount !== 1 ? "s" : ""} Scheduled
-                  </span>
-                </div>
-
-                {/* Vault Gating Banner */}
-                <div className="rounded-md border border-white/10 bg-zinc-950/80 p-3.5 space-y-2">
-                  <div className="flex items-start gap-2.5">
-                    <ShieldAlert className="size-4 text-amber-400 shrink-0 mt-0.5" />
-                    <div className="space-y-1 text-xs font-mono">
-                      <div className="text-zinc-200 font-semibold">
-                        Cryptographic Challenge Vault
-                      </div>
-                      <p className="text-zinc-400 leading-relaxed text-[11px]">
-                        Problem statements, constraints, and judge test suites are cryptographically sealed in the backend engine. All challenges unlock simultaneously across all workstations at contest launch.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Technical Bento Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  {/* Languages & Compilers */}
-                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                      <Terminal className="size-3.5 text-lime-400" />
-                      <span className="font-semibold uppercase tracking-wider text-[11px]">Compilers</span>
-                    </div>
-                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                      GCC 14 (C++23) · Clang 18 · Python 3.12 · OpenJDK 21 LTS
-                    </p>
-                  </div>
-
-                  {/* Sandbox Execution */}
-                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                      <Cpu className="size-3.5 text-lime-400" />
-                      <span className="font-semibold uppercase tracking-wider text-[11px]">Sandbox Limits</span>
-                    </div>
-                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                      2.0s / 256 MB (C++) · 4.0s / 512 MB (Python) · Isolated micro-containers
-                    </p>
-                  </div>
-
-                  {/* Evaluation Precision */}
-                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                      <Gauge className="size-3.5 text-lime-400" />
-                      <span className="font-semibold uppercase tracking-wider text-[11px]">Judge System</span>
-                    </div>
-                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                      Sub-millisecond precision · Trimmed token match · +10m penalty per WA
-                    </p>
-                  </div>
-
-                  {/* Prize & Rating */}
-                  <div className="rounded-md border border-white/8 bg-zinc-950/50 p-3 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                      <Trophy className="size-3.5 text-lime-400" />
-                      <span className="font-semibold uppercase tracking-wider text-[11px]">Prizes & Rating</span>
-                    </div>
-                    <p className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                      {contest.prize_pool || "Official Elo Rating + Merit Badges"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Chief Proctors (if available) */}
-                {contest.chief_proctors && contest.chief_proctors.length > 0 && (
-                  <div className="rounded-md border border-white/6 bg-white/[0.02] px-3 py-2 text-[11px] font-mono text-zinc-400 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-zinc-500 uppercase text-[10px] font-semibold">Proctoring Desk:</span>
-                    <span>{contest.chief_proctors.join(" · ")}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Lobby Quick Navigation Strip */}
-              <AnimatePresence>
-                {isRegistered && (
-                  <motion.div
-                    key="spec-waiting-room"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <div className="pt-3 border-t border-white/8 flex items-center justify-between text-xs font-mono">
-                      <span className="text-zinc-500">
-                        Waiting room open with synced clock
-                      </span>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/8 hover:bg-transparent">
+                <TableHead className="w-12 font-sans text-[10px] uppercase text-zinc-500">#</TableHead>
+                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">Title</TableHead>
+                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">Score</TableHead>
+                <TableHead className="text-right font-sans text-[10px] uppercase text-zinc-500">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {problems.length === 0 ? (
+                <TableRow className="border-white/4">
+                  <TableCell colSpan={4} className="py-10 text-center font-sans text-xs text-zinc-500">
+                    Problems will appear here once contest opens.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                problems.map((p) => (
+                  <TableRow key={p.problem_index} className="border-white/4 hover:bg-white/5">
+                    <TableCell className="font-sans text-xs font-bold text-lime-400">
+                      {p.problem_index}
+                    </TableCell>
+                    <TableCell className="text-xs font-medium text-white">
+                      {p.title}
+                    </TableCell>
+                    <TableCell className="font-sans text-xs text-zinc-400 tabular-nums">
+                      {p.points} pts
+                    </TableCell>
+                    <TableCell className="text-right">
                       <Button
                         asChild
                         variant="outline"
                         size="sm"
                       >
-                        <Link to={`/contests/${contestSlug}/lobby`}>
-                          <span>Enter Waiting Room</span>
-                          <ArrowRight className="size-3.5 ml-1" />
+                        <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
+                          Solve →
                         </Link>
                       </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ) : (
-            /* Live / Concluded: Problem Set Table with Solve Links */
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-white/8 pb-3">
-                <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
-                  Problem Set
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+
+          {/* View Standings */}
+          <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-sans text-zinc-500">
+            <Link
+              to={`/contests/${contestSlug}/results`}
+              className="text-lime-400 hover:underline flex items-center gap-1 font-semibold"
+            >
+              View Standings →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ── CONTEST REGULATIONS, VIOLATIONS & INTEGRITY ── */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column: Important Notes & Prohibited Actions */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* 📌 Important Notes */}
+          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/8 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-base">📌</span>
+                <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                  Important Notes & Contest Rules
                 </h2>
-                <span className="text-[11px] font-mono text-zinc-500">
-                  {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
+              </div>
+              <span className="text-xs font-sans text-zinc-500">Fairness Protocol</span>
+            </div>
+
+            <ol className="space-y-4 font-sans text-xs leading-relaxed text-zinc-400">
+              <li className="flex gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                  1
+                </span>
+                <div>
+                  <strong className="text-white block pb-0.5">Contest Format & Fair Competition</strong>
+                  <span>
+                    To provide a better contest and ensure fairness, our tournament guidelines follow rigorous collegiate competitive programming standards. All participants compete under identical clock synchronization and automated judge verification.
+                  </span>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                  2
+                </span>
+                <div>
+                  <strong className="text-white block pb-0.5">5-Minute Wrong Submission Penalty</strong>
+                  <span>
+                    A penalty time of 5 minutes will be applied for each incorrect submission. Penalty time is added to your total ranking time only for problems that are eventually solved during the active contest window.
+                  </span>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                  3
+                </span>
+                <div>
+                  <strong className="text-white block pb-0.5">Hidden Test Cases During Contest</strong>
+                  <span>
+                    To ensure the fairness of the contest and prevent test case hardcoding or output guessing, the judge system will hide evaluation test cases during the active contest. When users submit incorrect submissions, the judge will display the verdict failure without disclosing hidden test case contents.
+                  </span>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                  4
+                </span>
+                <div>
+                  <strong className="text-white block pb-0.5">Sequential Test Group Execution</strong>
+                  <span>
+                    Test cases will be executed in sequential groups within isolated micro-containers. Submissions must satisfy time limits and memory constraints across all sub-task batches.
+                  </span>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                  5
+                </span>
+                <div>
+                  <strong className="text-white block pb-0.5">Rating Adjustment Timeline</strong>
+                  <span>
+                    The final Elo rating and university rank updates for this contest will be calculated and finalized within 24 to 48 hours following the conclusion of the contest and automated plagiarism screening.
+                  </span>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                  6
+                </span>
+                <div>
+                  <strong className="text-white block pb-0.5">Provisional Rating for New Participants</strong>
+                  <span>
+                    New users’ first five contests operate under a provisional rating system to accurately establish competitive standing; beginning from their sixth contest, rating adjustments fully reflect on the global university leaderboard.
+                  </span>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          {/* 🚨 Contest Violations & Prohibited Actions */}
+          <div className="rounded-lg border border-red-500/20 bg-zinc-950/70 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/8 pb-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="size-4 text-red-400" />
+                <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                  Contest Violations & Prohibited Actions
+                </h2>
+              </div>
+              <span className="rounded bg-red-500/10 border border-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-400 uppercase tracking-wide">
+                Strict Zero-Tolerance
+              </span>
+            </div>
+
+            <p className="text-xs font-sans text-zinc-300">
+              The actions below are strictly deemed contest violations:
+            </p>
+
+            <ul className="space-y-3 font-sans text-xs leading-relaxed text-zinc-400">
+              <li className="flex items-start gap-2.5">
+                <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">Multi-Account Submissions:</strong> One user submitting with multiple accounts during a contest is strictly forbidden. Multiple accounts belonging to the same user will be disqualified.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">Cross-Account Code Sharing:</strong> Multiple accounts submitting identical or structurally similar (AST-isomorphic) code for the same problem.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">Platform Disturbances:</strong> Creating unwanted disturbances, network attacks, or automated tooling that interrupts other users' participation.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">Public Discussion Leakage:</strong> Disclosing contest-related problem details, hints, starter solutions, or test cases in public chat channels or discussion boards before the contest concludes.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Bot className="size-3.5 text-red-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong className="text-white">Generative AI & External Assistance:</strong> The use of code generation tools (e.g. ChatGPT, Claude, GitHub Copilot) or any external assistance for solving problems is strictly prohibited. This includes, but is not limited to, inputting problem statements, test cases, or starter code into external assistance tools.
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Right Column: Zero-Tolerance Penalties, Fair Play Whistleblowing & Waiting Lobby */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* ⚖️ Enforcement & Penalties */}
+          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/8 pb-3">
+              <Scale className="size-4 text-lime-400" />
+              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                Zero-Tolerance Violation Penalties
+              </h2>
+            </div>
+
+            <p className="text-xs font-sans text-zinc-300 leading-relaxed">
+              Chaos Computer Club heavily emphasizes the justice and fairness of our contests. We maintain absolutely <strong className="text-red-400 font-semibold">ZERO TOLERANCE</strong> for violation behaviors (such as plagiarism, cheating, or surrogate participation).
+            </p>
+
+            <div className="space-y-3 pt-1">
+              <div className="rounded-md border border-white/8 bg-zinc-950 p-3.5 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 uppercase">
+                    First Violation
+                  </span>
+                  <span className="text-xs font-semibold text-white">Temporary Ban & Reset</span>
+                </div>
+                <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
+                  Contest score resets to zero, complete disqualification from the tournament edition, and a contest and discuss ban for 1 month.
+                </p>
+              </div>
+
+              <div className="rounded-md border border-red-500/20 bg-red-950/20 p-3.5 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 uppercase">
+                    Second Violation
+                  </span>
+                  <span className="text-xs font-semibold text-white">Permanent Deactivation</span>
+                </div>
+                <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
+                  Contest score resets to zero, permanent account deactivation without appeal, and formal referral to the University Academic Disciplinary Committee.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 🛡️ Community Whistleblowing & Fair Play */}
+          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+            <div className="flex items-center gap-2 border-b border-white/8 pb-3">
+              <Flag className="size-4 text-lime-400" />
+              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                Community Fair Play & Reporting
+              </h2>
+            </div>
+
+            <p className="text-xs font-sans text-zinc-400 leading-relaxed">
+              We encourage all participants to contribute to maintaining the justice and fairness of our contests. Cadets who discover coordinated cheating, AI leakage, or identical submissions can file violation reports to proctors.
+            </p>
+
+            <div className="rounded-md border border-lime-400/20 bg-lime-400/[0.03] p-3 text-xs font-sans text-zinc-300 space-y-1">
+              <span className="font-semibold text-lime-400 block">Verified Reporting Recognition:</span>
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                Participants who submit verified violation reports that successfully uncover cheating rings will receive official recognition on the CCC Academic Honor Roll.
+              </p>
+            </div>
+          </div>
+
+          {/* 🔒 Waiting Room / Arena Gate Status (when upcoming) */}
+          {isUpcoming && (
+            <div className="rounded-lg border border-white/8 bg-zinc-950/80 p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/8 pb-3">
+                <div className="flex items-center gap-2">
+                  <Lock className="size-4 text-lime-400" />
+                  <h3 className="text-sm font-semibold text-white font-sans">
+                    Challenge Vault Status
+                  </h3>
+                </div>
+                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+                  Locked Until Start
                 </span>
               </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-white/8 hover:bg-transparent">
-                    <TableHead className="w-12 font-mono text-[10px] uppercase text-zinc-500">#</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Title</TableHead>
-                    <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Score</TableHead>
-                    <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {problems.length === 0 ? (
-                    <TableRow className="border-white/4">
-                      <TableCell colSpan={4} className="py-10 text-center font-mono text-xs text-zinc-500">
-                        Problems will appear here once contest opens.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    problems.map((p) => (
-                      <TableRow key={p.problem_index} className="border-white/4 hover:bg-white/5">
-                        <TableCell className="font-mono text-xs font-bold text-lime-400">
-                          {p.problem_index}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium text-white">
-                          {p.title}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs text-zinc-400 tabular-nums">
-                          {p.points} pts
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
-                              Solve →
-                            </Link>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+              <p className="text-xs font-sans text-zinc-400 leading-relaxed">
+                All {problemCount} challenge statements and evaluation suites unlock simultaneously across all workstations at launch time.
+              </p>
 
-              {/* View Standings — only available once contest is live or finished */}
-              <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-mono text-zinc-500">
-                <Link
-                  to={`/contests/${contestSlug}/results`}
-                  className="text-lime-400 hover:underline flex items-center gap-1"
-                >
-                  View Standings →
-                </Link>
-              </div>
+              {isRegistered ? (
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-center justify-between text-xs font-sans text-zinc-400">
+                    <span className="flex items-center gap-1.5 text-emerald-400">
+                      <CheckCircle2 className="size-3.5" />
+                      <span>Registration Confirmed</span>
+                    </span>
+                    <span className="text-[11px] text-zinc-500">Synced Clock Active</span>
+                  </div>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="default"
+                    className="w-full"
+                  >
+                    <Link to={`/contests/${contestSlug}/lobby`}>
+                      <span>Enter Waiting Room</span>
+                      <ArrowRight className="size-3.5 ml-1" />
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="pt-1">
+                  <Button
+                    onClick={handleRegister}
+                    disabled={isRegistering}
+                    variant="default"
+                    size="default"
+                    className="w-full"
+                  >
+                    {isRegistering ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Loader2 className="size-3.5 animate-spin" />
+                        <span>Registering...</span>
+                      </span>
+                    ) : (
+                      <>
+                        <Sparkles className="size-3.5 mr-1.5" />
+                        <span>Register to Participate</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
