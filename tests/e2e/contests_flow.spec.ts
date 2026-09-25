@@ -40,7 +40,7 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
     await expect(contestTitle).toBeVisible({ timeout: 15000 });
 
     // Locate the contest card
-    const contestCard = page.locator('[role="button"]').filter({ hasText: /Weekly Contest/i }).first();
+    const contestCard = page.locator('[data-testid="hero-contest-card"], [role="button"], a[href^="/contests/"]').filter({ hasText: /Weekly Contest/i }).first();
     await expect(contestCard).toBeVisible({ timeout: 10000 });
 
     // Click the contest card

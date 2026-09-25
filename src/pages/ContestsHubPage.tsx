@@ -431,16 +431,9 @@ export function ContestsHubPage() {
                   return (
                     <div
                       key={contest.slug}
-                      role="button"
-                      tabIndex={0}
+                      data-testid="hero-contest-card"
                       onClick={() => navigate(`/contests/${contest.slug}`)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          navigate(`/contests/${contest.slug}`);
-                        }
-                      }}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
+                      className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
                       <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-gradient-to-br from-zinc-900/90 via-black to-zinc-950 overflow-hidden border-b border-white/8">
