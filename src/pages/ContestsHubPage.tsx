@@ -638,7 +638,7 @@ export function ContestsHubPage() {
                   <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
                     {rank2?.rating ?? 1200}
                   </span>
-                  <span className="block font-mono text-[10px] text-zinc-500 mt-1">
+                  <span className="block font-mono text-[10px] text-zinc-400 mt-1">
                     {rank2?.attendance_count ?? 0} rounds
                   </span>
                 </div>
@@ -698,7 +698,7 @@ export function ContestsHubPage() {
                   <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
                     {rank3?.rating ?? 1200}
                   </span>
-                  <span className="block font-mono text-[10px] text-zinc-500 mt-1">
+                  <span className="block font-mono text-[10px] text-zinc-400 mt-1">
                     {rank3?.attendance_count ?? 0} rounds
                   </span>
                 </div>
@@ -708,7 +708,7 @@ export function ContestsHubPage() {
             {/* ─── RANKS 4 TO 10 LIST (LARGER ROWS & AVATARS) ───────────────── */}
             <div className="divide-y divide-white/5 space-y-1">
               {otherRankers.length === 0 ? (
-                <p className="py-6 text-center text-xs sm:text-sm font-mono text-zinc-500">
+                <p className="py-6 text-center text-xs sm:text-sm font-mono text-zinc-400">
                   Compete in weekly rounds to claim ranks 4–10.
                 </p>
               ) : (
@@ -736,7 +736,7 @@ export function ContestsHubPage() {
                           <p className="truncate text-xs sm:text-sm font-semibold text-white group-hover:text-lime-400 transition-colors font-sans">
                             {leader.handle}
                           </p>
-                          <p className="truncate font-mono text-[11px] sm:text-xs text-zinc-500 mt-0.5">
+                          <p className="truncate font-mono text-[11px] sm:text-xs text-zinc-400 mt-0.5">
                             {leader.department || "Medi-Caps"} · <span className="text-zinc-400">{leader.tier || "Active"}</span>
                           </p>
                         </div>
@@ -747,7 +747,7 @@ export function ContestsHubPage() {
                           <span className="font-mono text-xs sm:text-sm font-bold tabular-nums text-white group-hover:text-lime-400 transition-colors">
                             {leader.rating}
                           </span>
-                          <span className="block font-mono text-[10px] sm:text-[11px] text-zinc-500">
+                          <span className="block font-mono text-[10px] sm:text-[11px] text-zinc-400">
                             {leader.attendance_count ?? 0} rounds
                           </span>
                         </div>
@@ -819,7 +819,7 @@ export function ContestsHubPage() {
                       <p className="text-base font-semibold text-white font-sans">
                         No Concluded Rounds Yet
                       </p>
-                      <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
+                      <p className="text-xs sm:text-sm font-mono text-zinc-400 max-w-sm">
                         Past weekly round challenges and editorial solutions will appear here for practice.
                       </p>
                     </div>
@@ -863,7 +863,7 @@ export function ContestsHubPage() {
                               <span className="truncate">{contest.title}</span>
                               <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
                             </Link>
-                            <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1 truncate">
+                            <p className="text-xs sm:text-sm font-mono text-zinc-400 mt-1 truncate">
                               {formattedDate} · {contest.registered_count} cadets
                             </p>
                           </div>
@@ -906,7 +906,7 @@ export function ContestsHubPage() {
                 {!member ? (
                   <div className="flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5">
                     <p className="text-base font-semibold text-white">Login Required</p>
-                    <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
+                    <p className="text-xs sm:text-sm font-mono text-zinc-400 max-w-sm">
                       Sign in to view your contest participation history and ratings.
                     </p>
                     <Button asChild size="default" className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs sm:text-sm rounded-xl group/btn h-10 px-5">
@@ -919,7 +919,7 @@ export function ContestsHubPage() {
                 ) : paginatedMyParticipations.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5">
                     <p className="text-base font-semibold text-white">No Participations Yet</p>
-                    <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
+                    <p className="text-xs sm:text-sm font-mono text-zinc-400 max-w-sm">
                       You haven't participated in any contests yet. Register for Weekly Contest 1 above!
                     </p>
                   </div>
@@ -937,7 +937,7 @@ export function ContestsHubPage() {
                           <span className="truncate">{record.contest_title}</span>
                           <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
                         </Link>
-                        <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1">
+                        <p className="text-xs sm:text-sm font-mono text-zinc-400 mt-1">
                           Score: {record.score ?? 0} pts · Rank: #{record.rank ?? "--"}
                         </p>
                       </div>
