@@ -18,6 +18,7 @@ import {
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { useAppDispatch } from "@/store/hooks";
+import { prefetchProfileRoute } from "@/AppRoutes";
 
 function Spark({ data }: { data: number[] }) {
   if (!data || data.length < 2) return <span className="inline-block h-1.5 w-12 rounded bg-zinc-900" aria-hidden="true" />;
@@ -182,6 +183,8 @@ export function LeaderboardPage() {
                         >
                           <Link
                             to={`/profile/${x.handle}`}
+                            onMouseEnter={() => prefetchProfileRoute(x.handle)}
+                            onTouchStart={() => prefetchProfileRoute(x.handle)}
                             className="flex items-center gap-3 cursor-pointer group/row min-w-0"
                           >
                             {/* Avatar always visible */}

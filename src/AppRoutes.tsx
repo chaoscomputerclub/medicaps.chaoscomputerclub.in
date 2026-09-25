@@ -1,5 +1,7 @@
 import React, { Suspense } from "react";
 import { Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
+import { getPublicPortalData, getMemberProfileData, getUniversityLeaderboardData, getStudentProfileData } from "@/organization/data/portal.functions";
+import { contestApi } from "@/features/contest/api";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 import {
   DashboardSkeleton,
@@ -56,12 +58,78 @@ export const routePreloaders: Record<string, () => Promise<any>> = {
   "/settings": () => SettingsPage.preload(),
 };
 
+/**
+ * SWR data prefetchers per route — fires before navigation so pages render
+ * instantly from cache instead of showing a skeleton on first visit.
+ */
+const routeDataPrefetchers: Record<string, () => void> = {
+  "/contests": () => {
+    getPublicPortalData().catch(() => {});
+  },
+  "/": () => {
+    getMemberProfileData().catch(() => {});
+    getPublicPortalData().catch(() => {});
+  },
+  "/leaderboard": () => {
+    getUniversityLeaderboardData().catch(() => {});
+  },
+  "/my-contests": () => {
+    contestApi.list().catch(() => {});
+    getMemberProfileData().catch(() => {});
+  },
+  "/profile": () => {
+    getMemberProfileData().catch(() => {});
+  },
+};
+
+/**
+ * Prefetch a route's JS chunk AND SWR data simultaneously.
+ * Call on mouseenter / touchstart / focus — before the actual click.
+ * Uses in-flight deduplication so concurrent calls are free.
+ */
 export function prefetchRoute(path: string): void {
   const clean = path.replace(/\/+$/, "") || "/";
+
+  // 1. Preload the lazy JS chunk
   const loader = routePreloaders[clean];
-  if (loader) {
-    loader().catch(() => {});
+  if (loader) loader().catch(() => {});
+
+  // 2. Prime the SWR data cache for the target page
+  const dataPrefetcher = routeDataPrefetchers[clean];
+  if (dataPrefetcher) dataPrefetcher();
+}
+
+/**
+ * Prefetch data for a dynamic contest page (overview, lobby, results).
+ * Fire on hover/touch of any contest card or link before the user clicks.
+ */
+export function prefetchContestRoute(slug: string, variant: "overview" | "lobby" | "results" = "overview"): void {
+  if (!slug) return;
+
+  // Preload the right JS chunk
+  if (variant === "lobby") {
+    ContestLobbyPage.preload().catch(() => {});
+  } else if (variant === "results") {
+    ContestResultsPage.preload().catch(() => {});
+  } else {
+    ContestOverviewPage.preload().catch(() => {});
   }
+
+  // Prime all data the contest page needs
+  contestApi.detail(slug).catch(() => {});
+  contestApi.registrationStatus(slug).catch(() => {});
+  if (variant === "results") {
+    contestApi.finalStandings(slug).catch(() => {});
+  }
+}
+
+/**
+ * Prefetch a student profile by handle — fires before the user lands on /profile/:handle.
+ */
+export function prefetchProfileRoute(handle: string): void {
+  if (!handle) return;
+  ProfilePage.preload().catch(() => {});
+  getStudentProfileData(handle).catch(() => {});
 }
 
 function ProfileHandleRedirect() {

@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { getStudentProfileData } from "@/organization/data/portal.functions";
 import { swrFetch } from "@/lib/cache/swrCache";
 import { toast } from "sonner";
+import { prefetchProfileRoute } from "@/AppRoutes";
 
 export interface CadetProfileSummary {
   id?: string | undefined;
@@ -364,6 +365,8 @@ export function CadetProfileHoverCard({
 
           <Link
             to={`/profile/${cleanHandle}`}
+            onMouseEnter={() => prefetchProfileRoute(cleanHandle)}
+            onTouchStart={() => prefetchProfileRoute(cleanHandle)}
             onClick={handleProfileNavigation}
             className={`flex items-center justify-center gap-1.5 py-2 rounded-lg font-mono text-xs font-semibold border border-white/10 text-zinc-300 hover:text-white hover:border-white/25 hover:bg-white/[0.04] transition-all duration-150 ${
               isYou ? "flex-1" : "px-4"
