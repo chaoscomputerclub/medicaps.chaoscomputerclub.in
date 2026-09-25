@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -20,47 +20,20 @@ import { globalSwrStore } from "@/lib/cache/swrCache";
 import {
   formatWhen,
 } from "@/features/contest/lifecycle";
-
-function useCountdown(targetIsoDate: string | null | undefined, onExpire?: () => void) {
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number; hours: number; minutes: number; seconds: number;
-    isExpired: boolean; totalSeconds: number;
-  }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, totalSeconds: 0 });
-
-  useEffect(() => {
-    if (!targetIsoDate) return;
-    let fired = false;
-    const calc = () => {
-      const target = new Date(targetIsoDate).getTime();
-      const now = Date.now();
-      const diff = Math.max(0, target - now);
-      const totalSeconds = Math.floor(diff / 1000);
-      const isExpired = totalSeconds <= 0;
-      setTimeLeft({
-        days: Math.floor(totalSeconds / 86400),
-        hours: Math.floor((totalSeconds % 86400) / 3600),
-        minutes: Math.floor((totalSeconds % 3600) / 60),
-        seconds: totalSeconds % 60,
-        isExpired,
-        totalSeconds,
-      });
-      if (isExpired && !fired && onExpire) {
-        fired = true;
-        onExpire();
-      }
-    };
-    calc();
-    const interval = setInterval(calc, 1000);
-    return () => clearInterval(interval);
-  }, [targetIsoDate, onExpire]);
-
-  return timeLeft;
-}
+import { useCountdown } from "@/hooks/useCountdown";
 
 export function ContestLobbyPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const handleBack = useCallback(() => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(`/contests/${contestSlug}`);
+    }
+  }, [navigate, contestSlug]);
 
   const { currentContest: contest, registration, isLoadingDetail } = useAppSelector(
     (state) => state.contest
@@ -68,11 +41,11 @@ export function ContestLobbyPage() {
 
   const [ack, setAck] = useState(false);
 
-  const refreshDetail = () => {
+  const refreshDetail = useCallback(() => {
     if (contestSlug) {
       dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
     }
-  };
+  }, [contestSlug, dispatch]);
 
   useEffect(() => {
     if (contestSlug) {
@@ -85,7 +58,7 @@ export function ContestLobbyPage() {
   const cachedContest = !contest && contestSlug
     ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
     : null;
-  const resolvedContest = contest ?? cachedContest;
+  const resolvedContest = (contest?.slug === contestSlug ? contest : null) ?? cachedContest;
 
   const cachedRegistration = !registration && contestSlug
     ? (globalSwrStore.get<any>(`contest:reg_status:${contestSlug}`)?.data ?? null)
@@ -118,7 +91,10 @@ export function ContestLobbyPage() {
     )
   );
   const notYetOpen = isUpcoming && !isDevBypass;
-  if (isLoadingDetail && !resolvedContest) {
+  // Show skeleton when: loading detail with no data, OR registration is still resolving
+  const isRegistrationLoading = isLoadingDetail && resolvedRegistration === null;
+
+  if ((isLoadingDetail && !resolvedContest) || isRegistrationLoading) {
     return <ContestLobbySkeleton />;
   }
 
@@ -149,12 +125,13 @@ export function ContestLobbyPage() {
   return (
     <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
       {/* Back / Close link */}
-      <Link
-        to={`/contests/${contestSlug}`}
+      <button
+        type="button"
+        onClick={handleBack}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start cursor-pointer"
       >
         <ArrowLeft className="size-3.5" /> Back to {resolvedContest.title}
-      </Link>
+      </button>
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (
@@ -193,7 +170,7 @@ export function ContestLobbyPage() {
             </Button>
           </div>
         </div>
-      ) : (!resolvedRegistration?.registered && !isDevBypass) ? (
+      ) : (!isRegistered && !isDevBypass) ? (
         /* Not Registered */
         <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
           <div className="space-y-3">
@@ -277,8 +254,12 @@ export function ContestLobbyPage() {
               </div>
             </div>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
-            <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
+          <Button
+            variant="outline"
+            className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            onClick={handleBack}
+          >
+            Back to Contest
           </Button>
         </div>
       ) : (isFinished && !isDevBypass) ? (
@@ -302,8 +283,12 @@ export function ContestLobbyPage() {
               The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
-            <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
+          <Button
+            variant="outline"
+            className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            onClick={handleBack}
+          >
+            Back to Contest
           </Button>
         </div>
       ) : (
@@ -405,8 +390,12 @@ export function ContestLobbyPage() {
                     <span>Resume Contest</span>
                   </Link>
                 </Button>
-                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent">
-                  <Link to={`/contests/${contestSlug}`}>Back to Overview</Link>
+                <Button
+                  variant="ghost"
+                  className="rounded-md font-mono text-xs text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
+                  onClick={handleBack}
+                >
+                  Back to Overview
                 </Button>
               </div>
             </div>
@@ -445,11 +434,11 @@ export function ContestLobbyPage() {
                   )}
                 </Button>
                 <Button
-                  asChild
                   variant="ghost"
                   className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
+                  onClick={handleBack}
                 >
-                  <Link to={`/contests/${contestSlug}`}>Not Now</Link>
+                  Not Now
                 </Button>
               </div>
 

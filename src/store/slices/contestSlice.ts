@@ -208,8 +208,13 @@ export const contestSlice = createSlice({
     });
     builder.addCase(fetchContestDetailThunk.fulfilled, (state, action) => {
       state.isLoadingDetail = false;
-      state.currentContest = action.payload.contest;
-      state.registration = action.payload.registration;
+      const contest = action.payload.contest ? { ...action.payload.contest } : null;
+      const registration = action.payload.registration;
+      if (registration && contest) {
+        contest.registered = registration.registered;
+      }
+      state.currentContest = contest;
+      state.registration = registration;
       state.problems = action.payload.problems;
     });
     builder.addCase(fetchContestDetailThunk.rejected, (state, action) => {
@@ -253,8 +258,8 @@ export const contestSlice = createSlice({
 
     // Unregister
     builder.addCase(unregisterContestThunk.fulfilled, (state, action) => {
-      state.registration = action.payload.registration;
       const slug = action.meta.arg;
+      state.registration = action.payload.registration ?? (state.registration ? { ...state.registration, registered: false } : null);
       if (state.currentContest && state.currentContest.slug === slug) {
         state.currentContest.registered = false;
         state.currentContest.registered_count = (action.payload.result as any)?.registered_count ?? Math.max(0, state.currentContest.registered_count - 1);

@@ -18,7 +18,7 @@ const buttonVariants = cva(
         lime:
           "bg-lime-400 text-black font-sans font-semibold uppercase text-xs tracking-wider border border-lime-400 hover:bg-lime-300 hover:border-lime-300 active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         destructive:
-          "bg-transparent text-red-400 font-sans font-semibold uppercase text-xs tracking-wider border border-red-500/40 hover:bg-red-500 hover:text-white hover:border-red-500 active:bg-red-600 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
+          "bg-transparent text-red-400 font-sans font-semibold uppercase text-xs tracking-wider border border-red-500/40 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500 active:bg-red-500/30 focus-visible:ring-red-500 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         outline:
           "bg-transparent text-white font-sans font-semibold uppercase text-xs tracking-wider border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors",
         secondary:

@@ -23,6 +23,7 @@ import { PageHeader } from "@/organization/components/ui";
 
 import { formatWhen } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
+import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import type { FinalStandingRow } from "@/features/contest/types";
 import { ContestFinalResultsSkeleton } from "@/organization/components/skeletons";
 
@@ -148,14 +149,25 @@ export function ContestFinalResultsPage() {
                       #{row.rank}
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col">
-                        <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
-                          {row.full_name}
-                        </Link>
-                        <span className="font-mono text-[10px] text-zinc-500">
-                          @{row.handle}
-                        </span>
-                      </div>
+                      <CadetProfileHoverCard
+                        handle={row.handle}
+                        profile={{
+                          handle: row.handle,
+                          full_name: row.full_name,
+                          department: row.department,
+                        }}
+                        side="top"
+                        align="start"
+                      >
+                        <div className="inline-flex flex-col cursor-pointer">
+                          <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
+                            {row.full_name}
+                          </Link>
+                          <span className="font-mono text-[10px] text-zinc-500">
+                            @{row.handle}
+                          </span>
+                        </div>
+                      </CadetProfileHoverCard>
                     </TableCell>
                     <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
                       {row.department}
