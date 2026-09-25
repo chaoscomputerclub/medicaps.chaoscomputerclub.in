@@ -37,6 +37,7 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
 import { resolveAvatarUrl } from "@/lib/utils";
 import LightRays from "./LightRays";
+import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/ui/animated-tabs";
 
 function useCountdown(
   targetIsoDate: string | null | undefined,
@@ -97,32 +98,8 @@ function useCountdown(
   return timeLeft;
 }
 
-function contestDuration(startsAt?: string, endsAt?: string): string {
-  if (!startsAt || !endsAt) return "90 Mins";
-  try {
-    const diffMs = new Date(endsAt).getTime() - new Date(startsAt).getTime();
-    if (isNaN(diffMs) || diffMs <= 0) return "90 Mins";
-    const totalMinutes = Math.round(diffMs / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    if (hours === 0) return `${mins} Mins`;
-    if (mins === 0) return `${hours} Hr${hours > 1 ? "s" : ""}`;
-    return `${hours}h ${mins}m`;
-  } catch {
-    return "90 Mins";
-  }
-}
-
-function ContestCountdownBadge({
-  targetIsoDate,
-  isLive,
-  onExpire,
-}: {
-  targetIsoDate?: string | null;
-  isLive?: boolean;
-  onExpire?: () => void;
-}) {
-  const cd = useCountdown(targetIsoDate, onExpire);
+function ContestCountdownBadge({ targetIsoDate, isLive }: { targetIsoDate?: string | null; isLive?: boolean }) {
+  const cd = useCountdown(targetIsoDate);
   if (isLive || cd.isExpired) {
     return (
       <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/15 px-3 py-1 text-xs font-mono font-semibold text-red-400 shadow-sm animate-pulse">
@@ -157,7 +134,7 @@ export function ContestsHubPage() {
   const [isLoadingParticipations, setIsLoadingParticipations] = useState(false);
   const [registeringSlug, setRegisteringSlug] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [leaderboardScope, setLeaderboardScope] = useState<"campus" | "global">("campus");
+
   const itemsPerPage = 8;
 
   const refreshHubData = useCallback(
@@ -477,53 +454,34 @@ export function ContestsHubPage() {
                           }}
                         />
 
-                        {/* Top Row: Type Pill & Live Countdown Badge */}
-                        <div className="relative z-10 flex items-center justify-between w-full">
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-lime-400">
-                            {isLive ? (
-                              <>
-                                <span className="size-2 rounded-full bg-red-500 animate-ping" />
-                                <span>LIVE NOW</span>
-                              </>
-                            ) : (
-                              <>
-                                <Flame className="size-3.5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-12" />
-                                <span>RATED ROUND</span>
-                              </>
-                            )}
-                          </span>
+                        {/* Top Row: Live Indicator & Countdown Badge */}
+                        <div className={`relative z-10 flex items-center ${isLive ? "justify-between" : "justify-end"} w-full`}>
+                          {isLive && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-red-400">
+                              <span className="size-2 rounded-full bg-red-500 animate-ping" />
+                              <span>LIVE NOW</span>
+                            </span>
+                          )}
 
-                          <ContestCountdownBadge
-                            targetIsoDate={contest.starts_at}
-                            isLive={isLive}
-                            onExpire={() => refreshHubData(true)}
-                          />
+                          <ContestCountdownBadge targetIsoDate={contest.starts_at} isLive={isLive} />
                         </div>
 
-                        {/* Center Visual Art / Typography - Larger Icon & Title */}
+                        {/* Center Typography */}
                         <div className="relative z-10 my-auto py-2">
-                          <div className="flex items-center gap-4">
-                            {/* Animated Larger Thumbnail Cube */}
-                            <div className="flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-2xl border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-lg sm:text-xl font-bold shadow-inner transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:border-lime-400/60 group-hover:shadow-[0_0_20px_rgba(203,255,0,0.25)]">
-                              #{contest.edition ?? idx + 1}
-                            </div>
-                            <div className="min-w-0">
-                              <Link
-                                to={`/contests/${contest.slug}`}
-                                className="text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-lime-400 transition-colors font-sans flex items-center gap-2 truncate"
-                              >
-                                <span className="truncate">{contest.title}</span>
-                                <ArrowRight className="size-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
-                              </Link>
-                              <p className="text-xs font-mono text-zinc-400 flex items-center gap-2 mt-1">
-                                <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
-                                <span>
-                                  {contest.registered_count} cadet{contest.registered_count === 1 ? "" : "s"} registered
-                                </span>
-                                <span className="text-zinc-600">·</span>
-                                <span className="text-lime-400/90 font-semibold">Medi-Caps Arena</span>
-                              </p>
-                            </div>
+                          <div className="min-w-0">
+                            <Link
+                              to={`/contests/${contest.slug}`}
+                              className="text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-lime-400 transition-colors font-sans flex items-center gap-2.5 truncate"
+                            >
+                              <span className="truncate">{contest.title}</span>
+                              <ArrowRight className="size-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
+                            </Link>
+                            <p className="text-xs font-mono text-zinc-400 flex items-center gap-2 mt-1.5">
+                              <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
+                              <span>{contest.registered_count} cadets registered</span>
+                              <span className="text-zinc-600">·</span>
+                              <span className="text-lime-400/90 font-semibold">Medi-Caps Arena</span>
+                            </p>
                           </div>
                         </div>
 
@@ -539,7 +497,7 @@ export function ContestsHubPage() {
                             <span className="truncate">{startsAtFormatted}</span>
                           </div>
                           <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mt-1">
-                            {contest.problem_count || 4} Algorithmic Challenges · {contestDuration(contest.starts_at, contest.ends_at)} · Live Gate
+                            4 Algorithmic Challenges · 90 Mins · Live Gate
                           </span>
                         </div>
 
@@ -620,43 +578,12 @@ export function ContestsHubPage() {
 
           {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
           <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
-            {/* Header: Segmented Pill Toggle */}
-            <div className="flex items-center justify-between border-b border-white/8 pb-4">
-              <div className="group flex items-center gap-2.5 cursor-default">
-                <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-                <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
-                  University Standings
-                </h3>
-              </div>
-
-              {/* Segmented Campus / Global Toggle */}
-              <div className="inline-flex rounded-xl bg-black border border-white/10 p-1 text-xs font-mono">
-                <button
-                  type="button"
-                  onClick={() => setLeaderboardScope("campus")}
-                  className={`rounded-lg px-3.5 py-1.5 transition-all ${
-                    leaderboardScope === "campus"
-                      ? "bg-lime-400 font-bold text-black shadow-sm"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  CAMPUS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLeaderboardScope("global");
-                    toast.info("Global Inter-University standings will open for national rounds.");
-                  }}
-                  className={`rounded-lg px-3.5 py-1.5 transition-all ${
-                    leaderboardScope === "global"
-                      ? "bg-lime-400 font-bold text-black shadow-sm"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  GLOBAL
-                </button>
-              </div>
+            {/* Header */}
+            <div className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
+              <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
+              <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+                University Standings
+              </h3>
             </div>
 
             {/* ─── CADET'S PERSONAL STANDING STRIP (LARGER BOX) ── */}
@@ -846,40 +773,22 @@ export function ContestsHubPage() {
 
           {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
           <div className="lg:col-span-7 rounded-3xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
-            {/* Header: Tabs & Search */}
+            {/* Header: Animated Tabs & Search */}
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => {
+                setSearchParams({ tab: v });
+                setCurrentPage(1);
+              }}
+              className="gap-0"
+            >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
-              {/* Segmented Tabs */}
-              <div className="inline-flex rounded-xl bg-black border border-white/10 p-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchParams({ tab: "past" });
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-mono font-semibold transition-all ${
-                    activeTab === "past"
-                      ? "bg-zinc-800 text-white shadow-sm border border-white/10"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  Past Contests
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchParams({ tab: "my" });
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-mono font-semibold transition-all ${
-                    activeTab === "my"
-                      ? "bg-zinc-800 text-white shadow-sm border border-white/10"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  My Contests{" "}
-                  {myParticipations.length > 0 && `(${myParticipations.length})`}
-                </button>
-              </div>
+              <TabsList>
+                <TabsTab value="past" id="tab-past-contests">Past Contests</TabsTab>
+                <TabsTab value="my" id="tab-my-contests">
+                  My Contests{myParticipations.length > 0 && ` (${myParticipations.length})`}
+                </TabsTab>
+              </TabsList>
 
               {/* Search Filter */}
               <div className="relative w-full sm:w-64 group">
@@ -897,8 +806,9 @@ export function ContestsHubPage() {
               </div>
             </div>
 
-            {/* Tab 1: Past Contests - Visibly Larger Item Boxes */}
-            {activeTab === "past" && (
+            <TabsPanels className="pt-4">
+              {/* Panel 1: Past Contests */}
+              <TabsPanel value="past">
               <div className="space-y-3.5">
                 {paginatedPastContests.length === 0 ? (
                   <div className="group flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5 hover:border-white/15 transition-all">
@@ -988,10 +898,10 @@ export function ContestsHubPage() {
                   })
                 )}
               </div>
-            )}
+              </TabsPanel>
 
-            {/* Tab 2: My Contests - Visibly Larger Item Boxes */}
-            {activeTab === "my" && (
+              {/* Panel 2: My Contests */}
+              <TabsPanel value="my">
               <div className="space-y-3.5">
                 {!member ? (
                   <div className="flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5">
@@ -1054,7 +964,9 @@ export function ContestsHubPage() {
                   ))
                 )}
               </div>
-            )}
+              </TabsPanel>
+            </TabsPanels>
+            </Tabs>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (

@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { cn, resolveAvatarUrl } from "@/lib/utils";
+import { Tabs, TabsList, TabsTab } from "@/components/ui/animated-tabs";
 
 export function SocialDrawer() {
   const dispatch = useAppDispatch();
@@ -117,56 +118,49 @@ export function SocialDrawer() {
             </div>
           </div>
 
-          {/* Segmented Tab Switcher */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 mt-4 bg-white/[0.03] border border-white/[0.08] rounded-xl">
-            <button
-              type="button"
-              onClick={() => dispatch(setDrawerType("followers"))}
-              className={cn(
-                "h-9 px-3 text-xs font-sans font-semibold uppercase rounded-lg flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98]",
-                drawerType === "followers"
-                  ? "bg-lime-400 text-black shadow-[0_0_18px_rgba(163,230,53,0.3)] font-bold"
-                  : "text-zinc-400 hover:text-white hover:bg-white/[0.05]",
-              )}
-            >
-              <Users size={12} />
-              <span>Followers</span>
-              <span
-                className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-md font-sans tabular-nums font-semibold transition-colors duration-150",
-                  drawerType === "followers"
-                    ? "bg-black/20 text-black font-bold"
-                    : "bg-white/[0.05] text-zinc-400 border border-white/[0.08]",
-                )}
+          {/* Animated Tab Switcher */}
+          <Tabs
+            value={drawerType}
+            onValueChange={(v) => dispatch(setDrawerType(v as "followers" | "following"))}
+            className="mt-4 gap-0"
+          >
+            <TabsList className="w-full grid grid-cols-2 p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl gap-1">
+              <TabsTab
+                value="followers"
+                className="w-full py-2 text-xs"
               >
-                {displayedFollowersTabCount}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => dispatch(setDrawerType("following"))}
-              className={cn(
-                "h-9 px-3 text-xs font-sans font-semibold uppercase rounded-lg flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98]",
-                drawerType === "following"
-                  ? "bg-lime-400 text-black shadow-[0_0_18px_rgba(163,230,53,0.3)] font-bold"
-                  : "text-zinc-400 hover:text-white hover:bg-white/[0.05]",
-              )}
-            >
-              <UserCheck size={12} />
-              <span>Following</span>
-              <span
-                className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-md font-sans tabular-nums font-semibold transition-colors duration-150",
-                  drawerType === "following"
-                    ? "bg-black/20 text-black font-bold"
-                    : "bg-white/[0.05] text-zinc-400 border border-white/[0.08]",
-                )}
+                <Users size={13} className="shrink-0" />
+                <span>Followers</span>
+                <span
+                  className={cn(
+                    "text-[10px] min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-md font-sans tabular-nums font-bold transition-colors duration-150 shrink-0",
+                    drawerType === "followers"
+                      ? "bg-black/20 text-black font-bold"
+                      : "bg-white/[0.06] text-zinc-400 border border-white/[0.08]",
+                  )}
+                >
+                  {displayedFollowersTabCount}
+                </span>
+              </TabsTab>
+              <TabsTab
+                value="following"
+                className="w-full py-2 text-xs"
               >
-                {displayedFollowingTabCount}
-              </span>
-            </button>
-          </div>
+                <UserCheck size={13} className="shrink-0" />
+                <span>Following</span>
+                <span
+                  className={cn(
+                    "text-[10px] min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-md font-sans tabular-nums font-bold transition-colors duration-150 shrink-0",
+                    drawerType === "following"
+                      ? "bg-black/20 text-black font-bold"
+                      : "bg-white/[0.06] text-zinc-400 border border-white/[0.08]",
+                  )}
+                >
+                  {displayedFollowingTabCount}
+                </span>
+              </TabsTab>
+            </TabsList>
+          </Tabs>
 
           {/* Filter Input */}
           <div className="relative mt-3">
@@ -295,10 +289,7 @@ export function SocialDrawer() {
                         {student.full_name || `@${student.handle}`}
                       </p>
 
-                      <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
-                        <span className="text-[9px] font-sans uppercase bg-white/[0.03] border border-white/[0.08] text-zinc-400 px-1.5 py-0.5 rounded-md">
-                          {student.department} · {student.batch}
-                        </span>
+                      <div className="flex items-center gap-1.5 pt-0.5">
                         <TierBadge>{student.tier}</TierBadge>
                       </div>
                     </div>
@@ -371,7 +362,7 @@ export function SocialDrawer() {
         {/* Footer */}
         <footer className="p-3.5 border-t border-white/[0.08] bg-black/90 backdrop-blur-md text-center">
           <p className="text-[9px] text-zinc-500 font-sans uppercase tracking-widest">
-            AUTHENTICATED CAMPUS SOCIAL GRAPH • MEDI-CAPS CHAPTER
+            AUTHENTICATED CAMPUS SOCIAL GRAPH · MEDI-CAPS CHAPTER
           </p>
         </footer>
       </SheetContent>
