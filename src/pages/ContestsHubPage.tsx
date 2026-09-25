@@ -435,8 +435,6 @@ export function ContestsHubPage() {
                       key={contest.slug}
                       data-testid="hero-contest-card"
                       onClick={() => navigate(`/contests/${contest.slug}`)}
-                      onMouseEnter={() => prefetchContestRoute(contest.slug)}
-                      onTouchStart={() => prefetchContestRoute(contest.slug)}
                       className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
@@ -897,8 +895,6 @@ export function ContestsHubPage() {
                     return (
                       <div
                         key={contest.slug}
-                        onMouseEnter={() => prefetchContestRoute(contest.slug, "results")}
-                        onTouchStart={() => prefetchContestRoute(contest.slug, "results")}
                         className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
                       >
                         {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
@@ -979,8 +975,6 @@ export function ContestsHubPage() {
                   paginatedMyParticipations.map((record) => (
                     <div
                       key={record.contest_slug}
-                      onMouseEnter={() => prefetchContestRoute(record.contest_slug)}
-                      onTouchStart={() => prefetchContestRoute(record.contest_slug)}
                       className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
                     >
                       <div className="min-w-0">

@@ -183,8 +183,6 @@ export function LeaderboardPage() {
                         >
                           <Link
                             to={`/profile/${x.handle}`}
-                            onMouseEnter={() => prefetchProfileRoute(x.handle)}
-                            onTouchStart={() => prefetchProfileRoute(x.handle)}
                             className="flex items-center gap-3 cursor-pointer group/row min-w-0"
                           >
                             {/* Avatar always visible */}

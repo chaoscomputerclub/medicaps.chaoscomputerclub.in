@@ -1,8 +1,9 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { getPublicPortalData, getMemberProfileData, getUniversityLeaderboardData, getStudentProfileData } from "@/organization/data/portal.functions";
 import { contestApi } from "@/features/contest/api";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
+import { usePrefetchOnIntent } from "@/hooks/usePrefetchOnIntent";
 import {
   DashboardSkeleton,
   ContestsHubSkeleton,
@@ -154,6 +155,9 @@ function PortalLegacyRedirect() {
 }
 
 export function AppRoutes() {
+  // Mount the global delegated prefetch listener once — covers every <a> in the app
+  usePrefetchOnIntent();
+
   return (
     <Routes>
       {/* Guest-only Authentication Route — immediate, zero secondary network waterfall */}
