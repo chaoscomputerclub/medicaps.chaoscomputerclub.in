@@ -147,7 +147,10 @@ export const contestApi = {
     return swrFetch(
       `contest:detail:${slug}`,
       async () => {
-        const raw = await request<Record<string, any>>(`/contests/${encodeURIComponent(slug)}`);
+        const raw = await request<Record<string, any>>(
+          `/contests/${encodeURIComponent(slug)}`,
+          force ? { cache: "no-store" } : undefined
+        );
         return toContestSummary(raw);
       },
       {
@@ -164,7 +167,8 @@ export const contestApi = {
       `contest:problems:${slug}`,
       async () => {
         const raw = await request<Record<string, any>[]>(
-          `/contests/${encodeURIComponent(slug)}/problems`
+          `/contests/${encodeURIComponent(slug)}/problems`,
+          force ? { cache: "no-store" } : undefined
         );
         return raw.map((p, index) => ({
           problem_index: String(p["problem_index"] ?? index + 1),
@@ -190,7 +194,8 @@ export const contestApi = {
       async () => {
         try {
           const raw = await request<Record<string, any>>(
-            `/contests/${encodeURIComponent(slug)}/registration-status`
+            `/contests/${encodeURIComponent(slug)}/registration-status`,
+            force ? { cache: "no-store" } : undefined
           );
           return {
             registered: Boolean(raw["registered"]),
@@ -233,7 +238,9 @@ export const contestApi = {
     );
     // Invalidate caches across the platform
     invalidateSwrCache("contests:*");
-    invalidateSwrCache(`contest:*:${slug}*`);
+    invalidateSwrCache("contest:*");
+    invalidateSwrCache(`contest:detail:${slug}`);
+    invalidateSwrCache(`contest:reg_status:${slug}`);
     invalidateSwrCache("portal:*");
     invalidateSwrCache("passes:*");
     return res;
@@ -245,7 +252,9 @@ export const contestApi = {
       { method: "POST" }
     );
     invalidateSwrCache("contests:*");
-    invalidateSwrCache(`contest:*:${slug}*`);
+    invalidateSwrCache("contest:*");
+    invalidateSwrCache(`contest:detail:${slug}`);
+    invalidateSwrCache(`contest:reg_status:${slug}`);
     invalidateSwrCache("portal:*");
     invalidateSwrCache("passes:*");
     return res;

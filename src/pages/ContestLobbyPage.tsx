@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -18,25 +18,34 @@ import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
 import { globalSwrStore } from "@/lib/cache/swrCache";
 import {
-  ASSESSMENT_DURATION_MINUTES,
-  ASSESSMENT_WINDOW_HOURS,
-  FINALIST_SEATS,
-  assessmentClosesAt,
-  assessmentOpensAt,
-  contestPhase,
   formatWhen,
 } from "@/features/contest/lifecycle";
+import { useCountdown } from "@/hooks/useCountdown";
 
 export function ContestLobbyPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  const handleBack = useCallback(() => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(`/contests/${contestSlug}`);
+    }
+  }, [navigate, contestSlug]);
+
   const { currentContest: contest, registration, isLoadingDetail } = useAppSelector(
     (state) => state.contest
   );
 
   const [ack, setAck] = useState(false);
+
+  const refreshDetail = useCallback(() => {
+    if (contestSlug) {
+      dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+    }
+  }, [contestSlug, dispatch]);
 
   useEffect(() => {
     if (contestSlug) {
@@ -49,28 +58,26 @@ export function ContestLobbyPage() {
   const cachedContest = !contest && contestSlug
     ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
     : null;
-  const resolvedContest = contest ?? cachedContest;
+  const resolvedContest = (contest?.slug === contestSlug ? contest : null) ?? cachedContest;
 
   const cachedRegistration = !registration && contestSlug
     ? (globalSwrStore.get<any>(`contest:reg_status:${contestSlug}`)?.data ?? null)
     : null;
   const resolvedRegistration = registration ?? cachedRegistration;
 
-  if (isLoadingDetail && !resolvedContest) {
-    return <ContestLobbySkeleton />;
-  }
-
-  if (!resolvedContest) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
-        Contest not found.
-      </div>
-    );
-  }
-
   const isDevBypass = Boolean(resolvedRegistration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const durationMinutes = resolvedContest?.assessment?.duration_minutes || 90;
-  const phase = contestPhase(resolvedContest, resolvedRegistration ?? null);
+
+  const isLive = resolvedContest?.status === "live";
+  const isFinished = resolvedContest?.status === "finished";
+  const isUpcoming = resolvedContest?.status === "upcoming" || (!isLive && !isFinished);
+  const isRegistered = Boolean(resolvedRegistration?.registered || resolvedContest?.registered);
+
+  const countdown = useCountdown(
+    isUpcoming ? resolvedContest?.starts_at : resolvedContest?.ends_at,
+    refreshDetail
+  );
+
   const isInProgress = Boolean(
     resolvedRegistration?.can_resume_assessment ||
     (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
@@ -78,29 +85,49 @@ export function ContestLobbyPage() {
   const isAssessmentSubmitted = Boolean(
     !isDevBypass &&
     !isInProgress && (
-      phase === "assessment_submitted" ||
       resolvedRegistration?.assessment_taken ||
-      resolvedRegistration?.assessment_status === "submitted"
+      resolvedRegistration?.assessment_status === "submitted" ||
+      resolvedRegistration?.assessment_status === "completed"
     )
   );
-  const opensAt = assessmentOpensAt(resolvedContest);
-  const notYetOpen = phase === "registration_open" && !isDevBypass;
-  const canStart =
-    !isAssessmentSubmitted &&
-    (Boolean(resolvedRegistration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
+  const notYetOpen = isUpcoming && !isDevBypass;
+  // Show skeleton when: loading detail with no data, OR registration is still resolving
+  const isRegistrationLoading = isLoadingDetail && resolvedRegistration === null;
+
+  if ((isLoadingDetail && !resolvedContest) || isRegistrationLoading) {
+    return <ContestLobbySkeleton />;
+  }
+
+  if (!resolvedContest) {
+    return (
+      <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
+        <Link
+          to="/contests"
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
+        >
+          <ArrowLeft className="size-3.5" /> Back to Contests Hub
+        </Link>
+        <div className="rounded-lg border border-white/8 bg-black p-6 sm:p-8 space-y-4">
+          <h1 className="text-xl font-semibold text-white tracking-tight">Contest Not Found</h1>
+          <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+            The requested contest tournament could not be found or has not been initialized yet.
+          </p>
+          <Button asChild variant="outline" className="rounded-md border-white/10 font-mono text-xs">
+            <Link to="/contests">Explore All Contests</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const canStart = !isAssessmentSubmitted && (isLive || isDevBypass || isInProgress);
 
   return (
     <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
-      {/* Back / Close button */}
+      {/* Back / Close link */}
       <button
         type="button"
-        onClick={() => {
-          if (window.opener) {
-            window.close();
-          } else {
-            navigate(`/contests/${contestSlug}`);
-          }
-        }}
+        onClick={handleBack}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start cursor-pointer"
       >
         <ArrowLeft className="size-3.5" /> Back to {resolvedContest.title}
@@ -135,22 +162,15 @@ export function ContestLobbyPage() {
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
             <Button
-              type="button"
+              asChild
               variant="outline"
-              onClick={() => {
-                if (window.opener) {
-                  window.close();
-                } else {
-                  navigate(`/contests/${contestSlug}`);
-                }
-              }}
               className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
             >
-              Contest Overview
+              <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>
         </div>
-      ) : (!resolvedRegistration?.registered && !isDevBypass) ? (
+      ) : (!isRegistered && !isDevBypass) ? (
         /* Not Registered */
         <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
           <div className="space-y-3">
@@ -196,6 +216,29 @@ export function ContestLobbyPage() {
               <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
               <span>Registered · Contest arena unlocks at start time</span>
             </div>
+
+            {/* Live Countdown in Waiting Room */}
+            <div className="rounded-md border border-white/8 bg-zinc-950 p-4 text-center space-y-2">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+                Arena Unlocks In
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { val: countdown.days, label: "Days" },
+                  { val: countdown.hours, label: "Hrs" },
+                  { val: countdown.minutes, label: "Min" },
+                  { val: countdown.seconds, label: "Sec" },
+                ].map(({ val, label }) => (
+                  <div key={label} className="flex flex-col items-center bg-white/5 p-2 rounded">
+                    <span className="font-mono text-xl font-bold tabular-nums text-white">
+                      {String(val).padStart(2, "0")}
+                    </span>
+                    <span className="text-[9px] font-mono uppercase text-zinc-500">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Starts at:</span>
@@ -211,11 +254,15 @@ export function ContestLobbyPage() {
               </div>
             </div>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
-            <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
+          <Button
+            variant="outline"
+            className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            onClick={handleBack}
+          >
+            Back to Contest
           </Button>
         </div>
-      ) : (phase === "assessment_closed" && !isDevBypass) ? (
+      ) : (isFinished && !isDevBypass) ? (
         /* Closed */
         <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8 font-mono">
           <div className="space-y-3">
@@ -236,8 +283,12 @@ export function ContestLobbyPage() {
               The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
-          <Button asChild variant="outline" className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
-            <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
+          <Button
+            variant="outline"
+            className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            onClick={handleBack}
+          >
+            Back to Contest
           </Button>
         </div>
       ) : (
@@ -339,8 +390,12 @@ export function ContestLobbyPage() {
                     <span>Resume Contest</span>
                   </Link>
                 </Button>
-                <Button asChild variant="ghost" className="rounded-md font-mono text-xs text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent">
-                  <Link to={`/contests/${contestSlug}`}>Back to Overview</Link>
+                <Button
+                  variant="ghost"
+                  className="rounded-md font-mono text-xs text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
+                  onClick={handleBack}
+                >
+                  Back to Overview
                 </Button>
               </div>
             </div>
@@ -379,16 +434,9 @@ export function ContestLobbyPage() {
                   )}
                 </Button>
                 <Button
-                  type="button"
                   variant="ghost"
-                  onClick={() => {
-                    if (window.opener) {
-                      window.close();
-                    } else {
-                      navigate(`/contests/${contestSlug}`);
-                    }
-                  }}
                   className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
+                  onClick={handleBack}
                 >
                   Not Now
                 </Button>

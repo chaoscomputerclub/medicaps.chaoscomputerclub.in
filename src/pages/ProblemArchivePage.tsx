@@ -62,11 +62,16 @@ export function ProblemArchivePage() {
                         {pIndex}
                       </span>
                       <div className="min-w-0 space-y-0.5">
-                        <small className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider block truncate">
+                        <Link
+                          to={`/contests/${c.slug}`}
+                          className="font-mono text-[9px] text-zinc-500 hover:text-zinc-300 uppercase tracking-wider block truncate transition-colors"
+                        >
                           {c.title}
-                        </small>
+                        </Link>
                         <h2 className="text-sm font-semibold text-white group-hover:text-lime-400 transition-colors truncate">
-                          {p.title}
+                          <Link to={`/problems/${c.slug}--${pSlug}`} className="hover:underline">
+                            {p.title}
+                          </Link>
                         </h2>
                         <p className="font-mono text-[11px] text-zinc-500">
                           {p.topic} · <span className="tabular-nums text-zinc-400">{p.solved_count ?? 0}</span> solves

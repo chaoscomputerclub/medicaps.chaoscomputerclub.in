@@ -62,7 +62,7 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
     });
   });
 
-  await page.route('**/auth/profile', async (route) => {
+  await page.route('**/auth/profile*', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -72,6 +72,14 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
         ratingHistory: [],
         recentBattles: [],
       }),
+    });
+  });
+
+  await page.route('**/contests/my/participated', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
     });
   });
 

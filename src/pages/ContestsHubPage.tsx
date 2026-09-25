@@ -36,7 +36,9 @@ import { ContestsHubSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
 import { resolveAvatarUrl } from "@/lib/utils";
+import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import LightRays from "./LightRays";
+import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/ui/animated-tabs";
 
 function useCountdown(
   targetIsoDate: string | null | undefined,
@@ -133,7 +135,7 @@ export function ContestsHubPage() {
   const [isLoadingParticipations, setIsLoadingParticipations] = useState(false);
   const [registeringSlug, setRegisteringSlug] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [leaderboardScope, setLeaderboardScope] = useState<"campus" | "global">("campus");
+
   const itemsPerPage = 8;
 
   const refreshHubData = useCallback(
@@ -453,47 +455,34 @@ export function ContestsHubPage() {
                           }}
                         />
 
-                        {/* Top Row: Type Pill & Live Countdown Badge */}
-                        <div className="relative z-10 flex items-center justify-between w-full">
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-lime-400">
-                            {isLive ? (
-                              <>
-                                <span className="size-2 rounded-full bg-red-500 animate-ping" />
-                                <span>LIVE NOW</span>
-                              </>
-                            ) : (
-                              <>
-                                <Flame className="size-3.5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-12" />
-                                <span>RATED ROUND</span>
-                              </>
-                            )}
-                          </span>
+                        {/* Top Row: Live Indicator & Countdown Badge */}
+                        <div className={`relative z-10 flex items-center ${isLive ? "justify-between" : "justify-end"} w-full`}>
+                          {isLive && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-red-400">
+                              <span className="size-2 rounded-full bg-red-500 animate-ping" />
+                              <span>LIVE NOW</span>
+                            </span>
+                          )}
 
                           <ContestCountdownBadge targetIsoDate={contest.starts_at} isLive={isLive} />
                         </div>
 
-                        {/* Center Visual Art / Typography - Larger Icon & Title */}
+                        {/* Center Typography */}
                         <div className="relative z-10 my-auto py-2">
-                          <div className="flex items-center gap-4">
-                            {/* Animated Larger Thumbnail Cube */}
-                            <div className="flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-2xl border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-lg sm:text-xl font-bold shadow-inner transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:border-lime-400/60 group-hover:shadow-[0_0_20px_rgba(203,255,0,0.25)]">
-                              #{contest.edition ?? idx + 1}
-                            </div>
-                            <div className="min-w-0">
-                              <Link
-                                to={`/contests/${contest.slug}`}
-                                className="text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-lime-400 transition-colors font-sans flex items-center gap-2 truncate"
-                              >
-                                <span className="truncate">{contest.title}</span>
-                                <ArrowRight className="size-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
-                              </Link>
-                              <p className="text-xs font-mono text-zinc-400 flex items-center gap-2 mt-1">
-                                <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
-                                <span>{contest.registered_count} cadets registered</span>
-                                <span className="text-zinc-600">·</span>
-                                <span className="text-lime-400/90 font-semibold">Medi-Caps Arena</span>
-                              </p>
-                            </div>
+                          <div className="min-w-0">
+                            <Link
+                              to={`/contests/${contest.slug}`}
+                              className="text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-lime-400 transition-colors font-sans flex items-center gap-2.5 truncate"
+                            >
+                              <span className="truncate">{contest.title}</span>
+                              <ArrowRight className="size-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
+                            </Link>
+                            <p className="text-xs font-mono text-zinc-400 flex items-center gap-2 mt-1.5">
+                              <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
+                              <span>{contest.registered_count} cadets registered</span>
+                              <span className="text-zinc-600">·</span>
+                              <span className="text-lime-400/90 font-semibold">Medi-Caps Arena</span>
+                            </p>
                           </div>
                         </div>
 
@@ -590,43 +579,12 @@ export function ContestsHubPage() {
 
           {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
           <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
-            {/* Header: Segmented Pill Toggle */}
-            <div className="flex items-center justify-between border-b border-white/8 pb-4">
-              <div className="group flex items-center gap-2.5 cursor-default">
-                <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-                <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
-                  University Standings
-                </h3>
-              </div>
-
-              {/* Segmented Campus / Global Toggle */}
-              <div className="inline-flex rounded-xl bg-black border border-white/10 p-1 text-xs font-mono">
-                <button
-                  type="button"
-                  onClick={() => setLeaderboardScope("campus")}
-                  className={`rounded-lg px-3.5 py-1.5 transition-all ${
-                    leaderboardScope === "campus"
-                      ? "bg-lime-400 font-bold text-black shadow-sm"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  CAMPUS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLeaderboardScope("global");
-                    toast.info("Global Inter-University standings will open for national rounds.");
-                  }}
-                  className={`rounded-lg px-3.5 py-1.5 transition-all ${
-                    leaderboardScope === "global"
-                      ? "bg-lime-400 font-bold text-black shadow-sm"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  GLOBAL
-                </button>
-              </div>
+            {/* Header */}
+            <div className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
+              <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
+              <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+                University Standings
+              </h3>
             </div>
 
             {/* ─── CADET'S PERSONAL STANDING STRIP (LARGER BOX) ── */}
@@ -645,107 +603,153 @@ export function ContestsHubPage() {
                     </p>
                   </div>
                 </div>
-                <Link
-                  to={myStanding.entry.handle ? `/u/${myStanding.entry.handle}` : "/profile"}
-                  className="inline-flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-lime-400 hover:text-lime-300 shrink-0"
+                <CadetProfileHoverCard
+                  handle={myStanding.entry.handle}
+                  profile={myStanding.entry}
+                  side="bottom"
+                  align="end"
                 >
-                  <span>Profile</span>
-                  <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </Link>
+                  <Link
+                    to={myStanding.entry.handle ? `/profile/${myStanding.entry.handle}` : "/profile"}
+                    className="inline-flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-lime-400 hover:text-lime-300 shrink-0"
+                  >
+                    <span>Profile</span>
+                    <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                </CadetProfileHoverCard>
               </div>
             )}
 
             {/* ─── TOP 3 PODIUM DISPLAY (FIXED OVERLAP & CIRCULAR AVATARS) ───────────────── */}
             <div className="grid grid-cols-3 gap-3 items-end pt-6 pb-4 border-b border-white/6">
               {/* Rank 2 (Left - Silver, Larger Box) */}
-              <Link
-                to={rank2 ? `/u/${rank2.handle}` : "#"}
-                className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between"
-              >
-                <div className="relative pt-4 pb-2 flex flex-col items-center">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 shadow-lg font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
-                    <Medal className="size-3 text-zinc-300 transition-transform duration-300 group-hover:rotate-12" />
-                    <span>#2</span>
-                  </div>
-                  <Avatar className="size-16 sm:size-18 rounded-full border-2 border-zinc-400/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 shadow-xl overflow-hidden">
-                    <AvatarImage src={resolveAvatarUrl(rank2?.avatar_url)} className="rounded-full object-cover" />
-                    <AvatarFallback className="rounded-full bg-zinc-900 text-zinc-300 font-mono text-sm font-bold">
-                      {rank2?.handle?.slice(0, 2).toUpperCase() || "02"}
-                    </AvatarFallback>
-                  </Avatar>
+              {rank2 ? (
+                <CadetProfileHoverCard
+                  handle={rank2.handle}
+                  profile={rank2}
+                  side="bottom"
+                  align="center"
+                >
+                  <Link
+                    to={`/profile/${rank2.handle}`}
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                  >
+                    <div className="relative pt-4 pb-2 flex flex-col items-center">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 shadow-lg font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                        <Medal className="size-3 text-zinc-300 transition-transform duration-300 group-hover:rotate-12" />
+                        <span>#2</span>
+                      </div>
+                      <Avatar className="size-16 sm:size-18 rounded-full border-2 border-zinc-400/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 shadow-xl overflow-hidden">
+                        <AvatarImage src={resolveAvatarUrl(rank2?.avatar_url)} className="rounded-full object-cover" />
+                        <AvatarFallback className="rounded-full bg-zinc-900 text-zinc-300 font-mono text-sm font-bold">
+                          {rank2?.handle?.slice(0, 2).toUpperCase() || "02"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="w-full px-1 pt-2 flex flex-col items-center">
+                      <p className="text-xs sm:text-sm font-bold text-white group-hover:text-zinc-200 transition-colors truncate font-sans max-w-full" title={rank2?.handle || "Cadet 2"}>
+                        {rank2?.handle || "Cadet 2"}
+                      </p>
+                      <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
+                        {rank2?.rating ?? 1200}
+                      </span>
+                      <span className="block font-mono text-[10px] text-zinc-500 mt-1">
+                        {rank2?.attendance_count ?? 0} rounds
+                      </span>
+                    </div>
+                  </Link>
+                </CadetProfileHoverCard>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-black/20 min-h-[225px] opacity-40">
+                  <span className="font-mono text-xs text-zinc-600">Rank #2</span>
                 </div>
-                <div className="w-full px-1 pt-2 flex flex-col items-center">
-                  <p className="text-xs sm:text-sm font-bold text-white group-hover:text-zinc-200 transition-colors truncate font-sans max-w-full" title={rank2?.handle || "Cadet 2"}>
-                    {rank2?.handle || "Cadet 2"}
-                  </p>
-                  <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
-                    {rank2?.rating ?? 1200}
-                  </span>
-                  <span className="block font-mono text-[10px] text-zinc-500 mt-1">
-                    {rank2?.attendance_count ?? 0} rounds
-                  </span>
-                </div>
-              </Link>
+              )}
 
               {/* Rank 1 (Center - Elevated Champion, Proper Z-Index & Breathing Room) */}
-              <Link
-                to={rank1 ? `/u/${rank1.handle}` : "#"}
-                className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-2xl border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between"
-              >
-                <div className="relative pt-6 pb-3 flex flex-col items-center">
-                  <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 drop-shadow-[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
-                  <Avatar className="size-18 sm:size-22 rounded-full border-2 border-lime-400 ring-4 ring-lime-400/25 shadow-[0_0_30px_rgba(203,255,0,0.35)] transition-transform duration-300 group-hover:scale-105 overflow-hidden">
-                    <AvatarImage src={resolveAvatarUrl(rank1?.avatar_url)} className="rounded-full object-cover" />
-                    <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-base font-bold">
-                      {rank1?.handle?.slice(0, 2).toUpperCase() || "01"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center px-2.5 py-0.5 rounded-full bg-lime-400 text-black font-mono text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider shadow-md transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
-                    #1 CHAMPION
-                  </div>
+              {rank1 ? (
+                <CadetProfileHoverCard
+                  handle={rank1.handle}
+                  profile={rank1}
+                  side="bottom"
+                  align="center"
+                >
+                  <Link
+                    to={`/profile/${rank1.handle}`}
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-2xl border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
+                  >
+                    <div className="relative pt-6 pb-3 flex flex-col items-center">
+                      <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 drop-shadow-[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
+                      <Avatar className="size-18 sm:size-22 rounded-full border-2 border-lime-400 ring-4 ring-lime-400/25 shadow-[0_0_30px_rgba(203,255,0,0.35)] transition-transform duration-300 group-hover:scale-105 overflow-hidden">
+                        <AvatarImage src={resolveAvatarUrl(rank1?.avatar_url)} className="rounded-full object-cover" />
+                        <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-base font-bold">
+                          {rank1?.handle?.slice(0, 2).toUpperCase() || "01"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center px-2.5 py-0.5 rounded-full bg-lime-400 text-black font-mono text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider shadow-md transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                        #1 CHAMPION
+                      </div>
+                    </div>
+                    <div className="w-full px-1 pt-4 flex flex-col items-center">
+                      <p className="text-xs sm:text-sm font-bold text-white group-hover:text-lime-400 transition-colors truncate font-sans max-w-full" title={rank1?.handle || "Cadet 1"}>
+                        {rank1?.handle || "Cadet 1"}
+                      </p>
+                      <span className="inline-block mt-1.5 rounded-full border border-lime-400/50 bg-lime-400/15 px-3 py-0.5 font-mono text-xs font-bold tabular-nums text-lime-400 shadow-sm group-hover:bg-lime-400/25 transition-colors">
+                        {rank1?.rating ?? 1200}
+                      </span>
+                      <span className="block font-mono text-[10px] text-lime-400/80 mt-1">
+                        {rank1?.attendance_count ?? 0} rounds
+                      </span>
+                    </div>
+                  </Link>
+                </CadetProfileHoverCard>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-black/20 min-h-[245px] opacity-40">
+                  <span className="font-mono text-xs text-zinc-600">Rank #1</span>
                 </div>
-                <div className="w-full px-1 pt-4 flex flex-col items-center">
-                  <p className="text-xs sm:text-sm font-bold text-white group-hover:text-lime-400 transition-colors truncate font-sans max-w-full" title={rank1?.handle || "Cadet 1"}>
-                    {rank1?.handle || "Cadet 1"}
-                  </p>
-                  <span className="inline-block mt-1.5 rounded-full border border-lime-400/50 bg-lime-400/15 px-3 py-0.5 font-mono text-xs font-bold tabular-nums text-lime-400 shadow-sm group-hover:bg-lime-400/25 transition-colors">
-                    {rank1?.rating ?? 1200}
-                  </span>
-                  <span className="block font-mono text-[10px] text-lime-400/80 mt-1">
-                    {rank1?.attendance_count ?? 0} rounds
-                  </span>
-                </div>
-              </Link>
+              )}
 
               {/* Rank 3 (Right - Bronze, Larger Box) */}
-              <Link
-                to={rank3 ? `/u/${rank3.handle}` : "#"}
-                className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between"
-              >
-                <div className="relative pt-4 pb-2 flex flex-col items-center">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 shadow-lg font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
-                    <Medal className="size-3 text-amber-500 transition-transform duration-300 group-hover:rotate-12" />
-                    <span>#3</span>
-                  </div>
-                  <Avatar className="size-14 sm:size-16 rounded-full border-2 border-amber-600/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 shadow-xl overflow-hidden">
-                    <AvatarImage src={resolveAvatarUrl(rank3?.avatar_url)} className="rounded-full object-cover" />
-                    <AvatarFallback className="rounded-full bg-zinc-900 text-amber-500 font-mono text-sm font-bold">
-                      {rank3?.handle?.slice(0, 2).toUpperCase() || "03"}
-                    </AvatarFallback>
-                  </Avatar>
+              {rank3 ? (
+                <CadetProfileHoverCard
+                  handle={rank3.handle}
+                  profile={rank3}
+                  side="bottom"
+                  align="center"
+                >
+                  <Link
+                    to={`/profile/${rank3.handle}`}
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                  >
+                    <div className="relative pt-4 pb-2 flex flex-col items-center">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 shadow-lg font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                        <Medal className="size-3 text-amber-500 transition-transform duration-300 group-hover:rotate-12" />
+                        <span>#3</span>
+                      </div>
+                      <Avatar className="size-14 sm:size-16 rounded-full border-2 border-amber-600/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 shadow-xl overflow-hidden">
+                        <AvatarImage src={resolveAvatarUrl(rank3?.avatar_url)} className="rounded-full object-cover" />
+                        <AvatarFallback className="rounded-full bg-zinc-900 text-amber-500 font-mono text-sm font-bold">
+                          {rank3?.handle?.slice(0, 2).toUpperCase() || "03"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="w-full px-1 pt-2 flex flex-col items-center">
+                      <p className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate font-sans max-w-full" title={rank3?.handle || "Cadet 3"}>
+                        {rank3?.handle || "Cadet 3"}
+                      </p>
+                      <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
+                        {rank3?.rating ?? 1200}
+                      </span>
+                      <span className="block font-mono text-[10px] text-zinc-500 mt-1">
+                        {rank3?.attendance_count ?? 0} rounds
+                      </span>
+                    </div>
+                  </Link>
+                </CadetProfileHoverCard>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-black/20 min-h-[225px] opacity-40">
+                  <span className="font-mono text-xs text-zinc-600">Rank #3</span>
                 </div>
-                <div className="w-full px-1 pt-2 flex flex-col items-center">
-                  <p className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate font-sans max-w-full" title={rank3?.handle || "Cadet 3"}>
-                    {rank3?.handle || "Cadet 3"}
-                  </p>
-                  <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
-                    {rank3?.rating ?? 1200}
-                  </span>
-                  <span className="block font-mono text-[10px] text-zinc-500 mt-1">
-                    {rank3?.attendance_count ?? 0} rounds
-                  </span>
-                </div>
-              </Link>
+              )}
             </div>
 
             {/* ─── RANKS 4 TO 10 LIST (LARGER ROWS & AVATARS) ───────────────── */}
@@ -758,45 +762,52 @@ export function ContestsHubPage() {
                 otherRankers.map((leader, idx) => {
                   const rankNum = idx + 4;
                   return (
-                    <Link
-                      to={`/u/${leader.handle}`}
+                    <CadetProfileHoverCard
                       key={leader.handle}
-                      className="group flex items-center justify-between py-3.5 px-4 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px]"
+                      handle={leader.handle}
+                      profile={leader}
+                      side="top"
+                      align="start"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
-                          {String(rankNum).padStart(2, "0")}
-                        </span>
-
-                        <Avatar className="size-10 sm:size-11 shrink-0 rounded-full border border-white/10 transition-transform duration-200 group-hover:scale-105 overflow-hidden">
-                          <AvatarImage src={resolveAvatarUrl(leader.avatar_url)} className="rounded-full object-cover" />
-                          <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-xs font-bold">
-                            {leader.handle.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="min-w-0">
-                          <p className="truncate text-xs sm:text-sm font-semibold text-white group-hover:text-lime-400 transition-colors font-sans">
-                            {leader.handle}
-                          </p>
-                          <p className="truncate font-mono text-[11px] sm:text-xs text-zinc-500 mt-0.5">
-                            {leader.department || "Medi-Caps"} · <span className="text-zinc-400">{leader.tier || "Active"}</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <span className="font-mono text-xs sm:text-sm font-bold tabular-nums text-white group-hover:text-lime-400 transition-colors">
-                            {leader.rating}
+                      <Link
+                        to={`/profile/${leader.handle}`}
+                        className="group flex items-center justify-between py-3.5 px-4 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px] cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
+                            {String(rankNum).padStart(2, "0")}
                           </span>
-                          <span className="block font-mono text-[10px] sm:text-[11px] text-zinc-500">
-                            {leader.attendance_count ?? 0} rounds
-                          </span>
+
+                          <Avatar className="size-10 sm:size-11 shrink-0 rounded-full border border-white/10 transition-transform duration-200 group-hover:scale-105 overflow-hidden">
+                            <AvatarImage src={resolveAvatarUrl(leader.avatar_url)} className="rounded-full object-cover" />
+                            <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-xs font-bold">
+                              {leader.handle.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+
+                          <div className="min-w-0">
+                            <p className="truncate text-xs sm:text-sm font-semibold text-white group-hover:text-lime-400 transition-colors font-sans">
+                              {leader.handle}
+                            </p>
+                            <p className="truncate font-mono text-[11px] sm:text-xs text-zinc-500 mt-0.5">
+                              {leader.department || "Medi-Caps"} · <span className="text-zinc-400">{leader.tier || "Active"}</span>
+                            </p>
+                          </div>
                         </div>
-                        <ChevronRight className="size-4 text-zinc-600 transition-transform duration-200 group-hover:text-lime-400 group-hover:translate-x-1" />
-                      </div>
-                    </Link>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <span className="font-mono text-xs sm:text-sm font-bold tabular-nums text-white group-hover:text-lime-400 transition-colors">
+                              {leader.rating}
+                            </span>
+                            <span className="block font-mono text-[10px] sm:text-[11px] text-zinc-500">
+                              {leader.attendance_count ?? 0} rounds
+                            </span>
+                          </div>
+                          <ChevronRight className="size-4 text-zinc-600 transition-transform duration-200 group-hover:text-lime-400 group-hover:translate-x-1" />
+                        </div>
+                      </Link>
+                    </CadetProfileHoverCard>
                   );
                 })
               )}
@@ -816,40 +827,22 @@ export function ContestsHubPage() {
 
           {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
           <div className="lg:col-span-7 rounded-3xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
-            {/* Header: Tabs & Search */}
+            {/* Header: Animated Tabs & Search */}
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => {
+                setSearchParams({ tab: v });
+                setCurrentPage(1);
+              }}
+              className="gap-0"
+            >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
-              {/* Segmented Tabs */}
-              <div className="inline-flex rounded-xl bg-black border border-white/10 p-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchParams({ tab: "past" });
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-mono font-semibold transition-all ${
-                    activeTab === "past"
-                      ? "bg-zinc-800 text-white shadow-sm border border-white/10"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  Past Contests
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchParams({ tab: "my" });
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-mono font-semibold transition-all ${
-                    activeTab === "my"
-                      ? "bg-zinc-800 text-white shadow-sm border border-white/10"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  My Contests{" "}
-                  {myParticipations.length > 0 && `(${myParticipations.length})`}
-                </button>
-              </div>
+              <TabsList>
+                <TabsTab value="past" id="tab-past-contests">Past Contests</TabsTab>
+                <TabsTab value="my" id="tab-my-contests">
+                  My Contests{myParticipations.length > 0 && ` (${myParticipations.length})`}
+                </TabsTab>
+              </TabsList>
 
               {/* Search Filter */}
               <div className="relative w-full sm:w-64 group">
@@ -867,8 +860,9 @@ export function ContestsHubPage() {
               </div>
             </div>
 
-            {/* Tab 1: Past Contests - Visibly Larger Item Boxes */}
-            {activeTab === "past" && (
+            <TabsPanels className="pt-4">
+              {/* Panel 1: Past Contests */}
+              <TabsPanel value="past">
               <div className="space-y-3.5">
                 {paginatedPastContests.length === 0 ? (
                   <div className="group flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5 hover:border-white/15 transition-all">
@@ -958,10 +952,10 @@ export function ContestsHubPage() {
                   })
                 )}
               </div>
-            )}
+              </TabsPanel>
 
-            {/* Tab 2: My Contests - Visibly Larger Item Boxes */}
-            {activeTab === "my" && (
+              {/* Panel 2: My Contests */}
+              <TabsPanel value="my">
               <div className="space-y-3.5">
                 {!member ? (
                   <div className="flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5">
@@ -1024,7 +1018,9 @@ export function ContestsHubPage() {
                   ))
                 )}
               </div>
-            )}
+              </TabsPanel>
+            </TabsPanels>
+            </Tabs>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (

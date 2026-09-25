@@ -1,27 +1,74 @@
+"use client";
+
 import * as React from "react";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
-
+import { motion, type Transition } from "motion/react";
 import { cn } from "@/lib/utils";
 
 const HoverCard = HoverCardPrimitive.Root;
-
 const HoverCardTrigger = HoverCardPrimitive.Trigger;
+
+/* ─── Animated HoverCardContent ──────────────────────────────── */
+// Key design decision: use `asChild` (Radix controls mounting/unmounting).
+// We get a smooth entrance animation via motion.div. No forceMount/AnimatePresence
+// so Radix's pointer-leave tracking works correctly — the card stays open
+// as long as the cursor is over trigger OR content (including the gap covered
+// by the invisible bridge Radix creates).
+interface HoverCardContentProps
+  extends Omit<
+    React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>,
+    "asChild"
+  > {
+  transition?: Transition;
+}
 
 const HoverCardContent = React.forwardRef<
   React.ElementRef<typeof HoverCardPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <HoverCardPrimitive.Content
-    ref={ref}
-    align={align}
-    sideOffset={sideOffset}
-    className={cn(
-      "z-50 w-64 rounded-none border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-(--radix-hover-card-content-transform-origin)",
+  HoverCardContentProps
+>(
+  (
+    {
       className,
-    )}
-    {...props}
-  />
-));
-HoverCardContent.displayName = HoverCardPrimitive.Content.displayName;
+      align = "center",
+      sideOffset = 6,
+      transition,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const spring: Transition = transition ?? {
+      type: "spring",
+      stiffness: 320,
+      damping: 28,
+    };
+
+    return (
+      <HoverCardPrimitive.Portal>
+        <HoverCardPrimitive.Content
+          ref={ref}
+          align={align}
+          sideOffset={sideOffset}
+          asChild
+          {...props}
+        >
+          <motion.div
+            className={cn(
+              "z-50 rounded-xl border border-white/10 bg-zinc-950 shadow-2xl shadow-black/70 outline-none",
+              "origin-[var(--radix-hover-card-content-transform-origin)]",
+              className
+            )}
+            initial={{ opacity: 0, scale: 0.95, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={spring}
+          >
+            {children}
+          </motion.div>
+        </HoverCardPrimitive.Content>
+      </HoverCardPrimitive.Portal>
+    );
+  }
+);
+HoverCardContent.displayName = "HoverCardContent";
 
 export { HoverCard, HoverCardTrigger, HoverCardContent };

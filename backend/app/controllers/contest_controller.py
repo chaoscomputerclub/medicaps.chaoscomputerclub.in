@@ -294,7 +294,11 @@ class ContestController:
         cached = await get_cache(cache_key)
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
-            response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+            if current_member:
+                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                response.headers["Pragma"] = "no-cache"
+            else:
+                response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
             return cached
 
         stmt = (
@@ -322,9 +326,20 @@ class ContestController:
 
         payload = OfflineContestResponse.model_validate(contest).model_dump()
         payload["registered"] = is_registered
+        if contest.status == "upcoming":
+            for p in payload.get("problems", []):
+                idx = p.get("problem_index", "")
+                p["title"] = f"Problem {idx} — sealed until contest starts"
+                p["topic"] = "—"
+                p["editorial_summary"] = None
+                p["first_ac_seconds"] = None
         await set_cache(cache_key, payload, ttl_seconds=60)
         response.headers["X-Cache"] = "MISS"
-        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+        if current_member:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+        else:
+            response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
         return payload
 
     @staticmethod
@@ -360,10 +375,17 @@ class ContestController:
         )
         records = res.scalars().all()
         payload = [ContestProblemResponse.model_validate(p).model_dump() for p in records]
+        if contest.status == "upcoming":
+            for p in payload:
+                idx = p.get("problem_index", "")
+                p["title"] = f"Problem {idx} — sealed until contest starts"
+                p["topic"] = "—"
+                p["editorial_summary"] = None
+                p["first_ac_seconds"] = None
         await set_cache(cache_key, payload, ttl_seconds=60)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
-        return records
+        return payload
 
     @staticmethod
     async def get_registration_status(
