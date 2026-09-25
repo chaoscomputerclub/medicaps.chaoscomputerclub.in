@@ -26,7 +26,7 @@ export const RatingChart = memo(function RatingChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 w-full flex items-center justify-center text-zinc-500 font-mono text-xs border border-white/8 rounded-lg bg-black">
+      <div className="h-64 w-full flex items-center justify-center text-zinc-400 font-mono text-xs border border-white/8 rounded-lg bg-black">
         No rating history recorded yet.
       </div>
     );

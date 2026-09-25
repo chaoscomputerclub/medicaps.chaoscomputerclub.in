@@ -21,7 +21,7 @@ export function ScoreboardMatrix({
 
   if (!entries || entries.length === 0) {
     return (
-      <div className="text-center py-10 text-[#666] font-mono text-xs border border-dashed border-[#222]">
+      <div className="text-center py-10 text-zinc-400 font-mono text-xs border border-dashed border-white/10">
         No standings recorded yet.
       </div>
     );

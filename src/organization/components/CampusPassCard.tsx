@@ -18,19 +18,19 @@ export function CampusPassCard({
   if (!pass || !pass.pass_code || pass.pass_code === "NONE") {
     return (
       <article className="campus-pass flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#222]">
-        <header className="w-full flex justify-between font-mono text-xs text-[#555]">
+        <header className="w-full flex justify-between font-mono text-xs text-zinc-400">
           <span>CCC / MEDI-CAPS</span>
           <strong>CAMPUS ACCESS PASS</strong>
         </header>
         <div className="my-auto py-10 flex flex-col items-center gap-2">
-          <ScanLine size={36} className="text-[#444]" />
+          <ScanLine size={36} className="text-zinc-500" />
           <h3 className="text-white font-mono text-sm font-bold mt-2">No Active Gate Pass</h3>
-          <p className="text-[#666] font-mono text-xs max-w-xs">
+          <p className="text-zinc-400 font-mono text-xs max-w-xs">
             Appear in an online screening round to qualify among the Top 30 for an offline physical
             lab seat pass.
           </p>
         </div>
-        <footer className="w-full text-center text-[#444] font-mono text-[10px]">
+        <footer className="w-full text-center text-zinc-400 font-mono text-[10px]">
           OFFLINE ADMISSION • SINGLE ENTRY
         </footer>
       </article>
