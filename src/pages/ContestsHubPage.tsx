@@ -496,7 +496,7 @@ export function ContestsHubPage() {
                             <Calendar className="size-4 text-zinc-500 shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:text-lime-400" />
                             <span className="truncate">{startsAtFormatted}</span>
                           </div>
-                          <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mt-1">
+                          <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 block mt-1">
                             4 Algorithmic Challenges · 90 Mins · Live Gate
                           </span>
                         </div>
@@ -564,9 +564,9 @@ export function ContestsHubPage() {
             )}
 
             {/* Sub-hero note with animated sparkles */}
-            <div className="group flex items-center justify-center gap-2 text-xs sm:text-sm font-mono text-zinc-500 mt-6 cursor-default">
+            <div className="group flex items-center justify-center gap-2 text-xs sm:text-sm font-mono text-zinc-400 mt-6 cursor-default">
               <Sparkles className="size-4 text-lime-400 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-125" />
-              <span className="group-hover:text-zinc-400 transition-colors">
+              <span className="group-hover:text-zinc-300 transition-colors">
                 Campus Competitive Programming Arena • Medi-Caps University Cadets
               </span>
             </div>

@@ -86,15 +86,15 @@ export function DashboardPage() {
       {/* Telemetry Bento Strip (4 Columns) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Campus Standings</span>
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Campus Standings</span>
           <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
             #{member?.university_rank || 1}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-600 mt-1">Medi-Caps University</span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Medi-Caps University</span>
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Global Rating</span>
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Global Rating</span>
           <strong className="block text-2xl font-mono font-bold text-lime-400 mt-1 tabular-nums">
             {member?.rating ?? 1200}
           </strong>
@@ -102,19 +102,19 @@ export function DashboardPage() {
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Contests Logged</span>
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Contests Logged</span>
           <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
             {history.length || (member as any)?.contests_count || 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-600 mt-1">Verified Tournaments</span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Verified Tournaments</span>
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Accepted Solutions</span>
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Accepted Solutions</span>
           <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
             {(member as any)?.solved_count || 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-600 mt-1">Problem Archive</span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Problem Archive</span>
         </div>
       </div>
 

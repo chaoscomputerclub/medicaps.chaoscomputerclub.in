@@ -100,7 +100,7 @@ export function LeaderboardPage() {
           </p>
         </div>
         <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-zinc-950 px-5 py-3.5 min-w-[160px] shrink-0">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Rating Season</span>
           <strong className="font-mono text-lg font-bold text-white mt-0.5">2025–2026</strong>
           <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount} ranked cadets</small>
         </div>
@@ -112,12 +112,12 @@ export function LeaderboardPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-white/8 hover:bg-transparent">
-                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold w-16">Rank</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold">Cadet</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden md:table-cell">Trend</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold">Rating</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden sm:table-cell">Peak</TableHead>
-                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden sm:table-cell">Attended</TableHead>
+                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold w-16">Rank</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold">Cadet</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold hidden md:table-cell">Trend</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold">Rating</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold hidden sm:table-cell">Peak</TableHead>
+                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold hidden sm:table-cell">Attended</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
