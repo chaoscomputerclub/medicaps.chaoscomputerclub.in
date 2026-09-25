@@ -13,6 +13,7 @@ concurrency:
 jobs:
   build-and-deploy:
     name: Build & Deploy to Production
+    if: github.repository == 'chaoscomputerclub/medicaps.chaoscomputerclub.in'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 

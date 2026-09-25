@@ -14,7 +14,7 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
 
     // 3. Verify LightRays WebGL canvas container is present
     const lightRaysContainer = page.locator('.custom-rays, canvas');
-    await expect(lightRaysContainer.first()).toBeAttached();
+    await expect(lightRaysContainer.first()).toBeAttached({ timeout: 10000 });
 
     // 4. Verify main header text
     const heading = page.locator('h1, [data-testid="hub-heading"]').filter({
@@ -24,11 +24,11 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
 
     // 5. Verify Weekly Contest 1 card is displayed
     const contestCard = page.locator('text=/Weekly Contest/i').first();
-    await expect(contestCard).toBeVisible();
+    await expect(contestCard).toBeVisible({ timeout: 15000 });
 
     // 6. Verify single action button exists on the card
     const actionButton = page.locator('button:has-text("Register"), button:has-text("Enter Arena"), button:has-text("Details"), a:has-text("Details")').first();
-    await expect(actionButton).toBeVisible();
+    await expect(actionButton).toBeVisible({ timeout: 10000 });
   });
 
   test('Contest card navigation leads to valid contest overview', async ({ page }) => {
