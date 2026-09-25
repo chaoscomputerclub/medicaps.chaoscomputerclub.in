@@ -97,8 +97,32 @@ function useCountdown(
   return timeLeft;
 }
 
-function ContestCountdownBadge({ targetIsoDate, isLive }: { targetIsoDate?: string | null; isLive?: boolean }) {
-  const cd = useCountdown(targetIsoDate);
+function contestDuration(startsAt?: string, endsAt?: string): string {
+  if (!startsAt || !endsAt) return "90 Mins";
+  try {
+    const diffMs = new Date(endsAt).getTime() - new Date(startsAt).getTime();
+    if (isNaN(diffMs) || diffMs <= 0) return "90 Mins";
+    const totalMinutes = Math.round(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (hours === 0) return `${mins} Mins`;
+    if (mins === 0) return `${hours} Hr${hours > 1 ? "s" : ""}`;
+    return `${hours}h ${mins}m`;
+  } catch {
+    return "90 Mins";
+  }
+}
+
+function ContestCountdownBadge({
+  targetIsoDate,
+  isLive,
+  onExpire,
+}: {
+  targetIsoDate?: string | null;
+  isLive?: boolean;
+  onExpire?: () => void;
+}) {
+  const cd = useCountdown(targetIsoDate, onExpire);
   if (isLive || cd.isExpired) {
     return (
       <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/15 px-3 py-1 text-xs font-mono font-semibold text-red-400 shadow-sm animate-pulse">
@@ -469,7 +493,11 @@ export function ContestsHubPage() {
                             )}
                           </span>
 
-                          <ContestCountdownBadge targetIsoDate={contest.starts_at} isLive={isLive} />
+                          <ContestCountdownBadge
+                            targetIsoDate={contest.starts_at}
+                            isLive={isLive}
+                            onExpire={() => refreshHubData(true)}
+                          />
                         </div>
 
                         {/* Center Visual Art / Typography - Larger Icon & Title */}
@@ -489,7 +517,9 @@ export function ContestsHubPage() {
                               </Link>
                               <p className="text-xs font-mono text-zinc-400 flex items-center gap-2 mt-1">
                                 <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
-                                <span>{contest.registered_count} cadets registered</span>
+                                <span>
+                                  {contest.registered_count} cadet{contest.registered_count === 1 ? "" : "s"} registered
+                                </span>
                                 <span className="text-zinc-600">·</span>
                                 <span className="text-lime-400/90 font-semibold">Medi-Caps Arena</span>
                               </p>
@@ -509,7 +539,7 @@ export function ContestsHubPage() {
                             <span className="truncate">{startsAtFormatted}</span>
                           </div>
                           <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mt-1">
-                            4 Algorithmic Challenges · 90 Mins · Live Gate
+                            {contest.problem_count || 4} Algorithmic Challenges · {contestDuration(contest.starts_at, contest.ends_at)} · Live Gate
                           </span>
                         </div>
 

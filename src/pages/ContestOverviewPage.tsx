@@ -26,7 +26,7 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { slugifyProblem } from "@/lib/utils";
 
-function useCountdown(targetIsoDate: string | null | undefined) {
+function useCountdown(targetIsoDate: string | null | undefined, onExpire?: () => void) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number; hours: number; minutes: number; seconds: number;
     isExpired: boolean; totalSeconds: number;
@@ -34,24 +34,30 @@ function useCountdown(targetIsoDate: string | null | undefined) {
 
   useEffect(() => {
     if (!targetIsoDate) return;
+    let fired = false;
     const calc = () => {
       const target = new Date(targetIsoDate).getTime();
       const now = Date.now();
       const diff = Math.max(0, target - now);
       const totalSeconds = Math.floor(diff / 1000);
+      const isExpired = totalSeconds <= 0;
       setTimeLeft({
         days: Math.floor(totalSeconds / 86400),
         hours: Math.floor((totalSeconds % 86400) / 3600),
         minutes: Math.floor((totalSeconds % 3600) / 60),
         seconds: totalSeconds % 60,
-        isExpired: totalSeconds <= 0,
+        isExpired,
         totalSeconds,
       });
+      if (isExpired && !fired && onExpire) {
+        fired = true;
+        onExpire();
+      }
     };
     calc();
     const interval = setInterval(calc, 1000);
     return () => clearInterval(interval);
-  }, [targetIsoDate]);
+  }, [targetIsoDate, onExpire]);
 
   return timeLeft;
 }
@@ -109,7 +115,10 @@ export function ContestOverviewPage() {
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
 
-  const countdown = useCountdown(isLive ? contest?.ends_at : contest?.starts_at);
+  const countdown = useCountdown(
+    isLive ? contest?.ends_at : contest?.starts_at,
+    () => refreshDetail(true)
+  );
   const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
 
   // Real-time status update: only stream when contest is actively live or within 5m waiting lobby
@@ -244,7 +253,7 @@ export function ContestOverviewPage() {
               </span>
               <span className="flex items-center gap-1.5 text-zinc-300">
                 <Users className="size-3.5 text-lime-400" />
-                <span className="tabular-nums">{contest.registered_count.toLocaleString()}</span>&nbsp;Registered
+                <span className="tabular-nums">{contest.registered_count.toLocaleString()}</span>&nbsp;Cadet{contest.registered_count === 1 ? "" : "s"} Registered
               </span>
             </div>
           </div>
@@ -288,14 +297,10 @@ export function ContestOverviewPage() {
                 size="lg"
                 className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
               >
-                <a
-                  href={`/contests/${contestSlug}/lobby`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <Link to={`/contests/${contestSlug}/lobby`}>
                   <Play className="size-4 fill-current" />
                   <span>Enter Contest Arena</span>
-                </a>
+                </Link>
               </Button>
             ) : isFinished ? (
               <Button

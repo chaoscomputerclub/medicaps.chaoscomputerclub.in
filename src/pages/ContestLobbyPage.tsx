@@ -18,14 +18,44 @@ import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
 import { globalSwrStore } from "@/lib/cache/swrCache";
 import {
-  ASSESSMENT_DURATION_MINUTES,
-  ASSESSMENT_WINDOW_HOURS,
-  FINALIST_SEATS,
-  assessmentClosesAt,
-  assessmentOpensAt,
-  contestPhase,
   formatWhen,
 } from "@/features/contest/lifecycle";
+
+function useCountdown(targetIsoDate: string | null | undefined, onExpire?: () => void) {
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number; hours: number; minutes: number; seconds: number;
+    isExpired: boolean; totalSeconds: number;
+  }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, totalSeconds: 0 });
+
+  useEffect(() => {
+    if (!targetIsoDate) return;
+    let fired = false;
+    const calc = () => {
+      const target = new Date(targetIsoDate).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, target - now);
+      const totalSeconds = Math.floor(diff / 1000);
+      const isExpired = totalSeconds <= 0;
+      setTimeLeft({
+        days: Math.floor(totalSeconds / 86400),
+        hours: Math.floor((totalSeconds % 86400) / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
+        isExpired,
+        totalSeconds,
+      });
+      if (isExpired && !fired && onExpire) {
+        fired = true;
+        onExpire();
+      }
+    };
+    calc();
+    const interval = setInterval(calc, 1000);
+    return () => clearInterval(interval);
+  }, [targetIsoDate, onExpire]);
+
+  return timeLeft;
+}
 
 export function ContestLobbyPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -37,6 +67,12 @@ export function ContestLobbyPage() {
   );
 
   const [ack, setAck] = useState(false);
+
+  const refreshDetail = () => {
+    if (contestSlug) {
+      dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+    }
+  };
 
   useEffect(() => {
     if (contestSlug) {
@@ -56,21 +92,19 @@ export function ContestLobbyPage() {
     : null;
   const resolvedRegistration = registration ?? cachedRegistration;
 
-  if (isLoadingDetail && !resolvedContest) {
-    return <ContestLobbySkeleton />;
-  }
-
-  if (!resolvedContest) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
-        Contest not found.
-      </div>
-    );
-  }
-
   const isDevBypass = Boolean(resolvedRegistration?.is_dev_bypass || contestSlug.startsWith("dev-"));
   const durationMinutes = resolvedContest?.assessment?.duration_minutes || 90;
-  const phase = contestPhase(resolvedContest, resolvedRegistration ?? null);
+
+  const isLive = resolvedContest?.status === "live";
+  const isFinished = resolvedContest?.status === "finished";
+  const isUpcoming = resolvedContest?.status === "upcoming" || (!isLive && !isFinished);
+  const isRegistered = Boolean(resolvedRegistration?.registered || resolvedContest?.registered);
+
+  const countdown = useCountdown(
+    isUpcoming ? resolvedContest?.starts_at : resolvedContest?.ends_at,
+    refreshDetail
+  );
+
   const isInProgress = Boolean(
     resolvedRegistration?.can_resume_assessment ||
     (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
@@ -78,16 +112,13 @@ export function ContestLobbyPage() {
   const isAssessmentSubmitted = Boolean(
     !isDevBypass &&
     !isInProgress && (
-      phase === "assessment_submitted" ||
       resolvedRegistration?.assessment_taken ||
-      resolvedRegistration?.assessment_status === "submitted"
+      resolvedRegistration?.assessment_status === "submitted" ||
+      resolvedRegistration?.assessment_status === "completed"
     )
   );
-  const opensAt = assessmentOpensAt(resolvedContest);
-  const notYetOpen = phase === "registration_open" && !isDevBypass;
-  const canStart =
-    !isAssessmentSubmitted &&
-    (Boolean(resolvedRegistration?.can_take_assessment) || isInProgress || phase === "assessment_open" || isDevBypass);
+  const notYetOpen = isUpcoming && !isDevBypass;
+  const canStart = !isAssessmentSubmitted && (isLive || isDevBypass || isInProgress);
 
   return (
     <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
@@ -196,6 +227,29 @@ export function ContestLobbyPage() {
               <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
               <span>Registered · Contest arena unlocks at start time</span>
             </div>
+
+            {/* Live Countdown in Waiting Room */}
+            <div className="rounded-md border border-white/8 bg-zinc-950 p-4 text-center space-y-2">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+                Arena Unlocks In
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { val: countdown.days, label: "Days" },
+                  { val: countdown.hours, label: "Hrs" },
+                  { val: countdown.minutes, label: "Min" },
+                  { val: countdown.seconds, label: "Sec" },
+                ].map(({ val, label }) => (
+                  <div key={label} className="flex flex-col items-center bg-white/5 p-2 rounded">
+                    <span className="font-mono text-xl font-bold tabular-nums text-white">
+                      {String(val).padStart(2, "0")}
+                    </span>
+                    <span className="text-[9px] font-mono uppercase text-zinc-500">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Starts at:</span>
@@ -215,7 +269,7 @@ export function ContestLobbyPage() {
             <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
           </Button>
         </div>
-      ) : (phase === "assessment_closed" && !isDevBypass) ? (
+      ) : (isFinished && !isDevBypass) ? (
         /* Closed */
         <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8 font-mono">
           <div className="space-y-3">
