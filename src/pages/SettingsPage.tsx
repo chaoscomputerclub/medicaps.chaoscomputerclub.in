@@ -556,17 +556,17 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "relative z-10 flex items-center gap-2.5 w-full px-3 py-2 text-xs font-sans rounded-md transition-colors cursor-pointer select-none",
+                  "relative z-10 flex items-center gap-2.5 w-full px-3 py-2 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer select-none",
                   active
                     ? item.danger
-                      ? "text-red-400 font-semibold"
-                      : "text-white font-semibold"
+                      ? "text-red-400"
+                      : "text-white"
                     : item.danger
                     ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/5"
                     : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                 )}
               >
-                <Icon size={13} className="shrink-0" />
+                <Icon size={14} className="shrink-0" />
                 <span>{item.label}</span>
                 {active && !item.danger && (
                   <span className="size-1.5 rounded-full bg-lime-400 ml-auto shadow-[0_0_6px_rgba(204,255,0,0.6)]" />
@@ -587,7 +587,7 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-sans whitespace-nowrap rounded-md border transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 text-sm font-sans font-semibold whitespace-nowrap rounded-md border transition-colors",
                   active
                     ? item.danger
                       ? "bg-red-500/10 text-red-400 border-red-500/30"

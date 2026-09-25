@@ -7,6 +7,7 @@ import { LeaderboardSkeleton, LeaderboardRowSkeleton } from "@/organization/comp
 import { useSwrData } from "@/lib/cache/swrCache";
 import { useChunkedList } from "@/hooks/useChunkedList";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableHeader,
@@ -256,16 +257,17 @@ export function LeaderboardPage() {
 
           <div className="flex items-center gap-3">
             {/* Page Size */}
-            <div className="flex items-center gap-1.5 font-mono text-xs text-zinc-400">
+            <div className="flex items-center gap-1.5 font-sans text-sm text-zinc-400">
               <span>Rows:</span>
               <div className="flex items-center border border-white/8 rounded-md overflow-hidden">
                 {[25, 50, 100].map((size) => (
                   <button
                     key={size}
+                    type="button"
                     onClick={() => handlePageSizeChange(size)}
-                    className={`px-2 py-0.5 font-mono text-xs transition-colors ${
+                    className={`px-2.5 py-1 font-sans text-sm font-semibold transition-colors cursor-pointer ${
                       pageSize === size
-                        ? "bg-lime-400 text-black font-semibold"
+                        ? "bg-lime-400 text-black"
                         : "text-zinc-400 hover:text-white bg-black"
                     }`}
                   >
@@ -277,27 +279,29 @@ export function LeaderboardPage() {
 
             {/* Prev / Next */}
             <div className="flex items-center gap-1">
-              <button
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={handlePrevPage}
                 disabled={pageIndex === 0}
                 aria-label="Previous page"
-                className="flex size-7 items-center justify-center rounded-md border border-white/8 bg-black text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:pointer-events-none disabled:opacity-30"
               >
                 <ChevronLeft className="size-3.5" />
-              </button>
+              </Button>
 
               <span className="px-2 font-mono text-xs tabular-nums text-zinc-400">
                 {pageIndex + 1} / {totalPages}
               </span>
 
-              <button
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={handleNextPage}
                 disabled={pageIndex >= totalPages - 1}
                 aria-label="Next page"
-                className="flex size-7 items-center justify-center rounded-md border border-white/8 bg-black text-zinc-400 transition-colors hover:border-white/20 hover:text-white disabled:pointer-events-none disabled:opacity-30"
               >
                 <ChevronRight className="size-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>

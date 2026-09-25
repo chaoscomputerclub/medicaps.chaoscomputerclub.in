@@ -383,7 +383,7 @@ export function ProfilePage() {
                   onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
                   disabled={isUploadingAvatar}
                   aria-label="Change photo"
-                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-mono text-[9px] font-semibold uppercase tracking-wider p-1 text-center"
+                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-sans text-xs font-semibold p-1 text-center"
                 >
                   {isUploadingAvatar ? (
                     <Loader2 className="size-4 animate-spin text-lime-400" />

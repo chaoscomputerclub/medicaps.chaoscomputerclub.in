@@ -993,21 +993,23 @@ export function ContestArenaPage() {
               <ChevronLeft className="size-3.5" />
             </Button>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setIsProblemListOpen(true)}
-              className="h-7 px-2.5 rounded-md border border-white/10 bg-zinc-950 text-xs font-mono font-medium text-zinc-300 hover:border-lime-400/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
               title="Open Problem List (⌥P)"
+              className="shrink-0"
             >
-              <ListOrdered className="size-3 text-lime-400" />
+              <ListOrdered className="size-3 text-lime-400 mr-1" />
               <span className="font-semibold text-lime-400">
                 Q{activeProblem?.problem_index || resolvedIndex + 1}
               </span>
-              <span className="text-zinc-500 hidden sm:inline text-[10px]">
+              <span className="text-zinc-500 hidden sm:inline text-xs ml-0.5">
                 / {problems.length}
               </span>
               <ChevronDown className="size-3 text-zinc-500 ml-0.5" />
-            </button>
+            </Button>
 
             <Button
               type="button"
@@ -1069,15 +1071,16 @@ export function ContestArenaPage() {
           {/* Layout Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
+              <Button
                 type="button"
-                className="flex items-center gap-1 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-black border border-white/10 hover:border-white/20 transition-colors cursor-pointer h-7"
+                variant="outline"
+                size="sm"
                 title="Adjust Workspace Layout"
               >
                 <Layout className="size-3.5 text-lime-400" />
                 <span className="hidden sm:inline">{isFocusMode ? "Focus" : "Default"}</span>
                 <ChevronDown className="size-3 text-zinc-500" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-zinc-950 border-white/10 text-white text-xs font-mono">
               <DropdownMenuItem
@@ -1152,9 +1155,9 @@ export function ContestArenaPage() {
               <button
                 type="button"
                 onClick={() => setActiveProblemTab("description")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-colors cursor-pointer border ${
+                className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer border ${
                   activeProblemTab === "description"
-                    ? "bg-zinc-900 text-white border-lime-400/40 font-semibold"
+                    ? "bg-zinc-900 text-white border-lime-400/40"
                     : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
                 }`}
               >
@@ -1164,9 +1167,9 @@ export function ContestArenaPage() {
               <button
                 type="button"
                 onClick={() => setActiveProblemTab("submissions")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-colors cursor-pointer border ${
+                className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer border ${
                   activeProblemTab === "submissions"
-                    ? "bg-zinc-900 text-white border-lime-400/40 font-semibold"
+                    ? "bg-zinc-900 text-white border-lime-400/40"
                     : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
                 }`}
               >
@@ -1515,9 +1518,9 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("testcases");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 text-sm font-sans font-semibold rounded-md cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-zinc-900 text-white font-semibold border border-white/10"
+                      ? "bg-zinc-900 text-white border border-white/10"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -1529,9 +1532,9 @@ export function ContestArenaPage() {
                     setActiveConsoleTab("output");
                     if (isDrawerCollapsed) setIsDrawerCollapsed(false);
                   }}
-                  className={`px-2.5 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1 text-sm font-sans font-semibold rounded-md cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-zinc-900 text-white font-semibold border border-white/10"
+                      ? "bg-zinc-900 text-white border border-white/10"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -1561,7 +1564,7 @@ export function ContestArenaPage() {
                 <button
                   type="button"
                   onClick={() => setIsDrawerCollapsed(true)}
-                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-900 cursor-pointer transition-colors"
+                  className="flex items-center gap-1 text-xs font-sans font-semibold text-zinc-500 hover:text-zinc-200 px-2 py-1 rounded-md hover:bg-zinc-900 cursor-pointer transition-colors"
                   title="Collapse Console"
                 >
                   <span className="hidden sm:inline">Collapse</span>
@@ -1582,9 +1585,9 @@ export function ContestArenaPage() {
                           key={i}
                           type="button"
                           onClick={() => setActiveTestcaseIndex(i)}
-                          className={`px-3 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
+                          className={`px-3 py-1 rounded-md text-sm font-sans font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
                             activeTestcaseIndex === i
-                              ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                              ? "bg-zinc-800 text-white border border-white/10"
                               : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
                           }`}
                         >
@@ -1594,9 +1597,9 @@ export function ContestArenaPage() {
                       <button
                         type="button"
                         onClick={() => setActiveTestcaseIndex(-1)}
-                        className={`px-3 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
+                        className={`px-3 py-1 rounded-md text-sm font-sans font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
                           activeTestcaseIndex === -1
-                            ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                            ? "bg-zinc-800 text-white border border-white/10"
                             : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
                         }`}
                       >
@@ -1728,9 +1731,9 @@ export function ContestArenaPage() {
                                   key={tc.testcase_id || idx}
                                   type="button"
                                   onClick={() => setActiveSubmitCaseIndex(idx)}
-                                  className={`px-2.5 py-1 rounded text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                  className={`px-2.5 py-1 rounded-md text-sm font-sans font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
                                     activeSubmitCaseIndex === idx
-                                      ? "bg-zinc-800 text-white font-semibold border border-white/10"
+                                      ? "bg-zinc-800 text-white border border-white/10"
                                       : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
                                   }`}
                                 >
@@ -2007,7 +2010,7 @@ export function ContestArenaPage() {
               <button
                 type="button"
                 onClick={() => setIsDrawerCollapsed((prev) => !prev)}
-                className="flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-950 border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 text-sm font-sans font-semibold text-zinc-400 hover:text-white px-2.5 py-1 rounded-md bg-zinc-950 border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
                 title={isDrawerCollapsed ? "Open Console Drawer" : "Close Console Drawer"}
               >
                 <Terminal className="size-3 text-lime-400" />
@@ -2042,13 +2045,13 @@ export function ContestArenaPage() {
           </DialogHeader>
 
           {/* Settings Tabs */}
-          <div className="flex items-center gap-1 border-b border-white/10 pb-2 pt-1 text-xs font-mono">
+          <div className="flex items-center gap-1 border-b border-white/10 pb-2 pt-1">
             <button
               type="button"
               onClick={() => setActiveSettingsTab("editor")}
-              className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
                 activeSettingsTab === "editor"
-                  ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                  ? "bg-zinc-900 text-white border border-lime-400/40"
                   : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
@@ -2057,9 +2060,9 @@ export function ContestArenaPage() {
             <button
               type="button"
               onClick={() => setActiveSettingsTab("shortcuts")}
-              className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
                 activeSettingsTab === "shortcuts"
-                  ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                  ? "bg-zinc-900 text-white border border-lime-400/40"
                   : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
@@ -2068,9 +2071,9 @@ export function ContestArenaPage() {
             <button
               type="button"
               onClick={() => setActiveSettingsTab("timer")}
-              className={`px-3 py-1 rounded transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
                 activeSettingsTab === "timer"
-                  ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                  ? "bg-zinc-900 text-white border border-lime-400/40"
                   : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
@@ -2098,9 +2101,9 @@ export function ContestArenaPage() {
                             localStorage.setItem("ccc_editor_font_size", String(size));
                           } catch {}
                         }}
-                        className={`size-7 rounded font-mono text-xs transition-colors cursor-pointer border ${
+                        className={`size-7 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorFontSize === size
-                            ? "bg-lime-400 text-black border-lime-400 font-bold"
+                            ? "bg-lime-400 text-black border-lime-400"
                             : "bg-black text-zinc-400 border-white/10 hover:border-lime-400 hover:text-white"
                         }`}
                       >
@@ -2125,9 +2128,9 @@ export function ContestArenaPage() {
                         localStorage.setItem("ccc_editor_wordwrap", next);
                       } catch {}
                     }}
-                    className={`px-3 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-sm font-sans font-semibold transition-colors cursor-pointer ${
                       editorWordWrap === "on"
-                        ? "bg-lime-400/20 text-lime-400 border border-lime-400/40 font-semibold"
+                        ? "bg-lime-400/20 text-lime-400 border border-lime-400/40"
                         : "bg-black text-zinc-500 border border-white/10"
                     }`}
                   >
@@ -2152,9 +2155,9 @@ export function ContestArenaPage() {
                             localStorage.setItem("ccc_editor_tab_size", String(spaces));
                           } catch {}
                         }}
-                        className={`px-3 py-1 rounded font-mono text-xs transition-colors cursor-pointer border ${
+                        className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorTabSize === spaces
-                            ? "bg-lime-400 text-black border-lime-400 font-bold"
+                            ? "bg-lime-400 text-black border-lime-400"
                             : "bg-black text-zinc-400 border-white/10 hover:border-lime-400 hover:text-white"
                         }`}
                       >
@@ -2212,7 +2215,7 @@ export function ContestArenaPage() {
             <Button
               type="button"
               onClick={() => setShowSettingsModal(false)}
-              className="w-full rounded-md bg-lime-400 hover:bg-lime-300 text-black font-mono text-xs font-bold cursor-pointer transition-colors"
+              className="w-full"
             >
               Done
             </Button>
@@ -2313,9 +2316,9 @@ export function ContestArenaPage() {
             <button
               type="button"
               onClick={() => setProblemListTab("problems")}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-all cursor-pointer ${
                 problemListTab === "problems"
-                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
+                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 shadow-[0_0_10px_rgba(204,255,0,0.15)]"
                   : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
@@ -2325,9 +2328,9 @@ export function ContestArenaPage() {
             <button
               type="button"
               onClick={() => setProblemListTab("ranking")}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-all cursor-pointer ${
                 problemListTab === "ranking"
-                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 font-semibold shadow-[0_0_10px_rgba(204,255,0,0.15)]"
+                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 shadow-[0_0_10px_rgba(204,255,0,0.15)]"
                   : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >

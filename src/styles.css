@@ -153,6 +153,12 @@ select,
   font-variant-numeric: tabular-nums;
 }
 
+button {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 /* Authentic VS Code Monospace Typography for Code, Editors, and Pre Blocks */
 /* Scoped to editor containers & problem statement — rest of UI uses sans-serif */
 .monaco-editor,

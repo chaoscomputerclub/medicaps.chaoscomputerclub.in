@@ -129,13 +129,16 @@ export function ContestLobbyPage() {
   return (
     <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
       {/* Back / Close link */}
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={handleBack}
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start cursor-pointer"
+        className="text-zinc-400 hover:text-white self-start -ml-3"
       >
-        <ArrowLeft className="size-3.5" /> Back to {resolvedContest.title}
-      </button>
+        <ArrowLeft className="size-3.5" />
+        <span>Back to {resolvedContest.title}</span>
+      </Button>
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (

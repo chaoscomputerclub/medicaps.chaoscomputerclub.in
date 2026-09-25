@@ -337,8 +337,10 @@ export function AssessmentWorkspacePage() {
           )}
 
           <div className="flex flex-col gap-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="default"
+              size="default"
               onClick={() => {
                 if (window.opener) {
                   window.close();
@@ -346,24 +348,28 @@ export function AssessmentWorkspacePage() {
                   navigate(`/contests/${contestSlug}`);
                 }
               }}
-              className="w-full py-2 px-4 rounded-md bg-transparent text-white border border-white/20 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer [&_svg]:transition-colors"
+              className="w-full"
             >
               Close Workspace
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="default"
               onClick={() => navigate(`/contests/${contestSlug}/results`)}
-              className="w-full py-2 px-4 rounded-md bg-black border border-white/10 text-white font-semibold font-mono text-xs hover:bg-zinc-950 transition-colors cursor-pointer"
+              className="w-full"
             >
               View Standings
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="default"
               onClick={() => navigate(`/contests/${contestSlug}`)}
-              className="w-full py-2 px-4 rounded-md border border-white/6 text-zinc-500 font-mono text-xs hover:text-white transition-colors cursor-pointer"
+              className="w-full"
             >
               Return to Contest Details
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -496,9 +502,9 @@ export function AssessmentWorkspacePage() {
                 key={prob.id}
                 type="button"
                 onClick={() => dispatch(setActiveProblemIndex(idx))}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-zinc-900 text-white border border-lime-400/40 font-semibold"
+                    ? "bg-zinc-900 text-white border border-lime-400/40"
                     : "text-zinc-400 hover:text-white hover:bg-zinc-950 border border-transparent"
                 }`}
               >
@@ -720,7 +726,7 @@ export function AssessmentWorkspacePage() {
                         <button
                           type="button"
                           onClick={() => handleCopy(inputVal, idx)}
-                          className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer font-mono"
+                          className="flex items-center gap-1 text-xs font-sans font-semibold text-zinc-400 hover:text-white cursor-pointer"
                         >
                           {copiedIndex === idx ? <Check size={11} className="text-lime-400" /> : <Copy size={11} />}
                           <span>{copiedIndex === idx ? "Copied" : "Copy Input"}</span>
@@ -782,16 +788,19 @@ export function AssessmentWorkspacePage() {
                 }}
               />
             </Suspense>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => {
                 if (!activeProblem) return;
                 setShowResetModal(true);
               }}
-              className="absolute bottom-3 right-4 flex items-center gap-1 px-2 py-1 rounded bg-black border border-white/10 text-zinc-400 hover:text-white text-[10px] font-mono transition-colors z-10 cursor-pointer"
+              className="absolute bottom-3 right-4 z-10"
             >
-              <RotateCcw size={10} /> Reset Starter
-            </button>
+              <RotateCcw className="size-3.5 mr-1" />
+              <span>Reset Starter</span>
+            </Button>
           </div>
 
           {/* Output / Execution Drawer */}
@@ -802,9 +811,9 @@ export function AssessmentWorkspacePage() {
                 <button
                   type="button"
                   onClick={() => dispatch(setActiveConsoleTab("testcases"))}
-                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 text-sm font-sans font-semibold rounded-md cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-zinc-900 text-white font-semibold"
+                      ? "bg-zinc-900 text-white"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -813,9 +822,9 @@ export function AssessmentWorkspacePage() {
                 <button
                   type="button"
                   onClick={() => dispatch(setActiveConsoleTab("output"))}
-                  className={`px-2 py-0.5 text-xs font-mono rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1 text-sm font-sans font-semibold rounded-md cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-zinc-900 text-white font-semibold"
+                      ? "bg-zinc-900 text-white"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >

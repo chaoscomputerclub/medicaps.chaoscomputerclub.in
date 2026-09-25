@@ -175,30 +175,22 @@ export function ContestResultsPage() {
           <div className="flex flex-wrap items-center gap-3">
             {departments.length > 1 && (
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant={deptFilter === "all" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setDeptFilter("all")}
-                  className={cn(
-                    "rounded-md px-3 py-1 font-mono text-xs uppercase tracking-wider transition-colors",
-                    deptFilter === "all"
-                      ? "bg-lime-400 text-black font-semibold"
-                      : "border border-white/8 bg-black text-zinc-400 hover:text-white"
-                  )}
                 >
                   All
-                </button>
+                </Button>
                 {departments.map((dept) => (
-                  <button
+                  <Button
                     key={dept}
+                    variant={deptFilter === dept ? "default" : "outline"}
+                    size="sm"
                     onClick={() => setDeptFilter(dept)}
-                    className={cn(
-                      "rounded-md px-3 py-1 font-mono text-xs uppercase tracking-wider transition-colors",
-                      deptFilter === dept
-                        ? "bg-lime-400 text-black font-semibold"
-                        : "border border-white/8 bg-black text-zinc-400 hover:text-white"
-                    )}
                   >
                     {dept}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}

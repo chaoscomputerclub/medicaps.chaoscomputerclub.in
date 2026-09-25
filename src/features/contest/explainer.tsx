@@ -76,8 +76,8 @@ export function FirstContestExplainer() {
               key={s.title}
               className={
                 index <= step
-                  ? "h-1 flex-1 rounded-none bg-lime-400"
-                  : "h-1 flex-1 rounded-none bg-zinc-800"
+                  ? "h-1 flex-1 rounded bg-lime-400"
+                  : "h-1 flex-1 rounded bg-zinc-800"
               }
             />
           ))}
@@ -87,13 +87,12 @@ export function FirstContestExplainer() {
           <Button
             variant="ghost"
             onClick={dismiss}
-            className="rounded-none font-mono text-xs uppercase text-zinc-400 hover:text-white"
           >
             Skip
           </Button>
           <Button
             onClick={() => (isLast ? dismiss() : setStep(step + 1))}
-            className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-bold uppercase tracking-wider hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] transition-colors [&_svg]:transition-colors"
+            variant="default"
           >
             {isLast ? (
               <>

@@ -108,11 +108,11 @@ function TabsTab({ value, children, className, disabled, id }: TabsTabProps) {
         if (!disabled) setValue(value);
       }}
       className={cn(
-        "relative z-10 flex items-center justify-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold whitespace-nowrap",
+        "relative z-10 flex items-center justify-center gap-2 rounded-md px-3 py-1.5 font-sans text-sm font-semibold whitespace-nowrap",
         "transition-colors duration-150 cursor-pointer select-none",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-lime-400",
         "disabled:pointer-events-none disabled:opacity-40",
-        isActive ? "text-black font-bold" : "text-zinc-400 hover:text-white",
+        isActive ? "text-black font-semibold" : "text-zinc-400 hover:text-white",
         className,
       )}
     >
