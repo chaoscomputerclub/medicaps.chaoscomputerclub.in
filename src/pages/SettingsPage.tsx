@@ -17,7 +17,6 @@ import {
   Github,
   KeyRound,
   Laptop,
-  Linkedin,
   Loader2,
   Lock,
   LogOut,
@@ -76,6 +75,7 @@ import {
   type AlertDialogFlipDirection,
 } from "@/components/animate-ui/primitives/base/alert-dialog";
 import { SettingsSkeleton } from "@/organization/components/skeletons";
+import { FaLinkedinIn } from "react-icons/fa";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -813,7 +813,7 @@ export function SettingsPage() {
                 <SettingRow label="LinkedIn" htmlFor="s-linkedin" hint="Full profile URL or handle." borderless>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <FaLinkedinIn size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-linkedin"
                         value={linkedin}
