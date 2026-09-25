@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export function PageHeader({
   kicker,
@@ -32,7 +33,7 @@ export function PageHeader({
             {formattedKicker}
           </span>
           {index && (
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 tabular-nums">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400 tabular-nums">
               · {index}
             </span>
           )}
@@ -74,7 +75,7 @@ export function SectionHeader({
             {formattedKicker}
           </p>
           {index && (
-            <span className="text-[10px] font-mono tracking-wider text-zinc-500 uppercase tabular-nums">
+            <span className="text-[10px] font-mono tracking-wider text-zinc-400 uppercase tabular-nums">
               · {index}
             </span>
           )}
@@ -129,17 +130,17 @@ export function Metric({
 
 export function TierBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium uppercase tracking-wider bg-lime-400/8 border border-lime-400/25 text-lime-400">
+    <Badge variant="default" className="rounded font-mono text-xs font-medium uppercase tracking-wider bg-lime-400/10 border-lime-400/30 text-lime-400">
       {children}
-    </span>
+    </Badge>
   );
 }
 
 export function MonoTag({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-black border border-white/10 text-zinc-300", className)}>
+    <Badge variant="secondary" className={cn("rounded font-mono text-[11px] font-medium tracking-wide bg-black border-white/10 text-zinc-300", className)}>
       {children}
-    </span>
+    </Badge>
   );
 }
 

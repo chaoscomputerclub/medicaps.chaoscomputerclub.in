@@ -35,7 +35,7 @@ export default defineConfig({
     host: true,
     proxy: {
       "/api": {
-        target: "https://medicaps.chaoscomputerclub.in",
+        target: "https://medicaps-api.chaoscomputerclub.in",
         changeOrigin: true,
         secure: false,
       },

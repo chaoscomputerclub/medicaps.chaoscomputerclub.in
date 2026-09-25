@@ -21,7 +21,7 @@
 
 import fetch from "node-fetch";
 
-const API_BASE = process.env.API_BASE || "https://medicaps.chaoscomputerclub.in/api";
+const API_BASE = process.env.API_BASE || "https://medicaps-api.chaoscomputerclub.in/api";
 const PROCTOR_KEY = process.env.PROCTOR_KEY || "1337";
 
 const results = [];

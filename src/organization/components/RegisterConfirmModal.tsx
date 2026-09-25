@@ -73,7 +73,7 @@ export function RegisterConfirmModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-none bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden shadow-2xl">
+      <DialogContent className="max-w-lg rounded-lg bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden shadow-2xl">
         {/* Modal Header */}
         <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export function RegisterConfirmModal({
         {/* Modal Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
           <div>
-            <span className="rounded-none border border-white/10 bg-zinc-800/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-300">
+            <span className="rounded-md border border-white/10 bg-zinc-800/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-300">
               {contest.season}
             </span>
             <h2 className="text-xl font-bold font-mono uppercase text-white mt-2 leading-snug">
@@ -101,7 +101,7 @@ export function RegisterConfirmModal({
           </div>
 
           {/* Key Facts Card */}
-          <div className="rounded-none border border-white/10 bg-zinc-900/60 p-4 space-y-3.5">
+          <div className="rounded-md border border-white/10 bg-zinc-900/60 p-4 space-y-3.5">
             <div className="flex items-start gap-3">
               <Sparkles className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
               <div>
@@ -140,7 +140,7 @@ export function RegisterConfirmModal({
           </div>
 
           {/* Agreement Checkbox */}
-          <label className="flex items-start gap-3 p-3.5 rounded-none bg-zinc-900/40 border border-white/10 cursor-pointer text-left hover:border-white/20 transition-colors">
+          <label className="flex items-start gap-3 p-3.5 rounded-md bg-zinc-900/40 border border-white/10 cursor-pointer text-left hover:border-white/20 transition-colors">
             <Checkbox
               checked={agreed}
               onCheckedChange={(checked) => setAgreed(checked === true)}
@@ -158,15 +158,16 @@ export function RegisterConfirmModal({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
-            className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold uppercase active:scale-[0.98] transition-colors [&_svg]:transition-colors"
+            className="rounded-md font-mono text-xs font-semibold uppercase"
           >
             Cancel
           </Button>
 
           <Button
+            variant="default"
             onClick={handleConfirmRegistration}
             disabled={isSubmitting || !agreed}
-            className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-bold uppercase tracking-wider px-5 active:scale-[0.98] disabled:opacity-50 transition-colors [&_svg]:transition-colors"
+            className="rounded-md font-mono text-xs font-bold uppercase tracking-wider px-5"
           >
             {isSubmitting ? (
               <>

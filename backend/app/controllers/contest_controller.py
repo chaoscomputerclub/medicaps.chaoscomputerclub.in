@@ -492,10 +492,8 @@ class ContestController:
         if contest and contest.starts_at:
             assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
 
-        from app.core.security import is_privileged_test_member
-        is_test_user = is_privileged_test_member(current_member)
         is_dev_contest = slug.startswith("dev-")
-        is_dev_bypass = bool(settings.is_dev_bypass_enabled or is_dev_contest or is_test_user)
+        is_dev_bypass = bool(settings.DEV_MODE and is_dev_contest)
 
         can_take_assessment = (
             contest_status == "upcoming"
@@ -822,13 +820,10 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        from app.core.security import is_privileged_test_member
-        is_test_user = is_privileged_test_member(current_member)
-
-        if not current_member and not is_test_user:
+        if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to enter contest arena.")
 
-        if not is_test_user and not slug.startswith("dev-"):
+        if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":
                 raise HTTPException(
                     status_code=403,
@@ -926,13 +921,10 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        from app.core.security import is_privileged_test_member
-        is_test_user = is_privileged_test_member(current_member)
-
-        if not current_member and not is_test_user:
+        if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to execute code in contest arena.")
 
-        if not is_test_user and not slug.startswith("dev-"):
+        if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":
                 raise HTTPException(
                     status_code=403,
@@ -1024,13 +1016,10 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        from app.core.security import is_privileged_test_member
-        is_test_user = is_privileged_test_member(current_member)
-
-        if not current_member and not is_test_user:
+        if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to submit code in contest arena.")
 
-        if not is_test_user and not slug.startswith("dev-"):
+        if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":
                 raise HTTPException(
                     status_code=403,

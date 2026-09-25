@@ -13,6 +13,7 @@ concurrency:
 jobs:
   build-and-deploy:
     name: Build & Deploy to Production
+    if: github.repository == 'chaoscomputerclub/medicaps.chaoscomputerclub.in'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -30,10 +31,9 @@ jobs:
         run: npm ci
 
       - name: 🏗️ Build Student Portal Frontend
+        env:
+          VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: ${{ secrets.CLOUDFLARE_TURNSTILE_SITE_KEY || secrets.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}
         run: npm run build
-
-      - name: 🛠️ Build Admin Console Frontend
-        run: npm run build:admin
 
       - name: 🔑 Configure SSH Key
         env:
@@ -83,12 +83,10 @@ jobs:
 
       - name: 🌐 Deploy Pre-Built Frontends & Reload Nginx
         run: |
-          echo "→ Deploying verified Student Portal..."
-          rsync -avz dist/ production:/var/www/ccc-medicaps/.output/public/
-
-          echo "→ Deploying verified Admin Console..."
-          ssh production "mkdir -p /var/www/ccc-medicaps-admin"
-          rsync -avz dist-admin/ production:/var/www/ccc-medicaps-admin/
+          echo "→ Deploying verified Student Portal (with stale-file cleanup)..."
+          # --delete removes files on server that are no longer in the current build.
+          # This prevents stale JS/CSS chunks from accumulating (previously caused 155MB / 2418 files).
+          rsync -avz --delete dist/ production:/var/www/ccc-medicaps/.output/public/
 
           echo "→ Reloading Nginx web server..."
           ssh production "systemctl reload nginx"

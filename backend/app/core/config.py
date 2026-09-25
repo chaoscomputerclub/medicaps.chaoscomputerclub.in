@@ -4,8 +4,9 @@ Configuration settings
 """
 
 import os
+from functools import cached_property
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Optional
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -14,7 +15,7 @@ load_dotenv(BASE_DIR / ".env", override=True)
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "CCC Medi-Caps Arena API"
+    PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
@@ -26,31 +27,43 @@ class Settings(BaseSettings):
     # Database (PostgreSQL 16+ via asyncpg)
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps"
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/arena_dev"
     )
 
     # JWT Authentication (RSA 256 / RS256 Asymmetric Cryptography)
     ALGORITHM: str = os.getenv("ALGORITHM", "RS256")
-    SECRET_KEY: str = os.getenv(
-        "SECRET_KEY",
-        "ccc-medicaps-in-person-contest-security-key-2026-sha256-verified"
-    )
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     JWT_PRIVATE_KEY: str = os.getenv("JWT_PRIVATE_KEY", "")
     JWT_PUBLIC_KEY: str = os.getenv("JWT_PUBLIC_KEY", "")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 30)))  # 30 days
+    JWT_PRIVATE_KEY_PATH: Optional[str] = os.getenv("JWT_PRIVATE_KEY_PATH", None)
+    JWT_PUBLIC_KEY_PATH: Optional[str] = os.getenv("JWT_PUBLIC_KEY_PATH", None)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "43200"))  # 30 days long-lived persistent access
+    REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
+
+    # Cookie Security Settings
+    COOKIE_DOMAIN: Optional[str] = os.getenv("COOKIE_DOMAIN", None)
+    COOKIE_SECURE: Optional[bool] = None if os.getenv("COOKIE_SECURE") is None else os.getenv("COOKIE_SECURE", "false").lower() in ("true", "1", "yes")
+    COOKIE_SAMESITE: str = os.getenv("COOKIE_SAMESITE", "lax")
 
     # Google OAuth
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REDIRECT_URI: Union[str, None] = os.getenv("GOOGLE_REDIRECT_URI", None)
 
+    # Cloudflare Client Security & Turnstile (read strictly from environment)
+    CLOUDFLARE_TURNSTILE_SECRET_KEY: str = os.getenv("CLOUDFLARE_TURNSTILE_SECRET_KEY", "")
+    CLOUDFLARE_TURNSTILE_SITE_KEY: str = os.getenv("CLOUDFLARE_TURNSTILE_SITE_KEY", "")
+    CLOUDFLARE_TURNSTILE_ENABLED: bool = os.getenv(
+        "CLOUDFLARE_TURNSTILE_ENABLED", "false"
+    ).lower() in ("true", "1", "yes")
+
     # Email (SMTP) for OTP
-    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.hostinger.com")
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "localhost")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "465"))
     SMTP_USER: str = os.getenv("SMTP_USER") or os.getenv("SMTP_USERNAME", "")
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
     SMTP_FROM: str = os.getenv("SMTP_FROM") or os.getenv("SMTP_FROM_EMAIL", "")
-    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Chaos Computer Club")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Arena Auth")
 
     # URLs
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:8081")
@@ -83,51 +96,25 @@ class Settings(BaseSettings):
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
 
-    @property
-    def cors_origins_list(self) -> List[str]:
-        env_origins = os.getenv("CORS_ORIGINS", "")
-        origins = list(self.CORS_ORIGINS)
-        if env_origins:
-            for o in env_origins.split(","):
-                clean = o.strip()
-                if clean and clean not in origins:
-                    origins.append(clean)
-        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
-            origins.append(self.FRONTEND_URL)
-        return origins
+    # CORS (strictly loaded via environment variables in O(1))
+    CORS_ORIGINS: Optional[Union[List[str], str]] = None
+
+    @cached_property
+    def cors_origins_list(self) -> Optional[List[str]]:
+        if not self.CORS_ORIGINS:
+            return None
+        if isinstance(self.CORS_ORIGINS, list):
+            return self.CORS_ORIGINS
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
 
     # MinIO / S3 Object Storage
     MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "127.0.0.1:9002")
-    MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-    MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "minioadminsecret")
-    MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "ccc-medicaps-media")
+    MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "")
+    MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "")
+    MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "arena-media")
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
-    MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "https://medicaps.chaoscomputerclub.in/media")
-
-    # CORS
-    CORS_ORIGINS: Union[List[str], str] = [
-        "http://localhost:8080",
-        "http://localhost:8081",
-        "http://localhost:8082",
-        "http://localhost:8083",
-        "http://localhost:8084",
-        "http://localhost:8085",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:8081",
-        "http://127.0.0.1:8082",
-        "http://127.0.0.1:8083",
-        "http://127.0.0.1:8084",
-        "http://127.0.0.1:8085",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "https://medicaps.chaoscomputerclub.in",
-        "https://chaoscomputerclub.in",
-        "https://www.chaoscomputerclub.in",
-        "https://api.medicaps.chaoscomputerclub.in",
-    ]
+    MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "")
 
     class Config:
         case_sensitive = True
@@ -135,13 +122,18 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Automatically load RSA keys from backend/keys/ if not supplied via env
-if not settings.JWT_PRIVATE_KEY or not settings.JWT_PUBLIC_KEY:
-    keys_dir = BASE_DIR / "keys"
-    priv_file = keys_dir / "jwt_private_key.pem"
-    pub_file = keys_dir / "jwt_public_key.pem"
-    if priv_file.exists():
-        settings.JWT_PRIVATE_KEY = priv_file.read_text().strip()
-    if pub_file.exists():
-        settings.JWT_PUBLIC_KEY = pub_file.read_text().strip()
+# Only load key files if paths are explicitly specified in environment variables
+if not settings.JWT_PRIVATE_KEY and settings.JWT_PRIVATE_KEY_PATH:
+    priv_path = Path(settings.JWT_PRIVATE_KEY_PATH)
+    if not priv_path.is_absolute():
+        priv_path = BASE_DIR / priv_path
+    if priv_path.exists():
+        settings.JWT_PRIVATE_KEY = priv_path.read_text().strip()
+
+if not settings.JWT_PUBLIC_KEY and settings.JWT_PUBLIC_KEY_PATH:
+    pub_path = Path(settings.JWT_PUBLIC_KEY_PATH)
+    if not pub_path.is_absolute():
+        pub_path = BASE_DIR / pub_path
+    if pub_path.exists():
+        settings.JWT_PUBLIC_KEY = pub_path.read_text().strip()
 

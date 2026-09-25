@@ -8,6 +8,7 @@ from typing import Optional
 
 class SendOTPRequest(BaseModel):
     email: str
+    turnstile_token: Optional[str] = None
 
     @field_validator("email")
     @classmethod

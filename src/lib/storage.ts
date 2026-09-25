@@ -31,9 +31,6 @@ export async function uploadMedia(
   prefix: string = "avatars",
 ): Promise<StorageUploadResult> {
   const token = getToken();
-  if (!token) {
-    throw new Error("Authentication required to upload media.");
-  }
 
   // 10MB limit guard
   if (file.size > 10 * 1024 * 1024) {
@@ -45,11 +42,13 @@ export async function uploadMedia(
   formData.append("prefix", prefix);
 
   const apiBase = getApiBase();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(`${apiBase}/storage/upload`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: "include",
+    headers,
     body: formData,
   });
 
@@ -82,12 +81,15 @@ export async function getPresignedUploadUrl(
   }
 
   const apiBase = getApiBase();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(`${apiBase}/storage/presigned-upload`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: "include",
+    headers,
     body: JSON.stringify({
       filename,
       content_type: contentType,
@@ -134,6 +136,7 @@ export async function getPresignedDownloadUrl(
       objectName,
     )}&expires_minutes=${expiresMinutes}`,
     {
+      credentials: "include",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     },
   );
@@ -153,9 +156,6 @@ export async function uploadAvatarDirect(
   file: File
 ): Promise<{ success: boolean; message: string; avatar_url: string; member?: any }> {
   const token = getToken();
-  if (!token) {
-    throw new Error("Authentication required to upload avatar.");
-  }
   if (!file.type.startsWith("image/")) {
     throw new Error("Please upload a PNG, JPG, WebP, or GIF image.");
   }
@@ -167,13 +167,15 @@ export async function uploadAvatarDirect(
   const formData = new FormData();
   formData.append("file", file);
 
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   // 1. Attempt atomic backend endpoint
   try {
     const res = await fetch(`${apiBase}/auth/profile/avatar`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
+      headers,
       body: formData,
     });
 
@@ -201,17 +203,15 @@ export async function uploadAvatarDirect(
  */
 export async function removeAvatarDirect(): Promise<{ success: boolean; message: string; member?: any }> {
   const token = getToken();
-  if (!token) {
-    throw new Error("Authentication required.");
-  }
   const apiBase = getApiBase();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   try {
     const res = await fetch(`${apiBase}/auth/profile/avatar`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
+      headers,
     });
 
     if (res.ok) {

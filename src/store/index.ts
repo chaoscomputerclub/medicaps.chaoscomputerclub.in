@@ -20,3 +20,21 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+import { setTokenDirect, logout } from "./slices/authSlice";
+import { initAuthKeepalive } from "@/lib/auth";
+
+if (typeof window !== "undefined") {
+  window.addEventListener("ccc:token-refreshed", (e: any) => {
+    const token = e.detail?.token;
+    if (token) {
+      store.dispatch(setTokenDirect(token));
+    }
+  });
+
+  window.addEventListener("ccc:session-invalidated", () => {
+    store.dispatch(logout());
+  });
+
+  initAuthKeepalive();
+}

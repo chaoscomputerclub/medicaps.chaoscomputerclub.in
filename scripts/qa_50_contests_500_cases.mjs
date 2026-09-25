@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BASE_URL = process.env.API_BASE_URL || 'https://medicaps.chaoscomputerclub.in/api';
+const BASE_URL = process.env.API_BASE_URL || 'https://medicaps-api.chaoscomputerclub.in/api';
 const PROCTOR_KEY = process.env.PROCTOR_KEY || '1337';
 
 const c = {

@@ -40,6 +40,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogPopup,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogPortal,
+  AlertDialogBackdrop,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/animate-ui/primitives/base/alert-dialog";
 const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -111,6 +131,9 @@ export function AssessmentWorkspacePage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showFinishModal, setShowFinishModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   // 1. Initial Load
   useEffect(() => {
@@ -218,7 +241,7 @@ export function AssessmentWorkspacePage() {
   }
 
   async function handleFinish() {
-    if (!confirm("Are you sure you want to finalize and submit your assessment session?")) return;
+    setShowFinishModal(false);
     const action = await dispatch(finishAssessmentThunk(contestSlug));
     if (finishAssessmentThunk.fulfilled.match(action)) {
       try {
@@ -235,17 +258,18 @@ export function AssessmentWorkspacePage() {
   }
 
   function handleExitWindow() {
-    if (
-      confirm(
-        "Your code and progress are automatically saved on this device. You can resume this contest session before the assessment window closes. Close assessment window now?",
-      )
-    ) {
-      if (window.opener) {
-        window.close();
-      } else {
-        navigate(`/contests/${contestSlug}`);
-      }
+    setShowExitModal(false);
+    if (window.opener) {
+      window.close();
+    } else {
+      navigate(`/contests/${contestSlug}`);
     }
+  }
+
+  function handleResetStarter() {
+    setShowResetModal(false);
+    dispatch(resetStarterCode());
+    toast.success("Starter code restored to default template.");
   }
 
   async function handleDirectRegister() {
@@ -572,8 +596,8 @@ export function AssessmentWorkspacePage() {
           <Button
             size="sm"
             variant="ghost"
-            onClick={handleExitWindow}
-            className="h-7 px-2 text-[11px] font-mono text-zinc-500 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md"
+            onClick={() => setShowExitModal(true)}
+            className="h-7 px-2 text-[11px] font-mono text-zinc-500 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md cursor-pointer"
           >
             <X size={12} className="mr-1" />
             <span className="hidden sm:inline">Exit</span>
@@ -583,8 +607,8 @@ export function AssessmentWorkspacePage() {
           <Button
             size="sm"
             variant="ghost"
-            onClick={handleFinish}
-            className="h-7 px-2 text-[11px] font-mono text-red-400 hover:text-red-300 hover:bg-red-950/20 border border-red-500/20 rounded-md"
+            onClick={() => setShowFinishModal(true)}
+            className="h-7 px-2 text-[11px] font-mono text-red-400 hover:text-red-300 hover:bg-red-950/20 border border-red-500/20 rounded-md cursor-pointer"
           >
             Finish
           </Button>
@@ -761,9 +785,7 @@ export function AssessmentWorkspacePage() {
               type="button"
               onClick={() => {
                 if (!activeProblem) return;
-                if (confirm("Reset code to default starter template?")) {
-                  dispatch(resetStarterCode());
-                }
+                setShowResetModal(true);
               }}
               className="absolute bottom-3 right-4 flex items-center gap-1 px-2 py-1 rounded bg-black border border-white/10 text-zinc-400 hover:text-white text-[10px] font-mono transition-colors z-10 cursor-pointer"
             >
@@ -942,31 +964,131 @@ export function AssessmentWorkspacePage() {
         </div>
       </div>
 
-      {/* Anti-cheat Telemetry Warning Dialog */}
-      {antiCheatWarningOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full p-6 rounded-lg bg-black border border-amber-500/40 text-center space-y-4 shadow-2xl">
+      {/* Anti-cheat Telemetry Warning Dialog using official shadcn Dialog */}
+      <Dialog
+        open={antiCheatWarningOpen}
+        onOpenChange={(open) => {
+          if (!open) dispatch(dismissAntiCheatWarning());
+        }}
+      >
+        <DialogContent className="max-w-md rounded-lg bg-zinc-950 border border-amber-500/40 text-center p-6 space-y-4 shadow-2xl">
+          <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="size-11 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
               <ShieldAlert size={22} />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold font-mono text-white uppercase tracking-wider">Proctored Session Warning</h3>
-              <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-mono text-xs tabular-nums">
-                Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
-              </div>
+            <DialogTitle className="text-sm font-semibold font-mono text-white uppercase tracking-wider text-center">
+              Proctored Session Warning
+            </DialogTitle>
+            <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-mono text-xs tabular-nums">
+              Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
             </div>
-            <p className="text-xs text-zinc-400 font-mono leading-relaxed px-2">
+            <DialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed px-2 text-center">
               {antiCheatWarningMessage || "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
-            </p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
             <Button
               onClick={() => dispatch(dismissAntiCheatWarning())}
               className="w-full rounded-md bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs font-semibold"
             >
               Acknowledge & Continue
             </Button>
-          </div>
-        </div>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 1. Finalize Assessment Session Dialog */}
+      <AlertDialog open={showFinishModal} onOpenChange={setShowFinishModal}>
+        <AlertDialogPortal>
+          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
+          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+            <AlertDialogHeader className="space-y-2 text-left">
+              <AlertDialogTitle className="text-base font-semibold text-white">
+                Finalize & Submit Assessment?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+                Are you sure you want to finalize and submit your assessment session? All your code submissions will be graded and your attempt will be permanently locked.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+              <AlertDialogCancel
+                onClick={() => setShowFinishModal(false)}
+                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Continue Working
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleFinish}
+                className="bg-lime-400 hover:bg-lime-300 text-black font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Yes, Finalize Session
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogPopup>
+        </AlertDialogPortal>
+      </AlertDialog>
+
+      {/* 2. Exit Assessment Workspace Dialog */}
+      <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
+        <AlertDialogPortal>
+          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
+          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+            <AlertDialogHeader className="space-y-2 text-left">
+              <AlertDialogTitle className="text-base font-semibold text-white">
+                Exit Assessment Workspace?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+                Your code and progress are automatically saved on this device. You can resume this contest session before the assessment window closes. Close assessment window now?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+              <AlertDialogCancel
+                onClick={() => setShowExitModal(false)}
+                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Stay in Assessment
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleExitWindow}
+                className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Yes, Exit
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogPopup>
+        </AlertDialogPortal>
+      </AlertDialog>
+
+      {/* 3. Reset Starter Code Dialog */}
+      <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
+        <AlertDialogPortal>
+          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
+          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+            <AlertDialogHeader className="space-y-2 text-left">
+              <AlertDialogTitle className="text-base font-semibold text-white">
+                Reset to Default Starter Code?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+                This will discard your current unsaved edits for this problem and restore the initial starter code template. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+              <AlertDialogCancel
+                onClick={() => setShowResetModal(false)}
+                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleResetStarter}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              >
+                Reset Code
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogPopup>
+        </AlertDialogPortal>
+      </AlertDialog>
     </div>
   );
 }

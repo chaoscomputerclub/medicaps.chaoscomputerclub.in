@@ -4,23 +4,30 @@
  * Dynamically resolves API base URL for ultra-flexible multi-domain deployment.
  */
 
+/**
+ * Dynamic API Base Resolution
+ * Priority:
+ *  1. Runtime window injection: window.__ENV__?.VITE_API_URL
+ *  2. Build-time environment variable: import.meta.env.VITE_API_URL
+ *  3. Default: relative "/api" (proxied same-origin via Nginx / Vite dev server)
+ * 
+ * Never hardcodes or exposes backend domains directly to the client bundle.
+ */
 export function getApiBase(): string {
+  if (typeof window !== "undefined" && (window as any).__ENV__?.VITE_API_URL) {
+    return String((window as any).__ENV__.VITE_API_URL).trim().replace(/\/+$/, "");
+  }
+
   const envUrl =
     typeof import.meta !== "undefined" && import.meta.env
       ? (import.meta.env as Record<string, string>)["VITE_API_URL"]
       : undefined;
 
-  if (envUrl && envUrl.trim() && !envUrl.includes("medicaps-api.chaoscomputerclub.in")) {
+  if (envUrl && envUrl.trim()) {
     return envUrl.trim().replace(/\/+$/, "");
   }
 
-  if (typeof window !== "undefined") {
-    // Both dev (via Vite dev proxy) and production (via Nginx proxy) use relative /api.
-    // This completely eliminates CORS preflight OPTIONS requests, SSL overhead, and 520 dropouts.
-    return "/api";
-  }
-
-  return "https://medicaps.chaoscomputerclub.in/api";
+  return "/api";
 }
 
 export class ApiError extends Error {
@@ -185,7 +192,115 @@ export interface AuthResult {
   member: Member;
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * Silently refreshes access token using the HttpOnly refresh_token cookie.
+ * Request deduplication ensures only one refresh call is made concurrently.
+ */
+export async function silentRefreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
+          setToken(data.access_token, data.member || undefined);
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("ccc:token-refreshed", {
+                detail: { token: data.access_token, member: data.member },
+              }),
+            );
+          }
+          return true;
+        }
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+export const refreshToken = silentRefreshToken;
+
+/**
+ * Returns number of seconds remaining until current JWT access token expires.
+ * Returns null if token is missing or malformed.
+ */
+export function getTokenRemainingSeconds(): number | null {
+  const token = getToken();
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  if (!payload || typeof payload["exp"] !== "number") return null;
+  const now = Math.floor(Date.now() / 1000);
+  return payload["exp"] - now;
+}
+
+let keepaliveInitialized = false;
+
+/**
+ * Initializes proactive background session keepalive.
+ * Periodically verifies access token freshness and silently refreshes before expiry.
+ * Also checks when the browser tab regains visibility or focus (e.g. waking from sleep).
+ */
+export function initAuthKeepalive(): () => void {
+  if (typeof window === "undefined" || keepaliveInitialized) {
+    return () => {};
+  }
+  keepaliveInitialized = true;
+
+  const checkAndRefresh = async () => {
+    const remaining = getTokenRemainingSeconds();
+    // Proactively refresh if token expires within 24 hours (86,400s) or has already expired
+    if (remaining !== null && remaining < 86400) {
+      await silentRefreshToken();
+    } else if (remaining === null && (getToken() || getStoredMember())) {
+      await silentRefreshToken();
+    }
+  };
+
+  // Run initial check
+  void checkAndRefresh();
+
+  // Check every 10 minutes
+  const intervalId = setInterval(checkAndRefresh, 10 * 60 * 1000);
+
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      void checkAndRefresh();
+    }
+  };
+
+  const onFocus = () => {
+    void checkAndRefresh();
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("focus", onFocus);
+
+  return () => {
+    clearInterval(intervalId);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    window.removeEventListener("focus", onFocus);
+    keepaliveInitialized = false;
+  };
+}
+
+export async function apiFetch<T>(path: string, init?: RequestInit, isRetry = false): Promise<T> {
   const apiBase = getApiBase();
   const token = getToken();
   const headers: Record<string, string> = {
@@ -200,10 +315,32 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const res = await fetch(`${targetBase}${path}`, {
         ...init,
+        credentials: "include",
         headers,
         signal: init?.signal || controller.signal,
       });
       clearTimeout(timeoutId);
+
+      // Silent Refresh Trigger on 401 Unauthorized
+      const isAuthEndpoint =
+        path.startsWith("/auth/send-otp") ||
+        path.startsWith("/auth/verify-otp") ||
+        path.startsWith("/auth/refresh") ||
+        path.startsWith("/auth/logout") ||
+        path.startsWith("/auth/check-handle");
+
+      if (res.status === 401 && !isRetry && !isAuthEndpoint) {
+        const refreshed = await silentRefreshToken();
+        if (refreshed) {
+          return await apiFetch<T>(path, init, true);
+        } else {
+          clearToken();
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+          }
+        }
+      }
+
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Request failed" }));
         let msg = "Request failed";
@@ -232,14 +369,6 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     if (err instanceof ApiError) {
       throw err;
     }
-    // If primary relative /api failed due to proxy glitch, attempt direct failover
-    if (apiBase === "/api" && typeof window !== "undefined") {
-      try {
-        return await makeAttempt("https://medicaps-api.chaoscomputerclub.in/api");
-      } catch {
-        // Fall through to standard error handling
-      }
-    }
     if (err?.name === "AbortError") {
       throw new ApiError("Request timed out. Please check your connection and try again.", 408, err);
     }
@@ -264,10 +393,11 @@ export function isMedicapsEmail(email: string): boolean {
 
 export async function sendOTP(
   email: string,
+  turnstileToken?: string,
 ): Promise<{ sent: boolean; email: string; transaction_id?: string; dev_otp?: string }> {
   return apiFetch("/auth/send-otp", {
     method: "POST",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, turnstile_token: turnstileToken || undefined }),
   });
 }
 
@@ -346,15 +476,26 @@ export async function deleteAccount(): Promise<{ success: boolean; message: stri
   });
 }
 
-export function logout(): void {
-  clearToken();
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.removeItem("ccc_auth_token");
-      localStorage.removeItem("ccc_member_profile");
-      sessionStorage.clear();
-    } catch {}
-    window.location.replace("/auth");
+export async function logout(): Promise<void> {
+  try {
+    const apiBase = getApiBase();
+    await fetch(`${apiBase}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+  } catch {
+    // Ignore network errors during logout
+  } finally {
+    clearToken();
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("ccc_auth_token");
+        localStorage.removeItem("ccc_member_profile");
+        sessionStorage.clear();
+      } catch {}
+      window.location.replace("/auth");
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 from app.middleware.contest_eligibility import ContestEligibilityMiddleware
+from app.middleware.cloudflare_security import CloudflareSecurityMiddleware
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 FastAPI Main Application Entrypoint
@@ -63,13 +64,15 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS Middleware
+# Cloudflare Edge & Client Security (Real IP, HSTS, COOP, Permissions, CF-Ray)
+app.add_middleware(CloudflareSecurityMiddleware)
+
 # Live Contest Eligibility Middleware (Enforces Top 30 restriction on live finals)
 app.add_middleware(ContestEligibilityMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=settings.cors_origins_list or [],
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|.*\.sharexpress\.in|.*\.chaoscomputerclub\.in|.*\.shaxpress\.in)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import {
+  getApiBase,
   getToken,
   getStoredMember,
   setStoredMember,
@@ -82,11 +83,13 @@ const initialState: AuthState = {
 // Async Thunks
 export const sendOtpThunk = createAsyncThunk<
   { sent: boolean; email: string; transaction_id?: string; dev_otp?: string },
-  string,
+  { email: string; turnstileToken?: string | null | undefined } | string,
   { rejectValue: string }
->("auth/sendOtp", async (email, { rejectWithValue }) => {
+>("auth/sendOtp", async (arg, { rejectWithValue }) => {
+  const email = typeof arg === "string" ? arg : arg.email;
+  const turnstileToken = typeof arg === "string" ? undefined : (arg.turnstileToken || undefined);
   try {
-    return await sendOTP(email.trim().toLowerCase());
+    return await sendOTP(email.trim().toLowerCase(), turnstileToken);
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to send verification code.");
   }
@@ -294,6 +297,14 @@ export const authSlice = createSlice({
       state.message = null;
       state.devOtp = null;
       invalidateFullProfileCache();
+      try {
+        const apiBase = getApiBase();
+        fetch(`${apiBase}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }).catch(() => {});
+      } catch {}
     },
   },
   extraReducers: (builder) => {

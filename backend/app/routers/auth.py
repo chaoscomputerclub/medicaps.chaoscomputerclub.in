@@ -13,11 +13,13 @@ Flow:
   POST /auth/logout           → client-side token drop (stateless JWT)
 """
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, Request, UploadFile, File
+from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.db import get_db
 from app.middleware.auth import get_current_member, get_current_member_optional, require_onboarded
+from app.middleware.rate_limit import ip_rate_limit
 from app.models.db_models import MemberProfile
 from app.schemas.auth import (
     SendOTPRequest,
@@ -28,6 +30,14 @@ from app.schemas.auth import (
 from app.controllers.auth_controller import AuthController
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+@router.get("/security-config", summary="Public security configuration for client verification")
+async def security_config():
+    return {
+        "turnstile_enabled": settings.CLOUDFLARE_TURNSTILE_ENABLED,
+        "turnstile_site_key": settings.CLOUDFLARE_TURNSTILE_SITE_KEY,
+    }
 
 
 @router.get("/google/login", summary="Initiate Google OAuth flow restricted to @medicaps.ac.in")
@@ -41,13 +51,31 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/send-otp", summary="Request OTP verification email")
-async def send_otp(payload: SendOTPRequest):
-    return await AuthController.send_otp(payload)
+async def send_otp(
+    payload: SendOTPRequest,
+    request: Request,
+    _rl: None = Depends(ip_rate_limit("auth:send_otp", max_calls=10, window_seconds=60)),
+):
+    return await AuthController.send_otp(payload, request=request)
 
 
-@router.post("/verify-otp", summary="Verify OTP and receive access token")
-async def verify_otp(payload: VerifyOTPRequest, db: AsyncSession = Depends(get_db)):
-    return await AuthController.verify_otp(payload, db)
+@router.post("/verify-otp", summary="Verify OTP and receive access token + set auth cookies")
+async def verify_otp(
+    payload: VerifyOTPRequest,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.verify_otp(payload, db, request=request, response=response)
+
+
+@router.post("/refresh", summary="Rotate and refresh access token via HttpOnly refresh cookie")
+async def refresh_tokens(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    return await AuthController.refresh_tokens(request, response, db)
 
 
 @router.post("/complete-onboarding", summary="Complete new member profile setup")
@@ -136,15 +164,26 @@ async def check_handle(
 
 @router.delete("/me", summary="Permanently delete authenticated member account")
 async def delete_account(
+    request: Request,
+    response: Response,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    return await AuthController.delete_account(current_member, db)
+    return await AuthController.delete_account(
+        current_member=current_member,
+        db=db,
+        request=request,
+        response=response,
+    )
 
 
-@router.post("/logout", summary="Invalidate current session (client-side)")
-async def logout(current_member: MemberProfile = Depends(get_current_member)):
-    return {"success": True, "message": "Logged out. Delete your local token."}
+@router.post("/logout", summary="Invalidate session, revoke refresh token, and clear auth cookies")
+async def logout(
+    request: Request,
+    response: Response,
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
+    return await AuthController.logout(request, response, current_member)
 
 
 @router.get("/jwt-public-key", summary="Get RSA 256 public key for asymmetric token verification")

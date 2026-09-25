@@ -51,6 +51,18 @@ backend/.env
 backend/.env.*
 !backend/.env.example
 
-# RSA Private Keys
-backend/keys/jwt_private_key.pem
+# Cryptographic Keys & Certificates
+backend/keys/
+keys/
 *.pem
+*.key
+*.pub
+
+# Test Results & Reports
+playwright-report/
+test-results/
+
+# Private Admin Portal (Localhost Only - Not Open Sourced)
+admin/
+dist-admin/
+vite.admin.config.ts

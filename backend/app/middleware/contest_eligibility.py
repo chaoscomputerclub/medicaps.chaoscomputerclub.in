@@ -71,11 +71,9 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
                     contest = c_res.scalars().first()
 
                     if contest and contest.status == "live" and not contest.slug.startswith("dev-"):
-                        # Extract Authorization header
-                        auth_header = request.headers.get("Authorization")
-                        token: Optional[str] = None
-                        if auth_header and auth_header.startswith("Bearer "):
-                            token = auth_header[7:].strip()
+                        # Extract access token from HttpOnly cookie, Bearer header, or query param
+                        from app.middleware.auth import extract_access_token
+                        token = extract_access_token(request)
 
                         if not token:
                             return JSONResponse(

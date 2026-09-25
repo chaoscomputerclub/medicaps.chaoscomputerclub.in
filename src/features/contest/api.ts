@@ -45,7 +45,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   let response: Response;
   try {
-    response = await fetch(`${getApiBase()}${path}`, { ...init, headers });
+    response = await fetch(`${getApiBase()}${path}`, { ...init, credentials: "include", headers });
   } catch {
     throw new ContestApiError("The contest service is unreachable right now.", 0);
   }

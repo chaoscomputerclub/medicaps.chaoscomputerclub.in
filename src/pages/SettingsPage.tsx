@@ -17,7 +17,6 @@ import {
   Github,
   KeyRound,
   Laptop,
-  Linkedin,
   Loader2,
   Lock,
   LogOut,
@@ -62,16 +61,21 @@ import {
 } from "@/components/ui/select";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
+  AlertDialogTrigger,
+  AlertDialogPopup,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogPortal,
+  AlertDialogBackdrop,
+  AlertDialogClose,
+  AlertDialogAction,
+  AlertDialogCancel,
+  type AlertDialogFlipDirection,
+} from "@/components/animate-ui/primitives/base/alert-dialog";
 import { SettingsSkeleton } from "@/organization/components/skeletons";
+import { FaLinkedinIn } from "react-icons/fa";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -809,7 +813,7 @@ export function SettingsPage() {
                 <SettingRow label="LinkedIn" htmlFor="s-linkedin" hint="Full profile URL or handle." borderless>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <FaLinkedinIn size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                       <Input
                         id="s-linkedin"
                         value={linkedin}
@@ -1101,46 +1105,52 @@ export function SettingsPage() {
                       Delete account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-black border border-red-500/40 rounded-lg text-white">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-red-400 flex items-center gap-2 text-base">
-                        <ShieldAlert size={18} />
-                        Confirm account deletion
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="text-zinc-400 text-xs leading-relaxed space-y-2">
-                        <p>
-                          This will permanently delete <strong className="text-white">@{member.handle}</strong>{" "}
-                          and all associated records including contest history, rating certificates, and standings.
-                        </p>
-                        <p>
-                          Type <code className="font-sans text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">{member.handle}</code> to confirm:
-                        </p>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="my-1">
-                      <Input
-                        value={deleteConfirmText}
-                        onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        placeholder={member.handle || "handle"}
-                        className="font-sans text-sm bg-black border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
-                      />
-                    </div>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        onClick={() => setDeleteConfirmText("")}
-                        className="text-xs rounded-md border-white/15 bg-transparent hover:bg-white/5 text-zinc-300"
-                      >
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        disabled={deleteConfirmText.trim().toLowerCase() !== member.handle?.toLowerCase() || isDeleting}
-                        onClick={handleDelete}
-                        className="text-xs rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-40"
-                      >
-                        {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently delete"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
+                  <AlertDialogPortal>
+                    <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
+                    <AlertDialogPopup
+                      from="top"
+                      className="bg-black border border-red-500/40 rounded-lg text-white sm:max-w-md p-6"
+                    >
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-red-400 flex items-center gap-2 text-base">
+                          <ShieldAlert size={18} />
+                          Confirm account deletion
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400 text-xs leading-relaxed space-y-2">
+                          <p>
+                            This will permanently delete <strong className="text-white">@{member.handle}</strong>{" "}
+                            and all associated records including contest history, rating certificates, and standings.
+                          </p>
+                          <p>
+                            Type <code className="font-sans text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">{member.handle}</code> to confirm:
+                          </p>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="my-1">
+                        <Input
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          placeholder={member.handle || "handle"}
+                          className="font-sans text-sm bg-black border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
+                        />
+                      </div>
+                      <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+                        <AlertDialogClose
+                          onClick={() => setDeleteConfirmText("")}
+                          className="text-xs rounded-md border border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 px-4 py-2 cursor-pointer"
+                        >
+                          Cancel
+                        </AlertDialogClose>
+                        <AlertDialogAction
+                          disabled={deleteConfirmText.trim().toLowerCase() !== member.handle?.toLowerCase() || isDeleting}
+                          onClick={handleDelete}
+                          className="text-xs rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-40 px-4 py-2 cursor-pointer"
+                        >
+                          {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently delete"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogPopup>
+                  </AlertDialogPortal>
                 </AlertDialog>
               </div>
             </SettingSection>

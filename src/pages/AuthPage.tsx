@@ -15,6 +15,7 @@ import { Loader2, Check, X, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AuthLayout } from "@/organization/components/AuthLayout";
+import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -33,6 +34,7 @@ import {
   setHandleStatus,
 } from "@/store/slices/authSlice";
 import { getGoogleLoginURL } from "@/lib/auth";
+import { CloudflareTurnstile } from "@/components/auth/CloudflareTurnstile";
 
 // ─────────────────────────────────────────────
 // SVG icons
@@ -61,23 +63,6 @@ const INPUT_BASE =
 // ─────────────────────────────────────────────
 const LABEL = "block text-[13px] font-normal text-zinc-300 mb-2";
 
-// ─────────────────────────────────────────────
-// Lime primary button
-// ─────────────────────────────────────────────
-const BTN_PRIMARY =
-  "w-full h-11 rounded-xl bg-[#CCFF00] text-black text-[14px] font-medium " +
-  "hover:bg-[#d4ff1a] active:scale-[0.99] transition-all duration-150 " +
-  "flex items-center justify-center cursor-pointer " +
-  "disabled:opacity-40 disabled:cursor-not-allowed";
-
-// ─────────────────────────────────────────────
-// Secondary (OAuth / outline) button
-// ─────────────────────────────────────────────
-const BTN_SECONDARY =
-  "w-full h-11 rounded-xl border border-white/[0.08] bg-transparent text-[14px] font-normal text-zinc-200 " +
-  "hover:bg-white/[0.03] hover:border-white/20 transition-all duration-150 " +
-  "flex items-center justify-center gap-2.5 cursor-pointer " +
-  "disabled:opacity-40 disabled:cursor-not-allowed";
 
 // ─────────────────────────────────────────────
 // Domain guard
@@ -96,6 +81,7 @@ export function AuthPage() {
   const dispatch = useAppDispatch();
   const [countdown, setCountdown] = useState(30);
   const [navDirection, setNavDirection] = useState<"forward" | "backward">("forward");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const {
     step,
@@ -144,6 +130,8 @@ export function AuthPage() {
         ));
       } else if (errorParam === "google_cancelled") {
         dispatch(setMessage("Google sign-in was cancelled."));
+      } else if (errorParam === "state_mismatch") {
+        dispatch(setMessage("Security verification failed (state mismatch). Please try again."));
       } else {
         dispatch(setMessage("Google authentication failed. Please try again."));
       }
@@ -162,6 +150,27 @@ export function AuthPage() {
       } else {
         dispatch(setStep("onboarding"));
       }
+      return;
+    }
+
+    // Google OAuth redirect with HttpOnly cookie session
+    const isGoogleSuccess = params.get("google_success") === "1";
+    if (isGoogleSuccess) {
+      if (emailParam) dispatch(setEmail(emailParam));
+      window.history.replaceState({}, document.title, window.location.pathname);
+      dispatch(fetchCurrentUserThunk())
+        .unwrap()
+        .then((m) => {
+          if (m.is_onboarded) {
+            navigate("/");
+          } else {
+            if (m.email) dispatch(setEmail(m.email));
+            if (m.full_name) dispatch(setName(m.full_name));
+            if (m.handle) dispatch(setHandle(m.handle));
+            dispatch(setStep("onboarding"));
+          }
+        })
+        .catch(() => {});
       return;
     }
 
@@ -199,7 +208,7 @@ export function AuthPage() {
     if (!checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted.")); return;
     }
-    await dispatch(sendOtpThunk(clean));
+    await dispatch(sendOtpThunk({ email: clean, turnstileToken: turnstileToken || undefined }));
   }
 
   // ── Step 2: verify OTP ───────────────────────────────────────────
@@ -220,7 +229,7 @@ export function AuthPage() {
     if (!clean || !checkIsMedicapsEmail(clean)) {
       dispatch(setMessage("Only @medicaps.ac.in emails are permitted.")); return;
     }
-    await dispatch(sendOtpThunk(clean));
+    await dispatch(sendOtpThunk({ email: clean, turnstileToken: turnstileToken || undefined }));
     setCountdown(30);
     toast.success("New code sent to your inbox.");
   }
@@ -249,19 +258,21 @@ export function AuthPage() {
     layoutTitle = "Check your email";
     layoutSubtitle = undefined;
     bottomAction = (
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={() => {
           setNavDirection("backward");
           dispatch(setStep("email"));
           dispatch(setOtp(""));
           dispatch(setMessage(null));
         }}
-        className="auth-title-transition inline-flex items-center gap-1.5 text-[13px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+        className="auth-title-transition inline-flex items-center gap-1.5 text-[13px] text-zinc-400 hover:text-white"
       >
         <ChevronLeft className="size-3.5" />
         <span>Change email</span>
-      </button>
+      </Button>
     );
   } else if (step === "onboarding") {
     layoutTitle = "Complete your profile";
@@ -324,13 +335,29 @@ export function AuthPage() {
             )}
 
             {/* Primary CTA — lime */}
-            <button
+            <Button
               type="submit"
+              variant="default"
+              size="lg"
               disabled={pending || isInvalidDomain || !email.trim()}
-              className={cn(BTN_PRIMARY, "mt-4")}
+              className="w-full mt-4 h-11 text-[14px] rounded-xl"
             >
               {pending ? <Loader2 className="size-4 animate-spin" /> : "Continue with email"}
-            </button>
+            </Button>
+
+            {/* Cloudflare Client Security */}
+            <CloudflareTurnstile
+              className="mt-3.5"
+              onSuccess={(token) => {
+                setTurnstileToken(token);
+              }}
+              onError={() => {
+                setTurnstileToken(null);
+              }}
+              onExpire={() => {
+                setTurnstileToken(null);
+              }}
+            />
           </form>
 
           {/* OR hairline divider */}
@@ -347,15 +374,17 @@ export function AuthPage() {
 
           {/* OAuth button */}
           <div>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
               onClick={() => { window.location.href = getGoogleLoginURL(); }}
               disabled={pending}
-              className={BTN_SECONDARY}
+              className="w-full h-11 text-[14px] text-zinc-200 hover:text-white [&_span]:hover:text-white border-white/[0.08] hover:bg-white/[0.04] hover:border-white/20 gap-2.5 font-normal rounded-xl transition-colors duration-150"
             >
               <GoogleIcon className="size-4 shrink-0" />
               <span>Continue with Google</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -421,14 +450,15 @@ export function AuthPage() {
                 You can request a new one in {countdown}
               </p>
             ) : (
-              <button
+              <Button
                 type="button"
+                variant="link"
                 onClick={handleResendOtp}
                 disabled={pending}
-                className="text-[13px] font-medium text-[#CCFF00] hover:text-[#d4ff1a] transition-colors cursor-pointer disabled:opacity-40"
+                className="text-[13px] font-medium text-lime-400 hover:text-lime-300 p-0 h-auto"
               >
                 Resend code
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -507,16 +537,18 @@ export function AuthPage() {
           )}
 
           {/* Submit — lime */}
-          <button
+          <Button
             type="submit"
+            variant="default"
+            size="lg"
             disabled={
               pending || !name.trim() || handle.trim().length < 3 ||
               handleStatus === "taken" || handleStatus === "checking"
             }
-            className={cn(BTN_PRIMARY, "mt-4")}
+            className="w-full mt-4 h-11 text-[14px] rounded-xl"
           >
             {pending ? <Loader2 className="size-4 animate-spin" /> : "Enter CCC Arena"}
-          </button>
+          </Button>
         </form>
       )}
     </AuthLayout>
