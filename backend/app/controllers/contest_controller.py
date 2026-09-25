@@ -294,7 +294,11 @@ class ContestController:
         cached = await get_cache(cache_key)
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
-            response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+            if current_member:
+                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                response.headers["Pragma"] = "no-cache"
+            else:
+                response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
             return cached
 
         stmt = (
@@ -331,7 +335,11 @@ class ContestController:
                 p["first_ac_seconds"] = None
         await set_cache(cache_key, payload, ttl_seconds=60)
         response.headers["X-Cache"] = "MISS"
-        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+        if current_member:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+        else:
+            response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
         return payload
 
     @staticmethod

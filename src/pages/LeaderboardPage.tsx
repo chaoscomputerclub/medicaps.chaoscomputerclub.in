@@ -15,11 +15,9 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import { resolveAvatarUrl } from "@/lib/utils";
-import { toggleFollowThunk } from "@/store/slices/socialSlice";
 import { useAppDispatch } from "@/store/hooks";
-import { toast } from "sonner";
 
 function Spark({ data }: { data: number[] }) {
   if (!data || data.length < 2) return <span className="inline-block h-1.5 w-12 rounded bg-zinc-900" aria-hidden="true" />;
@@ -100,7 +98,7 @@ export function LeaderboardPage() {
           </p>
         </div>
         <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-zinc-950 px-5 py-3.5 min-w-[160px] shrink-0">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Rating Season</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
           <strong className="font-mono text-lg font-bold text-white mt-0.5">2025–2026</strong>
           <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount} ranked cadets</small>
         </div>
@@ -112,12 +110,12 @@ export function LeaderboardPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-white/8 hover:bg-transparent">
-                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold w-16">Rank</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold">Cadet</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold hidden md:table-cell">Trend</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold">Rating</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold hidden sm:table-cell">Peak</TableHead>
-                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-400 font-semibold hidden sm:table-cell">Attended</TableHead>
+                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold w-16">Rank</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold">Cadet</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden md:table-cell">Trend</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold">Rating</TableHead>
+                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden sm:table-cell">Peak</TableHead>
+                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden sm:table-cell">Attended</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -175,135 +173,40 @@ export function LeaderboardPage() {
 
                       {/* Avatar + Handle HoverCard */}
                       <TableCell className="py-3">
-                        <HoverCard openDelay={180} closeDelay={200}>
-                          <HoverCardTrigger asChild>
-                            <Link
-                              to={`/profile/${x.handle}`}
-                              className="flex items-center gap-3 cursor-pointer group/row min-w-0"
-                            >
-                              {/* Avatar always visible */}
-                              <Avatar className="size-9 shrink-0 rounded-full border border-white/10 group-hover/row:border-lime-400/40 transition-colors overflow-hidden">
-                                <AvatarImage
-                                  src={resolveAvatarUrl(x.avatar_url ?? null)}
-                                  alt={x.full_name || x.handle}
-                                  className="object-cover"
-                                />
-                                <AvatarFallback className="bg-zinc-900 text-lime-400 font-mono text-[10px] font-bold rounded-full">
-                                  {initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0">
-                                <p className="font-mono text-xs font-semibold text-white group-hover/row:text-lime-400 transition-colors truncate">
-                                  @{x.handle}
-                                </p>
-                                {x.full_name && (
-                                  <p className="text-[11px] text-zinc-400 truncate mt-0.5 font-sans">
-                                    {x.full_name}
-                                  </p>
-                                )}
-                              </div>
-                            </Link>
-                          </HoverCardTrigger>
-
-                          {/* LeetCode-style popup card */}
-                          <HoverCardContent
-                            className="w-72 p-0 overflow-hidden"
-                            sideOffset={10}
-                            align="start"
+                        <CadetProfileHoverCard
+                          handle={x.handle}
+                          profile={x}
+                          align="start"
+                          side="top"
+                          sideOffset={10}
+                        >
+                          <Link
+                            to={`/profile/${x.handle}`}
+                            className="flex items-center gap-3 cursor-pointer group/row min-w-0"
                           >
-                            {/* Top accent */}
-                            <div className="h-px w-full bg-gradient-to-r from-transparent via-lime-400/50 to-transparent" />
-
-                            {/* Profile header */}
-                            <div className="p-4 pb-3 flex items-start gap-3.5">
-                              <Avatar className="size-14 shrink-0 rounded-full border-2 border-lime-400/30 overflow-hidden">
-                                <AvatarImage
-                                  src={resolveAvatarUrl(x.avatar_url ?? null)}
-                                  alt={x.full_name || x.handle}
-                                  className="object-cover"
-                                />
-                                <AvatarFallback className="bg-zinc-900 text-lime-400 font-mono text-base font-bold rounded-full">
-                                  {initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0 flex-1">
-                                <p className="font-sans text-base font-bold text-white leading-tight">
-                                  {x.full_name || `@${x.handle}`}
+                            {/* Avatar always visible */}
+                            <Avatar className="size-9 shrink-0 rounded-full border border-white/10 group-hover/row:border-lime-400/40 transition-colors overflow-hidden">
+                              <AvatarImage
+                                src={resolveAvatarUrl(x.avatar_url ?? null)}
+                                alt={x.full_name || x.handle}
+                                className="object-cover"
+                              />
+                              <AvatarFallback className="bg-zinc-900 text-lime-400 font-mono text-[10px] font-bold rounded-full">
+                                {initials}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <p className="font-mono text-xs font-semibold text-white group-hover/row:text-lime-400 transition-colors truncate">
+                                @{x.handle}
+                              </p>
+                              {x.full_name && (
+                                <p className="text-[11px] text-zinc-500 truncate mt-0.5 font-sans">
+                                  {x.full_name}
                                 </p>
-                                <p className="font-mono text-xs text-zinc-400 mt-0.5">
-                                  @{x.handle}
-                                </p>
-                                <p className="font-mono text-xs text-lime-400 tabular-nums mt-1">
-                                  Rank&nbsp;
-                                  <span className="font-bold">#{x.university_rank}</span>
-                                  &nbsp;·&nbsp;
-                                  <span className="text-zinc-400">{x.tier}</span>
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Stats grid */}
-                            <div className="grid grid-cols-3 divide-x divide-white/6 border-t border-white/6 text-center">
-                              <div className="py-2.5 px-2">
-                                <p className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider">Rating</p>
-                                <p className="font-mono text-sm font-bold text-lime-400 tabular-nums mt-0.5">{x.rating}</p>
-                              </div>
-                              <div className="py-2.5 px-2">
-                                <p className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider">Peak</p>
-                                <p className="font-mono text-sm font-bold text-white tabular-nums mt-0.5">{x.peak_rating ?? "—"}</p>
-                              </div>
-                              <div className="py-2.5 px-2">
-                                <p className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider">Rounds</p>
-                                <p className="font-mono text-sm font-bold text-white tabular-nums mt-0.5">{attendanceCount}</p>
-                              </div>
-                            </div>
-
-                            {/* Trend sparkline */}
-                            {(x.ratings ?? []).length >= 2 && (
-                              <div className="px-4 py-2.5 border-t border-white/6 flex items-center gap-2">
-                                <span className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider shrink-0">Trend</span>
-                                <Spark data={x.ratings ?? []} />
-                              </div>
-                            )}
-
-                            {/* CTA row */}
-                            <div className="p-3 border-t border-white/6 flex gap-2">
-                              {!isYou && (
-                                <button
-                                  type="button"
-                                  onClick={async () => {
-                                    try {
-                                      const res = await dispatch(
-                                        toggleFollowThunk({ targetId: x.id, targetHandle: x.handle })
-                                      ).unwrap();
-                                      if (res.isFollowing) {
-                                        toast.success(`Following @${x.handle}`);
-                                      } else {
-                                        toast.info(`Unfollowed @${x.handle}`);
-                                      }
-                                    } catch {
-                                      toast.error("Action failed");
-                                    }
-                                  }}
-                                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg font-mono text-xs font-bold transition-all duration-150 active:scale-95 ${
-                                    isFollowing
-                                      ? "border border-white/15 text-zinc-300 hover:text-white hover:border-white/25 bg-transparent"
-                                      : "bg-lime-400 text-black hover:bg-lime-300 shadow-sm shadow-lime-400/20"
-                                  }`}
-                                >
-                                  <UserPlus className="size-3.5" />
-                                  {isFollowing ? "Following" : "+ Follow"}
-                                </button>
                               )}
-                              <Link
-                                to={`/profile/${x.handle}`}
-                                className={`flex items-center justify-center gap-1.5 py-2 rounded-lg font-mono text-xs font-semibold border border-white/10 text-zinc-300 hover:text-white hover:border-white/25 transition-colors duration-150 ${isYou ? "flex-1" : "px-4"}`}
-                              >
-                                View Profile
-                              </Link>
                             </div>
-                          </HoverCardContent>
-                        </HoverCard>
+                          </Link>
+                        </CadetProfileHoverCard>
                       </TableCell>
 
                       {/* Trend sparkline */}

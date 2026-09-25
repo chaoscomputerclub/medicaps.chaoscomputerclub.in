@@ -13,6 +13,7 @@ import {
   Cpu,
   Flame,
   Gauge,
+  Loader2,
   Lock,
   Play,
   ShieldAlert,
@@ -24,48 +25,14 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { slugifyProblem } from "@/lib/utils";
-
-function useCountdown(targetIsoDate: string | null | undefined, onExpire?: () => void) {
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number; hours: number; minutes: number; seconds: number;
-    isExpired: boolean; totalSeconds: number;
-  }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, totalSeconds: 0 });
-
-  useEffect(() => {
-    if (!targetIsoDate) return;
-    let fired = false;
-    const calc = () => {
-      const target = new Date(targetIsoDate).getTime();
-      const now = Date.now();
-      const diff = Math.max(0, target - now);
-      const totalSeconds = Math.floor(diff / 1000);
-      const isExpired = totalSeconds <= 0;
-      setTimeLeft({
-        days: Math.floor(totalSeconds / 86400),
-        hours: Math.floor((totalSeconds % 86400) / 3600),
-        minutes: Math.floor((totalSeconds % 3600) / 60),
-        seconds: totalSeconds % 60,
-        isExpired,
-        totalSeconds,
-      });
-      if (isExpired && !fired && onExpire) {
-        fired = true;
-        onExpire();
-      }
-    };
-    calc();
-    const interval = setInterval(calc, 1000);
-    return () => clearInterval(interval);
-  }, [targetIsoDate, onExpire]);
-
-  return timeLeft;
-}
+import { useCountdown } from "@/hooks/useCountdown";
 
 /** Compute human-readable duration from two ISO datetime strings. */
 function contestDuration(startsAt: string, endsAt: string): string {
@@ -115,7 +82,9 @@ export function ContestOverviewPage() {
     : null;
   const registration = rawRegistration ?? cachedRegistration;
 
-  const isRegistered = Boolean(registration?.registered || contest?.registered);
+  const isRegistered = registration !== null && registration !== undefined
+    ? Boolean(registration.registered)
+    : Boolean(contest?.registered);
   const isLive = contest?.status === "live";
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
@@ -297,58 +266,114 @@ export function ContestOverviewPage() {
         {/* ── PRIMARY ACTION STRIP ── */}
         <div className="pt-4 border-t border-white/8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            {isLive ? (
-              <Button
-                asChild
-                size="lg"
-                className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
-              >
-                <Link to={`/contests/${contestSlug}/lobby`}>
-                  <Play className="size-4 fill-current" />
-                  <span>Enter Contest Arena</span>
-                </Link>
-              </Button>
-            ) : isFinished ? (
-              <Button
-                asChild
-                size="lg"
-                className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
-              >
-                <Link to={`/contests/${contestSlug}/results`}>
-                  <Trophy className="size-4" />
-                  <span>View Final Standings</span>
-                </Link>
-              </Button>
-            ) : isRegistered ? (
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-sans text-xs font-semibold">
-                  <CheckCircle2 className="size-4 text-emerald-400" />
-                  <span>You are Registered · Contest Opens at Start Time</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUnregister}
-                  disabled={isRegistering}
-                  className="rounded-md border-rose-500/30 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 text-xs font-sans font-semibold cursor-pointer transition-colors"
+            <AnimatePresence mode="wait" initial={false}>
+              {isLive ? (
+                <motion.div
+                  key="live-action"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  {isRegistering ? "Unregistering..." : "Unregister from Contest"}
-                </Button>
-                <span className="text-xs text-zinc-400 font-sans">
-                  Arena unlocks automatically at start time
-                </span>
-              </div>
-            ) : (
-              <Button
-                onClick={handleRegister}
-                disabled={isRegistering}
-                size="lg"
-                className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
-              >
-                <Sparkles className="size-4" />
-                <span>{isRegistering ? "Registering..." : "Register for Contest"}</span>
-              </Button>
-            )}
+                  <Button
+                    asChild
+                    size="lg"
+                    className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                  >
+                    <Link to={`/contests/${contestSlug}/lobby`}>
+                      <Play className="size-4 fill-current" />
+                      <span>Enter Contest Arena</span>
+                    </Link>
+                  </Button>
+                </motion.div>
+              ) : isFinished ? (
+                <motion.div
+                  key="finished-action"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                  >
+                    <Link to={`/contests/${contestSlug}/results`}>
+                      <Trophy className="size-4" />
+                      <span>View Final Standings</span>
+                    </Link>
+                  </Button>
+                </motion.div>
+              ) : isRegistered ? (
+                <motion.div
+                  key="registered-actions"
+                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-wrap items-center gap-3"
+                >
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-sans text-xs font-semibold">
+                    <CheckCircle2 className="size-4 text-emerald-400" />
+                    <span>Registered · Arena unlocks at start time</span>
+                  </div>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="rounded-md bg-transparent text-lime-400 border border-lime-400/40 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                  >
+                    <Link to={`/contests/${contestSlug}/lobby`}>
+                      <Clock className="size-4" />
+                      <span>Enter Waiting Room</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleUnregister}
+                    disabled={isRegistering}
+                    className="rounded-md border-red-500/40 bg-red-950/20 text-red-400 hover:bg-red-950/50 hover:text-red-300 hover:border-red-500 focus-visible:ring-red-500 text-xs font-sans font-semibold cursor-pointer transition-colors"
+                  >
+                    {isRegistering ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Loader2 className="size-3.5 animate-spin" />
+                        <span>Unregistering...</span>
+                      </span>
+                    ) : (
+                      <span>Unregister</span>
+                    )}
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="unregistered-action"
+                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Button
+                    onClick={handleRegister}
+                    disabled={isRegistering}
+                    size="lg"
+                    className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                  >
+                    {isRegistering ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Loader2 className="size-4 animate-spin" />
+                        <span>Registering...</span>
+                      </span>
+                    ) : (
+                      <>
+                        <Sparkles className="size-4" />
+                        <span>Register for Contest</span>
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="flex items-center gap-3 text-xs font-mono text-zinc-500">
@@ -500,18 +525,34 @@ export function ContestOverviewPage() {
               </div>
 
               {/* Lobby Quick Navigation Strip */}
-              <div className="pt-3 border-t border-white/8 flex items-center justify-between text-xs font-mono">
-                <span className="text-zinc-500">
-                  Waiting room open with synced clock
-                </span>
-                <Link
-                  to={`/contests/${contestSlug}/lobby`}
-                  className="inline-flex items-center gap-1.5 text-lime-400 hover:text-lime-300 transition-colors font-semibold"
-                >
-                  <span>Enter Waiting Room</span>
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
+              <AnimatePresence>
+                {isRegistered && (
+                  <motion.div
+                    key="spec-waiting-room"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-3 border-t border-white/8 flex items-center justify-between text-xs font-mono">
+                      <span className="text-zinc-500">
+                        Waiting room open with synced clock
+                      </span>
+                      <Button
+                        asChild
+                        size="sm"
+                        className="h-8 rounded-md bg-transparent text-lime-400 border border-lime-400/30 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer"
+                      >
+                        <Link to={`/contests/${contestSlug}/lobby`}>
+                          <span>Enter Waiting Room</span>
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
             /* Live / Concluded: Problem Set Table with Solve Links */

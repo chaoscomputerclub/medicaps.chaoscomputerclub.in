@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import type { RankingRow, AssessmentRanking } from "@/features/contest/types";
 import { ContestResultsSkeleton } from "@/organization/components/skeletons";
 import { PageHeader } from "@/organization/components/ui";
@@ -290,14 +291,25 @@ function RankRow({
         </span>
       </TableCell>
       <TableCell>
-        <div className="flex flex-col">
-          <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
-            {row.full_name}
-          </Link>
-          <span className="font-mono text-[10px] text-zinc-500">
-            @{row.handle}
-          </span>
-        </div>
+        <CadetProfileHoverCard
+          handle={row.handle}
+          profile={{
+            handle: row.handle,
+            full_name: row.full_name,
+            department: row.department,
+          }}
+          side="top"
+          align="start"
+        >
+          <div className="inline-flex flex-col cursor-pointer">
+            <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
+              {row.full_name}
+            </Link>
+            <span className="font-mono text-[10px] text-zinc-500">
+              @{row.handle}
+            </span>
+          </div>
+        </CadetProfileHoverCard>
       </TableCell>
       <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
         {row.department || "—"}

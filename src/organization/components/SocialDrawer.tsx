@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { cn, resolveAvatarUrl } from "@/lib/utils";
+import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/animated-tabs";
 
 export function SocialDrawer() {
@@ -251,49 +252,68 @@ export function SocialDrawer() {
                   key={student.id}
                   className="group flex items-center justify-between p-3 sm:p-3.5 border border-white/[0.08] bg-black/40 hover:bg-white/[0.03] hover:border-lime-400/35 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Link
-                      to={`/profile/${student.handle}`}
-                      onClick={() => dispatch(closeSocialDrawer())}
-                      className="cursor-pointer shrink-0"
-                    >
-                      <Avatar className="size-10 rounded-lg border border-white/10 bg-black group-hover:border-lime-400/40 transition-[border-color] duration-150 overflow-hidden">
-                        {student.avatar_url ? (
-                          <AvatarImage
-                            src={resolveAvatarUrl(student.avatar_url)}
-                            alt={student.full_name || student.handle}
-                            className="object-cover"
-                          />
-                        ) : null}
-                        <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-sans text-xs font-bold">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
+                  <CadetProfileHoverCard
+                    handle={student.handle}
+                    profile={{
+                      id: student.id,
+                      handle: student.handle,
+                      full_name: student.full_name,
+                      avatar_url: student.avatar_url,
+                      rating: student.rating,
+                      peak_rating: student.peak_rating,
+                      tier: student.tier,
+                      department: student.department,
+                      is_following: isFollowing,
+                      is_self: student.is_self,
+                    }}
+                    side="left"
+                    align="start"
+                    sideOffset={14}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 cursor-pointer">
+                      <Link
+                        to={`/profile/${student.handle}`}
+                        onClick={() => dispatch(closeSocialDrawer())}
+                        className="cursor-pointer shrink-0"
+                      >
+                        <Avatar className="size-10 rounded-lg border border-white/10 bg-black group-hover:border-lime-400/40 transition-[border-color] duration-150 overflow-hidden">
+                          {student.avatar_url ? (
+                            <AvatarImage
+                              src={resolveAvatarUrl(student.avatar_url)}
+                              alt={student.full_name || student.handle}
+                              className="object-cover"
+                            />
+                          ) : null}
+                          <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-sans text-xs font-bold">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
 
-                    <div className="min-w-0 space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          to={`/profile/${student.handle}`}
-                          onClick={() => dispatch(closeSocialDrawer())}
-                          className="text-xs font-sans text-white truncate tracking-tight hover:text-lime-400 transition-colors font-semibold"
-                        >
-                          @{student.handle}
-                        </Link>
-                        <span className="text-[10px] text-lime-400 font-sans font-bold tabular-nums bg-lime-400/10 border border-lime-400/20 px-1.5 py-0.5 rounded-md">
-                          {student.rating}
-                        </span>
-                      </div>
+                      <div className="min-w-0 space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/profile/${student.handle}`}
+                            onClick={() => dispatch(closeSocialDrawer())}
+                            className="text-xs font-sans text-white truncate tracking-tight hover:text-lime-400 transition-colors font-semibold"
+                          >
+                            @{student.handle}
+                          </Link>
+                          <span className="text-[10px] text-lime-400 font-sans font-bold tabular-nums bg-lime-400/10 border border-lime-400/20 px-1.5 py-0.5 rounded-md">
+                            {student.rating}
+                          </span>
+                        </div>
 
-                      <p className="text-[11px] text-zinc-400 truncate font-sans">
-                        {student.full_name || `@${student.handle}`}
-                      </p>
+                        <p className="text-[11px] text-zinc-400 truncate font-sans">
+                          {student.full_name || `@${student.handle}`}
+                        </p>
 
-                      <div className="flex items-center gap-1.5 pt-0.5">
-                        <TierBadge>{student.tier}</TierBadge>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <TierBadge>{student.tier}</TierBadge>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </CadetProfileHoverCard>
 
                   {student.is_self ? (
                     <span className="px-2.5 py-1 text-[10px] font-sans font-semibold uppercase bg-white/[0.04] text-zinc-400 border border-white/[0.08] rounded-lg shrink-0">
