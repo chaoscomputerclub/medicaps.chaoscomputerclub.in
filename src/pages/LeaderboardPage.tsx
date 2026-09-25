@@ -197,7 +197,7 @@ export function LeaderboardPage() {
                                   @{x.handle}
                                 </p>
                                 {x.full_name && (
-                                  <p className="text-[11px] text-zinc-500 truncate mt-0.5 font-sans">
+                                  <p className="text-[11px] text-zinc-400 truncate mt-0.5 font-sans">
                                     {x.full_name}
                                   </p>
                                 )}
@@ -245,15 +245,15 @@ export function LeaderboardPage() {
                             {/* Stats grid */}
                             <div className="grid grid-cols-3 divide-x divide-white/6 border-t border-white/6 text-center">
                               <div className="py-2.5 px-2">
-                                <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Rating</p>
+                                <p className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider">Rating</p>
                                 <p className="font-mono text-sm font-bold text-lime-400 tabular-nums mt-0.5">{x.rating}</p>
                               </div>
                               <div className="py-2.5 px-2">
-                                <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Peak</p>
+                                <p className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider">Peak</p>
                                 <p className="font-mono text-sm font-bold text-white tabular-nums mt-0.5">{x.peak_rating ?? "—"}</p>
                               </div>
                               <div className="py-2.5 px-2">
-                                <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Rounds</p>
+                                <p className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider">Rounds</p>
                                 <p className="font-mono text-sm font-bold text-white tabular-nums mt-0.5">{attendanceCount}</p>
                               </div>
                             </div>
@@ -261,7 +261,7 @@ export function LeaderboardPage() {
                             {/* Trend sparkline */}
                             {(x.ratings ?? []).length >= 2 && (
                               <div className="px-4 py-2.5 border-t border-white/6 flex items-center gap-2">
-                                <span className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider shrink-0">Trend</span>
+                                <span className="text-[9px] font-mono uppercase text-zinc-400 tracking-wider shrink-0">Trend</span>
                                 <Spark data={x.ratings ?? []} />
                               </div>
                             )}
