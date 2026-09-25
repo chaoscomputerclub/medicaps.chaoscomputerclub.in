@@ -106,7 +106,7 @@ export function LeaderboardPage() {
       </header>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-xl border border-white/8 bg-zinc-950">
+      <div className="overflow-hidden rounded-lg border border-white/8 bg-zinc-950">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

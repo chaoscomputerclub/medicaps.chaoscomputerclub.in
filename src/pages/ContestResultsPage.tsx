@@ -119,7 +119,7 @@ export function ContestResultsPage() {
 
             {/* CTA */}
             <div className="flex items-center gap-2 shrink-0">
-              <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
+              <Button asChild variant="outline" size="sm">
                 <Link to="/leaderboard">University Leaderboard →</Link>
               </Button>
             </div>
@@ -165,7 +165,7 @@ export function ContestResultsPage() {
               })}.
             </p>
           </div>
-          <Button asChild variant="outline" className="border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
+          <Button asChild variant="outline" size="sm">
             <Link to={`/contests/${contestSlug}`}>Back to Contest Overview</Link>
           </Button>
         </div>
@@ -256,10 +256,10 @@ export function ContestResultsPage() {
 
       {/* Bottom Actions */}
       <div className="flex flex-wrap items-center gap-3 pt-2">
-        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
+        <Button asChild variant="outline" size="sm">
           <Link to={`/contests/${contestSlug}`}>Contest Details</Link>
         </Button>
-        <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20">
+        <Button asChild variant="outline" size="sm">
           <Link to="/leaderboard">University Leaderboard →</Link>
         </Button>
       </div>

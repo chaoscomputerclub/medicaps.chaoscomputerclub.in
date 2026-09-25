@@ -391,13 +391,13 @@ export function ContestsHubPage() {
           {/* ─── UPCOMING CONTEST HERO CARDS (LEETCODE STYLE - LARGER SIZE) ───────────── */}
           <div className="w-full pt-4 max-w-5xl mx-auto">
             {upcomingContests.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-xl p-10 text-center space-y-3 group hover:border-white/20 transition-all duration-200">
+              <div className="rounded-lg border border-white/10 bg-zinc-950/80 backdrop-blur-xl p-10 text-center space-y-3 group hover:border-white/20 transition-all duration-200">
                 <Trophy className="size-10 text-zinc-600 mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-lime-400" />
                 <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
                 <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
                   New official rounds will be announced shortly. Practice in the Problem Archive in the meantime.
                 </p>
-                <Button asChild variant="outline" size="sm" className="mt-3 text-xs sm:text-sm font-mono group/btn h-9 px-4">
+                <Button asChild variant="outline" size="sm" className="mt-3 group/btn">
                   <Link to="/problems" className="flex items-center gap-1.5">
                     <span>Problem Archive</span>
                     <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
@@ -435,7 +435,7 @@ export function ContestsHubPage() {
                       key={contest.slug}
                       data-testid="hero-contest-card"
                       onClick={() => navigate(`/contests/${contest.slug}`)}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
+                      className="group relative flex flex-col justify-between rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
                       <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-gradient-to-br from-zinc-900/90 via-black to-zinc-950 overflow-hidden border-b border-white/8">
@@ -501,8 +501,8 @@ export function ContestsHubPage() {
                           {isLive ? (
                             <Button
                               asChild
-                              size="default"
-                              className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs sm:text-sm font-bold h-10 sm:h-11 px-5 rounded-xl shadow-lg shadow-lime-400/20 group/btn transition-all duration-200 active:scale-95"
+                              size="hero"
+                              className="group/btn shadow-lg shadow-lime-400/20 active:scale-95"
                             >
                               <Link to={`/contests/${contest.slug}/lobby`} className="flex items-center gap-1.5">
                                 <Play className="size-4 fill-black transition-transform duration-200 group-hover/btn:scale-125 group-hover/btn:translate-x-0.5" />
@@ -512,14 +512,14 @@ export function ContestsHubPage() {
                           ) : isRegistered ? (
                             <Button
                               type="button"
-                              size="default"
+                              size="hero"
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleUnregister(contest.slug);
                               }}
                               disabled={registeringSlug === contest.slug}
-                              className="group/btn border-lime-400/30 bg-lime-400/10 text-lime-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 font-mono text-xs sm:text-sm font-semibold h-10 sm:h-11 px-4 sm:px-5 rounded-xl transition-all cursor-pointer active:scale-95 shadow-sm"
+                              className="group/btn border-lime-400/30 bg-lime-400/10 text-lime-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 active:scale-95"
                               title="Click to cancel registration"
                             >
                               {registeringSlug === contest.slug ? (
@@ -538,15 +538,15 @@ export function ContestsHubPage() {
                           ) : (
                             <Button
                               type="button"
-                              size="default"
+                              size="hero"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRegister(contest.slug);
                               }}
                               disabled={registeringSlug === contest.slug}
-                              className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs sm:text-sm font-bold h-10 sm:h-11 px-5 rounded-xl shadow-lg shadow-lime-400/20 active:scale-95 transition-all group/btn cursor-pointer"
+                              className="group/btn shadow-lg shadow-lime-400/20 active:scale-95"
                             >
-                              <Bell className="size-4 mr-1.5 transition-transform duration-200 group-hover/btn:rotate-12 group-hover/btn:scale-110" />
+                              <Bell className="size-4 transition-transform duration-200 group-hover/btn:rotate-12 group-hover/btn:scale-110" />
                               <span>{registeringSlug === contest.slug ? "Registering..." : "Register"}</span>
                             </Button>
                           )}
@@ -572,7 +572,7 @@ export function ContestsHubPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
           {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
-          <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
+          <div className="lg:col-span-5 rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
               <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
@@ -583,9 +583,9 @@ export function ContestsHubPage() {
 
             {/* ─── CADET'S PERSONAL STANDING STRIP (LARGER BOX) ── */}
             {myStanding && myStanding.entry && (
-              <div className="p-4 sm:p-5 rounded-2xl border border-lime-400/30 bg-lime-400/[0.04] flex items-center justify-between gap-3 group hover:border-lime-400/60 transition-all duration-200">
+              <div className="p-4 sm:p-5 rounded-lg border border-lime-400/30 bg-lime-400/[0.04] flex items-center justify-between gap-3 group hover:border-lime-400/60 transition-all duration-200">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-lime-400/15 border border-lime-400/40 font-mono text-base font-bold text-lime-400 shadow-sm">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-lime-400/15 border border-lime-400/40 font-mono text-base font-bold text-lime-400 shadow-sm">
                     #{myStanding.rank}
                   </div>
                   <div className="min-w-0">
@@ -626,7 +626,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank2.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 shadow-lg font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
@@ -654,7 +654,7 @@ export function ContestsHubPage() {
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-black/20 min-h-[225px] opacity-40">
+                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[225px] opacity-40">
                   <span className="font-mono text-xs text-zinc-600">Rank #2</span>
                 </div>
               )}
@@ -669,7 +669,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank1.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-2xl border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-lg border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-6 pb-3 flex flex-col items-center">
                       <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 drop-shadow-[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
@@ -697,7 +697,7 @@ export function ContestsHubPage() {
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-black/20 min-h-[245px] opacity-40">
+                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[245px] opacity-40">
                   <span className="font-mono text-xs text-zinc-600">Rank #1</span>
                 </div>
               )}
@@ -712,7 +712,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank3.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 shadow-lg font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
@@ -740,7 +740,7 @@ export function ContestsHubPage() {
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-black/20 min-h-[225px] opacity-40">
+                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[225px] opacity-40">
                   <span className="font-mono text-xs text-zinc-600">Rank #3</span>
                 </div>
               )}
@@ -765,10 +765,10 @@ export function ContestsHubPage() {
                     >
                       <Link
                         to={`/profile/${leader.handle}`}
-                        className="group flex items-center justify-between py-3.5 px-4 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px] cursor-pointer"
+                        className="group flex items-center justify-between py-3.5 px-4 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px] cursor-pointer"
                       >
                         <div className="flex items-center gap-3.5 min-w-0">
-                          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
                             {String(rankNum).padStart(2, "0")}
                           </span>
 
@@ -820,7 +820,7 @@ export function ContestsHubPage() {
           </div>
 
           {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
-          <div className="lg:col-span-7 rounded-3xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
+          <div className="lg:col-span-7 rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
             {/* Header: Animated Tabs & Search */}
             <Tabs
               value={activeTab}
@@ -849,7 +849,7 @@ export function ContestsHubPage() {
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-black/70 border-white/10 focus-visible:ring-1 focus-visible:ring-lime-400 font-mono rounded-xl"
+                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-black/70 border-white/10 focus-visible:ring-1 focus-visible:ring-lime-400 font-mono rounded-md"
                 />
               </div>
             </div>
@@ -859,8 +859,8 @@ export function ContestsHubPage() {
               <TabsPanel value="past">
               <div className="space-y-3.5">
                 {paginatedPastContests.length === 0 ? (
-                  <div className="group flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5 hover:border-white/15 transition-all">
-                    <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-zinc-900 transition-transform duration-300 group-hover:scale-110">
+                  <div className="group flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5 hover:border-white/15 transition-all">
+                    <div className="flex size-14 items-center justify-center rounded-lg border border-white/10 bg-zinc-900 transition-transform duration-300 group-hover:scale-110">
                       <Code2 className="size-7 text-zinc-500 group-hover:text-lime-400 transition-colors" />
                     </div>
                     <div className="space-y-1">
@@ -871,7 +871,7 @@ export function ContestsHubPage() {
                         Past weekly round challenges and editorial solutions will appear here for practice.
                       </p>
                     </div>
-                    <Button asChild size="default" variant="outline" className="text-xs sm:text-sm font-mono group/btn h-10 px-5 rounded-xl">
+                    <Button asChild size="default" variant="outline" className="group/btn">
                       <Link to="/problems" className="flex items-center gap-1.5">
                         <span>Explore Problem Archive</span>
                         <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
@@ -895,11 +895,11 @@ export function ContestsHubPage() {
                     return (
                       <div
                         key={contest.slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
+                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
                       >
                         {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-800 to-zinc-950 font-mono text-sm font-bold text-lime-400 shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:border-lime-400/40">
+                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br from-zinc-800 to-zinc-950 font-mono text-sm font-bold text-lime-400 shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:border-lime-400/40">
                             <Trophy className="size-6 text-lime-400/80 group-hover:text-lime-400 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
 
@@ -933,7 +933,7 @@ export function ContestsHubPage() {
                             asChild
                             size="sm"
                             variant="ghost"
-                            className="h-9 sm:h-10 text-xs sm:text-sm font-mono font-semibold text-zinc-300 hover:text-black hover:bg-lime-400 border border-white/10 hover:border-lime-400 rounded-xl px-4 transition-all duration-200 group-hover:shadow-sm"
+                            className="border border-white/10 hover:border-lime-400 group-hover:shadow-sm"
                           >
                             <Link to={`/contests/${contest.slug}`} className="flex items-center gap-1.5">
                               <Play className="size-3.5 fill-current transition-transform duration-200 group-hover:scale-110" />
@@ -952,12 +952,12 @@ export function ContestsHubPage() {
               <TabsPanel value="my">
               <div className="space-y-3.5">
                 {!member ? (
-                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5">
+                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5">
                     <p className="text-base font-semibold text-white">Login Required</p>
                     <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
                       Sign in to view your contest participation history and ratings.
                     </p>
-                    <Button asChild size="default" className="bg-lime-400 text-black hover:bg-lime-300 font-mono text-xs sm:text-sm rounded-xl group/btn h-10 px-5">
+                    <Button asChild size="default" className="group/btn">
                       <Link to="/auth" className="flex items-center gap-1.5">
                         <span>Sign In</span>
                         <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
@@ -965,7 +965,7 @@ export function ContestsHubPage() {
                     </Button>
                   </div>
                 ) : paginatedMyParticipations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-2xl border border-white/6 bg-black/30 space-y-3.5">
+                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5">
                     <p className="text-base font-semibold text-white">No Participations Yet</p>
                     <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
                       You haven't participated in any contests yet. Register for Weekly Contest 1 above!
@@ -975,7 +975,7 @@ export function ContestsHubPage() {
                   paginatedMyParticipations.map((record) => (
                     <div
                       key={record.contest_slug}
-                      className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
+                      className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
                     >
                       <div className="min-w-0">
                         <Link
@@ -1000,7 +1000,7 @@ export function ContestsHubPage() {
                           asChild
                           size="sm"
                           variant="ghost"
-                          className="h-9 sm:h-10 text-xs sm:text-sm font-mono text-zinc-300 hover:text-white hover:bg-white/10 border border-white/10 rounded-xl px-4 transition-all"
+                          className="border border-white/10 hover:bg-white/10 hover:text-white"
                         >
                           <Link to={`/contests/${record.contest_slug}`} className="flex items-center gap-1.5">
                             <span>Results</span>
@@ -1020,11 +1020,11 @@ export function ContestsHubPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/6">
                 <Button
-                  size="sm"
+                  size="icon-sm"
                   variant="ghost"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="group size-8 p-0 text-zinc-400 hover:text-white disabled:opacity-30 rounded-xl"
+                  className="group text-zinc-400 hover:text-white disabled:opacity-30"
                 >
                   <ChevronLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
                 </Button>
@@ -1032,25 +1032,21 @@ export function ContestsHubPage() {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
                   <Button
                     key={pg}
-                    size="sm"
+                    size="icon-sm"
                     variant={pg === currentPage ? "default" : "ghost"}
                     onClick={() => setCurrentPage(pg)}
-                    className={`size-8 p-0 text-xs sm:text-sm font-mono font-bold rounded-xl transition-all ${
-                      pg === currentPage
-                        ? "bg-lime-400 text-black hover:bg-lime-300 shadow-sm"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
+                    className={pg !== currentPage ? "text-zinc-400 hover:text-white" : "shadow-sm"}
                   >
                     {pg}
                   </Button>
                 ))}
 
                 <Button
-                  size="sm"
+                  size="icon-sm"
                   variant="ghost"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="group size-8 p-0 text-zinc-400 hover:text-white disabled:opacity-30 rounded-xl"
+                  className="group text-zinc-400 hover:text-white disabled:opacity-30"
                 >
                   <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Button>
@@ -1060,7 +1056,7 @@ export function ContestsHubPage() {
         </div>
 
         {/* ─── ABOUT THE CHAMPIONSHIP TROPHY ─────────────── */}
-        <div className="group rounded-2xl border border-white/8 bg-zinc-950/60 backdrop-blur-md p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/15 transition-all duration-200">
+        <div className="group rounded-lg border border-white/8 bg-zinc-950/60 backdrop-blur-md p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/15 transition-all duration-200">
           <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold text-lime-400 uppercase tracking-widest">
             <Trophy className="size-4 sm:size-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
             <span>About the Medi-Caps Chapter Trophy</span>

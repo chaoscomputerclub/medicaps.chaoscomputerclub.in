@@ -241,7 +241,7 @@ export function ContestQualifiedPage() {
                         <span className="size-2 rounded-full bg-lime-400 animate-pulse" />
                         <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">Round 2 Is Live</span>
                       </div>
-                      <Button asChild size="sm" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors cursor-pointer">
+                      <Button asChild variant="outline" size="sm">
                         <a href={`/contests/${contestSlug}/lobby`} target="_blank" rel="noopener noreferrer">
                           <Play className="mr-1 size-3 fill-current" /> Enter Arena
                         </a>
@@ -274,7 +274,7 @@ export function ContestQualifiedPage() {
             <div className="rounded-lg border border-white/8 bg-black p-8 text-center font-mono text-xs text-zinc-400 space-y-3">
               <ShieldCheck className="size-8 mx-auto text-lime-400" />
               <p>Top 30 qualification verified. Generating your secure QR pass...</p>
-              <Button onClick={() => refreshData(true)} variant="outline" size="sm" className="rounded-md border-white/10 text-white">
+              <Button onClick={() => refreshData(true)} variant="outline" size="sm">
                 Refresh Credentials
               </Button>
             </div>
@@ -293,10 +293,10 @@ export function ContestQualifiedPage() {
             </p>
           </div>
           <div className="pt-2 flex justify-center gap-3">
-            <Button asChild className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+            <Button asChild variant="default" size="sm">
               <Link to={`/contests/${contestSlug}/results`}>View Standings</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-md border-white/10 bg-black text-zinc-300 text-xs hover:bg-zinc-900 hover:text-white hover:border-white/20">
+            <Button asChild variant="outline" size="sm">
               <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>

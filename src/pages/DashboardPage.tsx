@@ -144,7 +144,7 @@ export function DashboardPage() {
               </div>
             </div>
             <div className="shrink-0">
-              <Button asChild className="w-full sm:w-auto font-mono text-xs uppercase tracking-wider font-semibold rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+              <Button asChild variant="outline">
                 <Link to={`/contests/${live.slug}`}>
                   Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
@@ -167,7 +167,7 @@ export function DashboardPage() {
               <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
               <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
             </div>
-            <Button asChild className="text-xs bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors font-mono [&_svg]:transition-colors">
+            <Button asChild variant="outline">
               <Link to={`/contests/${next.slug}`}>
                 View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>

@@ -75,10 +75,10 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
 
       return (
         <div className="min-h-[400px] flex items-center justify-center p-6 bg-zinc-950 text-white font-mono selection:bg-lime-400 selection:text-black">
-          <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-2xl rounded-none relative">
+          <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-2xl rounded-lg relative">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-none border border-rose-500/30 bg-rose-950/40 text-rose-400">
+                <div className="p-2.5 rounded-md border border-rose-500/30 bg-rose-950/40 text-rose-400">
                   <AlertTriangle size={20} />
                 </div>
                 <div>
@@ -90,11 +90,10 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
                   </h2>
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-white/10 px-2.5 py-1 rounded-none">
+              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-white/10 px-2.5 py-1 rounded">
                 {isChunkError ? "CHUNK-REFRESH" : "500-CLI-CRASH"}
               </span>
             </div>
-
 
             <div className="space-y-2">
               <p className="text-xs text-zinc-300 font-mono leading-relaxed">
@@ -103,7 +102,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
               </p>
 
               {this.state.error && (
-                <div className="p-3.5 bg-zinc-950/90 border border-white/10 rounded-none font-mono text-xs text-rose-300 overflow-x-auto max-h-40">
+                <div className="p-3.5 bg-zinc-950/90 border border-white/10 rounded-md font-mono text-xs text-rose-300 overflow-x-auto max-h-40">
                   <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] pb-1 border-b border-white/5 uppercase">
                     <Terminal size={12} />
                     <span>Exception Message</span>
@@ -117,38 +116,40 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
               <Button
                 type="button"
                 onClick={this.handleReset}
-                className="bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors [&_svg]:transition-colors"
+                variant="default"
+                size="default"
               >
-                <RefreshCw size={13} />
+                <RefreshCw size={13} className="mr-1.5" />
                 <span>Reload Interface</span>
               </Button>
 
               <Button
                 type="button"
                 variant="outline"
+                size="default"
                 onClick={() => {
                   window.location.href = "/";
                 }}
-                className="bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs uppercase font-semibold rounded-md h-10 px-4 cursor-pointer flex items-center gap-1.5 transition-colors [&_svg]:transition-colors"
               >
-                <Home size={13} />
+                <Home size={13} className="mr-1.5" />
                 <span>Return to Arena</span>
               </Button>
 
               <Button
                 type="button"
                 variant="ghost"
+                size="default"
                 onClick={this.handleCopyDiagnostic}
-                className="border border-white/10 hover:border-white/20 text-zinc-400 hover:text-white font-mono text-xs uppercase rounded-none h-10 px-3 cursor-pointer flex items-center gap-1.5 ml-auto transition-colors"
+                className="ml-auto"
               >
                 {this.state.copied ? (
                   <>
-                    <Check size={13} className="text-emerald-400" />
+                    <Check size={13} className="text-emerald-400 mr-1.5" />
                     <span className="text-emerald-400">Diagnostic Copied</span>
                   </>
                 ) : (
                   <>
-                    <Copy size={13} />
+                    <Copy size={13} className="mr-1.5" />
                     <span>Copy Diagnostic</span>
                   </>
                 )}

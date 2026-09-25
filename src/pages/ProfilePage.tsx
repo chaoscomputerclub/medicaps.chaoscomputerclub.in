@@ -201,10 +201,7 @@ export function ProfilePage() {
         <p className="text-sm text-zinc-400 max-w-md mb-6">
           The requested cadet profile could not be found or you may need to sign in.
         </p>
-        <Button
-          asChild
-          className="bg-lime-400 hover:bg-lime-300 text-black font-semibold text-xs cursor-pointer"
-        >
+        <Button asChild>
           <Link to={isViewingSelf ? "/auth" : "/leaderboard"}>
             {isViewingSelf ? "Sign In to Access Profile" : "Back to Leaderboard"}
           </Link>
@@ -428,8 +425,8 @@ export function ProfilePage() {
                     type="button"
                     onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
                     disabled={isUploadingAvatar}
+                    variant="outline"
                     size="sm"
-                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-white bg-transparent border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-semibold transition-colors [&_svg]:transition-colors"
                   >
                     {isUploadingAvatar ? <Loader2 size={11} className="animate-spin" /> : <Camera size={11} />}
                     <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
@@ -441,7 +438,6 @@ export function ProfilePage() {
                       onClick={() => setShowRemoveAvatarModal(true)}
                       variant="destructive"
                       size="sm"
-                      className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-red-400 hover:text-white border border-red-500/30 bg-transparent hover:bg-red-600 rounded-md transition-colors"
                     >
                       <Trash2 size={10} />
                       <span>Remove</span>
@@ -450,8 +446,8 @@ export function ProfilePage() {
 
                   <Button
                     asChild
+                    variant="outline"
                     size="sm"
-                    className="h-7 inline-flex items-center gap-1.5 px-2.5 font-mono text-xs text-white bg-transparent border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-semibold transition-colors [&_svg]:transition-colors"
                   >
                     <Link to="/settings">
                       <Edit3 size={11} />
@@ -465,13 +461,8 @@ export function ProfilePage() {
                     type="button"
                     onClick={handleFollowToggle}
                     disabled={isPendingFollowAction}
+                    variant={isFollowing ? "secondary" : "outline"}
                     size="sm"
-                    className={cn(
-                      "h-7 inline-flex items-center gap-1.5 px-3 font-mono text-xs rounded-md transition-colors",
-                      isFollowing
-                        ? "bg-transparent text-zinc-400 border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400"
-                        : "bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-semibold"
-                    )}
                   >
                     {isFollowing ? (
                       <>
@@ -489,8 +480,7 @@ export function ProfilePage() {
                     type="button"
                     onClick={handleCopyLink}
                     variant="outline"
-                    size="sm"
-                    className="h-7 inline-flex items-center gap-1 px-2 font-mono text-xs text-white border border-white/20 bg-transparent hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors"
+                    size="icon-sm"
                   >
                     {copied ? <Check size={11} className="text-lime-400" /> : <Share2 size={11} />}
                   </Button>
@@ -539,7 +529,7 @@ export function ProfilePage() {
                     })
                   )
                 }
-                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
+                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
               >
                 <div className="size-5 rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400 group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150">
                   <Users size={11} />
@@ -570,7 +560,7 @@ export function ProfilePage() {
                     })
                   )
                 }
-                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
+                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
               >
                 <div className="size-5 rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400 group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150">
                   <UserCheck size={11} />

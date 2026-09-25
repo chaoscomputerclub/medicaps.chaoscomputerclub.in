@@ -99,7 +99,7 @@ export function TermsPage() {
               The platform evaluates algorithmic proficiency and security problem-solving. To maintain institutional
               standards and fair evaluation, participants must adhere to the following rules:
             </p>
-            <div className="mt-4 rounded-xl border border-white/[0.08] bg-[#121214] p-5">
+            <div className="mt-4 rounded-lg border border-white/[0.08] bg-[#121214] p-5">
               <h3 className="text-sm font-medium text-white">Prohibited Actions:</h3>
               <ul className="mt-2.5 list-inside list-disc space-y-2 text-xs leading-normal text-zinc-400">
                 <li>
@@ -199,7 +199,7 @@ export function TermsPage() {
             <p className="mt-3">
               Questions regarding these Terms, contest rules, or appeals may be directed to the Chapter Administration:
             </p>
-            <div className="mt-4 rounded-xl border border-white/[0.08] bg-[#121214] p-5 text-sm text-zinc-300">
+            <div className="mt-4 rounded-lg border border-white/[0.08] bg-[#121214] p-5 text-sm text-zinc-300">
               <p className="font-medium text-white">Chaos Computer Club India — Medi-Caps Chapter</p>
               <p className="mt-1 text-zinc-400">Faculty Coordinator &amp; Student Technical Lead</p>
               <p className="mt-2 font-mono text-xs text-lime-400">

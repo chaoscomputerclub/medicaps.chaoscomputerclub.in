@@ -73,7 +73,7 @@ export function OtpStep({
         variant="default"
         size="lg"
         disabled={pending || code.length < 6}
-        className="w-full h-11 font-mono text-xs tracking-wider font-bold uppercase rounded-md"
+        className="w-full"
       >
         {pending ? "Checking…" : submitLabel}
       </Button>
@@ -83,7 +83,6 @@ export function OtpStep({
           type="button"
           variant="link"
           onClick={onResend}
-          className="font-mono text-xs tracking-wider text-zinc-400 uppercase hover:text-lime-400 h-auto p-0"
         >
           Resend code
         </Button>
@@ -91,7 +90,6 @@ export function OtpStep({
           type="button"
           variant="link"
           onClick={onChangeEmail}
-          className="font-mono text-xs tracking-wider text-zinc-400 uppercase hover:text-lime-400 h-auto p-0"
         >
           Use another email
         </Button>

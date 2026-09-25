@@ -75,7 +75,7 @@ function TabsList({ children, className }: TabsListProps) {
     <div
       role="tablist"
       className={cn(
-        "relative inline-flex items-center rounded-xl bg-black border border-white/10 p-1 gap-0.5",
+        "relative inline-flex items-center rounded-lg bg-black border border-white/10 p-1 gap-0.5",
         className,
       )}
     >
@@ -108,7 +108,7 @@ function TabsTab({ value, children, className, disabled, id }: TabsTabProps) {
         if (!disabled) setValue(value);
       }}
       className={cn(
-        "relative z-10 flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap",
+        "relative z-10 flex items-center justify-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold whitespace-nowrap",
         "transition-colors duration-150 cursor-pointer select-none",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-lime-400",
         "disabled:pointer-events-none disabled:opacity-40",
@@ -120,7 +120,7 @@ function TabsTab({ value, children, className, disabled, id }: TabsTabProps) {
       {isActive && (
         <motion.span
           layoutId={layoutId}
-          className="absolute inset-0 rounded-lg bg-lime-400 shadow-sm"
+          className="absolute inset-0 rounded-md bg-lime-400 shadow-sm"
           style={{ zIndex: -1 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         />

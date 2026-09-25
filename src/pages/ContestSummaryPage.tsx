@@ -248,7 +248,6 @@ export function ContestSummaryPage() {
             asChild
             variant="outline"
             size="sm"
-            className="h-8 px-2.5 rounded-md font-mono text-xs border-white/10 bg-zinc-950 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
           >
             <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
@@ -288,7 +287,6 @@ export function ContestSummaryPage() {
           <Button
             onClick={() => setShowSubmitModal(true)}
             size="sm"
-            className="h-8 px-3.5 rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 shadow-sm cursor-pointer transition-colors"
           >
             <Send className="size-3.5 mr-1.5" />
             <span>Submit Contest</span>
@@ -478,7 +476,6 @@ export function ContestSummaryPage() {
                       asChild
                       variant="outline"
                       size="sm"
-                      className="h-8 px-3 rounded font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors"
                     >
                       <Link to={`/contests/${contestSlug}/problems/${problemSlug}`}>
                         <span>{isSolved ? "Review Code" : isAttempted ? "Continue Solving" : "Solve Challenge"}</span>
@@ -520,7 +517,8 @@ export function ContestSummaryPage() {
             <Button
               asChild
               variant="outline"
-              className="w-full sm:w-auto rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white"
+              size="default"
+              className="w-full sm:w-auto"
             >
               <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
                 <ArrowLeft className="size-3.5 mr-1.5" />
@@ -530,7 +528,9 @@ export function ContestSummaryPage() {
 
             <Button
               onClick={() => setShowSubmitModal(true)}
-              className="w-full sm:w-auto rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer shadow-lg transition-all"
+              variant="default"
+              size="default"
+              className="w-full sm:w-auto"
             >
               <Send className="size-3.5 mr-1.5" />
               <span>Submit Final Contest</span>

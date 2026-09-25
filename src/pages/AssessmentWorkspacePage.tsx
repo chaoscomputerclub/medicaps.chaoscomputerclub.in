@@ -399,7 +399,9 @@ export function AssessmentWorkspacePage() {
               if (window.opener) window.close();
               else navigate(`/contests/${contestSlug}`);
             }}
-            className="w-full bg-transparent text-white border border-white/20 font-mono font-semibold text-xs rounded-md hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
+            variant="outline"
+            size="default"
+            className="w-full"
           >
             Close & Return
           </Button>
@@ -429,37 +431,40 @@ export function AssessmentWorkspacePage() {
 
           <div className="pt-2 flex flex-col gap-2">
             {isLifecycleErr && (
-              <a href={`/contests/${contestSlug}/results`} className="w-full">
-                <Button className="w-full bg-transparent text-white border border-white/20 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors">
-                  <Trophy size={14} />
+              <Button asChild variant="outline" size="default" className="w-full">
+                <Link to={`/contests/${contestSlug}/results`}>
+                  <Trophy size={14} className="mr-1.5" />
                   <span>View Standings</span>
-                </Button>
-              </a>
+                </Link>
+              </Button>
             )}
             {isRegistrationErr && !isLifecycleErr && (
               <Button
                 onClick={handleDirectRegister}
                 disabled={isRegistering}
-                className="w-full bg-transparent text-white border border-white/20 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
+                variant="outline"
+                size="default"
+                className="w-full"
               >
-                <Users size={14} />
+                <Users size={14} className="mr-1.5" />
                 <span>{isRegistering ? "Registering..." : "Register Now & Enter"}</span>
               </Button>
             )}
             {isAuthErr && (
-              <a href={`/auth?redirect=/assessments/${contestSlug}`} className="w-full">
-                <Button className="w-full bg-transparent text-white border border-white/20 font-semibold font-mono text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors">
+              <Button asChild variant="outline" size="default" className="w-full">
+                <Link to={`/auth?redirect=/assessments/${contestSlug}`}>
                   Sign In to Continue
-                </Button>
-              </a>
+                </Link>
+              </Button>
             )}
             <Button
               variant="outline"
+              size="default"
               onClick={() => {
                 if (window.opener) window.close();
                 else window.location.href = `/contests/${contestSlug}`;
               }}
-              className="w-full font-mono text-xs border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md"
+              className="w-full"
             >
               Return to Contest Details
             </Button>
@@ -562,7 +567,6 @@ export function AssessmentWorkspacePage() {
             size="sm"
             variant="ghost"
             onClick={toggleFullscreen}
-            className="h-7 px-2 text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullscreen ? <Minimize2 size={13} className="mr-1" /> : <Maximize2 size={13} className="mr-1" />}
@@ -575,20 +579,19 @@ export function AssessmentWorkspacePage() {
             variant="outline"
             disabled={isRunning || isSubmitting}
             onClick={handleRun}
-            className="h-7 px-2.5 gap-1 text-xs font-mono border-white/10 bg-black text-white hover:bg-zinc-950 hover:border-white/20 rounded-md"
           >
-            <Play size={12} className="text-lime-400 fill-lime-400" />
+            <Play size={12} className="text-lime-400 fill-lime-400 mr-1" />
             <span>{isRunning ? "Testing..." : "Run"}</span>
           </Button>
 
           {/* Submit Solution */}
           <Button
             size="sm"
+            variant="default"
             disabled={isRunning || isSubmitting}
             onClick={handleSubmit}
-            className="h-7 px-2.5 gap-1 text-xs font-mono bg-transparent text-white border border-white/20 font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md transition-colors [&_svg]:transition-colors"
           >
-            <Send size={12} />
+            <Send size={12} className="mr-1" />
             <span>{isSubmitting ? "Judging..." : "Submit"}</span>
           </Button>
 
@@ -597,7 +600,6 @@ export function AssessmentWorkspacePage() {
             size="sm"
             variant="ghost"
             onClick={() => setShowExitModal(true)}
-            className="h-7 px-2 text-[11px] font-mono text-zinc-500 hover:text-white hover:bg-zinc-950 border border-white/8 rounded-md cursor-pointer"
           >
             <X size={12} className="mr-1" />
             <span className="hidden sm:inline">Exit</span>
@@ -606,9 +608,8 @@ export function AssessmentWorkspacePage() {
           {/* Finish Button */}
           <Button
             size="sm"
-            variant="ghost"
+            variant="destructive"
             onClick={() => setShowFinishModal(true)}
-            className="h-7 px-2 text-[11px] font-mono text-red-400 hover:text-red-300 hover:bg-red-950/20 border border-red-500/20 rounded-md cursor-pointer"
           >
             Finish
           </Button>
@@ -989,7 +990,8 @@ export function AssessmentWorkspacePage() {
           <DialogFooter className="sm:justify-center">
             <Button
               onClick={() => dispatch(dismissAntiCheatWarning())}
-              className="w-full rounded-md bg-amber-400 text-black hover:bg-amber-300 font-mono text-xs font-semibold"
+              size="default"
+              className="w-full bg-amber-400 text-black hover:bg-amber-300"
             >
               Acknowledge & Continue
             </Button>

@@ -116,7 +116,7 @@ export function ContestLobbyPage() {
           <p className="text-xs font-mono text-zinc-400 leading-relaxed">
             The requested contest tournament could not be found or has not been initialized yet.
           </p>
-          <Button asChild variant="outline" className="rounded-md border-white/10 font-mono text-xs">
+          <Button asChild variant="outline" size="sm">
             <Link to="/contests">Explore All Contests</Link>
           </Button>
         </div>
@@ -161,14 +161,15 @@ export function ContestLobbyPage() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               asChild
-              className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors"
+              variant="outline"
+              size="sm"
             >
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
             <Button
               asChild
               variant="outline"
-              className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+              size="sm"
             >
               <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
@@ -195,7 +196,7 @@ export function ContestLobbyPage() {
               You must register for this tournament round before accessing the live contest arena.
             </p>
           </div>
-          <Button asChild className="rounded-md font-mono text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors [&_svg]:transition-colors">
+          <Button asChild variant="default" size="sm">
             <Link to={`/contests/${contestSlug}`}>Register Slot</Link>
           </Button>
         </div>
@@ -260,7 +261,7 @@ export function ContestLobbyPage() {
           </div>
           <Button
             variant="outline"
-            className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            size="sm"
             onClick={handleBack}
           >
             Back to Contest
@@ -289,7 +290,7 @@ export function ContestLobbyPage() {
           </div>
           <Button
             variant="outline"
-            className="rounded-md text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+            size="sm"
             onClick={handleBack}
           >
             Back to Contest
@@ -386,17 +387,18 @@ export function ContestLobbyPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <Button
                   asChild
-                  size="lg"
-                  className="rounded-md bg-transparent text-amber-400 border border-amber-400 font-mono text-xs font-semibold hover:bg-amber-400 hover:text-black transition-colors cursor-pointer"
+                  variant="outline"
+                  size="default"
+                  className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black"
                 >
                   <Link to={`/contests/${contestSlug}/problems`}>
-                    <Play className="size-3.5 fill-current" />
+                    <Play className="size-3.5 fill-current mr-1.5" />
                     <span>Resume Contest</span>
                   </Link>
                 </Button>
                 <Button
                   variant="ghost"
-                  className="rounded-md font-mono text-xs text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
+                  size="default"
                   onClick={handleBack}
                 >
                   Back to Overview
@@ -422,24 +424,24 @@ export function ContestLobbyPage() {
                 <Button
                   asChild={ack && canStart}
                   disabled={!ack || !canStart}
-                  size="lg"
-                  className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 disabled:pointer-events-none transition-colors [&_svg]:transition-colors cursor-pointer"
+                  variant="default"
+                  size="default"
                 >
                   {ack && canStart ? (
                     <Link to={`/contests/${contestSlug}/problems`}>
-                      <Play className="size-3.5 fill-current" />
+                      <Play className="size-3.5 fill-current mr-1.5" />
                       <span>Start Contest</span>
                     </Link>
                   ) : (
                     <>
-                      <Play className="size-3.5 fill-current" />
+                      <Play className="size-3.5 fill-current mr-1.5" />
                       <span>Start Contest</span>
                     </>
                   )}
                 </Button>
                 <Button
                   variant="ghost"
-                  className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
+                  size="default"
                   onClick={handleBack}
                 >
                   Not Now

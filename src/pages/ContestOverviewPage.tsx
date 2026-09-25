@@ -277,11 +277,11 @@ export function ContestOverviewPage() {
                 >
                   <Button
                     asChild
-                    size="lg"
-                    className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                    variant="default"
+                    size="hero"
                   >
                     <Link to={`/contests/${contestSlug}/lobby`}>
-                      <Play className="size-4 fill-current" />
+                      <Play className="size-4 fill-current mr-1.5" />
                       <span>Enter Contest Arena</span>
                     </Link>
                   </Button>
@@ -296,11 +296,11 @@ export function ContestOverviewPage() {
                 >
                   <Button
                     asChild
-                    size="lg"
-                    className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                    variant="default"
+                    size="hero"
                   >
                     <Link to={`/contests/${contestSlug}/results`}>
-                      <Trophy className="size-4" />
+                      <Trophy className="size-4 mr-1.5" />
                       <span>View Final Standings</span>
                     </Link>
                   </Button>
@@ -320,11 +320,11 @@ export function ContestOverviewPage() {
                   </div>
                   <Button
                     asChild
-                    size="lg"
-                    className="rounded-md bg-transparent text-lime-400 border border-lime-400/40 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                    variant="outline"
+                    size="hero"
                   >
                     <Link to={`/contests/${contestSlug}/lobby`}>
-                      <Clock className="size-4" />
+                      <Clock className="size-4 mr-1.5" />
                       <span>Enter Waiting Room</span>
                     </Link>
                   </Button>
@@ -333,7 +333,6 @@ export function ContestOverviewPage() {
                     size="sm"
                     onClick={handleUnregister}
                     disabled={isRegistering}
-                    className="rounded-md border-red-500/40 bg-red-950/20 text-red-400 hover:bg-red-950/50 hover:text-red-300 hover:border-red-500 focus-visible:ring-red-500 text-xs font-sans font-semibold cursor-pointer transition-colors"
                   >
                     {isRegistering ? (
                       <span className="inline-flex items-center gap-1.5">
@@ -356,17 +355,17 @@ export function ContestOverviewPage() {
                   <Button
                     onClick={handleRegister}
                     disabled={isRegistering}
-                    size="lg"
-                    className="rounded-md bg-transparent text-white border border-white/20 font-semibold text-xs hover:bg-lime-400 hover:text-black hover:border-lime-400 active:scale-[0.98] cursor-pointer transition-colors [&_svg]:transition-colors"
+                    variant="default"
+                    size="hero"
                   >
                     {isRegistering ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <Loader2 className="size-4 animate-spin" />
+                        <Loader2 className="size-4 animate-spin mr-1.5" />
                         <span>Registering...</span>
                       </span>
                     ) : (
                       <>
-                        <Sparkles className="size-4" />
+                        <Sparkles className="size-4 mr-1.5" />
                         <span>Register for Contest</span>
                       </>
                     )}
@@ -541,12 +540,12 @@ export function ContestOverviewPage() {
                       </span>
                       <Button
                         asChild
+                        variant="outline"
                         size="sm"
-                        className="h-8 rounded-md bg-transparent text-lime-400 border border-lime-400/30 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer"
                       >
                         <Link to={`/contests/${contestSlug}/lobby`}>
                           <span>Enter Waiting Room</span>
-                          <ArrowRight className="size-3.5" />
+                          <ArrowRight className="size-3.5 ml-1" />
                         </Link>
                       </Button>
                     </div>
@@ -599,7 +598,6 @@ export function ContestOverviewPage() {
                             asChild
                             variant="outline"
                             size="sm"
-                            className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
                           >
                             <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
                               Solve →

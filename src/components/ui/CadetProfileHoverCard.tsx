@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserPlus, UserMinus, Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   HoverCard,
   HoverCardTrigger,
@@ -230,7 +231,7 @@ export function CadetProfileHoverCard({
       <HoverCardTrigger asChild={asChild}>{children}</HoverCardTrigger>
 
       <HoverCardContent
-        className={`w-72 p-0 overflow-hidden z-[100] bg-zinc-950 border border-white/10 shadow-2xl shadow-black/90 rounded-xl pointer-events-auto ${
+        className={`w-72 p-0 overflow-hidden z-[100] bg-zinc-950 border border-white/10 shadow-2xl shadow-black/90 rounded-lg pointer-events-auto ${
           className || ""
         }`}
         sideOffset={sideOffset}
@@ -326,19 +327,21 @@ export function CadetProfileHoverCard({
         {/* CTA Actions Row */}
         <div className="p-3 border-t border-white/6 flex items-center gap-2">
           {!isYou && (
-            <button
+            <Button
               type="button"
               disabled={isPending}
               onMouseEnter={() => setIsUnfollowHovered(true)}
               onMouseLeave={() => setIsUnfollowHovered(false)}
               onClick={handleFollowClick}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg font-mono text-xs font-bold transition-all duration-150 active:scale-95 cursor-pointer disabled:opacity-50 disabled:pointer-events-none ${
+              variant={
                 isFollowing
                   ? isUnfollowHovered
-                    ? "border border-red-500/40 text-red-400 bg-red-500/10"
-                    : "border border-white/15 text-zinc-300 hover:text-white hover:border-white/25 bg-transparent"
-                  : "bg-lime-400 text-black hover:bg-lime-300 shadow-sm shadow-lime-400/20"
-              }`}
+                    ? "destructive"
+                    : "secondary"
+                  : "default"
+              }
+              size="sm"
+              className="flex-1"
             >
               {isPending ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -360,18 +363,22 @@ export function CadetProfileHoverCard({
                   <span>+ Follow</span>
                 </>
               )}
-            </button>
+            </Button>
           )}
 
-          <Link
-            to={`/profile/${cleanHandle}`}
-            onClick={handleProfileNavigation}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-lg font-mono text-xs font-semibold border border-white/10 text-zinc-300 hover:text-white hover:border-white/25 hover:bg-white/[0.04] transition-all duration-150 ${
-              isYou ? "flex-1" : "px-4"
-            }`}
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className={isYou ? "flex-1" : "px-4"}
           >
-            View Profile
-          </Link>
+            <Link
+              to={`/profile/${cleanHandle}`}
+              onClick={handleProfileNavigation}
+            >
+              View Profile
+            </Link>
+          </Button>
         </div>
       </HoverCardContent>
     </HoverCard>

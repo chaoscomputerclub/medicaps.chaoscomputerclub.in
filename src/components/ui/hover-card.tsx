@@ -54,7 +54,7 @@ const HoverCardContent = React.forwardRef<
         >
           <motion.div
             className={cn(
-              "z-50 rounded-xl border border-white/10 bg-zinc-950 shadow-2xl shadow-black/70 outline-none",
+              "z-50 rounded-lg border border-white/10 bg-zinc-950 shadow-2xl shadow-black/70 outline-none",
               "origin-[var(--radix-hover-card-content-transform-origin)]",
               className
             )}

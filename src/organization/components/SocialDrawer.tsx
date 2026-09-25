@@ -125,7 +125,7 @@ export function SocialDrawer() {
             onValueChange={(v) => dispatch(setDrawerType(v as "followers" | "following"))}
             className="mt-4 gap-0"
           >
-            <TabsList className="w-full grid grid-cols-2 p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl gap-1">
+            <TabsList className="w-full grid grid-cols-2 p-1 bg-white/[0.03] border border-white/[0.08] rounded-lg gap-1">
               <TabsTab
                 value="followers"
                 className="w-full py-2 text-xs"
@@ -174,15 +174,15 @@ export function SocialDrawer() {
               value={searchQuery}
               onChange={(e) => dispatch(setSocialSearchQuery(e.target.value))}
               placeholder="Search handle, name, or department..."
-              className="h-9 pl-8.5 pr-8 text-xs font-sans bg-black/80 border border-white/[0.08] rounded-xl text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60 focus-visible:ring-1 focus-visible:ring-lime-400/30 transition-[border-color,box-shadow] duration-150"
+              className="h-9 pl-8.5 pr-8 text-xs font-sans bg-black/80 border border-white/[0.08] rounded-md text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60 focus-visible:ring-1 focus-visible:ring-lime-400/30 transition-[border-color,box-shadow] duration-150"
             />
             {searchQuery && (
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
+                size="icon-sm"
                 onClick={() => dispatch(setSocialSearchQuery(""))}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-colors duration-150"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
               >
                 <X size={12} />
               </Button>
@@ -197,7 +197,7 @@ export function SocialDrawer() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-3.5 border border-white/[0.08] bg-black/40 rounded-xl"
+                  className="flex items-center justify-between p-3.5 border border-white/[0.08] bg-black/40 rounded-lg"
                 >
                   <div className="flex items-center gap-3">
                     <Skeleton className="w-10 h-10 bg-zinc-900 rounded-lg" />
@@ -207,7 +207,7 @@ export function SocialDrawer() {
                       <Skeleton className="h-2 w-16 bg-zinc-900" />
                     </div>
                   </div>
-                  <Skeleton className="h-7 w-20 bg-zinc-900 rounded-lg" />
+                  <Skeleton className="h-7 w-20 bg-zinc-900 rounded-md" />
                 </div>
               ))}
             </div>
@@ -250,7 +250,7 @@ export function SocialDrawer() {
               return (
                 <article
                   key={student.id}
-                  className="group flex items-center justify-between p-3 sm:p-3.5 border border-white/[0.08] bg-black/40 hover:bg-white/[0.03] hover:border-lime-400/35 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5"
+                  className="group flex items-center justify-between p-3 sm:p-3.5 border border-white/[0.08] bg-black/40 hover:bg-white/[0.03] hover:border-lime-400/35 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5"
                 >
                   <CadetProfileHoverCard
                     handle={student.handle}
@@ -316,7 +316,7 @@ export function SocialDrawer() {
                   </CadetProfileHoverCard>
 
                   {student.is_self ? (
-                    <span className="px-2.5 py-1 text-[10px] font-sans font-semibold uppercase bg-white/[0.04] text-zinc-400 border border-white/[0.08] rounded-lg shrink-0">
+                    <span className="px-2 py-0.5 text-[10px] font-mono font-semibold uppercase bg-white/[0.04] text-zinc-400 border border-white/[0.08] rounded shrink-0">
                       You
                     </span>
                   ) : (
@@ -342,26 +342,26 @@ export function SocialDrawer() {
                           toast.error(typeof err === "string" ? err : "Action failed");
                         }
                       }}
-                      className={cn(
-                        "font-sans text-[11px] font-semibold uppercase px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-[transform,background-color,border-color,color,box-shadow] duration-150 flex-shrink-0 cursor-pointer h-auto active:scale-95",
+                      variant={
                         isFollowing
                           ? isHovered
-                            ? "bg-white/[0.08] border border-white/30 text-white"
-                            : "bg-black border border-white/15 text-zinc-300 hover:text-white hover:border-white/25"
-                          : "bg-transparent border border-lime-400/40 text-lime-400 hover:bg-lime-400 hover:text-black font-semibold hover:shadow-[0_0_15px_rgba(163,230,53,0.25)]",
-                      )}
+                            ? "destructive"
+                            : "secondary"
+                          : "default"
+                      }
+                      size="sm"
                     >
                       {isPending ? (
                         <Loader2 size={11} className="animate-spin" />
                       ) : isFollowing ? (
                         isHovered ? (
                           <>
-                            <UserMinus size={11} className="text-zinc-300" />
+                            <UserMinus size={11} />
                             <span>Unfollow</span>
                           </>
                         ) : (
                           <>
-                            <Check size={11} className="text-lime-400" />
+                            <Check size={11} />
                             <span>Following</span>
                           </>
                         )

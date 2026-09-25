@@ -89,7 +89,7 @@ export function RegisterConfirmModal({
         {/* Modal Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
           <div>
-            <span className="rounded-md border border-white/10 bg-zinc-800/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-300">
+            <span className="rounded border border-white/10 bg-zinc-800/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-300">
               {contest.season}
             </span>
             <h2 className="text-xl font-bold font-mono uppercase text-white mt-2 leading-snug">
@@ -158,7 +158,6 @@ export function RegisterConfirmModal({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
-            className="rounded-md font-mono text-xs font-semibold uppercase"
           >
             Cancel
           </Button>
@@ -167,7 +166,6 @@ export function RegisterConfirmModal({
             variant="default"
             onClick={handleConfirmRegistration}
             disabled={isSubmitting || !agreed}
-            className="rounded-md font-mono text-xs font-bold uppercase tracking-wider px-5"
           >
             {isSubmitting ? (
               <>

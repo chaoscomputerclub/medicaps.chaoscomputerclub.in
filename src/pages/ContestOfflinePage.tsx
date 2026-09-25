@@ -101,7 +101,7 @@ export function ContestOfflinePage() {
               {registration?.eligibility_message ??
                 `This workstation portal is accessible only to Top ${FINALIST_SEATS} verified qualifiers.`}
             </p>
-            <Button asChild variant="outline" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white hover:border-white/20 mt-2">
+            <Button asChild variant="outline" className="mt-2">
               <Link to={`/contests/${contestSlug}/results`}>
                 View Round 1 Standings
                 <ArrowRight className="ml-1.5 size-3" />
@@ -142,7 +142,7 @@ export function ContestOfflinePage() {
             Seat: <strong className="text-lime-400">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </p>
         </div>
-        <Button asChild size="lg" className="rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold transition-colors [&_svg]:transition-colors cursor-pointer">
+        <Button asChild variant="outline" size="lg">
           <a href={`/contests/${contestSlug}/lobby`} target="_blank" rel="noopener noreferrer">
             <Play className="size-3.5 fill-current mr-1.5" />
             Enter Arena
@@ -184,11 +184,8 @@ export function ContestOfflinePage() {
               <span className="text-white font-semibold">{pass?.seat ?? "Lab-04-WS-07"}</span>
             </div>
             <Button
-              className={`w-full rounded-md font-sans text-xs font-semibold transition-colors [&_svg]:transition-colors ${
-                checkedIn
-                  ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-950/60"
-                  : "bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400"
-              }`}
+              className="w-full"
+              variant={checkedIn ? "secondary" : "outline"}
               disabled={checkedIn || isCheckingIn}
               onClick={handleCheckIn}
             >
@@ -226,7 +223,7 @@ export function ContestOfflinePage() {
           <h2 className="font-mono text-xs uppercase tracking-wider text-zinc-400">
             Final Problem Set
           </h2>
-          <Button asChild variant="outline" size="sm" className="rounded-md border-white/10 bg-black font-mono text-xs text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400">
+          <Button asChild variant="outline" size="sm">
             <Link to={`/contests/${contestSlug}/problems`}>
               <Play className="size-3 text-lime-400" />
               <span>Open in Arena</span>

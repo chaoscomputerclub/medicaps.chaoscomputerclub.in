@@ -215,10 +215,10 @@ function SaveButton({
   return (
     <Button
       type="button"
+      variant="outline"
       size="sm"
       disabled={disabled || saving}
       onClick={onClick}
-      className="h-8 px-3.5 text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
     >
       {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
@@ -505,7 +505,7 @@ export function SettingsPage() {
           asChild
           variant="outline"
           size="sm"
-          className="hidden sm:flex text-xs border-white/10 bg-black hover:bg-zinc-950 text-zinc-300 hover:text-white rounded-md gap-1.5 font-sans"
+          className="hidden sm:flex"
         >
           <Link to="/profile">
             View profile
@@ -891,10 +891,10 @@ export function SettingsPage() {
                       </div>
                       <Button
                         type="button"
+                        variant="outline"
                         size="sm"
                         disabled={!isHandleChanged || handleInput.length < 3 || handleStatus !== "available" || fieldStatus["handle"] === "saving"}
                         onClick={saveHandle}
-                        className="h-9 px-3 text-xs font-semibold bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-40 rounded-md cursor-pointer transition-colors [&_svg]:transition-colors"
                       >
                         {fieldStatus["handle"] === "saving" ? <Loader2 size={12} className="animate-spin" /> : "Update"}
                       </Button>
@@ -956,7 +956,6 @@ export function SettingsPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleExport}
-                    className="text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 hover:text-white rounded-md gap-1.5 cursor-pointer"
                   >
                     <Download size={13} />
                     Export
@@ -1044,10 +1043,9 @@ export function SettingsPage() {
                   </div>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="destructive"
                     size="sm"
                     onClick={handleLogout}
-                    className="text-xs border-white/15 bg-transparent hover:bg-white/5 text-zinc-300 hover:text-red-400 hover:border-red-500/40 rounded-md gap-1.5 cursor-pointer"
                   >
                     <LogOut size={12} />
                     Sign out
@@ -1077,7 +1075,7 @@ export function SettingsPage() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="shrink-0 text-xs font-semibold rounded-md bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer"
+                      className="shrink-0"
                     >
                       <Trash2 size={13} className="mr-1.5" />
                       Delete account

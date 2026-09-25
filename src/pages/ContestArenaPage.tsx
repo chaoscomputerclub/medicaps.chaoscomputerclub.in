@@ -763,20 +763,13 @@ export function ContestArenaPage() {
             </div>
 
             <div className="flex flex-col gap-2.5 pt-2">
-              <Button
-                asChild
-                className="rounded-md bg-lime-400 text-black font-mono text-xs font-semibold hover:bg-lime-300 transition-colors cursor-pointer"
-              >
+              <Button asChild>
                 <Link to={`/auth?redirect=${encodeURIComponent(`/contests/${contestSlug}/arena`)}`}>
                   <LogIn className="size-3.5 mr-1.5" />
                   <span>Sign In to Continue</span>
                 </Link>
               </Button>
-              <Button
-                asChild
-                variant="ghost"
-                className="rounded-md font-mono text-xs text-zinc-400 hover:bg-white/5 hover:text-white"
-              >
+              <Button asChild variant="ghost">
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Return to Contest Overview</span>
@@ -809,20 +802,13 @@ export function ContestArenaPage() {
             </div>
 
             <div className="flex flex-col gap-2.5 pt-2">
-              <Button
-                asChild
-                className="rounded-md bg-transparent text-white border border-white/20 font-mono text-xs font-semibold hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer"
-              >
+              <Button asChild variant="outline">
                 <Link to={`/contests/${contestSlug}/lobby`}>
                   <Clock className="size-3.5 mr-1.5" />
                   <span>Go to Contest Waiting Lobby</span>
                 </Link>
               </Button>
-              <Button
-                asChild
-                variant="ghost"
-                className="rounded-md font-mono text-xs text-zinc-400 hover:bg-white/5 hover:text-white"
-              >
+              <Button asChild variant="ghost">
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Contest Overview</span>
@@ -855,10 +841,7 @@ export function ContestArenaPage() {
             </div>
 
             <div className="pt-2">
-              <Button
-                asChild
-                className="w-full rounded-md bg-lime-400 text-black font-mono text-xs font-semibold hover:bg-lime-300 transition-colors cursor-pointer"
-              >
+              <Button asChild className="w-full">
                 <Link to="/contests">
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Explore All Contests</span>
@@ -894,7 +877,7 @@ export function ContestArenaPage() {
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
                 variant="outline"
-                className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+                className="w-full"
               >
                 <RotateCcw className="size-3 mr-1.5" />
                 <span>Re-check Status</span>
@@ -902,7 +885,7 @@ export function ContestArenaPage() {
               <Button
                 asChild
                 variant="ghost"
-                className="w-full rounded-md font-mono text-xs text-zinc-500 hover:bg-white/5 hover:text-white"
+                className="w-full"
               >
                 <Link to={`/contests/${contestSlug}`}>
                   Exit to Overview
@@ -938,7 +921,7 @@ export function ContestArenaPage() {
             <Button
               onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
               variant="outline"
-              className="w-full rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
+              className="w-full"
             >
               <RotateCcw className="size-3 mr-1.5" />
               <span>Retry Connection</span>
@@ -946,7 +929,7 @@ export function ContestArenaPage() {
             <Button
               asChild
               variant="ghost"
-              className="w-full rounded-md font-mono text-xs text-zinc-400 hover:bg-white/5 hover:text-white"
+              className="w-full"
             >
               <Link to={`/contests/${contestSlug}`}>
                 Back to Contest
@@ -971,7 +954,6 @@ export function ContestArenaPage() {
             variant="outline"
             size="sm"
             onClick={() => setShowExitModal(true)}
-            className="h-7 px-2 text-zinc-300 border-white/10 bg-black hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md font-mono text-xs cursor-pointer flex items-center transition-colors shrink-0"
             title="Exit to contest overview"
           >
             <ChevronLeft className="size-4 mr-0.5" />
@@ -1003,10 +985,9 @@ export function ContestArenaPage() {
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="icon-sm"
               onClick={handlePrevProblem}
               disabled={resolvedIndex <= 0}
-              className="size-7 p-0 rounded-md border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer shrink-0"
               title="Previous question (⌥←)"
             >
               <ChevronLeft className="size-3.5" />
@@ -1031,10 +1012,9 @@ export function ContestArenaPage() {
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="icon-sm"
               onClick={handleNextProblem}
               disabled={resolvedIndex >= problems.length - 1}
-              className="size-7 p-0 rounded-md border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer shrink-0"
               title="Next question (⌥→)"
             >
               <ChevronRight className="size-3.5" />
@@ -1044,8 +1024,7 @@ export function ContestArenaPage() {
           <Button
             asChild
             variant="outline"
-            size="sm"
-            className="size-7 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md border-white/10 bg-black transition-colors ml-0.5 shrink-0"
+            size="icon-sm"
           >
             <Link
               to={`/contests/${contestSlug}/results`}
@@ -1066,7 +1045,6 @@ export function ContestArenaPage() {
             size="sm"
             disabled={isRunningCode || isSubmittingCode || isContestOver}
             onClick={handleRunCode}
-            className="h-7 px-3 text-xs font-mono font-semibold rounded-md border border-white/20 bg-black text-white hover:bg-lime-400 hover:text-black hover:border-lime-400 disabled:opacity-30 cursor-pointer transition-colors flex items-center gap-1.5"
           >
             <Play className="size-3 fill-current" />
             <span>{isRunningCode ? "Running…" : "Run"}</span>
@@ -1075,10 +1053,10 @@ export function ContestArenaPage() {
 
           <Button
             type="button"
+            variant="default"
             size="sm"
             disabled={isRunningCode || isSubmittingCode || isContestOver}
             onClick={handleSubmitCode}
-            className="h-7 px-3.5 text-xs font-mono font-bold uppercase tracking-wider rounded-md bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 active:bg-lime-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors shadow-[0_0_12px_rgba(204,255,0,0.3)] flex items-center gap-1.5"
           >
             <Send className="size-3 fill-current" />
             <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
@@ -1125,9 +1103,8 @@ export function ContestArenaPage() {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="icon-sm"
             onClick={() => setShowSettingsModal(true)}
-            className="size-7 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded-md border-white/10 bg-black transition-colors cursor-pointer shrink-0"
             title="Preferences & Keyboard Shortcuts"
           >
             <Settings className="size-3.5" />
@@ -1435,22 +1412,21 @@ export function ContestArenaPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleResetStarter}
-                className="h-6 px-2 text-xs font-mono border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded transition-colors cursor-pointer"
                 title="Reset to official starter code"
               >
-                <RotateCcw className="size-2.5 mr-1" />
+                <RotateCcw className="size-3 mr-1" />
                 <span>Reset</span>
               </Button>
 
               {/* Fullscreen Toggle */}
               <Button
+                type="button"
                 variant="outline"
-                size="sm"
+                size="icon-sm"
                 onClick={toggleFullscreen}
-                className="size-6 p-0 text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 rounded border-white/10 bg-black transition-colors cursor-pointer"
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
-                {isFullscreen ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
+                {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
               </Button>
             </div>
           </div>
@@ -2281,7 +2257,7 @@ export function ContestArenaPage() {
             </div>
             <Button
               onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-              className="font-mono text-xs font-semibold uppercase text-black bg-lime-400 border border-lime-400 hover:bg-lime-300 px-5 py-2 rounded-md"
+              variant="default"
             >
               View Final Results →
             </Button>
@@ -2322,9 +2298,8 @@ export function ContestArenaPage() {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="icon-sm"
             onClick={() => setIsProblemListOpen(false)}
-            className="size-7 p-0 rounded-md border-white/10 bg-black text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 transition-colors cursor-pointer shrink-0"
             title="Close Problem List (Esc)"
           >
             <X className="size-3.5" />
@@ -2533,7 +2508,8 @@ export function ContestArenaPage() {
             <div className="pt-3 border-t border-white/8 shrink-0">
               <Button
                 asChild
-                className="w-full h-9 rounded-md bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 font-mono text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+                variant="outline"
+                className="w-full"
               >
                 <Link
                   to={`/contests/${contestSlug}/results`}
@@ -2592,17 +2568,16 @@ export function ContestArenaPage() {
               type="button"
               variant="outline"
               onClick={() => setShowExitModal(false)}
-              className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer"
             >
               Continue Solving
             </Button>
             <Button
               type="button"
+              variant="default"
               onClick={() => {
                 setShowExitModal(false);
                 navigate(`/contests/${contestSlug}/summary`);
               }}
-              className="rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer"
             >
               <span>Proceed to Summary</span>
               <ArrowRight className="size-3.5 ml-1" />
