@@ -33,7 +33,7 @@ export function PageHeader({
             {formattedKicker}
           </span>
           {index && (
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 tabular-nums">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400 tabular-nums">
               · {index}
             </span>
           )}
@@ -75,7 +75,7 @@ export function SectionHeader({
             {formattedKicker}
           </p>
           {index && (
-            <span className="text-[10px] font-mono tracking-wider text-zinc-500 uppercase tabular-nums">
+            <span className="text-[10px] font-mono tracking-wider text-zinc-400 uppercase tabular-nums">
               · {index}
             </span>
           )}

@@ -92,7 +92,7 @@ export function LeaderboardPage() {
         description="Unified standings across Medi-Caps University computing departments."
         action={
           <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-black p-4 min-w-[180px]">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Rating Season</span>
             <strong className="font-mono text-base font-semibold text-white">2025–2026</strong>
             <small className="font-mono text-xs text-lime-400 tabular-nums">{totalCount} ranked cadets</small>
           </div>
@@ -173,7 +173,7 @@ export function LeaderboardPage() {
                           >
                             @{x.handle}
                           </Link>
-                          <span className="text-[11px] text-zinc-500">{x.full_name}</span>
+                          <span className="text-[11px] text-zinc-400">{x.full_name}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -189,7 +189,7 @@ export function LeaderboardPage() {
                               style={{ width: `${attendancePct}%` }}
                             />
                           </div>
-                          <span className="font-mono text-[11px] tabular-nums text-zinc-500">
+                          <span className="font-mono text-[11px] tabular-nums text-zinc-400">
                             {attendanceCount}/{attendanceTotal}
                           </span>
                         </div>
@@ -204,7 +204,7 @@ export function LeaderboardPage() {
 
         {/* Pagination Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/8 bg-black px-5 py-3.5">
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
+          <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
             <span>
               Showing <strong className="tabular-nums text-white font-medium">{startRecord}–{endRecord}</strong> of{" "}
               <strong className="tabular-nums text-white font-medium">{totalCount}</strong> cadets
