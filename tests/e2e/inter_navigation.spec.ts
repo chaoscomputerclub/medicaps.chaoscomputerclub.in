@@ -105,8 +105,8 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
       await lobbyLink.click();
       await expect(page).toHaveURL(/.*\/lobby$/);
 
-      // Verify Waiting Room / Lobby renders cleanly
-      await expect(page.locator('h1, h2, h3').filter({ hasText: /Waiting Room|Lobby|Contest/i }).first()).toBeVisible({ timeout: 10000 });
+      // Verify Waiting Room / Lobby renders cleanly (any valid lobby state)
+      await expect(page.locator('h1, h2, h3').filter({ hasText: /Waiting Room|Lobby|Contest|Registration Required|Concluded/i }).first()).toBeVisible({ timeout: 10000 });
 
       // Click "Contest Overview" or back button in lobby
       const backToOverviewLink = page.locator('a[href^="/contests/"]').filter({
