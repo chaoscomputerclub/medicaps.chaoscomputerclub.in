@@ -177,7 +177,10 @@ export function LeaderboardPage() {
                       <TableCell className="py-3">
                         <HoverCard openDelay={180} closeDelay={200}>
                           <HoverCardTrigger asChild>
-                            <div className="flex items-center gap-3 cursor-pointer group/row min-w-0">
+                            <Link
+                              to={`/profile/${x.handle}`}
+                              className="flex items-center gap-3 cursor-pointer group/row min-w-0"
+                            >
                               {/* Avatar always visible */}
                               <Avatar className="size-9 shrink-0 rounded-full border border-white/10 group-hover/row:border-lime-400/40 transition-colors overflow-hidden">
                                 <AvatarImage
@@ -199,7 +202,7 @@ export function LeaderboardPage() {
                                   </p>
                                 )}
                               </div>
-                            </div>
+                            </Link>
                           </HoverCardTrigger>
 
                           {/* LeetCode-style popup card */}

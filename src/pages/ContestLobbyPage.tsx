@@ -118,24 +118,43 @@ export function ContestLobbyPage() {
     )
   );
   const notYetOpen = isUpcoming && !isDevBypass;
+  if (isLoadingDetail && !resolvedContest) {
+    return <ContestLobbySkeleton />;
+  }
+
+  if (!resolvedContest) {
+    return (
+      <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
+        <Link
+          to="/contests"
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
+        >
+          <ArrowLeft className="size-3.5" /> Back to Contests Hub
+        </Link>
+        <div className="rounded-lg border border-white/8 bg-black p-6 sm:p-8 space-y-4">
+          <h1 className="text-xl font-semibold text-white tracking-tight">Contest Not Found</h1>
+          <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+            The requested contest tournament could not be found or has not been initialized yet.
+          </p>
+          <Button asChild variant="outline" className="rounded-md border-white/10 font-mono text-xs">
+            <Link to="/contests">Explore All Contests</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const canStart = !isAssessmentSubmitted && (isLive || isDevBypass || isInProgress);
 
   return (
     <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
-      {/* Back / Close button */}
-      <button
-        type="button"
-        onClick={() => {
-          if (window.opener) {
-            window.close();
-          } else {
-            navigate(`/contests/${contestSlug}`);
-          }
-        }}
+      {/* Back / Close link */}
+      <Link
+        to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start cursor-pointer"
       >
         <ArrowLeft className="size-3.5" /> Back to {resolvedContest.title}
-      </button>
+      </Link>
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (
@@ -166,18 +185,11 @@ export function ContestLobbyPage() {
               <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
             </Button>
             <Button
-              type="button"
+              asChild
               variant="outline"
-              onClick={() => {
-                if (window.opener) {
-                  window.close();
-                } else {
-                  navigate(`/contests/${contestSlug}`);
-                }
-              }}
               className="rounded-md font-mono text-xs border-white/10 bg-black text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 cursor-pointer"
             >
-              Contest Overview
+              <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
           </div>
         </div>
@@ -433,18 +445,11 @@ export function ContestLobbyPage() {
                   )}
                 </Button>
                 <Button
-                  type="button"
+                  asChild
                   variant="ghost"
-                  onClick={() => {
-                    if (window.opener) {
-                      window.close();
-                    } else {
-                      navigate(`/contests/${contestSlug}`);
-                    }
-                  }}
                   className="rounded-md font-mono text-xs text-zinc-500 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent cursor-pointer"
                 >
-                  Not Now
+                  <Link to={`/contests/${contestSlug}`}>Not Now</Link>
                 </Button>
               </div>
 

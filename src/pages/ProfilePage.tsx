@@ -204,10 +204,12 @@ export function ProfilePage() {
           The requested cadet profile could not be found or you may need to sign in.
         </p>
         <Button
-          onClick={() => navigate(isViewingSelf ? "/auth" : "/leaderboard")}
+          asChild
           className="bg-lime-400 hover:bg-lime-300 text-black font-semibold text-xs cursor-pointer"
         >
-          {isViewingSelf ? "Sign In to Access Profile" : "Back to Leaderboard"}
+          <Link to={isViewingSelf ? "/auth" : "/leaderboard"}>
+            {isViewingSelf ? "Sign In to Access Profile" : "Back to Leaderboard"}
+          </Link>
         </Button>
       </div>
     );
@@ -683,8 +685,25 @@ export function ProfilePage() {
                   })}
                 </time>
                 <div>
-                  <h3 className="font-semibold text-white">{b.contest}</h3>
-                  <code className="text-[10px] text-zinc-500">{b.certificate_id}</code>
+                  {b.contest_slug || b.slug ? (
+                    <Link
+                      to={`/contests/${b.contest_slug || b.slug}/results`}
+                      className="font-semibold text-white hover:text-lime-400 transition-colors block"
+                    >
+                      {b.contest}
+                    </Link>
+                  ) : (
+                    <h3 className="font-semibold text-white">{b.contest}</h3>
+                  )}
+                  {b.certificate_id ? (
+                    <Link
+                      to={`/verify?proof=${encodeURIComponent(b.certificate_id)}`}
+                      className="text-[10px] text-zinc-500 hover:text-lime-400 font-mono transition-colors block"
+                      title="Verify this certificate"
+                    >
+                      {b.certificate_id}
+                    </Link>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-zinc-400">Rank <strong className="text-white font-semibold tabular-nums">#{b.rank}</strong></span>

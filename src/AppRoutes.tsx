@@ -274,14 +274,7 @@ export function AppRoutes() {
               </Suspense>
             }
           />
-          <Route
-            path="u/:handle"
-            element={
-              <Suspense fallback={<ProfileSkeleton />}>
-                <ProfilePage />
-              </Suspense>
-            }
-          />
+          <Route path="u/:handle" element={<ProfileHandleRedirect />} />
 
           {/* Account & Security Settings */}
           <Route

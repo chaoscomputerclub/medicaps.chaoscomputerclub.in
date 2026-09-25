@@ -1,4 +1,5 @@
 import type { ContestProblem, ScoreboardEntry } from "../data/types";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatPenalty } from "./ui";
 import { ScoreboardMatrixSkeleton } from "./skeletons";
@@ -62,8 +63,11 @@ export function ScoreboardMatrix({
                 {row.rank}
               </td>
               <td className="p-3">
-                <div className="flex flex-col">
-                  <strong className="text-white font-semibold flex items-center gap-1.5">
+                <Link
+                  to={`/profile/${row.handle}`}
+                  className="flex flex-col group/cadet hover:opacity-90 transition-opacity"
+                >
+                  <strong className="text-white font-semibold flex items-center gap-1.5 group-hover/cadet:text-lime-400 transition-colors">
                     {row.handle}
                     {row.is_you && (
                       <span className="text-[9px] px-1 py-0.2 bg-lime-400 text-black font-bold uppercase">
@@ -72,7 +76,7 @@ export function ScoreboardMatrix({
                     )}
                   </strong>
                   <span className="text-[11px] text-slate-400 font-sans">{row.full_name}</span>
-                </div>
+                </Link>
               </td>
               {!compact && (
                 <td className="p-3">
