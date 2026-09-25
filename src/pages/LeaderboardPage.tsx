@@ -219,7 +219,7 @@ export function LeaderboardPage() {
 
           <div className="flex items-center gap-3">
             {/* Page Size */}
-            <div className="flex items-center gap-1.5 font-mono text-xs text-zinc-500">
+            <div className="flex items-center gap-1.5 font-mono text-xs text-zinc-400">
               <span>Rows:</span>
               <div className="flex items-center border border-white/8 rounded-md overflow-hidden">
                 {[25, 50, 100].map((size) => (
@@ -229,7 +229,7 @@ export function LeaderboardPage() {
                     className={`px-2 py-0.5 font-mono text-xs transition-colors ${
                       pageSize === size
                         ? "bg-lime-400 text-black font-semibold"
-                        : "text-zinc-500 hover:text-white bg-black"
+                        : "text-zinc-400 hover:text-white bg-black"
                     }`}
                   >
                     {size}
