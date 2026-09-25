@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -68,11 +68,11 @@ export function ContestLobbyPage() {
 
   const [ack, setAck] = useState(false);
 
-  const refreshDetail = () => {
+  const refreshDetail = useCallback(() => {
     if (contestSlug) {
       dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
     }
-  };
+  }, [contestSlug, dispatch]);
 
   useEffect(() => {
     if (contestSlug) {
@@ -100,9 +100,13 @@ export function ContestLobbyPage() {
   const isUpcoming = resolvedContest?.status === "upcoming" || (!isLive && !isFinished);
   const isRegistered = Boolean(resolvedRegistration?.registered || resolvedContest?.registered);
 
+  const onCountdownExpire = useCallback(() => {
+    refreshDetail();
+  }, [refreshDetail]);
+
   const countdown = useCountdown(
     isUpcoming ? resolvedContest?.starts_at : resolvedContest?.ends_at,
-    refreshDetail
+    onCountdownExpire
   );
 
   const isInProgress = Boolean(
