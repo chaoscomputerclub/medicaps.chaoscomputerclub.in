@@ -2148,9 +2148,9 @@
     "semantic_hash": "a0a6300a86232c0473bcd5804ca19853"
   },
   "backend/app/controllers/assessment_controller.py": {
-    "mtime": 1790427263.3491292,
-    "seen": 1790427925.277483,
-    "ast_hash": "5b463679f654b091f9e76b5057ae9b74",
+    "mtime": 1790428901.8006532,
+    "seen": 1790429129.391901,
+    "ast_hash": "be983d21e715c4939a44b97509a44536",
     "semantic_hash": ""
   },
   "backend/app/controllers/auth_controller.py": {
@@ -2718,9 +2718,9 @@
     "semantic_hash": "9fc2df0e6741a87bfce6e59059f9204d"
   },
   "backend/app/services/background_tasks_service.py": {
-    "mtime": 1790419013.866378,
-    "seen": 1790419058.8041668,
-    "ast_hash": "62f6fe688c03d5508f684c234c7533dc",
+    "mtime": 1790428505.592623,
+    "seen": 1790429129.393488,
+    "ast_hash": "76ed8da6ff51623040168ed1c6cea976",
     "semantic_hash": ""
   },
   "backend/app/services/contest_eligibility_service.py": {
@@ -2748,9 +2748,9 @@
     "semantic_hash": "42eeaff74e7f1654a245673b6573765e"
   },
   "backend/app/services/dynamic_contest_service.py": {
-    "mtime": 1790419028.9033904,
-    "seen": 1790419058.804373,
-    "ast_hash": "c297f78b3848ea443c59a6c77e13746c",
+    "mtime": 1790428459.7959654,
+    "seen": 1790429129.393568,
+    "ast_hash": "beac736c38eec3e384bc25f22679553e",
     "semantic_hash": ""
   },
   "backend/app/services/event_broadcaster.py": {
@@ -3042,9 +3042,9 @@
     "semantic_hash": "653c5b935af730ecfb00071fbe05e305"
   },
   "src/AppRoutes.tsx": {
-    "mtime": 1790418861.0305414,
-    "seen": 1790418968.6568801,
-    "ast_hash": "a8b87f23682219b17d6dd59491bdc749",
+    "mtime": 1790428533.7245064,
+    "seen": 1790429129.3943338,
+    "ast_hash": "bc83f7f7b88e9ca4656c56ad7946cf4a",
     "semantic_hash": ""
   },
   "src/components/ErrorBoundary.tsx": {
@@ -3498,9 +3498,9 @@
     "semantic_hash": "0367e03b7d71917510e4dc1cdae172ec"
   },
   "src/lib/realtime.ts": {
-    "mtime": 1790418861.012577,
-    "seen": 1790418968.659986,
-    "ast_hash": "05d265615c0d336cec93dacaa68c4cfd",
+    "mtime": 1790428521.8963256,
+    "seen": 1790429129.395641,
+    "ast_hash": "a998116ee1719738ca7ae7a3a09b0ca5",
     "semantic_hash": ""
   },
   "src/lib/storage.ts": {
@@ -3672,21 +3672,21 @@
     "semantic_hash": "5520b76661b222b0eb4b671f295eb78a"
   },
   "src/pages/ContestArenaPage.tsx": {
-    "mtime": 1790426572.4140344,
-    "seen": 1790426833.062342,
-    "ast_hash": "5cec1eeba29597f0e92f1f9b39d4f7d9",
+    "mtime": 1790428558.3726525,
+    "seen": 1790429129.396119,
+    "ast_hash": "62941620cfc53390b88f069789969b55",
     "semantic_hash": ""
   },
   "src/pages/ContestFinalResultsPage.tsx": {
-    "mtime": 1790367169.2129564,
-    "seen": 1790415324.800786,
-    "ast_hash": "8f78af06192a01f374e914ad38b7a199",
-    "semantic_hash": "8f78af06192a01f374e914ad38b7a199"
+    "mtime": 1790429007.6097097,
+    "seen": 1790429129.396119,
+    "ast_hash": "42e10511bf1ba75f6936265b3e5186bf",
+    "semantic_hash": ""
   },
   "src/pages/ContestLobbyPage.tsx": {
-    "mtime": 1790427807.175434,
-    "seen": 1790427925.28451,
-    "ast_hash": "e3d83e4150be70e0371869513fc59b15",
+    "mtime": 1790428964.4237409,
+    "seen": 1790429129.39612,
+    "ast_hash": "10374d43dc432fc6482116d6c1b45021",
     "semantic_hash": ""
   },
   "src/pages/ContestOfflinePage.tsx": {
@@ -3696,46 +3696,46 @@
     "semantic_hash": "7b2b9b52796f9246fbf306085290589a"
   },
   "src/pages/ContestOverviewPage.tsx": {
-    "mtime": 1790427761.1943827,
-    "seen": 1790427925.284527,
-    "ast_hash": "353c67da2d66e1c1459d65ac3a64b036",
+    "mtime": 1790428572.6055675,
+    "seen": 1790429129.396137,
+    "ast_hash": "85df49d81eb1b5b7d2635be0595970a9",
     "semantic_hash": ""
   },
   "src/pages/ContestQualifiedPage.tsx": {
-    "mtime": 1790418813.3401933,
-    "seen": 1790418968.661293,
-    "ast_hash": "8c54c47118bc8d22d5877e2e34991345",
+    "mtime": 1790429017.8352416,
+    "seen": 1790429129.396138,
+    "ast_hash": "c366132d72045dfd9eb1570a49a82caf",
     "semantic_hash": ""
   },
   "src/pages/ContestResultsPage.tsx": {
-    "mtime": 1790368290.828619,
-    "seen": 1790415324.800788,
-    "ast_hash": "91bea619a1d137432f0c3e0532bec3a0",
-    "semantic_hash": "91bea619a1d137432f0c3e0532bec3a0"
+    "mtime": 1790428922.5944073,
+    "seen": 1790429129.396139,
+    "ast_hash": "f5728048e5a1cad6a50319845626b802",
+    "semantic_hash": ""
   },
   "src/pages/ContestSummaryPage.tsx": {
-    "mtime": 1790426745.5906413,
-    "seen": 1790426833.062405,
-    "ast_hash": "f62326cffacab950d838a472e61b5d6b",
+    "mtime": 1790428990.4894102,
+    "seen": 1790429129.396139,
+    "ast_hash": "d4f608e8c179daa220dba762f0f81854",
     "semantic_hash": ""
   },
   "src/pages/ContestsHubPage.tsx": {
-    "mtime": 1790427868.8387372,
-    "seen": 1790427925.284575,
-    "ast_hash": "d24d9d82963bc6cf28399eab6fccd86e",
+    "mtime": 1790428589.9377987,
+    "seen": 1790429129.39614,
+    "ast_hash": "a2639c4bfdeb73191cd91ea539a6212f",
     "semantic_hash": ""
   },
   "src/pages/DashboardPage.tsx": {
-    "mtime": 1790365952.9258091,
-    "seen": 1790415324.80079,
-    "ast_hash": "cf1d407572becf30bcf06725b88dfccf",
-    "semantic_hash": "cf1d407572becf30bcf06725b88dfccf"
+    "mtime": 1790428941.5510867,
+    "seen": 1790429129.39614,
+    "ast_hash": "c36d4c7c6b8f09e175cf7a14a3623c53",
+    "semantic_hash": ""
   },
   "src/pages/LeaderboardPage.tsx": {
-    "mtime": 1790368625.1941917,
-    "seen": 1790415324.80079,
-    "ast_hash": "3e072e2fea483ff99fc7f3a909d6b7f6",
-    "semantic_hash": "3e072e2fea483ff99fc7f3a909d6b7f6"
+    "mtime": 1790428932.118751,
+    "seen": 1790429129.396141,
+    "ast_hash": "a5f5a74eb29d0a3a7b95dcbabfab7b72",
+    "semantic_hash": ""
   },
   "src/pages/LightRays.tsx": {
     "mtime": 1790236535.1631699,
@@ -7441,13 +7441,13 @@
   },
   "drizzle/migrations/0000_create_offline_contest_platform.sql": {
     "mtime": 1789371317.04122,
-    "seen": 1790426854.79342,
+    "seen": 1790427982.041718,
     "ast_hash": "",
     "semantic_hash": ""
   },
   "drizzle/migrations/0001_member_accounts_and_achievements.sql": {
     "mtime": 1790236535.1172073,
-    "seen": 1790426854.793421,
+    "seen": 1790427982.0417202,
     "ast_hash": "",
     "semantic_hash": ""
   }

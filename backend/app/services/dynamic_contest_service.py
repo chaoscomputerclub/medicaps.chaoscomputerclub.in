@@ -66,7 +66,16 @@ class DynamicContestService:
         for pattern in DynamicContestService._CONTEST_CACHE_PATTERNS:
             await delete_cache_pattern(pattern)
         if include_rating_caches:
-            for pattern in ("cache:leaderboard:*", "cache:profile:*", "cache:student:profile:*"):
+            for pattern in (
+                "cache:leaderboard:*",
+                "cache:profile:*",
+                "cache:student:profile:*",
+                "cache:contests:*",
+                "cache:contest:*",
+                "cache:scoreboard:*",
+                "cache:ranking:*",
+                "cache:*",
+            ):
                 await delete_cache_pattern(pattern)
 
     @staticmethod
@@ -1115,6 +1124,28 @@ class DynamicContestService:
         await DynamicContestService._publish_contest_event(
             "contest_status_changed", contest.slug, status_event_data
         )
+
+        if cleaned_status == "finished":
+            concluded_event_data = DynamicContestService._contest_event_data(contest, "concluded")
+            concluded_event_data.update({
+                "old_status": old_status,
+                "new_status": "finished",
+                "status": "finished",
+                "rating_summary": rating_summary,
+            })
+            await DynamicContestService._publish_contest_event(
+                "contest_concluded", contest.slug, concluded_event_data
+            )
+            # Also publish global stream event so all platform pages react
+            try:
+                from app.services.event_broadcaster import broadcast_event
+                await broadcast_event(
+                    event_type="contest_concluded",
+                    data=concluded_event_data,
+                    contest_slug=None,
+                )
+            except Exception:
+                pass
 
         return {
             "success": True,

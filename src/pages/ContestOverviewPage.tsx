@@ -122,6 +122,8 @@ export function ContestOverviewPage() {
       }
       if (
         event.event === "contest_status_changed" ||
+        event.event === "contest_concluded" ||
+        event.event === "contest_finished" ||
         event.event === "contest_updated" ||
         event.event === "top30_qualified" ||
         event.event === "contest_created" ||

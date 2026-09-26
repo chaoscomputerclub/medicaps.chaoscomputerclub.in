@@ -15,6 +15,7 @@ import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 import { useAppSelector } from "@/store/hooks";
 import { getFirstName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
@@ -24,13 +25,13 @@ export function DashboardPage() {
   const currentMember = useAppSelector((s) => s.auth.member);
 
   const authed = isAuthenticated();
-  const { data: profile, loading: profileLoading } = useSwrData<FullProfilePayload | null>(
+  const { data: profile, loading: profileLoading, revalidate: revalidateProfile } = useSwrData<FullProfilePayload | null>(
     authed ? "member:profile:full" : null,
     () => fetchFullProfileData(),
     { ttl: 5 * 60 * 1000, enabled: authed }
   );
 
-  const { data: publicDataRaw, loading: publicLoading } = useSwrData<{
+  const { data: publicDataRaw, loading: publicLoading, revalidate: revalidatePublic } = useSwrData<{
     contests: OfflineContest[];
     announcements: AnnouncementFeedItem[];
     standings: any[];
@@ -40,6 +41,37 @@ export function DashboardPage() {
     () => getPublicPortalData(),
     { ttl: 5 * 60 * 1000 }
   );
+
+  useRealtimeEvents(
+    null,
+    (event) => {
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_status_changed" ||
+        event.event === "contest_finished" ||
+        event.event === "contest_created" ||
+        event.event === "contest_updated" ||
+        event.event === "top30_qualified" ||
+        event.event === "assessment_finished"
+      ) {
+        revalidateProfile();
+        revalidatePublic();
+      }
+    }
+  );
+
+  useEffect(() => {
+    const handleConcluded = () => {
+      revalidateProfile();
+      revalidatePublic();
+    };
+    window.addEventListener("contest:concluded", handleConcluded);
+    window.addEventListener("contest:cache_invalidated", handleConcluded);
+    return () => {
+      window.removeEventListener("contest:concluded", handleConcluded);
+      window.removeEventListener("contest:cache_invalidated", handleConcluded);
+    };
+  }, [revalidateProfile, revalidatePublic]);
 
   const publicData = publicDataRaw || { contests: [], announcements: [], standings: [], problems: [] };
 

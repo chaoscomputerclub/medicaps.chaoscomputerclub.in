@@ -225,22 +225,22 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                 if not entries:
                     await db.commit()
                     _auto_finish_done.add(slug)
-                    await DynamicContestService._invalidate_contest_caches()
+                    await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
                     try:
                         from app.services.event_broadcaster import broadcast_event as _broadcast
-                        await _broadcast(
-                            "contest_status_changed",
-                            {
-                                "contest_slug": slug,
-                                "contest_title": contest.title,
-                                "old_status": "live",
-                                "new_status": "finished",
-                                "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
-                                "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
-                                "change": "status_changed",
-                            },
-                            contest_slug=slug,
-                        )
+                        finish_payload = {
+                            "contest_slug": slug,
+                            "contest_title": contest.title,
+                            "old_status": "live",
+                            "new_status": "finished",
+                            "status": "finished",
+                            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+                            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+                            "change": "concluded",
+                        }
+                        await _broadcast("contest_status_changed", finish_payload, contest_slug=slug)
+                        await _broadcast("contest_concluded", finish_payload, contest_slug=slug)
+                        await _broadcast("contest_concluded", finish_payload, contest_slug=None)
                     except Exception:
                         pass
                     logger.info("auto-finish: '%s' → finished (no scoreboard entries)", slug)
@@ -315,19 +315,19 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                 # Broadcast SSE so connected frontends move contest to history
                 try:
                     from app.services.event_broadcaster import broadcast_event as _broadcast
-                    await _broadcast(
-                        "contest_status_changed",
-                        {
-                            "contest_slug": slug,
-                            "contest_title": contest.title,
-                            "old_status": "live",
-                            "new_status": "finished",
-                            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
-                            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
-                            "change": "status_changed",
-                        },
-                        contest_slug=slug,
-                    )
+                    finish_payload = {
+                        "contest_slug": slug,
+                        "contest_title": contest.title,
+                        "old_status": "live",
+                        "new_status": "finished",
+                        "status": "finished",
+                        "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+                        "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+                        "change": "concluded",
+                    }
+                    await _broadcast("contest_status_changed", finish_payload, contest_slug=slug)
+                    await _broadcast("contest_concluded", finish_payload, contest_slug=slug)
+                    await _broadcast("contest_concluded", finish_payload, contest_slug=None)
                 except Exception:
                     pass
 

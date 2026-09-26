@@ -49,6 +49,7 @@ import { ContestSummarySkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
 import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
@@ -186,6 +187,35 @@ export function ContestSummaryPage() {
 
     return () => clearInterval(timer);
   }, [arenaData?.ends_at, currentContest?.ends_at]);
+
+  // Real-time: auto-redirect if contest concludes while candidate is reviewing summary
+  useRealtimeEvents(
+    contestSlug,
+    (event) => {
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_finished" ||
+        (event.event === "contest_status_changed" &&
+          (event.data?.new_status === "finished" || event.data?.status === "finished"))
+      ) {
+        toast.info("Contest has concluded. Redirecting to official standings…");
+        navigate(`/contests/${contestSlug}/results`, { replace: true });
+      }
+    },
+    undefined,
+    Boolean(contestSlug)
+  );
+
+  useEffect(() => {
+    const handleConcluded = () => {
+      toast.info("Contest has concluded. Redirecting to official standings…");
+      navigate(`/contests/${contestSlug}/results`, { replace: true });
+    };
+    window.addEventListener("contest:concluded", handleConcluded);
+    return () => {
+      window.removeEventListener("contest:concluded", handleConcluded);
+    };
+  }, [contestSlug, navigate]);
 
   const handleFinalSubmit = async () => {
     setIsSubmittingFinal(true);

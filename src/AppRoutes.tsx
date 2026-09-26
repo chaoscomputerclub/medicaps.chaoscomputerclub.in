@@ -33,7 +33,12 @@ const CONTEST_MUTATION_EVENTS = [
   "contest_updated",
   "contest_deleted",
   "contest_status_changed",
+  "contest_concluded",
+  "contest_finished",
   "contest_timer_reset",
+  "assessment_finished",
+  "submission_evaluated",
+  "top30_qualified",
 ];
 
 function ContestRealtimeSynchronizer() {

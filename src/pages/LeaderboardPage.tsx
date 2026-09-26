@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy, UserPlus } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import { LeaderboardSkeleton, LeaderboardRowSkeleton } from "@/organization/components/skeletons";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 import { useChunkedList } from "@/hooks/useChunkedList";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -41,11 +42,38 @@ export function LeaderboardPage() {
   const [pageSize, setPageSize] = useState<number>(25);
   const [pageIndex, setPageIndex] = useState<number>(0);
 
-  const { data: rawData, loading } = useSwrData(
+  const { data: rawData, loading, revalidate } = useSwrData(
     "leaderboard:university",
     getUniversityLeaderboardData,
     { staleTime: 30000, persistSession: true }
   );
+
+  useRealtimeEvents(
+    null,
+    (event) => {
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_status_changed" ||
+        event.event === "contest_finished" ||
+        event.event === "top30_qualified" ||
+        event.event === "assessment_finished"
+      ) {
+        revalidate();
+      }
+    }
+  );
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      revalidate();
+    };
+    window.addEventListener("contest:concluded", handleRefresh);
+    window.addEventListener("contest:cache_invalidated", handleRefresh);
+    return () => {
+      window.removeEventListener("contest:concluded", handleRefresh);
+      window.removeEventListener("contest:cache_invalidated", handleRefresh);
+    };
+  }, [revalidate]);
   const data = rawData || [];
   const currentMemberId = useAppSelector((s) => s.auth.member?.id);
   const followingIds = useAppSelector((s) => s.social.followingIds);

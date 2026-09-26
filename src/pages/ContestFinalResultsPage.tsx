@@ -3,9 +3,11 @@
  * Redesigned to Strix AI Paradigm (Pure Pitch Black × Electric Lime)
  */
 
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { contestApi } from "@/features/contest/api";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 import { ArrowLeft, Award, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -30,17 +32,47 @@ import { ContestFinalResultsSkeleton } from "@/organization/components/skeletons
 export function ContestFinalResultsPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
 
-  const { data: finalRows, loading: rowsLoading } = useSwrData<FinalStandingRow[]>(
+  const { data: finalRows, loading: rowsLoading, revalidate: revalidateRows } = useSwrData<FinalStandingRow[]>(
     `contest:final_standings:${contestSlug}`,
     () => contestApi.finalStandings(contestSlug),
     { ttl: 30 * 1000 }
   );
 
-  const { data: contest, loading: contestLoading } = useSwrData(
+  const { data: contest, loading: contestLoading, revalidate: revalidateContest } = useSwrData(
     `contest:detail:${contestSlug}`,
     () => contestApi.detail(contestSlug),
     { ttl: 2 * 60 * 1000 }
   );
+
+  useRealtimeEvents(
+    contestSlug,
+    (event) => {
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_status_changed" ||
+        event.event === "contest_finished" ||
+        event.event === "top30_qualified"
+      ) {
+        revalidateRows();
+        revalidateContest();
+      }
+    },
+    undefined,
+    Boolean(contestSlug)
+  );
+
+  useEffect(() => {
+    const handleConcluded = () => {
+      revalidateRows();
+      revalidateContest();
+    };
+    window.addEventListener("contest:concluded", handleConcluded);
+    window.addEventListener("contest:cache_invalidated", handleConcluded);
+    return () => {
+      window.removeEventListener("contest:concluded", handleConcluded);
+      window.removeEventListener("contest:cache_invalidated", handleConcluded);
+    };
+  }, [revalidateRows, revalidateContest]);
 
   const rows = finalRows || [];
 

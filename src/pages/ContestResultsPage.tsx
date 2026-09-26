@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { contestApi } from "@/features/contest/api";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 import { ArrowLeft, Award, Clock, Crown, Lock, Search, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,23 +19,57 @@ export function ContestResultsPage() {
   const query = searchParams.get("query") || "";
   const [deptFilter, setDeptFilter] = useState<string>("all");
 
-  const { data: rankingData, loading: rankLoading } = useSwrData<AssessmentRanking>(
+  const { data: rankingData, loading: rankLoading, revalidate: revalidateRanking } = useSwrData<AssessmentRanking>(
     `contest:ranking:${contestSlug}`,
     () => contestApi.ranking(contestSlug),
     { ttl: 30 * 1000 }
   );
 
-  const { data: contest, loading: contestLoading } = useSwrData(
+  const { data: contest, loading: contestLoading, revalidate: revalidateContest } = useSwrData(
     `contest:detail:${contestSlug}`,
     () => contestApi.detail(contestSlug),
     { ttl: 2 * 60 * 1000 }
   );
 
-  const { data: registration } = useSwrData(
+  const { data: registration, revalidate: revalidateRegistration } = useSwrData(
     `contest:registration:${contestSlug}`,
     () => contestApi.registrationStatus(contestSlug),
     { ttl: 2 * 60 * 1000 }
   );
+
+  useRealtimeEvents(
+    contestSlug,
+    (event) => {
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_status_changed" ||
+        event.event === "contest_finished" ||
+        event.event === "top30_qualified" ||
+        event.event === "submission_evaluated" ||
+        event.event === "assessment_finished"
+      ) {
+        revalidateRanking();
+        revalidateContest();
+        revalidateRegistration();
+      }
+    },
+    undefined,
+    Boolean(contestSlug)
+  );
+
+  useEffect(() => {
+    const handleConcluded = () => {
+      revalidateRanking();
+      revalidateContest();
+      revalidateRegistration();
+    };
+    window.addEventListener("contest:concluded", handleConcluded);
+    window.addEventListener("contest:cache_invalidated", handleConcluded);
+    return () => {
+      window.removeEventListener("contest:concluded", handleConcluded);
+      window.removeEventListener("contest:cache_invalidated", handleConcluded);
+    };
+  }, [revalidateRanking, revalidateContest, revalidateRegistration]);
 
   const ranking = rankingData || {
     contest_slug: contestSlug,

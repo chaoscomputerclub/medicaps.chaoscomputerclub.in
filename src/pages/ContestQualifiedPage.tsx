@@ -75,6 +75,8 @@ export function ContestQualifiedPage() {
     if (
       event.event === "pass_checked_in" ||
       event.event === "contest_status_changed" ||
+      event.event === "contest_concluded" ||
+      event.event === "contest_finished" ||
       event.event === "contest_updated" ||
       event.event === "top30_qualified"
     ) {
@@ -98,11 +100,15 @@ export function ContestQualifiedPage() {
     window.addEventListener("focus", handleSync);
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
+    window.addEventListener("contest:concluded" as any, handleSync);
+    window.addEventListener("contest:cache_invalidated" as any, handleSync);
 
     return () => {
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
+      window.removeEventListener("contest:concluded" as any, handleSync);
+      window.removeEventListener("contest:cache_invalidated" as any, handleSync);
     };
   }, [contestSlug, refreshData]);
 

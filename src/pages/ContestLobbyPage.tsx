@@ -56,7 +56,7 @@ export function ContestLobbyPage() {
     }
   }, [contestSlug, dispatch]);
 
-  // Real-time: auto-refresh when contest goes live so "Start Contest" unlocks without page reload
+  // Real-time: auto-refresh when contest goes live or concludes so states unlock without page reload
   useRealtimeEvents(
     contestSlug,
     (event) => {
@@ -66,6 +66,8 @@ export function ContestLobbyPage() {
       }
       if (
         event.event === "contest_status_changed" ||
+        event.event === "contest_concluded" ||
+        event.event === "contest_finished" ||
         event.event === "contest_updated" ||
         event.event === "top30_qualified" ||
         event.event === "assessment_finished" ||
@@ -77,6 +79,18 @@ export function ContestLobbyPage() {
     undefined,
     Boolean(contestSlug)
   );
+
+  useEffect(() => {
+    const handleConcluded = () => {
+      refreshDetail();
+    };
+    window.addEventListener("contest:concluded", handleConcluded);
+    window.addEventListener("contest:cache_invalidated", handleConcluded);
+    return () => {
+      window.removeEventListener("contest:concluded", handleConcluded);
+      window.removeEventListener("contest:cache_invalidated", handleConcluded);
+    };
+  }, [refreshDetail]);
 
   // On reload, Redux resets to null while the thunk is in-flight.
   // Hydrate from SWR sessionStorage cache instantly — zero skeleton flash.
@@ -412,8 +426,42 @@ export function ContestLobbyPage() {
             </ul>
           </div>
 
-          {/* Attempt Submitted Alert */}
-          {isAssessmentSubmitted ? (
+          {/* Contest Concluded or Attempt Submitted Alert */}
+          {isFinished ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-md border border-white/10 bg-zinc-900/60 text-zinc-300 font-mono text-xs">
+                <Trophy className="size-4 shrink-0 text-lime-400 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-semibold uppercase tracking-wider text-lime-400">
+                    Contest Concluded
+                  </div>
+                  <p className="text-zinc-400 leading-relaxed">
+                    This contest tournament has officially concluded. Submissions are closed and official standings and Elo ratings have been finalized.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  asChild
+                  variant="default"
+                  size="default"
+                  className="bg-lime-400 text-black hover:bg-lime-300"
+                >
+                  <Link to={`/contests/${contestSlug}/results`}>
+                    <Trophy className="size-3.5 mr-1.5" />
+                    <span>View Standings & Results</span>
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="default"
+                  onClick={handleBack}
+                >
+                  Back to Overview
+                </Button>
+              </div>
+            </div>
+          ) : isAssessmentSubmitted ? (
             <div className="space-y-4">
               <div className="flex items-start gap-3 p-4 rounded-md border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 font-mono text-xs">
                 <CheckCircle2 className="size-4 shrink-0 text-emerald-400 mt-0.5" />

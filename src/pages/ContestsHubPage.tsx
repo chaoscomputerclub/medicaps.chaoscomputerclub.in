@@ -195,6 +195,8 @@ export function ContestsHubPage() {
     (event) => {
       if (
         event.event === "contest_status_changed" ||
+        event.event === "contest_concluded" ||
+        event.event === "contest_finished" ||
         event.event === "contest_updated" ||
         event.event === "contest_created" ||
         event.event === "contest_deleted" ||

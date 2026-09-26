@@ -445,8 +445,10 @@ export function ContestArenaPage() {
       setRemainingSeconds(event.data.remaining_seconds);
       toast.info("Contest clock synchronized by Chief Proctor.");
     } else if (
-      event.event === "contest_status_changed" &&
-      (event.data?.new_status === "finished" || event.data?.status === "finished")
+      event.event === "contest_concluded" ||
+      event.event === "contest_finished" ||
+      (event.event === "contest_status_changed" &&
+        (event.data?.new_status === "finished" || event.data?.status === "finished"))
     ) {
       setRemainingSeconds(0);
       toast.warning("Contest concluded by Chief Proctor.");

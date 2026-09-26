@@ -397,12 +397,12 @@ class AssessmentController:
                     "status": "submitted",
                     "total_score": final_score,
                 },
-                db=db,
+                contest_slug=contest_slug,
             )
             await broadcast_event(
                 event_type="contest_updated",
                 data={"contest_slug": contest_slug, "status": contest.status if contest else "live"},
-                db=db,
+                contest_slug=contest_slug,
             )
         except Exception:
             pass

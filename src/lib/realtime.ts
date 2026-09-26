@@ -27,11 +27,19 @@ const CONTEST_CACHE_PATTERNS = [
   "ranking:*",
   "leaderboard:*",
   "portal:*",
+  "profile:*",
+  "student:*",
+  "hub:*",
 ];
 
-function invalidateContestCaches(): void {
+export function invalidateContestCaches(): void {
   for (const pattern of CONTEST_CACHE_PATTERNS) {
     invalidateSwrCache(pattern);
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("contest:cache_invalidated"));
+    window.dispatchEvent(new CustomEvent("assessment:status_changed"));
+    window.dispatchEvent(new CustomEvent("contest:status_changed"));
   }
 }
 
@@ -80,14 +88,27 @@ export function useRealtimeEvents(
             if (
               parsed.event === "pass_checked_in" ||
               parsed.event === "contest_status_changed" ||
+              parsed.event === "contest_concluded" ||
+              parsed.event === "contest_finished" ||
               parsed.event === "contest_created" ||
               parsed.event === "contest_updated" ||
-              parsed.event === "contest_deleted"
-              || parsed.event === "contest_timer_reset"
+              parsed.event === "contest_deleted" ||
+              parsed.event === "contest_timer_reset" ||
+              parsed.event === "top30_qualified" ||
+              parsed.event === "submission_evaluated" ||
+              parsed.event === "assessment_finished"
             ) {
               invalidateContestCaches();
-            } else if (parsed.event === "top30_qualified" || parsed.event === "submission_evaluated") {
-              invalidateContestCaches();
+            }
+
+            if (
+              parsed.event === "contest_concluded" ||
+              (parsed.event === "contest_status_changed" &&
+                (parsed.data?.new_status === "finished" || parsed.data?.status === "finished"))
+            ) {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("contest:concluded", { detail: parsed }));
+              }
             }
 
             // Check if matches filter
