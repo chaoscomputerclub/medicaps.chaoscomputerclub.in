@@ -4,7 +4,7 @@ import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy, UserPlus } from "lucide-react";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import { LeaderboardSkeleton, LeaderboardRowSkeleton } from "@/organization/components/skeletons";
-import { useSwrData } from "@/lib/cache/swrCache";
+import { useSwrData, invalidateSwrCache } from "@/lib/cache/swrCache";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { useChunkedList } from "@/hooks/useChunkedList";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -20,6 +20,7 @@ import {
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { useAppDispatch } from "@/store/hooks";
+import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { prefetchProfileRoute } from "@/AppRoutes";
 
 function Spark({ data }: { data: number[] }) {
@@ -48,6 +49,10 @@ export function LeaderboardPage() {
     { staleTime: 5000, persistSession: false }
   );
 
+  const currentMember = useAppSelector((s) => s.auth.member);
+  const currentMemberId = currentMember?.id;
+  const followingIds = useAppSelector((s) => s.social.followingIds);
+
   useRealtimeEvents(
     null,
     (event) => {
@@ -55,28 +60,37 @@ export function LeaderboardPage() {
         event.event === "contest_concluded" ||
         event.event === "contest_status_changed" ||
         event.event === "contest_finished" ||
+        event.event === "leaderboard_updated" ||
+        event.event === "ratings_updated" ||
+        event.event === "assessment_finished" ||
+        event.event === "submission_evaluated" ||
         event.event === "top30_qualified" ||
-        event.event === "assessment_finished"
+        event.event === "member_profile_updated"
       ) {
-        revalidate();
+        invalidateSwrCache("leaderboard:*");
+        void dispatch(fetchCurrentUserThunk());
+        void revalidate();
       }
     }
   );
 
   useEffect(() => {
     const handleRefresh = () => {
-      revalidate();
+      invalidateSwrCache("leaderboard:*");
+      void dispatch(fetchCurrentUserThunk());
+      void revalidate();
     };
     window.addEventListener("contest:concluded", handleRefresh);
     window.addEventListener("contest:cache_invalidated", handleRefresh);
+    window.addEventListener("leaderboard:invalidate", handleRefresh);
     return () => {
       window.removeEventListener("contest:concluded", handleRefresh);
       window.removeEventListener("contest:cache_invalidated", handleRefresh);
+      window.removeEventListener("leaderboard:invalidate", handleRefresh);
     };
-  }, [revalidate]);
+  }, [dispatch, revalidate]);
+
   const data = rawData || [];
-  const currentMemberId = useAppSelector((s) => s.auth.member?.id);
-  const followingIds = useAppSelector((s) => s.social.followingIds);
 
   const totalCount = data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -131,6 +145,13 @@ export function LeaderboardPage() {
           <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
           <strong className="font-mono text-lg font-bold text-white mt-0.5">2025–2026</strong>
           <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount} ranked cadets</small>
+          <div className="flex items-center gap-1.5 mt-1.5 font-mono text-[9px] uppercase tracking-wider text-emerald-400">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+            </span>
+            Real-Time Sync · SSE Active
+          </div>
         </div>
       </header>
 
@@ -162,14 +183,19 @@ export function LeaderboardPage() {
                 </TableRow>
               ) : (
                 visibleItems.map((x) => {
+                  const isYou =
+                    x.id === currentMemberId ||
+                    Boolean(x.handle && currentMember?.handle && x.handle.toLowerCase() === currentMember.handle.toLowerCase());
+
+                  // Optimistically bind to currentMember when SSE updates authSlice in real time
+                  const displayRating = isYou && currentMember?.rating ? currentMember.rating : x.rating;
+                  const displayPeak = isYou && currentMember?.peak_rating ? currentMember.peak_rating : x.peak_rating;
+                  const displayRank = isYou && currentMember?.university_rank ? currentMember.university_rank : x.university_rank;
+                  const attendanceCount = isYou && currentMember?.attendance_count !== undefined ? currentMember.attendance_count : (x.attendance_count ?? 0);
+                  const attendanceTotal = isYou && currentMember?.attendance_total ? currentMember.attendance_total : (x.attendance_total && x.attendance_total > 0 ? x.attendance_total : Math.max(1, attendanceCount));
+
                   const change =
-                    (x.previous_rank ?? x.university_rank) - x.university_rank;
-                  const isYou = x.id === currentMemberId;
-                  const attendanceCount = x.attendance_count ?? 0;
-                  const attendanceTotal =
-                    x.attendance_total && x.attendance_total > 0
-                      ? x.attendance_total
-                      : Math.max(1, attendanceCount);
+                    (x.previous_rank ?? displayRank) - displayRank;
                   const isFollowing = followingIds.includes(x.id) || followingIds.includes(x.handle);
                   const initials = x.full_name
                     ? x.full_name.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase()
@@ -186,7 +212,7 @@ export function LeaderboardPage() {
                       <TableCell className="pl-5 py-3">
                         <div className="flex items-center gap-1.5 font-mono">
                           <strong className="text-xs font-bold tabular-nums text-white w-5 text-right">
-                            {x.university_rank}
+                            {displayRank}
                           </strong>
                           <span
                             className={`inline-flex items-center text-[10px] tabular-nums ${
@@ -208,7 +234,14 @@ export function LeaderboardPage() {
                       <TableCell className="py-3">
                         <CadetProfileHoverCard
                           handle={x.handle}
-                          profile={x}
+                          profile={{
+                            ...x,
+                            rating: displayRating,
+                            peak_rating: displayPeak,
+                            university_rank: displayRank,
+                            attendance_count: attendanceCount,
+                            attendance_total: attendanceTotal,
+                          }}
                           align="start"
                           side="top"
                           sideOffset={10}
@@ -249,12 +282,12 @@ export function LeaderboardPage() {
 
                       {/* Rating */}
                       <TableCell className="py-3 font-mono font-bold text-sm tabular-nums text-lime-400">
-                        {x.rating}
+                        {displayRating}
                       </TableCell>
 
                       {/* Peak */}
                       <TableCell className="py-3 font-mono text-xs tabular-nums text-zinc-400 hidden sm:table-cell">
-                        {x.peak_rating}
+                        {displayPeak}
                       </TableCell>
 
                       {/* Attendance */}

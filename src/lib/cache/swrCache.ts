@@ -269,7 +269,7 @@ export function useSwrData<T>(
       setIsValidating(true);
 
       try {
-        const res = await swrFetch(key, () => fetcherRef.current(), {
+        const res = await swrFetch<T>(key, () => (fetcherRef.current as any)(force), {
           staleTime,
           ttl,
           forceRefresh: force,

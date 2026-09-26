@@ -30,20 +30,32 @@ class LeaderboardController:
         limit: Optional[int],
         offset: Optional[int],
         db: AsyncSession,
+        request: Optional[Any] = None,
+        fresh: bool = False,
     ) -> List[LeaderboardRow]:
         safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=500)
         cache_key = leaderboard_cache_key(department, batch, tier, safe_limit, safe_offset)
-        cached = await get_cache(cache_key)
-        if cached is not None:
-            response.headers["X-Cache"] = "HIT"
-            response.headers["Cache-Control"] = f"public, max-age={TTL_LEADERBOARD}, stale-while-revalidate=30"
-            if isinstance(cached, dict) and "items" in cached:
-                inject_pagination_headers(response, cached.get("total", len(cached["items"])), safe_limit, safe_offset)
-                return cached["items"]
-            elif isinstance(cached, list):
-                inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
+
+        is_no_cache = fresh or (
+            request is not None and (
+                request.headers.get("cache-control") == "no-cache" or
+                request.headers.get("pragma") == "no-cache" or
+                "no-cache" in (request.headers.get("cache-control") or "")
+            )
+        )
+
+        if not is_no_cache:
+            cached = await get_cache(cache_key)
+            if cached is not None:
+                response.headers["X-Cache"] = "HIT"
+                response.headers["Cache-Control"] = f"public, max-age={TTL_LEADERBOARD}, stale-while-revalidate=30"
+                if isinstance(cached, dict) and "items" in cached:
+                    inject_pagination_headers(response, cached.get("total", len(cached["items"])), safe_limit, safe_offset)
+                    return cached["items"]
+                elif isinstance(cached, list):
+                    inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
+                    return cached
                 return cached
-            return cached
 
         stmt = select(MemberProfile).where(
             MemberProfile.is_onboarded.is_(True),

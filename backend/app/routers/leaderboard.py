@@ -5,7 +5,7 @@ Delegates to app.controllers.leaderboard_controller.LeaderboardController
 """
 
 from typing import Dict, List, Optional, Any
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -17,12 +17,14 @@ router = APIRouter(prefix="/leaderboard", tags=["Leaderboards & Ratings"])
 
 @router.get("", response_model=List[LeaderboardRow])
 async def get_university_leaderboard(
+    request: Request,
     response: Response,
     department: Optional[str] = Query(None, description="Filter: CSE, IT, AIDS, Cyber Security"),
     batch: Optional[str] = Query(None, description="Filter: 2022-26, 2023-27, 2024-28"),
     tier: Optional[str] = Query(None, description="Filter: 5_star, 4_star, 3_star, 2_star, 1_star"),
     limit: Optional[int] = Query(None, ge=1, le=500, description="Max rows to return"),
     offset: Optional[int] = Query(0, ge=0, description="Offset for pagination"),
+    fresh: Optional[bool] = Query(False, description="Bypass cache for real-time SSE updates"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -38,6 +40,8 @@ async def get_university_leaderboard(
         limit=limit,
         offset=offset,
         db=db,
+        request=request,
+        fresh=fresh or False,
     )
 
 

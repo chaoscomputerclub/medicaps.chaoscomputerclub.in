@@ -26,6 +26,7 @@ export interface CadetProfileSummary {
   tier?: string | undefined;
   university_rank?: number | null | undefined;
   attendance_count?: number | undefined;
+  attendance_total?: number | undefined;
   ratings?: number[] | undefined;
   department?: string | undefined;
   batch?: string | undefined;

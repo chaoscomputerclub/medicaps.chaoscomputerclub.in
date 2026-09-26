@@ -430,16 +430,27 @@ class AssessmentController:
             pass
 
         try:
+            finish_payload = {
+                "contest_slug": contest_slug,
+                "member_id": current_member.id,
+                "handle": current_member.handle,
+                "status": "submitted",
+                "total_score": final_score,
+            }
             await broadcast_event(
                 event_type="assessment_finished",
-                data={
-                    "contest_slug": contest_slug,
-                    "member_id": current_member.id,
-                    "handle": current_member.handle,
-                    "status": "submitted",
-                    "total_score": final_score,
-                },
+                data=finish_payload,
                 contest_slug=contest_slug,
+            )
+            await broadcast_event(
+                event_type="assessment_finished",
+                data=finish_payload,
+                contest_slug=None,
+            )
+            await broadcast_event(
+                event_type="leaderboard_updated",
+                data=finish_payload,
+                contest_slug=None,
             )
             await broadcast_event(
                 event_type="contest_updated",

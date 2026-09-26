@@ -1349,6 +1349,25 @@ class DynamicContestService:
         for u_rank, m_prof in enumerate(all_ranked_res.scalars().all(), start=1):
             m_prof.university_rank = u_rank
 
+        try:
+            from app.services.event_broadcaster import broadcast_event
+            await broadcast_event(
+                event_type="leaderboard_updated",
+                data={
+                    "contest_slug": contest.slug,
+                    "rated_count": rated,
+                    "action": "ratings_applied",
+                },
+                contest_slug=None,
+            )
+            await broadcast_event(
+                event_type="ratings_updated",
+                data={"contest_slug": contest.slug, "rated_count": rated},
+                contest_slug=None,
+            )
+        except Exception as exc:
+            logger.debug("Failed to broadcast leaderboard update SSE: %s", exc)
+
         return {"rated_count": rated, "message": f"Ratings applied for {rated} participant(s)."}
 
     @staticmethod

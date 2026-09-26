@@ -104,9 +104,21 @@ export function useRealtimeEvents(
               parsed.event === "contest_unregistered" ||
               parsed.event === "top30_qualified" ||
               parsed.event === "submission_evaluated" ||
-              parsed.event === "assessment_finished"
+              parsed.event === "assessment_finished" ||
+              parsed.event === "leaderboard_updated" ||
+              parsed.event === "ratings_updated" ||
+              parsed.event === "member_profile_updated"
             ) {
               invalidateContestCaches();
+            }
+
+            if (
+              parsed.event === "leaderboard_updated" ||
+              parsed.event === "ratings_updated"
+            ) {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("leaderboard:invalidate", { detail: parsed }));
+              }
             }
 
             if (

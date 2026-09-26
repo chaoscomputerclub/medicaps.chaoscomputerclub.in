@@ -51,6 +51,9 @@ const CONTEST_MUTATION_EVENTS = [
   "assessment_finished",
   "submission_evaluated",
   "top30_qualified",
+  "leaderboard_updated",
+  "ratings_updated",
+  "member_profile_updated",
 ];
 
 function ContestRealtimeSynchronizer() {
@@ -77,7 +80,10 @@ function ContestRealtimeSynchronizer() {
           event.event === "contest_concluded" ||
           event.event === "contest_finished" ||
           event.event === "contest_status_changed" ||
-          event.event === "assessment_finished"
+          event.event === "assessment_finished" ||
+          event.event === "leaderboard_updated" ||
+          event.event === "ratings_updated" ||
+          event.event === "member_profile_updated"
         ) {
           invalidateSwrCache("leaderboard:*");
           invalidateSwrCache("student:profile:*");

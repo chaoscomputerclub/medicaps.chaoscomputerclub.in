@@ -238,6 +238,8 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                     await _broadcast("contest_status_changed", finish_payload, contest_slug=slug)
                     await _broadcast("contest_concluded", finish_payload, contest_slug=slug)
                     await _broadcast("contest_concluded", finish_payload, contest_slug=None)
+                    await _broadcast("leaderboard_updated", finish_payload, contest_slug=None)
+                    await _broadcast("ratings_updated", finish_payload, contest_slug=None)
                 except Exception:
                     pass
 

@@ -231,7 +231,19 @@ export async function getUniversityLeaderboardData(
     cacheKey,
     async () => {
       const backendUrl = getApiBase();
-      const res = await fetch(`${backendUrl}/leaderboard${qs ? `?${qs}` : ""}`).catch(() => null);
+      const headers: Record<string, string> = {};
+      if (force) {
+        headers["Cache-Control"] = "no-cache";
+        headers["Pragma"] = "no-cache";
+      }
+      const fetchParams = new URLSearchParams(queryParams);
+      if (force) {
+        fetchParams.set("fresh", "true");
+      }
+      const fetchQs = fetchParams.toString();
+      const res = await fetch(`${backendUrl}/leaderboard${fetchQs ? `?${fetchQs}` : ""}`, {
+        headers,
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         return (data || []) as LeaderboardEntry[];
@@ -239,10 +251,10 @@ export async function getUniversityLeaderboardData(
       return [] as LeaderboardEntry[];
     },
     {
-      staleTime: 30000, // 30s
-      ttl: 300000,
+      staleTime: 5000,
+      ttl: 60000,
       forceRefresh: force,
-      persistSession: true,
+      persistSession: false,
     }
   );
 }
