@@ -452,6 +452,9 @@ export function ContestArenaPage() {
 
   // Real-time arena clock push
   useRealtimeEvents(contestSlug, (event) => {
+    const evSlug = event.contest_slug || event.data?.contest_slug;
+    if (evSlug && evSlug !== contestSlug) return;
+
     if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
       setRemainingSeconds(event.data.remaining_seconds);
       toast.info("Contest clock synchronized by Chief Proctor.");
@@ -461,6 +464,7 @@ export function ContestArenaPage() {
       (event.event === "contest_status_changed" &&
         (event.data?.new_status === "finished" || event.data?.status === "finished"))
     ) {
+      if (!evSlug || evSlug !== contestSlug) return;
       setRemainingSeconds(0);
       toast.warning("Contest concluded by Chief Proctor.");
     }

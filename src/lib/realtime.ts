@@ -45,7 +45,6 @@ export function invalidateContestCaches(): void {
     window.dispatchEvent(new CustomEvent("contest:cache_invalidated"));
     window.dispatchEvent(new CustomEvent("assessment:status_changed"));
     window.dispatchEvent(new CustomEvent("contest:status_changed"));
-    window.dispatchEvent(new CustomEvent("contest:concluded"));
   }
 }
 

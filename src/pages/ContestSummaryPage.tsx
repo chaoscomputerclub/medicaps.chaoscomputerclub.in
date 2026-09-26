@@ -43,12 +43,13 @@ import {
 } from "@/components/animate-ui/primitives/base/alert-dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestArenaThunk, fetchContestDetailThunk } from "@/store/slices/contestSlice";
+import { fetchContestArenaThunk, fetchContestDetailThunk, fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { ContestSummarySkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
+import type { ContestArenaProblem } from "@/features/contest/types";
 import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
-import { getToken } from "@/lib/auth";
+import { getToken, fetchAssessmentData } from "@/lib/auth";
 import { useRealtimeEvents } from "@/lib/realtime";
 
 function formatTimer(totalSeconds: number): string {
@@ -69,11 +70,33 @@ export function ContestSummaryPage() {
   );
   const member = useAppSelector((state) => state.auth.member);
 
+  const [backendVerified, setBackendVerified] = useState<{
+    isLoading: boolean;
+    isSubmitted: boolean;
+    contestStatus: string;
+    score: number;
+    checked: boolean;
+  }>({
+    isLoading: true,
+    isSubmitted: false,
+    contestStatus: "live",
+    score: 0,
+    checked: false,
+  });
+
+  const [serverSubmissions, setServerSubmissions] = useState<
+    Record<string, { verdict: string; score: number; code?: string }>
+  >({});
+
+  const isCurrentSlug = currentContest?.slug === contestSlug;
   const isAlreadySubmitted = Boolean(
-    registration?.status === "submitted" ||
-    registration?.assessment_taken ||
-    registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed"
+    backendVerified.isSubmitted ||
+    (isCurrentSlug && (
+      registration?.status === "submitted" ||
+      registration?.assessment_taken ||
+      registration?.assessment_status === "submitted" ||
+      registration?.assessment_status === "completed"
+    ))
   );
 
   useEffect(() => {
@@ -95,20 +118,68 @@ export function ContestSummaryPage() {
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
+  // Validate state with backend on mount & whenever contestSlug changes (Do Not Trust Client policy)
   useEffect(() => {
-    if (contestSlug) {
-      if (!arenaData) {
-        dispatch(fetchContestArenaThunk(contestSlug));
-      }
-      if (!currentContest) {
-        dispatch(fetchContestDetailThunk({ slug: contestSlug }));
-      }
-    }
-  }, [contestSlug, arenaData, currentContest, dispatch]);
+    let isCancelled = false;
+    const validateWithBackend = async () => {
+      if (!contestSlug) return;
+      try {
+        void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+        void dispatch(fetchContestArenaThunk(contestSlug));
 
-  const problems = arenaData?.problems || [];
+        const [reg, assessData] = await Promise.all([
+          contestApi.registrationStatus(contestSlug, true).catch(() => null),
+          fetchAssessmentData(contestSlug).catch(() => null),
+        ]);
+        if (isCancelled) return;
 
-  // Load solved problems from localStorage
+        let verifiedSubmissions: Record<string, { verdict: string; score: number; code?: string }> = {};
+        if (assessData?.submissions && typeof assessData.submissions === "object") {
+          verifiedSubmissions = assessData.submissions;
+          setServerSubmissions(verifiedSubmissions);
+        }
+
+        const isSub = Boolean(
+          reg?.status === "submitted" ||
+          reg?.assessment_taken ||
+          reg?.assessment_status === "submitted" ||
+          reg?.assessment_status === "completed" ||
+          assessData?.session?.status === "submitted" ||
+          assessData?.session?.status === "completed"
+        );
+
+        const verifiedScore = typeof reg?.assessment_score === "number" && reg.assessment_score > 0
+          ? reg.assessment_score
+          : typeof assessData?.session?.total_score === "number"
+          ? assessData.session.total_score
+          : 0;
+
+        setBackendVerified({
+          isLoading: false,
+          isSubmitted: isSub,
+          contestStatus: reg?.contest_status || "live",
+          score: verifiedScore,
+          checked: true,
+        });
+      } catch {
+        if (isCancelled) return;
+        setBackendVerified((prev) => ({ ...prev, isLoading: false, checked: true }));
+      }
+    };
+
+    void validateWithBackend();
+    return () => {
+      isCancelled = true;
+    };
+  }, [contestSlug, dispatch]);
+
+  const activeArena = arenaData?.slug === contestSlug ? arenaData : null;
+  const activeContest = currentContest?.slug === contestSlug ? currentContest : null;
+  const problems: ContestArenaProblem[] = activeArena?.problems && activeArena.problems.length > 0
+    ? activeArena.problems
+    : ((activeContest as any)?.problems || []);
+
+  // Load solved problems from localStorage as secondary fallback
   const solvedProblemIds = useMemo(() => {
     if (typeof window === "undefined" || !contestSlug) return new Set<string>();
     try {
@@ -119,7 +190,7 @@ export function ContestSummaryPage() {
     }
   }, [contestSlug]);
 
-  // Inspect attempted status by checking if user saved custom code in localStorage
+  // Inspect attempted status: authoritative server submissions first, fallback to verified local drafts
   const problemStatusMap = useMemo(() => {
     const map: Record<string, "solved" | "attempted" | "unattempted"> = {};
     if (typeof window === "undefined") return map;
@@ -127,8 +198,20 @@ export function ContestSummaryPage() {
     const languages = ["python", "cpp", "c", "java", "javascript", "typescript"];
 
     problems.forEach((p) => {
-      if (solvedProblemIds.has(p.id)) {
+      const serverSub = serverSubmissions[p.id];
+      const isServerAccepted = serverSub && (
+        serverSub.verdict === "Accepted" ||
+        serverSub.verdict === "ACCEPTED" ||
+        serverSub.score >= (p.points || 100)
+      );
+
+      if (isServerAccepted || solvedProblemIds.has(p.id)) {
         map[p.id] = "solved";
+        return;
+      }
+
+      if (serverSub) {
+        map[p.id] = "attempted";
         return;
       }
 
@@ -138,7 +221,6 @@ export function ContestSummaryPage() {
         const key = `ccc_code_v4_${contestSlug}_${p.id}_${lang}`;
         const savedCode = localStorage.getItem(key);
         if (savedCode && savedCode.trim().length > 0) {
-          // Check if it's more than just unmodified placeholder comments
           const isCustom =
             !savedCode.includes("TODO: Calculate valid mirror pairs") &&
             savedCode.replace(/\s+/g, "").length > 40;
@@ -153,16 +235,21 @@ export function ContestSummaryPage() {
     });
 
     return map;
-  }, [problems, solvedProblemIds, contestSlug]);
+  }, [problems, solvedProblemIds, serverSubmissions, contestSlug]);
 
   const solvedCount = problems.filter((p) => problemStatusMap[p.id] === "solved").length;
   const attemptedCount = problems.filter((p) => problemStatusMap[p.id] === "attempted").length;
   const unattemptedCount = Math.max(0, problems.length - solvedCount - attemptedCount);
 
   const totalPossiblePoints = problems.reduce((acc, p) => acc + (p.points || 0), 0);
-  const earnedPoints = problems
-    .filter((p) => problemStatusMap[p.id] === "solved")
-    .reduce((acc, p) => acc + (p.points || 0), 0);
+  const earnedPoints = useMemo(() => {
+    if (backendVerified.score > 0) {
+      return backendVerified.score;
+    }
+    return problems
+      .filter((p) => problemStatusMap[p.id] === "solved")
+      .reduce((acc, p) => acc + (p.points || 0), 0);
+  }, [backendVerified.score, problems, problemStatusMap]);
 
   // Live countdown timer synced to arena ends_at
   const [remainingSeconds, setRemainingSeconds] = useState<number>(() => {
@@ -188,18 +275,42 @@ export function ContestSummaryPage() {
     return () => clearInterval(timer);
   }, [arenaData?.ends_at, currentContest?.ends_at]);
 
-  // Real-time: auto-redirect if contest concludes while candidate is reviewing summary
+  // Real-time: synchronize contest status changes without involuntary redirects (Do Not Trust Client policy)
   useRealtimeEvents(
     contestSlug,
     (event) => {
+      const evSlug = event.contest_slug || event.data?.contest_slug;
+      if (evSlug && evSlug !== contestSlug) return;
+
       if (
         event.event === "contest_concluded" ||
         event.event === "contest_finished" ||
         (event.event === "contest_status_changed" &&
           (event.data?.new_status === "finished" || event.data?.status === "finished"))
       ) {
-        toast.info("Contest has concluded. Redirecting to official standings…");
-        navigate(`/contests/${contestSlug}/results`, { replace: true });
+        // Zero-Trust Client Policy: Validate status with backend and update UI state without auto-redirecting
+        void (async () => {
+          try {
+            const reg = await contestApi.registrationStatus(contestSlug, true);
+            if (reg) {
+              setBackendVerified((prev) => ({
+                ...prev,
+                isSubmitted: Boolean(
+                  reg.status === "submitted" ||
+                  reg.assessment_taken ||
+                  reg.assessment_status === "submitted" ||
+                  reg.assessment_status === "completed"
+                ),
+                contestStatus: reg.contest_status || "finished",
+                score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
+                checked: true,
+              }));
+              if (reg.contest_status === "finished") {
+                toast.info("Contest has concluded. Official submissions are now closed.");
+              }
+            }
+          } catch {}
+        })();
       }
     },
     undefined,
@@ -207,31 +318,66 @@ export function ContestSummaryPage() {
   );
 
   useEffect(() => {
-    const handleConcluded = () => {
-      toast.info("Contest has concluded. Redirecting to official standings…");
-      navigate(`/contests/${contestSlug}/results`, { replace: true });
+    const handleConcluded = (e: any) => {
+      const evSlug = e?.detail?.contest_slug || e?.detail?.data?.contest_slug;
+      if (evSlug && evSlug !== contestSlug) return;
+
+      // Zero-Trust Client Policy: Validate status with backend and update UI state without auto-redirecting
+      void (async () => {
+        try {
+          const reg = await contestApi.registrationStatus(contestSlug, true);
+          if (reg) {
+            setBackendVerified((prev) => ({
+              ...prev,
+              isSubmitted: Boolean(
+                reg.status === "submitted" ||
+                reg.assessment_taken ||
+                reg.assessment_status === "submitted" ||
+                reg.assessment_status === "completed"
+              ),
+              contestStatus: reg.contest_status || "finished",
+              score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
+              checked: true,
+            }));
+          }
+        } catch {}
+      })();
     };
     window.addEventListener("contest:concluded", handleConcluded);
     return () => {
       window.removeEventListener("contest:concluded", handleConcluded);
     };
-  }, [contestSlug, navigate]);
+  }, [contestSlug]);
 
   const handleFinalSubmit = async () => {
     setIsSubmittingFinal(true);
     try {
       const res = await contestApi.finishContest(contestSlug);
-      toast.success(res.message || "Contest successfully submitted!");
-      setShowSubmitModal(false);
-      navigate(`/contests/${contestSlug}/results`, { replace: true });
+      if (res && (res.success || (res as any).status === "submitted" || (res as any).already_submitted)) {
+        toast.success(res.message || "Contest successfully submitted!");
+        setShowSubmitModal(false);
+        setBackendVerified((prev) => ({
+          ...prev,
+          isSubmitted: true,
+          score: typeof res.total_score === "number" ? res.total_score : prev.score,
+        }));
+        await Promise.all([
+          dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true })),
+          dispatch(fetchMyParticipationsThunk(true)),
+          dispatch(fetchCurrentUserThunk()),
+        ]);
+        navigate(`/contests/${contestSlug}/results`, { replace: true });
+      } else {
+        toast.error(res?.message || "Failed to finalize contest submission.");
+      }
     } catch (err: any) {
-      toast.error(err.message || "Failed to finalize contest submission.");
+      toast.error(err?.message || "Failed to finalize contest submission.");
     } finally {
       setIsSubmittingFinal(false);
     }
   };
 
-  if (isLoadingArena && !arenaData) {
+  if ((isLoadingArena || backendVerified.isLoading) && !activeArena && !activeContest) {
     return <ContestSummarySkeleton />;
   }
 

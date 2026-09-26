@@ -6,7 +6,7 @@ controllers/assessment_controller.py — Online Screening Assessment Orchestrato
 from datetime import timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Response
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db_models import (
@@ -14,6 +14,7 @@ from app.models.db_models import (
     AssessmentSession,
     AssessmentSubmission,
     ContestRegistration,
+    ContestSubmission,
     MemberProfile,
     ScoreboardEntry,
     now_utc,
@@ -317,7 +318,18 @@ class AssessmentController:
             )
         )
         session = s_result.scalars().first()
-        # Determine score
+
+        # Idempotent: If attempt is already submitted, return verified finalized state
+        if session and session.status in ("submitted", "completed"):
+            return {
+                "success": True,
+                "message": "Contest attempt has already been finalized and submitted.",
+                "total_score": session.total_score or 0.0,
+                "status": "submitted",
+                "already_submitted": True,
+            }
+
+        # Determine verified score from database
         score_val = 0.0
         if contest:
             sb_res = await db.execute(
@@ -329,6 +341,34 @@ class AssessmentController:
             sb_entry = sb_res.scalars().first()
             if sb_entry and sb_entry.score is not None:
                 score_val = float(sb_entry.score)
+
+            # Also check arena submissions from ContestSubmission
+            cs_res = await db.execute(
+                select(ContestSubmission.problem_id, func.max(ContestSubmission.points_awarded))
+                .where(
+                    ContestSubmission.contest_id == contest.id,
+                    ContestSubmission.member_id == current_member.id,
+                )
+                .group_by(ContestSubmission.problem_id)
+            )
+            cs_scores = cs_res.all()
+            if cs_scores:
+                computed_cs = float(sum(s[1] for s in cs_scores if s[1]))
+                if computed_cs > score_val:
+                    score_val = computed_cs
+
+        if session and (session.total_score is None or session.total_score == 0):
+            subs_res = await db.execute(
+                select(AssessmentSubmission.problem_id, func.max(AssessmentSubmission.score))
+                .where(AssessmentSubmission.session_id == session.id)
+                .group_by(AssessmentSubmission.problem_id)
+            )
+            subs_scores = subs_res.all()
+            if subs_scores:
+                computed_score = round(sum(s[1] for s in subs_scores if s[1]), 2)
+                session.total_score = computed_score
+                if computed_score > score_val:
+                    score_val = computed_score
 
         if not session:
             session = AssessmentSession(
@@ -464,6 +504,7 @@ class AssessmentController:
             "success": True,
             "message": "Contest attempt finalized and submitted.",
             "total_score": final_score,
+            "status": "submitted",
         }
 
     @staticmethod
