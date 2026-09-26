@@ -242,7 +242,7 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                     pass
 
                 logger.info(
-                    "auto-finish: '%s' done — %d participants rated", slug, len(entries)
+                    "auto-finish: '%s' done — contest marked finished and ratings applied", slug
                 )
 
         except Exception as exc:

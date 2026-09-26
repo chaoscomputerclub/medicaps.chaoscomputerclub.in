@@ -45,7 +45,7 @@ export function LeaderboardPage() {
   const { data: rawData, loading, revalidate } = useSwrData(
     "leaderboard:university",
     getUniversityLeaderboardData,
-    { staleTime: 30000, persistSession: true }
+    { staleTime: 5000, persistSession: false }
   );
 
   useRealtimeEvents(

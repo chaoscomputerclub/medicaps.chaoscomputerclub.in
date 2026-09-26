@@ -35,6 +35,7 @@ import {
   applyRealtimeEvent,
 } from "@/store/slices/contestSlice";
 import { useRealtimeEvents } from "@/lib/realtime";
+import { invalidateSwrCache } from "@/lib/cache/swrCache";
 
 const CONTEST_MUTATION_EVENTS = [
   "contest_created",
@@ -78,6 +79,9 @@ function ContestRealtimeSynchronizer() {
           event.event === "contest_status_changed" ||
           event.event === "assessment_finished"
         ) {
+          invalidateSwrCache("leaderboard:*");
+          invalidateSwrCache("student:profile:*");
+          invalidateSwrCache("member:profile:*");
           void dispatch(fetchCurrentUserThunk());
         }
       }

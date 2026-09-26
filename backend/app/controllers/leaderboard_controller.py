@@ -94,6 +94,8 @@ class LeaderboardController:
 
         page_member_ids = [m.id for m in members]
         history_by_member: Dict[str, List[int]] = {}
+        latest_rating_by_member: Dict[str, int] = {}
+        peak_rating_by_member: Dict[str, int] = {}
         # Live attendance count per member from ScoreboardEntry (avoids stale denormalized column)
         live_attendance_by_member: Dict[str, int] = {}
         if page_member_ids:
@@ -107,6 +109,11 @@ class LeaderboardController:
             )
             for h in histories:
                 history_by_member.setdefault(h.member_id, []).append(h.new_rating - h.old_rating)
+                if h.member_id not in latest_rating_by_member:
+                    latest_rating_by_member[h.member_id] = h.new_rating
+                curr_peak = peak_rating_by_member.get(h.member_id, 1200)
+                if h.new_rating > curr_peak:
+                    peak_rating_by_member[h.member_id] = h.new_rating
 
             # Batch attendance count: one query, zero N+1
             sb_count_rows = await db.execute(
@@ -122,10 +129,24 @@ class LeaderboardController:
             select(func.count(OfflineContest.id)).where(OfflineContest.status.in_(["finished", "live"]))
         ) or 0
 
+        needs_commit = False
         rows = []
         for idx, m in enumerate(members):
             current_rank = safe_offset + idx + 1
-            member_tier = get_rating_tier(m.rating)
+
+            # Sync latest verified rating from RatingHistory ledger to avoid stale profile discrepancies
+            verified_rating = latest_rating_by_member.get(m.id, m.rating if m.rating is not None else 1200)
+            verified_peak = max(
+                m.peak_rating if m.peak_rating is not None else 1200,
+                peak_rating_by_member.get(m.id, 1200),
+                verified_rating
+            )
+            if m.rating != verified_rating or m.peak_rating != verified_peak:
+                m.rating = verified_rating
+                m.peak_rating = verified_peak
+                needs_commit = True
+
+            member_tier = get_rating_tier(verified_rating)
 
             # Use live ScoreboardEntry count; fall back to denormalized column only as last resort
             attendance_count = live_attendance_by_member.get(m.id) or m.attendance_count or 0
@@ -140,7 +161,7 @@ class LeaderboardController:
             prn_str = m.prn or ""
             masked_prn = f"{prn_str[:6]}****{prn_str[-2:]}" if len(prn_str) >= 10 else (prn_str or "—")
 
-            m_rating = m.rating if m.rating is not None else 1200
+            m_rating = verified_rating
             sparkline = [m_rating]
             running_rating = m_rating
             for delta in recent_deltas:
@@ -166,15 +187,24 @@ class LeaderboardController:
                     department=dept,
                     batch=batch_val,
                     rating=m_rating,
-                    peak_rating=m.peak_rating if m.peak_rating is not None else m_rating,
+                    peak_rating=verified_peak,
                     attendance_rate=attendance_rate,
                     attendance_count=attendance_count,
                     attendance_total=attendance_total,
                     tier=member_tier,
                     ratings=sparkline,
                     recent_deltas=recent_deltas,
+                    country="IN",
+                    verified=bool(m.is_onboarded),
+                    is_core_member=bool(getattr(m, "is_core_member", False)),
                 )
             )
+
+        if needs_commit:
+            try:
+                await db.commit()
+            except Exception:
+                await db.rollback()
 
         inject_pagination_headers(response, total_count, safe_limit, safe_offset)
 
