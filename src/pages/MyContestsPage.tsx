@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -59,6 +59,7 @@ export function MyContestsPage() {
   const data = myParticipations && myParticipations.length > 0 ? myParticipations : ((rawData as any[]) || []);
   const loading = rawLoading && data.length === 0;
   const [filter, setFilter] = useState<"all" | "registered" | "live" | "completed">("all");
+  const [isPending, startTransition] = useTransition();
 
   if (loading && !rawData) {
     return <MyContestsSkeleton />;
@@ -103,7 +104,7 @@ export function MyContestsPage() {
       />
 
       {/* Segmented Filter Controls */}
-      <Tabs value={filter} onValueChange={(val: any) => setFilter(val)} className="my-4">
+      <Tabs value={filter} onValueChange={(val: any) => startTransition(() => setFilter(val))} className="my-4">
         <TabsList className="h-auto flex-wrap gap-1 rounded-md border border-white/8 bg-black p-1">
           <TabsTrigger value="all" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
             All (<span className="tabular-nums">{data.length}</span>)
@@ -161,7 +162,7 @@ export function MyContestsPage() {
               return (
                 <article
                   key={c.contest_slug}
-                  className="flex flex-col justify-between gap-4 p-5 transition-colors hover:bg-zinc-950 lg:flex-row lg:items-center"
+                  className="flex flex-col justify-between gap-4 p-5 transition-colors hover:bg-zinc-950 lg:flex-row lg:items-center content-auto-card"
                 >
                   {/* Left: Details */}
                   <div className="flex items-start gap-3.5">

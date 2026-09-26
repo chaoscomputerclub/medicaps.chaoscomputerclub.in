@@ -5,7 +5,7 @@ Delegates to app.controllers.assessment_controller.AssessmentController
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -86,15 +86,18 @@ async def run_sample_code(
 @router.post("/{contest_slug}/submit")
 async def submit_assessment_code(
     request: Request,
+    response: Response,
     contest_slug: str,
     payload: SubmitCodeRequest,
+    async_mode: Optional[bool] = Query(None, alias="async", description="Set to true for non-blocking async execution"),
     active_guard: tuple = Depends(require_active_assessment_session),
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
     _rl: None = Depends(rate_limit("assessment:submit", max_calls=10, window_seconds=60)),
 ):
     """Submit code for official assessment evaluation against all testcases on CodeBox. Blocked if already submitted."""
-    return await AssessmentController.submit_assessment_code(
+    is_async = async_mode is True or request.headers.get("X-Execution-Mode", "").lower() == "async"
+    result = await AssessmentController.submit_assessment_code(
         contest_slug=contest_slug,
         problem_id=payload.problem_id,
         language=payload.language,
@@ -102,7 +105,11 @@ async def submit_assessment_code(
         active_guard=active_guard,
         current_member=current_member,
         db=db,
+        async_mode=is_async,
     )
+    if is_async and result.get("status") == "queued":
+        response.status_code = status.HTTP_202_ACCEPTED
+    return result
 
 
 @router.post("/{contest_slug}/telemetry")

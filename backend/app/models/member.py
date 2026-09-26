@@ -9,6 +9,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     UniqueConstraint,
@@ -54,6 +55,14 @@ class MemberProfile(Base):
     assessment_submissions = relationship("AssessmentSubmission", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
     trust_proofs = relationship("TrustProof", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
 
+    __table_args__ = (
+        Index("ix_member_profiles_leaderboard_core", "is_onboarded", "rating", "peak_rating", "id"),
+        Index("ix_member_profiles_dept_rating_peak", "is_onboarded", "department", "rating", "peak_rating"),
+        Index("ix_member_profiles_batch_rating_peak", "is_onboarded", "batch", "rating", "peak_rating"),
+        Index("ix_member_profiles_dept_batch_rating", "department", "batch", "rating"),
+        Index("ix_member_profiles_onboarded_rating", "is_onboarded", "rating"),
+    )
+
 
 class OTPStore(Base):
     """Ephemeral table for short-lived email OTP verification codes."""
@@ -78,6 +87,11 @@ class RatingHistory(Base):
     old_rating = Column(Integer, nullable=False)
     new_rating = Column(Integer, nullable=False)
     rank = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        Index("ix_rating_history_member_contested_new_rating", "member_id", "contested_at", "new_rating"),
+        Index("ix_rating_history_contest_rank", "contest_id", "rank"),
+    )
 
     # Relationships
     member = relationship("MemberProfile", back_populates="rating_history")

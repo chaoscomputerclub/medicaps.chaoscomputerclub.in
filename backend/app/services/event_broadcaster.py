@@ -104,9 +104,21 @@ async def broadcast_event(
     except Exception as exc:
         logger.debug("Redis event publish unavailable: %s", exc)
 
-    # Outbound webhook delivery (non-blocking)
+    # Outbound webhook delivery via dedicated async queue with automatic retries
     if _outbound_webhooks:
-        asyncio.create_task(_dispatch_outbound_webhooks(raw_message))
+        try:
+            from app.core.queue import RedisQueueEngine
+            for url in list(_outbound_webhooks):
+                await RedisQueueEngine.enqueue(
+                    queue_name="webhooks",
+                    job_type="DISPATCH_OUTBOUND_WEBHOOK",
+                    payload={"url": url, "event_type": event_type, "data": data},
+                    max_retries=5,
+                    backoff_base_seconds=2.0,
+                )
+        except Exception as exc:
+            logger.debug("Queue unavailable for outbound webhook, falling back to direct dispatch: %s", exc)
+            asyncio.create_task(_dispatch_outbound_webhooks(raw_message))
 
 
 async def redis_event_relay() -> None:

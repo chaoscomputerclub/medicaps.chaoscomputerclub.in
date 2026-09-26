@@ -20,7 +20,8 @@ from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
-from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, events, feed, leaderboard, passes, scoreboards, social, storage, verify, webhooks
+from app.core.queue import queue_manager
+from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, events, feed, jobs, leaderboard, passes, scoreboards, social, storage, verify, webhooks
 from app.api.v1.router import api_router_v1
 
 
@@ -30,6 +31,10 @@ async def lifespan(app: FastAPI):
     print(f"⚡ Starting {settings.PROJECT_NAME} (v{settings.VERSION})...")
     await init_db()
     print("✓ Database verified & initialized successfully (clean state).")
+
+    # ── Production async queue workers ──────────────────────────────────────
+    queue_tasks = queue_manager.start_all()
+    print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
 
     # ── Production background tasks ──────────────────────────────────────────
     bg_tasks = start_background_tasks(AsyncSessionLocal)
@@ -51,6 +56,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
+    await queue_manager.stop_all(drain_timeout=15.0)
     for task in [*bg_tasks, realtime_relay_task]:
         task.cancel()
     await asyncio.gather(*bg_tasks, realtime_relay_task, return_exceptions=True)
@@ -152,6 +158,7 @@ app.include_router(social.router, prefix=settings.API_PREFIX)
 app.include_router(storage.router, prefix=settings.API_PREFIX)
 app.include_router(events.router, prefix=settings.API_PREFIX)
 app.include_router(webhooks.router, prefix=settings.API_PREFIX)
+app.include_router(jobs.router, prefix=settings.API_PREFIX)
 
 # OpenAPI 3.1.0 Webhooks specifications for Swagger / ReDoc docs UI
 app.webhooks.include_router(webhooks.webhooks_router)

@@ -13,6 +13,7 @@ from app.routers import (
     auth,
     contests,
     feed,
+    jobs,
     leaderboard,
     passes,
     scoreboards,
@@ -34,6 +35,7 @@ for domain_router in (
     feed.router,
     social.router,
     storage.router,
+    jobs.router,
 ):
     api_router_v1.include_router(domain_router)
 

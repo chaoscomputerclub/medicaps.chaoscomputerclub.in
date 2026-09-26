@@ -1,20 +1,20 @@
 {
-  "audit_id": "QA-20260922-131958",
-  "timestamp_utc": "2026-09-22T13:19:58.790163+00:00",
+  "audit_id": "QA-20260926-212650",
+  "timestamp_utc": "2026-09-26T21:26:51.036703+00:00",
   "environment": "Production Live Probe",
   "base_url": "http://testserver",
   "total_tests": 51,
   "passed_tests": 51,
   "failed_tests": 0,
   "overall_success_rate_percent": 100.0,
-  "total_execution_time_ms": 389.89,
+  "total_execution_time_ms": 640.76,
   "categories": [
     {
       "category": "System & Health",
       "total_tests": 1,
       "passed_tests": 1,
       "failed_tests": 0,
-      "avg_latency_ms": 38.16,
+      "avg_latency_ms": 38.75,
       "success_rate_percent": 100.0
     },
     {
@@ -22,7 +22,7 @@
       "total_tests": 12,
       "passed_tests": 12,
       "failed_tests": 0,
-      "avg_latency_ms": 3.41,
+      "avg_latency_ms": 5.14,
       "success_rate_percent": 100.0
     },
     {
@@ -30,7 +30,7 @@
       "total_tests": 4,
       "passed_tests": 4,
       "failed_tests": 0,
-      "avg_latency_ms": 5.73,
+      "avg_latency_ms": 4.79,
       "success_rate_percent": 100.0
     },
     {
@@ -38,7 +38,7 @@
       "total_tests": 4,
       "passed_tests": 4,
       "failed_tests": 0,
-      "avg_latency_ms": 2.52,
+      "avg_latency_ms": 3.36,
       "success_rate_percent": 100.0
     },
     {
@@ -46,7 +46,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.03,
+      "avg_latency_ms": 2.08,
       "success_rate_percent": 100.0
     },
     {
@@ -54,7 +54,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.74,
+      "avg_latency_ms": 4.01,
       "success_rate_percent": 100.0
     },
     {
@@ -62,7 +62,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 3.36,
+      "avg_latency_ms": 3.65,
       "success_rate_percent": 100.0
     },
     {
@@ -70,7 +70,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 2.71,
+      "avg_latency_ms": 3.99,
       "success_rate_percent": 100.0
     },
     {
@@ -78,7 +78,7 @@
       "total_tests": 9,
       "passed_tests": 9,
       "failed_tests": 0,
-      "avg_latency_ms": 4.96,
+      "avg_latency_ms": 8.36,
       "success_rate_percent": 100.0
     },
     {
@@ -86,7 +86,7 @@
       "total_tests": 3,
       "passed_tests": 3,
       "failed_tests": 0,
-      "avg_latency_ms": 11.85,
+      "avg_latency_ms": 20.98,
       "success_rate_percent": 100.0
     },
     {
@@ -94,7 +94,7 @@
       "total_tests": 7,
       "passed_tests": 7,
       "failed_tests": 0,
-      "avg_latency_ms": 7.02,
+      "avg_latency_ms": 27.84,
       "success_rate_percent": 100.0
     },
     {
@@ -102,7 +102,7 @@
       "total_tests": 1,
       "passed_tests": 1,
       "failed_tests": 0,
-      "avg_latency_ms": 7.96,
+      "avg_latency_ms": 4.68,
       "success_rate_percent": 100.0
     },
     {
@@ -110,7 +110,7 @@
       "total_tests": 2,
       "passed_tests": 2,
       "failed_tests": 0,
-      "avg_latency_ms": 1.2,
+      "avg_latency_ms": 2.08,
       "success_rate_percent": 100.0
     }
   ],
@@ -124,11 +124,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 38.16,
+      "latency_ms": 38.75,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['status', 'chapter', 'version', 'services']",
       "actual_response_summary": "Dict with keys: ['status', 'chapter', 'environment', 'version', 'services']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 38.16ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 38.75ms)",
       "request_payload": null,
       "actual_response_sample": {
         "status": "operational",
@@ -152,11 +152,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.69,
+      "latency_ms": 4.61,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['algorithm', 'public_key']",
       "actual_response_summary": "Dict with keys: ['algorithm', 'public_key']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.69ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.61ms)",
       "request_payload": null,
       "actual_response_sample": {
         "algorithm": "RS256",
@@ -172,15 +172,16 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.33,
+      "latency_ms": 3.33,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['available', 'handle']",
-      "actual_response_summary": "Dict with keys: ['available', 'handle']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.33ms)",
+      "actual_response_summary": "Dict with keys: ['available', 'handle', 'reason']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.33ms)",
       "request_payload": null,
       "actual_response_sample": {
         "available": true,
-        "handle": "qa_cadet_unique_99"
+        "handle": "qa_cadet_unique_99",
+        "reason": "Available"
       }
     },
     {
@@ -192,11 +193,11 @@
       "expected_status": 401,
       "actual_status": 401,
       "passed": true,
-      "latency_ms": 0.62,
+      "latency_ms": 1.15,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.62ms)",
+      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 1.15ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Authentication required. Please sign in."
@@ -211,15 +212,16 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 0.99,
+      "latency_ms": 2.54,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['available', 'handle']",
-      "actual_response_summary": "Dict with keys: ['available', 'handle']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 0.99ms)",
+      "actual_response_summary": "Dict with keys: ['available', 'handle', 'reason']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.54ms)",
       "request_payload": null,
       "actual_response_sample": {
         "available": true,
-        "handle": "admin"
+        "handle": "admin",
+        "reason": "Available"
       }
     },
     {
@@ -231,11 +233,11 @@
       "expected_status": 401,
       "actual_status": 401,
       "passed": true,
-      "latency_ms": 0.5,
+      "latency_ms": 1.12,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.5ms)",
+      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 1.12ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Authentication required. Please sign in."
@@ -250,80 +252,59 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 15.53,
+      "latency_ms": 18.88,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'campusPass', 'ratingHistory']",
-      "actual_response_summary": "Dict with keys: ['member', 'campusPass', 'ratingHistory', 'history', 'recentBattles', 'battles', 'achievements', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 15.53ms)",
+      "actual_response_summary": "Dict with keys: ['member', 'pass', 'campusPass', 'stats', 'recent_battles', 'recentBattles', 'rating_history', 'ratingHistory']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 18.88ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
-          "id": "24b33bdb-03f4-4abe-9d53-6b35a7743da3",
+          "id": "690458d6-7063-4b1b-8753-4b3dfa53bf07",
           "handle": "qa_organizer",
           "full_name": "QA Automated Test Runner",
           "email": "qa.organizer@medicaps.ac.in",
           "prn": "0801CS211000",
-          "enrollment_number": "0801CS211000",
-          "enrollment_no": "0801CS211000",
           "department": "CSE",
           "batch": "2022-26",
           "rating": 1200,
           "peak_rating": 1200,
-          "peak_contest": "Chaos Arena 2026",
-          "university_rank": null,
-          "percentile": null,
-          "active_members": 2,
-          "attendance_count": 0,
-          "attendance_total": 2,
-          "is_onboarded": true,
           "is_core_member": true,
-          "is_self": true,
-          "is_following": false,
-          "tier": "1★ Explorer",
-          "podiums": 0,
-          "streak": 0,
-          "followers_count": 0,
-          "following_count": 0,
+          "is_onboarded": true,
+          "avatar_url": null,
           "bio": null,
           "github_username": null,
           "linkedin_url": null,
-          "avatar_url": null
+          "attendance_count": 0,
+          "attendance_total": 1,
+          "university_rank": 1,
+          "department_rank": 1,
+          "percentile": 0.0
         },
+        "pass": null,
         "campusPass": null,
-        "ratingHistory": [],
-        "history": [],
+        "stats": {
+          "attended": 0,
+          "total_contests": 1,
+          "attendance_rate": "0%",
+          "streak": "0w",
+          "podiums": 0,
+          "best_rank": 1,
+          "accepted_solves": 0,
+          "total_submissions": 0,
+          "accuracy": "0.0%",
+          "followers_count": 0,
+          "following_count": 0,
+          "percentile": 0.0
+        },
+        "recent_battles": [],
         "recentBattles": [],
-        "battles": [],
-        "achievements": [
-          {
-            "id": "cadet_init",
-            "code": "INIT",
-            "title": "Cadet Commissioned",
-            "name": "Cadet Commissioned",
-            "icon": "⚡",
-            "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-            "earned": true
-          },
-          {
-            "id": "tier_badge",
-            "code": "TIER",
-            "title": "1★ Explorer",
-            "name": "1★ Explorer",
-            "icon": "🏆",
-            "description": "Reached official university tier 1★ Explorer.",
-            "earned": true
-          },
-          {
-            "id": "core",
-            "code": "CORE",
-            "title": "CCC Core Organizer",
-            "name": "CCC Core Organizer",
-            "icon": "🛡️",
-            "description": "Official Chapter Organizer and Proctor.",
-            "earned": true
-          }
+        "rating_history": [
+          1200
         ],
-        "proofs": []
+        "ratingHistory": [
+          1200
+        ]
       }
     },
     {
@@ -335,37 +316,37 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 7.38,
+      "latency_ms": 13.75,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'ratingHistory', 'problemStats', 'submissionCalendar']",
-      "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'history', 'recentBattles', 'battles', 'problemStats', 'submissionCalendar', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 7.38ms)",
+      "actual_response_summary": "Dict with keys: ['member', 'stats', 'recent_battles', 'recentBattles', 'rating_history', 'ratingHistory', 'problemStats', 'submissionCalendar']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 13.75ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
-          "id": "24b33bdb-03f4-4abe-9d53-6b35a7743da3",
+          "id": "690458d6-7063-4b1b-8753-4b3dfa53bf07",
           "handle": "qa_organizer",
           "full_name": "QA Automated Test Runner",
           "email": "qa.organizer@medicaps.ac.in",
-          "prn": "0801CS211000",
-          "enrollment_number": "0801CS211000",
-          "enrollment_no": "0801CS211000",
+          "prn": "0801•••000",
+          "enrollment_number": "0801•••000",
+          "enrollment_no": "0801•••000",
           "department": "CSE",
           "batch": "2022-26",
           "rating": 1200,
           "peak_rating": 1200,
-          "peak_contest": "Chaos Arena",
+          "peak_contest": null,
           "university_rank": null,
           "percentile": null,
-          "active_members": 2,
+          "active_members": 1,
           "attendance_count": 0,
-          "attendance_total": 2,
+          "attendance_total": 1,
           "attendance_rate": 0.0,
           "is_onboarded": true,
           "is_core_member": true,
-          "tier": "1★ Explorer",
+          "tier": "1_star",
           "podiums": 0,
-          "streak": 0,
+          "streak": "0w",
           "followers_count": 0,
           "following_count": 0,
           "is_following": false,
@@ -375,10 +356,28 @@
           "linkedin_url": null,
           "avatar_url": null
         },
-        "ratingHistory": [],
-        "history": [],
+        "stats": {
+          "attended": 0,
+          "total_contests": 1,
+          "attendance_rate": "0%",
+          "streak": "0w",
+          "podiums": 0,
+          "best_rank": 1,
+          "accepted_solves": 0,
+          "followers_count": 0,
+          "following_count": 0,
+          "percentile": null,
+          "is_following": false,
+          "is_you": true
+        },
+        "recent_battles": [],
         "recentBattles": [],
-        "battles": [],
+        "rating_history": [
+          1200
+        ],
+        "ratingHistory": [
+          1200
+        ],
         "problemStats": {
           "total_solved": 0,
           "easy_solved": 0,
@@ -413,31 +412,16 @@
         "proofs": [],
         "achievements": [
           {
-            "id": "cadet_init",
-            "code": "INIT",
-            "title": "Cadet Commissioned",
-            "name": "Cadet Commissioned",
-            "icon": "⚡",
-            "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-            "earned": true
-          },
-          {
             "id": "tier_badge",
-            "code": "TIER",
-            "title": "1★ Explorer",
-            "name": "1★ Explorer",
+            "title": "1_star",
             "icon": "🏆",
-            "description": "Reached official university tier 1★ Explorer.",
-            "earned": true
+            "description": "Reached official university tier 1_star."
           },
           {
             "id": "core",
-            "code": "CORE",
             "title": "CCC Core Organizer",
-            "name": "CCC Core Organizer",
             "icon": "🛡️",
-            "description": "Official Chapter Organizer and Proctor.",
-            "earned": true
+            "description": "Official Chapter Organizer and Proctor."
           }
         ]
       }
@@ -451,37 +435,37 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.79,
+      "latency_ms": 2.51,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'ratingHistory', 'problemStats']",
-      "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'history', 'recentBattles', 'battles', 'problemStats', 'submissionCalendar', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.79ms)",
+      "actual_response_summary": "Dict with keys: ['member', 'stats', 'recent_battles', 'recentBattles', 'rating_history', 'ratingHistory', 'problemStats', 'submissionCalendar']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 2.51ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
-          "id": "24b33bdb-03f4-4abe-9d53-6b35a7743da3",
+          "id": "690458d6-7063-4b1b-8753-4b3dfa53bf07",
           "handle": "qa_organizer",
           "full_name": "QA Automated Test Runner",
           "email": "qa.organizer@medicaps.ac.in",
-          "prn": "0801CS211000",
-          "enrollment_number": "0801CS211000",
-          "enrollment_no": "0801CS211000",
+          "prn": "0801•••000",
+          "enrollment_number": "0801•••000",
+          "enrollment_no": "0801•••000",
           "department": "CSE",
           "batch": "2022-26",
           "rating": 1200,
           "peak_rating": 1200,
-          "peak_contest": "Chaos Arena",
+          "peak_contest": null,
           "university_rank": null,
           "percentile": null,
-          "active_members": 2,
+          "active_members": 1,
           "attendance_count": 0,
-          "attendance_total": 2,
+          "attendance_total": 1,
           "attendance_rate": 0.0,
           "is_onboarded": true,
           "is_core_member": true,
-          "tier": "1★ Explorer",
+          "tier": "1_star",
           "podiums": 0,
-          "streak": 0,
+          "streak": "0w",
           "followers_count": 0,
           "following_count": 0,
           "is_following": false,
@@ -491,10 +475,28 @@
           "linkedin_url": null,
           "avatar_url": null
         },
-        "ratingHistory": [],
-        "history": [],
+        "stats": {
+          "attended": 0,
+          "total_contests": 1,
+          "attendance_rate": "0%",
+          "streak": "0w",
+          "podiums": 0,
+          "best_rank": 1,
+          "accepted_solves": 0,
+          "followers_count": 0,
+          "following_count": 0,
+          "percentile": null,
+          "is_following": false,
+          "is_you": true
+        },
+        "recent_battles": [],
         "recentBattles": [],
-        "battles": [],
+        "rating_history": [
+          1200
+        ],
+        "ratingHistory": [
+          1200
+        ],
         "problemStats": {
           "total_solved": 0,
           "easy_solved": 0,
@@ -529,31 +531,16 @@
         "proofs": [],
         "achievements": [
           {
-            "id": "cadet_init",
-            "code": "INIT",
-            "title": "Cadet Commissioned",
-            "name": "Cadet Commissioned",
-            "icon": "⚡",
-            "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-            "earned": true
-          },
-          {
             "id": "tier_badge",
-            "code": "TIER",
-            "title": "1★ Explorer",
-            "name": "1★ Explorer",
+            "title": "1_star",
             "icon": "🏆",
-            "description": "Reached official university tier 1★ Explorer.",
-            "earned": true
+            "description": "Reached official university tier 1_star."
           },
           {
             "id": "core",
-            "code": "CORE",
             "title": "CCC Core Organizer",
-            "name": "CCC Core Organizer",
             "icon": "🛡️",
-            "description": "Official Chapter Organizer and Proctor.",
-            "earned": true
+            "description": "Official Chapter Organizer and Proctor."
           }
         ]
       }
@@ -567,80 +554,59 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.36,
+      "latency_ms": 2.12,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'campusPass']",
-      "actual_response_summary": "Dict with keys: ['member', 'campusPass', 'ratingHistory', 'history', 'recentBattles', 'battles', 'achievements', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.36ms)",
+      "actual_response_summary": "Dict with keys: ['member', 'pass', 'campusPass', 'stats', 'recent_battles', 'recentBattles', 'rating_history', 'ratingHistory']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.12ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
-          "id": "24b33bdb-03f4-4abe-9d53-6b35a7743da3",
+          "id": "690458d6-7063-4b1b-8753-4b3dfa53bf07",
           "handle": "qa_organizer",
           "full_name": "QA Automated Test Runner",
           "email": "qa.organizer@medicaps.ac.in",
           "prn": "0801CS211000",
-          "enrollment_number": "0801CS211000",
-          "enrollment_no": "0801CS211000",
           "department": "CSE",
           "batch": "2022-26",
           "rating": 1200,
           "peak_rating": 1200,
-          "peak_contest": "Chaos Arena 2026",
-          "university_rank": null,
-          "percentile": null,
-          "active_members": 2,
-          "attendance_count": 0,
-          "attendance_total": 2,
-          "is_onboarded": true,
           "is_core_member": true,
-          "is_self": true,
-          "is_following": false,
-          "tier": "1★ Explorer",
-          "podiums": 0,
-          "streak": 0,
-          "followers_count": 0,
-          "following_count": 0,
+          "is_onboarded": true,
+          "avatar_url": null,
           "bio": null,
           "github_username": null,
           "linkedin_url": null,
-          "avatar_url": null
+          "attendance_count": 0,
+          "attendance_total": 1,
+          "university_rank": 1,
+          "department_rank": 1,
+          "percentile": 0.0
         },
+        "pass": null,
         "campusPass": null,
-        "ratingHistory": [],
-        "history": [],
+        "stats": {
+          "attended": 0,
+          "total_contests": 1,
+          "attendance_rate": "0%",
+          "streak": "0w",
+          "podiums": 0,
+          "best_rank": 1,
+          "accepted_solves": 0,
+          "total_submissions": 0,
+          "accuracy": "0.0%",
+          "followers_count": 0,
+          "following_count": 0,
+          "percentile": 0.0
+        },
+        "recent_battles": [],
         "recentBattles": [],
-        "battles": [],
-        "achievements": [
-          {
-            "id": "cadet_init",
-            "code": "INIT",
-            "title": "Cadet Commissioned",
-            "name": "Cadet Commissioned",
-            "icon": "⚡",
-            "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-            "earned": true
-          },
-          {
-            "id": "tier_badge",
-            "code": "TIER",
-            "title": "1★ Explorer",
-            "name": "1★ Explorer",
-            "icon": "🏆",
-            "description": "Reached official university tier 1★ Explorer.",
-            "earned": true
-          },
-          {
-            "id": "core",
-            "code": "CORE",
-            "title": "CCC Core Organizer",
-            "name": "CCC Core Organizer",
-            "icon": "🛡️",
-            "description": "Official Chapter Organizer and Proctor.",
-            "earned": true
-          }
+        "rating_history": [
+          1200
         ],
-        "proofs": []
+        "ratingHistory": [
+          1200
+        ]
       }
     },
     {
@@ -652,37 +618,37 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.72,
+      "latency_ms": 2.68,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'ratingHistory', 'problemStats']",
-      "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'history', 'recentBattles', 'battles', 'problemStats', 'submissionCalendar', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 1.72ms)",
+      "actual_response_summary": "Dict with keys: ['member', 'stats', 'recent_battles', 'recentBattles', 'rating_history', 'ratingHistory', 'problemStats', 'submissionCalendar']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 2.68ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
-          "id": "24b33bdb-03f4-4abe-9d53-6b35a7743da3",
+          "id": "690458d6-7063-4b1b-8753-4b3dfa53bf07",
           "handle": "qa_organizer",
           "full_name": "QA Automated Test Runner",
           "email": "qa.organizer@medicaps.ac.in",
-          "prn": "0801CS211000",
-          "enrollment_number": "0801CS211000",
-          "enrollment_no": "0801CS211000",
+          "prn": "0801•••000",
+          "enrollment_number": "0801•••000",
+          "enrollment_no": "0801•••000",
           "department": "CSE",
           "batch": "2022-26",
           "rating": 1200,
           "peak_rating": 1200,
-          "peak_contest": "Chaos Arena",
+          "peak_contest": null,
           "university_rank": null,
           "percentile": null,
-          "active_members": 2,
+          "active_members": 1,
           "attendance_count": 0,
-          "attendance_total": 2,
+          "attendance_total": 1,
           "attendance_rate": 0.0,
           "is_onboarded": true,
           "is_core_member": true,
-          "tier": "1★ Explorer",
+          "tier": "1_star",
           "podiums": 0,
-          "streak": 0,
+          "streak": "0w",
           "followers_count": 0,
           "following_count": 0,
           "is_following": false,
@@ -692,10 +658,28 @@
           "linkedin_url": null,
           "avatar_url": null
         },
-        "ratingHistory": [],
-        "history": [],
+        "stats": {
+          "attended": 0,
+          "total_contests": 1,
+          "attendance_rate": "0%",
+          "streak": "0w",
+          "podiums": 0,
+          "best_rank": 1,
+          "accepted_solves": 0,
+          "followers_count": 0,
+          "following_count": 0,
+          "percentile": null,
+          "is_following": false,
+          "is_you": true
+        },
+        "recent_battles": [],
         "recentBattles": [],
-        "battles": [],
+        "rating_history": [
+          1200
+        ],
+        "ratingHistory": [
+          1200
+        ],
         "problemStats": {
           "total_solved": 0,
           "easy_solved": 0,
@@ -730,31 +714,16 @@
         "proofs": [],
         "achievements": [
           {
-            "id": "cadet_init",
-            "code": "INIT",
-            "title": "Cadet Commissioned",
-            "name": "Cadet Commissioned",
-            "icon": "⚡",
-            "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-            "earned": true
-          },
-          {
             "id": "tier_badge",
-            "code": "TIER",
-            "title": "1★ Explorer",
-            "name": "1★ Explorer",
+            "title": "1_star",
             "icon": "🏆",
-            "description": "Reached official university tier 1★ Explorer.",
-            "earned": true
+            "description": "Reached official university tier 1_star."
           },
           {
             "id": "core",
-            "code": "CORE",
             "title": "CCC Core Organizer",
-            "name": "CCC Core Organizer",
             "icon": "🛡️",
-            "description": "Official Chapter Organizer and Proctor.",
-            "earned": true
+            "description": "Official Chapter Organizer and Proctor."
           }
         ]
       }
@@ -768,11 +737,11 @@
       "expected_status": 404,
       "actual_status": 404,
       "passed": true,
-      "latency_ms": 1.0,
+      "latency_ms": 1.96,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.0ms)",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.96ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Student cadet '@non_existent_cadet_99999' was not found."
@@ -787,37 +756,37 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.96,
+      "latency_ms": 7.04,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['member', 'problemStats', 'ratingHistory', 'recentBattles']",
-      "actual_response_summary": "Dict with keys: ['member', 'ratingHistory', 'history', 'recentBattles', 'battles', 'problemStats', 'submissionCalendar', 'proofs']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 3.96ms)",
+      "actual_response_summary": "Dict with keys: ['member', 'stats', 'recent_battles', 'recentBattles', 'rating_history', 'ratingHistory', 'problemStats', 'submissionCalendar']",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 7.04ms)",
       "request_payload": null,
       "actual_response_sample": {
         "member": {
-          "id": "24b33bdb-03f4-4abe-9d53-6b35a7743da3",
+          "id": "690458d6-7063-4b1b-8753-4b3dfa53bf07",
           "handle": "qa_organizer",
           "full_name": "QA Automated Test Runner",
           "email": "",
-          "prn": "0801CS****00",
-          "enrollment_number": "0801CS****00",
-          "enrollment_no": "0801CS****00",
+          "prn": "0801•••000",
+          "enrollment_number": "0801•••000",
+          "enrollment_no": "0801•••000",
           "department": "CSE",
           "batch": "2022-26",
           "rating": 1200,
           "peak_rating": 1200,
-          "peak_contest": "Chaos Arena",
+          "peak_contest": null,
           "university_rank": null,
           "percentile": null,
-          "active_members": 2,
+          "active_members": 1,
           "attendance_count": 0,
-          "attendance_total": 2,
+          "attendance_total": 1,
           "attendance_rate": 0.0,
           "is_onboarded": true,
           "is_core_member": true,
-          "tier": "1★ Explorer",
+          "tier": "1_star",
           "podiums": 0,
-          "streak": 0,
+          "streak": "0w",
           "followers_count": 0,
           "following_count": 0,
           "is_following": false,
@@ -827,10 +796,28 @@
           "linkedin_url": null,
           "avatar_url": null
         },
-        "ratingHistory": [],
-        "history": [],
+        "stats": {
+          "attended": 0,
+          "total_contests": 1,
+          "attendance_rate": "0%",
+          "streak": "0w",
+          "podiums": 0,
+          "best_rank": 1,
+          "accepted_solves": 0,
+          "followers_count": 0,
+          "following_count": 0,
+          "percentile": null,
+          "is_following": false,
+          "is_you": false
+        },
+        "recent_battles": [],
         "recentBattles": [],
-        "battles": [],
+        "rating_history": [
+          1200
+        ],
+        "ratingHistory": [
+          1200
+        ],
         "problemStats": {
           "total_solved": 0,
           "easy_solved": 0,
@@ -865,31 +852,16 @@
         "proofs": [],
         "achievements": [
           {
-            "id": "cadet_init",
-            "code": "INIT",
-            "title": "Cadet Commissioned",
-            "name": "Cadet Commissioned",
-            "icon": "⚡",
-            "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-            "earned": true
-          },
-          {
             "id": "tier_badge",
-            "code": "TIER",
-            "title": "1★ Explorer",
-            "name": "1★ Explorer",
+            "title": "1_star",
             "icon": "🏆",
-            "description": "Reached official university tier 1★ Explorer.",
-            "earned": true
+            "description": "Reached official university tier 1_star."
           },
           {
             "id": "core",
-            "code": "CORE",
             "title": "CCC Core Organizer",
-            "name": "CCC Core Organizer",
             "icon": "🛡️",
-            "description": "Official Chapter Organizer and Proctor.",
-            "earned": true
+            "description": "Official Chapter Organizer and Proctor."
           }
         ]
       }
@@ -903,374 +875,57 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 15.1,
+      "latency_ms": 11.18,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['id', 'title', 'slug', 'status', 'starts_at', 'ends_at', 'division', 'seat_capacity']",
-      "actual_response_summary": "List [2 items]. First item keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 8 schema keys verified in list items (Latency: 15.1ms)",
+      "actual_response_summary": "List [0 items]. First item keys: primitive",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 11.18ms)",
       "request_payload": null,
-      "actual_response_sample": [
-        {
-          "id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-          "slug": "biweekly-contest-1",
-          "title": "CCC Biweekly Contest 1",
-          "season": "Season 2026",
-          "status": "upcoming",
-          "division": "open",
-          "starts_at": "2026-09-26T14:30:00",
-          "ends_at": "2026-09-26T16:30:00",
-          "check_in_opens_at": "2026-09-26T13:30:00",
-          "venue": "Online Arena · Open to All Students",
-          "seat_capacity": 1000,
-          "registered_count": 0,
-          "problem_count": 4,
-          "environment": "Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
-          "chief_proctors": [
-            "Dr. Ratnesh Litoriya (Chief Proctor)",
-            "Prof. Sanjeev Sharma",
-            "Prof. Amit Shrivastava"
-          ],
-          "prize_pool": "₹25,000 Cash Prize + Merit Badges",
-          "sponsor": "Chaos Computer Club Medi-Caps Chapter",
-          "summary": "Saturday night algorithmic clash. Biweekly #1 featuring 4 competitive challenges designed by the CCC competitive wing for Medi-Caps university cadets.",
-          "rules": [
-            "Schedule: Saturday from 8:00 PM to 10:00 PM IST in the online arena.",
-            "Format: 4 algorithmic problems ranging from Easy to Hard in a 120-minute live session.",
-            "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
-            "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
-            "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
-          ],
-          "cadence": "biweekly",
-          "edition": 1,
-          "banner_url": null,
-          "registered": false,
-          "problems": [
-            {
-              "id": "fa96f13f-32fb-40d9-9dd2-2fb820c658fa",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "A",
-              "title": "Cadet Workstation Matrix Shift",
-              "topic": "Matrix & Array Manipulation",
-              "points": 100,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "3b626249-4759-4e11-af41-0f6eb355f75d",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "B",
-              "title": "Medi-Caps Secure Subnet Partitions",
-              "topic": "Prefix Sums & Modulo Hashing",
-              "points": 200,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "0caa9b02-0168-4ea5-bbf9-c4ad90d710e9",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "C",
-              "title": "Server Rack Heat Dissipation Tree",
-              "topic": "Tree DP & Depth First Search",
-              "points": 300,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "6949cf79-b1e4-4f6c-9fb7-484899bceee9",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "D",
-              "title": "Air-Gapped Cryptographic Signature DAG",
-              "topic": "DAG Dynamic Programming",
-              "points": 400,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            }
-          ],
-          "assessment": {
-            "id": "77b47956-db65-432e-b068-52ed861f37a2",
-            "slug": "biweekly-contest-1",
-            "title": "Biweekly Contest 1 — Live Algorithmic Arena",
-            "summary": "Official biweekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 120 minutes.",
-            "duration_minutes": 120,
-            "starts_at": "2026-09-25T14:30:00",
-            "ends_at": "2026-09-26T12:30:00",
-            "is_active": true,
-            "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8"
-          }
-        },
-        {
-          "id": "75762ff5-c055-4d9b-b912-eee01773947d",
-          "slug": "weekly-contest-1",
-          "title": "CCC Weekly Contest 1",
-          "season": "Season 2026",
-          "status": "upcoming",
-          "division": "open",
-          "starts_at": "2026-09-23T09:30:00",
-          "ends_at": "2026-09-23T11:00:00",
-          "check_in_opens_at": "2026-09-23T08:30:00",
-          "venue": "Online Arena · Open to All Students",
-          "seat_capacity": 1000,
-          "registered_count": 0,
-          "problem_count": 4,
-          "environment": "Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
-          "chief_proctors": [
-            "Dr. Ratnesh Litoriya (Chief Proctor)",
-            "Prof. Amit Shrivastava",
-            "Prof. Prashant Panse"
-          ],
-          "prize_pool": "₹15,000 Cash Prize + Merit Certificates",
-          "sponsor": "Chaos Computer Club Medi-Caps Chapter",
-          "summary": "Wednesday algorithmic showdown for Medi-Caps students. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Open to all students — ratings update on the university leaderboard.",
-          "rules": [
-            "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the online arena.",
-            "Format: 4 algorithmic problems ranging from Easy to Hard in a 90-minute live session.",
-            "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
-            "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
-            "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
-          ],
-          "cadence": "weekly",
-          "edition": 1,
-          "banner_url": null,
-          "registered": false,
-          "problems": [
-            {
-              "id": "5354e709-5ef0-48b8-a797-7db5aacb2335",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "A",
-              "title": "Campus Pass String Validator",
-              "topic": "String Manipulation & Hashing",
-              "points": 100,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "caf23e27-33f3-4cd4-85a1-612c52ef5c9d",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "B",
-              "title": "Medi-Caps Lab Router Bandwidth Allocation",
-              "topic": "Greedy & Priority Queue",
-              "points": 200,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "cb49a6b0-4a73-4a1f-8614-989bd9fcabbc",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "C",
-              "title": "Air-Gapped Quantum Key Distribution",
-              "topic": "Graph Dijkstra & Dynamic Programming",
-              "points": 300,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "5b420ae2-fa4f-495e-84d3-85a05b0b1615",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "D",
-              "title": "Subnet Packet Collision Minimizer",
-              "topic": "Dynamic Programming & Bitmask",
-              "points": 400,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            }
-          ],
-          "assessment": {
-            "id": "93c36db7-bd40-484c-a82e-a57463927df1",
-            "slug": "weekly-contest-1",
-            "title": "Weekly Contest 1 — Live Algorithmic Arena",
-            "summary": "Official weekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 90 minutes.",
-            "duration_minutes": 90,
-            "starts_at": "2026-09-22T09:30:00",
-            "ends_at": "2026-09-23T07:30:00",
-            "is_active": true,
-            "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d"
-          }
-        }
-      ]
+      "actual_response_sample": []
     },
     {
       "test_id": "CONTEST-02",
       "category": "Contests",
-      "name": "Get Specific Contest Overview (biweekly-contest-1)",
+      "name": "Get Specific Contest Overview (weekly-contest-1)",
       "method": "GET",
-      "endpoint": "/api/contests/biweekly-contest-1",
+      "endpoint": "/api/contests/weekly-contest-1",
       "expected_status": [
         200,
         404
       ],
-      "actual_status": 200,
+      "actual_status": 404,
       "passed": true,
-      "latency_ms": 3.54,
-      "cache_header": "MISS",
+      "latency_ms": 2.68,
+      "cache_header": null,
       "expected_schema_summary": "Any valid response",
-      "actual_response_summary": "Dict with keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.54ms)",
+      "actual_response_summary": "Dict with keys: ['detail']",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. No specific schema required (Latency: 2.68ms)",
       "request_payload": null,
       "actual_response_sample": {
-        "id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-        "slug": "biweekly-contest-1",
-        "title": "CCC Biweekly Contest 1",
-        "season": "Season 2026",
-        "status": "upcoming",
-        "division": "open",
-        "starts_at": "2026-09-26T14:30:00",
-        "ends_at": "2026-09-26T16:30:00",
-        "check_in_opens_at": "2026-09-26T13:30:00",
-        "venue": "Online Arena · Open to All Students",
-        "seat_capacity": 1000,
-        "registered_count": 0,
-        "problem_count": 4,
-        "environment": "Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
-        "chief_proctors": [
-          "Dr. Ratnesh Litoriya (Chief Proctor)",
-          "Prof. Sanjeev Sharma",
-          "Prof. Amit Shrivastava"
-        ],
-        "prize_pool": "₹25,000 Cash Prize + Merit Badges",
-        "sponsor": "Chaos Computer Club Medi-Caps Chapter",
-        "summary": "Saturday night algorithmic clash. Biweekly #1 featuring 4 competitive challenges designed by the CCC competitive wing for Medi-Caps university cadets.",
-        "rules": [
-          "Schedule: Saturday from 8:00 PM to 10:00 PM IST in the online arena.",
-          "Format: 4 algorithmic problems ranging from Easy to Hard in a 120-minute live session.",
-          "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
-          "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
-          "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
-        ],
-        "cadence": "biweekly",
-        "edition": 1,
-        "banner_url": null,
-        "registered": false,
-        "problems": [
-          {
-            "id": "fa96f13f-32fb-40d9-9dd2-2fb820c658fa",
-            "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-            "problem_index": "A",
-            "title": "Cadet Workstation Matrix Shift",
-            "topic": "Matrix & Array Manipulation",
-            "points": 100,
-            "solved_count": 0,
-            "first_ac_seconds": null,
-            "editorial_summary": null
-          },
-          {
-            "id": "3b626249-4759-4e11-af41-0f6eb355f75d",
-            "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-            "problem_index": "B",
-            "title": "Medi-Caps Secure Subnet Partitions",
-            "topic": "Prefix Sums & Modulo Hashing",
-            "points": 200,
-            "solved_count": 0,
-            "first_ac_seconds": null,
-            "editorial_summary": null
-          },
-          {
-            "id": "0caa9b02-0168-4ea5-bbf9-c4ad90d710e9",
-            "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-            "problem_index": "C",
-            "title": "Server Rack Heat Dissipation Tree",
-            "topic": "Tree DP & Depth First Search",
-            "points": 300,
-            "solved_count": 0,
-            "first_ac_seconds": null,
-            "editorial_summary": null
-          },
-          {
-            "id": "6949cf79-b1e4-4f6c-9fb7-484899bceee9",
-            "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-            "problem_index": "D",
-            "title": "Air-Gapped Cryptographic Signature DAG",
-            "topic": "DAG Dynamic Programming",
-            "points": 400,
-            "solved_count": 0,
-            "first_ac_seconds": null,
-            "editorial_summary": null
-          }
-        ],
-        "assessment": {
-          "id": "77b47956-db65-432e-b068-52ed861f37a2",
-          "slug": "biweekly-contest-1",
-          "title": "Biweekly Contest 1 — Live Algorithmic Arena",
-          "summary": "Official biweekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 120 minutes.",
-          "duration_minutes": 120,
-          "starts_at": "2026-09-25T14:30:00",
-          "ends_at": "2026-09-26T12:30:00",
-          "is_active": true,
-          "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8"
-        }
+        "detail": "Contest 'weekly-contest-1' not found."
       }
     },
     {
       "test_id": "CONTEST-03",
       "category": "Contests",
-      "name": "Get Contest Problem Arena (biweekly-contest-1)",
+      "name": "Get Contest Problem Arena (weekly-contest-1)",
       "method": "GET",
-      "endpoint": "/api/contests/biweekly-contest-1/problems",
+      "endpoint": "/api/contests/weekly-contest-1/problems",
       "expected_status": [
         200,
         404
       ],
-      "actual_status": 200,
+      "actual_status": 404,
       "passed": true,
-      "latency_ms": 3.05,
-      "cache_header": "MISS",
+      "latency_ms": 3.51,
+      "cache_header": null,
       "expected_schema_summary": "Any valid response",
-      "actual_response_summary": "List [4 items]. First item keys: ['id', 'contest_id', 'problem_index', 'title', 'topic', 'points', 'solved_count', 'first_ac_seconds']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 3.05ms)",
+      "actual_response_summary": "Dict with keys: ['detail']",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. No specific schema required (Latency: 3.51ms)",
       "request_payload": null,
-      "actual_response_sample": [
-        {
-          "id": "fa96f13f-32fb-40d9-9dd2-2fb820c658fa",
-          "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-          "problem_index": "A",
-          "title": "Cadet Workstation Matrix Shift",
-          "topic": "Matrix & Array Manipulation",
-          "points": 100,
-          "solved_count": 0,
-          "first_ac_seconds": null,
-          "editorial_summary": null
-        },
-        {
-          "id": "3b626249-4759-4e11-af41-0f6eb355f75d",
-          "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-          "problem_index": "B",
-          "title": "Medi-Caps Secure Subnet Partitions",
-          "topic": "Prefix Sums & Modulo Hashing",
-          "points": 200,
-          "solved_count": 0,
-          "first_ac_seconds": null,
-          "editorial_summary": null
-        },
-        {
-          "id": "0caa9b02-0168-4ea5-bbf9-c4ad90d710e9",
-          "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-          "problem_index": "C",
-          "title": "Server Rack Heat Dissipation Tree",
-          "topic": "Tree DP & Depth First Search",
-          "points": 300,
-          "solved_count": 0,
-          "first_ac_seconds": null,
-          "editorial_summary": null
-        },
-        {
-          "id": "6949cf79-b1e4-4f6c-9fb7-484899bceee9",
-          "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-          "problem_index": "D",
-          "title": "Air-Gapped Cryptographic Signature DAG",
-          "topic": "DAG Dynamic Programming",
-          "points": 400,
-          "solved_count": 0,
-          "first_ac_seconds": null,
-          "editorial_summary": null
-        }
-      ]
+      "actual_response_sample": {
+        "detail": "Contest 'weekly-contest-1' not found."
+      }
     },
     {
       "test_id": "CONTEST-04",
@@ -1281,11 +936,11 @@
       "expected_status": 404,
       "actual_status": 404,
       "passed": true,
-      "latency_ms": 1.24,
+      "latency_ms": 1.81,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.24ms)",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.81ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Contest 'invalid-contest-slug-nonexistent' not found."
@@ -1300,11 +955,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 5.44,
+      "latency_ms": 6.49,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['rank', 'handle', 'rating', 'department', 'tier', 'ratings']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 5.44ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 6.49ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1317,11 +972,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.1,
+      "latency_ms": 3.52,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['department', 'total_members', 'avg_rating', 'top_rating']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 2.1ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.52ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1334,11 +989,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.76,
+      "latency_ms": 2.49,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['total', 'buckets']",
       "actual_response_summary": "Dict with keys: ['total', 'buckets']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.76ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.49ms)",
       "request_payload": null,
       "actual_response_sample": {
         "total": 0,
@@ -1500,11 +1155,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 0.77,
+      "latency_ms": 0.95,
       "cache_header": "HIT",
       "expected_schema_summary": "Keys: ['buckets']",
       "actual_response_summary": "Dict with keys: ['total', 'buckets']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 0.77ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 0.95ms)",
       "request_payload": null,
       "actual_response_sample": {
         "total": 0,
@@ -1660,42 +1315,46 @@
     {
       "test_id": "SCORE-01",
       "category": "Scoreboards",
-      "name": "Contest Scoreboard Matrix (biweekly-contest-1)",
+      "name": "Contest Scoreboard Matrix (weekly-contest-1)",
       "method": "GET",
-      "endpoint": "/api/scoreboards/biweekly-contest-1",
+      "endpoint": "/api/scoreboards/weekly-contest-1",
       "expected_status": [
         200,
         404
       ],
-      "actual_status": 200,
+      "actual_status": 404,
       "passed": true,
-      "latency_ms": 2.2,
-      "cache_header": "MISS",
+      "latency_ms": 2.32,
+      "cache_header": null,
       "expected_schema_summary": "Any valid response",
-      "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 2.2ms)",
+      "actual_response_summary": "Dict with keys: ['detail']",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. No specific schema required (Latency: 2.32ms)",
       "request_payload": null,
-      "actual_response_sample": []
+      "actual_response_sample": {
+        "detail": "Contest 'weekly-contest-1' not found."
+      }
     },
     {
       "test_id": "SCORE-02",
       "category": "Scoreboards",
-      "name": "Contest Scoreboard Division Filtering (biweekly-contest-1)",
+      "name": "Contest Scoreboard Division Filtering (weekly-contest-1)",
       "method": "GET",
-      "endpoint": "/api/scoreboards/biweekly-contest-1?division=division_1",
+      "endpoint": "/api/scoreboards/weekly-contest-1?division=division_1",
       "expected_status": [
         200,
         404
       ],
-      "actual_status": 200,
+      "actual_status": 404,
       "passed": true,
-      "latency_ms": 1.86,
-      "cache_header": "MISS",
+      "latency_ms": 1.85,
+      "cache_header": null,
       "expected_schema_summary": "Any valid response",
-      "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 1.86ms)",
+      "actual_response_summary": "Dict with keys: ['detail']",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. No specific schema required (Latency: 1.85ms)",
       "request_payload": null,
-      "actual_response_sample": []
+      "actual_response_sample": {
+        "detail": "Contest 'weekly-contest-1' not found."
+      }
     },
     {
       "test_id": "PROOF-01",
@@ -1706,11 +1365,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.62,
+      "latency_ms": 5.27,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['certificate_id', 'sha256_digest', 'issued_at', 'status']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.62ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 5.27ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1723,11 +1382,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.85,
+      "latency_ms": 2.76,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['is_valid', 'message']",
       "actual_response_summary": "Dict with keys: ['is_valid', 'proof', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 1.85ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.76ms)",
       "request_payload": {
         "certificate_id_or_hash": "NON_EXISTENT_FAKE_HASH_000"
       },
@@ -1742,18 +1401,18 @@
       "category": "Campus Passes",
       "name": "List Contest Attendees for Proctors",
       "method": "GET",
-      "endpoint": "/api/passes/contest/biweekly-contest-1/attendees",
+      "endpoint": "/api/passes/contest/weekly-contest-1/attendees",
       "expected_status": [
         200,
         404
       ],
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 5.44,
+      "latency_ms": 4.64,
       "cache_header": null,
       "expected_schema_summary": "Any valid response",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 5.44ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 4.64ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1766,11 +1425,11 @@
       "expected_status": 404,
       "actual_status": 404,
       "passed": true,
-      "latency_ms": 1.28,
+      "latency_ms": 2.66,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 1.28ms)",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. All 1 schema keys present in response object (Latency: 2.66ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "Gate pass 'INVALID_PASS_9999' not found."
@@ -1785,11 +1444,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.34,
+      "latency_ms": 4.92,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['id', 'title', 'content', 'kind', 'published_at']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.34ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 4.92ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1802,11 +1461,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.09,
+      "latency_ms": 3.06,
       "cache_header": "MISS",
       "expected_schema_summary": "Keys: ['id', 'title', 'kind']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 2.09ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 3.06ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -1819,16 +1478,16 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 12.49,
+      "latency_ms": 10.26,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 12.49ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 10.26ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
-        "followers_count": 0,
-        "following_count": 0,
+        "followers_count": null,
+        "following_count": null,
         "students": []
       }
     },
@@ -1841,16 +1500,16 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 3.83,
+      "latency_ms": 4.35,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.83ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.35ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
-        "followers_count": 0,
-        "following_count": 0,
+        "followers_count": null,
+        "following_count": null,
         "students": []
       }
     },
@@ -1863,11 +1522,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.74,
+      "latency_ms": 2.17,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['following_ids']",
       "actual_response_summary": "Dict with keys: ['following_ids']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 4.74ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 1 schema keys present in response object (Latency: 2.17ms)",
       "request_payload": null,
       "actual_response_sample": {
         "following_ids": []
@@ -1882,16 +1541,16 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.94,
+      "latency_ms": 2.73,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.94ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.73ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
-        "followers_count": 0,
-        "following_count": 0,
+        "followers_count": null,
+        "following_count": null,
         "students": []
       }
     },
@@ -1904,11 +1563,11 @@
       "expected_status": 400,
       "actual_status": 400,
       "passed": true,
-      "latency_ms": 4.34,
+      "latency_ms": 2.31,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 4.34ms)",
+      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 2.31ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "You cannot follow yourself."
@@ -1923,16 +1582,16 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.28,
+      "latency_ms": 3.27,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['count', 'students']",
       "actual_response_summary": "Dict with keys: ['count', 'followers_count', 'following_count', 'students']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.28ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 3.27ms)",
       "request_payload": null,
       "actual_response_sample": {
         "count": 0,
-        "followers_count": 0,
-        "following_count": 0,
+        "followers_count": null,
+        "following_count": null,
         "students": []
       }
     },
@@ -1945,18 +1604,18 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 5.55,
+      "latency_ms": 28.72,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle']",
       "actual_response_summary": "Dict with keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 6 schema keys present in response object (Latency: 5.55ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 6 schema keys present in response object (Latency: 28.72ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
         "is_following": true,
         "followers_count": 1,
         "following_count": 1,
-        "target_id": "b8d3395c-de09-4dc0-9e74-0b9f0b0aab3a",
+        "target_id": "6897a1b1-a936-4d66-b28b-ece3d4d1d9c3",
         "target_handle": "qa_target",
         "message": "You are now following @qa_target."
       }
@@ -1970,20 +1629,20 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.85,
+      "latency_ms": 19.23,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'is_following', 'followers_count', 'following_count']",
       "actual_response_summary": "Dict with keys: ['success', 'is_following', 'followers_count', 'following_count', 'target_id', 'target_handle', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 4.85ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys present in response object (Latency: 19.23ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
         "is_following": false,
         "followers_count": 0,
         "following_count": 0,
-        "target_id": "b8d3395c-de09-4dc0-9e74-0b9f0b0aab3a",
+        "target_id": "6897a1b1-a936-4d66-b28b-ece3d4d1d9c3",
         "target_handle": "qa_target",
-        "message": "Unfollowed @qa_target."
+        "message": "You have unfollowed @qa_target."
       }
     },
     {
@@ -1995,11 +1654,11 @@
       "expected_status": 400,
       "actual_status": 400,
       "passed": true,
-      "latency_ms": 1.58,
+      "latency_ms": 2.16,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 1.58ms)",
+      "diff_notes": "✓ Status HTTP 400 matched expectation. All 1 schema keys present in response object (Latency: 2.16ms)",
       "request_payload": null,
       "actual_response_sample": {
         "detail": "You cannot follow yourself."
@@ -2014,11 +1673,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 33.12,
+      "latency_ms": 60.61,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['version', 'contest_model', 'assessment_duration_minutes']",
       "actual_response_summary": "Dict with keys: ['version', 'contest_model', 'assessment_window_hours', 'assessment_duration_minutes', 'finalist_seats']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 33.12ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 60.61ms)",
       "request_payload": null,
       "actual_response_sample": {
         "version": "v1",
@@ -2037,198 +1696,13 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 1.5,
+      "latency_ms": 1.18,
       "cache_header": "HIT",
       "expected_schema_summary": "Keys: ['id', 'title', 'slug', 'status']",
-      "actual_response_summary": "List [2 items]. First item keys: ['id', 'slug', 'title', 'season', 'status', 'division', 'starts_at', 'ends_at']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 4 schema keys verified in list items (Latency: 1.5ms)",
+      "actual_response_summary": "List [0 items]. First item keys: primitive",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 1.18ms)",
       "request_payload": null,
-      "actual_response_sample": [
-        {
-          "id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-          "slug": "biweekly-contest-1",
-          "title": "CCC Biweekly Contest 1",
-          "season": "Season 2026",
-          "status": "upcoming",
-          "division": "open",
-          "starts_at": "2026-09-26T14:30:00",
-          "ends_at": "2026-09-26T16:30:00",
-          "check_in_opens_at": "2026-09-26T13:30:00",
-          "venue": "Online Arena · Open to All Students",
-          "seat_capacity": 1000,
-          "registered_count": 0,
-          "problem_count": 4,
-          "environment": "Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
-          "chief_proctors": [
-            "Dr. Ratnesh Litoriya (Chief Proctor)",
-            "Prof. Sanjeev Sharma",
-            "Prof. Amit Shrivastava"
-          ],
-          "prize_pool": "₹25,000 Cash Prize + Merit Badges",
-          "sponsor": "Chaos Computer Club Medi-Caps Chapter",
-          "summary": "Saturday night algorithmic clash. Biweekly #1 featuring 4 competitive challenges designed by the CCC competitive wing for Medi-Caps university cadets.",
-          "rules": [
-            "Schedule: Saturday from 8:00 PM to 10:00 PM IST in the online arena.",
-            "Format: 4 algorithmic problems ranging from Easy to Hard in a 120-minute live session.",
-            "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
-            "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
-            "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
-          ],
-          "cadence": "biweekly",
-          "edition": 1,
-          "banner_url": null,
-          "registered": false,
-          "problems": [
-            {
-              "id": "fa96f13f-32fb-40d9-9dd2-2fb820c658fa",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "A",
-              "title": "Cadet Workstation Matrix Shift",
-              "topic": "Matrix & Array Manipulation",
-              "points": 100,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "3b626249-4759-4e11-af41-0f6eb355f75d",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "B",
-              "title": "Medi-Caps Secure Subnet Partitions",
-              "topic": "Prefix Sums & Modulo Hashing",
-              "points": 200,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "0caa9b02-0168-4ea5-bbf9-c4ad90d710e9",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "C",
-              "title": "Server Rack Heat Dissipation Tree",
-              "topic": "Tree DP & Depth First Search",
-              "points": 300,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "6949cf79-b1e4-4f6c-9fb7-484899bceee9",
-              "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8",
-              "problem_index": "D",
-              "title": "Air-Gapped Cryptographic Signature DAG",
-              "topic": "DAG Dynamic Programming",
-              "points": 400,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            }
-          ],
-          "assessment": {
-            "id": "77b47956-db65-432e-b068-52ed861f37a2",
-            "slug": "biweekly-contest-1",
-            "title": "Biweekly Contest 1 — Live Algorithmic Arena",
-            "summary": "Official biweekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 120 minutes.",
-            "duration_minutes": 120,
-            "starts_at": "2026-09-25T14:30:00",
-            "ends_at": "2026-09-26T12:30:00",
-            "is_active": true,
-            "contest_id": "51833d40-6b64-49e2-9c2d-6d9b351427c8"
-          }
-        },
-        {
-          "id": "75762ff5-c055-4d9b-b912-eee01773947d",
-          "slug": "weekly-contest-1",
-          "title": "CCC Weekly Contest 1",
-          "season": "Season 2026",
-          "status": "upcoming",
-          "division": "open",
-          "starts_at": "2026-09-23T09:30:00",
-          "ends_at": "2026-09-23T11:00:00",
-          "check_in_opens_at": "2026-09-23T08:30:00",
-          "venue": "Online Arena · Open to All Students",
-          "seat_capacity": 1000,
-          "registered_count": 0,
-          "problem_count": 4,
-          "environment": "Online Arena · GCC 14 / Clang 18 / Python 3.12 / Java 21",
-          "chief_proctors": [
-            "Dr. Ratnesh Litoriya (Chief Proctor)",
-            "Prof. Amit Shrivastava",
-            "Prof. Prashant Panse"
-          ],
-          "prize_pool": "₹15,000 Cash Prize + Merit Certificates",
-          "sponsor": "Chaos Computer Club Medi-Caps Chapter",
-          "summary": "Wednesday algorithmic showdown for Medi-Caps students. 4 algorithmic challenges testing graph traversal, greedy optimization, and dynamic programming. Open to all students — ratings update on the university leaderboard.",
-          "rules": [
-            "Schedule: Every Wednesday from 3:00 PM to 4:30 PM IST in the online arena.",
-            "Format: 4 algorithmic problems ranging from Easy to Hard in a 90-minute live session.",
-            "Open Access: All enrolled Medi-Caps University students are eligible to participate.",
-            "Submissions: Evaluated via CodeBox automated sandbox with sub-millisecond precision.",
-            "Leaderboard: Official university Elo ratings are updated on the global scoreboard following contest completion."
-          ],
-          "cadence": "weekly",
-          "edition": 1,
-          "banner_url": null,
-          "registered": false,
-          "problems": [
-            {
-              "id": "5354e709-5ef0-48b8-a797-7db5aacb2335",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "A",
-              "title": "Campus Pass String Validator",
-              "topic": "String Manipulation & Hashing",
-              "points": 100,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "caf23e27-33f3-4cd4-85a1-612c52ef5c9d",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "B",
-              "title": "Medi-Caps Lab Router Bandwidth Allocation",
-              "topic": "Greedy & Priority Queue",
-              "points": 200,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "cb49a6b0-4a73-4a1f-8614-989bd9fcabbc",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "C",
-              "title": "Air-Gapped Quantum Key Distribution",
-              "topic": "Graph Dijkstra & Dynamic Programming",
-              "points": 300,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            },
-            {
-              "id": "5b420ae2-fa4f-495e-84d3-85a05b0b1615",
-              "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d",
-              "problem_index": "D",
-              "title": "Subnet Packet Collision Minimizer",
-              "topic": "Dynamic Programming & Bitmask",
-              "points": 400,
-              "solved_count": 0,
-              "first_ac_seconds": null,
-              "editorial_summary": null
-            }
-          ],
-          "assessment": {
-            "id": "93c36db7-bd40-484c-a82e-a57463927df1",
-            "slug": "weekly-contest-1",
-            "title": "Weekly Contest 1 — Live Algorithmic Arena",
-            "summary": "Official weekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 90 minutes.",
-            "duration_minutes": 90,
-            "starts_at": "2026-09-22T09:30:00",
-            "ends_at": "2026-09-23T07:30:00",
-            "is_active": true,
-            "contest_id": "75762ff5-c055-4d9b-b912-eee01773947d"
-          }
-        }
-      ]
+      "actual_response_sample": []
     },
     {
       "test_id": "V1-03",
@@ -2239,11 +1713,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 0.94,
+      "latency_ms": 1.15,
       "cache_header": "HIT",
       "expected_schema_summary": "Keys: ['rank', 'handle', 'rating', 'department']",
       "actual_response_summary": "List [0 items]. First item keys: primitive",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 0.94ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. Valid (empty list returned as expected) (Latency: 1.15ms)",
       "request_payload": null,
       "actual_response_sample": []
     },
@@ -2256,11 +1730,11 @@
       "expected_status": 201,
       "actual_status": 201,
       "passed": true,
-      "latency_ms": 8.49,
+      "latency_ms": 33.29,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'slug', 'contest_id']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'contest_id', 'slug', 'title', 'cadence', 'edition', 'status']",
-      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 8.49ms)",
+      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 33.29ms)",
       "request_payload": {
         "contest_type": "weekly",
         "edition": 999
@@ -2268,19 +1742,19 @@
       "actual_response_sample": {
         "success": true,
         "message": "Contest 'CCC Weekly Contest 999' created and published successfully.",
-        "contest_id": "661ad0e1-81a0-4144-b76e-479d9da87c87",
+        "contest_id": "5389df5b-7e63-4c18-b9f3-6e1b05a3071d",
         "slug": "weekly-contest-999",
         "title": "CCC Weekly Contest 999",
         "cadence": "weekly",
         "edition": 999,
         "status": "upcoming",
-        "starts_at": "2026-09-23T09:30:00+00:00",
-        "ends_at": "2026-09-23T11:00:00+00:00",
+        "starts_at": "2026-09-30T09:30:00+00:00",
+        "ends_at": "2026-09-30T11:00:00+00:00",
         "screening_round": {
-          "assessment_id": "5f71b110-2d61-4dfa-98b8-97c75d1c17ce",
+          "assessment_id": "a7a01345-f9d9-41f9-8b5e-9beb73201c17",
           "slug": "weekly-contest-999",
-          "starts_at": "2026-09-22T13:14:58.734235+00:00",
-          "ends_at": "2026-09-23T07:30:00+00:00",
+          "starts_at": "2026-09-26T21:21:50.836766+00:00",
+          "ends_at": "2026-09-30T07:30:00+00:00",
           "duration_minutes": 120,
           "is_active": true
         },
@@ -2321,11 +1795,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 6.19,
+      "latency_ms": 24.58,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message', 'problem_count']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'problem_index', 'target', 'problem_count']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 6.19ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 3 schema keys present in response object (Latency: 24.58ms)",
       "request_payload": {
         "problem_index": "D",
         "title": "Quantum Bit Manipulation Relay",
@@ -2363,11 +1837,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 2.58,
+      "latency_ms": 16.37,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'contest']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'contest']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 2.58ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 16.37ms)",
       "request_payload": {
         "venue": "Medi-Caps Advanced Supercomputing Lab (Lab 01)",
         "max_seats": 250,
@@ -2377,11 +1851,11 @@
         "success": true,
         "message": "Contest 'weekly-contest-999' updated successfully.",
         "contest": {
-          "id": "661ad0e1-81a0-4144-b76e-479d9da87c87",
+          "id": "5389df5b-7e63-4c18-b9f3-6e1b05a3071d",
           "slug": "weekly-contest-999",
           "title": "CCC Weekly Contest 999",
           "status": "upcoming",
-          "starts_at": "2026-09-23T09:30:00",
+          "starts_at": "2026-09-30T09:30:00+00:00",
           "venue": "Medi-Caps Advanced Supercomputing Lab (Lab 01)"
         }
       }
@@ -2395,11 +1869,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 4.28,
+      "latency_ms": 17.54,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'current_status']",
       "actual_response_summary": "Dict with keys: ['success', 'contest_slug', 'title', 'previous_status', 'current_status', 'top_30_qualification', 'rating_summary']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 4.28ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 17.54ms)",
       "request_payload": {
         "status": "live"
       },
@@ -2428,33 +1902,33 @@
       "expected_status": 201,
       "actual_status": 201,
       "passed": true,
-      "latency_ms": 5.74,
+      "latency_ms": 17.33,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'slug', 'contest_id']",
       "actual_response_summary": "Dict with keys: ['success', 'message', 'contest_id', 'slug', 'title', 'cadence', 'edition', 'status']",
-      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 5.74ms)",
+      "diff_notes": "✓ Status HTTP 201 matched expectation. All 3 schema keys present in response object (Latency: 17.33ms)",
       "request_payload": {
         "new_title": "CCC Weekly Contest 999 — Edition 2",
         "new_slug": "weekly-contest-999-v2",
-        "starts_at": "2026-09-29T13:19:58.515235+00:00",
-        "ends_at": "2026-09-29T16:19:58.515244+00:00"
+        "starts_at": "2026-10-03T21:26:50.532759+00:00",
+        "ends_at": "2026-10-04T00:26:50.532768+00:00"
       },
       "actual_response_sample": {
         "success": true,
         "message": "Contest 'CCC Weekly Contest 999 — Edition 2' created and published successfully.",
-        "contest_id": "cbdf4ac7-de5c-46a5-9cb2-db6891059ad2",
+        "contest_id": "67da38ef-9276-4438-8d3d-a0e37c5d242a",
         "slug": "weekly-contest-999-v2",
         "title": "CCC Weekly Contest 999 — Edition 2",
         "cadence": "weekly",
         "edition": 1000,
         "status": "upcoming",
-        "starts_at": "2026-09-29T13:19:58.515235+00:00",
-        "ends_at": "2026-09-29T16:19:58.515244+00:00",
+        "starts_at": "2026-10-03T21:26:50.532759+00:00",
+        "ends_at": "2026-10-04T00:26:50.532768+00:00",
         "screening_round": {
-          "assessment_id": "bfc143de-ca4c-4af4-90cd-b4349c0a7e82",
+          "assessment_id": "40983703-a72c-4dba-85c8-b170fd3e4bcf",
           "slug": "weekly-contest-999-v2",
-          "starts_at": "2026-09-22T13:14:58.755376+00:00",
-          "ends_at": "2026-09-29T11:19:58.515235+00:00",
+          "starts_at": "2026-09-26T21:21:50.929737+00:00",
+          "ends_at": "2026-10-03T19:26:50.532759+00:00",
           "duration_minutes": 120,
           "is_active": true
         },
@@ -2495,11 +1969,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 10.86,
+      "latency_ms": 47.15,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message']",
       "actual_response_summary": "Dict with keys: ['success', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 10.86ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 47.15ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
@@ -2515,11 +1989,11 @@
       "expected_status": 200,
       "actual_status": 200,
       "passed": true,
-      "latency_ms": 10.97,
+      "latency_ms": 38.64,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['success', 'message']",
       "actual_response_summary": "Dict with keys: ['success', 'message']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 10.97ms)",
+      "diff_notes": "✓ Status HTTP 200 matched expectation. All 2 schema keys present in response object (Latency: 38.64ms)",
       "request_payload": null,
       "actual_response_sample": {
         "success": true,
@@ -2529,165 +2003,24 @@
     {
       "test_id": "ASSESS-01",
       "category": "Assessment Service",
-      "name": "Fetch Screening Assessment Status (biweekly-contest-1)",
+      "name": "Fetch Screening Assessment Status (weekly-contest-1)",
       "method": "GET",
-      "endpoint": "/api/assessment/biweekly-contest-1",
+      "endpoint": "/api/assessment/weekly-contest-1",
       "expected_status": [
         200,
         403,
         404
       ],
-      "actual_status": 200,
+      "actual_status": 404,
       "passed": true,
-      "latency_ms": 7.96,
+      "latency_ms": 4.68,
       "cache_header": null,
       "expected_schema_summary": "Any valid response",
-      "actual_response_summary": "Dict with keys: ['assessment', 'session', 'problems', 'submissions']",
-      "diff_notes": "✓ Status HTTP 200 matched expectation. No specific schema required (Latency: 7.96ms)",
+      "actual_response_summary": "Dict with keys: ['detail']",
+      "diff_notes": "✓ Status HTTP 404 matched expectation. No specific schema required (Latency: 4.68ms)",
       "request_payload": null,
       "actual_response_sample": {
-        "assessment": {
-          "id": "77b47956-db65-432e-b068-52ed861f37a2",
-          "slug": "biweekly-contest-1",
-          "title": "Biweekly Contest 1 — Live Algorithmic Arena",
-          "summary": "Official biweekly algorithmic contest for Medi-Caps students. Solve all 4 challenges within 120 minutes.",
-          "duration_minutes": 120,
-          "max_violations": 3,
-          "starts_at": "2026-09-25T14:30:00+00:00",
-          "ends_at": "2026-09-26T12:30:00+00:00",
-          "is_open": true,
-          "opens_in_seconds": 0,
-          "closes_in_seconds": 342601
-        },
-        "session": {
-          "id": "3594f493-a79f-49b2-9d9f-859ce411827f",
-          "status": "in_progress",
-          "started_at": "2026-09-22T13:19:58.783815",
-          "remaining_seconds": 7199,
-          "total_score": 0.0,
-          "anti_cheat_violations": 0,
-          "is_top_30_qualified": false,
-          "is_resumed": false
-        },
-        "problems": [
-          {
-            "id": "05355e80-083c-4f42-be78-dbf20cd6191e",
-            "problem_index": "A",
-            "title": "Cadet Workstation Matrix Shift",
-            "difficulty": "EASY",
-            "description": "Given an M x N 2D grid of cadet seat numbers and an integer k, shift the grid elements cyclically by k positions. Element at grid[i][j] moves to grid[i][j + 1], element at grid[i][n - 1] moves to grid[i + 1][0], and element at grid[m - 1][n - 1] moves to grid[0][0]. Return the shifted 2D grid.",
-            "input_format": "grid = [[...], ...], k = <int>",
-            "output_format": "Return the shifted 2D grid.",
-            "constraints": "1 <= grid.length, grid[0].length <= 50\n-1000 <= grid[i][j] <= 1000\n0 <= k <= 100",
-            "points": 100,
-            "time_limit": 2.0,
-            "memory_limit": 256,
-            "starter_codes": {
-              "python": "class Solution:\n    def shiftGrid(self, grid: list[list[int]], k: int) -> list[list[int]]:\n        # Write your solution here\n        pass\n",
-              "cpp": "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<vector<int>> shiftGrid(vector<vector<int>>& grid, int k) {\n        // Write your solution here\n        return grid;\n    }\n};\n",
-              "java": "class Solution {\n    public int[][] shiftGrid(int[][] grid, int k) {\n        // Write your solution here\n        return grid;\n    }\n}\n",
-              "javascript": "var shiftGrid = function(grid, k) {\n    // Write your solution here\n};\n",
-              "typescript": "function shiftGrid(grid: number[][], k: number): number[][] {\n    // Write your solution here\n    return grid;\n};\n"
-            },
-            "sample_testcases": [
-              {
-                "stdin": "grid = [[1,2,3],[4,5,6],[7,8,9]], k = 1",
-                "input": "grid = [[1,2,3],[4,5,6],[7,8,9]], k = 1",
-                "expected_output": "[[9,1,2],[3,4,5],[6,7,8]]",
-                "output": "[[9,1,2],[3,4,5],[6,7,8]]",
-                "explanation": "Every element shifts right by 1 position cyclically."
-              }
-            ]
-          },
-          {
-            "id": "b5b4dc9d-8b1e-47db-8276-cb217015e8bf",
-            "problem_index": "B",
-            "title": "Medi-Caps Secure Subnet Partitions",
-            "difficulty": "MEDIUM",
-            "description": "Given an integer array traffic representing packet counts on consecutive subnets and an integer k, return the number of non-empty subarrays with sum divisible by k.",
-            "input_format": "traffic = [...], k = <int>",
-            "output_format": "Return an integer count of valid subarrays.",
-            "constraints": "1 <= traffic.length <= 30000\n-10000 <= traffic[i] <= 10000\n2 <= k <= 10000",
-            "points": 200,
-            "time_limit": 2.0,
-            "memory_limit": 256,
-            "starter_codes": {
-              "python": "class Solution:\n    def subarraysDivByK(self, traffic: list[int], k: int) -> int:\n        # Write your solution here\n        pass\n",
-              "cpp": "#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nclass Solution {\npublic:\n    int subarraysDivByK(vector<int>& traffic, int k) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
-              "java": "class Solution {\n    public int subarraysDivByK(int[] traffic, int k) {\n        // Write your solution here\n        return 0;\n    }\n}\n",
-              "javascript": "var subarraysDivByK = function(traffic, k) {\n    // Write your solution here\n};\n",
-              "typescript": "function subarraysDivByK(traffic: number[], k: number): number {\n    // Write your solution here\n    return 0;\n};\n"
-            },
-            "sample_testcases": [
-              {
-                "stdin": "traffic = [4,5,0,-2,-3,1], k = 5",
-                "input": "traffic = [4,5,0,-2,-3,1], k = 5",
-                "expected_output": "7",
-                "output": "7",
-                "explanation": "There are 7 subarrays with sum divisible by 5."
-              }
-            ]
-          },
-          {
-            "id": "f789bd9d-a2ba-4aeb-bf8a-e3ea16850328",
-            "problem_index": "C",
-            "title": "Server Rack Heat Dissipation Tree",
-            "difficulty": "MEDIUM",
-            "description": "You are given a tree with n server nodes labeled 0 to n - 1 rooted at node 0. Each node has heat output values[i]. You can place at most c independent cooling units such that no two cooled nodes are directly connected. Maximize the total heat mitigated by the cooled nodes.",
-            "input_format": "n = <int>, edges = [[u, v], ...], values = [...], c = <int>",
-            "output_format": "Return maximum mitigated heat sum.",
-            "constraints": "1 <= n <= 10^4\n1 <= values[i] <= 10^5\n0 <= c <= n",
-            "points": 300,
-            "time_limit": 2.0,
-            "memory_limit": 256,
-            "starter_codes": {
-              "python": "class Solution:\n    def maxHeatDissipation(self, n: int, edges: list[list[int]], values: list[int], c: int) -> int:\n        # Write your solution here\n        pass\n",
-              "cpp": "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxHeatDissipation(int n, vector<vector<int>>& edges, vector<int>& values, int c) {\n        // Write your solution here\n        return 0;\n    }\n};\n",
-              "java": "class Solution {\n    public int maxHeatDissipation(int n, int[][] edges, int[] values, int c) {\n        // Write your solution here\n        return 0;\n    }\n}\n",
-              "javascript": "var maxHeatDissipation = function(n, edges, values, c) {\n    // Write your solution here\n};\n",
-              "typescript": "function maxHeatDissipation(n: number, edges: number[][], values: number[], c: number): number {\n    // Write your solution here\n    return 0;\n};\n"
-            },
-            "sample_testcases": [
-              {
-                "stdin": "n = 3, edges = [[0,1],[0,2]], values = [15,15,15], c = 2",
-                "input": "n = 3, edges = [[0,1],[0,2]], values = [15,15,15], c = 2",
-                "expected_output": "30",
-                "output": "30",
-                "explanation": "Pick node 1 and node 2 => 15 + 15 = 30."
-              }
-            ]
-          },
-          {
-            "id": "3d75121f-485d-4731-8da4-5e0acb9db535",
-            "problem_index": "D",
-            "title": "Air-Gapped Cryptographic Signature DAG",
-            "difficulty": "HARD",
-            "description": "Given a directed acyclic graph of n certificate authorities with directed edges [[u, v, reliability], ...], find the path from authority 0 to authority n - 1 that visits at least k intermediate nodes with the maximum cumulative reliability score. If no such path exists, return -1.",
-            "input_format": "n = <int>, edges = [[u, v, score], ...], k = <int>",
-            "output_format": "Return maximum path reliability score or -1.",
-            "constraints": "2 <= n <= 500\n0 <= edges.length <= 10000\n1 <= k <= n",
-            "points": 400,
-            "time_limit": 2.0,
-            "memory_limit": 256,
-            "starter_codes": {
-              "python": "class Solution:\n    def maxDAGReliability(self, n: int, edges: list[list[int]], k: int) -> int:\n        # Write your solution here\n        pass\n",
-              "cpp": "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int maxDAGReliability(int n, vector<vector<int>>& edges, int k) {\n        // Write your solution here\n        return -1;\n    }\n};\n",
-              "java": "class Solution {\n    public int maxDAGReliability(int n, int[][] edges, int k) {\n        // Write your solution here\n        return -1;\n    }\n}\n",
-              "javascript": "var maxDAGReliability = function(n, edges, k) {\n    // Write your solution here\n};\n",
-              "typescript": "function maxDAGReliability(n: number, edges: number[][], k: number): number {\n    // Write your solution here\n    return -1;\n};\n"
-            },
-            "sample_testcases": [
-              {
-                "stdin": "n = 4, edges = [[0,1,10],[1,3,20],[0,3,50],[0,2,5],[2,3,25]], k = 1",
-                "input": "n = 4, edges = [[0,1,10],[1,3,20],[0,3,50],[0,2,5],[2,3,25]], k = 1",
-                "expected_output": "30",
-                "output": "30",
-                "explanation": "Path 0 -> 1 -> 3 has 1 intermediate node and score 10 + 20 = 30."
-              }
-            ]
-          }
-        ],
-        "submissions": {}
+        "detail": "No assessment round found for 'weekly-contest-1'."
       }
     },
     {
@@ -2699,11 +2032,11 @@
       "expected_status": 422,
       "actual_status": 422,
       "passed": true,
-      "latency_ms": 1.75,
+      "latency_ms": 3.22,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 1.75ms)",
+      "diff_notes": "✓ Status HTTP 422 matched expectation. All 1 schema keys present in response object (Latency: 3.22ms)",
       "request_payload": {
         "title": "Incomplete Contest"
       },
@@ -2739,15 +2072,15 @@
       "category": "Validation & Edge Cases",
       "name": "Contest Registration Without Auth (401 Rejection)",
       "method": "POST",
-      "endpoint": "/api/contests/biweekly-contest-1/register",
+      "endpoint": "/api/contests/weekly-contest-1/register",
       "expected_status": 401,
       "actual_status": 401,
       "passed": true,
-      "latency_ms": 0.64,
+      "latency_ms": 0.95,
       "cache_header": null,
       "expected_schema_summary": "Keys: ['detail']",
       "actual_response_summary": "Dict with keys: ['detail']",
-      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.64ms)",
+      "diff_notes": "✓ Status HTTP 401 matched expectation. All 1 schema keys present in response object (Latency: 0.95ms)",
       "request_payload": {},
       "actual_response_sample": {
         "detail": "Authentication required. Please sign in."

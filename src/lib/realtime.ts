@@ -2,11 +2,15 @@
  * Chaos Computer Club — Medi-Caps Chapter
  * src/lib/realtime.ts
  *
- * Real-Time Event Stream Subsystem & Webhook Triggers
- * Provides SSE subscriptions to eliminate server interval polling.
+ * Single Global SSE Multiplexer Subsystem
+ *
+ * Maintains EXACTLY ONE browser EventSource connection shared across all
+ * components and routes, with reference counting, automatic reconnection with
+ * exponential backoff, connection grace periods (preventing disconnect/reconnect
+ * thrashing during route transitions), and per-subscriber event routing.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getApiBase, getToken } from "@/lib/auth";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 
@@ -18,6 +22,15 @@ export interface RealtimeEvent<T = any> {
 }
 
 export type RealtimeEventHandler = (event: RealtimeEvent) => void | Promise<void>;
+
+export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "reconnecting";
+
+export interface SubscriptionOptions {
+  contestSlug?: string | null | undefined;
+  eventFilter?: string[] | undefined;
+  handler: RealtimeEventHandler;
+  enabled?: boolean | undefined;
+}
 
 const CONTEST_CACHE_PATTERNS = [
   "contests:*",
@@ -48,11 +61,331 @@ export function invalidateContestCaches(): void {
   }
 }
 
+interface InternalSubscriber {
+  id: string;
+  contestSlug?: string | null;
+  eventFilter?: Set<string> | null;
+  handler: RealtimeEventHandler;
+  enabled: boolean;
+}
+
+class GlobalSseMultiplexer {
+  private static instance: GlobalSseMultiplexer;
+
+  private eventSource: EventSource | null = null;
+  private subscribers: Map<string, InternalSubscriber> = new Map();
+  private status: ConnectionStatus = "disconnected";
+  private statusListeners: Set<(status: ConnectionStatus) => void> = new Set();
+
+  private reconnectAttempts = 0;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private disconnectGraceTimer: ReturnType<typeof setTimeout> | null = null;
+  private nextSubId = 0;
+
+  private readonly GRACE_PERIOD_MS = 10_000; // 10s grace period on 0 subscribers to prevent thrashing
+  private readonly BASE_RECONNECT_DELAY_MS = 1500;
+  private readonly MAX_RECONNECT_DELAY_MS = 15_000;
+
+  private constructor() {
+    if (typeof window !== "undefined") {
+      // Reconnect immediately when browser comes back online
+      window.addEventListener("online", () => {
+        if (this.subscribers.size > 0 && this.status !== "connected") {
+          this.reconnectImmediate();
+        }
+      });
+
+      // Disconnect when tab/page is hidden/closed to cleanly free server resources
+      window.addEventListener("pagehide", () => {
+        this.destroy();
+      });
+    }
+  }
+
+  public static getInstance(): GlobalSseMultiplexer {
+    if (!GlobalSseMultiplexer.instance) {
+      GlobalSseMultiplexer.instance = new GlobalSseMultiplexer();
+    }
+    return GlobalSseMultiplexer.instance;
+  }
+
+  public getStatus(): ConnectionStatus {
+    return this.status;
+  }
+
+  public onStatusChange(listener: (status: ConnectionStatus) => void): () => void {
+    this.statusListeners.add(listener);
+    listener(this.status);
+    return () => {
+      this.statusListeners.delete(listener);
+    };
+  }
+
+  private setStatus(newStatus: ConnectionStatus) {
+    if (this.status !== newStatus) {
+      this.status = newStatus;
+      this.statusListeners.forEach((listener) => {
+        try {
+          listener(newStatus);
+        } catch (e) {
+          console.error("Error in SSE status listener:", e);
+        }
+      });
+    }
+  }
+
+  public subscribe(options: SubscriptionOptions): () => void {
+    const id = `sub_${++this.nextSubId}_${Date.now()}`;
+    const sub: InternalSubscriber = {
+      id,
+      contestSlug: options.contestSlug || null,
+      eventFilter: options.eventFilter && options.eventFilter.length > 0 ? new Set(options.eventFilter) : null,
+      handler: options.handler,
+      enabled: options.enabled ?? true,
+    };
+
+    this.subscribers.set(id, sub);
+
+    // Cancel any pending disconnect grace timer since a subscriber is active
+    if (this.disconnectGraceTimer) {
+      clearTimeout(this.disconnectGraceTimer);
+      this.disconnectGraceTimer = null;
+    }
+
+    // Ensure connection is active if subscriber is enabled
+    if (sub.enabled && !this.eventSource && this.status !== "connecting") {
+      this.connect();
+    }
+
+    // Return unsubscriber function
+    return () => {
+      this.unsubscribe(id);
+    };
+  }
+
+  private unsubscribe(id: string) {
+    this.subscribers.delete(id);
+
+    const hasActiveSubscribers = Array.from(this.subscribers.values()).some((s) => s.enabled);
+    if (!hasActiveSubscribers) {
+      this.scheduleGracefulDisconnect();
+    }
+  }
+
+  private scheduleGracefulDisconnect() {
+    if (this.disconnectGraceTimer) {
+      clearTimeout(this.disconnectGraceTimer);
+    }
+
+    this.disconnectGraceTimer = setTimeout(() => {
+      this.disconnectGraceTimer = null;
+      const hasActive = Array.from(this.subscribers.values()).some((s) => s.enabled);
+      if (!hasActive) {
+        this.disconnect();
+      }
+    }, this.GRACE_PERIOD_MS);
+  }
+
+  private connect() {
+    if (typeof window === "undefined") return;
+
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+
+    this.setStatus(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
+
+    const base = getApiBase();
+    // Connect strictly to the unified global event stream which receives all chapter and contest events
+    const endpoint = `${base}/events/stream`;
+
+    try {
+      this.eventSource = new EventSource(endpoint);
+
+      this.eventSource.onopen = () => {
+        this.reconnectAttempts = 0;
+        this.setStatus("connected");
+      };
+
+      this.eventSource.onmessage = (e: MessageEvent) => {
+        this.handleRawMessage(e.data);
+      };
+
+      this.eventSource.onerror = () => {
+        if (this.eventSource) {
+          this.eventSource.close();
+          this.eventSource = null;
+        }
+
+        const hasActive = Array.from(this.subscribers.values()).some((s) => s.enabled);
+        if (hasActive) {
+          this.scheduleReconnect();
+        } else {
+          this.setStatus("disconnected");
+        }
+      };
+    } catch (err) {
+      console.warn("[SSE Multiplexer] Connection initialization error:", err);
+      this.scheduleReconnect();
+    }
+  }
+
+  private scheduleReconnect() {
+    this.setStatus("reconnecting");
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+    }
+
+    this.reconnectAttempts++;
+    // Exponential backoff with jitter (1.5x up to 15s)
+    const delay = Math.min(
+      this.BASE_RECONNECT_DELAY_MS * Math.pow(1.5, Math.min(this.reconnectAttempts, 6)) + Math.random() * 500,
+      this.MAX_RECONNECT_DELAY_MS
+    );
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      const hasActive = Array.from(this.subscribers.values()).some((s) => s.enabled);
+      if (hasActive) {
+        this.connect();
+      } else {
+        this.setStatus("disconnected");
+      }
+    }, delay);
+  }
+
+  public reconnectImmediate() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnectAttempts = 0;
+    this.connect();
+  }
+
+  private disconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.disconnectGraceTimer) {
+      clearTimeout(this.disconnectGraceTimer);
+      this.disconnectGraceTimer = null;
+    }
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+    this.setStatus("disconnected");
+  }
+
+  public destroy() {
+    this.subscribers.clear();
+    this.statusListeners.clear();
+    this.disconnect();
+  }
+
+  private handleRawMessage(rawData: string) {
+    if (!rawData) return;
+    const trimmed = rawData.trim();
+    if (trimmed === ": ping" || trimmed === ": connected" || trimmed.startsWith(": connected to")) {
+      if (this.status !== "connected") {
+        this.reconnectAttempts = 0;
+        this.setStatus("connected");
+      }
+      return;
+    }
+
+    try {
+      const parsed: RealtimeEvent = JSON.parse(rawData);
+
+      // 1. Process Global Platform Cache & Lifecycle Invalidation (Executed ONCE per event)
+      if (
+        parsed.event === "pass_checked_in" ||
+        parsed.event === "contest_status_changed" ||
+        parsed.event === "contest_concluded" ||
+        parsed.event === "contest_finished" ||
+        parsed.event === "contest_created" ||
+        parsed.event === "contest_updated" ||
+        parsed.event === "contest_deleted" ||
+        parsed.event === "contest_timer_reset" ||
+        parsed.event === "contest_registered" ||
+        parsed.event === "contest_unregistered" ||
+        parsed.event === "top30_qualified" ||
+        parsed.event === "submission_evaluated" ||
+        parsed.event === "assessment_finished" ||
+        parsed.event === "leaderboard_updated" ||
+        parsed.event === "ratings_updated" ||
+        parsed.event === "member_profile_updated"
+      ) {
+        invalidateContestCaches();
+      }
+
+      if (
+        parsed.event === "leaderboard_updated" ||
+        parsed.event === "ratings_updated"
+      ) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("leaderboard:invalidate", { detail: parsed }));
+        }
+      }
+
+      if (
+        parsed.event === "contest_concluded" ||
+        (parsed.event === "contest_status_changed" &&
+          (parsed.data?.new_status === "finished" || parsed.data?.status === "finished"))
+      ) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("contest:concluded", { detail: parsed }));
+        }
+      }
+
+      // 2. Dispatch to Subscribed Components with Selective Filtering
+      this.subscribers.forEach((sub) => {
+        if (!sub.enabled) return;
+
+        // Contest filter: if subscriber specified a contestSlug, only dispatch matching contest events
+        if (sub.contestSlug && parsed.contest_slug && parsed.contest_slug !== sub.contestSlug) {
+          return;
+        }
+
+        // Event name filter: if subscriber specified an eventFilter set, only dispatch matching events
+        if (sub.eventFilter && !sub.eventFilter.has(parsed.event)) {
+          return;
+        }
+
+        try {
+          void Promise.resolve(sub.handler(parsed)).catch((error) => {
+            console.error(`[SSE Multiplexer] Handler error for sub ${sub.id}:`, error);
+          });
+        } catch (err) {
+          console.error(`[SSE Multiplexer] Synchronous handler error for sub ${sub.id}:`, err);
+        }
+      });
+    } catch {
+      // Ignore keep-alive or malformed frames safely
+    }
+  }
+
+  public getSubscriberCount(): number {
+    return this.subscribers.size;
+  }
+}
+
 /**
- * Hook to subscribe to real-time events via Server-Sent Events (SSE).
+ * Hook to subscribe to real-time events via the single global SSE multiplexer.
+ * Multiple components subscribing share exactly ONE underlying EventSource connection.
+ *
  * @param contestSlug Optional contest slug to filter events. If omitted, connects to global stream.
  * @param onEvent Callback function invoked on every matching real-time event.
  * @param eventFilter Optional list of event names to listen for (e.g. ["pass_checked_in", "contest_status_changed"]).
+ * @param enabled Whether this subscription is currently active (defaults to true).
  */
 export function useRealtimeEvents(
   contestSlug?: string | null,
@@ -66,113 +399,47 @@ export function useRealtimeEvents(
   useEffect(() => {
     if (typeof window === "undefined" || !enabled) return;
 
-    const base = getApiBase();
-    const endpoint = contestSlug
-      ? `${base}/events/contest/${encodeURIComponent(contestSlug)}/stream`
-      : `${base}/events/stream`;
+    const multiplexer = GlobalSseMultiplexer.getInstance();
 
-    let eventSource: EventSource | null = null;
-    let reconnectTimeout: NodeJS.Timeout | null = null;
-    let isSubscribed = true;
-
-    function connect() {
-      if (!isSubscribed) return;
-
-      try {
-        eventSource = new EventSource(endpoint);
-
-        eventSource.onmessage = (e) => {
-          if (!e.data || e.data.trim() === ": ping" || e.data.trim() === ": connected") {
-            return;
-          }
-
-          try {
-            const parsed: RealtimeEvent = JSON.parse(e.data);
-
-            // Invalidate corresponding SWR cache entries immediately on incoming event
-            if (
-              parsed.event === "pass_checked_in" ||
-              parsed.event === "contest_status_changed" ||
-              parsed.event === "contest_concluded" ||
-              parsed.event === "contest_finished" ||
-              parsed.event === "contest_created" ||
-              parsed.event === "contest_updated" ||
-              parsed.event === "contest_deleted" ||
-              parsed.event === "contest_timer_reset" ||
-              parsed.event === "contest_registered" ||
-              parsed.event === "contest_unregistered" ||
-              parsed.event === "top30_qualified" ||
-              parsed.event === "submission_evaluated" ||
-              parsed.event === "assessment_finished" ||
-              parsed.event === "leaderboard_updated" ||
-              parsed.event === "ratings_updated" ||
-              parsed.event === "member_profile_updated"
-            ) {
-              invalidateContestCaches();
-            }
-
-            if (
-              parsed.event === "leaderboard_updated" ||
-              parsed.event === "ratings_updated"
-            ) {
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("leaderboard:invalidate", { detail: parsed }));
-              }
-            }
-
-            if (
-              parsed.event === "contest_concluded" ||
-              (parsed.event === "contest_status_changed" &&
-                (parsed.data?.new_status === "finished" || parsed.data?.status === "finished"))
-            ) {
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("contest:concluded", { detail: parsed }));
-              }
-            }
-
-            // Check if matches filter
-            if (!eventFilter || eventFilter.length === 0 || eventFilter.includes(parsed.event)) {
-              const handler = handlerRef.current;
-              if (handler) {
-                void Promise.resolve(handler(parsed)).catch((error) => {
-                  console.error("Realtime event handler failed:", error);
-                });
-              }
-            }
-          } catch {
-            // Ignore parse errors for keep-alive frames
-          }
-        };
-
-        eventSource.onerror = () => {
-          if (eventSource) {
-            eventSource.close();
-            eventSource = null;
-          }
-          if (isSubscribed) {
-            // Reconnect after 3 seconds on drop
-            reconnectTimeout = setTimeout(connect, 3000);
-          }
-        };
-      } catch (err) {
-        if (isSubscribed) {
-          reconnectTimeout = setTimeout(connect, 5000);
+    const unsubscribe = multiplexer.subscribe({
+      contestSlug,
+      eventFilter,
+      enabled,
+      handler: (event) => {
+        if (handlerRef.current) {
+          return handlerRef.current(event);
         }
-      }
-    }
-
-    connect();
+      },
+    });
 
     return () => {
-      isSubscribed = false;
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
-      if (eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
+      unsubscribe();
     };
   }, [contestSlug, enabled, JSON.stringify(eventFilter)]);
 }
+
+/**
+ * Hook to inspect the global SSE connection status in UI telemetry badges.
+ */
+export function useRealtimeStatus(): ConnectionStatus {
+  const [status, setStatus] = useState<ConnectionStatus>(() => {
+    if (typeof window === "undefined") return "disconnected";
+    return GlobalSseMultiplexer.getInstance().getStatus();
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const multiplexer = GlobalSseMultiplexer.getInstance();
+    return multiplexer.onStatusChange(setStatus);
+  }, []);
+
+  return status;
+}
+
+export function getGlobalRealtimeMultiplexer(): GlobalSseMultiplexer {
+  return GlobalSseMultiplexer.getInstance();
+}
+
 
 /**
  * Webhook client helper: Inbound Gate Scan (IoT Turnstile / Hardware Scanner).

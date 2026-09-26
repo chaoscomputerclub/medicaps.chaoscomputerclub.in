@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useTransition, useDeferredValue } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Trophy,
@@ -170,6 +170,8 @@ export function ContestsHubPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") as "past" | "my") || "past";
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -327,22 +329,22 @@ export function ContestsHubPage() {
   const filteredPastContests = useMemo(() => {
     return pastContests.filter((c) => {
       const matchesQuery =
-        searchQuery === "" ||
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(c.edition ?? "").includes(searchQuery);
+        deferredSearchQuery === "" ||
+        c.title.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+        String(c.edition ?? "").includes(deferredSearchQuery);
       return matchesQuery;
     });
-  }, [pastContests, searchQuery]);
+  }, [pastContests, deferredSearchQuery]);
 
   const filteredMyParticipations = useMemo(() => {
     return myParticipations.filter((p) => {
       return (
-        searchQuery === "" ||
-        p.contest_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.contest_slug.toLowerCase().includes(searchQuery.toLowerCase())
+        deferredSearchQuery === "" ||
+        p.contest_title.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+        p.contest_slug.toLowerCase().includes(deferredSearchQuery.toLowerCase())
       );
     });
-  }, [myParticipations, searchQuery]);
+  }, [myParticipations, deferredSearchQuery]);
 
   const totalPages = Math.max(
     1,
@@ -914,8 +916,10 @@ export function ContestsHubPage() {
             <Tabs
               value={activeTab}
               onValueChange={(v) => {
-                setSearchParams({ tab: v });
-                setCurrentPage(1);
+                startTransition(() => {
+                  setSearchParams({ tab: v });
+                  setCurrentPage(1);
+                });
               }}
               className="gap-0"
             >
@@ -984,7 +988,7 @@ export function ContestsHubPage() {
                     return (
                       <div
                         key={contest.slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
+                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px] content-auto-card"
                       >
                         {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
                         <div className="flex items-center gap-4 min-w-0">
@@ -1076,7 +1080,7 @@ export function ContestsHubPage() {
                     return (
                       <div
                         key={record.contest_slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
+                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px] content-auto-card"
                       >
                         <div className="min-w-0">
                           <Link

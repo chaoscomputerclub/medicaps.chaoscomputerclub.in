@@ -5,7 +5,7 @@ Delegates to app.controllers.contest_controller.ContestController
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -216,18 +216,26 @@ async def run_contest_arena_code(
 
 @router.post("/{slug}/arena/submit")
 async def submit_contest_arena_code(
+    request: Request,
+    response: Response,
     slug: str,
     payload: ArenaSubmitRequest,
+    async_mode: Optional[bool] = Query(None, alias="async", description="Set to true for non-blocking async execution"),
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
     """Submit solution in live contest arena against full judge test suite & update live scoreboard."""
-    return await ContestController.submit_arena_code(
+    is_async = async_mode is True or request.headers.get("X-Execution-Mode", "").lower() == "async"
+    result = await ContestController.submit_arena_code(
         slug=slug,
         payload=payload,
         current_member=current_member,
         db=db,
+        async_mode=is_async,
     )
+    if is_async and result.get("status") == "queued":
+        response.status_code = status.HTTP_202_ACCEPTED
+    return result
 
 
 @router.post("/{slug}/finish")

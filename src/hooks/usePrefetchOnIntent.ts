@@ -92,7 +92,7 @@ export function usePrefetchOnIntent(): void {
     let lastHref = "";
     let lastFiredAt = 0;
 
-    function handleIntent(e: MouseEvent | TouchEvent): void {
+    function handleIntent(e: Event): void {
       const target = e.target as Element | null;
       if (!target) return;
 
@@ -114,12 +114,15 @@ export function usePrefetchOnIntent(): void {
     }
 
     // mouseover bubbles up through the DOM — one listener catches all links
-    document.addEventListener("mouseover", handleIntent as EventListener, { passive: true });
-    document.addEventListener("touchstart", handleIntent as EventListener, { passive: true });
+    // focusin intercepts keyboard tab focus for immediate prefetching before Enter/Space
+    document.addEventListener("mouseover", handleIntent, { passive: true });
+    document.addEventListener("touchstart", handleIntent, { passive: true });
+    document.addEventListener("focusin", handleIntent, { passive: true });
 
     return () => {
-      document.removeEventListener("mouseover", handleIntent as EventListener);
-      document.removeEventListener("touchstart", handleIntent as EventListener);
+      document.removeEventListener("mouseover", handleIntent);
+      document.removeEventListener("touchstart", handleIntent);
+      document.removeEventListener("focusin", handleIntent);
     };
   }, []);
 }

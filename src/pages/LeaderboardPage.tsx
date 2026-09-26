@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useTransition } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy, UserPlus } from "lucide-react";
@@ -42,6 +42,7 @@ export function LeaderboardPage() {
   const dispatch = useAppDispatch();
   const [pageSize, setPageSize] = useState<number>(25);
   const [pageIndex, setPageIndex] = useState<number>(0);
+  const [isPending, startTransition] = useTransition();
 
   const { data: rawData, loading, revalidate } = useSwrData(
     "leaderboard:university",
@@ -111,16 +112,22 @@ export function LeaderboardPage() {
   }
 
   const handlePageSizeChange = (newSize: number) => {
-    setPageSize(newSize);
-    setPageIndex(0);
+    startTransition(() => {
+      setPageSize(newSize);
+      setPageIndex(0);
+    });
   };
 
   const handlePrevPage = () => {
-    setPageIndex((prev) => Math.max(0, prev - 1));
+    startTransition(() => {
+      setPageIndex((prev) => Math.max(0, prev - 1));
+    });
   };
 
   const handleNextPage = () => {
-    setPageIndex((prev) => Math.min(totalPages - 1, prev + 1));
+    startTransition(() => {
+      setPageIndex((prev) => Math.min(totalPages - 1, prev + 1));
+    });
   };
 
   const startRecord = totalCount > 0 ? pageIndex * pageSize + 1 : 0;
@@ -204,7 +211,7 @@ export function LeaderboardPage() {
                   return (
                     <TableRow
                       key={x.handle || x.id}
-                      className={`border-b border-white/5 transition-colors hover:bg-white/[0.03] ${
+                      className={`border-b border-white/5 transition-colors hover:bg-white/[0.03] content-auto-row ${
                         isYou ? "bg-lime-400/[0.04] hover:bg-lime-400/[0.07]" : ""
                       }`}
                     >

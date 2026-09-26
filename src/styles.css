@@ -352,3 +352,19 @@ textarea {
   }
 }
 
+/* ─────────────────────────────────────────────
+   High-Performance Rendering Utilities
+   Content-Visibility & Containment Optimization
+   ───────────────────────────────────────────── */
+
+.content-auto-row {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 56px;
+}
+
+.content-auto-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 160px;
+}
+
+

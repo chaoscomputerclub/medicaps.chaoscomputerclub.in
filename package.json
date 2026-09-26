@@ -19,7 +19,8 @@
     "test:dead-ui": "playwright test tests/e2e/dead_ui_and_interactions.spec.ts",
     "test:nav": "playwright test tests/e2e/inter_navigation.spec.ts",
     "test:api": "node scripts/api_contract_fuzzer.mjs",
-    "test:qa": "node scripts/run_unified_qa.mjs"
+    "test:qa": "node scripts/run_unified_qa.mjs",
+    "audit:performance": "node scripts/audit_platform_performance.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

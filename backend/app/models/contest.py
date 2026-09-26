@@ -10,6 +10,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     JSON,
     String,
@@ -110,6 +111,12 @@ class ContestSubmission(Base):
     points_awarded = Column(Integer, default=0, nullable=False)
     submitted_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
+    __table_args__ = (
+        Index("ix_contest_submissions_contest_problem_verdict", "contest_id", "problem_id", "verdict"),
+        Index("ix_contest_submissions_contest_member_submitted", "contest_id", "member_id", "submitted_at"),
+        Index("ix_contest_submissions_member_problem_verdict", "member_id", "problem_id", "verdict"),
+    )
+
     # Relationships
     contest = relationship("OfflineContest", back_populates="submissions")
     problem = relationship("ContestProblem", back_populates="submissions")
@@ -135,6 +142,14 @@ class ScoreboardEntry(Base):
     rating_delta = Column(Integer, nullable=True)
     telemetry = Column(JSON, default=list, nullable=False)
 
+    __table_args__ = (
+        Index("ix_scoreboard_contest_score_penalty", "contest_id", "score", "penalty_seconds"),
+        Index("ix_scoreboard_contest_division_rank", "contest_id", "division", "rank"),
+        Index("ix_scoreboard_contest_department_rank", "contest_id", "department", "rank"),
+        Index("ix_scoreboard_contest_rank", "contest_id", "rank"),
+        Index("ix_scoreboard_member_contest", "member_id", "contest_id"),
+    )
+
     # Relationships
     contest = relationship("OfflineContest", back_populates="scoreboard_entries")
     member = relationship("MemberProfile", back_populates="scoreboard_entries")
@@ -159,8 +174,11 @@ class ContestRegistration(Base):
 
     __table_args__ = (
         UniqueConstraint("contest_id", "member_id", name="uq_contest_member_reg"),
+        Index("ix_contest_registrations_contest_status", "contest_id", "status"),
+        Index("ix_contest_registrations_contest_checked_in", "contest_id", "checked_in_at"),
     )
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="registrations")
     member = relationship("MemberProfile", back_populates="contest_registrations")
+

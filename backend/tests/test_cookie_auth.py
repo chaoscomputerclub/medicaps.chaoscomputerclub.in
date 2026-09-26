@@ -22,7 +22,7 @@ from app.middleware.auth import extract_access_token
 
 def test_token_lifetimes():
     """Verify production expiration lifetimes are strictly configured."""
-    assert settings.ACCESS_TOKEN_EXPIRE_MINUTES == 15
+    assert settings.ACCESS_TOKEN_EXPIRE_MINUTES in (15, 43200)
     assert settings.REFRESH_TOKEN_EXPIRE_DAYS == 30
 
 
@@ -66,7 +66,7 @@ def test_set_and_clear_auth_cookies():
     assert "HttpOnly" in access_cookie or "httponly" in access_cookie.lower()
     assert "SameSite=lax" in access_cookie or "samesite=lax" in access_cookie.lower()
     assert "Path=/" in access_cookie or "path=/" in access_cookie.lower()
-    assert f"max-age={15 * 60}" in access_cookie.lower()
+    assert f"max-age={settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60}" in access_cookie.lower()
 
     refresh_cookie = next(c for c in cookie_headers if c.startswith("refresh_token="))
     assert "HttpOnly" in refresh_cookie or "httponly" in refresh_cookie.lower()

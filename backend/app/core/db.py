@@ -129,6 +129,37 @@ async def ensure_database_integrity():
                 "CREATE INDEX IF NOT EXISTS ix_assessment_submissions_member_id ON assessment_submissions (member_id)",
                 "CREATE INDEX IF NOT EXISTS ix_announcements_published_at ON announcements (published_at)",
                 "CREATE INDEX IF NOT EXISTS ix_announcements_contest_slug ON announcements (contest_slug)",
+
+                # Composite Indexes for Instantaneous University Leaderboard & Star Divisions
+                "CREATE INDEX IF NOT EXISTS ix_member_profiles_leaderboard_core ON member_profiles (is_onboarded, rating DESC, peak_rating DESC, id ASC)",
+                "CREATE INDEX IF NOT EXISTS ix_member_profiles_dept_rating_peak ON member_profiles (is_onboarded, department, rating DESC, peak_rating DESC)",
+                "CREATE INDEX IF NOT EXISTS ix_member_profiles_batch_rating_peak ON member_profiles (is_onboarded, batch, rating DESC, peak_rating DESC)",
+                "CREATE INDEX IF NOT EXISTS ix_member_profiles_dept_batch_rating ON member_profiles (department, batch, rating DESC)",
+                "CREATE INDEX IF NOT EXISTS ix_member_profiles_onboarded_rating ON member_profiles (is_onboarded, rating DESC)",
+
+                # Composite Indexes for Live Scoreboard Re-Ranking & Division Standings
+                "CREATE INDEX IF NOT EXISTS ix_scoreboard_contest_score_penalty ON scoreboard_entries (contest_id, score DESC, penalty_seconds ASC)",
+                "CREATE INDEX IF NOT EXISTS ix_scoreboard_contest_division_rank ON scoreboard_entries (contest_id, division, rank ASC)",
+                "CREATE INDEX IF NOT EXISTS ix_scoreboard_contest_department_rank ON scoreboard_entries (contest_id, department, rank ASC)",
+                "CREATE INDEX IF NOT EXISTS ix_scoreboard_contest_rank ON scoreboard_entries (contest_id, rank ASC)",
+                "CREATE INDEX IF NOT EXISTS ix_scoreboard_member_contest ON scoreboard_entries (member_id, contest_id)",
+
+                # Composite Indexes for Contest Submissions & Problem Solving Telemetry
+                "CREATE INDEX IF NOT EXISTS ix_contest_submissions_contest_problem_verdict ON contest_submissions (contest_id, problem_id, verdict)",
+                "CREATE INDEX IF NOT EXISTS ix_contest_submissions_contest_member_submitted ON contest_submissions (contest_id, member_id, submitted_at DESC)",
+                "CREATE INDEX IF NOT EXISTS ix_contest_submissions_member_problem_verdict ON contest_submissions (member_id, problem_id, verdict)",
+
+                # Composite Covering Index for Rating Trajectories & Elo Changes
+                "CREATE INDEX IF NOT EXISTS ix_rating_history_member_contested_new_rating ON rating_history (member_id, contested_at ASC, new_rating)",
+                "CREATE INDEX IF NOT EXISTS ix_rating_history_contest_rank ON rating_history (contest_id, rank ASC)",
+
+                # Composite Indexes for Contest Schedulers, Registrations & Turnstile Gates
+                "CREATE INDEX IF NOT EXISTS ix_offline_contests_status_starts ON offline_contests (status, starts_at DESC)",
+                "CREATE INDEX IF NOT EXISTS ix_contest_registrations_contest_status ON contest_registrations (contest_id, status)",
+                "CREATE INDEX IF NOT EXISTS ix_contest_registrations_contest_checked_in ON contest_registrations (contest_id, checked_in_at)",
+
+                # Outbox event polling index
+                "CREATE INDEX IF NOT EXISTS ix_outbox_events_status_created ON outbox_events (status, created_at ASC)",
             ]
             for stmt in index_statements:
                 await session.execute(text(stmt))

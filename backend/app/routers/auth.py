@@ -187,10 +187,12 @@ async def logout(
 
 
 @router.get("/jwt-public-key", summary="Get RSA 256 public key for asymmetric token verification")
-async def get_jwt_public_key():
+async def get_jwt_public_key(response: Response):
     """Return the public RSA 256 key used to verify signatures issued by this server."""
     from app.core.config import settings
+    response.headers["Cache-Control"] = "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800, immutable"
     return {
         "algorithm": "RS256",
         "public_key": settings.JWT_PUBLIC_KEY,
     }
+
