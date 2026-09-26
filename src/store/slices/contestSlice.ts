@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import { contestApi } from "@/features/contest/api";
+import { globalSwrStore } from "@/lib/cache/swrCache";
 import type {
   ContestSummary,
   RegistrationStatus,
@@ -27,8 +28,22 @@ export interface ContestState {
   error: string | null;
 }
 
+function getInitialContests(): ContestSummary[] {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = globalSwrStore.get<ContestSummary[]>("contests:list");
+      if (cached && Array.isArray(cached.data)) {
+        return cached.data;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return [];
+}
+
 const initialState: ContestState = {
-  contests: [],
+  contests: getInitialContests(),
   currentContest: null,
   registration: null,
   pass: null,

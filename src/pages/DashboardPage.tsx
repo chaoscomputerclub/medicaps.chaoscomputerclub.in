@@ -14,15 +14,22 @@ import { fetchFullProfileData, type FullProfilePayload } from "@/organization/da
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
-import { useSwrData } from "@/lib/cache/swrCache";
+import { useSwrData, globalSwrStore } from "@/lib/cache/swrCache";
 import { useRealtimeEvents } from "@/lib/realtime";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchContestsThunk } from "@/store/slices/contestSlice";
+import type { ContestSummary } from "@/features/contest/types";
 import { getFirstName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const currentMember = useAppSelector((s) => s.auth.member);
+
+  const { contests: rawContests, isLoading: contestsLoading } = useAppSelector((state) => state.contest);
+  const cachedContests = (globalSwrStore.get<any>("contests:list")?.data ?? []) as ContestSummary[];
+  const contests = rawContests && rawContests.length > 0 ? rawContests : cachedContests;
 
   const authed = isAuthenticated();
   const { data: profile, loading: profileLoading, revalidate: revalidateProfile } = useSwrData<FullProfilePayload | null>(
@@ -42,6 +49,10 @@ export function DashboardPage() {
     { ttl: 5 * 60 * 1000 }
   );
 
+  useEffect(() => {
+    dispatch(fetchContestsThunk(false));
+  }, [dispatch]);
+
   useRealtimeEvents(
     null,
     (event) => {
@@ -56,6 +67,7 @@ export function DashboardPage() {
       ) {
         revalidateProfile();
         revalidatePublic();
+        dispatch(fetchContestsThunk(true));
       }
     }
   );
@@ -64,14 +76,17 @@ export function DashboardPage() {
     const handleConcluded = () => {
       revalidateProfile();
       revalidatePublic();
+      dispatch(fetchContestsThunk(true));
     };
     window.addEventListener("contest:concluded", handleConcluded);
     window.addEventListener("contest:cache_invalidated", handleConcluded);
+    window.addEventListener("contest:status_changed", handleConcluded);
     return () => {
       window.removeEventListener("contest:concluded", handleConcluded);
       window.removeEventListener("contest:cache_invalidated", handleConcluded);
+      window.removeEventListener("contest:status_changed", handleConcluded);
     };
-  }, [revalidateProfile, revalidatePublic]);
+  }, [dispatch, revalidateProfile, revalidatePublic]);
 
   const publicData = publicDataRaw || { contests: [], announcements: [], standings: [], problems: [] };
 
@@ -81,7 +96,12 @@ export function DashboardPage() {
     }
   }, [navigate]);
 
-  if ((profileLoading || publicLoading) && !profile && !publicDataRaw) {
+  if (
+    (profileLoading || publicLoading || (contestsLoading && contests.length === 0)) &&
+    !profile &&
+    !publicDataRaw &&
+    contests.length === 0
+  ) {
     return <DashboardSkeleton />;
   }
 
@@ -95,10 +115,11 @@ export function DashboardPage() {
       tier: (profile?.member as any)?.tier,
     } : {}),
   };
-  const contests = publicData.contests || [];
   const history = profile?.ratingHistory || [];
   const live = contests.find((c) => c.status === "live");
-  const next = contests.find((c) => c.status === "upcoming");
+  const next = contests
+    .filter((c) => c.status === "upcoming")
+    .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())[0];
   const greetingName = getFirstName(member?.full_name, member?.handle);
 
   return (
@@ -168,7 +189,7 @@ export function DashboardPage() {
                 </span>
                 <span className="flex items-center gap-1.5 text-zinc-400">
                   <Radio className="w-3.5 h-3.5 text-cyan-400" />
-                  Division {live.division}
+                  Division {live.division || "Open"}
                 </span>
                 <span className="text-zinc-500">
                   {live.problem_count} Problems · {live.registered_count} Registered

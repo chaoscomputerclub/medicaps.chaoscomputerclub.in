@@ -47,7 +47,16 @@ export async function getPublicPortalData(force = false) {
             .catch(() => [])
         : [];
 
-      const normalizedContests = (apiContests || []).map((c: any) => ({
+      const filteredContests = (apiContests || []).filter((r: any) => {
+        const slug = String(r?.slug ?? "").toLowerCase();
+        const title = String(r?.title ?? "").toLowerCase();
+        if (slug === "dev-assessment-round" || slug === "dev-offline-final") return false;
+        if (slug === "biweekly-contest-1") return false;
+        if (title.startsWith("[dev] round 1") || title.startsWith("[dev] round 2")) return false;
+        return true;
+      });
+
+      const normalizedContests = filteredContests.map((c: any) => ({
         ...c,
         problems: (c.problems || []).map((p: any) => ({
           ...p,

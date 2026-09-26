@@ -67,7 +67,8 @@ admin/
 dist-admin/
 vite.admin.config.ts
 
-# Graphify Local Artifacts
-graphify-out/cost.json
+# Graphify Local Knowledge Graph & Artifacts (Omit from Git & GitHub)
+graphify-out/
+.graphify*
 
 .codex/

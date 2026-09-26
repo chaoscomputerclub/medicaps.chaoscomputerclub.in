@@ -19,6 +19,7 @@ export type ContestSummary = {
   ends_at: string;
   check_in_opens_at: string;
   venue: string;
+  division?: string | undefined;
   seat_capacity: number;
   registered_count: number;
   problem_count: number;

@@ -54,4 +54,33 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
     const overviewContent = page.locator('main, section');
     await expect(overviewContent.first()).toBeVisible();
   });
+
+  test('Contest state is unified across Dashboard and Contests Hub', async ({ page }) => {
+    await authenticateCadetSession(page);
+
+    // 1. Visit Dashboard and retrieve contest banner details
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const contestSection = page.locator('section').filter({
+      hasText: /(?:Tournament Live|Next Campus Tournament)/i,
+    });
+    await expect(contestSection.first()).toBeVisible({ timeout: 15000 });
+
+    const dashTitle = await contestSection.locator('h2').first().innerText();
+    const dashLink = await contestSection.locator('a[href^="/contests/"]').first().getAttribute('href');
+
+    expect(dashTitle.trim().length).toBeGreaterThan(0);
+    expect(dashLink).toBeTruthy();
+
+    // 2. Visit Contests Hub and retrieve hero card details
+    await page.goto('/contests', { waitUntil: 'domcontentloaded' });
+    const hubCard = page.locator('[data-testid="hero-contest-card"]').first();
+    await expect(hubCard).toBeVisible({ timeout: 15000 });
+
+    const hubTitle = await hubCard.locator('h3, a, span').filter({ hasText: /Weekly Contest/i }).first().innerText();
+    const hubLink = await hubCard.locator('a[href^="/contests/"]').first().getAttribute('href');
+
+    // 3. Assert exact parity between both views
+    expect(dashTitle.trim()).toBe(hubTitle.trim());
+    expect(dashLink).toBe(hubLink);
+  });
 });

@@ -28,7 +28,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestsThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
 import { contestApi } from "@/features/contest/api";
-import { invalidateSwrCache } from "@/lib/cache/swrCache";
+import { invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
@@ -156,7 +156,9 @@ function ContestCountdownBadge({
 export function ContestsHubPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { contests, isLoading } = useAppSelector((state) => state.contest);
+  const { contests: rawContests, isLoading } = useAppSelector((state) => state.contest);
+  const cachedContests = (globalSwrStore.get<any>("contests:list")?.data ?? []) as ContestSummary[];
+  const contests = rawContests && rawContests.length > 0 ? rawContests : cachedContests;
   const member = useAppSelector((state) => state.auth.member);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -249,18 +251,30 @@ export function ContestsHubPage() {
     window.addEventListener("focus", handleSync);
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
+    window.addEventListener("contest:concluded" as any, handleSync);
+    window.addEventListener("contest:status_changed" as any, handleSync);
+    window.addEventListener("contest:cache_invalidated" as any, handleSync);
 
     return () => {
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
+      window.removeEventListener("contest:concluded" as any, handleSync);
+      window.removeEventListener("contest:status_changed" as any, handleSync);
+      window.removeEventListener("contest:cache_invalidated" as any, handleSync);
     };
   }, [refreshHubData]);
 
   const upcomingContests = useMemo(
     () =>
       contests
-        .filter((c) => c.status !== "finished")
+        .filter(
+          (c) =>
+            c.status !== "finished" &&
+            (c.status as string) !== "concluded" &&
+            (c.status as string) !== "past" &&
+            (c.status as string) !== "completed"
+        )
         .sort(
           (a, b) =>
             new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
@@ -271,7 +285,13 @@ export function ContestsHubPage() {
   const pastContests = useMemo(
     () =>
       contests
-        .filter((c) => c.status === "finished")
+        .filter(
+          (c) =>
+            c.status === "finished" ||
+            (c.status as string) === "concluded" ||
+            (c.status as string) === "past" ||
+            (c.status as string) === "completed"
+        )
         .sort(
           (a, b) =>
             new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()

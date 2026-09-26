@@ -79,13 +79,18 @@ function toContestSummary(raw: Record<string, any>): ContestSummary {
     title,
     season: String(raw["season"] ?? ""),
     summary: String(raw["summary"] ?? ""),
-    status: (raw["status"] ?? "upcoming") as ContestSummary["status"],
+    status: (raw["status"] === "finished" || raw["status"] === "concluded" || raw["status"] === "completed" || raw["status"] === "past"
+      ? "finished"
+      : raw["status"] === "live"
+      ? "live"
+      : "upcoming") as ContestSummary["status"],
     cadence: cadenceOf(title, slug),
     edition: editionOf(title, slug),
     starts_at: String(raw["starts_at"]),
     ends_at: String(raw["ends_at"]),
     check_in_opens_at: String(raw["check_in_opens_at"] ?? raw["starts_at"]),
     venue: String(raw["venue"] ?? "Campus computing complex"),
+    division: raw["division"] ? String(raw["division"]) : undefined,
     seat_capacity: Number(raw["seat_capacity"] ?? 0),
     registered_count: Number(raw["registered_count"] ?? 0),
     problem_count: Number(raw["problem_count"] ?? 0),
