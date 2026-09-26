@@ -48,7 +48,10 @@ from app.schemas.dynamic_contest import (
     PresetContestLaunchRequest,
     ProblemCreateSchema,
 )
-from app.services.contest_eligibility_service import is_member_eligible_for_live_contest
+from app.services.contest_eligibility_service import (
+    is_member_eligible_for_live_contest,
+    is_contest_attempt_submitted,
+)
 from app.services.dynamic_contest_service import DynamicContestService
 from app.services.event_broadcaster import broadcast_event
 
@@ -112,18 +115,40 @@ class ContestController:
         filtered_contests = [c for c in all_contests if c.slug not in ("dev-assessment-round", "dev-offline-final")]
 
         registered_contest_ids = set()
+        submitted_contest_ids = set()
         if current_member:
             user_regs = await db.execute(
-                select(ContestRegistration.contest_id).where(
+                select(
+                    ContestRegistration.contest_id,
+                    ContestRegistration.status,
+                    ContestRegistration.assessment_taken,
+                ).where(
                     ContestRegistration.member_id == current_member.id
                 )
             )
-            registered_contest_ids = set(user_regs.scalars().all())
+            for cid, r_stat, a_taken in user_regs.all():
+                registered_contest_ids.add(cid)
+                if r_stat in ("submitted", "completed") or a_taken:
+                    submitted_contest_ids.add(cid)
+
+            sess_stmt = (
+                select(Assessment.contest_id).join(
+                    AssessmentSession, AssessmentSession.assessment_id == Assessment.id
+                ).where(
+                    AssessmentSession.member_id == current_member.id,
+                    AssessmentSession.status.in_(["submitted", "completed", "expired", "disqualified"]),
+                )
+            )
+            sess_res = await db.execute(sess_stmt)
+            for (cid,) in sess_res.all():
+                if cid:
+                    submitted_contest_ids.add(cid)
 
         payload = []
         for c in filtered_contests:
             c_dict = OfflineContestResponse.model_validate(c).model_dump()
             c_dict["registered"] = c.id in registered_contest_ids
+            c_dict["is_submitted"] = c.id in submitted_contest_ids
             payload.append(c_dict)
 
         await set_cache(cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
@@ -188,11 +213,14 @@ class ContestController:
             sess_pair = sessions_by_contest_id.get(contest.id) or sessions_by_slug.get(contest.slug)
             sess = sess_pair[0] if sess_pair else None
 
-            is_sess_submitted = (sess and sess.status in ["submitted", "completed", "expired"]) or bool(reg and reg.assessment_taken)
+            is_sess_submitted = (
+                (sess and sess.status in ["submitted", "completed", "expired", "disqualified"])
+                or bool(reg and (reg.assessment_taken or reg.status in ["submitted", "completed"]))
+            )
             assessment_submitted = is_sess_submitted
 
             if is_sess_submitted:
-                outcome = "qualified" if (sess and sess.is_top_30_qualified) else ("submitted" if contest.status == "upcoming" else "pending")
+                outcome = "qualified" if (sess and sess.is_top_30_qualified) else "submitted"
             elif contest.status == "upcoming":
                 outcome = "registered"
             elif contest.status == "live":
@@ -317,6 +345,7 @@ class ContestController:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
         is_registered = False
+        is_sub = False
         if current_member:
             reg_check = await db.execute(
                 select(ContestRegistration.id).where(
@@ -325,9 +354,11 @@ class ContestController:
                 )
             )
             is_registered = reg_check.scalars().first() is not None
+            is_sub, _ = await is_contest_attempt_submitted(current_member, contest, db)
 
         payload = OfflineContestResponse.model_validate(contest).model_dump()
         payload["registered"] = is_registered
+        payload["is_submitted"] = is_sub
         if contest.status == "upcoming":
             for p in payload.get("problems", []):
                 idx = p.get("problem_index", "")

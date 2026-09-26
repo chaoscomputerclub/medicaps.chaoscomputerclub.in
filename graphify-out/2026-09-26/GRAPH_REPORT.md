@@ -1,17 +1,17 @@
 # Graph Report - medicaps.chaoscomputerclub.in  (2026-09-26)
 
 ## Corpus Check
-- 1228 files · ~1,995,070 words
+- 1228 files · ~1,996,083 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 18 file(s) not represented in the graph (top: (none) 9, .example 2, .toml 2)
 
 ## Summary
-- 13023 nodes · 24970 edges · 863 communities (532 shown, 331 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 2013 edges (avg confidence: 0.87)
+- 13025 nodes · 24986 edges · 856 communities (533 shown, 323 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 2015 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `39371ce3`
+- Built from commit: `406728c2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,32 +22,32 @@
 - db_models.py
 - auth.ts
 - auth_controller.py
-- controllers/__init__.py
+- delete_cache_pattern
 - gsd-tools.cjs
 - re2js.cjs
 - schemas/auth.py
 - capability-validator.cjs
-- phase-id.cjs
+- data/queries.ts
 - gap-checker.cjs
 - SettingsPage.tsx
 - config.cjs
-- security.py
+- planning-snapshot.cjs
 - package.json
 - commands.cjs
 - phase.cjs
 - allow
-- planning-workspace.cjs
+- workstream-inventory.cjs
 - uat.cjs
 - quick-batch.cjs
 - AppRoutes.tsx
 - runtime-hooks-surface.cjs
 - plan-phase.md
 - runtime-artifact-conversion.cjs
-- assessment_controller.py
+- main.py
 - install-engine.cjs
 - milestone.cjs
 - check-command-router.cjs
-- ContestArenaPage.tsx
+- SocialDrawer.tsx
 - AdminContestController
 - schemas/__init__.py
 - gsd-cursor-subagent-start.js
@@ -55,11 +55,11 @@
 - installer-migrations.cjs
 - dependencies
 - frontmatter.cjs
-- ContestOfflinePage.tsx
+- ContestsHubPage.tsx
 - verify.cjs
 - install-profiles.cjs
 - shell-command-projection.cjs
-- roadmap-parser.cjs
+- phase-id.cjs
 - planning-inspect.cjs
 - model-catalog.cjs
 - runtime-artifact-layout.cjs
@@ -67,31 +67,31 @@
 - cjs-command-router-adapter.cjs
 - capability-lifecycle.cjs
 - 🔬 2. Exhaustive API Expected vs Actual Assertions
-- Language
+- .execute_batch
 - js-yaml.cjs
-- qa_test_service.py
+- admin_qa.py
 - broken-windows.cjs
 - bin/lib/cli-exit.cjs
-- launch_official_contests.py
+- db.py
 - config-loader.cjs
-- DynamicContestService
+- Language
 - gen-capability-registry.cjs
-- AssessmentController
-- ContestController
+- routers/assessment.py
+- ProviderRunRequest
 - audit.cjs
 - verify-reapply-patches.cjs
 - requireLoader
 - onboard-projection.cjs
-- io.cjs
-- ref_path
+- planning-workspace.cjs
+- ContestOfflinePage.tsx
 - worktree-safety.cjs
 - capability-trust.cjs
 - capability-consent.cjs
 - command-routing-hub.cjs
 - refactor-trigger-command-router.cjs
 - gsd-statusline.js
-- gsd-workflow-guard.js
-- capability-command-router.cjs
+- middleware/auth.py
+- capability-state.cjs
 - output
 - capability-source.cjs
 - cli.cjs
@@ -104,7 +104,7 @@
 - gen-loop-host-contract.cjs
 - profile-output.cjs
 - smart-entry.cjs
-- test_webhooks_and_sse.py
+- webhooks.py
 - runtime-config-adapter-registry.cjs
 - gsd2-import.cjs
 - loop-resolver.cjs
@@ -114,8 +114,8 @@
 - requireDumper
 - verification.cjs
 - typing
-- form.tsx
-- profile-pipeline-command-router.cjs
+- test_cloudflare_security.py
+- passes.py
 - state-document.cjs
 - intel.cjs
 - complexity-trigger.cjs
@@ -127,7 +127,7 @@
 - cli-exit.js
 - learnings.cjs
 - capability-lock.cjs
-- model-resolver.cjs
+- logging
 - proof_service.py
 - update-context.cjs
 - roadmap-command-router.cjs
@@ -150,26 +150,26 @@
 - decisions.cjs
 - markdown-table.cjs
 - mcp-server.cjs
-- task-content-resolution.cjs
+- task-command-router.cjs
 - substring
 - runtime-name-policy.cjs
 - adr-parser.cjs
 - compilerOptions
-- user-artifact-staging.cjs
+- ref_path
 - agent-install-check.cjs
 - api-coverage.cjs
 - ai-integration-phase.md
 - profile-pipeline.cjs
 - Core Workflow
 - StorageController
-- ExitError
+- get_redis
 - harness.py
 - @playwright/test
-- ContestsHubPage.tsx
+- profile-pipeline-command-router.cjs
 - configuration.cjs
 - gsd-windsurf-pre-command.js
 - devDependencies
-- lucide-react
+- MyContestsPage.tsx
 - routeReviewLane
 - runtime-homes.cjs
 - host-integration-sdk.cjs
@@ -193,12 +193,12 @@
 - install-surface-shadowing.cjs
 - installer-migration-report.cjs
 - gsd-plan-checker.md
-- quick-batch-dispatch.cjs
+- parseUatItemsWithStats
 - scripts
 - qa_50_contests_500_cases.mjs
 - retired-artifact-cleanup.cjs
 - install-scope.cjs
-- roadmap-upgrade.cjs
+- DockerSandboxProvider
 - stale-bake-guard.cjs
 - fix-slash-commands.cjs
 - audit_ui_elements_backend_connectivity.mjs
@@ -209,17 +209,17 @@
 - package-legitimacy.cjs
 - appendRange
 - carousel.tsx
-- routeDriftGuard
+- plan-drift-guard.cjs
 - health-diagnostic-types.cjs
 - phase-lifecycle.cjs
-- VerifyController
+- pydantic
 - reviewer-step-dispatch.cjs
 - owners
-- .delete_account
+- delete_cache
 - constructor
 - MatcherInputBase
 - drift-scan.cjs
-- MinioStorageService
+- core/storage.py
 - context-predicates.cjs
 - real-home-guard.cjs
 - filterRuntimeNotesForTarget
@@ -233,11 +233,11 @@
 - chart.tsx
 - Dimensions
 - milestone-archive-hygiene.cjs
-- edge-probe.cjs
+- roadmap-upgrade.cjs
 - gate-predicate-evaluator.cjs
 - root-existence.cjs
 - worktree-health.cjs
-- roadmap.cjs
+- EventsController
 - checkpoints.md
 - requireInt
 - convertClaudeToKiloFrontmatter
@@ -252,7 +252,7 @@
 - config-schema.cjs
 - fallow-runner.cjs
 - 005-opencode-baseline-commands-dir.cjs
-- collectSection
+- execGit
 - research-provider.cjs
 - audit-milestone.md
 - section-manifest.cjs
@@ -260,19 +260,19 @@
 - assumption-delta.cjs
 - cline-sdk-binding.cjs
 - review-reviewer-selection.cjs
-- ui-frontend-evidence.cjs
+- installed-surface-resolver.cjs
 - indexOf
 - DFA
 - exit-codes.sh
 - Settings
-- hooks.ts
+- gsd-doc-writer.md
 - error-capture.ts
 - 002-codex-legacy-hooks-json.cjs
 - gsd-context-monitor.js
 - Chaos Computer Club (CCC) — Medi-Caps University Chapter
 - gsd-planner.md
 - .passed
-- ExitError
+- review-lane-descriptor.cjs
 - eval.cjs
 - 003-rename-get-shit-done-to-gsd-core.cjs
 - 004-prune-stale-pristine-snapshots.cjs
@@ -280,7 +280,7 @@
 - schema-detect.cjs
 - Planner Anti-Patterns and Specificity Examples
 - GSD Intel Updater
-- imperative-hook-bus.cjs
+- docker_provider.py
 - 007-retire-config-root-commonjs-marker.cjs
 - 009-pi-retire-reserved-hooks-dir.cjs
 - new.cjs
@@ -334,22 +334,22 @@
 - JudgeQueue
 - Gate Prompt Patterns
 - Model Profiles
-- ensure-runtime-build.cjs
+- ref_fs
 - React Composition Patterns
-- capability-registry.cjs
+- runtime-slash.cjs
 - gsd-ui-researcher.compact.md
-- event.cjs
+- git-cmd.js
 - Common Bug Patterns
 - tdd.md
 - spike.md
 - 5. Re-render Optimization
-- splitDeferredHeadingEntriesDetailed
+- ui-phase.md
 - Phase 3 — Route overhaul
 - 4. Feature Specifications & User Journeys
-- runtime-slash.cjs
+- _hostBehaviors
 - claude-orchestration.cjs
 - buildKimiAgentArtifacts
-- gsd-mempalace-curator.md
+- enums.py
 - Context Budget Rules
 - new-milestone.md
 - tasteskill: Anti-Slop Frontend Skill
@@ -363,9 +363,9 @@
 - email.py
 - ErrorBoundary
 - Step 2: Execute Operation
-- capability-activation.cjs
-- gsd-doc-writer.compact.md
-- recordProjectConsent
+- resumeBatch
+- pruneOrphanedWorktrees
+- cmdWorktreeCreate
 - walk
 - Deviation Rule Examples
 - Planner Preconditions — `<precondition>` Element
@@ -375,9 +375,9 @@
 - 5. Convergence Loop
 - secure-phase.md
 - spike-wrap-up.md
-- describeValue
-- pristine-baseline.cjs
-- computeWaves
+- context-composer.cjs
+- uat-predicate.cjs
+- partitionByFileOverlap
 - Debugger technique catalog
 - Positive Examples
 - SPIDR Story Splitting Rules
@@ -385,7 +385,7 @@
 - ui-brand.md
 - Developer Profile
 - graduation.md — LEARNINGS.md Cross-Phase Graduation Helper
-- new-project.md
+- indexPromptSegment
 - profile-user.md
 - sketch.md
 - sketch-wrap-up.md
@@ -435,7 +435,7 @@
 - Semantic Knowledge-Base Recall via MemPalace
 - Execute-Phase — TDD Gate (Runtime Enforcement)
 - Gate Types
-- ui-phase.md
+- gsd-check-update.js
 - Planner: Reversibility Tagging
 - Thinking Models: Execution Cluster
 - Thinking Models: Research Cluster
@@ -446,7 +446,7 @@
 - ⚡ DEVELOPMENT & DEPLOYMENT PROTOCOL (GITHUB CI/CD)
 - gsd-codebase-mapper.md
 - gsd-codebase-mapper.compact.md
-- context-composer.cjs
+- .get_university_leaderboard
 - 4. Handle Action
 - runtime-identity.cjs
 - Agent Contracts
@@ -466,12 +466,12 @@
 - eval-review.md
 - explore.md
 - plan-phase — Detail
-- semver-compare.cjs
+- event.cjs
 - ui-review.md
 - 9. AI TELLS (Forbidden Patterns)
-- lint.cjs
+- dispatch-identity.js
 - gsd-integration-checker.compact.md
-- federated-config.cjs
+- beginFrontmatterReassembly
 - Smart Discuss — Autonomous Mode
 - Dispatch isolation gate (ADR-1239 / #2584)
 - Doc Conflict Engine
@@ -499,15 +499,15 @@
 - 2. Bundle Size Optimization
 - gsd-code-fixer.md
 - gsd-code-fixer.compact.md
-- .google_callback
-- project-root.cjs
-- graphifyStatus
-- task-command-router.cjs
-- state-command-router.cjs
+- Verifier Phase Gates
+- gsd-dom-verifier.compact.md
+- gsd-mempalace-curator.md
+- io.cjs
+- Verification Report Template
 - vendor/
 - Compact Content Gate
 - Decimal Phase Calculation
-- Git Planning Commit
+- imperative-hook-bus.cjs
 - Chunked Mode Return Formats
 - Interface Context for Executors
 - Codebase scout — map selection table
@@ -549,14 +549,14 @@
 - gsd-nyquist-auditor.compact.md
 - gsd-security-auditor.md
 - gsd-security-auditor.compact.md
-- spec-phase.md
+- applyStatePreservation
 - Planner Coupling — Same-Wave Shared Mutable State
 - Stated Failing Direction (#3172)
 - research-philosophy.md
 - Developer Preferences
 - Discussion Log Template
 - Roadmap Template
-- re
+- state-io.cjs
 - --chain mode — interactive discuss, then auto-advance
 - DISCUSSION-LOG.md template — for discuss-phase git_commit step
 - execute-phase.md — deferred elaboration
@@ -572,7 +572,7 @@
 - 🛡️ CCC Medi-Caps — Production API QA Audit Report
 - 🛡️ CCC Medi-Caps — Production API QA Audit Report
 - 🛡️ UI Elements & Buttons Backend Connectivity Audit Report
-- bin/lib/exit-code-registry.cjs
+- convertClaudeAgentToAntigravityAgent
 - Plan-Checker Examples
 - Architecture Template
 - Technology Stack Template
@@ -583,7 +583,7 @@
 - Default mode — interactive discuss-phase
 - list-workspaces.md
 - Git-Based Deployment & Version Control Policy
-- scripts/lib/exit-code-registry.cjs
+- BaseModel
 - autonomous-ui-design-contract.md
 - execute-phase-response-language.md
 - gsd-run-resolver.md
@@ -702,19 +702,12 @@
 - server-serialization.md
 - vercel-react-best-practices/rules/_template.md
 - workflows/graphify.md
-- field_validator
-- Verification Report Template
 - extract-learnings.md
-- state-io.cjs
-- global_exception_handler
-- cli-skew-check.cjs
-- delete
-- patch
-- post
-- put
-- field_validator
-- datetime
-- Request
+- updateCore
+- rebuildCore
+- state-md-schema.cjs
+- tdd-red-evidence.cjs
+- gather_with_concurrency
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 272 edges
@@ -723,8 +716,8 @@
 4. `react` - 94 edges
 5. `planningDir()` - 90 edges
 6. `extractFrontmatter()` - 67 edges
-7. `Language` - 62 edges
-8. `planningPaths()` - 61 edges
+7. `planningPaths()` - 61 edges
+8. `Language` - 59 edges
 9. `loadConfig()` - 59 edges
 10. `installFs()` - 58 edges
 
@@ -746,35 +739,35 @@
 - 2-file cycle: `.agents/gsd-core/bin/lib/core-utils.cjs -> .agents/gsd-core/bin/lib/plan-scan.cjs -> .agents/gsd-core/bin/lib/core-utils.cjs`
 - 3-file cycle: `.agents/gsd-core/bin/lib/smart-entry.cjs -> .agents/gsd-core/bin/lib/state.cjs -> .agents/gsd-core/bin/lib/state-contract.cjs -> .agents/gsd-core/bin/lib/smart-entry.cjs`
 
-## Communities (863 total, 331 thin omitted)
+## Communities (856 total, 323 thin omitted)
 
 ### Community 0 - "init.cjs"
-Cohesion: 0.03
-Nodes (190): routeAgentSkills(), computeUiSafetyGate(), loadConfig(), generateSlugInternal(), pathExistsInternal(), cmdEstimateCalibrate(), collectCalibrationSamples(), repairPaths() (+182 more)
+Cohesion: 0.02
+Nodes (195): routeAgentSkills(), routeResolveExecution(), cmdResolveExecution(), cmdResolveModel(), cmdScaffold(), loadConfig(), generateSlugInternal(), pathExistsInternal() (+187 more)
 
 ### Community 1 - "cn"
 Cohesion: 0.02
-Nodes (168): class-variance-authority, clsx, @radix-ui/react-accordion, @radix-ui/react-context-menu, @radix-ui/react-dropdown-menu, @radix-ui/react-menubar, @radix-ui/react-navigation-menu, @radix-ui/react-popover (+160 more)
+Nodes (194): class-variance-authority, clsx, cmdk, @radix-ui/react-accordion, @radix-ui/react-context-menu, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-label (+186 more)
 
 ### Community 2 - "state.cjs"
 Cohesion: 0.03
-Nodes (103): propagateCommentChannel(), bracketMilestoneIntroSrcFor(), parsePhaseFromProse(), isMilestoneBoundedInRoadmap(), phaseTokenFromState(), ACQUIRE_LOCK_RETRY_ERRNOS, acquireStateLock(), advancePlanShapeError() (+95 more)
+Nodes (123): propagateCommentChannel(), stripFrontmatter(), applyRepairs(), repairPaths(), runRepairAction(), parsePhaseFromProse(), ACQUIRE_LOCK_RETRY_ERRNOS, acquireStateLock() (+115 more)
 
 ### Community 3 - "db_models.py"
-Cohesion: 0.04
-Nodes (108): AssessmentSession, Any, AsyncSession, Orchestrator for inbound hardware gate scans, contest triggers, and outbound…, WebhookController, AsyncSession, MemberProfile, OfflineContest (+100 more)
+Cohesion: 0.05
+Nodes (90): Announcement, Base, Chaos Computer Club — Announcements, Editorials & Bulletins Model, Platform news, editorial bulletins, and podium results., Assessment, AssessmentProblem, AssessmentSession, AssessmentSubmission (+82 more)
 
 ### Community 4 - "auth.ts"
 Cohesion: 0.04
-Nodes (113): request(), ApiError, apiFetch(), AuthResult, checkHandle(), clearToken(), completeOnboarding(), CompleteOnboardingPayload (+105 more)
+Nodes (117): @reduxjs/toolkit, request(), ApiError, apiFetch(), AuthResult, checkHandle(), clearToken(), completeOnboarding() (+109 more)
 
 ### Community 5 - "auth_controller.py"
-Cohesion: 0.03
-Nodes (96): Chaos Computer Club — Medi-Caps Chapter controllers/contest_controller.py —…, Chaos Computer Club — Medi-Caps Chapter controllers/events_controller.py —…, Chaos Computer Club — Medi-Caps Chapter controllers/webhook_controller.py —…, delete_cache_pattern(), generate_etag(), Chaos Computer Club India — Medi-Caps Chapter Backend Enterprise Redis Cache-…, Compute standard strong HTTP ETag from string payload., Invalidate all keys matching a glob pattern using Redis SCAN. Guarantees non-… (+88 more)
+Cohesion: 0.06
+Nodes (55): _get_frontend_url(), _get_redirect_uri(), is_allowed_organization_email(), _is_local_dev(), Request, Response, Step 1 of Google OAuth flow. Redirects user to Google consent screen restricted…, Step 2 of Google OAuth flow. Validates token, enforces @medicaps.ac.in… (+47 more)
 
-### Community 6 - "controllers/__init__.py"
-Cohesion: 0.04
-Nodes (92): FeedController, AsyncSession, Response, Orchestrator for campus feed, bulletins, and announcements., Chaos Computer Club — Medi-Caps Chapter app.controllers — Orchestration…, LeaderboardController, Any, AsyncSession (+84 more)
+### Community 6 - "delete_cache_pattern"
+Cohesion: 0.10
+Nodes (37): AsyncSession, MemberProfile, Response, Chaos Computer Club — Medi-Caps Chapter controllers/social_controller.py —…, Orchestrator for student peer graph, following, followers, and social telemetry., Resolve a member by handle (case-insensitive) or UUID., SocialController, delete_cache_pattern() (+29 more)
 
 ### Community 7 - "gsd-tools.cjs"
 Cohesion: 0.02
@@ -785,64 +778,64 @@ Cohesion: 0.02
 Nodes (74): allMatches(), asBytes(), asCharSequence(), ASCII_TO_LOWER, ASCII_TO_UPPER, B64_MAP, bitStatePool, CASE_ORBIT() (+66 more)
 
 ### Community 9 - "schemas/auth.py"
-Cohesion: 0.17
-Nodes (10): AuthTokenResponse, CompleteOnboardingRequest, MemberPublic, BaseModel, field_validator, Chaos Computer Club — Medi-Caps Chapter schemas/auth.py — Pydantic…, SendOTPRequest, SendOTPResponse (+2 more)
+Cohesion: 0.14
+Nodes (13): Step 1 — OTP Request. Enforces Cloudflare client security (Turnstile challenge)…, generate_otp(), Generate a cryptographically sufficient 6-digit numeric OTP., AuthTokenResponse, CompleteOnboardingRequest, MemberPublic, BaseModel, field_validator (+5 more)
 
 ### Community 10 - "capability-validator.cjs"
 Cohesion: 0.03
-Nodes (91): ADR-0857, ADR-0894, ADR-0959, ADR-1016, ADR-1239, ADR-1244, ADR-1517, ADR-2782 (+83 more)
+Nodes (110): ADR-0857, ADR-0894, ADR-0959, ADR-1016, ADR-1239, ADR-1244, ADR-1517, ADR-2782 (+102 more)
 
-### Community 11 - "phase-id.cjs"
-Cohesion: 0.04
-Nodes (56): checkW006(), checkW007(), ADR-0457, ADR-3180, computeClaimedDirs(), dirsForPhase(), healthDiagnosticMod, isPhaseNotStarted() (+48 more)
+### Community 11 - "data/queries.ts"
+Cohesion: 0.05
+Nodes (66): Phase 1 — Offline contest data architecture, Phase 2 — Specialized data graphics, qrcode.react, recharts, DashboardPage, ProblemArchivePage, ProblemDetailPage, CacheRecord (+58 more)
 
 ### Community 12 - "gap-checker.cjs"
 Cohesion: 0.08
-Nodes (30): cmdGapAnalysisPlanPost(), ADR-0457, ADR-1372, ADR-3473, cmdGapAnalysis(), decisions_cjs_1, detectCoverage(), expandPhaseReqIdToken() (+22 more)
+Nodes (28): ADR-0457, ADR-1372, ADR-3473, decisions_cjs_1, detectCoverage(), expandPhaseReqIdToken(), formatGapTable(), io (+20 more)
 
 ### Community 13 - "SettingsPage.tsx"
-Cohesion: 0.06
-Nodes (64): @radix-ui/react-alert-dialog, @radix-ui/react-select, react-icons, sonner, AssessmentWorkspacePage, AlertDialog(), AlertDialogAction, AlertDialogBackdrop (+56 more)
+Cohesion: 0.05
+Nodes (88): lucide-react, ref_monaco_editor, @monaco-editor/react, @radix-ui/react-checkbox, @radix-ui/react-select, react-icons, sonner, ContestArenaPage (+80 more)
 
 ### Community 14 - "config.cjs"
 Cohesion: 0.06
-Nodes (52): routeConfigGet(), routeConfigPath(), routeConfigSetModelProfile(), assertEnumValue(), buildNewProjectConfig(), ADR-0457, ADR-1244, ADR-1411 (+44 more)
+Nodes (48): routeConfigPath(), assertEnumValue(), ADR-0457, ADR-1244, ADR-1411, ADR-2629, ADR-3889, cliExitMod (+40 more)
 
-### Community 15 - "security.py"
-Cohesion: 0.07
-Nodes (45): Response, Refresh Token Rotation (RTR). Reads HttpOnly refresh_token cookie (or header…, Production logout: Revokes refresh token in Redis and clears HttpOnly auth…, Step 2 — OTP Verification. Verifies against Redis (SHA-256, 5-attempt rate…, clear_auth_cookies(), create_access_token(), generate_refresh_token(), get_password_hash() (+37 more)
+### Community 15 - "planning-snapshot.cjs"
+Cohesion: 0.05
+Nodes (55): routeMigrateConfig(), cmdMigrateConfig(), findOrphanSummaries(), agentInstallCheckMod, buildAllPhaseDirNamesField(), buildConfigField(), buildMilestoneArchiveStatusField(), buildPerPhasePlanScanFields() (+47 more)
 
 ### Community 16 - "package.json"
 Cohesion: 0.03
-Nodes (67): license, name, optionalDependencies, lightningcss-linux-x64-gnu, @rolldown/binding-linux-x64-gnu, @tailwindcss/oxide-linux-x64-gnu, overrides, rolldown (+59 more)
+Nodes (62): license, name, optionalDependencies, lightningcss-linux-x64-gnu, @rolldown/binding-linux-x64-gnu, @tailwindcss/oxide-linux-x64-gnu, overrides, rolldown (+54 more)
 
 ### Community 17 - "commands.cjs"
-Cohesion: 0.03
-Nodes (76): routeCommitDocsGuard(), routeCurrentTimestamp(), routePrSubrepo(), routeTodo(), routeWebsearch(), agentCommandRouterMod, buildCommitDocsGuardHookScript(), ADR-0443 (+68 more)
+Cohesion: 0.04
+Nodes (58): routeCommitDocsGuard(), routeCurrentTimestamp(), routeWebsearch(), agentCommandRouterMod, buildCommitDocsGuardHookScript(), ADR-0443, ADR-0457, ADR-1239 (+50 more)
 
 ### Community 18 - "phase.cjs"
-Cohesion: 0.04
-Nodes (71): readSubdirectories(), analyzeRequirementsLine(), ADR-0457, ADR-1769, ADR-2143, ADR-3180, ADR-3408, ADR-3473 (+63 more)
+Cohesion: 0.02
+Nodes (146): ADR-0857, ADR-3180, ADR-3473, countMatchedSummaries(), CYRILLIC_TRANSLITERATION, CYRILLIC_TRANSLITERATION_KEYS, detectSubRepos(), extractCanonicalPlanId() (+138 more)
 
 ### Community 19 - "allow"
-Cohesion: 0.04
-Nodes (49): fs, { HOOK_ON_CRASH, allow, crash }, path, stdinTimeout, { allow }, stdinTimeout, { allow }, ADR-1239 (+41 more)
+Cohesion: 0.03
+Nodes (69): fs, { HOOK_ON_CRASH, allow, crash }, path, stdinTimeout, { allow }, stdinTimeout, { allow }, ADR-1239 (+61 more)
 
-### Community 20 - "planning-workspace.cjs"
-Cohesion: 0.04
-Nodes (72): routeWorkstream(), parentPhaseKey(), phaseKeyFromProse(), activeWorkstreamStore, ADR-0457, clock_cjs_1, getActiveWorkstream(), _heldPlanningLocks (+64 more)
+### Community 20 - "workstream-inventory.cjs"
+Cohesion: 0.08
+Nodes (36): parentPhaseKey(), phaseKeyFromProse(), isMilestoneShippedInRoadmap(), getOtherActiveWorkstreams(), ADR-0457, ADR-3180, coreUtilsMod, countPhaseFiles() (+28 more)
 
 ### Community 21 - "uat.cjs"
 Cohesion: 0.06
-Nodes (57): ANY_KEY_SCALAR_HEADER_LINE_RE, auditMod, blankIndentedFenceDelimiters(), buildCheckpoint(), categorizeItem(), CHECKPOINT_FRAMES, CHECKPOINT_LANGUAGE_ALIASES, ADR-0457 (+49 more)
+Nodes (71): collectSection(), acknowledgeDeferredItem(), acknowledgeHeadingShapedEntry(), ANY_KEY_SCALAR_HEADER_LINE_RE, auditMod, buildCheckpoint(), categorizeItem(), CHECKPOINT_FRAMES (+63 more)
 
 ### Community 22 - "quick-batch.cjs"
-Cohesion: 0.09
-Nodes (33): quickDirFrom(), allocateIdsGivenUsed(), allocateQuickIds(), batchManifestPath(), ADR-0457, ADR-1239, clock_cjs_1, collectExistingBatchQuickIds() (+25 more)
+Cohesion: 0.11
+Nodes (25): quickDirFrom(), allocateIdsGivenUsed(), allocateQuickIds(), ADR-0457, ADR-1239, clock_cjs_1, collectExistingBatchQuickIds(), collectExistingQuickIds() (+17 more)
 
 ### Community 23 - "AppRoutes.tsx"
-Cohesion: 0.03
-Nodes (97): Phase 1 — Offline contest data architecture, Phase 2 — Specialized data graphics, qrcode.react, recharts, AppRoutes(), CONTEST_MUTATION_EVENTS, ContestArenaPage, ContestFinalResultsPage (+89 more)
+Cohesion: 0.06
+Nodes (44): AppRoutes(), AssessmentWorkspacePage, CONTEST_MUTATION_EVENTS, ContestSummaryPage, prefetchContestRoute(), prefetchProfileRoute(), prefetchRoute(), ProfilePage (+36 more)
 
 ### Community 24 - "runtime-hooks-surface.cjs"
 Cohesion: 0.05
@@ -850,35 +843,35 @@ Nodes (70): applySettingsJsonHooks(), atomicWriteFileSync(), __atomicWrittenTmps
 
 ### Community 25 - "plan-phase.md"
 Cohesion: 0.04
-Nodes (47): skipped(), File map, Interactions worth knowing, MVP Concepts — index, Tests, 0.5. Compact Content Gate, 0. Git Branch Invariant, 10. Spawn gsd-plan-checker Agent (+39 more)
+Nodes (52): skipped(), Amend previous commit, Commit Message Patterns, Commit via CLI, Git Planning Commit, When to Skip, File map, Interactions worth knowing (+44 more)
 
 ### Community 26 - "runtime-artifact-conversion.cjs"
-Cohesion: 0.04
-Nodes (62): resolveOrchestratorExec(), applyAgentBrandingRewrites(), applyAgentFrontmatterExtensions(), applyAgentPathRewrites(), applyRuntimeContentRewritesForCommandsInPlace(), applyRuntimeContentRewritesInPlace(), _applyRuntimeRewrites(), applySpecRootReferenceToStagedSkills() (+54 more)
+Cohesion: 0.05
+Nodes (48): applyAgentFrontmatterExtensions(), applySpecRootReferenceToStagedSkills(), buildKiloAgentPermissionBlock(), capabilityRegistry, ADR-0058, ADR-1235, ADR-1239, ADR-1508 (+40 more)
 
-### Community 27 - "assessment_controller.py"
+### Community 27 - "main.py"
 Cohesion: 0.06
-Nodes (58): async_sessionmaker, AdminController, Any, Chaos Computer Club — Medi-Caps Chapter controllers/admin_controller.py — Admin…, Orchestrator for internal maintenance sweeps and auto-qualification triggers., compute(), Chaos Computer Club — Medi-Caps Chapter controllers/assessment_controller.py —…, admin_run_auto_qualify() (+50 more)
+Nodes (52): async_sessionmaker, AdminController, Any, Chaos Computer Club — Medi-Caps Chapter controllers/admin_controller.py — Admin…, Orchestrator for internal maintenance sweeps and auto-qualification triggers., admin_run_auto_qualify(), admin_sweep_sessions(), post (+44 more)
 
 ### Community 28 - "install-engine.cjs"
-Cohesion: 0.08
-Nodes (62): applyOpencodeFamilyPathPrefix(), assertCorpusTreeHasNoSymlinks(), ADR-0058, ADR-1235, ADR-1239, ADR-4650, commonjs_marker_cjs_1, convertClaudeCommandToKiloSkill() (+54 more)
+Cohesion: 0.06
+Nodes (80): applyOpencodeFamilyPathPrefix(), assertCorpusTreeHasNoSymlinks(), ADR-0058, ADR-1235, ADR-1239, ADR-4650, commonjs_marker_cjs_1, convertClaudeCommandToKiloSkill() (+72 more)
 
 ### Community 29 - "milestone.cjs"
-Cohesion: 0.06
-Nodes (34): auditMod, buildQuickArchiveIndex(), ADR-0457, ADR-1769, ADR-2143, ADR-3180, ADR-3408, ADR-3889 (+26 more)
+Cohesion: 0.05
+Nodes (43): routeMilestone(), routeScaffold(), parseMultiwordArg(), extractOneLinerFromBody(), applyQuickTasksReset(), archiveQuickTaskDirectories(), auditMod, buildQuickArchiveIndex() (+35 more)
 
 ### Community 30 - "check-command-router.cjs"
-Cohesion: 0.05
-Nodes (73): apiCoverageMod, buildPlanMessage(), buildPredicateDeps(), buildVerifyMessage(), buildXmlDecisionTagRegex(), ADR-0457, ADR-0550, ADR-2008 (+65 more)
+Cohesion: 0.04
+Nodes (64): apiCoverageMod, buildPlanMessage(), buildPredicateDeps(), buildVerifyMessage(), buildXmlDecisionTagRegex(), ADR-0457, ADR-0550, ADR-2008 (+56 more)
 
-### Community 31 - "ContestArenaPage.tsx"
-Cohesion: 0.05
-Nodes (74): ContestLobbyPage, ContestOverviewPage, ContestRealtimeSynchronizer(), CadetProfileHoverCard(), CadetProfileHoverCardProps, CadetProfileSummary, getInitials(), src_components_ui_dropdown_menu_dropdownmenu (+66 more)
+### Community 31 - "SocialDrawer.tsx"
+Cohesion: 0.08
+Nodes (51): ContestLobbyPage, ContestOverviewPage, ContestQualifiedPage, ContestRealtimeSynchronizer(), CadetProfileHoverCard(), CadetProfileHoverCardProps, CadetProfileSummary, getInitials() (+43 more)
 
 ### Community 32 - "AdminContestController"
-Cohesion: 0.08
-Nodes (55): AdminContestController, Any, AsyncSession, Response, Orchestrator for proctor/admin contest lifecycle, problem sets, and attendee…, add_or_update_problem(), admin_register_participant(), change_contest_status() (+47 more)
+Cohesion: 0.06
+Nodes (68): AdminContestController, Any, AsyncSession, MemberProfile, Response, Chaos Computer Club — Medi-Caps Chapter controllers/admin_contest_controller.py…, Orchestrator for proctor/admin contest lifecycle, problem sets, and attendee…, add_or_update_problem() (+60 more)
 
 ### Community 33 - "schemas/__init__.py"
 Cohesion: 0.13
@@ -886,7 +879,7 @@ Nodes (35): AssessmentDetailResponse, AssessmentProblemResponse, AssessmentSessi
 
 ### Community 34 - "gsd-cursor-subagent-start.js"
 Cohesion: 0.05
-Nodes (58): { ensureRuntimeBuild, RuntimeBuildError }, evaluateDispatch(), EXECUTOR_SUBAGENT_TYPES, fs, { HOOK_ON_CRASH, allow, deny, crash }, ADR-0457, main(), os (+50 more)
+Nodes (74): acquireLock(), ADR-0457, defaultLibDir(), defaultPackageRoot(), ensureRuntimeBuild(), forceFullEmit(), fs, isBuilt() (+66 more)
 
 ### Community 35 - "active-workstream-store.cjs"
 Cohesion: 0.07
@@ -894,55 +887,55 @@ Nodes (57): ADR-0457, ADR-3473, clearActiveWorkstream(), createMemoryPointerAdap
 
 ### Community 36 - "installer-migrations.cjs"
 Cohesion: 0.06
-Nodes (61): ADR-0457, localToday(), now(), nowIso(), _pinnedNowMs(), _realSleepBuf, sleep(), today() (+53 more)
+Nodes (58): ADR-0457, localToday(), now(), nowIso(), _pinnedNowMs(), _realSleepBuf, sleep(), today() (+50 more)
 
 ### Community 37 - "dependencies"
 Cohesion: 0.03
 Nodes (60): dependencies, class-variance-authority, clsx, cmdk, date-fns, embla-carousel-react, @fontsource-variable/inter, @hookform/resolvers (+52 more)
 
 ### Community 38 - "frontmatter.cjs"
-Cohesion: 0.06
-Nodes (51): setEffortFrontmatter(), setFrontmatterKeyLine(), agentScalarNeedsDoubleQuoting(), AnchorDetectedSignal, ADR-0457, ADR-1411, ADR-3473, cmdFrontmatterSet() (+43 more)
+Cohesion: 0.07
+Nodes (50): agentScalarNeedsDoubleQuoting(), AnchorDetectedSignal, ADR-0457, ADR-1411, ADR-3473, coerceMustHavesValue(), countKeysBeforeTruncation(), countTopLevelKeyShapedLines() (+42 more)
 
-### Community 39 - "ContestOfflinePage.tsx"
-Cohesion: 0.06
-Nodes (68): react-router-dom, Badge(), BadgeProps, badgeVariants, Button, Card, CardContent, CardDescription (+60 more)
+### Community 39 - "ContestsHubPage.tsx"
+Cohesion: 0.05
+Nodes (65): ogl, ContestsHubPage, PanelsContext, PanelsCtx, Tabs(), TabsContext, TabsCtx, TabsList() (+57 more)
 
 ### Community 40 - "verify.cjs"
-Cohesion: 0.04
-Nodes (56): routeVerifySummary(), ADR-0457, model_catalog_cjs_1, agentInstallCheck, buildContextDriftMessage(), ADR-0457, ADR-2313, ADR-3180 (+48 more)
+Cohesion: 0.05
+Nodes (53): routeVerifySummary(), agentInstallCheck, buildContextDriftMessage(), ADR-0457, ADR-2313, ADR-3180, ADR-3473, ADR-4650 (+45 more)
 
 ### Community 41 - "install-profiles.cjs"
 Cohesion: 0.06
-Nodes (44): mkInstallTempDir(), capabilityClusterStems(), _capabilitySkillsForMode(), ADR-0011, ADR-0058, ADR-0457, ADR-0857, ADR-1235 (+36 more)
+Nodes (42): buildNamespaceBundleMap(), capabilityClusterStems(), _capabilitySkillsForMode(), ADR-0011, ADR-0058, ADR-0457, ADR-0857, ADR-1235 (+34 more)
 
 ### Community 42 - "shell-command-projection.cjs"
 Cohesion: 0.06
-Nodes (48): resolveSpawnBinary(), rewriteLegacyManagedNodeHookCommands(), atomicRenameWithRetry(), buildLocalShellHookCommand(), _buildVerbatimCmdLine(), ADR-0457, ADR-1239, ADR-1703 (+40 more)
+Nodes (49): resolveSpawnBinary(), rewriteLegacyManagedNodeHookCommands(), atomicRenameWithRetry(), buildLocalShellHookCommand(), _buildVerbatimCmdLine(), ADR-0457, ADR-1239, ADR-1703 (+41 more)
 
-### Community 43 - "roadmap-parser.cjs"
-Cohesion: 0.03
-Nodes (93): routeMigrateConfig(), cmdMigrateConfig(), agentInstallCheckMod, buildAllPhaseDirNamesField(), buildArchivedPhaseTokensField(), buildConfigField(), buildMilestoneArchiveStatusField(), buildPhaseSnapshot() (+85 more)
+### Community 43 - "phase-id.cjs"
+Cohesion: 0.02
+Nodes (175): routeDriftGuard(), cmdProgressRender(), cmdStats(), checkW023(), archivePhaseDirectories(), getRoadmapModeForPhase(), BARE_INTEGER_RE, BRACKET_DIR_TOKEN_RE (+167 more)
 
 ### Community 44 - "planning-inspect.cjs"
 Cohesion: 0.06
 Nodes (54): parseRequirements(), iterateBullets(), planIdFromFile(), AGREEMENT, buildActivePlan(), buildPhaseGoalAndDependencies(), buildPlanningInspect(), buildPlanRows() (+46 more)
 
 ### Community 45 - "model-catalog.cjs"
-Cohesion: 0.05
-Nodes (49): resolveDispatchIsolationDecision(), resolveDispatchModelPin(), _warnDispatchModelPinDropped(), _findAncestorGsdConfigPath(), _getGsdEffortCatalog(), installFsAdapter, modelCatalog, modelResolver (+41 more)
+Cohesion: 0.04
+Nodes (56): resolveDispatchIsolationDecision(), resolveDispatchModelPin(), routeEffort(), _warnDispatchModelPinDropped(), cmdEffortSync(), cmdEffortSyncCodex(), cmdEffortSyncOpencode(), removeEffortFrontmatter() (+48 more)
 
 ### Community 46 - "runtime-artifact-layout.cjs"
-Cohesion: 0.06
-Nodes (61): stageAgentsForRuntimeWithConverter(), buildScopeRecord(), ADR-2866, deriveStemsForKindEntry(), deriveStemsFromManifest(), getDefaultRuntimeRegistry(), install_scope_cjs_1, installerMigrationsMod (+53 more)
+Cohesion: 0.07
+Nodes (52): mkInstallTempDir(), resolveAgentModelOverride(), stageAgentsForRuntimeWithConverter(), stageCommandsForRuntimeFlat(), stageSkillsForProfile(), deriveStemsForKindEntry(), deriveStemsFromManifest(), agentsKind() (+44 more)
 
 ### Community 47 - "contests.py"
-Cohesion: 0.09
-Nodes (44): ArenaRunRequest, ArenaSubmitRequest, BaseModel, add_or_update_problem_endpoint(), change_contest_status_endpoint(), check_in_contest(), clone_contest_endpoint(), create_dynamic_contest_endpoint() (+36 more)
+Cohesion: 0.06
+Nodes (67): ArenaRunRequest, ArenaSubmitRequest, ContestController, Any, AsyncSession, MemberProfile, Response, Cancel registration for a contest, release workstation seat, and invalidate… (+59 more)
 
 ### Community 48 - "cjs-command-router-adapter.cjs"
 Cohesion: 0.04
-Nodes (47): routePhases(), routeVerification(), ADR-0959, cjsCommandRouterAdapter, io, routeAuditOpen(), routeAuditUat(), ADR-0174 (+39 more)
+Nodes (46): routeEval(), routeVerification(), ADR-0959, cjsCommandRouterAdapter, io, routeAuditOpen(), routeAuditUat(), ADR-0174 (+38 more)
 
 ### Community 49 - "capability-lifecycle.cjs"
 Cohesion: 0.08
@@ -952,57 +945,57 @@ Nodes (51): acquireLock(), applyCapabilitySharedEdits(), backupNameMatchesId(), 
 Cohesion: 0.04
 Nodes (52): 🔬 2. Exhaustive API Expected vs Actual Assertions, ✅ PASS `[ASSESS-01]` Fetch Screening Assessment Status (biweekly-contest-1), ✅ PASS `[AUTH-01]` RSA 256 JWT Public Key Fetch, ✅ PASS `[AUTH-02]` Handle Availability Check (Available), ✅ PASS `[AUTH-03]` Invalid Bearer Token Rejection (401), ✅ PASS `[AUTH-04]` Taken Handle Availability Check, ✅ PASS `[AUTH-05]` Unauthenticated Profile Access (401 Rejection), ✅ PASS `[AUTH-06]` Authenticated Member Profile Fetch (/me) (+44 more)
 
-### Community 51 - "Language"
-Cohesion: 0.03
-Nodes (142): ABC, AsyncClient, asyncio, Core Docker Execution Engine for Chaos Computer Club., get_language_spec(), LanguageSpec, Language configurations and execution profiles for the Core Docker Engine.…, Retrieve LanguageSpec for a given language name or enum value. (+134 more)
+### Community 51 - ".execute_batch"
+Cohesion: 0.19
+Nodes (9): Run single testcase or raw input., Execute one or more testcases within an isolated workspace., Path, Unified sandbox interface with asynchronous execution and process isolation., Create a temporary isolated execution directory., Safely remove the temporary execution workspace., Compile source code in workspace using local compiler or Docker., Run solution in workspace with stdin input, memory and timeout constraints. (+1 more)
 
 ### Community 52 - "js-yaml.cjs"
 Cohesion: 0.09
 Nodes (25): require_default(), require_null(), requireBinary(), requireBool(), extend(), requireCore(), requireException(), requireFailsafe() (+17 more)
 
-### Community 53 - "qa_test_service.py"
-Cohesion: 0.07
-Nodes (39): AdminQAController, Any, Chaos Computer Club — Medi-Caps Chapter controllers/admin_qa_controller.py —…, Orchestrator for automated QA audits, regression testing, and tournament…, get_latest_qa_markdown(), get_latest_qa_report(), BaseModel, get (+31 more)
+### Community 53 - "admin_qa.py"
+Cohesion: 0.08
+Nodes (34): AdminQAController, Any, Orchestrator for automated QA audits, regression testing, and tournament…, get_latest_qa_markdown(), get_latest_qa_report(), BaseModel, get, MemberProfile (+26 more)
 
 ### Community 54 - "broken-windows.cjs"
 Cohesion: 0.11
 Nodes (47): routeWindows(), acquireLedgerLock(), appendWindow(), assertOpen(), cmdWindowsAppend(), cmdWindowsMarkFixed(), cmdWindowsStatus(), cmdWindowsWaive() (+39 more)
 
 ### Community 55 - "bin/lib/cli-exit.cjs"
-Cohesion: 0.18
-Nodes (18): ADR-2980, ADR-3889, CONTRACT_VERSION_KEY, exitCodeFor(), exitCodeRegistryModule, findExitContractFlag(), getContractVersion(), getPendingOutcome() (+10 more)
+Cohesion: 0.07
+Nodes (33): routeTeamsStatus(), ADR-2980, ADR-3889, CONTRACT_VERSION_KEY, exitCodeFor(), exitCodeRegistryModule, findExitContractFlag(), getContractVersion() (+25 more)
 
-### Community 56 - "launch_official_contests.py"
-Cohesion: 0.10
-Nodes (23): argparse, init_db(), Create all database tables on initial startup., get_next_wednesday_schedule(), datetime, Chaos Computer Club India — Medi-Caps Chapter Contest Schedule Service:…, Computes canonical Wednesday contest timestamps: - starts_at: Wednesday 15:00…, purge_all_contest_data() (+15 more)
+### Community 56 - "db.py"
+Cohesion: 0.07
+Nodes (37): init_db(), Chaos Computer Club India — Medi-Caps Chapter Backend Database Engine and Async…, Create all database tables on initial startup., get_next_wednesday_schedule(), datetime, Chaos Computer Club India — Medi-Caps Chapter Contest Schedule Service:…, Computes canonical Wednesday contest timestamps: - starts_at: Wednesday 15:00…, ContestService (+29 more)
 
 ### Community 57 - "config-loader.cjs"
 Cohesion: 0.06
-Nodes (36): _applyFederatedOverlay(), _applyFederatedValues(), _capabilityRegistryReal, ADR-0227, ADR-0857, ADR-1244, ADR-1411, CONFIG_DEFAULTS (+28 more)
+Nodes (42): _applyFederatedOverlay(), _applyFederatedValues(), _capabilityRegistryReal, ADR-0227, ADR-0857, ADR-1244, ADR-1411, CONFIG_DEFAULTS (+34 more)
 
-### Community 58 - "DynamicContestService"
-Cohesion: 0.11
-Nodes (30): MemberProfile, AssessmentConfigSchema, ContestCloneRequest, DynamicContestCreateRequest, PresetContestLaunchRequest, BaseModel, DynamicContestService, Any (+22 more)
+### Community 58 - "Language"
+Cohesion: 0.16
+Nodes (30): AsyncClient, ComparisonMode, Language, TestCaseCategory, Verdict, CodeboxProvider, Run single code request against CodeBox., Execute one testcase concurrently against Codebox with fallback polling. (+22 more)
 
 ### Community 59 - "gen-capability-registry.cjs"
-Cohesion: 0.07
-Nodes (34): runConfigFormatParityGate(), topoSortContributions(), topoSortHookEntries(), topoSortSteps(), validateConfigSliceEntry(), ADR-0894, LOOP_HOST_CONTRACT, buildRegistry() (+26 more)
+Cohesion: 0.06
+Nodes (43): classifyCrossErrors(), materializeHookFragments(), runConfigFormatParityGate(), validateAgainstContract(), validateConfigSliceEntry(), validateConsumesGlobal(), validateHooksWired(), ADR-0894 (+35 more)
 
-### Community 60 - "AssessmentController"
+### Community 60 - "routers/assessment.py"
 Cohesion: 0.11
-Nodes (32): AssessmentController, Any, AsyncSession, MemberProfile, Response, Orchestrator for Phase 1 screening assessment, code execution, anti-cheat, and…, finish_assessment(), get_assessment_leaderboard() (+24 more)
+Nodes (36): AssessmentController, compute(), Any, AsyncSession, MemberProfile, Response, Orchestrator for Phase 1 screening assessment, code execution, anti-cheat, and…, finish_assessment() (+28 more)
 
-### Community 61 - "ContestController"
-Cohesion: 0.13
-Nodes (21): ContestController, Any, AsyncSession, MemberProfile, Response, Cancel registration for a contest, release workstation seat, and invalidate…, Orchestrator for candidate contests, registration status, arena code execution,…, get_contest_arena_data() (+13 more)
+### Community 61 - "ProviderRunRequest"
+Cohesion: 0.10
+Nodes (21): ABC, JudgeProvider, ProviderRunRequest, ProviderRunResult, Provider contract shared by every execution backend., Runs code executions against test cases., get_judge_provider(), Chooses the judge provider once per process, from the environment. (+13 more)
 
 ### Community 62 - "audit.cjs"
 Cohesion: 0.10
 Nodes (41): auditOpenArtifacts(), ADR-0457, ADR-3180, cmdAuditAcknowledge(), command_arg_projection_cjs_1, coreUtils, deriveOpenQuestions(), deriveOpenQuestionsDigest() (+33 more)
 
 ### Community 63 - "verify-reapply-patches.cjs"
-Cohesion: 0.14
-Nodes (24): BASELINE_VERIFIED_REASONS, CLASSIFICATION, classifyBaselineCoverage(), classifyFile(), computeUserAddedLines(), coverageHeadline(), crypto, { ExitError, runMain } (+16 more)
+Cohesion: 0.08
+Nodes (40): routePromptBudget(), readOptional(), readRequired(), ExitError, ADR-0457, findPristineByHash(), findPristineInGit(), gitExec() (+32 more)
 
 ### Community 64 - "requireLoader"
 Cohesion: 0.15
@@ -1012,17 +1005,17 @@ Nodes (44): requireLoader(), beginAnchorTransaction(), captureSegment(), charFro
 Cohesion: 0.12
 Nodes (23): buildHandoffCommands(), buildOnboardProjection(), CODE_EXTENSIONS, CODE_SCAN_SKIP_DIRS, coreUtils, FAST_CODEBASE_MAP_FILES, getMapReadiness(), hasCodeFilesInternal() (+15 more)
 
-### Community 66 - "io.cjs"
-Cohesion: 0.04
-Nodes (49): ADR-2346, ADR-2629, ADR-3473, cmdEstimateCalibration(), cmdEstimateCheck(), configLoader, defaultBudget(), estimation (+41 more)
+### Community 66 - "planning-workspace.cjs"
+Cohesion: 0.05
+Nodes (38): cmdListTodos(), ADR-2346, ADR-2629, ADR-3473, cmdEstimateCalibration(), cmdEstimateCheck(), collectCalibrationSamples(), configLoader (+30 more)
 
-### Community 67 - "ref_path"
+### Community 67 - "ContestOfflinePage.tsx"
 Cohesion: 0.09
-Nodes (22): fs, ADR-0457, MANAGED_HOOKS, path, NOTE: managed-hooks-registry.cjs must be in HOOKS_TO_COPY (scripts/build-…, result, staleHooks, { allow } (+14 more)
+Nodes (39): react-day-picker, react-router-dom, ContestFinalResultsPage, ContestOfflinePage, ContestResultsPage, LeaderboardPage, Props, State (+31 more)
 
 ### Community 68 - "worktree-safety.cjs"
-Cohesion: 0.07
-Nodes (43): routeWorktree(), ADR-0457, ADR-0857, ADR-4650, cmdWorktreeCleanupWave(), cmdWorktreeCreate(), cmdWorktreeReapOrphans(), cmdWorktreeRecordAgent() (+35 more)
+Cohesion: 0.11
+Nodes (17): routeWorktree(), ADR-0457, ADR-0857, ADR-4650, declaredScopePrefix(), decodeGitQuotedPath(), isSummaryArtifactRelPath(), node_fs_1 (+9 more)
 
 ### Community 69 - "capability-trust.cjs"
 Cohesion: 0.09
@@ -1030,7 +1023,7 @@ Nodes (43): artifactExists(), asString(), checkEngines(), checkReservedNamespace
 
 ### Community 70 - "capability-consent.cjs"
 Cohesion: 0.09
-Nodes (28): bundleContentHash(), ADR-2782, collectBundleEntries(), DIR_FSYNC_TOLERATED_ERRNOS, diskKey(), fsyncContainingDir(), hasPycacheFileSuffix(), isExcludedFileBasename() (+20 more)
+Nodes (41): acquireConsentLock(), bundleContentHash(), ADR-2782, collectBundleEntries(), consentKey(), consentLockPath(), consentStorePath(), DIR_FSYNC_TOLERATED_ERRNOS (+33 more)
 
 ### Community 71 - "command-routing-hub.cjs"
 Cohesion: 0.07
@@ -1044,28 +1037,25 @@ Nodes (44): makeInvalidArgs(), analyzeTouchedFiles(), artifactAbsPath(), artifac
 Cohesion: 0.09
 Nodes (40): agents_gsd_core_bin_lib_package_identity_package_name, agents_gsd_core_bin_lib_package_identity_updatecachefilename, normalizeStateStatus(), buildGitSegment(), CANONICAL_STATUSES, childProcess, compactModelName(), composeStatusline() (+32 more)
 
-### Community 74 - "gsd-workflow-guard.js"
-Cohesion: 0.05
-Nodes (48): block(), { allow, deny }, block(), fs, ADR-1239, ADR-3889, path, { reportIfUndetermined } (+40 more)
+### Community 74 - "middleware/auth.py"
+Cohesion: 0.06
+Nodes (43): Assessment, AssessmentSession, decode_access_token(), is_privileged_test_member(), Decode and validate a JWT access token. RS256 primary path; graceful HS256…, Returns True only for members whose is_core_member flag is explicitly set by an…, AsyncSession, MemberProfile (+35 more)
 
-### Community 75 - "capability-command-router.cjs"
-Cohesion: 0.07
-Nodes (24): capabilityState, capabilityWriter, ADR-1244, ADR-2346, { ExitError }, fs, io, path (+16 more)
+### Community 75 - "capability-state.cjs"
+Cohesion: 0.06
+Nodes (45): capabilityState, capabilityWriter, ADR-1244, ADR-2346, { ExitError }, fs, io, path (+37 more)
 
 ### Community 76 - "output"
-Cohesion: 0.04
-Nodes (150): _dispatchNonFamily(), routeAssumptionDelta(), routeClassifyConfidence(), routeConfigEnsureSection(), routeConfigNewProject(), routeConfigSet(), routeDocsInit(), routeFindPhase() (+142 more)
+Cohesion: 0.03
+Nodes (145): _dispatchNonFamily(), routeAssumptionDelta(), routeClassifyConfidence(), routeConfigEnsureSection(), routeConfigGet(), routeConfigNewProject(), routeConfigSet(), routeConfigSetModelProfile() (+137 more)
 
 ### Community 77 - "capability-source.cjs"
 Cohesion: 0.09
-Nodes (39): assertFetchableUrl(), assertSafeGitUrl(), assertSafeId(), assertSafeNpmSpec(), assertSafeTarMembers(), assertStagedBundleWithinBudget(), capValidator, ADR-0457 (+31 more)
+Nodes (40): assertFetchableUrl(), assertSafeGitUrl(), assertSafeId(), assertSafeNpmSpec(), assertSafeTarMembers(), assertStagedBundleWithinBudget(), capValidator, ADR-0457 (+32 more)
 
 ### Community 78 - "cli.cjs"
-Cohesion: 0.12
-Nodes (27): isStableTripletSemver(), assembleChangelog(), cmdExtract(), cmdGithubReleaseNotes(), cmdRender(), cmdVerify(), {
-  compareSemverCore,
-  isStableTripletSemver,
-}, { ExitError, runMain } (+19 more)
+Cohesion: 0.09
+Nodes (36): ADR-0457, compareSemverCore(), compareTuples(), expandComparator(), isSemverNewer(), isStableTripletSemver(), parseVersionToken(), satisfiesPrimitive() (+28 more)
 
 ### Community 79 - "gsd-secret-read-guard.js"
 Cohesion: 0.10
@@ -1076,12 +1066,12 @@ Cohesion: 0.04
 Nodes (52): 🔬 2. Exhaustive API Expected vs Actual Assertions, ✅ PASS `[ASSESS-01]` Fetch Screening Assessment Status (biweekly-contest-1), ✅ PASS `[AUTH-01]` RSA 256 JWT Public Key Fetch, ✅ PASS `[AUTH-02]` Handle Availability Check (Available), ✅ PASS `[AUTH-03]` Invalid Bearer Token Rejection (401), ✅ PASS `[AUTH-04]` Taken Handle Availability Check, ✅ PASS `[AUTH-05]` Unauthenticated Profile Access (401 Rejection), ✅ PASS `[AUTH-06]` Authenticated Member Profile Fetch (/me) (+44 more)
 
 ### Community 82 - "capability-loader.cjs"
-Cohesion: 0.11
-Nodes (23): capabilityLoader, ADR-1239, createImperativeAdapter(), installEngine, canonicalDir(), centralConfigKeys(), ADR-1239, ADR-1244 (+15 more)
+Cohesion: 0.08
+Nodes (30): capabilityLoader, ADR-1239, createImperativeAdapter(), installEngine, canonicalDir(), centralConfigKeys(), ADR-1239, ADR-1244 (+22 more)
 
 ### Community 83 - "github-release-notes.cjs"
-Cohesion: 0.13
-Nodes (23): agents_gsd_core_bin_lib_package_identity_reposlug, buildGithubReleaseNotesIr(), changedFragmentPaths(), classifyGroup(), compareUrl(), cp, FIXED_GROUPS, formatBullet() (+15 more)
+Cohesion: 0.09
+Nodes (34): agents_gsd_core_bin_lib_package_identity_reposlug, cmdGithubReleaseNotes(), buildGithubReleaseNotesIr(), changedFragmentPaths(), classifyGroup(), compareUrl(), cp, FIXED_GROUPS (+26 more)
 
 ### Community 84 - "push"
 Cohesion: 0.13
@@ -1096,12 +1086,12 @@ Cohesion: 0.09
 Nodes (34): buildClaudeMdFallbacks(), buildClaudeMdProfilePlaceholder(), buildClaudeMdWorkflowEnforcement(), buildSection(), ADR-0457, CLAUDE_INSTRUCTIONS, cmdGenerateClaudeMd(), buildSectionContent() (+26 more)
 
 ### Community 87 - "smart-entry.cjs"
-Cohesion: 0.09
-Nodes (32): action(), actionsFor(), buildSummary(), ADR-0227, ADR-1411, ADR-2207, ADR-3180, classify() (+24 more)
+Cohesion: 0.08
+Nodes (35): action(), actionsFor(), buildSummary(), ADR-0227, ADR-1411, ADR-2207, ADR-3180, classify() (+27 more)
 
-### Community 88 - "test_webhooks_and_sse.py"
-Cohesion: 0.12
-Nodes (23): EventsController, event_generator(), event_generator(), Request, Orchestrator for Server-Sent Events streams (global and contest-specific)., get_contest_event_stream(), get_global_event_stream(), get (+15 more)
+### Community 88 - "webhooks.py"
+Cohesion: 0.10
+Nodes (32): Any, AsyncSession, Orchestrator for inbound hardware gate scans, contest triggers, and outbound…, WebhookController, ContestEventWebhookPayload, ContestStatusChangedEventPayload, GateScanWebhookPayload, on_contest_status_changed() (+24 more)
 
 ### Community 89 - "runtime-config-adapter-registry.cjs"
 Cohesion: 0.25
@@ -1112,16 +1102,16 @@ Cohesion: 0.11
 Nodes (32): routeFromGsd2(), buildContextMd(), buildPlanMd(), buildPlanningArtifacts(), buildPreview(), buildRoadmapMd(), buildStateMd(), buildSummaryMd() (+24 more)
 
 ### Community 91 - "loop-resolver.cjs"
-Cohesion: 0.13
-Nodes (16): routeLoop(), CANONICAL_POINTS, capabilityActivationModule, capabilityStateModule, ADR-0857, ADR-1244, cmdLoopRenderHooks(), configLoaderModule (+8 more)
+Cohesion: 0.09
+Nodes (28): routeLoop(), _getNestedConfigValue(), node_fs_1, node_path_1, planningWorkspaceMod, _readRawConfigKey(), _resolveActivationValue(), resolveConfigKey() (+20 more)
 
 ### Community 92 - "health-diagnostic.cjs"
 Cohesion: 0.06
 Nodes (33): agentInstallMod, ADR-0457, ADR-3180, ADR-3473, clock_cjs_1, computeMissingMilestoneVersions(), configLoaderMod, configValidationMod (+25 more)
 
 ### Community 93 - "prohibition-enforcement.cjs"
-Cohesion: 0.11
-Nodes (36): baseOf(), buildLintArgs(), buildNodeTestArgs(), childEnv(), ADR-0550, defaultProveFailFirst(), defaultRunCheck(), eslintFileResultCount() (+28 more)
+Cohesion: 0.14
+Nodes (32): baseOf(), buildLintArgs(), buildNodeTestArgs(), childEnv(), ADR-0550, defaultProveFailFirst(), defaultRunCheck(), eslintFileResultCount() (+24 more)
 
 ### Community 94 - "review-lane-runner.cjs"
 Cohesion: 0.13
@@ -1133,23 +1123,23 @@ Nodes (34): requireDumper(), blockHeader(), chooseScalarStyle(), codePointAt(), 
 
 ### Community 96 - "verification.cjs"
 Cohesion: 0.05
-Nodes (52): stripFencedCode(), cmdPhaseUatPassed(), analyzeMarkdown(), BLOCKING_UAT_FM_RESULTS, BLOCKING_UAT_FM_STATUSES, BLOCKING_VERIFICATION_FM_STATUSES, ADR-0457, ADR-1372 (+44 more)
+Nodes (58): determinePhaseStatus(), checkW006(), checkW007(), ADR-0457, ADR-3180, computeClaimedDirs(), dirsForPhase(), healthDiagnosticMod (+50 more)
 
 ### Community 97 - "typing"
 Cohesion: 0.03
-Nodes (139): api_meta(), get, Versioned API surface (/api/v1). Every domain router is aggregated here exactly…, Chaos Computer Club — Medi-Caps Chapter controllers/admin_contest_controller.py…, Chaos Computer Club — Medi-Caps Chapter controllers/feed_controller.py — Campus…, PassController, AsyncSession, MemberProfile (+131 more)
+Nodes (143): api_meta(), get, Versioned API surface (/api/v1). Every domain router is aggregated here exactly…, Chaos Computer Club — Medi-Caps Chapter controllers/admin_qa_controller.py —…, Chaos Computer Club — Medi-Caps Chapter controllers/assessment_controller.py —…, Chaos Computer Club — Medi-Caps Chapter controllers/contest_controller.py —…, FeedController, AsyncSession (+135 more)
 
-### Community 98 - "form.tsx"
-Cohesion: 0.12
-Nodes (19): input-otp, @radix-ui/react-label, react-hook-form, FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem (+11 more)
+### Community 98 - "test_cloudflare_security.py"
+Cohesion: 0.09
+Nodes (31): get_cf_country(), get_cf_ray(), get_client_ip(), Request, Extract the authentic client IP address prioritizing Cloudflare edge headers.…, Retrieve Cloudflare Ray ID for distributed tracing and incident response., Retrieve two-letter ISO country code resolved by Cloudflare GeoIP., Validate a Cloudflare Turnstile token against Cloudflare's siteverify API. - If… (+23 more)
 
-### Community 99 - "profile-pipeline-command-router.cjs"
-Cohesion: 0.12
-Nodes (12): getJsonErrorMode(), ERROR_REASON, agents_gsd_core_bin_lib_io_getjsonerrormode, ADR-0857, ADR-0959, ADR-3889, { ERROR_REASON, getJsonErrorMode }, { ExitError } (+4 more)
+### Community 99 - "passes.py"
+Cohesion: 0.08
+Nodes (39): PassController, AsyncSession, MemberProfile, Response, Chaos Computer Club — Medi-Caps Chapter controllers/pass_controller.py — Campus…, Orchestrator for campus passes, gate scanner check-in, and attendee rosters., build_campus_pass_qr(), parse_campus_pass_qr() (+31 more)
 
 ### Community 100 - "state-document.cjs"
-Cohesion: 0.08
-Nodes (31): parseActivityTimestamp(), canonicalizeCharForCaselessCompare(), canonicalizeForCaselessCompare(), ADR-0227, ADR-0457, ADR-2207, ADR-3180, ADR-3473 (+23 more)
+Cohesion: 0.09
+Nodes (29): canonicalizeCharForCaselessCompare(), canonicalizeForCaselessCompare(), ADR-0227, ADR-0457, ADR-2207, ADR-3180, ADR-3473, countLeading() (+21 more)
 
 ### Community 101 - "intel.cjs"
 Cohesion: 0.12
@@ -1168,12 +1158,12 @@ Cohesion: 0.10
 Nodes (33): add(), ANY_RUNE_NOT_NL(), arraysEqual(), canCheckPrefix(), clear(), computeClosure(), context(), doExecuteNFA() (+25 more)
 
 ### Community 105 - "graphify.cjs"
-Cohesion: 0.15
-Nodes (23): isCapabilityActive(), applyBudget(), buildAdjacencyMap(), buildQueryResponse(), capabilityStateMod, checkGraphifyInstalled(), checkGraphifyVersion(), ADR-0457 (+15 more)
+Cohesion: 0.11
+Nodes (32): isCapabilityActive(), applyBudget(), buildAdjacencyMap(), buildQueryResponse(), capabilityStateMod, checkGraphifyInstalled(), checkGraphifyVersion(), ADR-0457 (+24 more)
 
 ### Community 106 - "mcp-catalog.cjs"
-Cohesion: 0.12
-Nodes (27): buildCatalog(), ADR-0457, ADR-1671, classifyUnindexedUri(), decodeCursor(), decodePassesFor(), defaultPackageRoot(), encodeCursor() (+19 more)
+Cohesion: 0.14
+Nodes (19): ADR-0457, ADR-1671, classifyUnindexedUri(), decodeCursor(), decodePassesFor(), encodeCursor(), fail(), getPrompt() (+11 more)
 
 ### Community 107 - "checkLimits"
 Cohesion: 0.40
@@ -1189,11 +1179,11 @@ Nodes (28): routeLearnings(), ADR-0457, cmdLearningsCopy(), cmdLearningsDelete()
 
 ### Community 110 - "capability-lock.cjs"
 Cohesion: 0.11
-Nodes (25): acquireLock(), { execTool, retryRenameSync }, getProcessStartTime(), holderVerifiedLive(), isPidAlive(), isSameHost(), ledgerMod, lockAgeMs() (+17 more)
+Nodes (24): acquireLock(), { execTool, retryRenameSync }, getProcessStartTime(), holderVerifiedLive(), isPidAlive(), isSameHost(), ledgerMod, lockAgeMs() (+16 more)
 
-### Community 111 - "model-resolver.cjs"
-Cohesion: 0.05
-Nodes (60): cmdResolveExecution(), cmdResolveModel(), agentInstallCheck, ADR-0457, cmdDocsInit(), configLoader, coreUtils, detectDocTooling() (+52 more)
+### Community 111 - "logging"
+Cohesion: 0.11
+Nodes (22): argparse, asyncio, Chaos Computer Club — Medi-Caps Chapter controllers/events_controller.py —…, Chaos Computer Club — Medi-Caps Chapter app/core/cloudflare.py — Cloudflare…, Chaos Computer Club India — Medi-Caps Chapter Backend Configuration settings, Core Docker Engine — Execution Harness Compiles and executes user code inside…, Chaos Computer Club — Interleet Docker Sandbox Judge Provider Connects Medi-…, Optional provider: an external Judge0-compatible service. Enabled with… (+14 more)
 
 ### Community 112 - "proof_service.py"
 Cohesion: 0.24
@@ -1204,40 +1194,40 @@ Cohesion: 0.12
 Nodes (26): routeUpdateContext(), ADR-2313, detectHostRuntime(), NO_DETECTION, node_fs_1, node_path_1, resolveReportedRuntime(), resolveReportedRuntimeUnsafe() (+18 more)
 
 ### Community 114 - "roadmap-command-router.cjs"
-Cohesion: 0.07
-Nodes (18): routeEval(), ADR-0457, cjsCommandRouterAdapter, command_aliases_cjs_1, routeEvalCommand(), checkW021(), ADR-0457, cjsCommandRouterAdapter (+10 more)
+Cohesion: 0.05
+Nodes (26): ADR-0457, ADR-0457, cjsCommandRouterAdapter, command_aliases_cjs_1, checkW021(), ADR-0457, cjsCommandRouterAdapter, cliExitMod (+18 more)
 
 ### Community 115 - "yamlQuote"
-Cohesion: 0.28
-Nodes (27): convertClaudeAgentToAntigravityAgent(), convertClaudeAgentToAugmentAgent(), convertClaudeAgentToClineAgent(), convertClaudeAgentToCodebuddyAgent(), convertClaudeAgentToCodexAgent(), convertClaudeAgentToCursorAgent(), convertClaudeAgentToQwenAgent(), convertClaudeAgentToTraeAgent() (+19 more)
+Cohesion: 0.29
+Nodes (26): convertClaudeAgentToAugmentAgent(), convertClaudeAgentToClineAgent(), convertClaudeAgentToCodebuddyAgent(), convertClaudeAgentToCodexAgent(), convertClaudeAgentToCursorAgent(), convertClaudeAgentToQwenAgent(), convertClaudeAgentToTraeAgent(), convertClaudeAgentToWindsurfAgent() (+18 more)
 
 ### Community 116 - "verify-command-grounding.cjs"
 Cohesion: 0.13
 Nodes (27): declaredPathCovers(), emptyResult(), extractAutomatedCommands(), extractAutomatedFromText(), extractDeclaredPaths(), extractFailingDirections(), extractFailingFromText(), foldCdArgs() (+19 more)
 
 ### Community 117 - "routers/auth.py"
-Cohesion: 0.14
-Nodes (36): AuthController, Unauthenticated handle availability check. Used during onboarding before the…, Return full member profile with computed stats and Redis caching., check_handle(), complete_onboarding(), delete_account(), get_jwt_public_key(), get_me() (+28 more)
+Cohesion: 0.13
+Nodes (37): AuthController, Unauthenticated handle availability check. Used during onboarding before the…, Return full member profile with computed stats and Redis caching., Public LeetCode-style profile for any student cadet. Retrieves member details,…, check_handle(), complete_onboarding(), delete_account(), get_jwt_public_key() (+29 more)
 
 ### Community 118 - "scripts/lib/cli-exit.cjs"
-Cohesion: 0.16
-Nodes (19): ADR-2980, ADR-3889, CONTRACT_VERSION_KEY, exitCodeFor(), exitCodeRegistryModule, findExitContractFlag(), getContractVersion(), getJsonErrorMode() (+11 more)
+Cohesion: 0.11
+Nodes (23): ADR-2980, ADR-3889, CONTRACT_VERSION_KEY, exitCodeFor(), exitCodeRegistryModule, findExitContractFlag(), getContractVersion(), getJsonErrorMode() (+15 more)
 
 ### Community 119 - "security.cjs"
 Cohesion: 0.08
-Nodes (23): defaultRequireFromInstallRoot(), isInsideDir(), assertWithinRoot(), assertWithinRootLexical(), ADR-0457, ADR-4650, isContainedIn(), KNOWN_VALID_TAGS (+15 more)
+Nodes (24): defaultRequireFromInstallRoot(), dispatchCapabilityCommand(), isInsideDir(), assertWithinRoot(), assertWithinRootLexical(), ADR-0457, ADR-4650, isContainedIn() (+16 more)
 
 ### Community 120 - "host-integration.cjs"
 Cohesion: 0.08
 Nodes (20): routeDispatchCapacity(), ADR-1239, handleHandshakeRequest(), hostIntegration, ADR-1016, ADR-1239, DEFAULT_ENGINE, degradationFor() (+12 more)
 
 ### Community 121 - "legacy-cleanup.cjs"
-Cohesion: 0.19
-Nodes (12): CODE_EXTENSIONS, collectFilesUnder(), fileContainsLegacySkillPathSignal(), fileContainsOldPackageSignal(), fs, GSD_MANAGED_SUBTREES, isDevPreferencesPath(), os (+4 more)
+Cohesion: 0.11
+Nodes (22): CODE_EXTENSIONS, collectFilesUnder(), fileContainsLegacySkillPathSignal(), fileContainsOldPackageSignal(), fs, GSD_MANAGED_SUBTREES, isDevPreferencesPath(), os (+14 more)
 
 ### Community 122 - "state-transition.cjs"
-Cohesion: 0.04
-Nodes (82): generalScalarNeedsNumericQuoting(), reconstructFrontmatter(), validateFieldName(), cmdStateUpdate(), explainUpdateFailure(), ADR-0457, ADR-1769, ADR-2207 (+74 more)
+Cohesion: 0.08
+Nodes (24): ADR-1372, ADR-1411, ADR-1769, ADR-1817, ADR-2207, ADR-3180, ADR-3408, ADR-3473 (+16 more)
 
 ### Community 123 - "compile"
 Cohesion: 0.08
@@ -1248,8 +1238,8 @@ Cohesion: 0.04
 Nodes (49): After Checkpoint, Balance Research and Reasoning, Checkpoint Format, CHECKPOINT REACHED, Checkpoint Types, Combining Techniques, DEBUG COMPLETE (goal: find_and_fix), Decision Point: When to Act (+41 more)
 
 ### Community 125 - "check-latest-version.cjs"
-Cohesion: 0.18
-Nodes (13): ALLOWED_TAGS, buildViewArgs(), CHECK_REASON, checkLatestVersion(), { execNpm }, main(), { packageName: PACKAGE_NAME }, resolveTag() (+5 more)
+Cohesion: 0.19
+Nodes (12): ALLOWED_TAGS, buildViewArgs(), CHECK_REASON, checkLatestVersion(), { execNpm }, main(), { packageName: PACKAGE_NAME }, resolveTag() (+4 more)
 
 ### Community 126 - "command-arg-projection.cjs"
 Cohesion: 0.09
@@ -1260,8 +1250,8 @@ Cohesion: 0.13
 Nodes (22): actualsBlockOf(), applyCalibration(), asCalibratedTokens(), asRawTokens(), calibrationBasis(), ADR-0457, ADR-2629, ADR-3473 (+14 more)
 
 ### Community 128 - "git-base-branch.cjs"
-Cohesion: 0.14
-Nodes (23): routeGit(), changedFilesSince(), cmdGitBaseBranch(), configLoader, configuration_cjs_1, gitWorktreeInfoInternal(), io, isSafeRevisionRef() (+15 more)
+Cohesion: 0.16
+Nodes (17): routeGit(), changedFilesSince(), cmdGitBaseBranch(), configLoader, configuration_cjs_1, io, isSafeRevisionRef(), node_path_1 (+9 more)
 
 ### Community 129 - "capability-ledger.cjs"
 Cohesion: 0.15
@@ -1276,24 +1266,24 @@ Cohesion: 0.10
 Nodes (21): boldLeadInIsUnterminated(), bulletColonRe, bulletEmDashRe, bulletTitledColonRe, ADR-0457, ADR-1372, decisionBulletStartRe, decisionTokenRe (+13 more)
 
 ### Community 132 - "markdown-table.cjs"
-Cohesion: 0.17
-Nodes (27): routeQuickTasksMigrate(), appendQuickTaskRow(), ADR-0457, ADR-2143, deleteTableRow(), escapeCell(), findTableBySchema(), findTableWithColumns() (+19 more)
+Cohesion: 0.18
+Nodes (26): routeQuickTasksMigrate(), appendQuickTaskRow(), ADR-0457, ADR-2143, deleteTableRow(), escapeCell(), findTableBySchema(), findTableWithColumns() (+18 more)
 
 ### Community 133 - "mcp-server.cjs"
 Cohesion: 0.16
 Nodes (20): asString(), callTool(), catalogErrorCode(), catalogErrorMessage(), catalogErrorReason(), ADR-1239, errorResponse(), getCatalog() (+12 more)
 
-### Community 134 - "task-content-resolution.cjs"
-Cohesion: 0.12
-Nodes (19): buildInvocation(), ADR-0457, ADR-3646, coerceStringArray(), coerceStringOrNull(), findResolver(), ioMod, isExecTimeout() (+11 more)
+### Community 134 - "task-command-router.cjs"
+Cohesion: 0.07
+Nodes (32): capabilityLoaderMod, ADR-0457, ADR-1244, ADR-3646, ADR-4650, ioMod, isBehaviorAddingTaskContent(), node_fs_1 (+24 more)
 
 ### Community 135 - "substring"
 Cohesion: 0.09
 Nodes (41): Gate, Hard rules, Report, Tasks (each independently best-effort), Wing / mode / transport, appendReplacement(), appendReplacementFunc(), appendReplacementInternalJava() (+33 more)
 
 ### Community 136 - "runtime-name-policy.cjs"
-Cohesion: 0.09
-Nodes (25): routeProjectInstructionFile(), runtimes, aliasManifest, aliasToCanonical, canonicalizeRuntimeName(), ADR-0457, ADR-1239, ADR-1508 (+17 more)
+Cohesion: 0.06
+Nodes (32): routeProjectInstructionFile(), aliasManifest, aliasToCanonical, canonicalizeRuntimeName(), ADR-0457, ADR-1239, ADR-1508, FALLBACK_ALIASES (+24 more)
 
 ### Community 137 - "adr-parser.cjs"
 Cohesion: 0.13
@@ -1303,13 +1293,13 @@ Nodes (23): CANONICAL_HEADERS, ADR-0457, ADR-1372, classifyHeader(), cliExitModu
 Cohesion: 0.08
 Nodes (23): compilerOptions, allowImportingTsExtensions, exactOptionalPropertyTypes, jsx, lib, module, moduleResolution, noEmit (+15 more)
 
-### Community 139 - "user-artifact-staging.cjs"
-Cohesion: 0.20
-Nodes (17): ADR-3574, _installEngineSymlinkGuard(), installerMigrations, installFsAdapter, isFlatName(), isProcessAlive(), lstatPresent(), node_crypto_1 (+9 more)
+### Community 139 - "ref_path"
+Cohesion: 0.06
+Nodes (26): { HOOK_ON_CRASH, allow, crash }, { INJECTION_PATTERNS, describePattern }, KIMI_TOOL_NAMES, path, stdinTimeout, ALL_PATTERNS, fs, { HOOK_ON_CRASH, allow, crash } (+18 more)
 
 ### Community 140 - "agent-install-check.cjs"
 Cohesion: 0.13
-Nodes (23): agentFileExists(), _canonicalAgentSourceDir(), checkAgentsInstalled(), checkCodexModelPosture(), checkCodexSandboxPosture(), ADR-0857, ADR-2313, ADR-3473 (+15 more)
+Nodes (23): routeResolveAgent(), agentFileExists(), _canonicalAgentSourceDir(), checkAgentsInstalled(), checkCodexModelPosture(), checkCodexSandboxPosture(), ADR-0857, ADR-2313 (+15 more)
 
 ### Community 141 - "api-coverage.cjs"
 Cohesion: 0.07
@@ -1331,9 +1321,9 @@ Nodes (36): Additional Commands, Capturing Ideas, Notes, and Todos, Common Workf
 Cohesion: 0.14
 Nodes (19): Any, MemberProfile, UploadFile, Orchestrator for MinIO storage uploads, presigned URLs, and asset delivery., StorageController, get_presigned_download_url(), get_presigned_upload_url(), get_storage_status() (+11 more)
 
-### Community 146 - "ExitError"
-Cohesion: 0.14
-Nodes (15): classifyCrossErrors(), detectRequiresCycles(), dfs(), materializeHookFragments(), validateAgainstContract(), validateConsumesGlobal(), validateCrossCapability(), validateHooksWired() (+7 more)
+### Community 146 - "get_redis"
+Cohesion: 0.11
+Nodes (22): get_redis(), ping_redis(), Chaos Computer Club — Medi-Caps Chapter core/redis.py — Async Redis client…, Return the singleton async Redis client. Raises if not initialized., Health-check the Redis connection. Returns True if reachable., hash_otp(), Chaos Computer Club — Medi-Caps Chapter lib/otp.py — Pure OTP primitives (no…, SHA-256 hash of OTP string. Stored in Redis; plaintext never persisted. (+14 more)
 
 ### Community 147 - "harness.py"
 Cohesion: 0.15
@@ -1343,9 +1333,9 @@ Nodes (22): _build_c_driver(), _build_cpp_driver(), _build_java_driver(), _cpp_p
 Cohesion: 0.10
 Nodes (15): Common commands, GSD Core — Git. Ship. Done., Start here (3 commands), Update GSD, Want more?, @axe-core/playwright, ref_crypto, @playwright/test (+7 more)
 
-### Community 149 - "ContestsHubPage.tsx"
-Cohesion: 0.10
-Nodes (24): ogl, ContestsHubPage, PanelsContext, PanelsCtx, Tabs(), TabsContext, TabsCtx, TabsList() (+16 more)
+### Community 149 - "profile-pipeline-command-router.cjs"
+Cohesion: 0.13
+Nodes (11): ERROR_REASON, agents_gsd_core_bin_lib_io_getjsonerrormode, ADR-0857, ADR-0959, ADR-3889, { ERROR_REASON, getJsonErrorMode }, { ExitError }, _handlePipelineRejection() (+3 more)
 
 ### Community 150 - "configuration.cjs"
 Cohesion: 0.13
@@ -1359,25 +1349,25 @@ Nodes (22): { allow, deny }, basename(), CMD_PREFIXES, destructiveReason(), hasF
 Cohesion: 0.09
 Nodes (22): devDependencies, @axe-core/playwright, drizzle-kit, drizzle-orm, eslint, eslint-config-prettier, @eslint/js, eslint-plugin-prettier (+14 more)
 
-### Community 153 - "lucide-react"
-Cohesion: 0.05
-Nodes (42): cmdk, lucide-react, @radix-ui/react-checkbox, @radix-ui/react-dialog, CloudflareTurnstile(), removeWidget(), renderWidget(), CloudflareTurnstileProps (+34 more)
+### Community 153 - "MyContestsPage.tsx"
+Cohesion: 0.08
+Nodes (23): @radix-ui/react-tabs, MyContestsPage, src_components_ui_tabs_tabs, TabsContent, TabsList, TabsTrigger, LifecycleBadge(), lifecycleLabels (+15 more)
 
 ### Community 154 - "routeReviewLane"
-Cohesion: 0.10
-Nodes (29): routeReviewLane(), resolveReviewerEgressHost(), checkReviewerDocsParity(), checkReviewerLaneParity(), ADR-2782, countOccurrences(), findSignatureLine(), flagIsDocumented() (+21 more)
+Cohesion: 0.16
+Nodes (18): routeReviewLane(), resolveReviewerEgressHost(), mergeReviewerLanes(), REVIEWER_LANES(), artifactPaths(), ADR-2782, configString(), EFFORT_LEVELS (+10 more)
 
 ### Community 155 - "runtime-homes.cjs"
-Cohesion: 0.09
-Nodes (36): routeEffort(), routeSkillsRoot(), cmdEffortSync(), cmdEffortSyncCodex(), cmdEffortSyncOpencode(), removeEffortFrontmatter(), removeFrontmatterKeyLine(), ADR-0457 (+28 more)
+Cohesion: 0.10
+Nodes (30): routeSkillsRoot(), ADR-0457, ADR-1239, detectAntigravityDirAmbiguity(), expandTilde(), getGlobalConfigDir(), getGlobalSkillDir(), getGlobalSkillDisplayPath() (+22 more)
 
 ### Community 156 - "host-integration-sdk.cjs"
 Cohesion: 0.10
 Nodes (14): ADR-1239, installEngine, ADR-1239, adapterDeclarative, adapterImperative, ADR-1239, handshake, hookBus (+6 more)
 
 ### Community 157 - "surface.cjs"
-Cohesion: 0.04
-Nodes (73): routeCapabilityCommand(), activationMod, ADR-0857, ADR-1244, cmdCapabilityState(), configLoaderMod, installProfilesMod, ioMod (+65 more)
+Cohesion: 0.06
+Nodes (41): ADR-0457, readActiveProfile(), resolveEffectiveProfile(), agentFileExtensionFor(), applyRuntimeContentRewritesInPlace(), computePathPrefix(), rewriteStagedCommandBodies(), rewriteStagedSkillBodies() (+33 more)
 
 ### Community 158 - "adviseRemedy"
 Cohesion: 0.12
@@ -1388,8 +1378,8 @@ Cohesion: 0.15
 Nodes (17): buildMessage(), CATEGORY_PRIORITY, chooseAffectedPaths(), ADR-0457, classifyFile(), detectDrift(), DRIFT_CATEGORIES, isPathMapped() (+9 more)
 
 ### Community 161 - "markdown-sectionizer.cjs"
-Cohesion: 0.13
-Nodes (20): ADR-0457, ADR-1372, ADR-2143, collectSections(), deleteSection(), extractFencedBlock(), extractTaggedBlocks(), pattern_cjs_1 (+12 more)
+Cohesion: 0.16
+Nodes (16): ADR-0457, ADR-1372, ADR-2143, collectSections(), deleteSection(), extractTaggedBlocks(), pattern_cjs_1, replaceSection() (+8 more)
 
 ### Community 163 - "components.json"
 Cohesion: 0.10
@@ -1400,8 +1390,8 @@ Cohesion: 0.12
 Nodes (13): assertString(), buildManifest(), ADR-0457, _isNonTerminal(), MANIFEST_STATUS, manifestPath(), node_fs_1, node_path_1 (+5 more)
 
 ### Community 165 - "plan-document.cjs"
-Cohesion: 0.18
-Nodes (16): ADR-0457, ADR-3180, ADR-3646, collapseWhitespace(), elementBody(), extractObjective(), frontmatterMod, markdownTaskHeadings() (+8 more)
+Cohesion: 0.08
+Nodes (25): ADR-0457, ADR-3180, ADR-3646, collapseWhitespace(), elementBody(), extractObjective(), frontmatterMod, markdownTaskHeadings() (+17 more)
 
 ### Community 166 - "commonjs-marker.cjs"
 Cohesion: 0.43
@@ -1416,8 +1406,8 @@ Cohesion: 0.14
 Nodes (14): baselineInstallSurfaces(), ADR-0457, COMMON_SURFACES, INTERNAL_TOP_LEVEL_NAMES, isKnownGeneratedAgentPath(), listKnownGeneratedAgentNames(), migration, node_fs_1 (+6 more)
 
 ### Community 169 - "probe-core.cjs"
-Cohesion: 0.18
-Nodes (15): Step 3: Verify Observable Truths, analyzeCoverage(), ADR-0550, cliExitModule, dispositionForUnverifiableTruth(), errMessage(), isValidItem(), isValidReport() (+7 more)
+Cohesion: 0.11
+Nodes (24): Step 3: Verify Observable Truths, analyzeCoverage(), applicableCategories(), ADR-0457, ADR-0550, classifyShape(), cliExitModule, probe_core_cjs_1 (+16 more)
 
 ### Community 170 - "research-store.cjs"
 Cohesion: 0.15
@@ -1447,9 +1437,9 @@ Nodes (16): actionSupportsChoice(), assertInstallerMigrationsUnblocked(), baseli
 Cohesion: 0.06
 Nodes (33): Binding Payload vs Advisory Remediation, Check 8f - Stated Failing Direction (#3172), Dimension 10: GEMINI.md Compliance, Dimension 11: Research Resolution (#1602), Dimension 12: Pattern Compliance (#1861), Dimension 1: Requirement Coverage, Dimension 2: Task Completeness, Dimension 3: Dependency Correctness (+25 more)
 
-### Community 177 - "quick-batch-dispatch.cjs"
-Cohesion: 0.12
-Nodes (8): buildCleanupManifestEntry(), ADR-0457, ADR-1239, filterAlreadyExecuted(), parseQuickBatchArgs(), planDocumentMod, quickBatchDispatch, routeVerificationOutcome()
+### Community 177 - "parseUatItemsWithStats"
+Cohesion: 0.19
+Nodes (16): extractFencedBlock(), scanFencedBlocks(), blankIndentedFenceDelimiters(), clipBlockAtFirstFence(), countUnattributedIndentedRows(), dropTopLevelFencedRegions(), extractScalarField(), foldScalarBody() (+8 more)
 
 ### Community 178 - "scripts"
 Cohesion: 0.12
@@ -1467,9 +1457,9 @@ Nodes (14): assertDescriptorConfined(), ADR-1239, ADR-1577, ADR-4650, isPathConf
 Cohesion: 0.10
 Nodes (24): ADR-2866, expandTildeForExplicitDir(), getRegistry(), HOST_PRECEDENCE_RANK, isGlobalScope(), node_os_1, node_path_1, normalizeSeparators() (+16 more)
 
-### Community 182 - "roadmap-upgrade.cjs"
-Cohesion: 0.12
-Nodes (20): runWithTimeout(), applyMigration(), applyRoadmapEdits(), assignSubIndices(), buildNewDirName(), ADR-0457, computeMigrationPlan(), extractPhaseNumFromDir() (+12 more)
+### Community 182 - "DockerSandboxProvider"
+Cohesion: 0.07
+Nodes (37): Core Docker Execution Engine for Chaos Computer Club., get_language_spec(), LanguageSpec, Language configurations and execution profiles for the Core Docker Engine.…, Retrieve LanguageSpec for a given language name or enum value., _create_persistent_container(), get_container(), get_docker_client() (+29 more)
 
 ### Community 183 - "stale-bake-guard.cjs"
 Cohesion: 0.18
@@ -1511,9 +1501,9 @@ Nodes (16): appendClass(), appendClassWithSign(), appendFoldedClass(), appendFol
 Cohesion: 0.17
 Nodes (14): embla-carousel-react, Carousel, CarouselApi, CarouselContent, CarouselContext, CarouselContextProps, CarouselItem, CarouselNext (+6 more)
 
-### Community 193 - "routeDriftGuard"
-Cohesion: 0.22
-Nodes (13): routeDriftGuard(), ADR-0022, classifyDriftSeverity(), comparePhaseStatus(), getEffectiveAuthority(), normalizePhaseStatusText(), PHASE_STATUS_RANKS, resolvePhaseStatusRank() (+5 more)
+### Community 193 - "plan-drift-guard.cjs"
+Cohesion: 0.27
+Nodes (10): ADR-0022, classifyDriftSeverity(), comparePhaseStatus(), getEffectiveAuthority(), normalizePhaseStatusText(), PHASE_STATUS_RANKS, resolvePhaseStatusRank(), VALID_AUTHORITIES (+2 more)
 
 ### Community 194 - "health-diagnostic-types.cjs"
 Cohesion: 0.14
@@ -1523,9 +1513,9 @@ Nodes (12): checkAgentInstall(), ADR-3180, healthDiagnosticMod, package_identity
 Cohesion: 0.18
 Nodes (13): ADR-0457, ADR-2143, ADR-3180, ADR-3524, clampPercent(), clampPercentFromFraction(), deriveProgressFromRoadmap(), locateProgressTable() (+5 more)
 
-### Community 196 - "VerifyController"
-Cohesion: 0.14
-Nodes (20): AsyncSession, Orchestrator for cryptographic trust proof verification and public ledgers., VerifyController, list_proofs(), AsyncSession, get, post, Response (+12 more)
+### Community 196 - "pydantic"
+Cohesion: 0.13
+Nodes (19): AsyncSession, list_proofs(), AsyncSession, get, post, Response, Fetch live cryptographic trust proofs from database. Protected by 120s Redis…, Verify the cryptographic authenticity of an offline contest result certificate.… (+11 more)
 
 ### Community 197 - "reviewer-step-dispatch.cjs"
 Cohesion: 0.16
@@ -1535,9 +1525,9 @@ Nodes (13): buildSourceReviewPrompt(), ADR-2782, ADR-4650, depthMeaning(), dispa
 Cohesion: 0.30
 Nodes (13): buildMilestone(), buildNext(), buildPhases(), buildStateContract(), ADR-0457, ADR-3180, currentPhaseFromState(), node_fs_1 (+5 more)
 
-### Community 199 - ".delete_account"
-Cohesion: 0.17
-Nodes (13): _extract_minio_avatar_object(), AsyncSession, MemberProfile, UploadFile, Permanently delete the authenticated member's account and all associated data.…, Step 3 — Post-auth onboarding: set handle, name, PRN, department, batch.…, Allows a member whose full_name was incorrectly set to their enrollment ID (by…, Update editable student profile fields. Institutional identifiers (PRN,… (+5 more)
+### Community 199 - "delete_cache"
+Cohesion: 0.19
+Nodes (14): _extract_minio_avatar_object(), AsyncSession, MemberProfile, UploadFile, Permanently delete the authenticated member's account and all associated data.…, Step 3 — Post-auth onboarding: set handle, name, PRN, department, batch.…, Allows a member whose full_name was incorrectly set to their enrollment ID (by…, Update editable student profile fields. Institutional identifiers (PRN,… (+6 more)
 
 ### Community 200 - "constructor"
 Cohesion: 0.20
@@ -1551,9 +1541,9 @@ Nodes (3): MatcherInputBase, Utf16MatcherInput, Utf8MatcherInput
 Cohesion: 0.18
 Nodes (9): ADR-3180, fs, isInsideRoot(), isUnderSkippedDir(), path, regexScanStats, scanTree(), SKIP_DIR_NAMES (+1 more)
 
-### Community 203 - "MinioStorageService"
-Cohesion: 0.23
-Nodes (7): MinioStorageService, Any, Generates a secure presigned PUT URL allowing the client to upload directly to…, Generates a secure signed GET URL with expiration for authenticated access., Deletes an object from MinIO bucket., Directly uploads a file buffer to MinIO. Returns both the public unsigned URL…, Minio
+### Community 203 - "core/storage.py"
+Cohesion: 0.17
+Nodes (10): MinioStorageService, Any, Chaos Computer Club India — Medi-Caps Chapter Enterprise MinIO S3 Object…, Generates a secure presigned PUT URL allowing the client to upload directly to…, Generates a secure signed GET URL with expiration for authenticated access., Deletes an object from MinIO bucket., Directly uploads a file buffer to MinIO. Returns both the public unsigned URL…, Minio (+2 more)
 
 ### Community 204 - "context-predicates.cjs"
 Cohesion: 0.28
@@ -1564,8 +1554,8 @@ Cohesion: 0.29
 Nodes (11): assertTestHomeSandboxed(), ADR-1239, derivesFromSandboxedHome(), identify(), isInside(), node_fs_1, node_os_1, node_path_1 (+3 more)
 
 ### Community 206 - "filterRuntimeNotesForTarget"
-Cohesion: 0.22
-Nodes (13): applyClaudeCodeBrandSwap(), convertClaudeToAugmentMarkdown(), convertClaudeToCliineMarkdown(), convertClaudeToCodebuddyMarkdown(), convertClaudeToCursorMarkdown(), convertClaudeToTraeMarkdown(), convertClaudeToWindsurfMarkdown(), convertSlashCommandsToAugmentSkillMentions() (+5 more)
+Cohesion: 0.17
+Nodes (16): applyClaudeCodeBrandSwap(), convertClaudeToAugmentMarkdown(), convertClaudeToCliineMarkdown(), convertClaudeToCodebuddyMarkdown(), convertClaudeToCodexMarkdown(), convertClaudeToCursorMarkdown(), convertClaudeToTraeMarkdown(), convertClaudeToWindsurfMarkdown() (+8 more)
 
 ### Community 207 - "ui-consideration-probe.cjs"
 Cohesion: 0.25
@@ -1584,8 +1574,8 @@ Cohesion: 0.17
 Nodes (11): checkI001(), checkW005(), checkW009(), ADR-0457, ADR-3180, derivePhaseStatusLabel(), healthDiagnosticMod, phaseIdMod (+3 more)
 
 ### Community 211 - "Prohibition-Probe — Spec-Completeness Must-NOT Reference"
-Cohesion: 0.10
-Nodes (22): Step 2: Establish Must-Haves (Initial Mode Only), dispositionForProhibition(), projectProhibitions(), descriptorFromProjection(), Canon-referral (do not mint canon items), Generic mapping (requirements → checks → verifier), Inputs, Optional wired-check descriptor (deterministic locate + machine-proof, #1278 + #1346) (+14 more)
+Cohesion: 0.07
+Nodes (31): Step 2: Establish Must-Haves (Initial Mode Only), dispositionForProhibition(), projectProhibitions(), descriptorFromProjection(), Canon-referral (do not mint canon items), Generic mapping (requirements → checks → verifier), Inputs, Optional wired-check descriptor (deterministic locate + machine-proof, #1278 + #1346) (+23 more)
 
 ### Community 212 - "requireCommon"
 Cohesion: 0.26
@@ -1607,9 +1597,9 @@ Nodes (33): 1. Communication Style, 2. Decision Speed, 3. Explanation Depth, 4. 
 Cohesion: 0.18
 Nodes (7): ADR-0457, artifacts_cjs_1, checkW019(), ADR-0457, ADR-3180, healthDiagnosticMod, RULES
 
-### Community 217 - "edge-probe.cjs"
-Cohesion: 0.27
-Nodes (9): analyzeCoverage(), applicableCategories(), ADR-0457, ADR-0550, classifyShape(), cliExitModule, probe_core_cjs_1, proposeEdges() (+1 more)
+### Community 217 - "roadmap-upgrade.cjs"
+Cohesion: 0.17
+Nodes (15): applyMigration(), applyRoadmapEdits(), assignSubIndices(), buildNewDirName(), ADR-0457, computeMigrationPlan(), extractPhaseNumFromDir(), LEGACY_PHASE_HEADING_RE (+7 more)
 
 ### Community 218 - "gate-predicate-evaluator.cjs"
 Cohesion: 0.25
@@ -1623,9 +1613,9 @@ Nodes (9): checkE002(), checkE003(), checkW001(), ADR-0457, ADR-3180, healthDiag
 Cohesion: 0.20
 Nodes (10): checkW017(), checkW020(), checkW027(), ADR-0457, ADR-3180, healthDiagnosticMod, isActiveWorktreePath(), planningScopeMod (+2 more)
 
-### Community 221 - "roadmap.cjs"
-Cohesion: 0.03
-Nodes (94): ADR-0857, ADR-3180, ADR-3473, CYRILLIC_TRANSLITERATION, CYRILLIC_TRANSLITERATION_KEYS, detectSubRepos(), extractCanonicalPlanId(), findOrphanSummaries() (+86 more)
+### Community 221 - "EventsController"
+Cohesion: 0.19
+Nodes (13): EventsController, event_generator(), event_generator(), Request, Orchestrator for Server-Sent Events streams (global and contest-specific)., get_contest_event_stream(), get_global_event_stream(), get (+5 more)
 
 ### Community 222 - "checkpoints.md"
 Cohesion: 0.06
@@ -1636,8 +1626,8 @@ Cohesion: 0.27
 Nodes (11): isNegativeZero(), isFloat(), representYamlFloat(), requireInt(), constructYamlInteger(), isDecCode(), isHexCode(), isInteger() (+3 more)
 
 ### Community 224 - "convertClaudeToKiloFrontmatter"
-Cohesion: 0.12
-Nodes (18): buildKiloAgentPermissionBlock(), convertClaudeAgentToCopilotAgent(), convertClaudeCommandToKiloSkill(), convertClaudeCommandToOpencodeSkill(), convertClaudeToAntigravityContent(), convertClaudeToCodexMarkdown(), convertClaudeToCopilotContent(), convertClaudeToKiloFrontmatter() (+10 more)
+Cohesion: 0.15
+Nodes (17): appendAgentTools(), convertClaudeAgentToCopilotAgent(), convertClaudeAgentToZcodeAgent(), convertClaudeCommandToKiloSkill(), convertClaudeCommandToOpencodeSkill(), convertClaudeToCopilotContent(), convertClaudeToKiloFrontmatter(), convertClaudeToOpencodeFrontmatter() (+9 more)
 
 ### Community 225 - "AI-SPEC — Phase {N}: {phase_name}"
 Cohesion: 0.06
@@ -1679,9 +1669,9 @@ Nodes (8): ADR-0457, node_fs_1, node_path_1, normalizeFallowReport(), normalizeF
 Cohesion: 0.28
 Nodes (6): migration, node_fs_1, node_path_1, normalizeRelPath(), scanCommandsSurface(), walkFiles()
 
-### Community 236 - "collectSection"
-Cohesion: 0.28
-Nodes (15): collectSection(), acknowledgeDeferredItem(), acknowledgeHeadingShapedEntry(), crlfAtEof(), entryFencedLines(), entryFieldLines(), extractGapEntryFields(), parseDeferredItems() (+7 more)
+### Community 236 - "execGit"
+Cohesion: 0.19
+Nodes (13): gitWorktreeInfoInternal(), resolveBaseBranchDiagnosticsWithConfig(), tryLocalBranch(), tryRemoteShow(), trySymbolicRef(), execGit(), cmdWorktreeReapOrphans(), executeWorktreeWaveCleanupPlan() (+5 more)
 
 ### Community 237 - "research-provider.cjs"
 Cohesion: 0.33
@@ -1711,9 +1701,9 @@ Nodes (8): ADR-1239, collectPathValues(), evaluateBeforeTool(), inferProviderId(
 Cohesion: 0.18
 Nodes (13): ADR-0457, ADR-2782, deriveReviewerSlugs(), KNOWN_REVIEWER_SLUGS(), normalizeConfiguredDefaultReviewers(), normalizeReviewerInstances(), resolveReviewerSelection(), Config shape (+5 more)
 
-### Community 244 - "ui-frontend-evidence.cjs"
-Cohesion: 0.32
-Nodes (7): hasStaticFrontendEvidence(), node_fs_1, node_path_1, packageJsonHasUiFramework(), SKIP_DIRS, treeHasComponentFile(), UI_FRAMEWORK_DEPS
+### Community 244 - "installed-surface-resolver.cjs"
+Cohesion: 0.19
+Nodes (14): buildScopeRecord(), ADR-2866, getDefaultRuntimeRegistry(), install_scope_cjs_1, installerMigrationsMod, isSymlinkPath(), listRegisteredRuntimeIds(), node_fs_1 (+6 more)
 
 ### Community 245 - "indexOf"
 Cohesion: 0.10
@@ -1727,9 +1717,9 @@ Nodes (7): EXIT_DEGRADED, EXIT_HOOK_DENY, EXIT_INTERNAL, EXIT_NO_INPUT, EXIT_UNA
 Cohesion: 0.25
 Nodes (5): Config, Returns True if any development restriction bypass mode is active., Returns True if mail dispatching is disabled (dev mode, dev bypass, or explicit…, Settings, BaseSettings
 
-### Community 249 - "hooks.ts"
-Cohesion: 0.11
-Nodes (18): react-dom, react-redux, @reduxjs/toolkit, Toaster(), ToasterProps, AppDispatch, RootState, store (+10 more)
+### Community 249 - "gsd-doc-writer.md"
+Cohesion: 0.15
+Nodes (12): API.md, ARCHITECTURE.md, CONFIGURATION.md, CONTRIBUTING.md, Custom Documentation (gap-detected), DEPLOYMENT.md, DEVELOPMENT.md, Doc Tooling Adaptation (+4 more)
 
 ### Community 250 - "error-capture.ts"
 Cohesion: 0.32
@@ -1740,8 +1730,8 @@ Cohesion: 0.38
 Nodes (6): ADR-0457, isManagedCodexHookCommand(), isStructurallyEmpty(), migration, pruneLegacyCodexHooksJsonValue(), shell_command_projection_cjs_1
 
 ### Community 252 - "gsd-context-monitor.js"
-Cohesion: 0.20
-Nodes (13): fs, handleStdinEnd(), { HOOK_ON_CRASH, allow, crash }, ADR-3889, main(), os, path, readEventName() (+5 more)
+Cohesion: 0.22
+Nodes (12): fs, handleStdinEnd(), { HOOK_ON_CRASH, allow, crash }, ADR-3889, main(), os, path, readEventName() (+4 more)
 
 ### Community 253 - "Chaos Computer Club (CCC) — Medi-Caps University Chapter"
 Cohesion: 0.07
@@ -1752,12 +1742,12 @@ Cohesion: 0.08
 Nodes (25): Authentication Gates, Checkpoint Types, Context Budget for TDD, Context Section Rules, CRITICAL: Never Simplify User Decisions — Split Instead, CRITICAL: User Decision Fidelity, Frontmatter Fields, Gap Closure Mode (+17 more)
 
 ### Community 255 - ".passed"
-Cohesion: 0.04
-Nodes (46): Additive. Never block., Distinguish "nothing to report" from "could not look" — never collapse these, Expected, not a defect, Never write outside the phase directory, Two browser families, no others, Distinguish "nothing to report" from "could not look", The profile lock is expected, not a defect, You are additive. You never block. (+38 more)
+Cohesion: 0.05
+Nodes (35): Distinguish "nothing to report" from "could not look", The profile lock is expected, not a defect, You are additive. You never block., You carry two browser families and no others, You never write outside the phase directory, Step 10: Determine Overall Status, API Route Stubs, Create VERIFICATION.md (+27 more)
 
-### Community 256 - "ExitError"
-Cohesion: 0.15
-Nodes (14): routePromptBudget(), readOptional(), readRequired(), routeTeamsStatus(), ExitError, cliExitModule, countSectionDataRows(), node_fs_1 (+6 more)
+### Community 256 - "review-lane-descriptor.cjs"
+Cohesion: 0.24
+Nodes (11): checkReviewerDocsParity(), checkReviewerLaneParity(), ADR-2782, countOccurrences(), findSignatureLine(), flagIsDocumented(), flagsInFirstTableCell(), NON_LANE_SIGNATURE_FLAGS (+3 more)
 
 ### Community 257 - "eval.cjs"
 Cohesion: 0.47
@@ -1786,6 +1776,10 @@ Nodes (24): Allowlist escape hatch, Bad — Asking human to automate, Bad — fi
 ### Community 263 - "GSD Intel Updater"
 Cohesion: 0.08
 Nodes (23): Anti-Patterns, api-map.json — API Surfaces, arch-decisions.json — Architecture Summary, Completion Protocol, Context Quality Tiers, dependency-graph.json — Dependency Chains, Exploration Process, file-roles.json — File Graph (+15 more)
+
+### Community 264 - "docker_provider.py"
+Cohesion: 0.15
+Nodes (21): ExecutionStatus, Chaos Computer Club — Base Language Executor, JudgeEngine, Chaos Computer Club — Judge & Scoring Logic Ported directly from Interleet…, Compute aggregate verdict and score for a submission., Evaluates sandbox execution output against expected outputs., Layered output comparison pipeline with short-circuit evaluation., Chaos Computer Club — CodeBox Execution Engine Provider Integrates the high-… (+13 more)
 
 ### Community 265 - "007-retire-config-root-commonjs-marker.cjs"
 Cohesion: 0.40
@@ -1868,8 +1862,8 @@ Cohesion: 0.10
 Nodes (20): AI Evaluation Reference, Common Pitfalls, Core Concepts, Eval Tooling Guide, Evals in the Development Lifecycle, Evaluation Dimensions, Execute Phase (Instrument While Building), Model vs. Product Evaluation (+12 more)
 
 ### Community 322 - "shellcheck-fetch.cjs"
-Cohesion: 0.15
-Nodes (13): ARCH_MAP, CACHE_DIR, CACHED_BIN_PATH, { ExitError }, extractFileFromTar(), fs, https, httpsGetFollowingRedirects() (+5 more)
+Cohesion: 0.06
+Nodes (31): ARCH_MAP, CACHE_DIR, CACHED_BIN_PATH, { ExitError }, extractFileFromTar(), fs, https, httpsGetFollowingRedirects() (+23 more)
 
 ### Community 323 - "Design Audit"
 Cohesion: 0.10
@@ -1912,28 +1906,28 @@ Cohesion: 0.12
 Nodes (16): Gate Prompt Patterns, Pattern: action-routing, Pattern: approve-revise-abort, Pattern: context-handling, Pattern: depth-select, Pattern: gray-area-option, Pattern: multi-option-escalation, Pattern: multi-option-failure (+8 more)
 
 ### Community 333 - "Model Profiles"
-Cohesion: 0.08
-Nodes (23): Advisor Tool (Claude Code), Candidate pairings, Constraint: session-level only (today), Design Rationale, Model Profiles, Per-Agent Overrides, Per-Phase-Type Model Map (#3023), Phase-type → agent mapping (+15 more)
-
-### Community 334 - "ensure-runtime-build.cjs"
 Cohesion: 0.07
-Nodes (32): acquireLock(), ADR-0457, defaultLibDir(), defaultPackageRoot(), ensureRuntimeBuild(), forceFullEmit(), fs, isBuilt() (+24 more)
+Nodes (24): Advisor Tool (Claude Code), Candidate pairings, Constraint: session-level only (today), Design Rationale, Dynamic Routing with Failure-Tier Escalation (#3024), Model Profiles, Per-Agent Overrides, Per-Phase-Type Model Map (#3023) (+16 more)
+
+### Community 334 - "ref_fs"
+Cohesion: 0.09
+Nodes (21): fs, ADR-0457, MANAGED_HOOKS, path, NOTE: managed-hooks-registry.cjs must be in HOOKS_TO_COPY (scripts/build-…, result, staleHooks, { allow } (+13 more)
 
 ### Community 335 - "React Composition Patterns"
 Cohesion: 0.12
 Nodes (16): 1.1 Avoid Boolean Prop Proliferation, 1.2 Use Compound Components, 1. Component Architecture, 2.1 Decouple State Management from UI, 2.2 Define Generic Context Interfaces for Dependency Injection, 2.3 Lift State into Provider Components, 2. State Management, 3.1 Create Explicit Component Variants (+8 more)
 
-### Community 336 - "capability-registry.cjs"
-Cohesion: 0.14
-Nodes (12): isFirstPartyCapabilityId(), byAgent, byLoopPoint, bySkill, capabilities, capabilityClusters, ADR-0894, commandFamilies (+4 more)
+### Community 336 - "runtime-slash.cjs"
+Cohesion: 0.09
+Nodes (26): routeDispatchShouldFlatten(), routeResolveDispatchType(), isFirstPartyCapabilityId(), byAgent, byLoopPoint, bySkill, capabilities, capabilityClusters (+18 more)
 
 ### Community 337 - "gsd-ui-researcher.compact.md"
 Cohesion: 0.12
 Nodes (15): Component Inventory — Enumerate, Never Recall, Output: UI-SPEC.md, Revision Conflict, shadcn Initialization Gate, Step 1: Load Context, Step 2: Scout Existing UI, Step 3: shadcn Gate, Step 4: Design Contract Questions (+7 more)
 
-### Community 338 - "event.cjs"
-Cohesion: 0.29
-Nodes (7): ADR-0174, ADR-0457, isValidParentTraceId(), makeDispatchEvent(), node_crypto_1, RFC-4122, ref_node_crypto
+### Community 338 - "git-cmd.js"
+Cohesion: 0.21
+Nodes (10): forceGitAddCwds(), ARGUMENT_TAKING_FLAGS, BOOLEAN_FLAGS, extractBranchArgument(), isGitSubcommand(), ADR-3212, path, skipToSubcommand() (+2 more)
 
 ### Community 339 - "Common Bug Patterns"
 Cohesion: 0.12
@@ -1951,9 +1945,9 @@ Nodes (15): Analyze for Frontier Spikes, Analyze for Integration Spikes, Build E
 Cohesion: 0.12
 Nodes (16): 5.10 Subscribe to Derived State, 5.11 Use Functional setState Updates, 5.12 Use Lazy State Initialization, 5.13 Use Transitions for Non-Urgent Updates, 5.14 Use useDeferredValue for Expensive Derived Renders, 5.15 Use useRef for Transient Values, 5.1 Calculate Derived State During Rendering, 5.2 Defer State Reads to Usage Point (+8 more)
 
-### Community 343 - "splitDeferredHeadingEntriesDetailed"
-Cohesion: 0.32
-Nodes (10): indentOf(), indentWidth(), lineOffsets(), ListRuns, matchListOpener(), scanFencesFrom(), splitDeferredHeadingEntriesDetailed(), splitGapsEntriesCore() (+2 more)
+### Community 343 - "ui-phase.md"
+Cohesion: 0.15
+Nodes (12): 10. Present Final Status, 11. Commit (if configured), 12. Update State, 1. Initialize, 2. Parse and Validate Phase, 3. Check Prerequisites, 4. Check Existing UI-SPEC, 5. Spawn gsd-ui-researcher (+4 more)
 
 ### Community 344 - "Phase 3 — Route overhaul"
 Cohesion: 0.12
@@ -1963,21 +1957,21 @@ Nodes (15): Foundation and integration, Goal, `/login`, `/signup`, `/recover`, M
 Cohesion: 0.12
 Nodes (15): 1.1 Product Purpose, 1.2 Core Product Tenets, 1. Executive Summary & Product Vision, 2. System Architecture & Topology, 3.1 Permission Matrix, 3. User Personas & Role-Based Access Control (RBAC), 4.1 Authentication & Onboarding, 4.2 Contests Hub & Registration (+7 more)
 
-### Community 346 - "runtime-slash.cjs"
+### Community 346 - "_hostBehaviors"
 Cohesion: 0.20
-Nodes (12): routeDispatchShouldFlatten(), routeResolveAgent(), routeResolveDispatchType(), ADR-0457, formatGsdSlash(), formatGsdSlashFor(), node_fs_1, node_path_1 (+4 more)
+Nodes (11): resolveOrchestratorExec(), applyAgentBrandingRewrites(), applyAgentPathRewrites(), applyRuntimeContentRewritesForCommandsInPlace(), _applyRuntimeRewrites(), convertClaudeAgentToHermesAgent(), _hostBehaviors(), _negotiatedDispatchIsolation() (+3 more)
 
 ### Community 347 - "claude-orchestration.cjs"
-Cohesion: 0.26
-Nodes (14): agentOptions(), BACKEND_VALUES, ADR-1411, compareSemver(), detectWorkflowBackend(), emittableModel(), emitWorkflowScript(), fileOverlapPartitionerMod (+6 more)
+Cohesion: 0.27
+Nodes (13): agentOptions(), BACKEND_VALUES, ADR-1411, compareSemver(), detectWorkflowBackend(), emittableModel(), emitWorkflowScript(), fileOverlapPartitionerMod (+5 more)
 
 ### Community 348 - "buildKimiAgentArtifacts"
-Cohesion: 0.21
-Nodes (12): addKimiAgentDiagnostic(), appendAgentTools(), buildKimiAgentArtifacts(), buildKimiRootAgentYaml(), buildKimiSubagentYaml(), convertClaudeAgentToZcodeAgent(), decodeToolScalar(), parseFrontmatterTools() (+4 more)
-
-### Community 349 - "gsd-mempalace-curator.md"
 Cohesion: 0.33
-Nodes (5): Gate, Hard rules, Report, Tasks (each independently best-effort), Wing / mode / transport
+Nodes (7): addKimiAgentDiagnostic(), buildKimiAgentArtifacts(), buildKimiRootAgentYaml(), buildKimiSubagentYaml(), neutralizeKimiAgentPrompt(), parseKimiAgentSource(), pushKimiToolsYaml()
+
+### Community 349 - "enums.py"
+Cohesion: 0.20
+Nodes (13): Chaos Computer Club — Code Execution Engine Enumerations Inspired by Interleet…, BaseExecutor, CppExecutor, C++ Executor using g++ or clang++, get_executor(), JavaExecutor, Java Executor using javac & java, JavaScriptExecutor (+5 more)
 
 ### Community 350 - "Context Budget Rules"
 Cohesion: 0.14
@@ -2031,17 +2025,17 @@ Nodes (8): changeset/ — release-notes tooling, `cli.cjs extract`, Examples, Ex
 Cohesion: 0.14
 Nodes (13): complete, create, /gsd-workstreams, list, progress, resume, status, Step 1: Parse Subcommand (+5 more)
 
-### Community 363 - "capability-activation.cjs"
+### Community 363 - "resumeBatch"
+Cohesion: 0.27
+Nodes (9): batchManifestPath(), completeQuickItem(), computeWaves(), hasQuickTaskRow(), loadBatch(), resumeBatch(), toWaveInput(), updateBatchItems() (+1 more)
+
+### Community 364 - "pruneOrphanedWorktrees"
+Cohesion: 0.20
+Nodes (11): buildWorktreeHealthField(), executeWorktreePrunePlan(), inspectWorktreeHealth(), listLinkedWorktreePaths(), parseWorktreeEntries(), parseWorktreeListPaths(), parseWorktreePorcelain(), planWorktreePrune() (+3 more)
+
+### Community 365 - "cmdWorktreeCreate"
 Cohesion: 0.24
-Nodes (12): _getNestedConfigValue(), node_fs_1, node_path_1, planningWorkspaceMod, _readRawConfigKey(), _resolveActivationValue(), resolveConfigKey(), _resolvePointGate() (+4 more)
-
-### Community 364 - "gsd-doc-writer.compact.md"
-Cohesion: 0.15
-Nodes (12): API.md, ARCHITECTURE.md, CONFIGURATION.md, CONTRIBUTING.md, Custom Documentation (gap-detected), DEPLOYMENT.md, DEVELOPMENT.md, Doc Tooling Adaptation (+4 more)
-
-### Community 365 - "recordProjectConsent"
-Cohesion: 0.37
-Nodes (13): acquireConsentLock(), consentKey(), consentLockPath(), consentStorePath(), hasProjectConsent(), isUnsafeCapabilityId(), isValidConsentRecord(), readConsentedReviewerHost() (+5 more)
+Nodes (11): cmdWorktreeCleanupWave(), cmdWorktreeCreate(), cmdWorktreeRecordAgent(), executeWorktreeCreatePlan(), normalizeCleanupManifest(), normalizeCleanupManifestEntry(), parseDeclaredScopeFlag(), planWorktreeCreate() (+3 more)
 
 ### Community 367 - "Deviation Rule Examples"
 Cohesion: 0.15
@@ -2075,17 +2069,17 @@ Nodes (12): 0. Initialize, 1. Detect Input State, 2. Discovery, 2a. Read Phase A
 Cohesion: 0.15
 Nodes (12): Auto-Group by Feature Area, Auto-Include All Spikes, Copy Source Files, Determine Output Skill Name, Gather Spike Inventory, Generate or Update CONVENTIONS.md, ▶ Next Up, Synthesize Reference Files (+4 more)
 
-### Community 375 - "describeValue"
-Cohesion: 0.31
-Nodes (13): describeValue(), isPositiveIntegerMs(), isReservedName(), safeErrorMessage(), validateEnumField(), validateHttpInvoke(), validateLaneInvoke(), validateLaneProbe() (+5 more)
+### Community 375 - "context-composer.cjs"
+Cohesion: 0.46
+Nodes (7): ADR-1671, composeWithinBudget(), costOf(), headShrink(), isPresent(), tailTruncate(), totalOf()
 
-### Community 376 - "pristine-baseline.cjs"
-Cohesion: 0.22
-Nodes (12): ADR-0457, findPristineByHash(), findPristineInGit(), gitExec(), isCleanRelativePosixPath(), node_child_process_1, node_crypto_1, node_fs_1 (+4 more)
+### Community 376 - "uat-predicate.cjs"
+Cohesion: 0.11
+Nodes (18): stripFencedCode(), analyzeMarkdown(), BLOCKING_UAT_FM_RESULTS, BLOCKING_UAT_FM_STATUSES, BLOCKING_VERIFICATION_FM_STATUSES, ADR-0457, ADR-1372, coreUtils (+10 more)
 
-### Community 377 - "computeWaves"
-Cohesion: 0.18
-Nodes (9): ADR-1239, partitionByFileOverlap(), computeWaves(), partitionDeclaredDeletions(), `depends_on` — reference SIBLING items by `quick_id`, never invent one, `files_deleted` — only if your plan removes a file, `files_modified` — every path your plan's tasks will touch, Quick-Batch Mode — Planner Reference (+1 more)
+### Community 377 - "partitionByFileOverlap"
+Cohesion: 0.20
+Nodes (8): partitionStages(), ADR-1239, partitionByFileOverlap(), `depends_on` — reference SIBLING items by `quick_id`, never invent one, `files_deleted` — only if your plan removes a file, `files_modified` — every path your plan's tasks will touch, Quick-Batch Mode — Planner Reference, What quick-batch mode does NOT need
 
 ### Community 378 - "Debugger technique catalog"
 Cohesion: 0.17
@@ -2115,9 +2109,9 @@ Nodes (11): Communication Style, Debugging Approach, Decision Speed, Developer P
 Cohesion: 0.17
 Nodes (11): Configuration, First-Run Behaviour, graduation.md — LEARNINGS.md Cross-Phase Graduation Helper, No-Op Conditions (silent skip), Step 1: Guard Checks, Step 2: Collect LEARNINGS.md Files, Step 3: Cluster by Lexical Similarity, Step 4: Check graduation_backlog in STATE.md (+3 more)
 
-### Community 385 - "new-project.md"
-Cohesion: 0.17
-Nodes (11): 2. Brownfield Offer, 2b. Prior Spike/Sketch Detection, 3. Deep Questioning, 4. Write PROJECT.md, 5.1. Sub-Repo Detection, 5.5. Resolve Model Profile, 5. Workflow Preferences, 6. Research Decision (+3 more)
+### Community 385 - "indexPromptSegment"
+Cohesion: 0.39
+Nodes (8): buildCatalog(), defaultPackageRoot(), indexPromptSegment(), indexResourceSegments(), posixBaseName(), titleFromBaseName(), tryReadDir(), walkMarkdownFilesFatal()
 
 ### Community 386 - "profile-user.md"
 Cohesion: 0.17
@@ -2132,8 +2126,8 @@ Cohesion: 0.17
 Nodes (11): Auto-Group by Design Area, CHECKPOINT: Decision Required, Copy Source Files, Curate Sketches One-at-a-Time, Determine Output Skill Name, Gather Sketch Inventory, ▶ Next Up, Synthesize Reference Files (+3 more)
 
 ### Community 389 - "gsd-ensure-canonical-path.js"
-Cohesion: 0.12
-Nodes (21): { allow }, createDirLink(), dirLinkType(), ensureCanonicalPath(), fs, linkPointsAt(), MANAGED_SUBDIRS, os (+13 more)
+Cohesion: 0.24
+Nodes (11): { allow }, createDirLink(), dirLinkType(), ensureCanonicalPath(), fs, linkPointsAt(), MANAGED_SUBDIRS, os (+3 more)
 
 ### Community 390 - "2. The 7 Pillars of Frontend Excellence (Vercel Guidelines)"
 Cohesion: 0.17
@@ -2315,9 +2309,9 @@ Nodes (8): Compatibility with existing TDD discipline, Escalation: end-of-phase 
 Cohesion: 0.22
 Nodes (8): Abort Gate, Escalation Gate, Gate Matrix, Gate Types, Gates Taxonomy, Implementing Gates, Pre-flight Gate, Revision Gate
 
-### Community 435 - "ui-phase.md"
-Cohesion: 0.15
-Nodes (12): 10. Present Final Status, 11. Commit (if configured), 12. Update State, 1. Initialize, 2. Parse and Validate Phase, 3. Check Prerequisites, 4. Check Existing UI-SPEC, 5. Spawn gsd-ui-researcher (+4 more)
+### Community 435 - "gsd-check-update.js"
+Cohesion: 0.12
+Nodes (15): cacheDir, cacheFile, child, cwd, fs, globalConfigDir, globalVersionFile, homeDir (+7 more)
 
 ### Community 436 - "Planner: Reversibility Tagging"
 Cohesion: 0.22
@@ -2359,9 +2353,9 @@ Nodes (7): ARCHITECTURE.md Template (arch focus), CONCERNS.md Template (concerns
 Cohesion: 0.25
 Nodes (7): ARCHITECTURE.md Template (arch focus), CONCERNS.md Template (concerns focus), CONVENTIONS.md Template (quality focus), INTEGRATIONS.md Template (tech focus), STACK.md Template (tech focus), STRUCTURE.md Template (arch focus), TESTING.md Template (quality focus)
 
-### Community 446 - "context-composer.cjs"
-Cohesion: 0.46
-Nodes (7): ADR-1671, composeWithinBudget(), costOf(), headShrink(), isPresent(), tailTruncate(), totalOf()
+### Community 446 - ".get_university_leaderboard"
+Cohesion: 0.22
+Nodes (14): LeaderboardController, Any, AsyncSession, Response, Orchestrator for university leaderboard, rating distributions, and department…, get_department_performance(), get_rating_distribution(), get_university_leaderboard() (+6 more)
 
 ### Community 447 - "4. Handle Action"
 Cohesion: 0.17
@@ -2439,9 +2433,9 @@ Nodes (7): Disposition the findings before sharing (three-way: admit / refute / 
 Cohesion: 0.25
 Nodes (7): § 11 thinking-partner — Thinking Partner For Architectural Tradeoffs, § 11a — Filesystem Fallback (Checker), § 12.5 — Plan Bounce (Optional External Refinement), § 9a — Filesystem Fallback (Planner), § 9b — Handle Phase Split Recommendation, § 9c — Handle Source Audit Gaps, plan-phase — Detail
 
-### Community 466 - "semver-compare.cjs"
-Cohesion: 0.33
-Nodes (10): ADR-0457, compareSemverCore(), compareTuples(), expandComparator(), isSemverNewer(), parseVersionToken(), satisfiesPrimitive(), satisfiesSet() (+2 more)
+### Community 466 - "event.cjs"
+Cohesion: 0.29
+Nodes (7): ADR-0174, ADR-0457, isValidParentTraceId(), makeDispatchEvent(), node_crypto_1, RFC-4122, ref_node_crypto
 
 ### Community 467 - "ui-review.md"
 Cohesion: 0.25
@@ -2451,17 +2445,17 @@ Nodes (7): 0. Initialize, 1. Detect Input State, 2. Gather Context Paths, 3. Spa
 Cohesion: 0.25
 Nodes (8): 9.A Visual & CSS, 9. AI TELLS (Forbidden Patterns), 9.B Typography, 9.C Layout & Spacing, 9.D Content & Data ("Jane Doe" Effect), 9.E External Resources & Components, 9.F Production-Test Tells (banned outright), 9.G EM-DASH BAN (the single most-violated Tell)
 
-### Community 469 - "lint.cjs"
-Cohesion: 0.27
-Nodes (10): evaluateLint(), { ExitError, runMain }, findPrFieldDrift(), isFragment(), isUserFacing(), LINT_REASON, main(), { parseFragment } (+2 more)
+### Community 469 - "dispatch-identity.js"
+Cohesion: 0.36
+Nodes (6): emptyResult(), findMarker(), findProse(), ADR-2121, parseDispatchIdentity(), PROSE_RE
 
 ### Community 470 - "gsd-integration-checker.compact.md"
 Cohesion: 0.29
 Nodes (6): Step 1: Build Export/Import Map, Step 2: Verify Export Usage, Step 3: Verify API Coverage, Step 4: Verify Auth Protection, Step 5: Verify E2E Flows, Step 6: Compile Integration Report
 
-### Community 471 - "federated-config.cjs"
-Cohesion: 0.43
-Nodes (6): ADR-0857, _getNestedValue(), _isWellFormedSlice(), mergeFederatedConfig(), _typeMatches(), VALID_SLICE_TYPES
+### Community 471 - "beginFrontmatterReassembly"
+Cohesion: 0.15
+Nodes (19): advancePlanCore(), beginFrontmatterReassembly(), beginPhaseCore(), bumpLeadingNumber(), completePhaseCore(), getFieldClassification(), isUnparseableFrontmatter(), locateCurrentPosition() (+11 more)
 
 ### Community 472 - "Smart Discuss — Autonomous Mode"
 Cohesion: 0.29
@@ -2571,25 +2565,25 @@ Nodes (5): 3-Tier Verification, Intelligent Fix Application, Partial Failure Sem
 Cohesion: 0.33
 Nodes (5): 3-Tier Verification, Intelligent Fix Application, Partial Failure Semantics, Robust REVIEW.md Parsing, Safe Per-Finding Rollback
 
-### Community 499 - ".google_callback"
+### Community 499 - "Verifier Phase Gates"
 Cohesion: 0.29
-Nodes (8): _get_frontend_url(), _get_redirect_uri(), is_allowed_organization_email(), _is_local_dev(), Request, Step 1 of Google OAuth flow. Redirects user to Google consent screen restricted…, Step 2 of Google OAuth flow. Validates token, enforces @medicaps.ac.in…, Step 1 — OTP Request. Enforces Cloudflare client security (Turnstile challenge)…
+Nodes (6): audit_test_quality (run after Step 7b, alongside anti-patterns), Backstop abstention — reporting contract (#3206, companion to agent Step 3 item 5b), identify_human_verification — infrastructure/foundation scoping (apply at Step 8), Lazy references, Verifier Phase Gates, verify_decisions — Decision Coverage Gate (run after Step 6, requirements coverage)
 
-### Community 500 - "project-root.cjs"
-Cohesion: 0.22
-Nodes (7): projectRootFor(), ADR-0457, consentProjectRoot(), findProjectRoot(), node_fs_1, node_os_1, node_path_1
+### Community 500 - "gsd-dom-verifier.compact.md"
+Cohesion: 0.33
+Nodes (5): Additive. Never block., Distinguish "nothing to report" from "could not look" — never collapse these, Expected, not a defect, Never write outside the phase directory, Two browser families, no others
 
-### Community 501 - "graphifyStatus"
-Cohesion: 0.27
-Nodes (9): countCommitsBetween(), graphifyStatus(), readGitHead(), Graphify Auto-Update — Status Surfacing, How the planner surfaces it (zero new prompt content), Opt-in reminder, The status file, Why this design (+1 more)
+### Community 501 - "gsd-mempalace-curator.md"
+Cohesion: 0.33
+Nodes (5): Gate, Hard rules, Report, Tasks (each independently best-effort), Wing / mode / transport
 
-### Community 502 - "task-command-router.cjs"
-Cohesion: 0.13
-Nodes (13): capabilityLoaderMod, ADR-0457, ADR-1244, ADR-3646, ADR-4650, ioMod, isBehaviorAddingTaskContent(), node_fs_1 (+5 more)
+### Community 502 - "io.cjs"
+Cohesion: 0.05
+Nodes (42): agentInstallCheck, ADR-0457, configLoader, coreUtils, hasGsdMarker(), io, modelResolver, node_fs_1 (+34 more)
 
-### Community 503 - "state-command-router.cjs"
-Cohesion: 0.22
-Nodes (9): ADR-0174, ADR-0457, ADR-3180, ADR-3473, cjsCommandRouterAdapter, command_aliases_cjs_1, command_arg_projection_cjs_1, routeStateCommand() (+1 more)
+### Community 503 - "Verification Report Template"
+Cohesion: 0.33
+Nodes (5): Example, File Template, Guidelines, Verification Report Template, Status
 
 ### Community 504 - "vendor/"
 Cohesion: 0.33
@@ -2602,10 +2596,6 @@ Nodes (5): Compact Content Gate, Stream 1 — spine + detail (top-level, eagerly
 ### Community 506 - "Decimal Phase Calculation"
 Cohesion: 0.33
 Nodes (5): Decimal Phase Calculation, Directory Naming, Examples, Extract Values, Using gsd-tools
-
-### Community 507 - "Git Planning Commit"
-Cohesion: 0.33
-Nodes (5): Amend previous commit, Commit Message Patterns, Commit via CLI, Git Planning Commit, When to Skip
 
 ### Community 508 - "Chunked Mode Return Formats"
 Cohesion: 0.33
@@ -2771,9 +2761,9 @@ Nodes (3): ESCALATE, OPEN_THREATS, SECURED
 Cohesion: 0.50
 Nodes (3): ESCALATE, OPEN_THREATS, SECURED
 
-### Community 549 - "spec-phase.md"
+### Community 549 - "applyStatePreservation"
 Cohesion: 0.20
-Nodes (9): Step 1: Initialize, Step 2: Scout Codebase, Step 3: First Ambiguity Assessment, Step 4: Socratic Interview Loop, Step 5.5: Edge-Completeness Probe, Step 5: (covered inline — ambiguity scoring is per-round), Step 6: Generate SPEC.md, Step 7: Commit (+1 more)
+Nodes (10): applyDerive(), applyPreserveAlways(), applyPreserveIfPlaceholder(), applyPreserveWhenUnchanged(), applyStatePreservation(), cloneCurated(), mergeResyncProgressRatchet(), preservedValuesEqual() (+2 more)
 
 ### Community 550 - "Planner Coupling — Same-Wave Shared Mutable State"
 Cohesion: 0.50
@@ -2799,9 +2789,9 @@ Nodes (3): Discussion Log Template, Format, Rules
 Cohesion: 0.50
 Nodes (3): Initial Roadmap (v1.0 Greenfield), Milestone-Grouped Roadmap (After v1.0 Ships), Roadmap Template
 
-### Community 556 - "re"
-Cohesion: 0.22
-Nodes (8): is_valid_handle(), is_valid_medicaps_email(), is_valid_prn(), Chaos Computer Club — Medi-Caps Chapter lib/validators.py — Domain validation…, Validate that email belongs to Medi-Caps University domain., Validate cadet handle format., Validate University Permanent Registration Number format., re
+### Community 556 - "state-io.cjs"
+Cohesion: 0.50
+Nodes (3): ADR-1239, createStateIO(), node_fs_1
 
 ### Community 557 - "--chain mode — interactive discuss, then auto-advance"
 Cohesion: 0.50
@@ -2855,49 +2845,53 @@ Nodes (3): 📊 1. Category Executive Summary, ⚡ 3. GSD Protocol Compliance Ve
 Cohesion: 0.50
 Nodes (3): ✨ 100% Production Grade Verification!, 📊 Classification Summary, 🛡️ UI Elements & Buttons Backend Connectivity Audit Report
 
-### Community 572 - "bin/lib/exit-code-registry.cjs"
-Cohesion: 0.29
-Nodes (4): ADR-3889, CODE_TO_NAME, EXIT_CODES, NAME_TO_CODE
-
-### Community 583 - "scripts/lib/exit-code-registry.cjs"
-Cohesion: 0.29
-Nodes (4): ADR-3889, CODE_TO_NAME, EXIT_CODES, NAME_TO_CODE
-
-### Community 851 - "Verification Report Template"
-Cohesion: 0.33
-Nodes (5): Example, File Template, Guidelines, Verification Report Template, Status
+### Community 572 - "convertClaudeAgentToAntigravityAgent"
+Cohesion: 0.67
+Nodes (3): convertClaudeAgentToAntigravityAgent(), convertClaudeToAntigravityContent(), convertGeminiToolName()
 
 ### Community 852 - "extract-learnings.md"
 Cohesion: 0.40
 Nodes (4): 1. Decisions, 2. Lessons, 3. Patterns, 4. Surprises
 
-### Community 853 - "state-io.cjs"
-Cohesion: 0.50
-Nodes (3): ADR-1239, createStateIO(), node_fs_1
+### Community 853 - "updateCore"
+Cohesion: 0.38
+Nodes (7): explainUpdateFailure(), frontmatterKeyForBodyField(), getFrontmatterBodySource(), sessionLabelsForBodyField(), sessionLabelsForKey(), sessionSourceExists(), updateCore()
 
-### Community 854 - "global_exception_handler"
-Cohesion: 0.50
-Nodes (4): global_exception_handler(), Exception, exception_handler, Request
+### Community 855 - "rebuildCore"
+Cohesion: 0.43
+Nodes (7): appendRebuildLogSection(), deduplicateSessionArchive(), rebuildCore(), reconcileByPhaseTable(), reconcileCurrentPosition(), stripTemplatePlaceholders(), truncateForLog()
+
+### Community 857 - "state-md-schema.cjs"
+Cohesion: 0.33
+Nodes (5): ADR-0457, ADR-1769, ADR-2207, ADR-3408, ADR-3473
+
+### Community 858 - "tdd-red-evidence.cjs"
+Cohesion: 0.47
+Nodes (4): baseOf(), classifyRedEvidence(), prohibition_enforcement_cjs_1, readInput()
+
+### Community 860 - "gather_with_concurrency"
+Cohesion: 0.40
+Nodes (4): gather_with_concurrency(), Any, Execute coroutines concurrently up to `max_concurrency` using an…, R
 
 ## Knowledge Gaps
-- **5272 isolated node(s):** `graphify`, `Workflow: graphify`, `📊 Classification Summary`, `✨ 100% Production Grade Verification!`, `1. Automated GitHub Actions CI/CD Pipeline` (+5267 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6925 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **331 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **5272 isolated node(s):** `ContestStatusAlias`, `ContestStatus`, `ContestArenaProblem`, `ArenaLanguage`, `initialState` (+5267 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6922 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **323 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `JudgeJob` connect `JudgeQueue` to `Language`, `.passed`?**
-  _High betweenness centrality (0.139) - this node is a cross-community bridge._
-- **Why does `readVerificationStatus()` connect `verification.cjs` to `roadmap-parser.cjs`, `planning-inspect.cjs`, `output`, `phase.cjs`, `audit.cjs`, `.passed`?**
-  _High betweenness centrality (0.049) - this node is a cross-community bridge._
-- **Why does `getMilestonePhaseFilter()` connect `init.cjs` to `plan-phase.md`, `roadmap-parser.cjs`, `output`, `planning-workspace.cjs`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `JudgeJob` connect `JudgeQueue` to `.passed`, `logging`?**
+  _High betweenness centrality (0.129) - this node is a cross-community bridge._
+- **Why does `getMilestonePhaseFilter()` connect `phase-id.cjs` to `init.cjs`, `plan-phase.md`, `workstream-inventory.cjs`, `milestone.cjs`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+- **Why does `readVerificationStatus()` connect `verification.cjs` to `init.cjs`, `phase-id.cjs`, `planning-inspect.cjs`, `output`, `phase.cjs`, `audit.cjs`, `.passed`?**
+  _High betweenness centrality (0.043) - this node is a cross-community bridge._
 - **Are the 11 inferred relationships involving `output()` (e.g. with `routeConfigEnsureSection()` and `routeConfigGet()`) actually correct?**
   _`output()` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 13 inferred relationships involving `error()` (e.g. with `MVP+TDD Gate` and `routeConfigEnsureSection()`) actually correct?**
   _`error()` has 13 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `graphify`, `Workflow: graphify`, `📊 Classification Summary` to the rest of the system?**
+- **What connects `ContestStatusAlias`, `ContestStatus`, `ContestArenaProblem` to the rest of the system?**
   _5272 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `init.cjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.02532705389848247 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0236318407960199 - nodes in this community are weakly interconnected._

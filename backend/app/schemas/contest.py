@@ -106,6 +106,7 @@ class ContestDetailResponse(BaseModel):
     edition: Optional[int] = None
     banner_url: Optional[str] = None
     registered: bool = False
+    is_submitted: Optional[bool] = False
     problems: List[ContestProblemResponse] = []
     assessment: Optional[AssessmentSummaryResponse] = None
 

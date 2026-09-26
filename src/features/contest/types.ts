@@ -28,6 +28,7 @@ export type ContestSummary = {
   rules: string[];
   chief_proctors: string[];
   registered: boolean;
+  is_submitted?: boolean;
   banner_url?: string | null;
   assessment?: {
     id: string;

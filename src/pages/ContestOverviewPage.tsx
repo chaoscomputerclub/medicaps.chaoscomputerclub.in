@@ -95,6 +95,7 @@ export function ContestOverviewPage() {
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
   const isSubmitted = Boolean(
+    contest?.is_submitted ||
     registration?.status === "submitted" ||
     registration?.assessment_taken ||
     registration?.assessment_status === "submitted" ||
@@ -123,7 +124,9 @@ export function ContestOverviewPage() {
         event.event === "contest_status_changed" ||
         event.event === "contest_updated" ||
         event.event === "top30_qualified" ||
-        event.event === "contest_created"
+        event.event === "contest_created" ||
+        event.event === "assessment_finished" ||
+        event.event === "submission_evaluated"
       ) {
         refreshDetail(true);
       }

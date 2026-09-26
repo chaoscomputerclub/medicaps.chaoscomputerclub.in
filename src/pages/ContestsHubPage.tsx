@@ -39,6 +39,7 @@ import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import LightRays from "./LightRays";
 import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/ui/animated-tabs";
 import { prefetchContestRoute } from "@/AppRoutes";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 function useCountdown(
   targetIsoDate: string | null | undefined,
@@ -99,17 +100,48 @@ function useCountdown(
   return timeLeft;
 }
 
-function ContestCountdownBadge({ targetIsoDate, isLive }: { targetIsoDate?: string | null; isLive?: boolean }) {
-  const cd = useCountdown(targetIsoDate);
-  if (isLive || cd.isExpired) {
+function ContestCountdownBadge({
+  startsAt,
+  endsAt,
+  isLive,
+}: {
+  startsAt?: string | null;
+  endsAt?: string | null;
+  isLive?: boolean;
+}) {
+  const cdStarts = useCountdown(startsAt);
+  const cdEnds = useCountdown(endsAt);
+
+  if (isLive) {
+    if (cdEnds.isExpired) {
+      return (
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-zinc-400 shadow-sm">
+          <span>ROUND CONCLUDED</span>
+        </div>
+      );
+    }
+    const { days, hours, minutes, seconds } = cdEnds;
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/15 px-3 py-1 text-xs font-mono font-semibold text-red-400 shadow-sm animate-pulse">
-        <span className="size-1.5 rounded-full bg-red-500" />
-        <span>LIVE NOW</span>
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-red-400 tabular-nums shadow-sm">
+        <Clock className="size-3 text-red-400 animate-pulse" />
+        <span>
+          Closes {days > 0 ? `${days}d ` : ""}
+          {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+        </span>
       </div>
     );
   }
-  const { days, hours, minutes, seconds } = cd;
+
+  if (cdStarts.isExpired) {
+    return (
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-lime-400 tabular-nums shadow-sm">
+        <span className="size-1.5 rounded-full bg-lime-400 animate-ping" />
+        <span>STARTING NOW</span>
+      </div>
+    );
+  }
+
+  const { days, hours, minutes, seconds } = cdStarts;
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-white tabular-nums shadow-sm transition-colors group-hover:border-lime-400/40">
       <Clock className="size-3 text-lime-400 transition-transform duration-300 group-hover:rotate-45" />
@@ -155,6 +187,26 @@ export function ContestsHubPage() {
       }
     },
     [dispatch, member]
+  );
+
+  // Real-time synchronization across clients, assessment finishes, and contest status updates
+  useRealtimeEvents(
+    undefined,
+    (event) => {
+      if (
+        event.event === "contest_status_changed" ||
+        event.event === "contest_updated" ||
+        event.event === "contest_created" ||
+        event.event === "contest_deleted" ||
+        event.event === "assessment_finished" ||
+        event.event === "submission_evaluated" ||
+        event.event === "top30_qualified"
+      ) {
+        refreshHubData(true);
+      }
+    },
+    undefined,
+    true
   );
 
   useEffect(() => {
@@ -397,11 +449,21 @@ export function ContestsHubPage() {
                 }`}
               >
                 {upcomingContests.map((contest, idx) => {
+                  const participation = myParticipations.find((p) => p.contest_slug === contest.slug);
                   const isRegistered = Boolean(
                     contest.registered ||
-                      myParticipations.some((p) => p.contest_slug === contest.slug)
+                      participation !== undefined
                   );
                   const isLive = contest.status === "live";
+                  const isUserCompleted = Boolean(
+                    contest.is_submitted ||
+                    participation?.assessment_submitted ||
+                    participation?.outcome === "submitted" ||
+                    participation?.outcome === "qualified" ||
+                    participation?.outcome === "not_qualified" ||
+                    (participation as any)?.assessment_status === "submitted" ||
+                    (participation as any)?.assessment_status === "completed"
+                  );
                   const startsAtFormatted = new Date(contest.starts_at).toLocaleString(
                     "en-IN",
                     {
@@ -418,7 +480,7 @@ export function ContestsHubPage() {
                     <div
                       key={contest.slug}
                       data-testid="hero-contest-card"
-                      onClick={() => navigate(`/contests/${contest.slug}`)}
+                      onClick={() => navigate(isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`)}
                       className="group relative flex flex-col justify-between rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
@@ -433,23 +495,41 @@ export function ContestsHubPage() {
                           }}
                         />
 
-                        {/* Top Row: Live Indicator & Countdown Badge */}
-                        <div className={`relative z-10 flex items-center ${isLive ? "justify-between" : "justify-end"} w-full`}>
-                          {isLive && (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-red-400">
-                              <span className="size-2 rounded-full bg-red-500 animate-ping" />
-                              <span>LIVE NOW</span>
-                            </span>
-                          )}
+                        {/* Top Row: Live Indicator, Completed Badge & Countdown */}
+                        <div className="relative z-10 flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            {isLive ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-red-400">
+                                <span className="size-2 rounded-full bg-red-500 animate-ping" />
+                                <span>LIVE NOW</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400">
+                                <Calendar className="size-3 text-zinc-400" />
+                                <span>OFFICIAL ROUND</span>
+                              </span>
+                            )}
 
-                          <ContestCountdownBadge targetIsoDate={contest.starts_at} isLive={isLive} />
+                            {isUserCompleted && (
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/70 backdrop-blur-sm px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-400 shadow-sm">
+                                <CheckCircle2 className="size-3 text-emerald-400" />
+                                <span>ATTEMPT SUBMITTED</span>
+                              </span>
+                            )}
+                          </div>
+
+                          <ContestCountdownBadge
+                            startsAt={contest.starts_at}
+                            endsAt={contest.ends_at}
+                            isLive={isLive}
+                          />
                         </div>
 
                         {/* Center Typography */}
                         <div className="relative z-10 my-auto py-2">
                           <div className="min-w-0">
                             <Link
-                              to={`/contests/${contest.slug}`}
+                              to={isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`}
                               className="text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-lime-400 transition-colors font-sans flex items-center gap-2.5 truncate"
                             >
                               <span className="truncate">{contest.title}</span>
@@ -482,7 +562,19 @@ export function ContestsHubPage() {
 
                         {/* Action CTA: Single Toggle Button (isolated from card click) */}
                         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                          {isLive ? (
+                          {isUserCompleted ? (
+                            <Button
+                              asChild
+                              size="hero"
+                              variant="outline"
+                              className="group/btn border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 active:scale-95"
+                            >
+                              <Link to={`/contests/${contest.slug}/results`} className="flex items-center gap-1.5">
+                                <CheckCircle2 className="size-4 text-emerald-400" />
+                                <span>View Results</span>
+                              </Link>
+                            </Button>
+                          ) : isLive ? (
                             <Button
                               asChild
                               size="hero"
@@ -958,44 +1050,59 @@ export function ContestsHubPage() {
                     </p>
                   </div>
                 ) : (
-                  paginatedMyParticipations.map((record) => (
-                    <div
-                      key={record.contest_slug}
-                      className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
-                    >
-                      <div className="min-w-0">
-                        <Link
-                          to={`/contests/${record.contest_slug}`}
-                          className="text-base sm:text-lg font-bold text-white hover:text-lime-400 transition-colors truncate flex items-center gap-2 font-sans"
-                        >
-                          <span className="truncate">{record.contest_title}</span>
-                          <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
-                        </Link>
-                        <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1">
-                          Score: {record.score ?? 0} pts · Rank: #{record.rank ?? "--"}
-                        </p>
-                      </div>
+                  paginatedMyParticipations.map((record) => {
+                    const isSubmitted = Boolean(
+                      record.assessment_submitted ||
+                      record.outcome === "submitted" ||
+                      record.outcome === "qualified"
+                    );
+                    const targetUrl = isSubmitted
+                      ? `/contests/${record.contest_slug}/results`
+                      : `/contests/${record.contest_slug}`;
 
-                      <div className="flex items-center gap-3 shrink-0">
-                        {record.outcome === "qualified" && (
-                          <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-bold uppercase text-lime-400">
-                            Qualified
-                          </span>
-                        )}
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="ghost"
-                          className="border border-white/10 hover:bg-white/10 hover:text-white"
-                        >
-                          <Link to={`/contests/${record.contest_slug}`} className="flex items-center gap-1.5">
-                            <span>Results</span>
-                            <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                    return (
+                      <div
+                        key={record.contest_slug}
+                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px]"
+                      >
+                        <div className="min-w-0">
+                          <Link
+                            to={targetUrl}
+                            className="text-base sm:text-lg font-bold text-white hover:text-lime-400 transition-colors truncate flex items-center gap-2 font-sans"
+                          >
+                            <span className="truncate">{record.contest_title}</span>
+                            <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
                           </Link>
-                        </Button>
+                          <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1">
+                            Score: {record.score ?? 0} pts · Rank: #{record.rank ?? "--"}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          {record.outcome === "qualified" ? (
+                            <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-bold uppercase text-lime-400">
+                              Qualified
+                            </span>
+                          ) : isSubmitted ? (
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold uppercase text-emerald-400">
+                              Submitted
+                            </span>
+                          ) : null}
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="ghost"
+                            className="border border-white/10 hover:bg-white/10 hover:text-white"
+                          >
+                            <Link to={targetUrl} className="flex items-center gap-1.5">
+                              <span>Results</span>
+                              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
               </TabsPanel>

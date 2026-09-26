@@ -1,17 +1,17 @@
 # Graph Report - medicaps.chaoscomputerclub.in  (2026-09-26)
 
 ## Corpus Check
-- 1228 files · ~1,996,083 words
+- 1228 files · ~1,996,612 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 18 file(s) not represented in the graph (top: (none) 9, .example 2, .toml 2)
 
 ## Summary
-- 13018 nodes · 25007 edges · 861 communities (540 shown, 321 thin omitted)
+- 13018 nodes · 25012 edges · 862 communities (541 shown, 321 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 2032 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `39371ce3`
+- Built from commit: `406728c2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -27,7 +27,7 @@
 - re2js.cjs
 - .verify_otp
 - capability-validator.cjs
-- validate.cjs
+- swrFetch
 - gap-checker.cjs
 - SettingsPage.tsx
 - config.cjs
@@ -55,7 +55,7 @@
 - installer-migrations.cjs
 - dependencies
 - frontmatter.cjs
-- ContestOfflinePage.tsx
+- ContestsHubPage.tsx
 - verify.cjs
 - install-profiles.cjs
 - shell-command-projection.cjs
@@ -83,15 +83,15 @@
 - requireLoader
 - onboard-projection.cjs
 - estimate-cli.cjs
-- planning-workspace.cjs
+- react
 - worktree-safety.cjs
 - capability-trust.cjs
 - capability-consent.cjs
 - command-routing-hub.cjs
 - refactor-trigger-command-router.cjs
 - gsd-statusline.js
-- gsd-worktree-path-guard.js
-- qa_full_application.mjs
+- core-utils.cjs
+- model-resolver.cjs
 - output
 - capability-source.cjs
 - cli.cjs
@@ -114,7 +114,7 @@
 - requireDumper
 - verification.cjs
 - typing
-- form.tsx
+- planning-workspace.cjs
 - PassController
 - state-document.cjs
 - intel.cjs
@@ -127,7 +127,7 @@
 - cli-exit.js
 - learnings.cjs
 - capability-lock.cjs
-- model-resolver.cjs
+- gsd-worktree-path-guard.js
 - proof_service.py
 - update-context.cjs
 - roadmap-command-router.cjs
@@ -162,10 +162,10 @@
 - profile-pipeline.cjs
 - Core Workflow
 - StorageController
-- loadAndValidate
+- validate.cjs
 - harness.py
 - @playwright/test
-- ContestsHubPage.tsx
+- form.tsx
 - configuration.cjs
 - gsd-windsurf-pre-command.js
 - devDependencies
@@ -193,7 +193,7 @@
 - install-surface-shadowing.cjs
 - installer-migration-report.cjs
 - gsd-plan-checker.md
-- quick-batch-dispatch.cjs
+- hooks.ts
 - scripts
 - qa_50_contests_500_cases.mjs
 - retired-artifact-cleanup.cjs
@@ -233,11 +233,11 @@
 - chart.tsx
 - Dimensions
 - milestone-archive-hygiene.cjs
-- edge-probe.cjs
+- gsd-verifier.md
 - gate-predicate-evaluator.cjs
 - root-existence.cjs
 - worktree-health.cjs
-- core-utils.cjs
+- docs.cjs
 - checkpoints.md
 - requireInt
 - convertClaudeToKiloFrontmatter
@@ -252,7 +252,7 @@
 - config-schema.cjs
 - fallow-runner.cjs
 - 005-opencode-baseline-commands-dir.cjs
-- collectSection
+- quick-batch-dispatch.cjs
 - research-provider.cjs
 - audit-milestone.md
 - section-manifest.cjs
@@ -260,19 +260,19 @@
 - assumption-delta.cjs
 - cline-sdk-binding.cjs
 - review-reviewer-selection.cjs
-- ui-frontend-evidence.cjs
+- collectSection
 - toString
 - DFA
 - exit-codes.sh
 - Settings
-- hooks.ts
+- capability-registry.cjs
 - error-capture.ts
 - 002-codex-legacy-hooks-json.cjs
 - gsd-context-monitor.js
 - Chaos Computer Club (CCC) — Medi-Caps University Chapter
 - gsd-planner.md
 - .passed
-- spec-section.cjs
+- splitDeferredHeadingEntriesDetailed
 - eval.cjs
 - 003-rename-get-shit-done-to-gsd-core.cjs
 - 004-prune-stale-pristine-snapshots.cjs
@@ -336,17 +336,17 @@
 - Model Profiles
 - ensure-runtime-build.cjs
 - React Composition Patterns
-- capability-registry.cjs
+- runtime-slash.cjs
 - gsd-ui-researcher.compact.md
 - gsd-workflow-guard.js
 - Common Bug Patterns
 - tdd.md
 - spike.md
 - 5. Re-render Optimization
-- splitDeferredHeadingEntriesDetailed
+- gsd-doc-writer.compact.md
 - Phase 3 — Route overhaul
 - 4. Feature Specifications & User Journeys
-- runtime-slash.cjs
+- describeValue
 - claude-orchestration.cjs
 - buildKimiAgentArtifacts
 - executors/base.py
@@ -363,9 +363,9 @@
 - email.py
 - ErrorBoundary
 - Step 2: Execute Operation
-- gsd-verifier.md
-- gsd-doc-writer.compact.md
-- docs.cjs
+- gsd-graphify/SKILL.md
+- InterleetProvider
+- new-project.md
 - walk
 - Deviation Rule Examples
 - Planner Preconditions — `<precondition>` Element
@@ -375,7 +375,7 @@
 - 5. Convergence Loop
 - secure-phase.md
 - spike-wrap-up.md
-- describeValue
+- edge-probe.cjs
 - uat-predicate.cjs
 - computeWaves
 - Debugger technique catalog
@@ -385,7 +385,7 @@
 - ui-brand.md
 - Developer Profile
 - graduation.md — LEARNINGS.md Cross-Phase Graduation Helper
-- new-project.md
+- semver-compare.cjs
 - profile-user.md
 - sketch.md
 - sketch-wrap-up.md
@@ -466,7 +466,7 @@
 - eval-review.md
 - explore.md
 - plan-phase — Detail
-- semver-compare.cjs
+- get
 - ui-review.md
 - 9. AI TELLS (Forbidden Patterns)
 - lint.cjs
@@ -500,14 +500,14 @@
 - gsd-code-fixer.md
 - gsd-code-fixer.compact.md
 - .google_callback
-- gsd-graphify/SKILL.md
-- InterleetProvider
+- qa_full_application.mjs
+- sync-skills — Cross-Runtime GSD Skill Sync
 - io.cjs
-- get
+- eval
 - vendor/
 - Compact Content Gate
 - Decimal Phase Calculation
-- Git Planning Commit
+- loadAndValidate
 - Chunked Mode Return Formats
 - Interface Context for Executors
 - Codebase scout — map selection table
@@ -572,7 +572,7 @@
 - 🛡️ CCC Medi-Caps — Production API QA Audit Report
 - 🛡️ CCC Medi-Caps — Production API QA Audit Report
 - 🛡️ UI Elements & Buttons Backend Connectivity Audit Report
-- sync-skills — Cross-Runtime GSD Skill Sync
+- schemas/member.py
 - Plan-Checker Examples
 - Architecture Template
 - Technology Stack Template
@@ -583,7 +583,7 @@
 - Default mode — interactive discuss-phase
 - list-workspaces.md
 - Git-Based Deployment & Version Control Policy
-- eval
+- beginPhaseCore
 - autonomous-ui-design-contract.md
 - execute-phase-response-language.md
 - gsd-run-resolver.md
@@ -702,17 +702,18 @@
 - server-serialization.md
 - vercel-react-best-practices/rules/_template.md
 - workflows/graphify.md
-- schemas/member.py
-- beginPhaseCore
+- ui-frontend-evidence.cjs
+- gsd-mempalace-curator.compact.md
 - extract-learnings.md
 - updateCore
-- global_exception_handler
+- spec-section.cjs
 - rebuildCore
-- gsd-mempalace-curator.compact.md
+- ui-safety-gate.cjs
 - state-md-schema.cjs
 - tdd-red-evidence.cjs
-- ui-safety-gate.cjs
+- Git Planning Commit
 - gather_with_concurrency
+- global_exception_handler
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 272 edges
@@ -744,7 +745,7 @@
 - 2-file cycle: `.agents/gsd-core/bin/lib/core-utils.cjs -> .agents/gsd-core/bin/lib/plan-scan.cjs -> .agents/gsd-core/bin/lib/core-utils.cjs`
 - 3-file cycle: `.agents/gsd-core/bin/lib/smart-entry.cjs -> .agents/gsd-core/bin/lib/state.cjs -> .agents/gsd-core/bin/lib/state-contract.cjs -> .agents/gsd-core/bin/lib/smart-entry.cjs`
 
-## Communities (861 total, 321 thin omitted)
+## Communities (862 total, 321 thin omitted)
 
 ### Community 0 - "init.cjs"
 Cohesion: 0.03
@@ -752,7 +753,7 @@ Nodes (76): routeAgentSkills(), agentInstallCheck, buildAgentSkillsBlock(), buil
 
 ### Community 1 - "cn"
 Cohesion: 0.02
-Nodes (168): class-variance-authority, clsx, @radix-ui/react-accordion, @radix-ui/react-context-menu, @radix-ui/react-dropdown-menu, @radix-ui/react-menubar, @radix-ui/react-navigation-menu, @radix-ui/react-popover (+160 more)
+Nodes (148): class-variance-authority, @radix-ui/react-accordion, @radix-ui/react-context-menu, @radix-ui/react-dropdown-menu, @radix-ui/react-menubar, @radix-ui/react-navigation-menu, @radix-ui/react-popover, @radix-ui/react-radio-group (+140 more)
 
 ### Community 2 - "state.cjs"
 Cohesion: 0.03
@@ -790,9 +791,9 @@ Nodes (11): Step 2 — OTP Verification. Verifies against Redis (SHA-256, 5-atte
 Cohesion: 0.03
 Nodes (94): ADR-0857, ADR-0894, ADR-0959, ADR-1016, ADR-1239, ADR-1244, ADR-1517, ADR-2782 (+86 more)
 
-### Community 11 - "validate.cjs"
-Cohesion: 0.11
-Nodes (22): checkW006(), checkW007(), ADR-0457, ADR-3180, computeClaimedDirs(), dirsForPhase(), healthDiagnosticMod, isPhaseNotStarted() (+14 more)
+### Community 11 - "swrFetch"
+Cohesion: 0.25
+Nodes (4): setSwrCache(), swrFetch(), SwrMemoryStore, triggerBackgroundRevalidate()
 
 ### Community 12 - "gap-checker.cjs"
 Cohesion: 0.08
@@ -800,7 +801,7 @@ Nodes (29): ADR-0457, ADR-1372, ADR-3473, cmdGapAnalysis(), decisions_cjs_1, det
 
 ### Community 13 - "SettingsPage.tsx"
 Cohesion: 0.06
-Nodes (64): @radix-ui/react-alert-dialog, @radix-ui/react-select, react-icons, sonner, AssessmentWorkspacePage, AlertDialog(), AlertDialogAction, AlertDialogBackdrop (+56 more)
+Nodes (67): @radix-ui/react-alert-dialog, @radix-ui/react-select, @radix-ui/react-switch, react-icons, sonner, AssessmentWorkspacePage, AlertDialog(), AlertDialogAction (+59 more)
 
 ### Community 14 - "config.cjs"
 Cohesion: 0.05
@@ -812,7 +813,7 @@ Nodes (44): buildActivePlan(), buildPlanningInspect(), buildUatRows(), cmdPlanni
 
 ### Community 16 - "package.json"
 Cohesion: 0.03
-Nodes (67): license, name, optionalDependencies, lightningcss-linux-x64-gnu, @rolldown/binding-linux-x64-gnu, @tailwindcss/oxide-linux-x64-gnu, overrides, rolldown (+59 more)
+Nodes (69): license, name, optionalDependencies, lightningcss-linux-x64-gnu, @rolldown/binding-linux-x64-gnu, @tailwindcss/oxide-linux-x64-gnu, overrides, rolldown (+61 more)
 
 ### Community 17 - "commands.cjs"
 Cohesion: 0.04
@@ -840,7 +841,7 @@ Nodes (33): quickDirFrom(), allocateIdsGivenUsed(), allocateQuickIds(), batchMan
 
 ### Community 23 - "AppRoutes.tsx"
 Cohesion: 0.03
-Nodes (97): Phase 1 — Offline contest data architecture, Phase 2 — Specialized data graphics, qrcode.react, recharts, AppRoutes(), CONTEST_MUTATION_EVENTS, ContestArenaPage, ContestFinalResultsPage (+89 more)
+Nodes (90): Phase 1 — Offline contest data architecture, Phase 2 — Specialized data graphics, qrcode.react, recharts, AppRoutes(), CONTEST_MUTATION_EVENTS, ContestArenaPage, ContestFinalResultsPage (+82 more)
 
 ### Community 24 - "runtime-hooks-surface.cjs"
 Cohesion: 0.05
@@ -871,8 +872,8 @@ Cohesion: 0.06
 Nodes (53): apiCoverageMod, buildPlanMessage(), buildPredicateDeps(), buildVerifyMessage(), buildXmlDecisionTagRegex(), ADR-0457, ADR-0550, ADR-2008 (+45 more)
 
 ### Community 31 - "ContestArenaPage.tsx"
-Cohesion: 0.05
-Nodes (74): ContestLobbyPage, ContestOverviewPage, ContestRealtimeSynchronizer(), CadetProfileHoverCard(), CadetProfileHoverCardProps, CadetProfileSummary, getInitials(), src_components_ui_dropdown_menu_dropdownmenu (+66 more)
+Cohesion: 0.08
+Nodes (59): ContestRealtimeSynchronizer(), CadetProfileHoverCard(), CadetProfileHoverCardProps, CadetProfileSummary, getInitials(), src_components_ui_dropdown_menu_dropdownmenu, src_components_ui_dropdown_menu_dropdownmenutrigger, src_components_ui_hover_card_hovercard (+51 more)
 
 ### Community 32 - "AdminContestController"
 Cohesion: 0.04
@@ -902,9 +903,9 @@ Nodes (60): dependencies, class-variance-authority, clsx, cmdk, date-fns, embla-
 Cohesion: 0.05
 Nodes (72): routeFrontmatter(), cmdMigrateConfig(), agentScalarNeedsDoubleQuoting(), AnchorDetectedSignal, ADR-0457, ADR-1411, ADR-3473, cmdFrontmatterGet() (+64 more)
 
-### Community 39 - "ContestOfflinePage.tsx"
+### Community 39 - "ContestsHubPage.tsx"
 Cohesion: 0.06
-Nodes (68): react-router-dom, Badge(), BadgeProps, badgeVariants, Button, Card, CardContent, CardDescription (+60 more)
+Nodes (49): ogl, ContestsHubPage, PanelsContext, PanelsCtx, Tabs(), TabsContext, TabsCtx, TabsList() (+41 more)
 
 ### Community 40 - "verify.cjs"
 Cohesion: 0.05
@@ -1014,9 +1015,9 @@ Nodes (24): buildHandoffCommands(), buildOnboardProjection(), CODE_EXTENSIONS, C
 Cohesion: 0.11
 Nodes (21): ADR-2346, ADR-2629, ADR-3473, cmdEstimateCalibration(), cmdEstimateCheck(), configLoader, defaultBudget(), estimation (+13 more)
 
-### Community 67 - "planning-workspace.cjs"
+### Community 67 - "react"
 Cohesion: 0.06
-Nodes (28): projectWorktreesOptedOut(), routeDispatchIsolation(), activeWorkstreamStore, ADR-0457, clock_cjs_1, _heldPlanningLocks, node_fs_1, node_path_1 (+20 more)
+Nodes (72): @radix-ui/react-progress, @radix-ui/react-tabs, react, react-router-dom, MyContestsPage, ProblemArchivePage, ProblemDetailPage, Button (+64 more)
 
 ### Community 68 - "worktree-safety.cjs"
 Cohesion: 0.07
@@ -1042,13 +1043,13 @@ Nodes (44): makeInvalidArgs(), analyzeTouchedFiles(), artifactAbsPath(), artifac
 Cohesion: 0.09
 Nodes (40): agents_gsd_core_bin_lib_package_identity_package_name, agents_gsd_core_bin_lib_package_identity_updatecachefilename, normalizeStateStatus(), buildGitSegment(), CANONICAL_STATUSES, childProcess, compactModelName(), composeStatusline() (+32 more)
 
-### Community 74 - "gsd-worktree-path-guard.js"
-Cohesion: 0.07
-Nodes (24): block(), { allow, deny }, block(), fs, ADR-1239, ADR-3889, path, { reportIfUndetermined } (+16 more)
+### Community 74 - "core-utils.cjs"
+Cohesion: 0.04
+Nodes (64): cmdSummaryExtract(), ADR-0857, ADR-3180, ADR-3473, countMatchedSummaries(), CYRILLIC_TRANSLITERATION, CYRILLIC_TRANSLITERATION_KEYS, detectSubRepos() (+56 more)
 
-### Community 75 - "qa_full_application.mjs"
-Cohesion: 0.22
-Nodes (7): ref_node_url, __dirname, __filename, PLANNING_DIR, QASimulator, request(), ROOT_DIR
+### Community 75 - "model-resolver.cjs"
+Cohesion: 0.05
+Nodes (44): routeResolveExecution(), cmdResolveExecution(), effortSurfaceForHost(), ADR-0457, model_catalog_cjs_1, ADR-0227, ADR-0443, ADR-0857 (+36 more)
 
 ### Community 76 - "output"
 Cohesion: 0.04
@@ -1137,9 +1138,9 @@ Nodes (36): buildPhaseCompletionProjection(), projectCompletionStatus(), allCurr
 Cohesion: 0.02
 Nodes (166): api_meta(), get, Versioned API surface (/api/v1). Every domain router is aggregated here exactly…, Chaos Computer Club — Medi-Caps Chapter controllers/assessment_controller.py —…, Chaos Computer Club — Medi-Caps Chapter controllers/contest_controller.py —…, EventsController, Chaos Computer Club — Medi-Caps Chapter controllers/events_controller.py —…, Orchestrator for Server-Sent Events streams (global and contest-specific). (+158 more)
 
-### Community 98 - "form.tsx"
-Cohesion: 0.12
-Nodes (19): input-otp, @radix-ui/react-label, react-hook-form, FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem (+11 more)
+### Community 98 - "planning-workspace.cjs"
+Cohesion: 0.06
+Nodes (28): projectWorktreesOptedOut(), routeDispatchIsolation(), activeWorkstreamStore, ADR-0457, clock_cjs_1, _heldPlanningLocks, node_fs_1, node_path_1 (+20 more)
 
 ### Community 99 - "PassController"
 Cohesion: 0.12
@@ -1189,9 +1190,9 @@ Nodes (28): routeLearnings(), ADR-0457, cmdLearningsCopy(), cmdLearningsDelete()
 Cohesion: 0.11
 Nodes (24): acquireLock(), { execTool, retryRenameSync }, getProcessStartTime(), holderVerifiedLive(), isPidAlive(), isSameHost(), ledgerMod, lockAgeMs() (+16 more)
 
-### Community 111 - "model-resolver.cjs"
-Cohesion: 0.05
-Nodes (44): routeResolveExecution(), cmdResolveExecution(), effortSurfaceForHost(), ADR-0457, model_catalog_cjs_1, ADR-0227, ADR-0443, ADR-0857 (+36 more)
+### Community 111 - "gsd-worktree-path-guard.js"
+Cohesion: 0.07
+Nodes (24): block(), { allow, deny }, block(), fs, ADR-1239, ADR-3889, path, { reportIfUndetermined } (+16 more)
 
 ### Community 112 - "proof_service.py"
 Cohesion: 0.24
@@ -1329,9 +1330,9 @@ Nodes (36): Additional Commands, Capturing Ideas, Notes, and Todos, Common Workf
 Cohesion: 0.14
 Nodes (19): Any, MemberProfile, UploadFile, Orchestrator for MinIO storage uploads, presigned URLs, and asset delivery., StorageController, get_presigned_download_url(), get_presigned_upload_url(), get_storage_status() (+11 more)
 
-### Community 146 - "loadAndValidate"
-Cohesion: 0.22
-Nodes (8): detectRequiresCycles(), dfs(), materializeHookFragments(), validateAgainstContract(), validateConsumesGlobal(), validateCrossCapability(), validateHooksWired(), loadAndValidate()
+### Community 146 - "validate.cjs"
+Cohesion: 0.11
+Nodes (22): checkW006(), checkW007(), ADR-0457, ADR-3180, computeClaimedDirs(), dirsForPhase(), healthDiagnosticMod, isPhaseNotStarted() (+14 more)
 
 ### Community 147 - "harness.py"
 Cohesion: 0.15
@@ -1341,9 +1342,9 @@ Nodes (22): _build_c_driver(), _build_cpp_driver(), _build_java_driver(), _cpp_p
 Cohesion: 0.10
 Nodes (15): Common commands, GSD Core — Git. Ship. Done., Start here (3 commands), Update GSD, Want more?, @axe-core/playwright, ref_crypto, @playwright/test (+7 more)
 
-### Community 149 - "ContestsHubPage.tsx"
-Cohesion: 0.10
-Nodes (24): ogl, ContestsHubPage, PanelsContext, PanelsCtx, Tabs(), TabsContext, TabsCtx, TabsList() (+16 more)
+### Community 149 - "form.tsx"
+Cohesion: 0.12
+Nodes (19): input-otp, @radix-ui/react-label, react-hook-form, FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem (+11 more)
 
 ### Community 150 - "configuration.cjs"
 Cohesion: 0.13
@@ -1359,7 +1360,7 @@ Nodes (22): devDependencies, @axe-core/playwright, drizzle-kit, drizzle-orm, esl
 
 ### Community 153 - "lucide-react"
 Cohesion: 0.05
-Nodes (42): cmdk, lucide-react, @radix-ui/react-checkbox, @radix-ui/react-dialog, CloudflareTurnstile(), removeWidget(), renderWidget(), CloudflareTurnstileProps (+34 more)
+Nodes (46): cmdk, lucide-react, @radix-ui/react-checkbox, @radix-ui/react-dialog, CloudflareTurnstile(), removeWidget(), renderWidget(), CloudflareTurnstileProps (+38 more)
 
 ### Community 154 - "routeReviewLane"
 Cohesion: 0.10
@@ -1445,9 +1446,9 @@ Nodes (16): actionSupportsChoice(), assertInstallerMigrationsUnblocked(), baseli
 Cohesion: 0.06
 Nodes (33): Binding Payload vs Advisory Remediation, Check 8f - Stated Failing Direction (#3172), Dimension 10: GEMINI.md Compliance, Dimension 11: Research Resolution (#1602), Dimension 12: Pattern Compliance (#1861), Dimension 1: Requirement Coverage, Dimension 2: Task Completeness, Dimension 3: Dependency Correctness (+25 more)
 
-### Community 177 - "quick-batch-dispatch.cjs"
-Cohesion: 0.12
-Nodes (8): buildCleanupManifestEntry(), ADR-0457, ADR-1239, filterAlreadyExecuted(), parseQuickBatchArgs(), planDocumentMod, quickBatchDispatch, routeVerificationOutcome()
+### Community 177 - "hooks.ts"
+Cohesion: 0.11
+Nodes (18): react-dom, react-redux, @reduxjs/toolkit, Toaster(), ToasterProps, AppDispatch, RootState, store (+10 more)
 
 ### Community 178 - "scripts"
 Cohesion: 0.12
@@ -1605,9 +1606,9 @@ Nodes (33): 1. Communication Style, 2. Decision Speed, 3. Explanation Depth, 4. 
 Cohesion: 0.18
 Nodes (7): ADR-0457, artifacts_cjs_1, checkW019(), ADR-0457, ADR-3180, healthDiagnosticMod, RULES
 
-### Community 217 - "edge-probe.cjs"
-Cohesion: 0.27
-Nodes (9): analyzeCoverage(), applicableCategories(), ADR-0457, ADR-0550, classifyShape(), cliExitModule, probe_core_cjs_1, proposeEdges() (+1 more)
+### Community 217 - "gsd-verifier.md"
+Cohesion: 0.10
+Nodes (19): API Route Stubs, Create VERIFICATION.md, Final Artifact Status, MVP Mode Verification, React Component Stubs, Return to Orchestrator, Step 0: Check for Previous Verification, Step 1: Load Context (Initial Mode Only) (+11 more)
 
 ### Community 218 - "gate-predicate-evaluator.cjs"
 Cohesion: 0.25
@@ -1621,9 +1622,9 @@ Nodes (9): checkE002(), checkE003(), checkW001(), ADR-0457, ADR-3180, healthDiag
 Cohesion: 0.20
 Nodes (10): checkW017(), checkW020(), checkW027(), ADR-0457, ADR-3180, healthDiagnosticMod, isActiveWorktreePath(), planningScopeMod (+2 more)
 
-### Community 221 - "core-utils.cjs"
-Cohesion: 0.04
-Nodes (64): cmdSummaryExtract(), ADR-0857, ADR-3180, ADR-3473, countMatchedSummaries(), CYRILLIC_TRANSLITERATION, CYRILLIC_TRANSLITERATION_KEYS, detectSubRepos() (+56 more)
+### Community 221 - "docs.cjs"
+Cohesion: 0.14
+Nodes (18): agentInstallCheck, ADR-0457, cmdDocsInit(), configLoader, coreUtils, detectDocTooling(), detectMonorepoWorkspaces(), detectProjectType() (+10 more)
 
 ### Community 222 - "checkpoints.md"
 Cohesion: 0.10
@@ -1677,9 +1678,9 @@ Nodes (8): ADR-0457, node_fs_1, node_path_1, normalizeFallowReport(), normalizeF
 Cohesion: 0.28
 Nodes (6): migration, node_fs_1, node_path_1, normalizeRelPath(), scanCommandsSurface(), walkFiles()
 
-### Community 236 - "collectSection"
-Cohesion: 0.25
-Nodes (16): collectSection(), acknowledgeDeferredItem(), acknowledgeHeadingShapedEntry(), crlfAtEof(), entryFencedLines(), entryFieldLines(), extractGapEntryFields(), parseDeferredItems() (+8 more)
+### Community 236 - "quick-batch-dispatch.cjs"
+Cohesion: 0.12
+Nodes (8): buildCleanupManifestEntry(), ADR-0457, ADR-1239, filterAlreadyExecuted(), parseQuickBatchArgs(), planDocumentMod, quickBatchDispatch, routeVerificationOutcome()
 
 ### Community 237 - "research-provider.cjs"
 Cohesion: 0.33
@@ -1709,9 +1710,9 @@ Nodes (8): ADR-1239, collectPathValues(), evaluateBeforeTool(), inferProviderId(
 Cohesion: 0.18
 Nodes (13): ADR-0457, ADR-2782, deriveReviewerSlugs(), KNOWN_REVIEWER_SLUGS(), normalizeConfiguredDefaultReviewers(), normalizeReviewerInstances(), resolveReviewerSelection(), Config shape (+5 more)
 
-### Community 244 - "ui-frontend-evidence.cjs"
-Cohesion: 0.32
-Nodes (7): hasStaticFrontendEvidence(), node_fs_1, node_path_1, packageJsonHasUiFramework(), SKIP_DIRS, treeHasComponentFile(), UI_FRAMEWORK_DEPS
+### Community 244 - "collectSection"
+Cohesion: 0.25
+Nodes (16): collectSection(), acknowledgeDeferredItem(), acknowledgeHeadingShapedEntry(), crlfAtEof(), entryFencedLines(), entryFieldLines(), extractGapEntryFields(), parseDeferredItems() (+8 more)
 
 ### Community 245 - "toString"
 Cohesion: 0.20
@@ -1725,9 +1726,9 @@ Nodes (7): EXIT_DEGRADED, EXIT_HOOK_DENY, EXIT_INTERNAL, EXIT_NO_INPUT, EXIT_UNA
 Cohesion: 0.25
 Nodes (5): Config, Returns True if any development restriction bypass mode is active., Returns True if mail dispatching is disabled (dev mode, dev bypass, or explicit…, Settings, BaseSettings
 
-### Community 249 - "hooks.ts"
-Cohesion: 0.11
-Nodes (18): react-dom, react-redux, @reduxjs/toolkit, Toaster(), ToasterProps, AppDispatch, RootState, store (+10 more)
+### Community 249 - "capability-registry.cjs"
+Cohesion: 0.14
+Nodes (12): isFirstPartyCapabilityId(), byAgent, byLoopPoint, bySkill, capabilities, capabilityClusters, ADR-0894, commandFamilies (+4 more)
 
 ### Community 250 - "error-capture.ts"
 Cohesion: 0.32
@@ -1753,9 +1754,9 @@ Nodes (25): Authentication Gates, Checkpoint Types, Context Budget for TDD, Cont
 Cohesion: 0.05
 Nodes (32): Additive. Never block., Distinguish "nothing to report" from "could not look" — never collapse these, Expected, not a defect, Never write outside the phase directory, Two browser families, no others, Distinguish "nothing to report" from "could not look", The profile lock is expected, not a defect, You are additive. You never block. (+24 more)
 
-### Community 256 - "spec-section.cjs"
-Cohesion: 0.40
-Nodes (5): cliExitModule, countSectionDataRows(), node_fs_1, specSectionStatus(), VALID_KEYS
+### Community 256 - "splitDeferredHeadingEntriesDetailed"
+Cohesion: 0.32
+Nodes (10): indentOf(), indentWidth(), lineOffsets(), ListRuns, matchListOpener(), scanFencesFrom(), splitDeferredHeadingEntriesDetailed(), splitGapsEntriesCore() (+2 more)
 
 ### Community 257 - "eval.cjs"
 Cohesion: 0.47
@@ -1925,9 +1926,9 @@ Nodes (24): acquireLock(), ADR-0457, defaultLibDir(), defaultPackageRoot(), ensu
 Cohesion: 0.12
 Nodes (16): 1.1 Avoid Boolean Prop Proliferation, 1.2 Use Compound Components, 1. Component Architecture, 2.1 Decouple State Management from UI, 2.2 Define Generic Context Interfaces for Dependency Injection, 2.3 Lift State into Provider Components, 2. State Management, 3.1 Create Explicit Component Variants (+8 more)
 
-### Community 336 - "capability-registry.cjs"
-Cohesion: 0.14
-Nodes (12): isFirstPartyCapabilityId(), byAgent, byLoopPoint, bySkill, capabilities, capabilityClusters, ADR-0894, commandFamilies (+4 more)
+### Community 336 - "runtime-slash.cjs"
+Cohesion: 0.20
+Nodes (12): routeDispatchShouldFlatten(), routeResolveAgent(), routeResolveDispatchType(), ADR-0457, formatGsdSlash(), formatGsdSlashFor(), node_fs_1, node_path_1 (+4 more)
 
 ### Community 337 - "gsd-ui-researcher.compact.md"
 Cohesion: 0.12
@@ -1953,9 +1954,9 @@ Nodes (15): Analyze for Frontier Spikes, Analyze for Integration Spikes, Build E
 Cohesion: 0.12
 Nodes (16): 5.10 Subscribe to Derived State, 5.11 Use Functional setState Updates, 5.12 Use Lazy State Initialization, 5.13 Use Transitions for Non-Urgent Updates, 5.14 Use useDeferredValue for Expensive Derived Renders, 5.15 Use useRef for Transient Values, 5.1 Calculate Derived State During Rendering, 5.2 Defer State Reads to Usage Point (+8 more)
 
-### Community 343 - "splitDeferredHeadingEntriesDetailed"
-Cohesion: 0.32
-Nodes (10): indentOf(), indentWidth(), lineOffsets(), ListRuns, matchListOpener(), scanFencesFrom(), splitDeferredHeadingEntriesDetailed(), splitGapsEntriesCore() (+2 more)
+### Community 343 - "gsd-doc-writer.compact.md"
+Cohesion: 0.15
+Nodes (12): API.md, ARCHITECTURE.md, CONFIGURATION.md, CONTRIBUTING.md, Custom Documentation (gap-detected), DEPLOYMENT.md, DEVELOPMENT.md, Doc Tooling Adaptation (+4 more)
 
 ### Community 344 - "Phase 3 — Route overhaul"
 Cohesion: 0.12
@@ -1965,9 +1966,9 @@ Nodes (15): Foundation and integration, Goal, `/login`, `/signup`, `/recover`, M
 Cohesion: 0.12
 Nodes (15): 1.1 Product Purpose, 1.2 Core Product Tenets, 1. Executive Summary & Product Vision, 2. System Architecture & Topology, 3.1 Permission Matrix, 3. User Personas & Role-Based Access Control (RBAC), 4.1 Authentication & Onboarding, 4.2 Contests Hub & Registration (+7 more)
 
-### Community 346 - "runtime-slash.cjs"
-Cohesion: 0.20
-Nodes (12): routeDispatchShouldFlatten(), routeResolveAgent(), routeResolveDispatchType(), ADR-0457, formatGsdSlash(), formatGsdSlashFor(), node_fs_1, node_path_1 (+4 more)
+### Community 346 - "describeValue"
+Cohesion: 0.31
+Nodes (13): describeValue(), isPositiveIntegerMs(), isReservedName(), safeErrorMessage(), validateEnumField(), validateHttpInvoke(), validateLaneInvoke(), validateLaneProbe() (+5 more)
 
 ### Community 347 - "claude-orchestration.cjs"
 Cohesion: 0.26
@@ -2033,17 +2034,17 @@ Nodes (8): changeset/ — release-notes tooling, `cli.cjs extract`, Examples, Ex
 Cohesion: 0.14
 Nodes (13): complete, create, /gsd-workstreams, list, progress, resume, status, Step 1: Parse Subcommand (+5 more)
 
-### Community 363 - "gsd-verifier.md"
-Cohesion: 0.10
-Nodes (19): API Route Stubs, Create VERIFICATION.md, Final Artifact Status, MVP Mode Verification, React Component Stubs, Return to Orchestrator, Step 0: Check for Previous Verification, Step 1: Load Context (Initial Mode Only) (+11 more)
+### Community 363 - "gsd-graphify/SKILL.md"
+Cohesion: 0.17
+Nodes (12): build(), init(), Service CLI Reference, Anti-Patterns, MVP-Mode Node Rendering, Step 0 -- Banner, Step 1 -- Config Gate, Step 2 -- Parse Argument (+4 more)
 
-### Community 364 - "gsd-doc-writer.compact.md"
-Cohesion: 0.15
-Nodes (12): API.md, ARCHITECTURE.md, CONFIGURATION.md, CONTRIBUTING.md, Custom Documentation (gap-detected), DEPLOYMENT.md, DEVELOPMENT.md, Doc Tooling Adaptation (+4 more)
+### Community 364 - "InterleetProvider"
+Cohesion: 0.21
+Nodes (6): InterleetProvider, Run single testcase for ProviderRunRequest contract., Execute multiple requests. If all belong to the same code/language submission,…, Check whether the Interleet Docker engine is responsive and has sandbox images…, Detailed status metadata for the /api/health probe., Primary execution entrypoint. Sends all testcases to the Interleet Docker…
 
-### Community 365 - "docs.cjs"
-Cohesion: 0.14
-Nodes (18): agentInstallCheck, ADR-0457, cmdDocsInit(), configLoader, coreUtils, detectDocTooling(), detectMonorepoWorkspaces(), detectProjectType() (+10 more)
+### Community 365 - "new-project.md"
+Cohesion: 0.17
+Nodes (11): 2. Brownfield Offer, 2b. Prior Spike/Sketch Detection, 3. Deep Questioning, 4. Write PROJECT.md, 5.1. Sub-Repo Detection, 5.5. Resolve Model Profile, 5. Workflow Preferences, 6. Research Decision (+3 more)
 
 ### Community 367 - "Deviation Rule Examples"
 Cohesion: 0.15
@@ -2077,9 +2078,9 @@ Nodes (12): 0. Initialize, 1. Detect Input State, 2. Discovery, 2a. Read Phase A
 Cohesion: 0.15
 Nodes (12): Auto-Group by Feature Area, Auto-Include All Spikes, Copy Source Files, Determine Output Skill Name, Gather Spike Inventory, Generate or Update CONVENTIONS.md, ▶ Next Up, Synthesize Reference Files (+4 more)
 
-### Community 375 - "describeValue"
-Cohesion: 0.31
-Nodes (13): describeValue(), isPositiveIntegerMs(), isReservedName(), safeErrorMessage(), validateEnumField(), validateHttpInvoke(), validateLaneInvoke(), validateLaneProbe() (+5 more)
+### Community 375 - "edge-probe.cjs"
+Cohesion: 0.27
+Nodes (9): analyzeCoverage(), applicableCategories(), ADR-0457, ADR-0550, classifyShape(), cliExitModule, probe_core_cjs_1, proposeEdges() (+1 more)
 
 ### Community 376 - "uat-predicate.cjs"
 Cohesion: 0.11
@@ -2117,9 +2118,9 @@ Nodes (11): Communication Style, Debugging Approach, Decision Speed, Developer P
 Cohesion: 0.17
 Nodes (11): Configuration, First-Run Behaviour, graduation.md — LEARNINGS.md Cross-Phase Graduation Helper, No-Op Conditions (silent skip), Step 1: Guard Checks, Step 2: Collect LEARNINGS.md Files, Step 3: Cluster by Lexical Similarity, Step 4: Check graduation_backlog in STATE.md (+3 more)
 
-### Community 385 - "new-project.md"
-Cohesion: 0.17
-Nodes (11): 2. Brownfield Offer, 2b. Prior Spike/Sketch Detection, 3. Deep Questioning, 4. Write PROJECT.md, 5.1. Sub-Repo Detection, 5.5. Resolve Model Profile, 5. Workflow Preferences, 6. Research Decision (+3 more)
+### Community 385 - "semver-compare.cjs"
+Cohesion: 0.33
+Nodes (10): ADR-0457, compareSemverCore(), compareTuples(), expandComparator(), isSemverNewer(), parseVersionToken(), satisfiesPrimitive(), satisfiesSet() (+2 more)
 
 ### Community 386 - "profile-user.md"
 Cohesion: 0.17
@@ -2441,9 +2442,9 @@ Nodes (7): Disposition the findings before sharing (three-way: admit / refute / 
 Cohesion: 0.25
 Nodes (7): § 11 thinking-partner — Thinking Partner For Architectural Tradeoffs, § 11a — Filesystem Fallback (Checker), § 12.5 — Plan Bounce (Optional External Refinement), § 9a — Filesystem Fallback (Planner), § 9b — Handle Phase Split Recommendation, § 9c — Handle Source Audit Gaps, plan-phase — Detail
 
-### Community 466 - "semver-compare.cjs"
-Cohesion: 0.33
-Nodes (10): ADR-0457, compareSemverCore(), compareTuples(), expandComparator(), isSemverNewer(), parseVersionToken(), satisfiesPrimitive(), satisfiesSet() (+2 more)
+### Community 466 - "get"
+Cohesion: 0.22
+Nodes (11): ANY_RUNE_NOT_NL(), get(), has(), isalnum(), isValidCaptureName(), quoteIfHyphen(), quoteReplacement(), simpleFold() (+3 more)
 
 ### Community 467 - "ui-review.md"
 Cohesion: 0.25
@@ -2577,21 +2578,21 @@ Nodes (5): 3-Tier Verification, Intelligent Fix Application, Partial Failure Sem
 Cohesion: 0.29
 Nodes (8): _get_frontend_url(), _get_redirect_uri(), is_allowed_organization_email(), _is_local_dev(), Request, Step 1 of Google OAuth flow. Redirects user to Google consent screen restricted…, Step 2 of Google OAuth flow. Validates token, enforces @medicaps.ac.in…, Step 1 — OTP Request. Enforces Cloudflare client security (Turnstile challenge)…
 
-### Community 500 - "gsd-graphify/SKILL.md"
-Cohesion: 0.17
-Nodes (12): build(), init(), Service CLI Reference, Anti-Patterns, MVP-Mode Node Rendering, Step 0 -- Banner, Step 1 -- Config Gate, Step 2 -- Parse Argument (+4 more)
+### Community 500 - "qa_full_application.mjs"
+Cohesion: 0.22
+Nodes (7): ref_node_url, __dirname, __filename, PLANNING_DIR, QASimulator, request(), ROOT_DIR
 
-### Community 501 - "InterleetProvider"
-Cohesion: 0.21
-Nodes (6): InterleetProvider, Run single testcase for ProviderRunRequest contract., Execute multiple requests. If all belong to the same code/language submission,…, Check whether the Interleet Docker engine is responsive and has sandbox images…, Detailed status metadata for the /api/health probe., Primary execution entrypoint. Sends all testcases to the Interleet Docker…
+### Community 501 - "sync-skills — Cross-Runtime GSD Skill Sync"
+Cohesion: 0.20
+Nodes (9): Arguments, Limitations, Safety Rules, Step 1: Parse Arguments, Step 2: Resolve Skills Roots, Step 3: Compute Diff Per Destination, Step 4: Print Diff Report, Step 5: Execute (only when --apply) (+1 more)
 
 ### Community 502 - "io.cjs"
 Cohesion: 0.05
 Nodes (35): routeTeamsStatus(), backoffOnce(), ADR-0857, ADR-2980, ADR-3180, ADR-3473, ADR-3889, cliExitModule (+27 more)
 
-### Community 503 - "get"
+### Community 503 - "eval"
 Cohesion: 0.22
-Nodes (11): ANY_RUNE_NOT_NL(), get(), has(), isalnum(), isValidCaptureName(), quoteIfHyphen(), quoteReplacement(), simpleFold() (+3 more)
+Nodes (7): Issues to Detect, Three Review Modes, eval(), hasAnyString(), hasString(), searchUTF16(), searchUTF8()
 
 ### Community 504 - "vendor/"
 Cohesion: 0.33
@@ -2605,9 +2606,9 @@ Nodes (5): Compact Content Gate, Stream 1 — spine + detail (top-level, eagerly
 Cohesion: 0.33
 Nodes (5): Decimal Phase Calculation, Directory Naming, Examples, Extract Values, Using gsd-tools
 
-### Community 507 - "Git Planning Commit"
-Cohesion: 0.33
-Nodes (5): Amend previous commit, Commit Message Patterns, Commit via CLI, Git Planning Commit, When to Skip
+### Community 507 - "loadAndValidate"
+Cohesion: 0.22
+Nodes (8): detectRequiresCycles(), dfs(), materializeHookFragments(), validateAgainstContract(), validateConsumesGlobal(), validateCrossCapability(), validateHooksWired(), loadAndValidate()
 
 ### Community 508 - "Chunked Mode Return Formats"
 Cohesion: 0.33
@@ -2857,21 +2858,21 @@ Nodes (3): 📊 1. Category Executive Summary, ⚡ 3. GSD Protocol Compliance Ve
 Cohesion: 0.50
 Nodes (3): ✨ 100% Production Grade Verification!, 📊 Classification Summary, 🛡️ UI Elements & Buttons Backend Connectivity Audit Report
 
-### Community 572 - "sync-skills — Cross-Runtime GSD Skill Sync"
-Cohesion: 0.20
-Nodes (9): Arguments, Limitations, Safety Rules, Step 1: Parse Arguments, Step 2: Resolve Skills Roots, Step 3: Compute Diff Per Destination, Step 4: Print Diff Report, Step 5: Execute (only when --apply) (+1 more)
-
-### Community 583 - "eval"
-Cohesion: 0.22
-Nodes (7): Issues to Detect, Three Review Modes, eval(), hasAnyString(), hasString(), searchUTF16(), searchUTF8()
-
-### Community 850 - "schemas/member.py"
+### Community 572 - "schemas/member.py"
 Cohesion: 0.36
 Nodes (8): LeaderboardRow, MemberLogin, MemberProfileResponse, MemberRegister, BaseModel, RatingHistoryResponse, Chaos Computer Club — Member, Profile & Auth Pydantic Schemas, Token
 
-### Community 851 - "beginPhaseCore"
+### Community 583 - "beginPhaseCore"
 Cohesion: 0.29
 Nodes (8): beginPhaseCore(), locateCurrentPosition(), milestoneCompleteCore(), mutateCurrentPositionFirstTime(), mutateCurrentPositionResume(), resetSectionVerbatim(), sliceCurrentPositionSection(), STOP_H2_PLUS()
+
+### Community 850 - "ui-frontend-evidence.cjs"
+Cohesion: 0.32
+Nodes (7): hasStaticFrontendEvidence(), node_fs_1, node_path_1, packageJsonHasUiFramework(), SKIP_DIRS, treeHasComponentFile(), UI_FRAMEWORK_DEPS
+
+### Community 851 - "gsd-mempalace-curator.compact.md"
+Cohesion: 0.33
+Nodes (5): Gate, Hard rules, Report, Tasks (each independently best-effort), Wing / mode / transport
 
 ### Community 852 - "extract-learnings.md"
 Cohesion: 0.40
@@ -2881,17 +2882,17 @@ Nodes (4): 1. Decisions, 2. Lessons, 3. Patterns, 4. Surprises
 Cohesion: 0.38
 Nodes (7): explainUpdateFailure(), frontmatterKeyForBodyField(), getFrontmatterBodySource(), sessionLabelsForBodyField(), sessionLabelsForKey(), sessionSourceExists(), updateCore()
 
-### Community 854 - "global_exception_handler"
-Cohesion: 0.50
-Nodes (4): global_exception_handler(), Request, Exception, exception_handler
+### Community 854 - "spec-section.cjs"
+Cohesion: 0.40
+Nodes (5): cliExitModule, countSectionDataRows(), node_fs_1, specSectionStatus(), VALID_KEYS
 
 ### Community 855 - "rebuildCore"
 Cohesion: 0.43
 Nodes (7): appendRebuildLogSection(), deduplicateSessionArchive(), rebuildCore(), reconcileByPhaseTable(), reconcileCurrentPosition(), stripTemplatePlaceholders(), truncateForLog()
 
-### Community 856 - "gsd-mempalace-curator.compact.md"
+### Community 856 - "ui-safety-gate.cjs"
 Cohesion: 0.33
-Nodes (5): Gate, Hard rules, Report, Tasks (each independently best-effort), Wing / mode / transport
+Nodes (4): ADR-0457, ADR-3889, UI_GATE_PATTERN, UI_GATE_PATTERN_GLOBAL
 
 ### Community 857 - "state-md-schema.cjs"
 Cohesion: 0.33
@@ -2901,13 +2902,17 @@ Nodes (5): ADR-0457, ADR-1769, ADR-2207, ADR-3408, ADR-3473
 Cohesion: 0.47
 Nodes (4): baseOf(), classifyRedEvidence(), prohibition_enforcement_cjs_1, readInput()
 
-### Community 859 - "ui-safety-gate.cjs"
+### Community 859 - "Git Planning Commit"
 Cohesion: 0.33
-Nodes (4): ADR-0457, ADR-3889, UI_GATE_PATTERN, UI_GATE_PATTERN_GLOBAL
+Nodes (5): Amend previous commit, Commit Message Patterns, Commit via CLI, Git Planning Commit, When to Skip
 
 ### Community 860 - "gather_with_concurrency"
 Cohesion: 0.40
 Nodes (4): gather_with_concurrency(), Any, Execute coroutines concurrently up to `max_concurrency` using an…, R
+
+### Community 861 - "global_exception_handler"
+Cohesion: 0.50
+Nodes (4): global_exception_handler(), Request, Exception, exception_handler
 
 ## Knowledge Gaps
 - **5272 isolated node(s):** `{ execNpm }`, `{ runMain }`, `{ packageName: PACKAGE_NAME }`, `CHECK_REASON`, `ALLOWED_TAGS` (+5267 more)

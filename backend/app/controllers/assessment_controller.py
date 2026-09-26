@@ -387,6 +387,26 @@ class AssessmentController:
         except Exception:
             pass
 
+        try:
+            await broadcast_event(
+                event_type="assessment_finished",
+                data={
+                    "contest_slug": contest_slug,
+                    "member_id": current_member.id,
+                    "handle": current_member.handle,
+                    "status": "submitted",
+                    "total_score": final_score,
+                },
+                db=db,
+            )
+            await broadcast_event(
+                event_type="contest_updated",
+                data={"contest_slug": contest_slug, "status": contest.status if contest else "live"},
+                db=db,
+            )
+        except Exception:
+            pass
+
         return {
             "success": True,
             "message": "Contest attempt finalized and submitted.",

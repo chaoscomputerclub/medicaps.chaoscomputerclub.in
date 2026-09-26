@@ -507,6 +507,9 @@ export const contestApi = {
     invalidateSwrCache("contests:*");
     invalidateSwrCache(`contest:*:${slug}*`);
     invalidateSwrCache(`contest:reg_status:${slug}*`);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("assessment:status_changed"));
+    }
     return res;
   },
 };

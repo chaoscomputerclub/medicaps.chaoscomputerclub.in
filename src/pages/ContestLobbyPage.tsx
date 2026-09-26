@@ -67,7 +67,9 @@ export function ContestLobbyPage() {
       if (
         event.event === "contest_status_changed" ||
         event.event === "contest_updated" ||
-        event.event === "top30_qualified"
+        event.event === "top30_qualified" ||
+        event.event === "assessment_finished" ||
+        event.event === "submission_evaluated"
       ) {
         refreshDetail();
       }
@@ -111,6 +113,7 @@ export function ContestLobbyPage() {
   );
   const isAssessmentSubmitted = Boolean(
     !isInProgress && (
+      resolvedContest?.is_submitted ||
       resolvedRegistration?.status === "submitted" ||
       resolvedRegistration?.assessment_taken ||
       resolvedRegistration?.assessment_status === "submitted" ||
@@ -409,8 +412,42 @@ export function ContestLobbyPage() {
             </ul>
           </div>
 
-          {/* In-Progress Session Alert */}
-          {isInProgress ? (
+          {/* Attempt Submitted Alert */}
+          {isAssessmentSubmitted ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-md border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 font-mono text-xs">
+                <CheckCircle2 className="size-4 shrink-0 text-emerald-400 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-semibold uppercase tracking-wider text-emerald-400">
+                    Official Attempt Submitted
+                  </div>
+                  <p className="text-zinc-400 leading-relaxed">
+                    You have already completed and submitted your official competition attempt for this contest. Multiple attempts are not permitted.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  asChild
+                  variant="default"
+                  size="default"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400"
+                >
+                  <Link to={`/contests/${contestSlug}/results`}>
+                    <Trophy className="size-3.5 mr-1.5" />
+                    <span>View Standings & Results</span>
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="default"
+                  onClick={handleBack}
+                >
+                  Back to Overview
+                </Button>
+              </div>
+            </div>
+          ) : isInProgress ? (
             <div className="space-y-4">
               <div className="flex items-start gap-3 p-4 rounded-md border border-amber-500/30 bg-black text-amber-300 font-mono text-xs">
                 <ShieldAlert className="size-4 shrink-0 text-amber-400 mt-0.5" />
