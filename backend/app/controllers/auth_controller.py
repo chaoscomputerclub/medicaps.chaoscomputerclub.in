@@ -632,7 +632,9 @@ class AuthController:
             select(func.count(StudentFollow.id)).where(StudentFollow.follower_id == current_member.id)
         ) or 0
 
-        total_contests = await db.scalar(select(func.count(OfflineContest.id)))
+        total_contests = await db.scalar(
+            select(func.count(OfflineContest.id)).where(OfflineContest.status.in_(["finished", "live"]))
+        ) or 1
         attended = await db.scalar(
             select(func.count(ScoreboardEntry.id)).where(
                 ScoreboardEntry.member_id == current_member.id
@@ -1099,7 +1101,9 @@ class AuthController:
                 await db.commit()
 
         # Total contests and attendance
-        total_contests = await db.scalar(select(func.count(OfflineContest.id))) or 0
+        total_contests = await db.scalar(
+            select(func.count(OfflineContest.id)).where(OfflineContest.status.in_(["finished", "live"]))
+        ) or 1
         attended = len(sb_items)
         attendance_rate = round((attended / total_contests * 100), 1) if total_contests > 0 else 0.0
 

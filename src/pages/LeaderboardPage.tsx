@@ -166,7 +166,10 @@ export function LeaderboardPage() {
                     (x.previous_rank ?? x.university_rank) - x.university_rank;
                   const isYou = x.id === currentMemberId;
                   const attendanceCount = x.attendance_count ?? 0;
-                  const attendanceTotal = x.attendance_total || 6;
+                  const attendanceTotal =
+                    x.attendance_total && x.attendance_total > 0
+                      ? x.attendance_total
+                      : Math.max(1, attendanceCount);
                   const isFollowing = followingIds.includes(x.id) || followingIds.includes(x.handle);
                   const initials = x.full_name
                     ? x.full_name.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase()

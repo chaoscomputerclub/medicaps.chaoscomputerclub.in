@@ -117,9 +117,9 @@ class LeaderboardController:
             for member_id, cnt in sb_count_rows.all():
                 live_attendance_by_member[member_id] = cnt
 
-        # Total finished (concluded) contests for attendance_total denominator
+        # Total active or concluded official contests for attendance_total denominator
         total_finished_contests = await db.scalar(
-            select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
+            select(func.count(OfflineContest.id)).where(OfflineContest.status.in_(["finished", "live"]))
         ) or 0
 
         rows = []
@@ -129,7 +129,7 @@ class LeaderboardController:
 
             # Use live ScoreboardEntry count; fall back to denormalized column only as last resort
             attendance_count = live_attendance_by_member.get(m.id) or m.attendance_count or 0
-            attendance_total = total_finished_contests or m.attendance_total or 0
+            attendance_total = total_finished_contests or m.attendance_total or (1 if attendance_count > 0 else 1)
             attendance_rate = (
                 round((attendance_count / attendance_total) * 100, 1)
                 if attendance_total > 0
