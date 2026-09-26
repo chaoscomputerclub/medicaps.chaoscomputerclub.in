@@ -30,6 +30,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  cacheDir: path.resolve(__dirname, "node_modules/.vite-student"),
   server: {
     port: 8081,
     host: true,

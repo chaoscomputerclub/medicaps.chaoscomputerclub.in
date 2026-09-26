@@ -72,7 +72,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchContestArenaThunk,
@@ -90,6 +89,8 @@ import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
 import type { AssessmentRanking } from "@/features/contest/types";
+
+const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 
 function formatTimer(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";

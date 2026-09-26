@@ -36,7 +36,7 @@ export function lazyWithRetry<T extends Record<string, any>, K extends keyof T>(
         const exported = exportName ? module[exportName] : (module["default"] || module);
         return { default: exported as React.ComponentType<any> };
       } catch (primaryError: any) {
-        console.warn(`[CCC] Dynamic import failed for ${pageKey}. Initiating retry...`, primaryError);
+        console.warn(`[CCC] Dynamic import failed for ${pageKey}. Initiating retry 1 (200ms)...`, primaryError);
         await new Promise((resolve) => setTimeout(resolve, 200));
 
         try {
@@ -46,26 +46,38 @@ export function lazyWithRetry<T extends Record<string, any>, K extends keyof T>(
           }
           const exported = exportName ? retryModule[exportName] : (retryModule["default"] || retryModule);
           return { default: exported as React.ComponentType<any> };
-        } catch (retryError: any) {
-          cachedPromise = null; // Clear on error so future retries can run
-          const lastReload =
-            typeof window !== "undefined" && window.sessionStorage
-              ? sessionStorage.getItem(sessionKey)
-              : null;
-          const now = Date.now();
+        } catch (retryError1: any) {
+          console.warn(`[CCC] Dynamic import retry 1 failed for ${pageKey}. Initiating retry 2 (600ms)...`, retryError1);
+          await new Promise((resolve) => setTimeout(resolve, 600));
 
-          if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+          try {
+            const finalModule = await importer();
             if (typeof window !== "undefined" && window.sessionStorage) {
-              sessionStorage.setItem(sessionKey, String(now));
+              sessionStorage.removeItem(sessionKey);
             }
-            console.error(`[CCC] Chunk stale or missing for ${pageKey}. Reloading application window...`);
-            if (typeof window !== "undefined") {
-              window.location.reload();
-            }
-            return new Promise<{ default: React.ComponentType<any> }>(() => {});
-          }
+            const exported = exportName ? finalModule[exportName] : (finalModule["default"] || finalModule);
+            return { default: exported as React.ComponentType<any> };
+          } catch (retryError2: any) {
+            cachedPromise = null; // Clear on error so future retries can run
+            const lastReload =
+              typeof window !== "undefined" && window.sessionStorage
+                ? sessionStorage.getItem(sessionKey)
+                : null;
+            const now = Date.now();
 
-          throw retryError;
+            if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+              if (typeof window !== "undefined" && window.sessionStorage) {
+                sessionStorage.setItem(sessionKey, String(now));
+              }
+              console.error(`[CCC] Chunk stale or missing for ${pageKey}. Reloading application window...`);
+              if (typeof window !== "undefined") {
+                window.location.reload();
+              }
+              return new Promise<{ default: React.ComponentType<any> }>(() => {});
+            }
+
+            throw retryError2;
+          }
         }
       }
     })();
