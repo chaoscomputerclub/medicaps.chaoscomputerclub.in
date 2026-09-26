@@ -76,6 +76,8 @@ const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor")
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchContestArenaThunk,
+  fetchContestDetailThunk,
+  fetchMyParticipationsThunk,
   runArenaCodeThunk,
   submitArenaCodeThunk,
   clearArenaResults,
@@ -127,15 +129,21 @@ export function ContestArenaPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error, registration } =
+  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error, registration, myParticipations } =
     useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
+
+  const participation = myParticipations.find((p) => p.contest_slug === contestSlug);
 
   const isAlreadySubmitted = Boolean(
     registration?.status === "submitted" ||
     registration?.assessment_taken ||
     registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed"
+    registration?.assessment_status === "completed" ||
+    participation?.assessment_submitted ||
+    participation?.outcome === "submitted" ||
+    participation?.outcome === "qualified" ||
+    (participation as any)?.assessment_status === "submitted"
   );
 
   useEffect(() => {
@@ -157,6 +165,8 @@ export function ContestArenaPage() {
   useEffect(() => {
     if (contestSlug) {
       dispatch(fetchContestArenaThunk(contestSlug));
+      dispatch(fetchContestDetailThunk(contestSlug));
+      dispatch(fetchMyParticipationsThunk(false));
     }
     return () => {
       dispatch(clearArenaResults());

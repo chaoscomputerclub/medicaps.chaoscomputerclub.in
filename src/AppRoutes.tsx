@@ -25,6 +25,7 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthPage } from "./pages/AuthPage";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import {
   fetchContestDetailThunk,
   fetchContestsThunk,
@@ -71,6 +72,14 @@ function ContestRealtimeSynchronizer() {
       void dispatch(fetchContestsThunk(true));
       if (currentMember) {
         void dispatch(fetchMyParticipationsThunk(true));
+        if (
+          event.event === "contest_concluded" ||
+          event.event === "contest_finished" ||
+          event.event === "contest_status_changed" ||
+          event.event === "assessment_finished"
+        ) {
+          void dispatch(fetchCurrentUserThunk());
+        }
       }
 
       // 3. Handle route or detail sync if user is currently viewing the affected contest

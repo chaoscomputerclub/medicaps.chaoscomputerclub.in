@@ -211,101 +211,11 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                 # 1. Mark as finished
                 contest.status = "finished"
 
-                # 2. Fetch all scoreboard entries, re-rank by score DESC, then penalty ASC
-                sb_res = await db.execute(
-                    select(ScoreboardEntry)
-                    .where(ScoreboardEntry.contest_id == contest.id)
-                    .order_by(
-                        ScoreboardEntry.score.desc(),
-                        ScoreboardEntry.penalty_seconds.asc(),
-                    )
-                )
-                entries = sb_res.scalars().all()
-
-                if not entries:
-                    await db.commit()
-                    _auto_finish_done.add(slug)
-                    await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
-                    try:
-                        from app.services.event_broadcaster import broadcast_event as _broadcast
-                        finish_payload = {
-                            "contest_slug": slug,
-                            "contest_title": contest.title,
-                            "old_status": "live",
-                            "new_status": "finished",
-                            "status": "finished",
-                            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
-                            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
-                            "change": "concluded",
-                        }
-                        await _broadcast("contest_status_changed", finish_payload, contest_slug=slug)
-                        await _broadcast("contest_concluded", finish_payload, contest_slug=slug)
-                        await _broadcast("contest_concluded", finish_payload, contest_slug=None)
-                    except Exception:
-                        pass
-                    logger.info("auto-finish: '%s' → finished (no scoreboard entries)", slug)
-                    continue
-
-                # Re-assign ranks
-                for new_rank, entry in enumerate(entries, start=1):
-                    entry.rank = new_rank
-
-                # 3. Build standings list for rating calculator
-                standings = []
-                for entry in entries:
-                    member_res = await db.execute(
-                        select(MemberProfile).where(MemberProfile.id == entry.member_id)
-                    )
-                    member = member_res.scalars().first()
-                    if member:
-                        standings.append({
-                            "rank": entry.rank,
-                            "handle": entry.handle,
-                            "member_id": entry.member_id,
-                            "rating": member.rating if member.rating is not None else 1200,
-                        })
-
-                # 4. Compute rating deltas
-                deltas = calculate_rating_deltas(standings)  # [(handle, delta, new_rating), ...]
-                delta_map: dict[str, tuple[int, int]] = {
-                    handle: (delta, new_rating) for handle, delta, new_rating in deltas
-                }
-
-                # 5. Apply deltas to members + write RatingHistory + update ScoreboardEntry
-                for entry in entries:
-                    handle = entry.handle
-                    if handle not in delta_map:
-                        continue
-                    delta, new_rating = delta_map[handle]
-                    entry.rating_delta = delta
-
-                    member_res = await db.execute(
-                        select(MemberProfile).where(MemberProfile.id == entry.member_id)
-                    )
-                    member = member_res.scalars().first()
-                    if not member:
-                        continue
-
-                    old_rating = member.rating if member.rating is not None else 1200
-                    member.rating = new_rating
-                    if member.peak_rating is None or new_rating > member.peak_rating:
-                        member.peak_rating = new_rating
-
-                    # Write RatingHistory ledger entry
-                    history = RatingHistory(
-                        member_id=member.id,
-                        contest_id=contest.id,
-                        contest_title=contest.title,
-                        contested_at=ends_at,
-                        old_rating=old_rating,
-                        new_rating=new_rating,
-                        rank=entry.rank,
-                    )
-                    db.add(history)
-                    logger.info(
-                        "rating: %s rank=%d %d→%d (Δ%+d)",
-                        handle, entry.rank, old_rating, new_rating, delta,
-                    )
+                # 2. Apply final ratings and sync all participant records
+                try:
+                    await DynamicContestService._apply_final_ratings(contest, db)
+                except Exception as e:
+                    logger.warning("Auto-finish rating application error: %s", e)
 
                 await db.commit()
                 _auto_finish_done.add(slug)

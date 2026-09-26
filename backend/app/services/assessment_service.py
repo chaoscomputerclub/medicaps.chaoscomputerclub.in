@@ -177,17 +177,8 @@ class AssessmentService:
         )
         session = s_result.scalars().first()
 
-        # For test user, auto-reopen or refresh session so they can test assessment repeatedly at any time
-        if is_test_user and session and session.status in ("submitted", "disqualified"):
-            session.status = "in_progress"
-            session.started_at = now_utc()
-            session.submitted_at = None
-            session.anti_cheat_violations = 0
-            await db.commit()
-            logger.info("Privileged test mode: auto-reopened assessment session for %s", current_member.email)
-
-        # If session already completed or submitted (for non-test users), return clean completed state without re-entry
-        if session and session.status in ("submitted", "disqualified") and not is_test_user:
+        # If session already completed or submitted, return clean completed state without re-entry
+        if session and session.status in ("submitted", "disqualified"):
             # Ensure contest registration is in sync
             if contest:
                 reg_stmt = select(ContestRegistration).where(
@@ -230,6 +221,7 @@ class AssessmentService:
                 "submissions": {},
                 "message": "Assessment attempt has been finalized and submitted.",
             }
+
 
         # If window not open yet and user doesn't have an active session, return waiting state
         if not is_open and not session and opens_in_seconds > 0 and not is_dev_bypass:

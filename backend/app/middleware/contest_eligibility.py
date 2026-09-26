@@ -22,6 +22,9 @@ from app.services.contest_eligibility_service import is_member_eligible_for_live
 logger = logging.getLogger(__name__)
 
 
+_contest_status_cache: dict[str, tuple[str, float]] = {}
+
+
 class ContestEligibilityMiddleware(BaseHTTPMiddleware):
     """
     Middleware intercepting direct requests targeting live contests.
@@ -66,11 +69,24 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
         # If this request is targeting a restricted action on a specific slug, check if that contest is LIVE
         if slug:
             try:
-                async with AsyncSessionLocal() as db:
-                    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
-                    contest = c_res.scalars().first()
+                import time
+                now_epoch = time.time()
+                cached = _contest_status_cache.get(slug)
+                contest_status = None
 
-                    if contest and contest.status == "live" and not contest.slug.startswith("dev-"):
+                if cached and (now_epoch - cached[1] < 15.0):
+                    contest_status = cached[0]
+                else:
+                    async with AsyncSessionLocal() as db:
+                        c_res = await db.execute(select(OfflineContest.status).where(OfflineContest.slug == slug))
+                        contest_status = c_res.scalar_one_or_none()
+                        if contest_status:
+                            _contest_status_cache[slug] = (contest_status, now_epoch)
+
+                if contest_status == "live" and not slug.startswith("dev-"):
+                    async with AsyncSessionLocal() as db:
+                        c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == slug))
+                        contest = c_res.scalars().first()
                         # Extract access token from HttpOnly cookie, Bearer header, or query param
                         from app.middleware.auth import extract_access_token
                         token = extract_access_token(request)

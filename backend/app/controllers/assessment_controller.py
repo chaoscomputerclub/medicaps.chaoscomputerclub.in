@@ -374,6 +374,48 @@ class AssessmentController:
                 reg.assessment_taken = True
                 reg.assessment_score = final_score
 
+            # Ensure ScoreboardEntry exists for this cadet so rating & standings are guaranteed
+            sb_res = await db.execute(
+                select(ScoreboardEntry).where(
+                    ScoreboardEntry.contest_id == contest.id,
+                    ScoreboardEntry.member_id == current_member.id,
+                )
+            )
+            sb_entry = sb_res.scalars().first()
+            contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
+            penalty_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
+
+            if not sb_entry:
+                sb_entry = ScoreboardEntry(
+                    contest_id=contest.id,
+                    member_id=current_member.id,
+                    rank=999,
+                    handle=current_member.handle or f"cadet_{current_member.id[:6]}",
+                    full_name=current_member.full_name or "Cadet",
+                    department=current_member.department or "CSE",
+                    batch=current_member.batch or "2023-27",
+                    division=getattr(contest, "division", "open") or "open",
+                    score=final_score,
+                    solved=1 if final_score > 0 else 0,
+                    penalty_seconds=penalty_secs,
+                    telemetry=[],
+                )
+                db.add(sb_entry)
+            else:
+                if final_score > (sb_entry.score or 0):
+                    sb_entry.score = final_score
+                    if final_score > 0 and sb_entry.solved == 0:
+                        sb_entry.solved = 1
+
+            await db.flush()
+            all_sb_res = await db.execute(
+                select(ScoreboardEntry)
+                .where(ScoreboardEntry.contest_id == contest.id)
+                .order_by(ScoreboardEntry.score.desc(), ScoreboardEntry.penalty_seconds.asc())
+            )
+            for cur_rank, entry in enumerate(all_sb_res.scalars().all(), start=1):
+                entry.rank = cur_rank
+
         await db.commit()
         await invalidate_ranking(contest_slug)
         if contest:

@@ -111,6 +111,7 @@ async def broadcast_event(
 
 async def redis_event_relay() -> None:
     """Relay Redis pub/sub events into this worker's local SSE queues."""
+    reconnect_delay = 5.0
     while True:
         pubsub = None
         try:
@@ -118,6 +119,7 @@ async def redis_event_relay() -> None:
 
             pubsub = get_redis().pubsub()
             await pubsub.subscribe(REDIS_EVENT_CHANNEL)
+            reconnect_delay = 5.0
             async for message in pubsub.listen():
                 if message.get("type") != "message":
                     continue
@@ -132,12 +134,13 @@ async def redis_event_relay() -> None:
                     raw_message = json.dumps(incoming)
                     await _fan_out(raw_message, incoming.get("contest_slug"))
                 except (TypeError, ValueError, KeyError) as exc:
-                    logger.warning("Ignoring malformed Redis realtime event: %s", exc)
+                    logger.debug("Ignoring malformed Redis realtime event: %s", exc)
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            logger.warning("Redis realtime relay disconnected: %s", exc)
-            await asyncio.sleep(2)
+            logger.debug("Redis realtime relay disconnected (retrying in %.1fs): %s", reconnect_delay, exc)
+            await asyncio.sleep(reconnect_delay)
+            reconnect_delay = min(reconnect_delay * 1.5, 30.0)
         finally:
             if pubsub is not None:
                 try:

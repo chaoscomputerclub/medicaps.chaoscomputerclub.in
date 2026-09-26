@@ -50,24 +50,16 @@ async def require_active_assessment_session(
         )
     )
     session = s_result.scalars().first()
-    from app.core.security import is_privileged_test_member
-    is_test_user = is_privileged_test_member(current_member)
+    from app.services.contest_eligibility_service import is_contest_attempt_submitted
+    if contest:
+        is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=sub_reason or "Contest attempt has already been submitted and finalized. Reattempts and code executions are not permitted.",
+            )
 
-    if not session and is_test_user:
-        session = AssessmentSession(
-            assessment_id=assessment.id,
-            member_id=current_member.id,
-            handle=current_member.handle or f"tester_{current_member.id[:6]}",
-            full_name=current_member.full_name or "Privileged Tester",
-            department=current_member.department or "CSE",
-            batch=current_member.batch or "2023-27",
-            started_at=now_utc(),
-            status="in_progress",
-        )
-        db.add(session)
-        await db.commit()
-        await db.refresh(session)
-    elif not session:
+    if not session:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No active assessment session found. You must register and start the screening assessment first.",

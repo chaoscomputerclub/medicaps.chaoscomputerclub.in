@@ -308,8 +308,18 @@ export function useSwrData<T>(
       setLoading(false);
     });
 
+    const handleInvalidateEvent = () => {
+      void executeFetch(true);
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("contest:cache_invalidated", handleInvalidateEvent);
+    }
+
     return () => {
       unsubscribe();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("contest:cache_invalidated", handleInvalidateEvent);
+      }
     };
   }, [key, enabled, executeFetch, forceRefresh, ttl]);
 

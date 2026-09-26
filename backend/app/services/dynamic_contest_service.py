@@ -1167,14 +1167,112 @@ class DynamicContestService:
         so the leaderboard and profiles always reflect accurate attendance data.
         Called both from change_contest_status("finished") and the background auto-finish task.
         """
-        from app.models.db_models import MemberProfile, RatingHistory, ScoreboardEntry
+        from app.models.db_models import (
+            MemberProfile, RatingHistory, ScoreboardEntry,
+            ContestRegistration, Assessment, AssessmentSession,
+        )
         from app.services.rating_service import calculate_rating_deltas
         from datetime import timezone
+        from sqlalchemy import text
 
         ends_at = contest.ends_at
         if ends_at and ends_at.tzinfo is None:
             ends_at = ends_at.replace(tzinfo=timezone.utc)
         finalized_at = ends_at or now_utc()
+        contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
+        penalty_secs = max(0, int((finalized_at - contest_start).total_seconds())) if contest_start else 0
+
+        # 1. Sync all participants who took part or submitted into ScoreboardEntry
+        reg_stmt = select(ContestRegistration).where(
+            ContestRegistration.contest_id == contest.id,
+            (ContestRegistration.status.in_(["submitted", "completed", "confirmed"])) | (ContestRegistration.assessment_taken == True)
+        )
+        reg_rows = (await db.execute(reg_stmt)).scalars().all()
+
+        sess_stmt = select(AssessmentSession, Assessment).join(
+            Assessment, AssessmentSession.assessment_id == Assessment.id
+        ).where(
+            (Assessment.contest_id == contest.id) | (Assessment.slug == contest.slug),
+            AssessmentSession.status.in_(["submitted", "completed", "in_progress"])
+        )
+        sess_rows = (await db.execute(sess_stmt)).all()
+
+        existing_sb_res = await db.execute(
+            select(ScoreboardEntry).where(ScoreboardEntry.contest_id == contest.id)
+        )
+        existing_sb_by_member = {sb.member_id: sb for sb in existing_sb_res.scalars().all()}
+
+        candidate_member_ids = set()
+        for r in reg_rows:
+            candidate_member_ids.add(r.member_id)
+        for s, _ in sess_rows:
+            candidate_member_ids.add(s.member_id)
+        for m_id in existing_sb_by_member.keys():
+            candidate_member_ids.add(m_id)
+
+        candidate_members = {}
+        if candidate_member_ids:
+            mem_res = await db.execute(
+                select(MemberProfile).where(MemberProfile.id.in_(candidate_member_ids))
+            )
+            candidate_members = {m.id: m for m in mem_res.scalars().all()}
+
+        for r in reg_rows:
+            if r.member_id not in existing_sb_by_member:
+                m_prof = candidate_members.get(r.member_id)
+                if m_prof:
+                    s_score = round(r.assessment_score or 0)
+                    new_sb = ScoreboardEntry(
+                        contest_id=contest.id,
+                        member_id=m_prof.id,
+                        rank=999,
+                        handle=m_prof.handle or f"cadet_{m_prof.id[:6]}",
+                        full_name=m_prof.full_name or "Cadet",
+                        department=m_prof.department or "CSE",
+                        batch=m_prof.batch or "2023-27",
+                        division=getattr(contest, "division", "open") or "open",
+                        score=s_score,
+                        solved=1 if s_score > 0 else 0,
+                        penalty_seconds=penalty_secs,
+                        telemetry=[],
+                    )
+                    db.add(new_sb)
+                    existing_sb_by_member[m_prof.id] = new_sb
+
+        for s, _ in sess_rows:
+            if s.member_id not in existing_sb_by_member:
+                m_prof = candidate_members.get(s.member_id)
+                if m_prof:
+                    s_score = round(s.total_score or 0)
+                    new_sb = ScoreboardEntry(
+                        contest_id=contest.id,
+                        member_id=m_prof.id,
+                        rank=999,
+                        handle=m_prof.handle or f"cadet_{m_prof.id[:6]}",
+                        full_name=m_prof.full_name or "Cadet",
+                        department=m_prof.department or "CSE",
+                        batch=m_prof.batch or "2023-27",
+                        division=getattr(contest, "division", "open") or "open",
+                        score=s_score,
+                        solved=1 if s_score > 0 else 0,
+                        penalty_seconds=penalty_secs,
+                        telemetry=[],
+                    )
+                    db.add(new_sb)
+                    existing_sb_by_member[m_prof.id] = new_sb
+
+        await db.flush()
+
+        # Count total finished contests for global attendance_total
+        total_finished = await db.scalar(
+            select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
+        ) or 1
+
+        # Sync attendance_total across all active members
+        await db.execute(
+            text("UPDATE member_profiles SET attendance_total = :tot"),
+            {"tot": total_finished}
+        )
 
         # Fetch & re-rank scoreboard
         sb_res = await db.execute(
@@ -1190,12 +1288,19 @@ class DynamicContestService:
         for new_rank, entry in enumerate(entries, start=1):
             entry.rank = new_rank
 
+        # Batch query all member profiles in ONE single query (no N+1)
+        entry_member_ids = [e.member_id for e in entries]
+        m_res = await db.execute(
+            select(MemberProfile).where(MemberProfile.id.in_(entry_member_ids))
+        )
+        all_entry_members = m_res.scalars().all()
+        member_map = {m.handle: m for m in all_entry_members}
+        member_by_id = {m.id: m for m in all_entry_members}
+
         # Build standings for rating calculation
         standings = []
-        member_map: Dict[str, Any] = {}
         for entry in entries:
-            m_res = await db.execute(select(MemberProfile).where(MemberProfile.id == entry.member_id))
-            member = m_res.scalars().first()
+            member = member_by_id.get(entry.member_id) or member_map.get(entry.handle)
             if member:
                 standings.append({
                     "rank": entry.rank,
@@ -1203,21 +1308,14 @@ class DynamicContestService:
                     "member_id": entry.member_id,
                     "rating": member.rating if member.rating is not None else 1200,
                 })
-                member_map[entry.handle] = member
 
         # Compute deltas
         deltas = calculate_rating_deltas(standings)
         delta_map = {handle: (delta, new_rating) for handle, delta, new_rating in deltas}
 
-        # Count total finished contests (including this one, whose status is already "finished")
-        # so attendance_total is always the true count of concluded official contests.
-        total_finished = await db.scalar(
-            select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
-        ) or 1
-
         rated = 0
         for entry in entries:
-            member = member_map.get(entry.handle)
+            member = member_by_id.get(entry.member_id) or member_map.get(entry.handle)
             if not member:
                 continue
 
@@ -1243,6 +1341,13 @@ class DynamicContestService:
                 rank=entry.rank,
             ))
             rated += 1
+
+        # Re-compute university rank across all active members based on official ratings
+        all_ranked_res = await db.execute(
+            select(MemberProfile).order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc(), MemberProfile.id.asc())
+        )
+        for u_rank, m_prof in enumerate(all_ranked_res.scalars().all(), start=1):
+            m_prof.university_rank = u_rank
 
         return {"rated_count": rated, "message": f"Ratings applied for {rated} participant(s)."}
 

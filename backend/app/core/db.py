@@ -38,16 +38,16 @@ if not db_url.startswith("postgresql+asyncpg://"):
         "CCC Medi-Caps backend requires 'postgresql+asyncpg://...' (PostgreSQL 16+ with asyncpg)."
     )
 
-# High-concurrency connection pool tuned for PostgreSQL 16
+# Optimized connection pool tuned for PostgreSQL 16
 engine = create_async_engine(
     db_url,
     echo=False,
     future=True,
-    pool_size=20,
-    max_overflow=30,
+    pool_size=10,
+    max_overflow=15,
     pool_pre_ping=True,
     pool_recycle=1800,
-    pool_timeout=10,
+    pool_timeout=15,
 )
 
 # Async session factory
