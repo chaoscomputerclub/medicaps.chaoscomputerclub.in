@@ -317,19 +317,20 @@ class AssessmentController:
             )
         )
         session = s_result.scalars().first()
-        if not session:
-            score_val = 0.0
-            if contest:
-                sb_res = await db.execute(
-                    select(ScoreboardEntry).where(
-                        ScoreboardEntry.contest_id == contest.id,
-                        ScoreboardEntry.member_id == current_member.id,
-                    )
+        # Determine score
+        score_val = 0.0
+        if contest:
+            sb_res = await db.execute(
+                select(ScoreboardEntry).where(
+                    ScoreboardEntry.contest_id == contest.id,
+                    ScoreboardEntry.member_id == current_member.id,
                 )
-                sb_entry = sb_res.scalars().first()
-                if sb_entry:
-                    score_val = float(sb_entry.score or 0.0)
+            )
+            sb_entry = sb_res.scalars().first()
+            if sb_entry and sb_entry.score is not None:
+                score_val = float(sb_entry.score)
 
+        if not session:
             session = AssessmentSession(
                 assessment_id=assessment.id,
                 member_id=current_member.id,
@@ -343,54 +344,54 @@ class AssessmentController:
                 total_score=score_val,
             )
             db.add(session)
-            await db.flush()
-
-        if session.status == "submitted":
-            return {
-                "success": True,
-                "already_submitted": True,
-                "message": "Contest attempt already submitted.",
-                "total_score": session.total_score,
-            }
-
-        if session.status == "in_progress":
+        else:
             session.status = "submitted"
             session.submitted_at = now_utc()
+            if (session.total_score is None or session.total_score == 0) and score_val > 0:
+                session.total_score = score_val
 
-            if contest:
-                reg_stmt = select(ContestRegistration).where(
-                    ContestRegistration.contest_id == contest.id,
-                    ContestRegistration.member_id == current_member.id,
+        # Always update ContestRegistration status to "submitted" and assessment_taken = True
+        final_score = session.total_score if (session and session.total_score is not None) else score_val
+        if contest:
+            reg_stmt = select(ContestRegistration).where(
+                ContestRegistration.contest_id == contest.id,
+                ContestRegistration.member_id == current_member.id,
+            )
+            reg_res = await db.execute(reg_stmt)
+            reg = reg_res.scalars().first()
+            if not reg:
+                reg = ContestRegistration(
+                    contest_id=contest.id,
+                    member_id=current_member.id,
+                    registered_at=now_utc(),
+                    status="submitted",
+                    assessment_taken=True,
+                    assessment_score=final_score,
                 )
-                reg_res = await db.execute(reg_stmt)
-                reg = reg_res.scalars().first()
-                if not reg:
-                    reg = ContestRegistration(
-                        contest_id=contest.id,
-                        member_id=current_member.id,
-                        registered_at=now_utc(),
-                        assessment_taken=True,
-                        assessment_score=session.total_score,
-                    )
-                    db.add(reg)
-                else:
-                    reg.assessment_taken = True
-                    reg.assessment_score = session.total_score
+                db.add(reg)
+            else:
+                reg.status = "submitted"
+                reg.assessment_taken = True
+                reg.assessment_score = final_score
 
-            await db.commit()
-            await invalidate_ranking(contest_slug)
-            if contest:
-                try:
-                    await AssessmentService.evaluate_and_qualify_top_30(contest_slug, db)
-                except Exception:
-                    pass
+        await db.commit()
+        await invalidate_ranking(contest_slug)
+        if contest:
             try:
-                from app.core.cache import delete_cache_pattern
-                await delete_cache_pattern("cache:*")
+                await AssessmentService.evaluate_and_qualify_top_30(contest_slug, db)
             except Exception:
                 pass
+        try:
+            from app.core.cache import delete_cache_pattern
+            await delete_cache_pattern("cache:*")
+        except Exception:
+            pass
 
-        return {"success": True, "total_score": session.total_score if session else 0}
+        return {
+            "success": True,
+            "message": "Contest attempt finalized and submitted.",
+            "total_score": final_score,
+        }
 
     @staticmethod
     async def get_assessment_leaderboard(

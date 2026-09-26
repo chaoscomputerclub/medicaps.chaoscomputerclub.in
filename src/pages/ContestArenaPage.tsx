@@ -127,9 +127,16 @@ export function ContestArenaPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error } =
+  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error, registration } =
     useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
+
+  const isAlreadySubmitted = Boolean(
+    registration?.status === "submitted" ||
+    registration?.assessment_taken ||
+    registration?.assessment_status === "submitted" ||
+    registration?.assessment_status === "completed"
+  );
 
   useEffect(() => {
     if (!member && getToken()) {
@@ -722,8 +729,64 @@ export function ContestArenaPage() {
     return <AssessmentStudioSkeleton />;
   }
 
-  if (!arenaData) {
+  if (isAlreadySubmitted || !arenaData) {
     const errLower = (error || "").toLowerCase();
+    const isSubmitted =
+      isAlreadySubmitted ||
+      errLower.includes("already been submitted") ||
+      errLower.includes("already submitted") ||
+      errLower.includes("retake") ||
+      errLower.includes("attempt concluded");
+
+    if (isSubmitted) {
+      return (
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+          <div className="w-full max-w-lg space-y-6 rounded-lg border border-lime-500/30 bg-zinc-950 p-8 text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-lime-500 via-emerald-400 to-lime-500" />
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-lime-500/30 bg-lime-500/10 text-lime-400">
+              <CheckCircle2 className="size-7" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-semibold">
+                Contest Attempt Concluded · Final Record
+              </span>
+              <h1 className="text-xl font-semibold tracking-tight text-white font-sans">
+                Contest Already Submitted
+              </h1>
+              <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+                You have officially finalized and submitted your contest attempt. In accordance with the fair competition protocol, retakes and further code executions are strictly prohibited.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+              <Button asChild variant="default" className="w-full">
+                <Link to={`/contests/${contestSlug}/results`}>
+                  <Trophy className="size-3.5 mr-1.5" />
+                  <span>View Official Standings</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to={`/contests/${contestSlug}/summary`}>
+                  <FileText className="size-3.5 mr-1.5" />
+                  <span>Review Submission Summary</span>
+                </Link>
+              </Button>
+            </div>
+
+            <div className="pt-1">
+              <Button asChild variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-300">
+                <Link to={`/contests/${contestSlug}`}>
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Back to Contest Overview</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const isUnauthenticated =
       (!member && !getToken()) ||
       errLower.includes("authentication") ||

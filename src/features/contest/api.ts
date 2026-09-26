@@ -202,6 +202,7 @@ export const contestApi = {
           );
           return {
             registered: Boolean(raw["registered"]),
+            status: (raw["status"] ?? null) as string | null,
             contest_slug: slug,
             contest_status: (raw["contest_status"] ?? null) as RegistrationStatus["contest_status"],
             registered_at: raw["registered_at"] ?? null,

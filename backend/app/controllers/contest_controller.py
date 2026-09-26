@@ -577,25 +577,34 @@ class ContestController:
         else:
             eligibility_message = "This contest has officially concluded."
 
+        from app.services.contest_eligibility_service import is_contest_attempt_submitted
+        is_submitted, _ = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_submitted or assessment_taken or (reg and (reg.status in ("submitted", "completed") or reg.assessment_taken)):
+            assessment_taken = True
+            can_take_assessment = False
+            can_resume_assessment = False
+            can_enter_live_contest = False
+            eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
+
         return {
             "registered": is_registered,
             "contest_slug": slug,
             "contest_status": contest_status,
-            "status": reg.status if reg else None,
+            "status": "submitted" if (is_submitted or (reg and reg.status == "submitted")) else (reg.status if reg else None),
             "registered_at": reg.registered_at.isoformat() if reg else None,
             "assessment_taken": assessment_taken,
             "assessment_score": assessment_score,
             "assessment_rank": assessment_rank,
-            "assessment_status": assessment_session_status,
-            "can_resume_assessment": can_resume_assessment,
+            "assessment_status": "submitted" if is_submitted else assessment_session_status,
+            "can_resume_assessment": can_resume_assessment and not is_submitted,
             "anti_cheat_violations": anti_cheat_violations,
             "max_violations": max_violations,
-            "remaining_seconds": remaining_seconds,
+            "remaining_seconds": 0 if is_submitted else remaining_seconds,
             "is_top_30_qualified": is_top_30_qualified,
             "is_checked_in": is_checked_in,
             "check_in_status": check_in_status,
-            "can_take_assessment": can_take_assessment,
-            "can_enter_live_contest": can_enter_live_contest,
+            "can_take_assessment": can_take_assessment and not is_submitted,
+            "can_enter_live_contest": can_enter_live_contest and not is_submitted and not assessment_taken,
             "eligibility_message": eligibility_message,
             "is_dev_bypass": is_dev_bypass,
         }
@@ -615,6 +624,14 @@ class ContestController:
             raise HTTPException(
                 status_code=400,
                 detail="Registration is only open for upcoming or live contests.",
+            )
+
+        from app.services.contest_eligibility_service import is_contest_attempt_submitted
+        is_sub, _ = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub:
+            raise HTTPException(
+                status_code=400,
+                detail="Contest attempt has already been submitted. Retakes are not permitted.",
             )
 
         existing_reg = await db.execute(
@@ -688,6 +705,14 @@ class ContestController:
                 "message": f"You are not registered for {contest.title}.",
                 "registered_count": contest.registered_count,
             }
+
+        from app.services.contest_eligibility_service import is_contest_attempt_submitted
+        is_sub, _ = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub or (reg_record.status in ("submitted", "completed") or reg_record.assessment_taken):
+            raise HTTPException(
+                status_code=400,
+                detail="You cannot unregister after submitting your contest attempt.",
+            )
 
         # Delete the registration record
         await db.delete(reg_record)
@@ -852,6 +877,14 @@ class ContestController:
         from app.core.security import is_privileged_test_member
         is_test_user = is_privileged_test_member(current_member)
 
+        from app.services.contest_eligibility_service import is_contest_attempt_submitted
+        is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub:
+            raise HTTPException(
+                status_code=403,
+                detail=sub_reason or "Contest attempt has already been submitted. Retakes are not permitted.",
+            )
+
         if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":
                 raise HTTPException(
@@ -953,6 +986,14 @@ class ContestController:
         if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to execute code in contest arena.")
 
+        from app.services.contest_eligibility_service import is_contest_attempt_submitted
+        is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub:
+            raise HTTPException(
+                status_code=403,
+                detail="Contest attempt has already been submitted. Further code runs are locked.",
+            )
+
         if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":
                 raise HTTPException(
@@ -1047,6 +1088,14 @@ class ContestController:
 
         if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to submit code in contest arena.")
+
+        from app.services.contest_eligibility_service import is_contest_attempt_submitted
+        is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub:
+            raise HTTPException(
+                status_code=403,
+                detail="Contest attempt has already been submitted. Further code submissions are locked.",
+            )
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":

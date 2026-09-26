@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
+  FileText,
   Lock,
   Play,
   Shield,
@@ -11,6 +12,7 @@ import {
   ShieldCheck,
   Cpu,
   Monitor,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -108,8 +110,8 @@ export function ContestLobbyPage() {
     (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
   );
   const isAssessmentSubmitted = Boolean(
-    !isDevBypass &&
     !isInProgress && (
+      resolvedRegistration?.status === "submitted" ||
       resolvedRegistration?.assessment_taken ||
       resolvedRegistration?.assessment_status === "submitted" ||
       resolvedRegistration?.assessment_status === "completed"
@@ -163,36 +165,49 @@ export function ContestLobbyPage() {
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (
-        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
+        <div className="space-y-6 rounded-lg border border-lime-500/30 bg-black p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Contest Concluded
+              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-semibold">
+                Contest Concluded · Attempt Finalized
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-emerald-950/40 border border-emerald-500/30 text-emerald-400">
-                <CheckCircle2 className="size-5 text-emerald-400" />
+              <div className="p-2 rounded-md bg-lime-950/40 border border-lime-500/30 text-lime-400">
+                <CheckCircle2 className="size-5 text-lime-400" />
               </div>
               <h1 className="text-xl font-semibold text-white tracking-tight font-sans">
                 Contest Solutions Submitted
               </h1>
             </div>
             <p className="text-xs font-mono text-zinc-400 leading-relaxed">
-              Your contest submissions have concluded and your scores are safely recorded. Standings and ratings will update automatically as evaluations finish.
+              Your contest submissions have concluded and your scores are safely recorded. Under the fair competition protocol, retakes and further attempts are not permitted.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               asChild
-              variant="outline"
+              variant="default"
               size="sm"
             >
-              <Link to={`/contests/${contestSlug}/results`}>View Live Standings</Link>
+              <Link to={`/contests/${contestSlug}/results`}>
+                <Trophy className="size-3.5 mr-1.5" />
+                <span>View Standings</span>
+              </Link>
             </Button>
             <Button
               asChild
               variant="outline"
+              size="sm"
+            >
+              <Link to={`/contests/${contestSlug}/summary`}>
+                <FileText className="size-3.5 mr-1.5" />
+                <span>View Summary</span>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="ghost"
               size="sm"
             >
               <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>

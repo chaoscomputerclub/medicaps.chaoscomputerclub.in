@@ -68,6 +68,13 @@ export function ContestSummaryPage() {
   );
   const member = useAppSelector((state) => state.auth.member);
 
+  const isAlreadySubmitted = Boolean(
+    registration?.status === "submitted" ||
+    registration?.assessment_taken ||
+    registration?.assessment_status === "submitted" ||
+    registration?.assessment_status === "completed"
+  );
+
   useEffect(() => {
     if (!member && getToken()) {
       dispatch(fetchCurrentUserThunk());
@@ -210,9 +217,9 @@ export function ContestSummaryPage() {
         {/* Left: Microservice Brand & Navigation */}
         <div className="flex items-center gap-3.5 min-w-0">
           <Link
-            to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}
+            to={isAlreadySubmitted ? `/contests/${contestSlug}` : `/contests/${contestSlug}/problems/${firstProblemSlug}`}
             className="flex items-center gap-2 shrink-0 group"
-            title="Return to Contest Arena"
+            title={isAlreadySubmitted ? "Return to Contest Overview" : "Return to Contest Arena"}
           >
             <div className="size-7 rounded bg-lime-400/10 border border-lime-400/30 flex items-center justify-center group-hover:bg-lime-400/20 transition-colors">
               <img src="/logo.webp" alt="CCC" className="size-5 object-contain" />
@@ -243,15 +250,15 @@ export function ContestSummaryPage() {
 
         {/* Right: Actions, Timer, Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          {/* Back to Arena Button */}
+          {/* Back to Arena / Overview Button */}
           <Button
             asChild
             variant="outline"
             size="sm"
           >
-            <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
+            <Link to={isAlreadySubmitted ? `/contests/${contestSlug}` : `/contests/${contestSlug}/problems/${firstProblemSlug}`}>
               <ArrowLeft className="size-3.5 mr-1" />
-              <span className="hidden sm:inline">Back to</span> Workspace
+              <span className="hidden sm:inline">{isAlreadySubmitted ? "Back to" : "Back to"}</span> {isAlreadySubmitted ? "Overview" : "Workspace"}
             </Link>
           </Button>
 
@@ -490,53 +497,97 @@ export function ContestSummaryPage() {
         </section>
 
         {/* Final Submission Card */}
-        <section className="p-6 rounded-lg border border-white/10 bg-zinc-950 space-y-4 shadow-xl">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-md border border-white/10 bg-zinc-900 text-lime-400 shrink-0 mt-0.5">
-              <Trophy className="size-5" />
+        {isAlreadySubmitted ? (
+          <section className="p-6 rounded-lg border border-lime-500/30 bg-zinc-950 space-y-4 shadow-xl">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400 shrink-0 mt-0.5">
+                <CheckCircle2 className="size-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-white">
+                  Contest Attempt Concluded &amp; Submitted
+                </h3>
+                <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+                  Your contest solutions have been officially submitted and recorded in the Medi-Caps Chapter contest ledger. In accordance with the fair competition protocol, retakes and further attempts are strictly locked.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-semibold text-white">
-                Ready to Complete Contest?
-              </h3>
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                {unattemptedCount > 0 ? (
-                  <span className="text-amber-400">
-                    You still have <strong>{unattemptedCount} unattempted question(s)</strong>. You can return to the coding workspace to complete them, or submit now if you are finished.
-                  </span>
-                ) : (
-                  <span>
-                    All challenges have been attempted and verified. Click below to officially submit your contest attempt and lock in your score.
-                  </span>
-                )}
-              </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
+              <Button
+                asChild
+                variant="outline"
+                size="default"
+                className="w-full sm:w-auto"
+              >
+                <Link to={`/contests/${contestSlug}`}>
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Return to Contest Overview</span>
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="default"
+                size="default"
+                className="w-full sm:w-auto"
+              >
+                <Link to={`/contests/${contestSlug}/results`}>
+                  <Trophy className="size-3.5 mr-1.5" />
+                  <span>View Official Standings</span>
+                </Link>
+              </Button>
             </div>
-          </div>
+          </section>
+        ) : (
+          <section className="p-6 rounded-lg border border-white/10 bg-zinc-950 space-y-4 shadow-xl">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-md border border-white/10 bg-zinc-900 text-lime-400 shrink-0 mt-0.5">
+                <Trophy className="size-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-white">
+                  Ready to Complete Contest?
+                </h3>
+                <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                  {unattemptedCount > 0 ? (
+                    <span className="text-amber-400">
+                      You still have <strong>{unattemptedCount} unattempted question(s)</strong>. You can return to the coding workspace to complete them, or submit now if you are finished.
+                    </span>
+                  ) : (
+                    <span>
+                      All challenges have been attempted and verified. Click below to officially submit your contest attempt and lock in your score.
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
-            <Button
-              asChild
-              variant="outline"
-              size="default"
-              className="w-full sm:w-auto"
-            >
-              <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
-                <ArrowLeft className="size-3.5 mr-1.5" />
-                <span>Return to Coding Workspace</span>
-              </Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
+              <Button
+                asChild
+                variant="outline"
+                size="default"
+                className="w-full sm:w-auto"
+              >
+                <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Return to Coding Workspace</span>
+                </Link>
+              </Button>
 
-            <Button
-              onClick={() => setShowSubmitModal(true)}
-              variant="default"
-              size="default"
-              className="w-full sm:w-auto"
-            >
-              <Send className="size-3.5 mr-1.5" />
-              <span>Submit Final Contest</span>
-            </Button>
-          </div>
-        </section>
+              <Button
+                onClick={() => setShowSubmitModal(true)}
+                variant="default"
+                size="default"
+                className="w-full sm:w-auto"
+              >
+                <Send className="size-3.5 mr-1.5" />
+                <span>Submit Final Contest</span>
+              </Button>
+            </div>
+          </section>
+        )}
       </main>
 
       {/* Microservice Architecture Telemetry Footer */}

@@ -50,6 +50,7 @@ export type ContestProblemPreview = {
 
 export type RegistrationStatus = {
   registered: boolean;
+  status?: string | null;
   contest_slug: string;
   contest_status: ContestStatus | null;
   registered_at: string | null;

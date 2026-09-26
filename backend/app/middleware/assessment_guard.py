@@ -80,24 +80,23 @@ async def require_active_assessment_session(
         session.anti_cheat_violations = 0
         await db.commit()
 
-    if not is_test_user:
-        if session.status == "submitted":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Assessment has already been submitted and finalized. Reattempts and code executions are not permitted.",
-            )
+    if session.status == "submitted":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Assessment has already been submitted and finalized. Reattempts and code executions are not permitted.",
+        )
 
-        if session.status == "disqualified":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Assessment session was disqualified due to anti-cheat policy violations. Reattempts are not permitted.",
-            )
+    if session.status == "disqualified":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Assessment session was disqualified due to anti-cheat policy violations. Reattempts are not permitted.",
+        )
 
-        if session.status != "in_progress":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Assessment session is in '{session.status}' state and is not currently active.",
-            )
+    if not is_test_user and session.status != "in_progress":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Assessment session is in '{session.status}' state and is not currently active.",
+        )
 
     # Check 120-minute timer expiration
     started_at = session.started_at

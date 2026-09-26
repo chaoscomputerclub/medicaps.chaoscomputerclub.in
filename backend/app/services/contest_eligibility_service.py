@@ -30,6 +30,51 @@ logger = logging.getLogger(__name__)
 from app.core.config import settings
 
 
+async def is_contest_attempt_submitted(
+    member: Optional[MemberProfile],
+    contest: OfflineContest,
+    db: AsyncSession,
+) -> Tuple[bool, str]:
+    """
+    Returns (True, reason) if the given member has already submitted or completed
+    their attempt for this contest (either screening assessment or live contest).
+    Once submitted, retakes and further attempts are strictly locked.
+    """
+    if not member or not contest:
+        return False, ""
+
+    # 1. Check ContestRegistration record
+    reg_res = await db.execute(
+        select(ContestRegistration).where(
+            ContestRegistration.contest_id == contest.id,
+            ContestRegistration.member_id == member.id,
+        )
+    )
+    reg = reg_res.scalars().first()
+    if reg and (reg.status in ("submitted", "completed") or reg.assessment_taken):
+        return True, "Contest attempt has already been submitted. Retakes are not permitted."
+
+    # 2. Check AssessmentSession record for any assessment linked to this contest
+    assess_res = await db.execute(
+        select(Assessment).where(
+            (Assessment.contest_id == contest.id) | (Assessment.slug == contest.slug)
+        )
+    )
+    assessments = assess_res.scalars().all()
+    for assess in assessments:
+        s_res = await db.execute(
+            select(AssessmentSession).where(
+                AssessmentSession.assessment_id == assess.id,
+                AssessmentSession.member_id == member.id,
+            )
+        )
+        sess = s_res.scalars().first()
+        if sess and sess.status in ("submitted", "completed", "expired", "disqualified"):
+            return True, "Contest attempt has already been submitted. Retakes are not permitted."
+
+    return False, ""
+
+
 async def is_member_eligible_for_live_contest(
     member: Optional[MemberProfile],
     contest: OfflineContest,
@@ -46,7 +91,13 @@ async def is_member_eligible_for_live_contest(
     If require_checked_in is False (for contest info & pass retrieval):
       - Top 30 qualifiers can view contest details to fetch and present their QR pass.
     """
-    # 0. Global Development Bypass Mode from ENV
+    # 0. STRICT ONE-ATTEMPT CHECK: Once submitted, retakes are strictly locked
+    if member:
+        is_sub, sub_reason = await is_contest_attempt_submitted(member, contest, db)
+        if is_sub:
+            return False, sub_reason
+
+    # 0.1 Global Development Bypass Mode from ENV
     if settings.is_dev_bypass_enabled:
         return True, "Development restriction bypass mode active."
 

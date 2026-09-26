@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Clock,
   Code2,
+  FileText,
   Flame,
   Flag,
   Loader2,
@@ -93,6 +94,12 @@ export function ContestOverviewPage() {
   const isLive = contest?.status === "live";
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
+  const isSubmitted = Boolean(
+    registration?.status === "submitted" ||
+    registration?.assessment_taken ||
+    registration?.assessment_status === "submitted" ||
+    registration?.assessment_status === "completed"
+  );
 
   const onCountdownExpire = useCallback(() => {
     refreshDetail(true);
@@ -281,7 +288,41 @@ export function ContestOverviewPage() {
         <div className="pt-4 border-t border-white/8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <AnimatePresence mode="wait" initial={false}>
-              {isLive ? (
+              {isSubmitted ? (
+                <motion.div
+                  key="submitted-action"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-wrap items-center gap-3"
+                >
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-lime-500/30 bg-lime-950/40 text-lime-400 font-sans text-xs font-semibold">
+                    <CheckCircle2 className="size-4 text-lime-400" />
+                    <span>Attempt Submitted · Retakes Not Permitted</span>
+                  </div>
+                  <Button
+                    asChild
+                    variant="default"
+                    size="hero"
+                  >
+                    <Link to={`/contests/${contestSlug}/results`}>
+                      <Trophy className="size-4 mr-1.5" />
+                      <span>View Standings</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="hero"
+                  >
+                    <Link to={`/contests/${contestSlug}/summary`}>
+                      <FileText className="size-4 mr-1.5" />
+                      <span>View Summary</span>
+                    </Link>
+                  </Button>
+                </motion.div>
+              ) : isLive ? (
                 <motion.div
                   key="live-action"
                   initial={{ opacity: 0, y: 6 }}
@@ -463,19 +504,32 @@ export function ContestOverviewPage() {
                       {p.points} pts
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Link
-                          to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      {isSubmitted ? (
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          className="border-white/10 text-zinc-400 hover:text-white"
                         >
-                          Solve →
-                        </Link>
-                      </Button>
+                          <Link to={`/contests/${contestSlug}/summary`}>
+                            Review →
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Link
+                            to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Solve →
+                          </Link>
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

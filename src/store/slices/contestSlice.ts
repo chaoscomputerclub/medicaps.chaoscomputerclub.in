@@ -251,6 +251,7 @@ export const contestSlice = createSlice({
     });
     builder.addCase(fetchContestArenaThunk.rejected, (state, action) => {
       state.isLoadingArena = false;
+      state.arenaData = null;
       state.error = action.payload as string;
     });
 
