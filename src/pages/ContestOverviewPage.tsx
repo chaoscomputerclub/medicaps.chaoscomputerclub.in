@@ -59,16 +59,22 @@ export function ContestOverviewPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { currentContest: rawContest, registration: rawRegistration, problems, isLoadingDetail } = useAppSelector(
-    (state) => state.contest
-  );
-  const [isRegistering, setIsRegistering] = useState(false);
+  const {
+    currentContest: rawContest,
+    registration: rawRegistration,
+    problems,
+    isLoadingDetail,
+    registeringSlugs,
+  } = useAppSelector((state) => state.contest);
+  const isRegistering = Boolean(registeringSlugs[contestSlug]);
 
   const refreshDetail = useCallback((force = false) => {
     if (!contestSlug) return;
     if (force) {
       invalidateSwrCache("contests:*");
       invalidateSwrCache(`contest:*:${contestSlug}*`);
+      invalidateSwrCache("system:contests:*");
+      invalidateSwrCache("passes:*");
     }
     dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
   }, [contestSlug, dispatch]);
@@ -127,6 +133,10 @@ export function ContestOverviewPage() {
         event.event === "contest_updated" ||
         event.event === "top30_qualified" ||
         event.event === "contest_created" ||
+        event.event === "contest_registered" ||
+        event.event === "contest_unregistered" ||
+        event.event === "pass_checked_in" ||
+        event.event === "contest_timer_reset" ||
         event.event === "assessment_finished" ||
         event.event === "submission_evaluated"
       ) {
@@ -139,7 +149,6 @@ export function ContestOverviewPage() {
 
   const handleRegister = async () => {
     try {
-      setIsRegistering(true);
       const res = await dispatch(registerContestThunk(contestSlug));
       if (registerContestThunk.fulfilled.match(res)) {
         toast.success("Successfully registered for the contest!");
@@ -149,14 +158,11 @@ export function ContestOverviewPage() {
       }
     } catch (e: any) {
       toast.error(e.message || "Registration failed");
-    } finally {
-      setIsRegistering(false);
     }
   };
 
   const handleUnregister = async () => {
     try {
-      setIsRegistering(true);
       const res = await dispatch(unregisterContestThunk(contestSlug));
       if (unregisterContestThunk.fulfilled.match(res)) {
         toast.success("Successfully unregistered from the contest.");
@@ -166,8 +172,6 @@ export function ContestOverviewPage() {
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to unregister");
-    } finally {
-      setIsRegistering(false);
     }
   };
 

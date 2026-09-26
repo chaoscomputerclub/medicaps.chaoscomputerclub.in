@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -19,14 +19,45 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyContestsSkeleton } from "@/organization/components/skeletons";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 export function MyContestsPage() {
-  const { data: rawData, loading } = useSwrData(
+  const dispatch = useAppDispatch();
+  const { myParticipations, isLoadingParticipations } = useAppSelector((state) => state.contest);
+  const member = useAppSelector((state) => state.auth.member);
+
+  const { data: rawData, loading: rawLoading } = useSwrData(
     "system:contests:history",
     () => contestSystemService.getHistory(),
     { ttl: 5 * 60 * 1000, staleTime: 30000, persistSession: true }
   );
-  const data = rawData || [];
+
+  useEffect(() => {
+    if (member && myParticipations.length === 0) {
+      void dispatch(fetchMyParticipationsThunk());
+    }
+  }, [member, myParticipations.length, dispatch]);
+
+  useRealtimeEvents(null, (event) => {
+    if (
+      event.event === "contest_registered" ||
+      event.event === "contest_unregistered" ||
+      event.event === "contest_status_changed" ||
+      event.event === "contest_concluded" ||
+      event.event === "contest_finished" ||
+      event.event === "top30_qualified" ||
+      event.event === "assessment_finished"
+    ) {
+      if (member) {
+        void dispatch(fetchMyParticipationsThunk(true));
+      }
+    }
+  });
+
+  const data = myParticipations && myParticipations.length > 0 ? myParticipations : ((rawData as any[]) || []);
+  const loading = rawLoading && data.length === 0;
   const [filter, setFilter] = useState<"all" | "registered" | "live" | "completed">("all");
 
   if (loading && !rawData) {

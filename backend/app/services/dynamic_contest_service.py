@@ -12,7 +12,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, delete, desc, update
+from sqlalchemy import select, delete, desc, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -31,7 +31,8 @@ from app.models.assessment import (
     AssessmentSubmission,
 )
 from app.models.campus_pass import CampusPass
-from app.models.member import MemberProfile
+from app.models.member import MemberProfile, RatingHistory
+from app.models.proof import TrustProof
 from app.schemas.dynamic_contest import (
     DynamicContestCreateRequest,
     DynamicContestUpdateRequest,
@@ -1162,6 +1163,8 @@ class DynamicContestService:
         """
         Re-rank ScoreboardEntry rows, compute ELO rating deltas, apply to
         MemberProfile.rating + peak_rating, and write RatingHistory entries.
+        Also increments MemberProfile.attendance_count and syncs attendance_total
+        so the leaderboard and profiles always reflect accurate attendance data.
         Called both from change_contest_status("finished") and the background auto-finish task.
         """
         from app.models.db_models import MemberProfile, RatingHistory, ScoreboardEntry
@@ -1206,15 +1209,26 @@ class DynamicContestService:
         deltas = calculate_rating_deltas(standings)
         delta_map = {handle: (delta, new_rating) for handle, delta, new_rating in deltas}
 
+        # Count total finished contests (including this one, whose status is already "finished")
+        # so attendance_total is always the true count of concluded official contests.
+        total_finished = await db.scalar(
+            select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
+        ) or 1
+
         rated = 0
         for entry in entries:
+            member = member_map.get(entry.handle)
+            if not member:
+                continue
+
+            # Sync attendance counters — increment per participant, set global total
+            member.attendance_count = (member.attendance_count or 0) + 1
+            member.attendance_total = total_finished
+
             if entry.handle not in delta_map:
                 continue
             delta, new_rating = delta_map[entry.handle]
             entry.rating_delta = delta
-            member = member_map.get(entry.handle)
-            if not member:
-                continue
             old_rating = member.rating if member.rating is not None else 1200
             member.rating = new_rating
             if member.peak_rating is None or new_rating > member.peak_rating:
@@ -1237,7 +1251,7 @@ class DynamicContestService:
         contest_slug: str,
         db: AsyncSession,
     ) -> Dict[str, Any]:
-        """Strict cascade deletion of a contest, its problems, screening assessments, and passes."""
+        """Strict cascade deletion of a contest, its problems, screening assessments, passes, rating history, and proofs."""
         c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
         contest = c_res.scalars().first()
         if not contest:
@@ -1246,16 +1260,47 @@ class DynamicContestService:
         contest_title = contest.title
         deleted_event_data = DynamicContestService._contest_event_data(contest, "deleted")
 
-        # Campus Passes Cascade
+        # 1. Collect all affected members (from ScoreboardEntry, RatingHistory, and ContestRegistration)
+        affected_member_ids = set()
+        sb_mids = (await db.execute(
+            select(ScoreboardEntry.member_id).where(ScoreboardEntry.contest_id == contest.id)
+        )).scalars().all()
+        affected_member_ids.update([m for m in sb_mids if m])
+
+        rh_mids = (await db.execute(
+            select(RatingHistory.member_id).where(
+                (RatingHistory.contest_id == contest.id) | (RatingHistory.contest_id == contest.slug)
+            )
+        )).scalars().all()
+        affected_member_ids.update([m for m in rh_mids if m])
+
+        reg_mids = (await db.execute(
+            select(ContestRegistration.member_id).where(ContestRegistration.contest_id == contest.id)
+        )).scalars().all()
+        affected_member_ids.update([m for m in reg_mids if m])
+
+        # 2. Rating History & Trust Proofs Cascade
+        await db.execute(
+            delete(RatingHistory).where(
+                (RatingHistory.contest_id == contest.id) | (RatingHistory.contest_id == contest.slug)
+            )
+        )
+        await db.execute(
+            delete(TrustProof).where(
+                (TrustProof.contest_id == contest.id) | (TrustProof.contest_title == contest.title)
+            )
+        )
+
+        # 3. Campus Passes Cascade
         await db.execute(delete(CampusPass).where(CampusPass.contest_id == contest.id))
 
-        # Contest Arena Submissions & Scoreboards Cascade
+        # 4. Contest Arena Submissions & Scoreboards Cascade
         await db.execute(delete(ContestSubmission).where(ContestSubmission.contest_id == contest.id))
         await db.execute(delete(ScoreboardEntry).where(ScoreboardEntry.contest_id == contest.id))
         await db.execute(delete(ContestRegistration).where(ContestRegistration.contest_id == contest.id))
         await db.execute(delete(ContestProblem).where(ContestProblem.contest_id == contest.id))
 
-        # Assessment Cascade
+        # 5. Assessment Cascade
         a_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
         assessment = a_res.scalars().first()
         if assessment:
@@ -1266,10 +1311,49 @@ class DynamicContestService:
             await db.execute(delete(AssessmentProblem).where(AssessmentProblem.assessment_id == assessment.id))
             await db.delete(assessment)
 
+        # 6. Delete contest entity
         await db.delete(contest)
+        await db.flush()
+
+        # 7. Recalculate rating, peak_rating, and attendance for affected members
+        total_finished = await db.scalar(
+            select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
+        ) or 0
+
+        for m_id in affected_member_ids:
+            m_res = await db.execute(select(MemberProfile).where(MemberProfile.id == m_id))
+            member = m_res.scalars().first()
+            if not member:
+                continue
+
+            # Query remaining valid RatingHistory entries joined with remaining OfflineContests
+            rh_res = await db.execute(
+                select(RatingHistory)
+                .join(OfflineContest, RatingHistory.contest_id == OfflineContest.id)
+                .where(RatingHistory.member_id == m_id)
+                .order_by(RatingHistory.contested_at.asc())
+            )
+            remaining_rh = rh_res.scalars().all()
+
+            if remaining_rh:
+                member.rating = remaining_rh[-1].new_rating
+                member.peak_rating = max(1200, max(rh.new_rating for rh in remaining_rh))
+            else:
+                member.rating = 1200
+                member.peak_rating = 1200
+
+            # Recalculate attendance count from remaining ScoreboardEntry rows
+            valid_attendance = await db.scalar(
+                select(func.count(ScoreboardEntry.id))
+                .join(OfflineContest, ScoreboardEntry.contest_id == OfflineContest.id)
+                .where(ScoreboardEntry.member_id == m_id)
+            ) or 0
+            member.attendance_count = valid_attendance
+            member.attendance_total = total_finished
+
         await db.commit()
 
-        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
         await DynamicContestService._publish_contest_event(
             "contest_deleted", contest_slug, deleted_event_data
         )

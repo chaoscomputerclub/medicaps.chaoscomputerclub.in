@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Response
 from pydantic import BaseModel
-from sqlalchemy import desc, select, delete
+from sqlalchemy import desc, select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -694,6 +694,26 @@ class ContestController:
         await db.commit()
         await delete_cache_pattern("cache:contest*")
         await delete_cache_pattern("cache:contests*")
+        await delete_cache_pattern(f"cache:*:{current_member.id}:*")
+        await delete_cache_pattern("cache:passes*")
+
+        try:
+            await broadcast_event(
+                event_type="contest_registered",
+                data={
+                    "contest_slug": contest.slug,
+                    "contest_title": contest.title,
+                    "member_id": current_member.id,
+                    "handle": current_member.handle,
+                    "full_name": current_member.full_name or current_member.handle,
+                    "registered_count": contest.registered_count,
+                    "capacity": contest.seat_capacity,
+                    "status": "confirmed",
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception as e:
+            logger.debug("Broadcast error: %s", e)
 
         return {
             "status": "confirmed",
@@ -762,8 +782,26 @@ class ContestController:
 
         # Invalidate related cache keys
         await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern("cache:contests*")
         await delete_cache_pattern(f"cache:*:{current_member.id}:*")
         await delete_cache_pattern("cache:passes*")
+
+        try:
+            await broadcast_event(
+                event_type="contest_unregistered",
+                data={
+                    "contest_slug": contest.slug,
+                    "contest_title": contest.title,
+                    "member_id": current_member.id,
+                    "handle": current_member.handle,
+                    "registered_count": contest.registered_count,
+                    "capacity": contest.seat_capacity,
+                    "status": "unregistered",
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception as e:
+            logger.debug("Broadcast error: %s", e)
 
         return {
             "status": "unregistered",
@@ -786,8 +824,8 @@ class ContestController:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        assigned_seat = "Lab-04-WS-07"
         effective_code = pass_code or f"CCC-PASS-{uuid.uuid4().hex[:6].upper()}"
+        assigned_seat = "UNASSIGNED"
 
         if current_member:
             pass_res = await db.execute(
@@ -798,6 +836,10 @@ class ContestController:
             )
             pass_obj = pass_res.scalars().first()
             if not pass_obj:
+                existing_passes_count = await db.scalar(
+                    select(func.count(CampusPass.id)).where(CampusPass.contest_id == contest.id)
+                ) or 0
+                assigned_seat = f"LAB-04-PC{existing_passes_count + 1:02d}"
                 pass_obj = CampusPass(
                     contest_id=contest.id,
                     member_id=current_member.id,
@@ -929,7 +971,7 @@ class ContestController:
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
 
-        assigned_seat = "Lab-04-WS-07"
+        assigned_seat = None
         pass_code = None
         check_in_status = "checked_in" if is_test_user else "issued"
 
@@ -1213,6 +1255,9 @@ class ContestController:
                 ScoreboardEntry.member_id == current_member.id,
             )
         )
+        contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
+        penalty_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
+
         sb_entry = sb_res.scalars().first()
         if not sb_entry:
             sb_entry = ScoreboardEntry(
@@ -1226,7 +1271,7 @@ class ContestController:
                 division="open",
                 score=points_awarded,
                 solved=1 if is_accepted else 0,
-                penalty_seconds=120,
+                penalty_seconds=penalty_secs,
                 telemetry=[{"problem_index": problem.problem_index, "status": "solved" if is_accepted else "failed", "attempts": 1, "is_first_ac": False}],
             )
             db.add(sb_entry)
@@ -1234,6 +1279,18 @@ class ContestController:
             if is_accepted:
                 sb_entry.score += points_awarded
                 sb_entry.solved += 1
+                sb_entry.penalty_seconds = penalty_secs
+
+        await db.flush()
+
+        # Real-time live re-ranking of scoreboard entries for this contest
+        all_sb_res = await db.execute(
+            select(ScoreboardEntry)
+            .where(ScoreboardEntry.contest_id == contest.id)
+            .order_by(ScoreboardEntry.score.desc(), ScoreboardEntry.penalty_seconds.asc())
+        )
+        for cur_rank, entry in enumerate(all_sb_res.scalars().all(), start=1):
+            entry.rank = cur_rank
 
         await db.commit()
         await delete_cache_pattern("cache:scoreboard*")

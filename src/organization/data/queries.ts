@@ -47,7 +47,7 @@ export const defaultMemberProfile: MemberProfile = {
   batch: "2023-27",
   rating: 1200,
   peak_rating: 1200,
-  peak_contest: "Campus Standby",
+  peak_contest: null,
   university_rank: 0,
   active_members: 0,
   attendance_count: 0,

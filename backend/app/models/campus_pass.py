@@ -32,6 +32,6 @@ class CampusPass(Base):
     checked_in_by = Column(String(100), nullable=True)  # Proctor name / handle
 
     # Relationships
-    member = relationship("MemberProfile", foreign_keys=[member_id])
-    contest = relationship("OfflineContest", foreign_keys=[contest_id])
+    member = relationship("MemberProfile", back_populates="campus_passes", foreign_keys=[member_id])
+    contest = relationship("OfflineContest", back_populates="campus_passes", foreign_keys=[contest_id])
 

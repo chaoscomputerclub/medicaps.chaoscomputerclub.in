@@ -91,6 +91,8 @@ export type CampusPass = {
   check_in_opens_at: string;
   status: "issued" | "checked_in" | "expired";
   check_in_status?: string;
+  qr_data?: string;
+  seat_number?: string;
 };
 export type AnnouncementFeedItem = {
   id: string;
@@ -119,7 +121,7 @@ export type MemberProfile = {
   batch: Batch;
   rating: number;
   peak_rating: number;
-  peak_contest: string;
+  peak_contest: string | null;
   university_rank: number;
   active_members: number;
   attendance_count: number;

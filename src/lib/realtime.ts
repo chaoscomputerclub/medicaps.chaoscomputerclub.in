@@ -34,6 +34,7 @@ const CONTEST_CACHE_PATTERNS = [
   "profile:*",
   "student:*",
   "hub:*",
+  "system:contests:*",
 ];
 
 export function invalidateContestCaches(): void {
@@ -99,6 +100,8 @@ export function useRealtimeEvents(
               parsed.event === "contest_updated" ||
               parsed.event === "contest_deleted" ||
               parsed.event === "contest_timer_reset" ||
+              parsed.event === "contest_registered" ||
+              parsed.event === "contest_unregistered" ||
               parsed.event === "top30_qualified" ||
               parsed.event === "submission_evaluated" ||
               parsed.event === "assessment_finished"

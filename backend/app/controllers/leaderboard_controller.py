@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import get_cache, set_cache
-from app.models.db_models import MemberProfile, RatingHistory
+from app.models.db_models import MemberProfile, RatingHistory, ScoreboardEntry, OfflineContest
 from app.models.schemas import LeaderboardRow
 from app.services.rating_service import get_rating_tier
 from app.lib.cache_keys import leaderboard_cache_key, TTL_LEADERBOARD
@@ -85,7 +85,7 @@ class LeaderboardController:
         total_count = await db.scalar(count_stmt) or 0
 
         stmt = (
-            stmt.order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc())
+            stmt.order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc(), MemberProfile.id.asc())
             .limit(safe_limit)
             .offset(safe_offset)
         )
@@ -94,6 +94,8 @@ class LeaderboardController:
 
         page_member_ids = [m.id for m in members]
         history_by_member: Dict[str, List[int]] = {}
+        # Live attendance count per member from ScoreboardEntry (avoids stale denormalized column)
+        live_attendance_by_member: Dict[str, int] = {}
         if page_member_ids:
             histories = await chunked_in_query(
                 session=db,
@@ -106,13 +108,28 @@ class LeaderboardController:
             for h in histories:
                 history_by_member.setdefault(h.member_id, []).append(h.new_rating - h.old_rating)
 
+            # Batch attendance count: one query, zero N+1
+            sb_count_rows = await db.execute(
+                select(ScoreboardEntry.member_id, func.count(ScoreboardEntry.id).label("cnt"))
+                .where(ScoreboardEntry.member_id.in_(page_member_ids))
+                .group_by(ScoreboardEntry.member_id)
+            )
+            for member_id, cnt in sb_count_rows.all():
+                live_attendance_by_member[member_id] = cnt
+
+        # Total finished (concluded) contests for attendance_total denominator
+        total_finished_contests = await db.scalar(
+            select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
+        ) or 0
+
         rows = []
         for idx, m in enumerate(members):
             current_rank = safe_offset + idx + 1
             member_tier = get_rating_tier(m.rating)
 
-            attendance_count = m.attendance_count if m.attendance_count is not None else 0
-            attendance_total = m.attendance_total if m.attendance_total is not None else 0
+            # Use live ScoreboardEntry count; fall back to denormalized column only as last resort
+            attendance_count = live_attendance_by_member.get(m.id) or m.attendance_count or 0
+            attendance_total = total_finished_contests or m.attendance_total or 0
             attendance_rate = (
                 round((attendance_count / attendance_total) * 100, 1)
                 if attendance_total > 0

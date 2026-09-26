@@ -25,7 +25,14 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthPage } from "./pages/AuthPage";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestDetailThunk, fetchContestsThunk, removeContestFromState } from "@/store/slices/contestSlice";
+import {
+  fetchContestDetailThunk,
+  fetchContestsThunk,
+  fetchCampusPassThunk,
+  fetchMyParticipationsThunk,
+  removeContestFromState,
+  applyRealtimeEvent,
+} from "@/store/slices/contestSlice";
 import { useRealtimeEvents } from "@/lib/realtime";
 
 const CONTEST_MUTATION_EVENTS = [
@@ -36,6 +43,9 @@ const CONTEST_MUTATION_EVENTS = [
   "contest_concluded",
   "contest_finished",
   "contest_timer_reset",
+  "contest_registered",
+  "contest_unregistered",
+  "pass_checked_in",
   "assessment_finished",
   "submission_evaluated",
   "top30_qualified",
@@ -45,6 +55,7 @@ function ContestRealtimeSynchronizer() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const currentContestSlug = useAppSelector((state) => state.contest.currentContest?.slug);
+  const currentMember = useAppSelector((state) => state.auth.member);
 
   useRealtimeEvents(
     null,
@@ -52,8 +63,17 @@ function ContestRealtimeSynchronizer() {
       if (!CONTEST_MUTATION_EVENTS.includes(event.event)) return;
 
       const contestSlug = event.contest_slug ?? event.data?.contest_slug;
-      void dispatch(fetchContestsThunk(true));
 
+      // 1. Immediately apply real-time mutation to synchronous Redux state
+      dispatch(applyRealtimeEvent({ event, currentMember }));
+
+      // 2. Refresh global contests list and user participation history
+      void dispatch(fetchContestsThunk(true));
+      if (currentMember) {
+        void dispatch(fetchMyParticipationsThunk(true));
+      }
+
+      // 3. Handle route or detail sync if user is currently viewing the affected contest
       if (!contestSlug || contestSlug !== currentContestSlug) return;
       if (event.event === "contest_deleted") {
         dispatch(removeContestFromState(contestSlug));
@@ -61,6 +81,13 @@ function ContestRealtimeSynchronizer() {
         return;
       }
       void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+      if (
+        event.event === "pass_checked_in" ||
+        event.event === "top30_qualified" ||
+        event.event === "contest_status_changed"
+      ) {
+        void dispatch(fetchCampusPassThunk(contestSlug));
+      }
     },
     CONTEST_MUTATION_EVENTS,
     true

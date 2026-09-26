@@ -9,7 +9,9 @@ import type {
   ContestArenaData,
   ArenaRunResult,
   ArenaSubmitResult,
+  ParticipationRecord,
 } from "@/features/contest/types";
+import type { RealtimeEvent } from "@/lib/realtime";
 
 export interface ContestState {
   contests: ContestSummary[];
@@ -18,6 +20,9 @@ export interface ContestState {
   pass: CampusPass | null;
   problems: ContestProblemPreview[];
   arenaData: ContestArenaData | null;
+  myParticipations: ParticipationRecord[];
+  isLoadingParticipations: boolean;
+  registeringSlugs: Record<string, boolean>;
   runResult: ArenaRunResult | null;
   submitResult: ArenaSubmitResult | null;
   isLoading: boolean;
@@ -49,6 +54,9 @@ const initialState: ContestState = {
   pass: null,
   problems: [],
   arenaData: null,
+  myParticipations: [],
+  isLoadingParticipations: false,
+  registeringSlugs: {},
   runResult: null,
   submitResult: null,
   isLoading: false,
@@ -114,13 +122,25 @@ export const fetchContestArenaThunk = createAsyncThunk(
   }
 );
 
+export const fetchMyParticipationsThunk = createAsyncThunk(
+  "contest/fetchMyParticipations",
+  async (force: boolean | undefined = false, { rejectWithValue }) => {
+    try {
+      return await contestApi.participated(Boolean(force));
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to load participation history");
+    }
+  }
+);
+
 export const registerContestThunk = createAsyncThunk(
   "contest/register",
   async (slug: string, { rejectWithValue }) => {
     try {
       const result = await contestApi.register(slug);
       const reg = await contestApi.registrationStatus(slug, true);
-      return { result, registration: reg };
+      const myParticipated = await contestApi.participated(true).catch(() => null);
+      return { result, registration: reg, myParticipated, slug };
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to register for contest");
     }
@@ -133,7 +153,8 @@ export const unregisterContestThunk = createAsyncThunk(
     try {
       const result = await contestApi.unregister(slug);
       const reg = await contestApi.registrationStatus(slug, true);
-      return { result, registration: reg };
+      const myParticipated = await contestApi.participated(true).catch(() => null);
+      return { result, registration: reg, myParticipated, slug };
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to unregister from contest");
     }
@@ -200,6 +221,7 @@ export const contestSlice = createSlice({
     removeContestFromState(state, action: PayloadAction<string>) {
       const contestSlug = action.payload;
       state.contests = state.contests.filter((contest) => contest.slug !== contestSlug);
+      state.myParticipations = state.myParticipations.filter((p) => p.contest_slug !== contestSlug);
       if (state.currentContest?.slug === contestSlug) {
         state.currentContest = null;
         state.registration = null;
@@ -208,6 +230,157 @@ export const contestSlice = createSlice({
         state.arenaData = null;
         state.runResult = null;
         state.submitResult = null;
+      }
+    },
+    applyRealtimeEvent(
+      state,
+      action: PayloadAction<{
+        event: RealtimeEvent;
+        currentMember?: { id?: string | number; handle?: string | null } | null;
+      }>
+    ) {
+      const { event, currentMember } = action.payload;
+      const slug = event.contest_slug ?? event.data?.contest_slug;
+      const isCurrentMember = Boolean(
+        currentMember &&
+          ((event.data?.member_id && String(event.data.member_id) === String(currentMember.id)) ||
+            (event.data?.handle &&
+              currentMember.handle &&
+              String(event.data.handle).toLowerCase() === currentMember.handle.toLowerCase()))
+      );
+
+      switch (event.event) {
+        case "contest_registered": {
+          const regCount = event.data?.registered_count;
+          const targetContest = state.contests.find((c) => c.slug === slug);
+          if (targetContest && typeof regCount === "number") {
+            targetContest.registered_count = regCount;
+          }
+          if (state.currentContest && state.currentContest.slug === slug && typeof regCount === "number") {
+            state.currentContest.registered_count = regCount;
+          }
+          if (isCurrentMember) {
+            if (targetContest) targetContest.registered = true;
+            if (state.currentContest && state.currentContest.slug === slug) {
+              state.currentContest.registered = true;
+              if (state.registration) {
+                state.registration.registered = true;
+                state.registration.status = "confirmed";
+              }
+            }
+          }
+          break;
+        }
+        case "contest_unregistered": {
+          const regCount = event.data?.registered_count;
+          const targetContest = state.contests.find((c) => c.slug === slug);
+          if (targetContest && typeof regCount === "number") {
+            targetContest.registered_count = regCount;
+          }
+          if (state.currentContest && state.currentContest.slug === slug && typeof regCount === "number") {
+            state.currentContest.registered_count = regCount;
+          }
+          if (isCurrentMember) {
+            if (targetContest) targetContest.registered = false;
+            if (state.currentContest && state.currentContest.slug === slug) {
+              state.currentContest.registered = false;
+              if (state.registration) {
+                state.registration.registered = false;
+              }
+            }
+            state.myParticipations = state.myParticipations.filter((p) => p.contest_slug !== slug);
+          }
+          break;
+        }
+        case "contest_status_changed":
+        case "contest_concluded":
+        case "contest_finished": {
+          const newStatus =
+            event.event === "contest_concluded" || event.event === "contest_finished"
+              ? "finished"
+              : (event.data?.new_status ?? event.data?.status ?? "upcoming");
+          const targetContest = state.contests.find((c) => c.slug === slug);
+          if (targetContest) targetContest.status = newStatus;
+          if (state.currentContest && state.currentContest.slug === slug) {
+            state.currentContest.status = newStatus;
+          }
+          const partRecord = state.myParticipations.find((p) => p.contest_slug === slug);
+          if (partRecord) partRecord.status = newStatus;
+          break;
+        }
+        case "contest_timer_reset": {
+          const startsAt = event.data?.starts_at;
+          if (startsAt) {
+            const targetContest = state.contests.find((c) => c.slug === slug);
+            if (targetContest) {
+              targetContest.starts_at = startsAt;
+              targetContest.status = "upcoming";
+            }
+            if (state.currentContest && state.currentContest.slug === slug) {
+              state.currentContest.starts_at = startsAt;
+              state.currentContest.status = "upcoming";
+            }
+          }
+          break;
+        }
+        case "contest_updated": {
+          const targetContest = state.contests.find((c) => c.slug === slug);
+          if (targetContest && event.data) {
+            if (event.data.contest_title) targetContest.title = event.data.contest_title;
+            if (event.data.status) targetContest.status = event.data.status;
+            if (event.data.starts_at) targetContest.starts_at = event.data.starts_at;
+            if (event.data.ends_at) targetContest.ends_at = event.data.ends_at;
+            if (typeof event.data.registered_count === "number") {
+              targetContest.registered_count = event.data.registered_count;
+            }
+          }
+          if (state.currentContest && state.currentContest.slug === slug && event.data) {
+            if (event.data.contest_title) state.currentContest.title = event.data.contest_title;
+            if (event.data.status) state.currentContest.status = event.data.status;
+            if (event.data.starts_at) state.currentContest.starts_at = event.data.starts_at;
+            if (event.data.ends_at) state.currentContest.ends_at = event.data.ends_at;
+            if (typeof event.data.registered_count === "number") {
+              state.currentContest.registered_count = event.data.registered_count;
+            }
+          }
+          break;
+        }
+        case "contest_deleted": {
+          state.contests = state.contests.filter((c) => c.slug !== slug);
+          state.myParticipations = state.myParticipations.filter((p) => p.contest_slug !== slug);
+          if (state.currentContest?.slug === slug) {
+            state.currentContest = null;
+            state.registration = null;
+            state.pass = null;
+            state.problems = [];
+            state.arenaData = null;
+          }
+          break;
+        }
+        case "pass_checked_in": {
+          if (isCurrentMember) {
+            if (state.pass) {
+              state.pass.status = "checked_in";
+              state.pass.check_in_status = "checked_in";
+              if (event.data?.seat_number) {
+                state.pass.seat = event.data.seat_number;
+                state.pass.seat_number = event.data.seat_number;
+              }
+            }
+            if (state.arenaData && event.data?.seat_number) {
+              state.arenaData.assigned_seat = event.data.seat_number;
+              state.arenaData.check_in_status = "checked_in";
+            }
+          }
+          break;
+        }
+        case "top30_qualified": {
+          if (isCurrentMember && state.registration) {
+            state.registration.is_top_30_qualified = true;
+            state.registration.can_enter_live_contest = true;
+          }
+          break;
+        }
       }
     },
   },
@@ -270,34 +443,75 @@ export const contestSlice = createSlice({
       state.error = action.payload as string;
     });
 
+    // My Participations
+    builder.addCase(fetchMyParticipationsThunk.pending, (state) => {
+      state.isLoadingParticipations = true;
+    });
+    builder.addCase(fetchMyParticipationsThunk.fulfilled, (state, action) => {
+      state.isLoadingParticipations = false;
+      state.myParticipations = action.payload || [];
+    });
+    builder.addCase(fetchMyParticipationsThunk.rejected, (state) => {
+      state.isLoadingParticipations = false;
+    });
+
     // Register
+    builder.addCase(registerContestThunk.pending, (state, action) => {
+      state.registeringSlugs[action.meta.arg] = true;
+    });
     builder.addCase(registerContestThunk.fulfilled, (state, action) => {
+      const slug = action.payload.slug;
+      state.registeringSlugs[slug] = false;
       state.registration = action.payload.registration;
-      const slug = action.meta.arg;
       if (state.currentContest && state.currentContest.slug === slug) {
         state.currentContest.registered = true;
-        state.currentContest.registered_count = (action.payload.result as any)?.registered_count ?? (state.currentContest.registered_count + 1);
+        state.currentContest.registered_count =
+          (action.payload.result as any)?.registered_count ?? (state.currentContest.registered_count + 1);
       }
       const contestInList = state.contests.find((c) => c.slug === slug);
       if (contestInList) {
         contestInList.registered = true;
-        contestInList.registered_count = (action.payload.result as any)?.registered_count ?? (contestInList.registered_count + 1);
+        contestInList.registered_count =
+          (action.payload.result as any)?.registered_count ?? (contestInList.registered_count + 1);
       }
+      if (action.payload.myParticipated) {
+        state.myParticipations = action.payload.myParticipated;
+      }
+    });
+    builder.addCase(registerContestThunk.rejected, (state, action) => {
+      state.registeringSlugs[action.meta.arg] = false;
     });
 
     // Unregister
+    builder.addCase(unregisterContestThunk.pending, (state, action) => {
+      state.registeringSlugs[action.meta.arg] = true;
+    });
     builder.addCase(unregisterContestThunk.fulfilled, (state, action) => {
-      const slug = action.meta.arg;
-      state.registration = action.payload.registration ?? (state.registration ? { ...state.registration, registered: false } : null);
+      const slug = action.payload.slug;
+      state.registeringSlugs[slug] = false;
+      state.registration =
+        action.payload.registration ?? (state.registration ? { ...state.registration, registered: false } : null);
       if (state.currentContest && state.currentContest.slug === slug) {
         state.currentContest.registered = false;
-        state.currentContest.registered_count = (action.payload.result as any)?.registered_count ?? Math.max(0, state.currentContest.registered_count - 1);
+        state.currentContest.registered_count =
+          (action.payload.result as any)?.registered_count ??
+          Math.max(0, state.currentContest.registered_count - 1);
       }
       const contestInList = state.contests.find((c) => c.slug === slug);
       if (contestInList) {
         contestInList.registered = false;
-        contestInList.registered_count = (action.payload.result as any)?.registered_count ?? Math.max(0, contestInList.registered_count - 1);
+        contestInList.registered_count =
+          (action.payload.result as any)?.registered_count ??
+          Math.max(0, contestInList.registered_count - 1);
       }
+      if (action.payload.myParticipated) {
+        state.myParticipations = action.payload.myParticipated;
+      } else {
+        state.myParticipations = state.myParticipations.filter((p) => p.contest_slug !== slug);
+      }
+    });
+    builder.addCase(unregisterContestThunk.rejected, (state, action) => {
+      state.registeringSlugs[action.meta.arg] = false;
     });
 
     // CheckIn
@@ -333,5 +547,6 @@ export const contestSlice = createSlice({
   },
 });
 
-export const { clearArenaResults, resetContestState, removeContestFromState } = contestSlice.actions;
+export const { clearArenaResults, resetContestState, removeContestFromState, applyRealtimeEvent } =
+  contestSlice.actions;
 export default contestSlice.reducer;

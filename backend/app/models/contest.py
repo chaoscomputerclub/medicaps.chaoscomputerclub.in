@@ -50,10 +50,14 @@ class OfflineContest(Base):
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
     # Relationships
-    assessment = relationship("Assessment", back_populates="contest", uselist=False, cascade="all, delete-orphan")
-    problems = relationship("ContestProblem", back_populates="contest", cascade="all, delete-orphan")
-    scoreboard_entries = relationship("ScoreboardEntry", back_populates="contest", cascade="all, delete-orphan")
-    registrations = relationship("ContestRegistration", back_populates="contest", cascade="all, delete-orphan")
+    assessment = relationship("Assessment", back_populates="contest", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+    problems = relationship("ContestProblem", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    scoreboard_entries = relationship("ScoreboardEntry", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    registrations = relationship("ContestRegistration", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    rating_histories = relationship("RatingHistory", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    trust_proofs = relationship("TrustProof", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    campus_passes = relationship("CampusPass", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    submissions = relationship("ContestSubmission", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class ContestProblem(Base):
@@ -61,7 +65,7 @@ class ContestProblem(Base):
     __tablename__ = "contest_problems"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False, index=True)
     problem_index = Column(String(5), nullable=False)  # A, B, C, D, E, F
     title = Column(String(120), nullable=False)
     topic = Column(String(60), nullable=False)
@@ -84,6 +88,7 @@ class ContestProblem(Base):
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="problems")
+    submissions = relationship("ContestSubmission", back_populates="problem", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class ContestSubmission(Base):
@@ -105,15 +110,20 @@ class ContestSubmission(Base):
     points_awarded = Column(Integer, default=0, nullable=False)
     submitted_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
+    # Relationships
+    contest = relationship("OfflineContest", back_populates="submissions")
+    problem = relationship("ContestProblem", back_populates="submissions")
+    member = relationship("MemberProfile", back_populates="contest_submissions")
+
 
 class ScoreboardEntry(Base):
     """Ranked leaderboard placement for completed offline contest."""
     __tablename__ = "scoreboard_entries"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False)
-    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="SET NULL"), nullable=True)
-    rank = Column(Integer, nullable=False)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False, index=True)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="SET NULL"), nullable=True, index=True)
+    rank = Column(Integer, nullable=False, index=True)
     handle = Column(String(50), nullable=False)
     full_name = Column(String(100), nullable=False)
     department = Column(String(50), nullable=False)
@@ -127,6 +137,7 @@ class ScoreboardEntry(Base):
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="scoreboard_entries")
+    member = relationship("MemberProfile", back_populates="scoreboard_entries")
 
 
 class ContestRegistration(Base):

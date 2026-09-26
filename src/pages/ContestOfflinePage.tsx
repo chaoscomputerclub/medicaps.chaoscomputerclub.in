@@ -30,6 +30,7 @@ import {
 } from "@/store/slices/contestSlice";
 import { slugifyProblem } from "@/lib/utils";
 import { ContestOfflineSkeleton } from "@/organization/components/skeletons";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 export function ContestOfflinePage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -43,9 +44,25 @@ export function ContestOfflinePage() {
   useEffect(() => {
     if (contestSlug) {
       dispatch(fetchContestDetailThunk(contestSlug));
-      dispatch(fetchCampusPassThunk());
+      dispatch(fetchCampusPassThunk(contestSlug));
     }
   }, [contestSlug, dispatch]);
+
+  useRealtimeEvents(contestSlug, (event) => {
+    if (
+      event.event === "pass_checked_in" ||
+      event.event === "top30_qualified" ||
+      event.event === "contest_status_changed" ||
+      event.event === "contest_concluded" ||
+      event.event === "contest_finished" ||
+      event.event === "contest_timer_reset"
+    ) {
+      if (contestSlug) {
+        dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+        dispatch(fetchCampusPassThunk(contestSlug));
+      }
+    }
+  });
 
   const qualified = Boolean(registration?.is_top_30_qualified || registration?.can_enter_live_contest);
   const checkedIn = pass?.status === "checked_in";
@@ -139,7 +156,7 @@ export function ContestOfflinePage() {
             <h3 className="font-semibold text-white text-sm">Air-Gapped Final Arena</h3>
           </div>
           <p className="text-xs text-zinc-400 font-mono">
-            Seat: <strong className="text-lime-400">{pass?.seat ?? "Lab-04-WS-07"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
+            Seat: <strong className="text-lime-400">{pass?.seat || "Unassigned"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </p>
         </div>
         <Button asChild variant="outline" size="lg">
@@ -173,20 +190,20 @@ export function ContestOfflinePage() {
           </CardHeader>
           <CardContent className="space-y-3 font-mono text-xs text-zinc-400 p-5 pt-0">
             <div className="flex justify-center bg-white p-3 rounded-md">
-              <QRCodeSVG value={pass?.pass_code || `CCC-${contestSlug.toUpperCase()}-WS07`} size={95} level="M" />
+              <QRCodeSVG value={pass?.qr_data || pass?.pass_code || "PENDING_QUALIFICATION"} size={95} level="M" />
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-zinc-500">Code:</span>
-              <span className="text-lime-400 font-semibold">{pass?.pass_code || "CCC-PASS-TOP30"}</span>
+              <span className="text-lime-400 font-semibold">{pass?.pass_code || "Pending Qualification"}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-zinc-500">Workstation:</span>
-              <span className="text-white font-semibold">{pass?.seat ?? "Lab-04-WS-07"}</span>
+              <span className="text-white font-semibold">{pass?.seat || "Unassigned"}</span>
             </div>
             <Button
               className="w-full"
               variant={checkedIn ? "secondary" : "outline"}
-              disabled={checkedIn || isCheckingIn}
+              disabled={checkedIn || isCheckingIn || !pass?.pass_code}
               onClick={handleCheckIn}
             >
               {checkedIn ? "✓ Attendance Verified" : isCheckingIn ? "Checking In…" : "Confirm Check-in"}

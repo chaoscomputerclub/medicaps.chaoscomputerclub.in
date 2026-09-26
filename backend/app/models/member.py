@@ -45,8 +45,14 @@ class MemberProfile(Base):
     updated_at = Column(DateTime(timezone=True), default=now_utc, onupdate=now_utc, nullable=True)
 
     # Relationships
-    rating_history = relationship("RatingHistory", back_populates="member", cascade="all, delete-orphan")
-    contest_registrations = relationship("ContestRegistration", back_populates="member", cascade="all, delete-orphan")
+    rating_history = relationship("RatingHistory", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    contest_registrations = relationship("ContestRegistration", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    campus_passes = relationship("CampusPass", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    scoreboard_entries = relationship("ScoreboardEntry", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    contest_submissions = relationship("ContestSubmission", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    assessment_sessions = relationship("AssessmentSession", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    assessment_submissions = relationship("AssessmentSubmission", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    trust_proofs = relationship("TrustProof", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class OTPStore(Base):
@@ -65,16 +71,17 @@ class RatingHistory(Base):
     __tablename__ = "rating_history"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False)
-    contest_id = Column(String(36), nullable=True)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=True, index=True)
     contest_title = Column(String(120), nullable=False)
-    contested_at = Column(DateTime(timezone=True), nullable=False)
+    contested_at = Column(DateTime(timezone=True), nullable=False, index=True)
     old_rating = Column(Integer, nullable=False)
     new_rating = Column(Integer, nullable=False)
     rank = Column(Integer, nullable=False)
 
     # Relationships
     member = relationship("MemberProfile", back_populates="rating_history")
+    contest = relationship("OfflineContest", back_populates="rating_histories")
 
 
 class StudentFollow(Base):

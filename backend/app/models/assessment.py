@@ -25,7 +25,7 @@ class Assessment(Base):
     __tablename__ = "assessments"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=True)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=True, index=True)
     slug = Column(String(80), unique=True, nullable=False, index=True)
     title = Column(String(120), nullable=False)
     summary = Column(Text, nullable=False)
@@ -38,8 +38,8 @@ class Assessment(Base):
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="assessment")
-    problems = relationship("AssessmentProblem", back_populates="assessment", cascade="all, delete-orphan")
-    sessions = relationship("AssessmentSession", back_populates="assessment", cascade="all, delete-orphan")
+    problems = relationship("AssessmentProblem", back_populates="assessment", cascade="all, delete-orphan", passive_deletes=True)
+    sessions = relationship("AssessmentSession", back_populates="assessment", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class AssessmentProblem(Base):
@@ -47,7 +47,7 @@ class AssessmentProblem(Base):
     __tablename__ = "assessment_problems"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False)
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
     problem_index = Column(String(5), nullable=False)  # A, B, C, D
     title = Column(String(120), nullable=False)
     difficulty = Column(String(20), default="MEDIUM", nullable=False)  # EASY, MEDIUM, HARD
@@ -65,6 +65,7 @@ class AssessmentProblem(Base):
 
     # Relationships
     assessment = relationship("Assessment", back_populates="problems")
+    submissions = relationship("AssessmentSubmission", back_populates="problem", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class AssessmentSession(Base):
@@ -72,8 +73,8 @@ class AssessmentSession(Base):
     __tablename__ = "assessment_sessions"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False)
-    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False)
+    assessment_id = Column(String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, index=True)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     handle = Column(String(50), nullable=False, index=True)
     full_name = Column(String(100), nullable=False)
     department = Column(String(50), nullable=False)
@@ -89,7 +90,8 @@ class AssessmentSession(Base):
 
     # Relationships
     assessment = relationship("Assessment", back_populates="sessions")
-    submissions = relationship("AssessmentSubmission", back_populates="session", cascade="all, delete-orphan")
+    member = relationship("MemberProfile", back_populates="assessment_sessions")
+    submissions = relationship("AssessmentSubmission", back_populates="session", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class AssessmentSubmission(Base):
@@ -97,9 +99,9 @@ class AssessmentSubmission(Base):
     __tablename__ = "assessment_submissions"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    session_id = Column(String(36), ForeignKey("assessment_sessions.id", ondelete="CASCADE"), nullable=False)
-    problem_id = Column(String(36), ForeignKey("assessment_problems.id", ondelete="CASCADE"), nullable=False)
-    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False)
+    session_id = Column(String(36), ForeignKey("assessment_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    problem_id = Column(String(36), ForeignKey("assessment_problems.id", ondelete="CASCADE"), nullable=False, index=True)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     language = Column(String(20), nullable=False)
     code = Column(Text, nullable=False)
     verdict = Column(String(30), nullable=False)
@@ -111,3 +113,5 @@ class AssessmentSubmission(Base):
 
     # Relationships
     session = relationship("AssessmentSession", back_populates="submissions")
+    problem = relationship("AssessmentProblem", back_populates="submissions")
+    member = relationship("MemberProfile", back_populates="assessment_submissions")

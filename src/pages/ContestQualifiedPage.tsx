@@ -37,7 +37,7 @@ export function ContestQualifiedPage() {
       invalidateSwrCache("passes:*");
     }
     void dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
-    void dispatch(fetchCampusPassThunk());
+    void dispatch(fetchCampusPassThunk(contestSlug));
   }, [contestSlug, dispatch]);
 
   useEffect(() => {
@@ -189,7 +189,7 @@ export function ContestQualifiedPage() {
                 {/* White QR Code container */}
                 <div className="flex flex-col items-center gap-2 rounded-md bg-white p-5">
                   <QRCodeSVG
-                    value={`CCC-PASS:${pass.pass_code}:${pass.seat || "LAB-04-WS-07"}:QUALIFIED`}
+                    value={pass.qr_data || `CCC-PASS:${pass.pass_code}:${pass.seat || "UNASSIGNED"}:QUALIFIED`}
                     size={200}
                     level="H"
                   />
@@ -204,7 +204,7 @@ export function ContestQualifiedPage() {
                     {[
                       { label: "Cadet", value: pass.member_name },
                       { label: "Handle", value: `@${pass.handle}` },
-                      { label: "Workstation", value: pass.seat || "LAB-04-WS-07", hi: true },
+                      { label: "Workstation", value: pass.seat || "Assigned on Check-in", hi: true },
                       { label: "Qualifier", value: `#${rank} (${score} pts)` },
                     ].map(({ label, value, hi }) => (
                       <div key={label} className="rounded-md border border-white/8 bg-zinc-950 p-3">

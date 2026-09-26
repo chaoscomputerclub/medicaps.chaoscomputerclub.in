@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestsThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
+import { fetchContestsThunk, registerContestThunk, unregisterContestThunk, fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
 import { contestApi } from "@/features/contest/api";
 import { invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
@@ -156,7 +156,13 @@ function ContestCountdownBadge({
 export function ContestsHubPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { contests: rawContests, isLoading } = useAppSelector((state) => state.contest);
+  const {
+    contests: rawContests,
+    isLoading,
+    myParticipations,
+    isLoadingParticipations,
+    registeringSlugs,
+  } = useAppSelector((state) => state.contest);
   const cachedContests = (globalSwrStore.get<any>("contests:list")?.data ?? []) as ContestSummary[];
   const contests = rawContests && rawContests.length > 0 ? rawContests : cachedContests;
   const member = useAppSelector((state) => state.auth.member);
@@ -165,9 +171,6 @@ export function ContestsHubPage() {
   const activeTab = (searchParams.get("tab") as "past" | "my") || "past";
   const [searchQuery, setSearchQuery] = useState("");
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
-  const [myParticipations, setMyParticipations] = useState<ParticipationRecord[]>([]);
-  const [isLoadingParticipations, setIsLoadingParticipations] = useState(false);
-  const [registeringSlug, setRegisteringSlug] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 8;
@@ -178,14 +181,12 @@ export function ContestsHubPage() {
         invalidateSwrCache("contests:*");
         invalidateSwrCache("contest:*");
         invalidateSwrCache("passes:*");
+        invalidateSwrCache("system:contests:*");
       }
       void dispatch(fetchContestsThunk(force));
       void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
       if (member) {
-        contestApi
-          .participated(force)
-          .then((res: ParticipationRecord[]) => setMyParticipations(res || []))
-          .catch(() => {});
+        void dispatch(fetchMyParticipationsThunk(force));
       }
     },
     [dispatch, member]
@@ -202,6 +203,9 @@ export function ContestsHubPage() {
         event.event === "contest_updated" ||
         event.event === "contest_created" ||
         event.event === "contest_deleted" ||
+        event.event === "contest_registered" ||
+        event.event === "contest_unregistered" ||
+        event.event === "pass_checked_in" ||
         event.event === "assessment_finished" ||
         event.event === "submission_evaluated" ||
         event.event === "top30_qualified"
@@ -217,14 +221,7 @@ export function ContestsHubPage() {
     void dispatch(fetchContestsThunk(false));
     void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
     if (member) {
-      if (myParticipations.length === 0) {
-        setIsLoadingParticipations(true);
-      }
-      contestApi
-        .participated(false)
-        .then((res: ParticipationRecord[]) => setMyParticipations(res || []))
-        .catch(() => {})
-        .finally(() => setIsLoadingParticipations(false));
+      void dispatch(fetchMyParticipationsThunk(false));
     }
   }, [dispatch, member]);
 
@@ -305,14 +302,11 @@ export function ContestsHubPage() {
       return;
     }
     try {
-      setRegisteringSlug(slug);
       await dispatch(registerContestThunk(slug)).unwrap();
       toast.success("Successfully registered for the contest!");
       refreshHubData(true);
     } catch (err: any) {
       toast.error(err || "Registration failed");
-    } finally {
-      setRegisteringSlug(null);
     }
   };
 
@@ -322,14 +316,11 @@ export function ContestsHubPage() {
       return;
     }
     try {
-      setRegisteringSlug(slug);
       await dispatch(unregisterContestThunk(slug)).unwrap();
       toast.success("Successfully unregistered from the contest.");
       refreshHubData(true);
     } catch (err: any) {
       toast.error(err || "Failed to unregister");
-    } finally {
-      setRegisteringSlug(null);
     }
   };
 
@@ -616,11 +607,11 @@ export function ContestsHubPage() {
                                 e.stopPropagation();
                                 handleUnregister(contest.slug);
                               }}
-                              disabled={registeringSlug === contest.slug}
+                              disabled={Boolean(registeringSlugs[contest.slug])}
                               className="group/btn border-lime-400/30 bg-lime-400/10 text-lime-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400 active:scale-95"
                               title="Click to cancel registration"
                             >
-                              {registeringSlug === contest.slug ? (
+                              {Boolean(registeringSlugs[contest.slug]) ? (
                                 "Canceling..."
                               ) : (
                                 <>
@@ -641,11 +632,11 @@ export function ContestsHubPage() {
                                 e.stopPropagation();
                                 handleRegister(contest.slug);
                               }}
-                              disabled={registeringSlug === contest.slug}
+                              disabled={Boolean(registeringSlugs[contest.slug])}
                               className="group/btn shadow-lg shadow-lime-400/20 active:scale-95"
                             >
                               <Bell className="size-4 transition-transform duration-200 group-hover/btn:rotate-12 group-hover/btn:scale-110" />
-                              <span>{registeringSlug === contest.slug ? "Registering..." : "Register"}</span>
+                              <span>{Boolean(registeringSlugs[contest.slug]) ? "Registering..." : "Register"}</span>
                             </Button>
                           )}
                         </div>

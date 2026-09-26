@@ -34,6 +34,8 @@ from app.services.dynamic_contest_service import DynamicContestService
 from app.services.pass_service import PassService
 from app.services.assessment_service import AssessmentService
 from app.lib.pagination import normalize_pagination, inject_pagination_headers
+from app.core.cache import delete_cache_pattern
+from app.services.event_broadcaster import broadcast_event
 
 
 class AdminContestController:
@@ -247,6 +249,28 @@ class AdminContestController:
         db.add(new_reg)
         contest.registered_count += 1
         await db.commit()
+        await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern("cache:contests*")
+        await delete_cache_pattern(f"cache:*:{member.id}:*")
+        await delete_cache_pattern("cache:passes*")
+
+        try:
+            await broadcast_event(
+                event_type="contest_registered",
+                data={
+                    "contest_slug": contest.slug,
+                    "contest_title": contest.title,
+                    "member_id": member.id,
+                    "handle": member.handle,
+                    "full_name": member.full_name or member.handle,
+                    "registered_count": contest.registered_count,
+                    "capacity": contest.seat_capacity,
+                    "status": "confirmed",
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception:
+            pass
 
         return {
             "status": "confirmed",
@@ -351,6 +375,24 @@ class AdminContestController:
                     db.add(c_pass)
 
         await db.commit()
+        await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern("cache:contests*")
+        await delete_cache_pattern("cache:passes*")
+
+        try:
+            await broadcast_event(
+                event_type="contest_updated",
+                data={
+                    "contest_slug": contest.slug,
+                    "contest_title": contest.title,
+                    "status": contest.status,
+                    "registered_count": contest.registered_count,
+                    "change": "demo_participants_seeded",
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception:
+            pass
         return {
             "status": "success",
             "message": f"Successfully initialized {len(demo_cadets)} Medi-Caps participants for {contest.title}.",
@@ -464,6 +506,24 @@ class AdminContestController:
 
         contest.registered_count = 100
         await db.commit()
+        await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern("cache:contests*")
+        await delete_cache_pattern("cache:passes*")
+
+        try:
+            await broadcast_event(
+                event_type="contest_updated",
+                data={
+                    "contest_slug": contest.slug,
+                    "contest_title": contest.title,
+                    "status": contest.status,
+                    "registered_count": contest.registered_count,
+                    "change": "simulation_100_cadets_completed",
+                },
+                contest_slug=contest.slug,
+            )
+        except Exception:
+            pass
 
         await AssessmentService.evaluate_and_qualify_top_30(contest.slug, db)
 

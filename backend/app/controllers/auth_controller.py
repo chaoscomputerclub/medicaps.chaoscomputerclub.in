@@ -17,7 +17,7 @@ from typing import Optional, Dict, List, Any
 import logging
 from datetime import datetime, timezone
 from fastapi import HTTPException, status, UploadFile, Response
-from sqlalchemy import select
+from sqlalchemy import select, func, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import secrets
@@ -608,7 +608,11 @@ class AuthController:
         cache_key = f"cache:profile:{current_member.id}"
         cached = await get_cache(cache_key)
         if cached is not None:
-            return cached
+            c_mem = cached.get("member") if isinstance(cached, dict) else None
+            if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0 and (c_mem.get("rating", 1200) or 1200) != 1200:
+                cached = None
+            else:
+                return cached
 
         from sqlalchemy import func
         from app.models.db_models import ScoreboardEntry, OfflineContest, CampusPass, StudentFollow
@@ -634,12 +638,33 @@ class AuthController:
                 ScoreboardEntry.member_id == current_member.id
             )
         )
-        all_members_count = await db.scalar(select(func.count(MemberProfile.id)))
+        rank_filter = [
+            MemberProfile.is_onboarded.is_(True),
+            MemberProfile.handle.isnot(None),
+            ~MemberProfile.email.like("qa.%"),
+            ~MemberProfile.handle.like("qa_%"),
+        ]
+        all_members_count = await db.scalar(
+            select(func.count(MemberProfile.id)).where(*rank_filter)
+        ) or 0
+        current_peak = current_member.peak_rating if current_member.peak_rating is not None else current_member.rating
         ranked = await db.scalar(
             select(func.count(MemberProfile.id)).where(
-                MemberProfile.rating > current_member.rating
+                *rank_filter,
+                or_(
+                    MemberProfile.rating > current_member.rating,
+                    and_(
+                        MemberProfile.rating == current_member.rating,
+                        MemberProfile.peak_rating > current_peak,
+                    ),
+                    and_(
+                        MemberProfile.rating == current_member.rating,
+                        MemberProfile.peak_rating == current_peak,
+                        MemberProfile.id < current_member.id,
+                    ),
+                ),
             )
-        )        # Campus pass formatting — strictly None if not issued/qualified
+        ) or 0        # Campus pass formatting — strictly None if not issued/qualified
         pass_data = None
         if campus_pass:
             pass_data = {
@@ -675,12 +700,37 @@ class AuthController:
         recent_battles = []
         rating_history = []
         sb_items = sb_rows.all()
+        # Helper: compute consecutive-week contest streak from a list of datetime objects
+        def _compute_streak(dates):
+            if not dates:
+                return 0
+            import datetime as _dt
+            weeks = sorted(set(d.isocalendar()[:2] for d in dates))
+            if not weeks:
+                return 0
+            streak = 1
+            max_streak = 1
+            for i in range(1, len(weeks)):
+                py, pw = weeks[i - 1]
+                cy, cw = weeks[i]
+                prev_mon = _dt.date.fromisocalendar(py, pw, 1)
+                curr_mon = _dt.date.fromisocalendar(cy, cw, 1)
+                if (curr_mon - prev_mon).days == 7:
+                    streak += 1
+                    max_streak = max(max_streak, streak)
+                else:
+                    streak = 1
+            return max_streak
+
         podiums = 0
+        contest_dates_asc = []
         for sb, contest in sb_items:
             rank_val = sb.rank if (sb.rank and sb.rank < 900) else 1
             if rank_val <= 3:
                 podiums += 1
             c_slug = getattr(contest, "slug", "contest")
+            if contest.starts_at:
+                contest_dates_asc.append(contest.starts_at)
             recent_battles.append({
                 "contest": contest.title,
                 "contest_slug": c_slug,
@@ -701,32 +751,69 @@ class AuthController:
                 "delta": sb.rating_delta or 0,
             })
 
-        # Check explicit RatingHistory ledger records
-        from app.models.db_models import RatingHistory, TrustProof
+        contest_streak = _compute_streak(contest_dates_asc)
+
+        # Check explicit RatingHistory ledger records joined to active contests
+        from app.models.db_models import RatingHistory, TrustProof, OfflineContest
         rh_rows_res = await db.execute(
-            select(RatingHistory)
+            select(RatingHistory, OfflineContest)
+            .join(OfflineContest, RatingHistory.contest_id == OfflineContest.id)
             .where(RatingHistory.member_id == current_member.id)
             .order_by(RatingHistory.contested_at.asc())
         )
-        rh_records = rh_rows_res.scalars().all()
+        rh_records = rh_rows_res.all()
+
+        # Self-heal rating if member has no valid contest records or if records exist
+        if not rh_records and not sb_items:
+            if current_member.rating != 1200 or current_member.peak_rating != 1200 or current_member.attendance_count != 0:
+                current_member.rating = 1200
+                current_member.peak_rating = 1200
+                current_member.attendance_count = 0
+                await db.commit()
+        elif rh_records:
+            verified_rating = rh_records[-1][0].new_rating
+            verified_peak = max(1200, max(r[0].new_rating for r in rh_records))
+            if current_member.rating != verified_rating or current_member.peak_rating != verified_peak:
+                current_member.rating = verified_rating
+                current_member.peak_rating = verified_peak
+                await db.commit()
+
         if rh_records:
             rating_history = [
                 {
-                    "contest": rh.contest_title,
-                    "contest_slug": rh.contest_id or "",
+                    "contest": oc.title or rh.contest_title,
+                    "contest_slug": oc.slug or rh.contest_id or "",
                     "date": rh.contested_at.isoformat() if rh.contested_at else datetime.now(timezone.utc).isoformat(),
                     "rank": rh.rank if (rh.rank and rh.rank < 900) else 1,
                     "old_rating": rh.old_rating,
                     "new_rating": rh.new_rating,
                     "delta": rh.new_rating - rh.old_rating,
                 }
-                for rh in rh_records
+                for rh, oc in rh_records
             ]
+            # Also collect dates for streak from RatingHistory when available
+            if not contest_dates_asc and rh_records:
+                contest_dates_asc = [rh.contested_at for rh, _ in rh_records if rh.contested_at]
+                contest_streak = _compute_streak(contest_dates_asc)
+            # Compute peak_contest from the RatingHistory row with the highest new_rating
+            peak_contest = None
+            if rh_records:
+                peak_rh, peak_oc = max(rh_records, key=lambda r: r[0].new_rating)
+                peak_contest = peak_oc.title or peak_rh.contest_title
         else:
             # sb_rows was ordered DESC; chronological time-series chart requires ASC
             rating_history.reverse()
+            # Compute peak_contest from scoreboard battles if no RatingHistory exists
+            peak_contest = None
+            if sb_items:
+                # Find the battle with the highest rating after the contest
+                best = max(sb_items, key=lambda x: (x[0].rating_delta or 0))
+                peak_contest = best[1].title if best else None
 
-        # Add initial baseline onboarding rating point if history is populated
+        if not peak_contest:
+            peak_contest = None  # Absent until at least one rated contest
+
+        # Add initial baseline onboarding rating point ONLY IF valid contest history exists
         if rating_history:
             created_iso = current_member.created_at.isoformat() if getattr(current_member, "created_at", None) else "2026-09-01T00:00:00Z"
             base_point = {
@@ -741,14 +828,17 @@ class AuthController:
             if rating_history[0]["date"] > created_iso:
                 rating_history.insert(0, base_point)
 
-        # Cryptographic trust proofs
+        # Cryptographic trust proofs joined to active contests
         tp_rows = await db.execute(
-            select(TrustProof).where(TrustProof.member_id == current_member.id).order_by(TrustProof.issued_at.desc())
+            select(TrustProof, OfflineContest)
+            .join(OfflineContest, TrustProof.contest_id == OfflineContest.id)
+            .where(TrustProof.member_id == current_member.id)
+            .order_by(TrustProof.issued_at.desc())
         )
         proofs = [
             {
                 "certificate_id": p.certificate_id,
-                "contest_title": p.contest_title,
+                "contest_title": oc.title or p.contest_title,
                 "rank": p.rank if (p.rank and p.rank < 900) else 1,
                 "score": p.score,
                 "sha256_digest": p.sha256_digest,
@@ -757,7 +847,7 @@ class AuthController:
                 "issued_at": p.issued_at.isoformat() if p.issued_at else None,
                 "status": p.status,
             }
-            for p in tp_rows.scalars().all()
+            for p, oc in tp_rows.all()
         ]
 
         # Synthesize proof if attended contest but TrustProof entry not yet created
@@ -870,7 +960,7 @@ class AuthController:
                 "batch": current_member.batch,
                 "rating": current_member.rating,
                 "peak_rating": current_member.peak_rating,
-                "peak_contest": "Chaos Arena 2026",
+                "peak_contest": peak_contest,
                 "university_rank": ((ranked or 0) + 1) if (attended or 0) > 0 else None,
                 "percentile": round((1.0 - (((ranked or 0) + 1) / max(1, all_members_count or 1))) * 100, 1) if (attended or 0) > 0 else None,
                 "active_members": all_members_count or 0,
@@ -882,7 +972,7 @@ class AuthController:
                 "is_following": False,
                 "tier": tier,
                 "podiums": podiums,
-                "streak": 3 if (attended or 0) > 0 else 0,
+                "streak": contest_streak,
                 "followers_count": followers_count,
                 "following_count": following_count,
                 "bio": getattr(current_member, "bio", None),
@@ -944,7 +1034,12 @@ class AuthController:
         cache_key = f"cache:student:profile:{student.id}:{current_member.id if current_member else 'guest'}"
         cached = await get_cache(cache_key)
         if cached is not None:
-            return cached
+            c_mem = cached.get("member") if isinstance(cached, dict) else None
+            # If cached profile has phantom rating with 0 attendance, invalidate stale cache
+            if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0 and (c_mem.get("rating", 1200) or 1200) != 1200:
+                cached = None
+            else:
+                return cached
 
         # Follow relationships
         followers_count = await db.scalar(
@@ -969,107 +1064,243 @@ class AuthController:
                 )
                 is_following = bool(rel_check)
 
-        # Total contests and attendance
-        total_contests = await db.scalar(select(func.count(OfflineContest.id))) or 0
-        attended = await db.scalar(
-            select(func.count(ScoreboardEntry.id)).where(ScoreboardEntry.member_id == student.id)
-        ) or 0
-        attendance_rate = round((attended / total_contests * 100), 1) if total_contests > 0 else 0.0
-
-        # University ranking — only cadets who have attended official tournaments receive an official rank
-        all_members_count = await db.scalar(select(func.count(MemberProfile.id))) or 0
-        higher_rated = await db.scalar(
-            select(func.count(MemberProfile.id)).where(MemberProfile.rating > student.rating)
-        ) or 0
-        university_rank = (higher_rated + 1) if (attended or 0) > 0 else None
-        percentile = round((1.0 - (university_rank / max(1, all_members_count))) * 100, 1) if ((attended or 0) > 0 and university_rank) else None
-
-        # Tier calculation
-        tier = "5★ Grandmaster" if student.rating >= 2200 else (
-            "4★ Master" if student.rating >= 1900 else (
-                "3★ Specialist" if student.rating >= 1600 else (
-                    "2★ Candidate" if student.rating >= 1400 else "1★ Explorer"
-                )
-            )
-        )
-
-        # Query attended scoreboards / battles
+        # Query attended scoreboards / battles joined to active contests
         sb_rows = await db.execute(
             select(ScoreboardEntry, OfflineContest)
             .join(OfflineContest, ScoreboardEntry.contest_id == OfflineContest.id)
             .where(ScoreboardEntry.member_id == student.id)
             .order_by(OfflineContest.starts_at.desc())
         )
+        sb_items = sb_rows.all()
+
+        # If actual RatingHistory ledger records exist, use them for true progressive trajectory
+        from app.models.db_models import RatingHistory, OfflineContest
+        rh_rows_res = await db.execute(
+            select(RatingHistory, OfflineContest)
+            .join(OfflineContest, RatingHistory.contest_id == OfflineContest.id)
+            .where(RatingHistory.member_id == student.id)
+            .order_by(RatingHistory.contested_at.asc())
+        )
+        rh_records = rh_rows_res.all()
+
+        # Self-heal rating if member has no valid contest records or if records exist
+        if not rh_records and not sb_items:
+            if (student.rating or 1200) != 1200 or (student.peak_rating or 1200) != 1200 or (student.attendance_count or 0) != 0:
+                student.rating = 1200
+                student.peak_rating = 1200
+                student.attendance_count = 0
+                await db.commit()
+        elif rh_records:
+            verified_rating = rh_records[-1][0].new_rating
+            verified_peak = max(1200, max(r[0].new_rating for r in rh_records))
+            if student.rating != verified_rating or student.peak_rating != verified_peak:
+                student.rating = verified_rating
+                student.peak_rating = verified_peak
+                await db.commit()
+
+        # Total contests and attendance
+        total_contests = await db.scalar(select(func.count(OfflineContest.id))) or 0
+        attended = len(sb_items)
+        attendance_rate = round((attended / total_contests * 100), 1) if total_contests > 0 else 0.0
+
+        # University ranking — only cadets who have attended official tournaments receive an official rank
+        # Uses the same filter as the leaderboard (onboarded, non-QA) for rank parity
+        all_members_count = await db.scalar(
+            select(func.count(MemberProfile.id)).where(
+                MemberProfile.is_onboarded.is_(True),
+                MemberProfile.handle.isnot(None),
+                ~MemberProfile.email.like("qa.%"),
+                ~MemberProfile.handle.like("qa_%"),
+            )
+        ) or 0
+        student_peak = student.peak_rating if student.peak_rating is not None else student.rating
+        higher_rated = await db.scalar(
+            select(func.count(MemberProfile.id)).where(
+                MemberProfile.is_onboarded.is_(True),
+                MemberProfile.handle.isnot(None),
+                ~MemberProfile.email.like("qa.%"),
+                ~MemberProfile.handle.like("qa_%"),
+                or_(
+                    MemberProfile.rating > student.rating,
+                    and_(
+                        MemberProfile.rating == student.rating,
+                        MemberProfile.peak_rating > student_peak,
+                    ),
+                    and_(
+                        MemberProfile.rating == student.rating,
+                        MemberProfile.peak_rating == student_peak,
+                        MemberProfile.id < student.id,
+                    ),
+                ),
+            )
+        ) or 0
+        university_rank = (higher_rated + 1) if attended > 0 else None
+        percentile = round((1.0 - (university_rank / max(1, all_members_count))) * 100, 1) if (attended > 0 and university_rank) else None
+
+        # Tier calculation
+        tier = "5★ Grandmaster" if (student.rating or 1200) >= 2200 else (
+            "4★ Master" if (student.rating or 1200) >= 1900 else (
+                "3★ Specialist" if (student.rating or 1200) >= 1600 else (
+                    "2★ Candidate" if (student.rating or 1200) >= 1400 else "1★ Explorer"
+                )
+            )
+        )
+
         recent_battles = []
         rating_history = []
         podiums = 0
-        for sb, contest in sb_rows.all():
-            if sb.rank and sb.rank <= 3:
+        pub_contest_dates = []
+        for sb, contest in sb_items:
+            rank_val = sb.rank if (sb.rank and sb.rank < 900) else 1
+            if rank_val <= 3:
                 podiums += 1
+            if contest.starts_at:
+                pub_contest_dates.append(contest.starts_at)
             recent_battles.append({
                 "contest": contest.title,
                 "contest_slug": contest.slug,
                 "date": contest.starts_at.isoformat() if contest.starts_at else datetime.now(timezone.utc).isoformat(),
-                "rank": sb.rank,
+                "rank": rank_val,
                 "solved": f"{sb.solved}/{contest.problem_count or 4}",
                 "penalty": f"{sb.penalty_seconds // 60}m",
                 "delta": sb.rating_delta or 0,
-                "certificate_id": f"PROOF-{contest.slug[:8].upper()}-{sb.rank:03d}",
+                "certificate_id": f"PROOF-{contest.slug[:8].upper()}-{rank_val:03d}",
             })
             rating_history.append({
                 "contest": contest.title,
                 "contest_slug": contest.slug,
                 "date": contest.starts_at.isoformat() if contest.starts_at else datetime.now(timezone.utc).isoformat(),
-                "rank": sb.rank,
+                "rank": rank_val,
                 "old_rating": student.rating - (sb.rating_delta or 0),
                 "new_rating": student.rating,
                 "delta": sb.rating_delta or 0,
             })
 
-        # If actual RatingHistory ledger records exist, use them for true progressive trajectory
-        from app.models.db_models import RatingHistory
-        rh_rows_res = await db.execute(
-            select(RatingHistory)
-            .where(RatingHistory.member_id == student.id)
-            .order_by(RatingHistory.contested_at.asc())
-        )
-        rh_records = rh_rows_res.scalars().all()
+        # Compute consecutive-week streak
+        def _pub_compute_streak(dates):
+            if not dates:
+                return 0
+            import datetime as _dt
+            weeks = sorted(set(d.isocalendar()[:2] for d in dates))
+            if not weeks:
+                return 0
+            streak = 1
+            max_streak = 1
+            for i in range(1, len(weeks)):
+                py, pw = weeks[i - 1]
+                cy, cw = weeks[i]
+                prev_mon = _dt.date.fromisocalendar(py, pw, 1)
+                curr_mon = _dt.date.fromisocalendar(cy, cw, 1)
+                if (curr_mon - prev_mon).days == 7:
+                    streak += 1
+                    max_streak = max(max_streak, streak)
+                else:
+                    streak = 1
+            return max_streak
+
+        pub_streak = _pub_compute_streak(pub_contest_dates)
+        pub_peak_contest = None
+
         if rh_records:
             rating_history = [
                 {
-                    "contest": rh.contest_title,
-                    "contest_slug": rh.contest_id or "",
+                    "contest": oc.title or rh.contest_title,
+                    "contest_slug": oc.slug or rh.contest_id or "",
                     "date": rh.contested_at.isoformat() if rh.contested_at else datetime.now(timezone.utc).isoformat(),
                     "rank": rh.rank,
                     "old_rating": rh.old_rating,
                     "new_rating": rh.new_rating,
                     "delta": rh.new_rating - rh.old_rating,
                 }
-                for rh in rh_records
+                for rh, oc in rh_records
             ]
+            peak_rh, peak_oc = max(rh_records, key=lambda r: r[0].new_rating)
+            pub_peak_contest = peak_oc.title or peak_rh.contest_title
+            # Use RatingHistory dates for streak if scoreboard dates were absent
+            if not pub_contest_dates:
+                pub_contest_dates = [rh.contested_at for rh, _ in rh_records if rh.contested_at]
+                pub_streak = _pub_compute_streak(pub_contest_dates)
 
-        # Problem Solving Statistics (LeetCode style)
+            # Add baseline onboarding point ONLY if valid contest history exists
+            created_iso = student.created_at.isoformat() if getattr(student, "created_at", None) else "2026-09-01T00:00:00Z"
+            base_point = {
+                "contest": "Cadet Commissioning",
+                "contest_slug": "onboarding",
+                "date": created_iso,
+                "rank": 0,
+                "old_rating": 1200,
+                "new_rating": 1200,
+                "delta": 0,
+            }
+            if rating_history and rating_history[0]["date"] > created_iso:
+                rating_history.insert(0, base_point)
+        else:
+            if not sb_items:
+                rating_history = []
+            else:
+                rating_history.reverse()
+
+        # Problem Solving Statistics — real difficulty breakdown via ContestSubmission → ContestProblem join
+        from app.models.contest import ContestProblem
         # 1. Assessment submissions
         as_rows = await db.execute(
             select(AssessmentSubmission).where(AssessmentSubmission.member_id == student.id)
         )
         assess_subs = as_rows.scalars().all()
 
-        # 2. Contest submissions
+        # 2. Contest submissions with problem difficulty/topic joined
         cs_rows = await db.execute(
-            select(ContestSubmission).where(ContestSubmission.member_id == student.id)
+            select(ContestSubmission, ContestProblem)
+            .join(ContestProblem, ContestSubmission.problem_id == ContestProblem.id)
+            .where(ContestSubmission.member_id == student.id)
         )
-        contest_subs = cs_rows.scalars().all()
+        cs_with_problems = cs_rows.all()
+        contest_subs = [cs for cs, _ in cs_with_problems]
 
         all_submissions = list(assess_subs) + list(contest_subs)
         total_submissions = len(all_submissions)
-        accepted_subs = [s for s in all_submissions if getattr(s, "verdict", "") == "AC" or getattr(s, "status", "") == "accepted"]
+        accepted_assess = [s for s in assess_subs if getattr(s, "verdict", "") == "AC" or getattr(s, "status", "") == "accepted"]
+        accepted_contest_with_problem = [(cs, prob) for cs, prob in cs_with_problems if getattr(cs, "verdict", "") == "AC"]
+        accepted_subs = list(accepted_assess) + [cs for cs, _ in accepted_contest_with_problem]
         total_solved = len(set(getattr(s, "problem_id", "") for s in accepted_subs))
 
-        # Problem difficulty breakdown
-        easy_count = max(1, int(total_solved * 0.45)) if total_solved > 0 else 0
-        med_count = max(0, int(total_solved * 0.40)) if total_solved > 0 else 0
-        hard_count = max(0, total_solved - easy_count - med_count) if total_solved > 0 else 0
+        # Real difficulty breakdown from ContestProblem.difficulty
+        easy_count = 0
+        med_count = 0
+        hard_count = 0
+        seen_problems_for_diff = set()
+        for cs, prob in accepted_contest_with_problem:
+            pid = cs.problem_id
+            if pid not in seen_problems_for_diff:
+                seen_problems_for_diff.add(pid)
+                diff = (getattr(prob, "difficulty", None) or "MEDIUM").upper()
+                if diff == "EASY":
+                    easy_count += 1
+                elif diff == "HARD":
+                    hard_count += 1
+                else:
+                    med_count += 1
+        # Assessment submissions don't have a difficulty model; approximate from accepted_assess
+        assess_easy = max(0, len(accepted_assess) // 2)
+        assess_med = len(accepted_assess) - assess_easy
+        easy_count += assess_easy
+        med_count += assess_med
+
+        # Real topic breakdown from ContestProblem.topic
+        from collections import Counter
+        topic_counter: Counter = Counter()
+        seen_topics = set()
+        for cs, prob in accepted_contest_with_problem:
+            pid = cs.problem_id
+            if pid not in seen_topics:
+                seen_topics.add(pid)
+                t = getattr(prob, "topic", None)
+                if t:
+                    topic_counter[t] += 1
+        topic_stats = [
+            {"topic": topic, "solved": count}
+            for topic, count in topic_counter.most_common(10)
+        ]
 
         # Submission Calendar Heatmap (Last 365 days)
         submission_calendar: Dict[str, int] = {}
@@ -1079,15 +1310,19 @@ class AuthController:
                 day_key = sub_time.strftime("%Y-%m-%d")
                 submission_calendar[day_key] = submission_calendar.get(day_key, 0) + 1
 
-        # Cryptographic trust proofs
+        # Cryptographic trust proofs joined to active contests
+        from app.models.db_models import TrustProof
         tp_rows = await db.execute(
-            select(TrustProof).where(TrustProof.member_id == student.id).order_by(TrustProof.issued_at.desc())
+            select(TrustProof, OfflineContest)
+            .join(OfflineContest, TrustProof.contest_id == OfflineContest.id)
+            .where(TrustProof.member_id == student.id)
+            .order_by(TrustProof.issued_at.desc())
         )
         proofs = [
             {
                 "certificate_id": p.certificate_id,
-                "contest_title": p.contest_title,
-                "title": p.contest_title,
+                "contest_title": oc.title or p.contest_title,
+                "title": oc.title or p.contest_title,
                 "rank": p.rank if (p.rank and p.rank < 900) else 1,
                 "score": getattr(p, "score", 100),
                 "sha256_digest": p.sha256_digest,
@@ -1096,7 +1331,7 @@ class AuthController:
                 "issued_at": p.issued_at.isoformat() if p.issued_at else None,
                 "status": p.status,
             }
-            for p in tp_rows.scalars().all()
+            for p, oc in tp_rows.all()
         ]
 
         if not proofs and recent_battles:
@@ -1205,7 +1440,7 @@ class AuthController:
                 "batch": student.batch,
                 "rating": student.rating,
                 "peak_rating": student.peak_rating or student.rating,
-                "peak_contest": "Chaos Arena",
+                "peak_contest": pub_peak_contest,
                 "university_rank": university_rank,
                 "percentile": percentile,
                 "active_members": all_members_count,
@@ -1216,7 +1451,7 @@ class AuthController:
                 "is_core_member": student.is_core_member,
                 "tier": tier,
                 "podiums": podiums,
-                "streak": 3 if attended > 0 else 0,
+                "streak": pub_streak,
                 "followers_count": followers_count,
                 "following_count": following_count,
                 "is_following": is_following,
@@ -1237,13 +1472,7 @@ class AuthController:
                 "hard_solved": hard_count,
                 "total_submissions": total_submissions,
                 "acceptance_rate": round((len(accepted_subs) / total_submissions * 100), 1) if total_submissions > 0 else 0.0,
-                "topics": [
-                    {"topic": "Graph Algorithms", "solved": max(0, int(total_solved * 0.35))},
-                    {"topic": "Dynamic Programming", "solved": max(0, int(total_solved * 0.30))},
-                    {"topic": "Greedy Heuristics", "solved": max(0, int(total_solved * 0.25))},
-                    {"topic": "String Manipulation", "solved": max(0, int(total_solved * 0.20))},
-                    {"topic": "Tree Traversal", "solved": max(0, int(total_solved * 0.15))},
-                ],
+                "topics": topic_stats,
             },
             "submissionCalendar": submission_calendar,
             "proofs": proofs,

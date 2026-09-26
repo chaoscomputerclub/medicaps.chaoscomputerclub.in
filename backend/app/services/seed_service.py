@@ -5,7 +5,7 @@ All contest and assessment data is managed dynamically via administrator endpoin
 """
 
 import logging
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db_models import (
@@ -77,6 +77,20 @@ async def purge_all_contest_data(db: AsyncSession) -> dict:
         await db.flush()
     except Exception:
         pass
+
+    # 6. Reset all surviving MemberProfiles to baseline rating & zero attendance
+    try:
+        await db.execute(
+            update(MemberProfile).values(
+                rating=1200,
+                peak_rating=1200,
+                attendance_count=0,
+                attendance_total=0,
+            )
+        )
+        await db.flush()
+    except Exception as e:
+        logger.warning(f"Notice on resetting member profiles: {e}")
 
     await db.commit()
 

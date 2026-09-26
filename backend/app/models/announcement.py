@@ -22,5 +22,5 @@ class Announcement(Base):
     kind = Column(String(30), nullable=False)  # contest_release, editorial, podium, system
     title = Column(String(150), nullable=False)
     summary = Column(Text, nullable=False)
-    published_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
-    contest_slug = Column(String(80), nullable=True)
+    published_at = Column(DateTime(timezone=True), default=now_utc, nullable=False, index=True)
+    contest_slug = Column(String(80), nullable=True, index=True)

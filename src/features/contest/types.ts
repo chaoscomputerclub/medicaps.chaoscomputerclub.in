@@ -121,6 +121,8 @@ export type CampusPass = {
   check_in_opens_at: string;
   status: "issued" | "checked_in" | "expired";
   check_in_status?: string;
+  qr_data?: string;
+  seat_number?: string;
 };
 
 export type ParticipationRecord = {
