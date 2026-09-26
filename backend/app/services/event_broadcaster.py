@@ -13,6 +13,7 @@ Provides:
 import asyncio
 import json
 import logging
+from uuid import uuid4
 import httpx
 from typing import Dict, Set, Optional, Any
 from datetime import datetime, timezone
@@ -22,6 +23,13 @@ logger = logging.getLogger(__name__)
 # Active subscriber queues: channel_name -> Set[asyncio.Queue]
 _subscribers: Dict[str, Set[asyncio.Queue]] = {}
 _lock = asyncio.Lock()
+
+# Redis lets independent ASGI workers deliver the same event to their own SSE
+# subscribers. The origin marker prevents the publishing worker from faning out
+# the event twice when it receives its own pub/sub message.
+REDIS_EVENT_CHANNEL = "ccc:realtime:events"
+_instance_id = uuid4().hex
+_redis_relay_task: Optional[asyncio.Task] = None
 
 # Outbound registered webhooks (configurable via env / settings)
 _outbound_webhooks: Set[str] = set()
@@ -51,6 +59,19 @@ async def unsubscribe(channel: str, q: asyncio.Queue):
                 del _subscribers[channel]
 
 
+async def _fan_out(raw_message: str, contest_slug: Optional[str]) -> None:
+    """Place an already serialized event in local SSE subscriber queues."""
+    target_channels = ["global"]
+    if contest_slug:
+        target_channels.append(f"contest:{contest_slug}")
+
+    async with _lock:
+        for channel in target_channels:
+            for queue in list(_subscribers.get(channel, set())):
+                if not queue.full():
+                    queue.put_nowait(raw_message)
+
+
 async def broadcast_event(
     event_type: str,
     data: Dict[str, Any],
@@ -70,33 +91,70 @@ async def broadcast_event(
     }
     raw_message = json.dumps(payload)
 
-    target_channels = ["global"]
-    if contest_slug:
-        target_channels.append(f"contest:{contest_slug}")
+    # Always deliver locally first. Redis is an inter-worker enhancement, not a
+    # prerequisite for an SSE event in a single-worker deployment.
+    await _fan_out(raw_message, contest_slug)
 
-    # Push to SSE queues
-    async with _lock:
-        for ch in target_channels:
-            if ch in _subscribers:
-                for q in list(_subscribers[ch]):
-                    try:
-                        if not q.full():
-                            q.put_nowait(raw_message)
-                    except Exception:
-                        pass
-
-    # Optional: mirror to Redis pub/sub
+    # Optional: mirror to Redis pub/sub for other ASGI workers.
     try:
-        from app.core.redis import get_redis_client
-        redis = await get_redis_client()
-        if redis:
-            await redis.publish("ccc:realtime:events", raw_message)
-    except Exception:
-        pass
+        from app.core.redis import get_redis
+
+        relay_payload = {**payload, "_origin": _instance_id}
+        await get_redis().publish(REDIS_EVENT_CHANNEL, json.dumps(relay_payload))
+    except Exception as exc:
+        logger.debug("Redis event publish unavailable: %s", exc)
 
     # Outbound webhook delivery (non-blocking)
     if _outbound_webhooks:
         asyncio.create_task(_dispatch_outbound_webhooks(raw_message))
+
+
+async def redis_event_relay() -> None:
+    """Relay Redis pub/sub events into this worker's local SSE queues."""
+    while True:
+        pubsub = None
+        try:
+            from app.core.redis import get_redis
+
+            pubsub = get_redis().pubsub()
+            await pubsub.subscribe(REDIS_EVENT_CHANNEL)
+            async for message in pubsub.listen():
+                if message.get("type") != "message":
+                    continue
+                try:
+                    incoming = json.loads(message["data"])
+                    if incoming.pop("_origin", None) == _instance_id:
+                        continue
+                    event_type = incoming.get("event")
+                    event_data = incoming.get("data")
+                    if not isinstance(event_type, str) or not isinstance(event_data, dict):
+                        continue
+                    raw_message = json.dumps(incoming)
+                    await _fan_out(raw_message, incoming.get("contest_slug"))
+                except (TypeError, ValueError, KeyError) as exc:
+                    logger.warning("Ignoring malformed Redis realtime event: %s", exc)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            logger.warning("Redis realtime relay disconnected: %s", exc)
+            await asyncio.sleep(2)
+        finally:
+            if pubsub is not None:
+                try:
+                    await pubsub.unsubscribe(REDIS_EVENT_CHANNEL)
+                    await pubsub.aclose()
+                except Exception:
+                    pass
+
+
+def start_redis_event_relay() -> asyncio.Task:
+    """Start one Redis relay task for the current ASGI process."""
+    global _redis_relay_task
+    if _redis_relay_task is None or _redis_relay_task.done():
+        _redis_relay_task = asyncio.create_task(
+            redis_event_relay(), name="ccc-redis-realtime-relay"
+        )
+    return _redis_relay_task
 
 
 async def _dispatch_outbound_webhooks(raw_json: str):

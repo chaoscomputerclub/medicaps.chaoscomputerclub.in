@@ -117,7 +117,10 @@ export const contestApi = {
       async () => {
         let raw: Record<string, any>[] = [];
         try {
-          raw = await request<Record<string, any>[]>("/contests");
+          raw = await request<Record<string, any>[]>(
+            "/contests",
+            force ? { cache: "no-store" } : undefined
+          );
         } catch {
           raw = [];
         }

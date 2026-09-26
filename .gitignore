@@ -66,3 +66,8 @@ test-results/
 admin/
 dist-admin/
 vite.admin.config.ts
+
+# Graphify Local Artifacts
+graphify-out/cost.json
+
+.codex/

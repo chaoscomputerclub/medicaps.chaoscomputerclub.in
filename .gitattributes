@@ -12,3 +12,4 @@ dist-admin/** linguist-generated
 # Exclude lockfiles and migration snapshots
 *-lock.json linguist-generated
 drizzle/migrations/meta/** linguist-generated
+graphify-out/graph.json merge=graphify

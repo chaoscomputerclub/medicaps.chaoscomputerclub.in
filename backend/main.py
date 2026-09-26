@@ -6,6 +6,7 @@ FastAPI Main Application Entrypoint
 Inspired by Desktop/sharexpress/interleet and Desktop/sharexpress/cloud.sharexpress
 """
 
+import asyncio
 import os
 import logging
 from contextlib import asynccontextmanager
@@ -18,6 +19,7 @@ from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
+from app.services.event_broadcaster import start_redis_event_relay
 from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, events, feed, leaderboard, passes, scoreboards, social, storage, verify, webhooks
 from app.api.v1.router import api_router_v1
 
@@ -31,6 +33,7 @@ async def lifespan(app: FastAPI):
 
     # ── Production background tasks ──────────────────────────────────────────
     bg_tasks = start_background_tasks(AsyncSessionLocal)
+    realtime_relay_task = start_redis_event_relay()
     print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
 
     # ── Prewarm Core Docker Engine sandboxes (only when docker is active) ──────
@@ -48,8 +51,9 @@ async def lifespan(app: FastAPI):
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
-    for task in bg_tasks:
+    for task in [*bg_tasks, realtime_relay_task]:
         task.cancel()
+    await asyncio.gather(*bg_tasks, realtime_relay_task, return_exceptions=True)
     print(f"🛑 Shutting down {settings.PROJECT_NAME}...")
 
 

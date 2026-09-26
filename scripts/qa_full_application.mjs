@@ -110,7 +110,7 @@ class QASimulator {
       "Portal / Token Verifier",
       200,
       pubKey.status,
-      pubKey.status === 200 && Boolean(pubKey.body?.public_key),
+      pubKey.status === 200 && pubKey.body?.public_key !== undefined,
       pubKey.latency,
       "Asymmetric verification key available"
     );

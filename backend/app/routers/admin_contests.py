@@ -3,7 +3,7 @@ Chaos Computer Club — Dynamic Contest Management & Admin API Router
 Delegates to app.controllers.admin_contest_controller.AdminContestController
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +14,7 @@ from app.schemas.campus_pass import ContestAttendeeItem
 from app.schemas.dynamic_contest import (
     DynamicContestCreateRequest,
     DynamicContestUpdateRequest,
-    ProblemCreateSchema,
+    ProblemSaveRequest,
     ProblemSyncRequest,
     AssessmentUpdateRequest,
     ContestAdminDetailResponse,
@@ -117,8 +117,11 @@ async def list_admin_contest_problems(
 @router.post("/{slug}/problems", summary="Add or update a problem challenge in contest and/or assessment")
 async def add_or_update_problem(
     slug: str,
-    payload: ProblemCreateSchema,
-    target: Optional[str] = Query(None, description="Target collection: 'contest', 'assessment', or 'both'"),
+    payload: ProblemSaveRequest,
+    target: Optional[Literal["contest", "assessment", "both"]] = Query(
+        None,
+        description="Target collection: 'contest', 'assessment', or 'both'",
+    ),
     db: AsyncSession = Depends(get_db),
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
@@ -130,7 +133,10 @@ async def add_or_update_problem(
 async def delete_problem(
     slug: str,
     problem_index: str,
-    target: Optional[str] = Query("both", description="Target collection: 'contest', 'assessment', or 'both'"),
+    target: Literal["contest", "assessment", "both"] = Query(
+        "both",
+        description="Target collection: 'contest', 'assessment', or 'both'",
+    ),
     db: AsyncSession = Depends(get_db),
     admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):

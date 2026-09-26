@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
@@ -174,7 +174,10 @@ class AssessmentUpdateRequest(BaseModel):
 
 
 class ProblemSaveRequest(ProblemCreateSchema):
-    target: Optional[str] = Field("both", description="Target problem collection: 'contest', 'assessment', or 'both'")
+    target: Literal["contest", "assessment", "both"] = Field(
+        "both",
+        description="Target problem collection: 'contest', 'assessment', or 'both'",
+    )
 
 
 class ProblemSyncRequest(BaseModel):
@@ -186,4 +189,3 @@ class ContestAdminDetailResponse(BaseModel):
     assessment: Optional[Dict[str, Any]] = None
     contest_problems: List[Dict[str, Any]] = Field(default_factory=list)
     assessment_problems: List[Dict[str, Any]] = Field(default_factory=list)
-

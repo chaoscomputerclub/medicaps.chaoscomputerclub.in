@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from "react";
-import { Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { getPublicPortalData, getMemberProfileData, getUniversityLeaderboardData, getStudentProfileData } from "@/organization/data/portal.functions";
 import { contestApi } from "@/features/contest/api";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
@@ -24,6 +24,45 @@ import {
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthPage } from "./pages/AuthPage";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchContestDetailThunk, fetchContestsThunk, removeContestFromState } from "@/store/slices/contestSlice";
+import { useRealtimeEvents } from "@/lib/realtime";
+
+const CONTEST_MUTATION_EVENTS = [
+  "contest_created",
+  "contest_updated",
+  "contest_deleted",
+  "contest_status_changed",
+  "contest_timer_reset",
+];
+
+function ContestRealtimeSynchronizer() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const currentContestSlug = useAppSelector((state) => state.contest.currentContest?.slug);
+
+  useRealtimeEvents(
+    null,
+    (event) => {
+      if (!CONTEST_MUTATION_EVENTS.includes(event.event)) return;
+
+      const contestSlug = event.contest_slug ?? event.data?.contest_slug;
+      void dispatch(fetchContestsThunk(true));
+
+      if (!contestSlug || contestSlug !== currentContestSlug) return;
+      if (event.event === "contest_deleted") {
+        dispatch(removeContestFromState(contestSlug));
+        navigate("/contests", { replace: true });
+        return;
+      }
+      void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+    },
+    CONTEST_MUTATION_EVENTS,
+    true
+  );
+
+  return null;
+}
 
 export { PortalShell };
 
@@ -156,7 +195,9 @@ export function AppRoutes() {
   usePrefetchOnIntent();
 
   return (
-    <Routes>
+    <>
+      <ContestRealtimeSynchronizer />
+      <Routes>
       {/* Guest-only Authentication Route — immediate, zero secondary network waterfall */}
       <Route element={<GuestGuard />}>
         <Route
@@ -355,6 +396,7 @@ export function AppRoutes() {
 
       {/* Catch-all fallback to root */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }

@@ -182,6 +182,19 @@ export const contestSlice = createSlice({
       state.runResult = null;
       state.submitResult = null;
     },
+    removeContestFromState(state, action: PayloadAction<string>) {
+      const contestSlug = action.payload;
+      state.contests = state.contests.filter((contest) => contest.slug !== contestSlug);
+      if (state.currentContest?.slug === contestSlug) {
+        state.currentContest = null;
+        state.registration = null;
+        state.pass = null;
+        state.problems = [];
+        state.arenaData = null;
+        state.runResult = null;
+        state.submitResult = null;
+      }
+    },
   },
   extraReducers: (builder) => {
     // List
@@ -304,5 +317,5 @@ export const contestSlice = createSlice({
   },
 });
 
-export const { clearArenaResults, resetContestState } = contestSlice.actions;
+export const { clearArenaResults, resetContestState, removeContestFromState } = contestSlice.actions;
 export default contestSlice.reducer;

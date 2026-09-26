@@ -21,6 +21,7 @@ import {
   formatWhen,
 } from "@/features/contest/lifecycle";
 import { useCountdown } from "@/hooks/useCountdown";
+import { useRealtimeEvents } from "@/lib/realtime";
 
 export function ContestLobbyPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -43,15 +44,35 @@ export function ContestLobbyPage() {
 
   const refreshDetail = useCallback(() => {
     if (contestSlug) {
-      dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+      void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
     }
   }, [contestSlug, dispatch]);
 
   useEffect(() => {
     if (contestSlug) {
-      dispatch(fetchContestDetailThunk({ slug: contestSlug, force: false }));
+      void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: false }));
     }
   }, [contestSlug, dispatch]);
+
+  // Real-time: auto-refresh when contest goes live so "Start Contest" unlocks without page reload
+  useRealtimeEvents(
+    contestSlug,
+    (event) => {
+      if (event.event === "contest_deleted") {
+        navigate("/contests", { replace: true });
+        return;
+      }
+      if (
+        event.event === "contest_status_changed" ||
+        event.event === "contest_updated" ||
+        event.event === "top30_qualified"
+      ) {
+        refreshDetail();
+      }
+    },
+    undefined,
+    Boolean(contestSlug)
+  );
 
   // On reload, Redux resets to null while the thunk is in-flight.
   // Hydrate from SWR sessionStorage cache instantly — zero skeleton flash.
@@ -394,7 +415,7 @@ export function ContestLobbyPage() {
                   size="default"
                   className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black"
                 >
-                  <Link to={`/contests/${contestSlug}/problems`}>
+                  <Link to={`/contests/${contestSlug}/problems`} target="_blank" rel="noopener noreferrer">
                     <Play className="size-3.5 fill-current mr-1.5" />
                     <span>Resume Contest</span>
                   </Link>
@@ -431,7 +452,7 @@ export function ContestLobbyPage() {
                   size="default"
                 >
                   {ack && canStart ? (
-                    <Link to={`/contests/${contestSlug}/problems`}>
+                    <Link to={`/contests/${contestSlug}/problems`} target="_blank" rel="noopener noreferrer">
                       <Play className="size-3.5 fill-current mr-1.5" />
                       <span>Start Contest</span>
                     </Link>

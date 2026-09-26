@@ -122,18 +122,25 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Only load key files if paths are explicitly specified in environment variables
-if not settings.JWT_PRIVATE_KEY and settings.JWT_PRIVATE_KEY_PATH:
-    priv_path = Path(settings.JWT_PRIVATE_KEY_PATH)
-    if not priv_path.is_absolute():
-        priv_path = BASE_DIR / priv_path
-    if priv_path.exists():
-        settings.JWT_PRIVATE_KEY = priv_path.read_text().strip()
+# Load key files if paths are explicitly specified or default keys/ directory exists
+if not settings.JWT_PRIVATE_KEY:
+    if settings.JWT_PRIVATE_KEY_PATH:
+        priv_path = Path(settings.JWT_PRIVATE_KEY_PATH)
+        if not priv_path.is_absolute():
+            priv_path = BASE_DIR / priv_path
+        if priv_path.exists():
+            settings.JWT_PRIVATE_KEY = priv_path.read_text().strip()
+    elif (BASE_DIR / "keys" / "jwt_private_key.pem").exists():
+        settings.JWT_PRIVATE_KEY = (BASE_DIR / "keys" / "jwt_private_key.pem").read_text().strip()
 
-if not settings.JWT_PUBLIC_KEY and settings.JWT_PUBLIC_KEY_PATH:
-    pub_path = Path(settings.JWT_PUBLIC_KEY_PATH)
-    if not pub_path.is_absolute():
-        pub_path = BASE_DIR / pub_path
-    if pub_path.exists():
-        settings.JWT_PUBLIC_KEY = pub_path.read_text().strip()
+if not settings.JWT_PUBLIC_KEY:
+    if settings.JWT_PUBLIC_KEY_PATH:
+        pub_path = Path(settings.JWT_PUBLIC_KEY_PATH)
+        if not pub_path.is_absolute():
+            pub_path = BASE_DIR / pub_path
+        if pub_path.exists():
+            settings.JWT_PUBLIC_KEY = pub_path.read_text().strip()
+    elif (BASE_DIR / "keys" / "jwt_public_key.pem").exists():
+        settings.JWT_PUBLIC_KEY = (BASE_DIR / "keys" / "jwt_public_key.pem").read_text().strip()
+
 

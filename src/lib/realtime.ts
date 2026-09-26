@@ -6,7 +6,7 @@
  * Provides SSE subscriptions to eliminate server interval polling.
  */
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { getApiBase, getToken } from "@/lib/auth";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 
@@ -17,7 +17,23 @@ export interface RealtimeEvent<T = any> {
   data: T;
 }
 
-export type RealtimeEventHandler = (event: RealtimeEvent) => void;
+export type RealtimeEventHandler = (event: RealtimeEvent) => void | Promise<void>;
+
+const CONTEST_CACHE_PATTERNS = [
+  "contests:*",
+  "contest:*",
+  "passes:*",
+  "scoreboard:*",
+  "ranking:*",
+  "leaderboard:*",
+  "portal:*",
+];
+
+function invalidateContestCaches(): void {
+  for (const pattern of CONTEST_CACHE_PATTERNS) {
+    invalidateSwrCache(pattern);
+  }
+}
 
 /**
  * Hook to subscribe to real-time events via Server-Sent Events (SSE).
@@ -39,7 +55,7 @@ export function useRealtimeEvents(
 
     const base = getApiBase();
     const endpoint = contestSlug
-      ? `${base}/events/contest/${contestSlug}/stream`
+      ? `${base}/events/contest/${encodeURIComponent(contestSlug)}/stream`
       : `${base}/events/stream`;
 
     let eventSource: EventSource | null = null;
@@ -61,19 +77,26 @@ export function useRealtimeEvents(
             const parsed: RealtimeEvent = JSON.parse(e.data);
 
             // Invalidate corresponding SWR cache entries immediately on incoming event
-            if (parsed.event === "pass_checked_in" || parsed.event === "contest_status_changed") {
-              invalidateSwrCache("contest");
-              invalidateSwrCache("pass");
-              invalidateSwrCache("scoreboard");
+            if (
+              parsed.event === "pass_checked_in" ||
+              parsed.event === "contest_status_changed" ||
+              parsed.event === "contest_created" ||
+              parsed.event === "contest_updated" ||
+              parsed.event === "contest_deleted"
+              || parsed.event === "contest_timer_reset"
+            ) {
+              invalidateContestCaches();
             } else if (parsed.event === "top30_qualified" || parsed.event === "submission_evaluated") {
-              invalidateSwrCache("contest");
-              invalidateSwrCache("ranking");
+              invalidateContestCaches();
             }
 
             // Check if matches filter
             if (!eventFilter || eventFilter.length === 0 || eventFilter.includes(parsed.event)) {
-              if (handlerRef.current) {
-                handlerRef.current(parsed);
+              const handler = handlerRef.current;
+              if (handler) {
+                void Promise.resolve(handler(parsed)).catch((error) => {
+                  console.error("Realtime event handler failed:", error);
+                });
               }
             }
           } catch {
@@ -108,7 +131,7 @@ export function useRealtimeEvents(
         eventSource = null;
       }
     };
-  }, [contestSlug, JSON.stringify(eventFilter)]);
+  }, [contestSlug, enabled, JSON.stringify(eventFilter)]);
 }
 
 /**

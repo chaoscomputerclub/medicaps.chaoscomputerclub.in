@@ -437,7 +437,10 @@ export function ContestArenaPage() {
     if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
       setRemainingSeconds(event.data.remaining_seconds);
       toast.info("Contest clock synchronized by Chief Proctor.");
-    } else if (event.event === "contest_status_changed" && event.data?.status === "finished") {
+    } else if (
+      event.event === "contest_status_changed" &&
+      (event.data?.new_status === "finished" || event.data?.status === "finished")
+    ) {
       setRemainingSeconds(0);
       toast.warning("Contest concluded by Chief Proctor.");
     }
@@ -2591,3 +2594,5 @@ export function ContestArenaPage() {
     </div>
   );
 }
+
+export default ContestArenaPage;

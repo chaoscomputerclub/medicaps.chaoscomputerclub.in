@@ -53,6 +53,48 @@ logger = logging.getLogger(__name__)
 class DynamicContestService:
     """Core domain service for dynamic on-the-fly contest creation, mutation, and scheduling."""
 
+    _CONTEST_CACHE_PATTERNS = (
+        "cache:contests:*",
+        "cache:contest:*",
+        "cache:scoreboard:*",
+        "cache:ranking:*",
+    )
+
+    @staticmethod
+    async def _invalidate_contest_caches(include_rating_caches: bool = False) -> None:
+        """Clear only memoized data whose value depends on contest state."""
+        for pattern in DynamicContestService._CONTEST_CACHE_PATTERNS:
+            await delete_cache_pattern(pattern)
+        if include_rating_caches:
+            for pattern in ("cache:leaderboard:*", "cache:profile:*", "cache:student:profile:*"):
+                await delete_cache_pattern(pattern)
+
+    @staticmethod
+    def _contest_event_data(contest: OfflineContest, change: str) -> Dict[str, Any]:
+        """Use one stable payload shape for every contest lifecycle mutation."""
+        return {
+            "contest_slug": contest.slug,
+            "contest_title": contest.title,
+            "status": contest.status,
+            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+            "change": change,
+        }
+
+    @staticmethod
+    async def _publish_contest_event(
+        event_type: str,
+        contest_slug: str,
+        data: Dict[str, Any],
+    ) -> None:
+        """Publish after commit without allowing realtime infrastructure to fail a mutation."""
+        try:
+            from app.services.event_broadcaster import broadcast_event
+
+            await broadcast_event(event_type=event_type, data=data, contest_slug=contest_slug)
+        except Exception as exc:
+            logger.warning("Contest realtime event '%s' was not published: %s", event_type, exc)
+
     @staticmethod
     def _slugify(text: str) -> str:
         """Convert arbitrary text into a URL-safe slug."""
@@ -290,13 +332,15 @@ class DynamicContestService:
 
         await db.commit()
 
-        # Invalidate contest caches across Redis
-        try:
-            await delete_cache_pattern("cache:*")
-        except Exception as exc:
-            logger.warning("Cache invalidate warning: %s", exc)
+        await DynamicContestService._invalidate_contest_caches()
 
         logger.info("✓ Contest '%s' (%s) successfully created.", contest.title, contest.slug)
+
+        await DynamicContestService._publish_contest_event(
+            "contest_created",
+            contest.slug,
+            DynamicContestService._contest_event_data(contest, "created"),
+        )
 
         return {
             "success": True,
@@ -351,10 +395,12 @@ class DynamicContestService:
 
         await db.commit()
 
-        try:
-            await delete_cache_pattern("cache:*")
-        except Exception:
-            pass
+        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._publish_contest_event(
+            "contest_updated",
+            contest.slug,
+            DynamicContestService._contest_event_data(contest, "metadata_updated"),
+        )
 
         return {
             "success": True,
@@ -538,7 +584,12 @@ class DynamicContestService:
                 assessment.is_active = payload.is_active
 
         await db.commit()
-        await delete_cache_pattern("cache:*")
+        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._publish_contest_event(
+            "contest_updated",
+            contest.slug,
+            DynamicContestService._contest_event_data(contest, "assessment_updated"),
+        )
 
         return {
             "success": True,
@@ -686,10 +737,12 @@ class DynamicContestService:
 
         await db.commit()
 
-        try:
-            await delete_cache_pattern("cache:*")
-        except Exception:
-            pass
+        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._publish_contest_event(
+            "contest_updated",
+            contest.slug,
+            DynamicContestService._contest_event_data(contest, "problems_updated"),
+        )
 
         return {
             "success": True,
@@ -744,10 +797,12 @@ class DynamicContestService:
 
         await db.commit()
 
-        try:
-            await delete_cache_pattern("cache:*")
-        except Exception:
-            pass
+        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._publish_contest_event(
+            "contest_updated",
+            contest.slug,
+            DynamicContestService._contest_event_data(contest, "problems_deleted"),
+        )
 
         return {
             "success": True,
@@ -887,7 +942,12 @@ class DynamicContestService:
             raise HTTPException(status_code=400, detail=f"Invalid sync direction '{direction}'.")
 
         await db.commit()
-        await delete_cache_pattern("cache:*")
+        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._publish_contest_event(
+            "contest_updated",
+            contest.slug,
+            DynamicContestService._contest_event_data(contest, "problems_synced"),
+        )
 
         return {
             "success": True,
@@ -1001,6 +1061,36 @@ class DynamicContestService:
         old_status = contest.status
         contest.status = cleaned_status
 
+        # When going LIVE: ensure starts_at and ends_at reflect actual live window.
+        # If admin forces the contest live before the scheduled start, recalculate
+        # starts_at = now, ends_at = now + original_duration (preserving contest length).
+        if cleaned_status == "live":
+            now_ts = now_utc()
+            current_starts = contest.starts_at
+            if current_starts and current_starts.tzinfo is None:
+                current_starts = current_starts.replace(tzinfo=timezone.utc)
+
+            current_ends = contest.ends_at
+            if current_ends and current_ends.tzinfo is None:
+                current_ends = current_ends.replace(tzinfo=timezone.utc)
+
+            # Compute original contest duration (fallback: 90 minutes)
+            if current_starts and current_ends and current_ends > current_starts:
+                original_duration = current_ends - current_starts
+            else:
+                original_duration = timedelta(minutes=90)
+
+            # Only reschedule if contest hasn't started yet (admin early-trigger)
+            if not current_starts or current_starts > now_ts:
+                contest.starts_at = now_ts
+                contest.ends_at = now_ts + original_duration
+                logger.info(
+                    "Contest '%s' early-triggered live. Rescheduled: starts_at=%s ends_at=%s",
+                    contest.slug,
+                    contest.starts_at.isoformat(),
+                    contest.ends_at.isoformat(),
+                )
+
         qualify_summary = None
         if cleaned_status == "live" and auto_qualify_top_30:
             try:
@@ -1017,28 +1107,14 @@ class DynamicContestService:
 
         await db.commit()
 
-        try:
-            await delete_cache_pattern("cache:*")
-        except Exception:
-            pass
-
-        # Broadcast real-time event to all connected clients & SSE streams
-        try:
-            from app.services.event_broadcaster import broadcast_event
-            await broadcast_event(
-                event_type="contest_status_changed",
-                data={
-                    "contest_slug": contest.slug,
-                    "contest_title": contest.title,
-                    "old_status": old_status,
-                    "new_status": cleaned_status,
-                    "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
-                    "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
-                },
-                contest_slug=contest.slug,
-            )
-        except Exception as e:
-            logger.debug("Realtime status broadcast notice: %s", e)
+        await DynamicContestService._invalidate_contest_caches(
+            include_rating_caches=cleaned_status == "finished"
+        )
+        status_event_data = DynamicContestService._contest_event_data(contest, "status_changed")
+        status_event_data.update({"old_status": old_status, "new_status": cleaned_status})
+        await DynamicContestService._publish_contest_event(
+            "contest_status_changed", contest.slug, status_event_data
+        )
 
         return {
             "success": True,
@@ -1137,6 +1213,7 @@ class DynamicContestService:
             raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
 
         contest_title = contest.title
+        deleted_event_data = DynamicContestService._contest_event_data(contest, "deleted")
 
         # Campus Passes Cascade
         await db.execute(delete(CampusPass).where(CampusPass.contest_id == contest.id))
@@ -1161,10 +1238,10 @@ class DynamicContestService:
         await db.delete(contest)
         await db.commit()
 
-        try:
-            await delete_cache_pattern("cache:*")
-        except Exception:
-            pass
+        await DynamicContestService._invalidate_contest_caches()
+        await DynamicContestService._publish_contest_event(
+            "contest_deleted", contest_slug, deleted_event_data
+        )
 
         return {
             "success": True,

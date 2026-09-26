@@ -33,7 +33,6 @@ import type { ContestSummary, ParticipationRecord } from "@/features/contest/typ
 import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
 import { ContestsHubSkeleton } from "@/organization/components/skeletons";
-import { useRealtimeEvents } from "@/lib/realtime";
 import { toast } from "sonner";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
@@ -146,8 +145,8 @@ export function ContestsHubPage() {
         invalidateSwrCache("contest:*");
         invalidateSwrCache("passes:*");
       }
-      dispatch(fetchContestsThunk(force));
-      getUniversityLeaderboardData().then((res) => setLeaders(res || []));
+      void dispatch(fetchContestsThunk(force));
+      void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
       if (member) {
         contestApi
           .participated(force)
@@ -159,8 +158,8 @@ export function ContestsHubPage() {
   );
 
   useEffect(() => {
-    dispatch(fetchContestsThunk(false));
-    getUniversityLeaderboardData().then((res) => setLeaders(res || []));
+    void dispatch(fetchContestsThunk(false));
+    void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
     if (member) {
       if (myParticipations.length === 0) {
         setIsLoadingParticipations(true);
@@ -176,21 +175,6 @@ export function ContestsHubPage() {
   const hasLiveContests = useMemo(
     () => contests.some((c) => c.status === "live"),
     [contests]
-  );
-
-  useRealtimeEvents(
-    null,
-    (event) => {
-      if (
-        event.event === "contest_status_changed" ||
-        event.event === "top30_qualified" ||
-        event.event === "pass_checked_in"
-      ) {
-        refreshHubData(true);
-      }
-    },
-    undefined,
-    hasLiveContests
   );
 
   useEffect(() => {
@@ -926,7 +910,9 @@ export function ContestsHubPage() {
                                 : "bg-zinc-900 border-white/10 text-zinc-400"
                             }`}
                           >
-                            {cadetSolved !== null ? `${cadetSolved}/4 Solved` : "4 Problems"}
+                            {cadetSolved !== null
+                              ? `${cadetSolved}/${contest.problem_count ?? 4} Solved`
+                              : `${contest.problem_count ?? 4} Problem${(contest.problem_count ?? 4) === 1 ? "" : "s"}`}
                           </span>
 
                           <Button

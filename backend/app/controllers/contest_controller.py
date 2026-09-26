@@ -86,7 +86,9 @@ class ContestController:
         cached = await get_cache(cache_key)
         if cached is not None:
             response.headers["X-Cache"] = "HIT"
-            response.headers["Cache-Control"] = f"public, max-age={TTL_CONTESTS_LIST}, stale-while-revalidate=15"
+            # The serialized list includes member-specific `registered` flags.
+            # Keep Redis memoization, but never let a browser or CDN reuse it.
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             if limit is not None:
                 safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
                 inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
@@ -126,7 +128,7 @@ class ContestController:
 
         await set_cache(cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
         response.headers["X-Cache"] = "MISS"
-        response.headers["Cache-Control"] = f"public, max-age={TTL_CONTESTS_LIST}, stale-while-revalidate=15"
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 
         if limit is not None:
             safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
@@ -643,6 +645,7 @@ class ContestController:
         contest.registered_count += 1
         await db.commit()
         await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern("cache:contests*")
 
         return {
             "status": "confirmed",
@@ -806,6 +809,7 @@ class ContestController:
 
         await db.commit()
         await delete_cache_pattern("cache:contest*")
+        await delete_cache_pattern("cache:contests*")
 
         try:
             await broadcast_event(
@@ -844,6 +848,9 @@ class ContestController:
 
         if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to enter contest arena.")
+
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":

@@ -180,7 +180,7 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
         MemberProfile, OfflineContest, RatingHistory, ScoreboardEntry,
     )
     from app.services.rating_service import calculate_rating_deltas
-    from app.core.cache import delete_cache_pattern
+    from app.services.dynamic_contest_service import DynamicContestService
 
     now = _utcnow()
 
@@ -225,6 +225,24 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                 if not entries:
                     await db.commit()
                     _auto_finish_done.add(slug)
+                    await DynamicContestService._invalidate_contest_caches()
+                    try:
+                        from app.services.event_broadcaster import broadcast_event as _broadcast
+                        await _broadcast(
+                            "contest_status_changed",
+                            {
+                                "contest_slug": slug,
+                                "contest_title": contest.title,
+                                "old_status": "live",
+                                "new_status": "finished",
+                                "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+                                "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+                                "change": "status_changed",
+                            },
+                            contest_slug=slug,
+                        )
+                    except Exception:
+                        pass
                     logger.info("auto-finish: '%s' → finished (no scoreboard entries)", slug)
                     continue
 
@@ -292,18 +310,22 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
                 await db.commit()
                 _auto_finish_done.add(slug)
 
-                # Bust all caches so the UI reflects the new state immediately
-                try:
-                    await delete_cache_pattern("cache:*")
-                except Exception:
-                    pass
+                await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
 
                 # Broadcast SSE so connected frontends move contest to history
                 try:
                     from app.services.event_broadcaster import broadcast_event as _broadcast
                     await _broadcast(
                         "contest_status_changed",
-                        {"slug": slug, "status": "finished", "title": contest.title},
+                        {
+                            "contest_slug": slug,
+                            "contest_title": contest.title,
+                            "old_status": "live",
+                            "new_status": "finished",
+                            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+                            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+                            "change": "status_changed",
+                        },
                         contest_slug=slug,
                     )
                 except Exception:
@@ -336,7 +358,7 @@ async def _auto_start_contests(session_factory: async_sessionmaker) -> None:
     """
     from app.models.db_models import OfflineContest
     from app.services.event_broadcaster import broadcast_event
-    from app.core.cache import delete_cache_pattern
+    from app.services.dynamic_contest_service import DynamicContestService
 
     now = _utcnow()
 
@@ -366,17 +388,21 @@ async def _auto_start_contests(session_factory: async_sessionmaker) -> None:
                 contest.status = "live"
                 await db.commit()
 
-                # Bust all caches so the UI picks up the new status immediately
-                try:
-                    await delete_cache_pattern("cache:contest*")
-                except Exception:
-                    pass
+                await DynamicContestService._invalidate_contest_caches()
 
                 # Broadcast SSE so connected frontends update without polling
                 try:
                     await broadcast_event(
                         "contest_status_changed",
-                        {"slug": slug, "status": "live", "title": contest.title},
+                        {
+                            "contest_slug": slug,
+                            "contest_title": contest.title,
+                            "old_status": "upcoming",
+                            "new_status": "live",
+                            "starts_at": contest.starts_at.isoformat() if contest.starts_at else None,
+                            "ends_at": contest.ends_at.isoformat() if contest.ends_at else None,
+                            "change": "status_changed",
+                        },
                         contest_slug=slug,
                     )
                 except Exception:

@@ -27,7 +27,7 @@ from app.schemas.dynamic_contest import (
     DynamicContestCreateRequest,
     DynamicContestUpdateRequest,
     PresetContestLaunchRequest,
-    ProblemCreateSchema,
+    ProblemSaveRequest,
     ProblemSyncRequest,
 )
 from app.services.dynamic_contest_service import DynamicContestService
@@ -141,11 +141,13 @@ class AdminContestController:
     @staticmethod
     async def add_or_update_problem(
         slug: str,
-        payload: ProblemCreateSchema,
+        payload: ProblemSaveRequest,
         target: Optional[str],
         db: AsyncSession,
     ) -> Dict[str, Any]:
-        resolved_target = getattr(payload, "target", None) or target or "both"
+        # The query parameter is canonical for the admin URL; the body field
+        # remains supported for clients that send a self-describing payload.
+        resolved_target = target or payload.target or "both"
         return await DynamicContestService.add_or_update_problem(slug, payload, db, target=resolved_target)
 
     @staticmethod

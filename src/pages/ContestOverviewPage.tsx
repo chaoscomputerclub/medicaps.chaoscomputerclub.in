@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
 import { useEffect, useState, useCallback } from "react";
@@ -57,6 +57,7 @@ function contestDuration(startsAt: string, endsAt: string): string {
 export function ContestOverviewPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { currentContest: rawContest, registration: rawRegistration, problems, isLoadingDetail } = useAppSelector(
     (state) => state.contest
   );
@@ -103,16 +104,25 @@ export function ContestOverviewPage() {
   );
   const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
 
-  // Real-time status update: only stream when contest is actively live or within 5m waiting lobby
+  // Real-time status update: always stream — must receive upcoming→live→finished transitions instantly
   useRealtimeEvents(
     contestSlug,
     (event) => {
-      if (event.event === "contest_status_changed") {
+      if (event.event === "contest_deleted") {
+        navigate("/contests", { replace: true });
+        return;
+      }
+      if (
+        event.event === "contest_status_changed" ||
+        event.event === "contest_updated" ||
+        event.event === "top30_qualified" ||
+        event.event === "contest_created"
+      ) {
         refreshDetail(true);
       }
     },
     undefined,
-    Boolean(contestSlug && (isLive || isWaitingRoom))
+    Boolean(contestSlug)
   );
 
   const handleRegister = async () => {
@@ -458,7 +468,11 @@ export function ContestOverviewPage() {
                         variant="outline"
                         size="sm"
                       >
-                        <Link to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}>
+                        <Link
+                          to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Solve →
                         </Link>
                       </Button>

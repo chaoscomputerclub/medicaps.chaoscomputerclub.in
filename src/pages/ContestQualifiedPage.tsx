@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useCallback, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -23,6 +23,7 @@ import { PageHeader, SectionHeader } from "@/organization/components/ui";
 export function ContestQualifiedPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { currentContest: contest, registration, pass, isLoadingDetail } = useAppSelector(
     (state) => state.contest
@@ -35,8 +36,8 @@ export function ContestQualifiedPage() {
       invalidateSwrCache(`contest:*:${contestSlug}*`);
       invalidateSwrCache("passes:*");
     }
-    dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
-    dispatch(fetchCampusPassThunk());
+    void dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
+    void dispatch(fetchCampusPassThunk());
   }, [contestSlug, dispatch]);
 
   useEffect(() => {
@@ -67,9 +68,14 @@ export function ContestQualifiedPage() {
 
   // Real-time synchronization
   useRealtimeEvents(contestSlug, (event) => {
+    if (event.event === "contest_deleted") {
+      navigate("/contests", { replace: true });
+      return;
+    }
     if (
       event.event === "pass_checked_in" ||
       event.event === "contest_status_changed" ||
+      event.event === "contest_updated" ||
       event.event === "top30_qualified"
     ) {
       refreshData(true);
