@@ -16,11 +16,26 @@ import {
 } from "recharts";
 import type { RatingHistoryPoint } from "../data/types";
 
-export function RatingChartInner({ data }: { data: RatingHistoryPoint[] }) {
-  const chartData = (data || []).map((d) => ({
-    ...d,
-    new_rating: d.new_rating ?? (d as any).rating ?? 1200,
-  }));
+export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)[] }) {
+  const chartData = (data || []).map((d, idx) => {
+    if (typeof d === "number") {
+      return {
+        contest: idx === 0 ? "Initial Baseline" : `Contest Round ${idx}`,
+        date: new Date(Date.now() - Math.max(0, (data.length - 1 - idx)) * 86400000 * 7).toISOString(),
+        new_rating: d,
+        delta: 0,
+      };
+    }
+    const rawDate = d?.date;
+    const isValidDate = Boolean(rawDate && !isNaN(new Date(rawDate).getTime()));
+    return {
+      ...d,
+      date: isValidDate
+        ? rawDate
+        : new Date(Date.now() - Math.max(0, (data.length - 1 - idx)) * 86400000 * 7).toISOString(),
+      new_rating: d?.new_rating ?? (d as any)?.rating ?? 1200,
+    };
+  });
 
   const ratings = chartData
     .map((d) => d.new_rating)
@@ -47,7 +62,12 @@ export function RatingChartInner({ data }: { data: RatingHistoryPoint[] }) {
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis
             dataKey="date"
-            tickFormatter={(v) => new Date(v).toLocaleDateString("en-IN", { month: "short" })}
+            tickFormatter={(v) => {
+              if (!v) return "";
+              const dateObj = new Date(v);
+              if (isNaN(dateObj.getTime())) return String(v);
+              return dateObj.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+            }}
             stroke="#71717a"
             fontSize={11}
             tickLine={false}
@@ -78,7 +98,16 @@ export function RatingChartInner({ data }: { data: RatingHistoryPoint[] }) {
               fontSize: 12,
               color: "#ffffff",
             }}
-            labelFormatter={(v) => new Date(v).toLocaleDateString("en-IN")}
+            labelFormatter={(v, payload) => {
+              const item = payload?.[0]?.payload;
+              const contestName = item?.contest;
+              if (!v) return contestName || "Rating Point";
+              const dateObj = new Date(v);
+              const formattedDate = isNaN(dateObj.getTime())
+                ? String(v)
+                : dateObj.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" });
+              return contestName ? `${contestName} (${formattedDate})` : formattedDate;
+            }}
           />
           <Area
             type="monotone"

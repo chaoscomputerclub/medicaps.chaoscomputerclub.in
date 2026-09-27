@@ -34,6 +34,7 @@ import {
   removeContestFromState,
   applyRealtimeEvent,
 } from "@/store/slices/contestSlice";
+import { syncSocialCounts, syncCadetSocialCounts } from "@/store/slices/socialSlice";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 
@@ -89,6 +90,41 @@ function ContestRealtimeSynchronizer() {
           invalidateSwrCache("student:profile:*");
           invalidateSwrCache("member:profile:*");
           void dispatch(fetchCurrentUserThunk());
+
+          if (event.event === "member_profile_updated" && event.data) {
+            const isTargetMe =
+              (event.data.member_id && currentMember?.id === event.data.member_id) ||
+              (event.data.handle && currentMember?.handle?.toLowerCase() === event.data.handle.toLowerCase());
+            const isFollowerMe =
+              (event.data.follower_id && currentMember?.id === event.data.follower_id) ||
+              (event.data.follower_handle && currentMember?.handle?.toLowerCase() === event.data.follower_handle.toLowerCase());
+
+            if (isTargetMe && typeof event.data.followers_count === "number") {
+              dispatch(
+                syncSocialCounts({
+                  followersCount: event.data.followers_count,
+                  followingCount: event.data.following_count,
+                })
+              );
+            } else if (event.data.handle || event.data.member_id) {
+              const targetKey = event.data.handle || event.data.member_id;
+              dispatch(
+                syncCadetSocialCounts({
+                  handleOrId: targetKey,
+                  followersCount: event.data.followers_count,
+                  followingCount: event.data.following_count,
+                })
+              );
+            }
+
+            if (isFollowerMe && typeof event.data.my_following_count === "number") {
+              dispatch(
+                syncSocialCounts({
+                  followingCount: event.data.my_following_count,
+                })
+              );
+            }
+          }
         }
       }
 

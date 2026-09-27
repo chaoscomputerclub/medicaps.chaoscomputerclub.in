@@ -124,6 +124,8 @@ class AssessmentService:
         assessment, contest = await AssessmentService.get_or_create_assessment_for_contest(contest_slug, db)
         is_dev_contest = contest_slug.startswith("dev-")
         is_dev_bypass = bool(settings.DEV_MODE and is_dev_contest)
+        from app.core.security import is_privileged_test_member
+        is_test_user = is_privileged_test_member(current_member)
 
         # 1. Check if user is registered for the contest
         is_registered = False

@@ -1342,12 +1342,7 @@ class DynamicContestService:
             ))
             rated += 1
 
-        # Re-compute university rank across all active members based on official ratings
-        all_ranked_res = await db.execute(
-            select(MemberProfile).order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc(), MemberProfile.id.asc())
-        )
-        for u_rank, m_prof in enumerate(all_ranked_res.scalars().all(), start=1):
-            m_prof.university_rank = u_rank
+
 
         try:
             from app.services.event_broadcaster import broadcast_event

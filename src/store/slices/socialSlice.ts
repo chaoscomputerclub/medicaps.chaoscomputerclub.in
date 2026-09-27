@@ -4,10 +4,50 @@
  */
 
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { getApiBase, getToken, apiFetch } from "@/lib/auth";
+import { getApiBase, getToken, getStoredMember, apiFetch } from "@/lib/auth";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
 import { invalidateFullProfileCache } from "@/organization/data/queries";
 import type { StudentFollowItem } from "@/organization/data/types";
+import { fetchCurrentUserThunk } from "./authSlice";
+
+const SOCIAL_COUNTS_KEY = "ccc_my_social_counts";
+
+function getStoredSocialCounts(): { followers: number; following: number; synced: boolean } {
+  if (typeof window === "undefined") return { followers: 0, following: 0, synced: false };
+  try {
+    const raw = localStorage.getItem(SOCIAL_COUNTS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed?.followers === "number" && typeof parsed?.following === "number") {
+        return { followers: parsed.followers, following: parsed.following, synced: true };
+      }
+    }
+  } catch {}
+  try {
+    const mem = getStoredMember();
+    if (typeof mem?.followers_count === "number" || typeof mem?.following_count === "number") {
+      return {
+        followers: mem.followers_count || 0,
+        following: mem.following_count || 0,
+        synced: true,
+      };
+    }
+  } catch {}
+  return { followers: 0, following: 0, synced: false };
+}
+
+function persistSocialCounts(followers: number, following: number) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(SOCIAL_COUNTS_KEY, JSON.stringify({ followers, following }));
+  } catch {}
+}
+
+export interface CadetSocialStats {
+  followersCount: number;
+  followingCount: number;
+  isFollowing?: boolean | undefined;
+}
 
 export interface SocialState {
   followingIds: string[];
@@ -17,14 +57,25 @@ export interface SocialState {
   drawerTargetHandle: string | null;
   drawerTargetName: string | null;
   drawerTargetId: string | null;
+  drawerTargetIsSelf: boolean;
   followersCount: number;
   followingCount: number;
+  /** Authenticated user's own follower count — global source of truth */
+  myFollowersCount: number;
+  /** Authenticated user's own following count — global source of truth */
+  myFollowingCount: number;
+  /** Whether own social counts have been hydrated from the server */
+  hasSyncedMyCounts: boolean;
+  /** Global cache of visited/viewed cadets' social counts indexed by handle or id */
+  cadetSocialCounts: Record<string, CadetSocialStats>;
   studentsList: StudentFollowItem[];
   loadingList: boolean;
   actionPendingId: string | null;
   searchQuery: string;
   error: string | null;
 }
+
+const initialCounts = getStoredSocialCounts();
 
 const initialState: SocialState = {
   followingIds: [],
@@ -34,8 +85,13 @@ const initialState: SocialState = {
   drawerTargetHandle: null,
   drawerTargetName: null,
   drawerTargetId: null,
+  drawerTargetIsSelf: false,
   followersCount: 0,
   followingCount: 0,
+  myFollowersCount: initialCounts.followers,
+  myFollowingCount: initialCounts.following,
+  hasSyncedMyCounts: initialCounts.synced,
+  cadetSocialCounts: {},
   studentsList: [],
   loadingList: false,
   actionPendingId: null,
@@ -57,6 +113,55 @@ export const fetchMyFollowingIdsThunk = createAsyncThunk<string[]>(
     }
   },
 );
+
+// 1b. Fetch current authenticated member's complete social stats (followers, following, followingIds)
+export const fetchMySocialStatsThunk = createAsyncThunk<
+  { followersCount: number; followingCount: number; followingIds: string[] },
+  string | void
+>("social/fetchMySocialStats", async (explicitHandle, { rejectWithValue, getState }) => {
+  try {
+    const token = getToken();
+    if (!token) return { followersCount: 0, followingCount: 0, followingIds: [] };
+    const state = getState() as any;
+    const currentMember = state.auth?.member || getStoredMember();
+    const handle = (typeof explicitHandle === "string" && explicitHandle)
+      ? explicitHandle
+      : currentMember?.handle;
+
+    const [followersRes, followingIdsRes] = await Promise.all([
+      handle
+        ? apiFetch<any>(`/social/${encodeURIComponent(handle.replace(/^@+/, ""))}/followers?limit=1`).catch(() => null)
+        : null,
+      apiFetch<{ following_ids: string[] }>("/social/my-following-ids").catch(() => null),
+    ]);
+
+    const followingIds = Array.isArray(followingIdsRes?.following_ids)
+      ? Array.from(new Set(followingIdsRes.following_ids))
+      : [];
+
+    const followersCount =
+      typeof followersRes?.count === "number"
+        ? followersRes.count
+        : typeof followersRes?.followers_count === "number"
+        ? followersRes.followers_count
+        : typeof currentMember?.followers_count === "number"
+        ? currentMember.followers_count
+        : 0;
+
+    const followingCount =
+      typeof followersRes?.following_count === "number" && followersRes.following_count > 0
+        ? followersRes.following_count
+        : followingIds.length;
+
+    return {
+      followersCount,
+      followingCount,
+      followingIds,
+    };
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Failed to fetch social stats");
+  }
+});
 
 // 2. Fetch followers list for a student
 export const fetchFollowersThunk = createAsyncThunk<
@@ -152,6 +257,7 @@ export const socialSlice = createSlice({
         followingCount?: number;
         type?: "followers" | "following";
         mode?: "followers" | "following";
+        isSelf?: boolean;
       } | string>,
     ) => {
       const payload = typeof action.payload === "string" ? { handle: action.payload } : action.payload;
@@ -165,6 +271,7 @@ export const socialSlice = createSlice({
       state.drawerTargetHandle = cleanHandle;
       state.drawerTargetName = rawName || cleanHandle;
       state.drawerTargetId = payload.targetId || null;
+      state.drawerTargetIsSelf = Boolean(payload.isSelf);
       if (typeof payload.followersCount === "number") state.followersCount = payload.followersCount;
       if (typeof payload.followingCount === "number") state.followingCount = payload.followingCount;
       state.searchQuery = "";
@@ -183,8 +290,85 @@ export const socialSlice = createSlice({
     updateFollowingIdsDirectly: (state, action: PayloadAction<string[]>) => {
       state.followingIds = Array.from(new Set(action.payload));
     },
+    /**
+     * Hydrate the authenticated user's own follower/following counts from any
+     * data source (profile API, SWR, SSE). This is the single write point for
+     * `myFollowersCount` / `myFollowingCount` — call it wherever you have
+     * fresh server data so every component reads from one global location.
+     */
+    syncSocialCounts: (
+      state,
+      action: PayloadAction<{ followersCount?: number; followingCount?: number }>,
+    ) => {
+      if (typeof action.payload.followersCount === "number") {
+        state.myFollowersCount = action.payload.followersCount;
+      }
+      if (typeof action.payload.followingCount === "number") {
+        state.myFollowingCount = action.payload.followingCount;
+      }
+      state.hasSyncedMyCounts = true;
+      persistSocialCounts(state.myFollowersCount, state.myFollowingCount);
+    },
+    /**
+     * Store/update social telemetry for any cadet profile (by handle or id)
+     * so non-self social stats stay reactive across components.
+     */
+    syncCadetSocialCounts: (
+      state,
+      action: PayloadAction<{
+        handleOrId: string;
+        followersCount?: number;
+        followingCount?: number;
+        isFollowing?: boolean;
+      }>,
+    ) => {
+      const key = action.payload.handleOrId.replace(/^@+/, "").trim().toLowerCase();
+      if (!key) return;
+      const existing = state.cadetSocialCounts[key] || { followersCount: 0, followingCount: 0 };
+      state.cadetSocialCounts[key] = {
+        followersCount:
+          typeof action.payload.followersCount === "number"
+            ? action.payload.followersCount
+            : existing.followersCount,
+        followingCount:
+          typeof action.payload.followingCount === "number"
+            ? action.payload.followingCount
+            : existing.followingCount,
+        isFollowing:
+          typeof action.payload.isFollowing === "boolean"
+            ? action.payload.isFollowing
+            : (existing.isFollowing ?? false),
+      };
+    },
   },
   extraReducers: (builder) => {
+    // Current User Profile Sync: keeps authoritative follower/following counts up to date
+    builder.addCase(fetchCurrentUserThunk.fulfilled, (state, action) => {
+      let changed = false;
+      if (typeof action.payload.followers_count === "number") {
+        state.myFollowersCount = action.payload.followers_count;
+        changed = true;
+      }
+      if (typeof action.payload.following_count === "number") {
+        state.myFollowingCount = action.payload.following_count;
+        changed = true;
+      }
+      if (changed) {
+        state.hasSyncedMyCounts = true;
+        persistSocialCounts(state.myFollowersCount, state.myFollowingCount);
+      }
+    });
+
+    // My Social Stats (Followers + Following + FollowingIDs coordinated fetch)
+    builder.addCase(fetchMySocialStatsThunk.fulfilled, (state, action) => {
+      state.myFollowersCount = action.payload.followersCount;
+      state.myFollowingCount = action.payload.followingCount;
+      state.hasSyncedMyCounts = true;
+      state.followingIds = action.payload.followingIds;
+      state.hasFetchedFollowing = true;
+      persistSocialCounts(state.myFollowersCount, state.myFollowingCount);
+    });
+
     // My Following IDs
     builder.addCase(fetchMyFollowingIdsThunk.fulfilled, (state, action) => {
       state.followingIds = Array.from(new Set(action.payload));
@@ -206,6 +390,22 @@ export const socialSlice = createSlice({
       if (typeof action.payload.followingCount === "number") {
         state.followingCount = action.payload.followingCount;
       }
+      if (state.drawerTargetIsSelf) {
+        state.myFollowersCount = action.payload.followersCount;
+        if (typeof action.payload.followingCount === "number" && action.payload.followingCount > 0) {
+          state.myFollowingCount = action.payload.followingCount;
+        }
+        state.hasSyncedMyCounts = true;
+        persistSocialCounts(state.myFollowersCount, state.myFollowingCount);
+      } else if (state.drawerTargetHandle) {
+        const key = state.drawerTargetHandle.replace(/^@+/, "").trim().toLowerCase();
+        const prev = state.cadetSocialCounts[key] || { followersCount: 0, followingCount: 0 };
+        state.cadetSocialCounts[key] = {
+          ...prev,
+          followersCount: action.payload.followersCount,
+          followingCount: action.payload.followingCount || prev.followingCount,
+        };
+      }
     });
     builder.addCase(fetchFollowersThunk.rejected, (state, action) => {
       state.loadingList = false;
@@ -223,6 +423,22 @@ export const socialSlice = createSlice({
       state.followingCount = action.payload.followingCount;
       if (typeof action.payload.followersCount === "number") {
         state.followersCount = action.payload.followersCount;
+      }
+      if (state.drawerTargetIsSelf) {
+        state.myFollowingCount = action.payload.followingCount;
+        if (typeof action.payload.followersCount === "number" && action.payload.followersCount > 0) {
+          state.myFollowersCount = action.payload.followersCount;
+        }
+        state.hasSyncedMyCounts = true;
+        persistSocialCounts(state.myFollowersCount, state.myFollowingCount);
+      } else if (state.drawerTargetHandle) {
+        const key = state.drawerTargetHandle.replace(/^@+/, "").trim().toLowerCase();
+        const prev = state.cadetSocialCounts[key] || { followersCount: 0, followingCount: 0 };
+        state.cadetSocialCounts[key] = {
+          ...prev,
+          followersCount: action.payload.followersCount || prev.followersCount,
+          followingCount: action.payload.followingCount,
+        };
       }
     });
     builder.addCase(fetchFollowingThunk.rejected, (state, action) => {
@@ -274,7 +490,7 @@ export const socialSlice = createSlice({
     builder.addCase(toggleFollowThunk.fulfilled, (state, action) => {
       state.hasFetchedFollowing = true;
       state.actionPendingId = null;
-      const { targetId, targetHandle, isFollowing, followersCount } = action.payload;
+      const { targetId, targetHandle, isFollowing, followersCount, followingCount } = action.payload;
 
       const cleanHandle = (targetHandle || "").replace(/^@+/, "").trim();
       const cleanId = (targetId || "").trim();
@@ -283,10 +499,30 @@ export const socialSlice = createSlice({
         if (cleanId) {
           state.followingIds = Array.from(new Set([...state.followingIds, cleanId]));
         }
+        // I just followed someone — my own following count goes up
+        if (state.hasSyncedMyCounts) state.myFollowingCount = Math.max(0, state.myFollowingCount + 1);
       } else {
         state.followingIds = state.followingIds.filter(
           (id) => id !== cleanId && id !== cleanHandle
         );
+        // I just unfollowed someone — my own following count goes down
+        if (state.hasSyncedMyCounts) state.myFollowingCount = Math.max(0, state.myFollowingCount - 1);
+      }
+
+      // Override with authoritative server counts when available
+      if (typeof followingCount === "number" && state.hasSyncedMyCounts) {
+        state.myFollowingCount = followingCount;
+      }
+      persistSocialCounts(state.myFollowersCount, state.myFollowingCount);
+
+      if (cleanHandle) {
+        const key = cleanHandle.toLowerCase();
+        const prev = state.cadetSocialCounts[key] || { followersCount: 0, followingCount: 0 };
+        state.cadetSocialCounts[key] = {
+          ...prev,
+          followersCount: typeof followersCount === "number" ? followersCount : (isFollowing ? prev.followersCount + 1 : Math.max(0, prev.followersCount - 1)),
+          isFollowing: isFollowing,
+        };
       }
 
       // Update in active modal list
@@ -354,6 +590,8 @@ export const {
   setDrawerType,
   setSocialSearchQuery,
   updateFollowingIdsDirectly,
+  syncSocialCounts,
+  syncCadetSocialCounts,
 } = socialSlice.actions;
 
 export default socialSlice.reducer;

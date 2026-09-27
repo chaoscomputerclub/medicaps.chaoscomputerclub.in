@@ -32,7 +32,12 @@ class JobController:
 
         # IDOR / BOLA Prevention: Verify referenced member ownership
         payload_member_id = job.payload.get("member_id")
-        if payload_member_id and current_member:
+        if payload_member_id:
+            if not current_member:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Authentication required to inspect this job.",
+                )
             is_owner = current_member.id == payload_member_id
             is_staff = bool(getattr(current_member, "is_core_member", False) or getattr(current_member, "role", "cadet") in ("admin", "core", "maintainer"))
             if not is_owner and not is_staff:

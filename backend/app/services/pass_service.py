@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Optional, List, Tuple
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.campus_pass import CampusPass
@@ -282,13 +282,49 @@ class PassService:
                 checked_in_by=c_pass.checked_in_by,
             )
 
-        # Mark Check-in
+        # Mark Check-in using atomic conditional UPDATE (eliminates TOCTOU race)
         now = now_utc()
+        update_stmt = (
+            update(CampusPass)
+            .where(
+                CampusPass.id == c_pass.id,
+                CampusPass.check_in_status != "checked_in",
+            )
+            .values(
+                check_in_status="checked_in",
+                checked_in_at=now,
+                checked_in_by=proctor_name,
+            )
+        )
+        update_res = await db.execute(update_stmt)
+        if update_res.rowcount == 0:
+            # Another proctor checked in this pass concurrently!
+            await db.refresh(c_pass)
+            return PassVerifyResponse(
+                valid=True,
+                status="already_checked_in",
+                message=f"Candidate {member.full_name} (@{member.handle}) was ALREADY checked in at {c_pass.checked_in_at.strftime('%H:%M:%S') if c_pass.checked_in_at else 'earlier'} by {c_pass.checked_in_by or 'Proctor'}.",
+                pass_code=c_pass.pass_code,
+                seat_number=c_pass.seat_number,
+                contest_title=contest.title,
+                contest_slug=contest.slug,
+                candidate_name=member.full_name or member.handle,
+                handle=member.handle,
+                department=member.department or "CSE",
+                batch=member.batch or "2023-27",
+                qualification_rank=screening_rank,
+                screening_score=screening_score,
+                checked_in_at=c_pass.checked_in_at,
+                checked_in_by=c_pass.checked_in_by,
+            )
+
+        # Update registration timestamp as well
+        if reg:
+            reg.checked_in_at = now
+
         c_pass.check_in_status = "checked_in"
         c_pass.checked_in_at = now
         c_pass.checked_in_by = proctor_name
-        if reg:
-            reg.checked_in_at = now
 
         await db.commit()
 

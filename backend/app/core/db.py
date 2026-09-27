@@ -108,6 +108,47 @@ async def ensure_database_integrity():
                   AND contest_id NOT IN (SELECT id FROM offline_contests)
             """))
 
+            # 2b. Ensure unique constraint on scoreboard_entries (contest_id, member_id)
+            sb_uq_res = await session.execute(text("""
+                SELECT 1 FROM information_schema.table_constraints 
+                WHERE constraint_name = 'uq_scoreboard_contest_member'
+            """))
+            if not sb_uq_res.scalar():
+                await session.execute(text("""
+                    DELETE FROM scoreboard_entries
+                    WHERE id NOT IN (
+                        SELECT DISTINCT ON (contest_id, member_id) id
+                        FROM scoreboard_entries
+                        WHERE member_id IS NOT NULL
+                        ORDER BY contest_id, member_id, score DESC, penalty_seconds ASC, id ASC
+                    ) AND member_id IS NOT NULL;
+                """))
+                await session.execute(text("""
+                    ALTER TABLE scoreboard_entries 
+                    ADD CONSTRAINT uq_scoreboard_contest_member 
+                    UNIQUE (contest_id, member_id);
+                """))
+
+            # 2c. Ensure unique constraint on assessment_sessions (assessment_id, member_id)
+            sess_uq_res = await session.execute(text("""
+                SELECT 1 FROM information_schema.table_constraints 
+                WHERE constraint_name = 'uq_assessment_session_member'
+            """))
+            if not sess_uq_res.scalar():
+                await session.execute(text("""
+                    DELETE FROM assessment_sessions
+                    WHERE id NOT IN (
+                        SELECT DISTINCT ON (assessment_id, member_id) id
+                        FROM assessment_sessions
+                        ORDER BY assessment_id, member_id, started_at DESC, total_score DESC, id ASC
+                    );
+                """))
+                await session.execute(text("""
+                    ALTER TABLE assessment_sessions 
+                    ADD CONSTRAINT uq_assessment_session_member 
+                    UNIQUE (assessment_id, member_id);
+                """))
+
             # 3. Ensure essential query & foreign key indexes
             index_statements = [
                 "CREATE INDEX IF NOT EXISTS ix_rating_history_contest_id ON rating_history (contest_id)",

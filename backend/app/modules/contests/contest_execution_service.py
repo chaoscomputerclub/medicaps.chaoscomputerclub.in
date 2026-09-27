@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.core.cache import delete_cache_pattern
 from app.core.config import settings
@@ -246,13 +246,23 @@ class ContestExecutionService:
         )
         db.add(sub)
 
-        if is_accepted:
+        # Check if cadet previously solved this problem to prevent duplicate scoring
+        prev_ac_stmt = select(func.count(ContestSubmission.id)).where(
+            ContestSubmission.contest_id == contest.id,
+            ContestSubmission.problem_id == problem.id,
+            ContestSubmission.member_id == current_member.id,
+            ContestSubmission.verdict == "ACCEPTED",
+        )
+        prev_ac_count = (await db.scalar(prev_ac_stmt)) or 0
+        is_first_solve_by_user = (prev_ac_count == 0) and is_accepted
+
+        if is_first_solve_by_user:
             problem.solved_count += 1
 
         contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
         penalty_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
 
-        sb_entry = await ContestRepository.get_scoreboard_entry(db, contest.id, current_member.id)
+        sb_entry = await ContestRepository.get_scoreboard_entry(db, contest.id, current_member.id, for_update=True)
         if not sb_entry:
             sb_entry = ScoreboardEntry(
                 contest_id=contest.id,
@@ -263,17 +273,44 @@ class ContestExecutionService:
                 department=current_member.department or "CSE",
                 batch=current_member.batch or "2023-27",
                 division="open",
-                score=points_awarded,
+                score=points_awarded if is_accepted else 0,
                 solved=1 if is_accepted else 0,
-                penalty_seconds=penalty_secs,
-                telemetry=[{"problem_index": problem.problem_index, "status": "solved" if is_accepted else "failed", "attempts": 1, "is_first_ac": False}],
+                penalty_seconds=penalty_secs if is_accepted else 0,
+                telemetry=[{
+                    "problem_index": problem.problem_index,
+                    "status": "solved" if is_accepted else "failed",
+                    "attempts": 1,
+                    "is_first_ac": False,
+                }],
             )
             db.add(sb_entry)
         else:
-            if is_accepted:
-                sb_entry.score += points_awarded
-                sb_entry.solved += 1
-                sb_entry.penalty_seconds = penalty_secs
+            telemetry_list = list(sb_entry.telemetry or [])
+            prob_item = next(
+                (item for item in telemetry_list if item.get("problem_index") == problem.problem_index),
+                None,
+            )
+
+            if prob_item:
+                prob_item["attempts"] = prob_item.get("attempts", 0) + 1
+                if is_accepted and prob_item.get("status") != "solved":
+                    prob_item["status"] = "solved"
+                    sb_entry.score += points_awarded
+                    sb_entry.solved += 1
+                    sb_entry.penalty_seconds = penalty_secs
+            else:
+                telemetry_list.append({
+                    "problem_index": problem.problem_index,
+                    "status": "solved" if is_accepted else "failed",
+                    "attempts": 1,
+                    "is_first_ac": False,
+                })
+                if is_accepted:
+                    sb_entry.score += points_awarded
+                    sb_entry.solved += 1
+                    sb_entry.penalty_seconds = penalty_secs
+
+            sb_entry.telemetry = telemetry_list
 
         await db.flush()
         await ContestRepository.re_rank_scoreboard(db, contest.id)

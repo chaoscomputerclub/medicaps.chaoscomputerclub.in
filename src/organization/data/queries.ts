@@ -30,6 +30,7 @@ import type {
 
 export type FullProfilePayload = {
   member: MemberProfile;
+  stats?: Record<string, any> | null;
   ratingHistory: RatingHistoryPoint[];
   recentBattles: OfflineBattleResult[];
   campusPass: CampusPass;

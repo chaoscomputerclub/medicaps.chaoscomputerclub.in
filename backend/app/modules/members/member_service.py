@@ -354,12 +354,45 @@ class MemberService:
         percentile = round((1.0 - (univ_rank / max(1, all_members_count))) * 100, 1)
         percentile = max(0.0, min(99.9, percentile))
 
+        from app.services.rating_service import get_rating_tier
+        tier = get_rating_tier(current_member.rating or 1200)
+
         member_dto = to_member_public(current_member).model_dump()
         member_dto["attendance_count"] = attended
         member_dto["attendance_total"] = total_contests
         member_dto["university_rank"] = univ_rank
         member_dto["department_rank"] = dept_rank
         member_dto["percentile"] = percentile
+        member_dto["followers_count"] = followers_count
+        member_dto["following_count"] = following_count
+        member_dto["tier"] = tier
+
+        # Structured rating history points with ISO date strings for frontend AreaChart
+        detailed_rating_history = []
+        if rh_rows:
+            for rh, contest in rh_rows:
+                detailed_rating_history.append({
+                    "contest": rh.contest_title or (contest.title if contest else "Contest Session"),
+                    "contest_slug": getattr(contest, "slug", "") if contest else "",
+                    "date": rh.contested_at.isoformat() if rh.contested_at else datetime.now(timezone.utc).isoformat(),
+                    "rank": rh.rank,
+                    "old_rating": rh.old_rating,
+                    "new_rating": rh.new_rating,
+                    "delta": rh.new_rating - rh.old_rating,
+                })
+        elif rating_history:
+            detailed_rating_history = list(reversed(rating_history))
+        else:
+            init_date = (current_member.created_at or datetime.now(timezone.utc)).isoformat()
+            detailed_rating_history = [{
+                "contest": "Initial Baseline",
+                "contest_slug": "",
+                "date": init_date,
+                "rank": 1,
+                "old_rating": 1200,
+                "new_rating": current_member.rating or 1200,
+                "delta": 0,
+            }]
 
         payload = {
             "member": member_dto,
@@ -381,8 +414,10 @@ class MemberService:
             },
             "recent_battles": recent_battles[:10],
             "recentBattles": recent_battles[:10],
-            "rating_history": sparkline_ratings,
-            "ratingHistory": sparkline_ratings,
+            "rating_history": detailed_rating_history,
+            "ratingHistory": detailed_rating_history,
+            "ratings": sparkline_ratings,
+            "sparkline_ratings": sparkline_ratings,
         }
 
         await set_cache(cache_key, payload, ttl_seconds=60)
@@ -420,14 +455,48 @@ class MemberService:
             from app.modules.members.social_repository import SocialRepository
             is_following = await SocialRepository.is_following(db, current_member.id, student.id)
 
-        # Rating history sparkline
+        # Rating history sparkline and structured points
         rh_records = await MemberRepository.get_rating_history(db, student.id)
         sparkline = [1200]
+        detailed_rh = []
         if rh_records:
             sparkline = [1200] + [r.new_rating for r in rh_records]
+            for r in rh_records:
+                detailed_rh.append({
+                    "contest": r.contest_title or "Contest Session",
+                    "contest_slug": "",
+                    "date": r.contested_at.isoformat() if r.contested_at else datetime.now(timezone.utc).isoformat(),
+                    "rank": r.rank,
+                    "old_rating": r.old_rating,
+                    "new_rating": r.new_rating,
+                    "delta": r.new_rating - r.old_rating,
+                })
 
         # Participations
         battles = await MemberRepository.get_participations(db, student.id)
+        if not detailed_rh and battles:
+            for b in reversed(battles):
+                detailed_rh.append({
+                    "contest": b.get("contest") or b.get("title") or "Contest",
+                    "contest_slug": b.get("contest_slug") or "",
+                    "date": b.get("date") or datetime.now(timezone.utc).isoformat(),
+                    "rank": b.get("rank") or 1,
+                    "old_rating": (student.rating or 1200) - (b.get("delta") or 0),
+                    "new_rating": student.rating or 1200,
+                    "delta": b.get("delta") or 0,
+                })
+
+        if not detailed_rh:
+            init_date = (student.created_at or datetime.now(timezone.utc)).isoformat()
+            detailed_rh = [{
+                "contest": "Initial Baseline",
+                "contest_slug": "",
+                "date": init_date,
+                "rank": 1,
+                "old_rating": 1200,
+                "new_rating": student.rating or 1200,
+                "delta": 0,
+            }]
 
         # Problem Solving Statistics (LeetCode style)
         as_rows = await db.execute(
@@ -514,7 +583,7 @@ class MemberService:
             "batch": student.batch,
             "rating": student.rating,
             "peak_rating": student.peak_rating or student.rating,
-            "peak_contest": battles[0]["title"] if battles else None,
+            "peak_contest": (battles[0].get("contest_title") or battles[0].get("title") or battles[0].get("contest")) if battles else None,
             "university_rank": univ_rank if attended > 0 else None,
             "percentile": percentile,
             "active_members": all_members_count,
@@ -553,9 +622,10 @@ class MemberService:
                 "is_you": bool(current_member and str(current_member.id) == str(student.id)),
             },
             "recent_battles": battles[:10],
-            "recentBattles": battles[:10],
-            "rating_history": sparkline,
-            "ratingHistory": sparkline,
+            "rating_history": detailed_rh,
+            "ratingHistory": detailed_rh,
+            "ratings": sparkline,
+            "sparkline_ratings": sparkline,
             "problemStats": {
                 "total_solved": total_solved,
                 "easy_solved": easy_count,

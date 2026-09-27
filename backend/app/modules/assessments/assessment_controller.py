@@ -58,7 +58,9 @@ class AssessmentController:
         async_mode: bool = False,
     ) -> Dict[str, Any]:
         if async_mode:
+            import hashlib
             from app.core.queue import RedisQueueEngine, JobPriority
+            code_hash = hashlib.sha256((code or "").strip().encode()).hexdigest()[:12]
             job = await RedisQueueEngine.enqueue(
                 queue_name="judge",
                 job_type="EVALUATE_ASSESSMENT_SUBMISSION",
@@ -70,7 +72,7 @@ class AssessmentController:
                     "language": language.value if hasattr(language, "value") else str(language),
                 },
                 priority=JobPriority.HIGH,
-                idempotency_key=f"sub:assess:{contest_slug}:{problem_id}:{current_member.id}",
+                idempotency_key=f"sub:assess:{contest_slug}:{problem_id}:{current_member.id}:{code_hash}",
             )
             return {
                 "success": True,

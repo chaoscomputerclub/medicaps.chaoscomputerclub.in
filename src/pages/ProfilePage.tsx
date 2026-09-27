@@ -19,7 +19,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
-import { openSocialDrawer, fetchMyFollowingIdsThunk, toggleFollowThunk } from "@/store/slices/socialSlice";
+import {
+  fetchMySocialStatsThunk,
+  toggleFollowThunk,
+  syncSocialCounts,
+  syncCadetSocialCounts,
+} from "@/store/slices/socialSlice";
+import { SocialFollowStats } from "@/organization/components/SocialFollowStats";
 import { uploadAvatarThunk, removeAvatarThunk, fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
@@ -58,6 +64,9 @@ export function ProfilePage() {
   const followingIds = useAppSelector((s) => s.social.followingIds);
   const hasFetchedFollowing = useAppSelector((s) => s.social.hasFetchedFollowing);
   const actionPendingId = useAppSelector((s) => s.social.actionPendingId);
+  const myFollowersCount = useAppSelector((s) => s.social.myFollowersCount);
+  const myFollowingCount = useAppSelector((s) => s.social.myFollowingCount);
+  const hasSyncedMyCounts = useAppSelector((s) => s.social.hasSyncedMyCounts);
 
   const [copied, setCopied] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
@@ -170,12 +179,12 @@ export function ProfilePage() {
   );
 
   useEffect(() => {
-    if (isAuthenticated() && !hasFetchedFollowing) {
-      dispatch(fetchMyFollowingIdsThunk());
+    if (isAuthenticated()) {
+      dispatch(fetchMySocialStatsThunk());
     }
-  }, [dispatch, hasFetchedFollowing]);
+  }, [dispatch]);
 
-  const activeData = isViewingSelf ? ownProfileData : studentProfileData;
+  const activeData: any = isViewingSelf ? ownProfileData : studentProfileData;
   const isLoading = isViewingSelf ? (ownLoading && !ownProfileData) : (studentLoading && !studentProfileData);
 
   const candidate = activeData?.member;
@@ -186,6 +195,46 @@ export function ProfilePage() {
   );
 
   const m = isCandidateValid ? candidate : (isViewingSelf ? currentMember : null);
+
+  useEffect(() => {
+    if (m) {
+      const stats = activeData?.stats;
+      const fc = m.followers_count ?? stats?.followers_count;
+      const fgc = m.following_count ?? stats?.following_count;
+
+      if (isViewingSelf) {
+        if (typeof fc === "number" || typeof fgc === "number") {
+          dispatch(
+            syncSocialCounts({
+              ...(typeof fc === "number" ? { followersCount: fc } : {}),
+              ...(typeof fgc === "number" ? { followingCount: fgc } : {}),
+            })
+          );
+        }
+      } else if (m.handle || m.id) {
+        dispatch(
+          syncCadetSocialCounts({
+            handleOrId: m.handle || m.id,
+            ...(typeof fc === "number" ? { followersCount: fc } : {}),
+            ...(typeof fgc === "number" ? { followingCount: fgc } : {}),
+            ...(typeof m.is_following === "boolean" ? { isFollowing: m.is_following } : {}),
+          })
+        );
+      }
+    }
+  }, [
+    dispatch,
+    isViewingSelf,
+    m?.id,
+    m?.handle,
+    m?.followers_count,
+    m?.following_count,
+    m?.is_following,
+    activeData?.stats?.followers_count,
+    activeData?.stats?.following_count,
+    currentMember?.followers_count,
+    currentMember?.following_count,
+  ]);
 
   if (isLoading || (!m && (ownLoading || studentLoading))) {
     return <ProfileSkeleton />;
@@ -299,16 +348,6 @@ export function ProfilePage() {
       : hasFetchedFollowing
         ? isFollowedInStore
         : (isFollowedInStore || Boolean(m.is_following));
-
-  const initialFollowed = Boolean(m.is_following);
-  const delta =
-    !isSelfUser
-      ? (isFollowing ? 1 : 0) - (initialFollowed ? 1 : 0)
-      : 0;
-  const displayedFollowers = Math.max(0, (m.followers_count || 0) + delta);
-  const displayedFollowing = isSelfUser
-    ? (hasFetchedFollowing ? followingIds.length : (m.following_count ?? 0))
-    : (m.following_count ?? 0);
 
   const isPendingFollowAction =
     followLoading ||
@@ -514,67 +553,14 @@ export function ProfilePage() {
 
             {/* Campus Social & Peer Telemetry */}
             <div className="flex items-center gap-2.5 flex-wrap pt-2.5">
-              {/* Followers Pod */}
-              <button
-                type="button"
-                onClick={() =>
-                  dispatch(
-                    openSocialDrawer({
-                      targetId: m.id,
-                      targetHandle: m.handle,
-                      targetName: m.full_name || m.handle,
-                      followersCount: displayedFollowers,
-                      followingCount: displayedFollowing,
-                      type: "followers",
-                    })
-                  )
-                }
-                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
-              >
-                <div className="size-5 rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400 group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150">
-                  <Users size={11} />
-                </div>
-                <div className="flex items-baseline gap-1.5 font-sans text-xs">
-                  <strong className="font-bold text-white text-sm tabular-nums tracking-tight group-hover:text-lime-400 transition-colors">
-                    {displayedFollowers}
-                  </strong>
-                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
-                    Followers
-                  </span>
-                </div>
-                <span className="size-1 rounded-full bg-lime-400/40 group-hover:bg-lime-400 transition-colors" />
-              </button>
-
-              {/* Following Pod */}
-              <button
-                type="button"
-                onClick={() =>
-                  dispatch(
-                    openSocialDrawer({
-                      targetId: m.id,
-                      targetHandle: m.handle,
-                      targetName: m.full_name || m.handle,
-                      followersCount: displayedFollowers,
-                      followingCount: displayedFollowing,
-                      type: "following",
-                    })
-                  )
-                }
-                className="group relative inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-white/[0.08] bg-black/60 hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.97] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
-              >
-                <div className="size-5 rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400 group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150">
-                  <UserCheck size={11} />
-                </div>
-                <div className="flex items-baseline gap-1.5 font-sans text-xs">
-                  <strong className="font-bold text-white text-sm tabular-nums tracking-tight group-hover:text-lime-400 transition-colors">
-                    {displayedFollowing}
-                  </strong>
-                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
-                    Following
-                  </span>
-                </div>
-                <span className="size-1 rounded-full bg-lime-400/40 group-hover:bg-lime-400 transition-colors" />
-              </button>
+              <SocialFollowStats
+                targetId={m.id}
+                targetHandle={m.handle}
+                targetName={m.full_name || m.handle}
+                initialFollowersCount={m.followers_count ?? activeData?.stats?.followers_count}
+                initialFollowingCount={m.following_count ?? activeData?.stats?.following_count}
+                isSelf={isSelfUser}
+              />
 
               {m.github_username && (
                 <a

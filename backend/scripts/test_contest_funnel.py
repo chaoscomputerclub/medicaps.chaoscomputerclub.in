@@ -11,10 +11,16 @@ Tests:
 """
 
 import asyncio
+import os
 import sys
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select, delete
 
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+
+from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.models.db_models import (
     MemberProfile,
@@ -32,6 +38,7 @@ from app.services.contest_service import ContestService
 from app.services.pass_service import PassService
 from app.services.seed_service import seed_initial_data
 from app.engine.enums import Language
+from app.engine.harness import prepare_solution_code
 
 
 async def run_funnel_test():
@@ -39,121 +46,127 @@ async def run_funnel_test():
     print("⚡ [CCC] Running Complete Contest & Assessment Funnel Test Suite")
     print("=" * 60)
 
-    await init_db()
+    old_qr_feat = settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+    settings.FEATURE_ASSESSMENT_AND_QR_ENABLED = True
 
-    async with AsyncSessionLocal() as db:
-        # Seed initial database
-        await seed_initial_data(db)
+    try:
+        await init_db()
 
-        # 1. Setup Test Cadet Member
-        test_handle = "cadet_funnel_test"
-        m_stmt = select(MemberProfile).where(MemberProfile.handle == test_handle)
-        m_res = await db.execute(m_stmt)
-        member = m_res.scalars().first()
+        async with AsyncSessionLocal() as db:
+            # Seed initial database
+            await seed_initial_data(db)
 
-        if not member:
-            member = MemberProfile(
-                handle=test_handle,
-                email="funnel_test@medicaps.ac.in",
-                full_name="Aarav Sharma",
-                department="Computer Science & Engineering",
-                batch="2023-2027",
-                rating=1580,
-                peak_rating=1620,
-                is_onboarded=True,
-            )
-            db.add(member)
-            await db.commit()
-            await db.refresh(member)
+            # 1. Setup Test Cadet Member
+            test_handle = "cadet_funnel_test"
+            m_stmt = select(MemberProfile).where(MemberProfile.handle == test_handle)
+            m_res = await db.execute(m_stmt)
+            member = m_res.scalars().first()
 
-        # 2. Setup Test Contest
-        contest_slug = "ccc-weekly-42"
-        c_stmt = select(OfflineContest).where(OfflineContest.slug == contest_slug)
-        c_res = await db.execute(c_stmt)
-        contest = c_res.scalars().first()
+            if not member:
+                member = MemberProfile(
+                    handle=test_handle,
+                    email="funnel_test@medicaps.ac.in",
+                    full_name="Aarav Sharma",
+                    department="Computer Science & Engineering",
+                    batch="2023-2027",
+                    rating=1580,
+                    peak_rating=1620,
+                    is_onboarded=True,
+                )
+                db.add(member)
+                await db.commit()
+                await db.refresh(member)
 
-        if not contest:
-            print("❌ Contest ccc-weekly-42 not found!")
-            sys.exit(1)
+            # 2. Setup Test Contest (Weekly Contest 1 or fallback to any active)
+            contest_slug = "weekly-contest-1"
+            c_stmt = select(OfflineContest).where(OfflineContest.slug == contest_slug)
+            c_res = await db.execute(c_stmt)
+            contest = c_res.scalars().first()
 
-        print(f"🔹 Step 1: Candidate Registration for '{contest.title}'")
-        reg_result = await ContestService.register_candidate(contest_slug, member, db)
-        assert reg_result["registered"] is True, "Registration failed"
-        print(f"  ✓ Candidate @{member.handle} registered successfully at {reg_result['registered_at']}")
+            if not contest:
+                c_any_res = await db.execute(select(OfflineContest).order_by(OfflineContest.created_at.desc()))
+                contest = c_any_res.scalars().first()
+                if contest:
+                    contest_slug = contest.slug
+                else:
+                    from scripts.launch_official_contests import launch_contests
+                    await launch_contests(force=True)
+                    c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == "weekly-contest-1"))
+                    contest = c_res.scalars().first()
+                    contest_slug = "weekly-contest-1"
 
-        # 3. Test Gating Window Check
-        print("\n🔹 Step 2: Assessment Window Gating & Waiting Verification")
-        # Ensure contest starts in the future so window is gated or check status
-        status_data = await AssessmentService.get_assessment_status(contest_slug, member, db)
-        assess_info = status_data["assessment"]
-        print(f"  Assessment Window Status: is_open={assess_info['is_open']}, opens_in={assess_info.get('opens_in_seconds')}s")
+            print(f"🔹 Step 1: Candidate Registration for '{contest.title}' ({contest_slug})")
+            reg_result = await ContestService.register_candidate(contest_slug, member, db)
+            assert reg_result["registered"] is True, "Registration failed"
+            print(f"  ✓ Candidate @{member.handle} registered successfully at {reg_result['registered_at']}")
 
-        # 4. Now simulate active window for testing session execution
-        print("\n🔹 Step 3: Assessment Session Creation & Problem Discovery")
-        # Temporarily shift assessment starts_at to now for session test
-        a_stmt = select(Assessment).where(Assessment.contest_id == contest.id)
-        a_res = await db.execute(a_stmt)
-        assessment = a_res.scalars().first()
-        if assessment:
-            assessment.starts_at = now_utc() - timedelta(minutes=10)
-            assessment.ends_at = now_utc() + timedelta(hours=2)
-            await db.commit()
+            # 3. Test Gating Window Check
+            print("\n🔹 Step 2: Assessment Window Gating & Waiting Verification")
+            status_data = await AssessmentService.get_assessment_status(contest_slug, member, db)
+            assess_info = status_data["assessment"]
+            print(f"  Assessment Window Status: is_open={assess_info['is_open']}, opens_in={assess_info.get('opens_in_seconds')}s")
 
-        active_status = await AssessmentService.get_assessment_status(contest_slug, member, db)
-        assert active_status["session"] is not None, "Active session should be created"
-        session_id = active_status["session"]["id"]
-        problems = active_status["problems"]
-        print(f"  ✓ Session Active! ID: {session_id} | Problems Available: {len(problems)}")
+            # 4. Now simulate active window for testing session execution
+            print("\n🔹 Step 3: Assessment Session Creation & Problem Discovery")
+            a_stmt = select(Assessment).where(Assessment.contest_id == contest.id)
+            a_res = await db.execute(a_stmt)
+            assessment = a_res.scalars().first()
+            if assessment:
+                assessment.starts_at = now_utc() - timedelta(minutes=10)
+                assessment.ends_at = now_utc() + timedelta(hours=2)
+                await db.commit()
 
-        # 5. Submit Solution to CodeBox
-        print("\n🔹 Step 4: Solution Code Evaluation on CodeBox")
-        prob_a = problems[0]
-        # Python solution for Problem A
-        sample_code = """import sys
+            active_status = await AssessmentService.get_assessment_status(contest_slug, member, db)
+            assert active_status["session"] is not None, "Active session should be created"
+            session_id = active_status["session"]["id"]
+            problems = active_status["problems"]
+            print(f"  ✓ Session Active! ID: {session_id} | Problems Available: {len(problems)}")
 
-def main():
-    input_data = sys.stdin.read().split()
-    if not input_data:
-        return
-    n = int(input_data[0])
-    passes = input_data[1:n+1]
-    counts = {}
-    total = 0
-    for p in passes:
-        rev = p[::-1]
-        if rev in counts:
-            total += counts[rev]
-        counts[p] = counts.get(p, 0) + 1
-    print(total)
-
-if __name__ == '__main__':
-    main()
+            # 5. Submit Solution to CodeBox
+            print("\n🔹 Step 4: Solution Code Evaluation on CodeBox")
+            prob_a = problems[0]
+            # Solution for Problem A (supports function / LeetCode class Solution)
+            sample_code = """class Solution:
+    def countMirrorPairs(self, passes: list[str]) -> int:
+        counts = {}
+        total = 0
+        for p in passes:
+            rev = p[::-1]
+            if rev in counts:
+                total += counts[rev]
+            counts[p] = counts.get(p, 0) + 1
+        return total
 """
-        from app.engine.providers.factory import get_judge_provider
-        provider = get_judge_provider()
-        sample_tcs = prob_a["sample_testcases"]
-        from app.engine.schemas import TestCaseSchema
-        tcs = [
-            TestCaseSchema(
-                id=f"tc_{i}",
-                name=f"Test {i+1}",
-                stdin=s["stdin"],
-                expected_output=s["expected_output"],
+            from app.engine.providers.factory import get_judge_provider
+            provider = get_judge_provider()
+            sample_tcs = prob_a["sample_testcases"]
+            from app.engine.schemas import TestCaseSchema
+            tcs = [
+                TestCaseSchema(
+                    id=f"tc_{i}",
+                    name=f"Test {i+1}",
+                    stdin=s["stdin"],
+                    expected_output=s["expected_output"],
+                )
+                for i, s in enumerate(sample_tcs)
+            ]
+            wrapped_code = prepare_solution_code(
+                code=sample_code,
+                language="python",
+                starter_codes=prob_a.get("starter_codes"),
             )
-            for i, s in enumerate(sample_tcs)
-        ]
-        exec_res = await provider.execute_batch(
-            language=Language.PYTHON,
-            code=sample_code,
-            testcases=tcs,
-            time_limit=prob_a["time_limit"],
-            memory_limit_mb=prob_a["memory_limit"],
-        )
-        print(f"  Verdict: {exec_res.verdict.value} | Passed: {exec_res.passed_testcases}/{exec_res.total_testcases} | Score: {exec_res.score}")
-        if exec_res.verdict.value != "ACCEPTED":
-            print(f"  Stderr: {exec_res.stderr} | Stdout: {exec_res.stdout}")
-        assert exec_res.verdict.value == "ACCEPTED", f"Expected ACCEPTED, got {exec_res.verdict}"
-        print("  ✓ CodeBox execution returned ACCEPTED!")
+            exec_res = await provider.execute_batch(
+                language=Language.PYTHON,
+                code=wrapped_code,
+                testcases=tcs,
+                time_limit=prob_a["time_limit"],
+                memory_limit_mb=prob_a["memory_limit"],
+            )
+            print(f"  Verdict: {exec_res.verdict.value} | Passed: {exec_res.passed_testcases}/{exec_res.total_testcases} | Score: {exec_res.score}")
+            if exec_res.verdict.value != "ACCEPTED":
+                print(f"  Stderr: {exec_res.stderr} | Stdout: {exec_res.stdout}")
+            assert exec_res.verdict.value == "ACCEPTED", f"Expected ACCEPTED, got {exec_res.verdict}"
+            print("  ✓ CodeBox execution returned ACCEPTED!")
 
         # 6. Top 30 Finalist Qualification & Campus Pass Generation
         print("\n🔹 Step 5: Top 30 Finalist Qualification & Campus Pass Issuance")
@@ -216,6 +229,8 @@ if __name__ == '__main__':
         print("\n" + "=" * 60)
         print("🎉 COMPLETE CONTEST & ASSESSMENT FUNNEL PASSED WITH 100% SUCCESS!")
         print("=" * 60)
+    finally:
+        settings.FEATURE_ASSESSMENT_AND_QR_ENABLED = old_qr_feat
 
 
 if __name__ == "__main__":

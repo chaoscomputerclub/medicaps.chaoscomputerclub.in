@@ -72,6 +72,14 @@ class MemberPublic(BaseModel):
     bio: Optional[str] = None
     github_username: Optional[str] = None
     linkedin_url: Optional[str] = None
+    followers_count: Optional[int] = 0
+    following_count: Optional[int] = 0
+    tier: Optional[str] = None
+    university_rank: Optional[int] = None
+    department_rank: Optional[int] = None
+    attendance_count: Optional[int] = 0
+    attendance_total: Optional[int] = 0
+    percentile: Optional[float] = None
 
 
 class AuthTokenResponse(BaseModel):

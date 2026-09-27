@@ -5,7 +5,7 @@ modules/contests/contest_repository.py — Data Persistence & Query Repository f
 
 import logging
 from typing import Any, Dict, List, Optional, Sequence, Tuple
-from sqlalchemy import delete, desc, func, select
+from sqlalchemy import delete, desc, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -215,20 +215,36 @@ class ContestRepository:
         db: AsyncSession,
         contest_id: str,
         member_id: str,
+        for_update: bool = False,
     ) -> Optional[ScoreboardEntry]:
         stmt = select(ScoreboardEntry).where(
             ScoreboardEntry.contest_id == contest_id,
             ScoreboardEntry.member_id == member_id,
         )
+        if for_update:
+            stmt = stmt.with_for_update()
         res = await db.execute(stmt)
         return res.scalars().first()
 
     @staticmethod
     async def re_rank_scoreboard(db: AsyncSession, contest_id: str) -> None:
-        all_sb_res = await db.execute(
-            select(ScoreboardEntry)
-            .where(ScoreboardEntry.contest_id == contest_id)
-            .order_by(ScoreboardEntry.score.desc(), ScoreboardEntry.penalty_seconds.asc())
+        """
+        Atomic set-based re-ranking using PostgreSQL window function.
+        Updates only rows whose rank has actually shifted; zero ORM object iteration.
+        """
+        await db.execute(
+            text("""
+                WITH ranked AS (
+                    SELECT id, ROW_NUMBER() OVER (
+                        ORDER BY score DESC, penalty_seconds ASC, id ASC
+                    ) AS new_rank
+                    FROM scoreboard_entries
+                    WHERE contest_id = :contest_id
+                )
+                UPDATE scoreboard_entries se
+                SET rank = ranked.new_rank
+                FROM ranked
+                WHERE se.id = ranked.id AND se.rank IS DISTINCT FROM ranked.new_rank;
+            """),
+            {"contest_id": contest_id},
         )
-        for cur_rank, entry in enumerate(all_sb_res.scalars().all(), start=1):
-            entry.rank = cur_rank

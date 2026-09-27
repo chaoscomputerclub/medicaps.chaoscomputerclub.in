@@ -14,6 +14,7 @@ from sqlalchemy import (
     JSON,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -87,6 +88,10 @@ class AssessmentSession(Base):
     anti_cheat_violations = Column(Integer, default=0, nullable=False)
     is_top_30_qualified = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("assessment_id", "member_id", name="uq_assessment_session_member"),
+    )
 
     # Relationships
     assessment = relationship("Assessment", back_populates="sessions")

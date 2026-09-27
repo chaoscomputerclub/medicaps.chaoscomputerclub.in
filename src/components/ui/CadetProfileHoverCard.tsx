@@ -174,13 +174,15 @@ export function CadetProfileHoverCard({
             currentMember.handle.toLowerCase() === cleanHandle.toLowerCase()))
     );
 
-  const isFollowing =
-    profile?.is_following ??
-    Boolean(
-      effectiveId
-        ? followingIds.includes(effectiveId) || followingIds.includes(cleanHandle)
-        : followingIds.includes(cleanHandle)
-    );
+  const hasFetchedFollowing = useAppSelector((s) => s.social.hasFetchedFollowing);
+  const isFollowedInStore = Boolean(
+    (effectiveId && followingIds.includes(effectiveId)) ||
+    (cleanHandle && followingIds.includes(cleanHandle))
+  );
+
+  const isFollowing = hasFetchedFollowing
+    ? isFollowedInStore
+    : (isFollowedInStore || Boolean(profile?.is_following));
 
   const isPending = effectiveId ? actionPendingId === effectiveId : false;
 

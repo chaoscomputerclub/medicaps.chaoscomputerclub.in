@@ -187,7 +187,9 @@ class ContestController:
         async_mode: bool = False,
     ) -> Dict[str, Any]:
         if async_mode:
+            import hashlib
             from app.core.queue import RedisQueueEngine, JobPriority
+            code_hash = hashlib.sha256((payload.code or "").strip().encode()).hexdigest()[:12]
             job = await RedisQueueEngine.enqueue(
                 queue_name="judge",
                 job_type="EVALUATE_ARENA_SUBMISSION",
@@ -199,7 +201,7 @@ class ContestController:
                     "language": str(payload.language),
                 },
                 priority=JobPriority.HIGH,
-                idempotency_key=f"sub:arena:{slug}:{payload.problem_id}:{current_member.id}",
+                idempotency_key=f"sub:arena:{slug}:{payload.problem_id}:{current_member.id}:{code_hash}",
             )
             return {
                 "success": True,

@@ -1,5 +1,5 @@
 import { SocialDrawer } from "./SocialDrawer";
-import { fetchMyFollowingIdsThunk } from "@/store/slices/socialSlice";
+import { fetchMyFollowingIdsThunk, fetchMySocialStatsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { prefetchRoute } from "@/AppRoutes";
 import {
@@ -120,7 +120,7 @@ export function PortalShell() {
     if (!token) {
       return;
     }
-    dispatch(fetchMyFollowingIdsThunk());
+    dispatch(fetchMySocialStatsThunk());
     dispatch(fetchCurrentUserThunk());
   }, [dispatch]);
 

@@ -143,6 +143,7 @@ class ScoreboardEntry(Base):
     telemetry = Column(JSON, default=list, nullable=False)
 
     __table_args__ = (
+        UniqueConstraint("contest_id", "member_id", name="uq_scoreboard_contest_member"),
         Index("ix_scoreboard_contest_score_penalty", "contest_id", "score", "penalty_seconds"),
         Index("ix_scoreboard_contest_division_rank", "contest_id", "division", "rank"),
         Index("ix_scoreboard_contest_department_rank", "contest_id", "department", "rank"),

@@ -105,6 +105,7 @@ export async function getMemberProfileData(force = false) {
   if (!token) {
     return {
       member: null,
+      stats: null as Record<string, any> | null,
       ratingHistory: [],
       history: [],
       recentBattles: [],
@@ -156,8 +157,11 @@ export async function getMemberProfileData(force = false) {
           }
           return {
             member: null,
+            stats: null as Record<string, any> | null,
             ratingHistory: [],
+            history: [],
             recentBattles: [],
+            battles: [],
             campusPass: null,
             proofs: [],
             achievements: [],
@@ -171,8 +175,20 @@ export async function getMemberProfileData(force = false) {
           const rBattles = Array.isArray(data.recentBattles)
             ? data.recentBattles
             : (Array.isArray(data.battles) ? data.battles : []);
+
+          const memberObj = data.member ? { ...data.member } : null;
+          if (memberObj && data.stats) {
+            if (typeof memberObj.followers_count !== "number" && typeof data.stats.followers_count === "number") {
+              memberObj.followers_count = data.stats.followers_count;
+            }
+            if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
+              memberObj.following_count = data.stats.following_count;
+            }
+          }
+
           return {
-            member: data.member || null,
+            member: memberObj,
+            stats: data.stats || null,
             ratingHistory: rHistory,
             history: rHistory,
             recentBattles: rBattles,
@@ -188,6 +204,7 @@ export async function getMemberProfileData(force = false) {
 
       return {
         member: null,
+        stats: null as Record<string, any> | null,
         ratingHistory: [],
         history: [],
         recentBattles: [],
@@ -319,8 +336,19 @@ export async function getStudentProfileData(handle: string, force = false) {
           const rBattles = Array.isArray(data.recentBattles)
             ? data.recentBattles
             : (Array.isArray(data.battles) ? data.battles : []);
+          const memberObj = data.member ? { ...data.member } : null;
+          if (memberObj && data.stats) {
+            if (typeof memberObj.followers_count !== "number" && typeof data.stats.followers_count === "number") {
+              memberObj.followers_count = data.stats.followers_count;
+            }
+            if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
+              memberObj.following_count = data.stats.following_count;
+            }
+          }
+
           return {
-            member: data.member || null,
+            member: memberObj,
+            stats: data.stats || null,
             ratingHistory: rHistory,
             history: rHistory,
             recentBattles: rBattles,
@@ -345,6 +373,7 @@ export async function getStudentProfileData(handle: string, force = false) {
 
       return {
         member: null,
+        stats: null as Record<string, any> | null,
         ratingHistory: [],
         history: [],
         recentBattles: [],

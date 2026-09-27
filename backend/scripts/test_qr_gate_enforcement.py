@@ -29,9 +29,10 @@ async def run_tests():
     old_env_bypass = os.environ.get("DEV_BYPASS_RESTRICTIONS")
     old_env_mode = os.environ.get("DEV_MODE")
     os.environ["DEV_BYPASS_RESTRICTIONS"] = "false"
-    os.environ["DEV_MODE"] = "false"
+    old_feature_qr = settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
     settings.DEV_BYPASS_RESTRICTIONS = False
     settings.DEV_MODE = False
+    settings.FEATURE_ASSESSMENT_AND_QR_ENABLED = True
 
     async with AsyncSessionLocal() as db:
         # 1. Setup mock contest
@@ -150,6 +151,7 @@ async def run_tests():
         os.environ["DEV_BYPASS_RESTRICTIONS"] = old_env_bypass
     if old_env_mode is not None:
         os.environ["DEV_MODE"] = old_env_mode
+    settings.FEATURE_ASSESSMENT_AND_QR_ENABLED = old_feature_qr
     print("\n🎉 ALL 5 STRICT QR GATE TESTS PASSED SUCCESSFULLY!")
 
 

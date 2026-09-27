@@ -18,6 +18,7 @@ import { useSwrData, globalSwrStore } from "@/lib/cache/swrCache";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestsThunk } from "@/store/slices/contestSlice";
+import { syncSocialCounts } from "@/store/slices/socialSlice";
 import type { ContestSummary } from "@/features/contest/types";
 import { getFirstName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
@@ -96,6 +97,22 @@ export function DashboardPage() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    if (profile) {
+      const p = profile as any;
+      const fc = p?.member?.followers_count ?? p?.stats?.followers_count;
+      const fgc = p?.member?.following_count ?? p?.stats?.following_count;
+      if (typeof fc === "number" || typeof fgc === "number") {
+        dispatch(
+          syncSocialCounts({
+            ...(typeof fc === "number" ? { followersCount: fc } : {}),
+            ...(typeof fgc === "number" ? { followingCount: fgc } : {}),
+          })
+        );
+      }
+    }
+  }, [dispatch, profile]);
+
   if (
     (profileLoading || publicLoading || (contestsLoading && contests.length === 0)) &&
     !profile &&
@@ -113,6 +130,8 @@ export function DashboardPage() {
       rating: currentMember.rating ?? profile?.member?.rating,
       department: currentMember.department || profile?.member?.department,
       tier: (profile?.member as any)?.tier,
+      followers_count: (profile?.member as any)?.followers_count ?? currentMember.followers_count,
+      following_count: (profile?.member as any)?.following_count ?? currentMember.following_count,
     } : {}),
   };
   const history = profile?.ratingHistory || [];

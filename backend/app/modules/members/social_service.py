@@ -60,6 +60,26 @@ class SocialService:
         followers_count, _ = await MemberRepository.get_social_counts(db, target_member.id)
         _, following_count = await MemberRepository.get_social_counts(db, current_member.id)
 
+        try:
+            from app.services.event_broadcaster import broadcast_event
+            target_following_count, _ = await MemberRepository.get_social_counts(db, target_member.id)
+            await broadcast_event(
+                event_type="member_profile_updated",
+                data={
+                    "member_id": str(target_member.id),
+                    "handle": target_member.handle,
+                    "followers_count": followers_count,
+                    "following_count": target_following_count,
+                    "follower_id": str(current_member.id),
+                    "follower_handle": current_member.handle,
+                    "my_following_count": following_count,
+                    "action": "follow",
+                },
+                contest_slug=None,
+            )
+        except Exception as b_err:
+            logger.debug("Failed to broadcast member_profile_updated on follow: %s", b_err)
+
         return FollowResponse(
             success=True,
             is_following=True,
@@ -91,6 +111,26 @@ class SocialService:
 
         followers_count, _ = await MemberRepository.get_social_counts(db, target_member.id)
         _, following_count = await MemberRepository.get_social_counts(db, current_member.id)
+
+        try:
+            from app.services.event_broadcaster import broadcast_event
+            target_following_count, _ = await MemberRepository.get_social_counts(db, target_member.id)
+            await broadcast_event(
+                event_type="member_profile_updated",
+                data={
+                    "member_id": str(target_member.id),
+                    "handle": target_member.handle,
+                    "followers_count": followers_count,
+                    "following_count": target_following_count,
+                    "follower_id": str(current_member.id),
+                    "follower_handle": current_member.handle,
+                    "my_following_count": following_count,
+                    "action": "unfollow",
+                },
+                contest_slug=None,
+            )
+        except Exception as b_err:
+            logger.debug("Failed to broadcast member_profile_updated on unfollow: %s", b_err)
 
         return FollowResponse(
             success=True,
@@ -181,7 +221,13 @@ class SocialService:
             for p in profiles
         ]
 
-        return FollowListResponse(count=total_count, students=items)
+        followers_count, following_count = await MemberRepository.get_social_counts(db, target_member.id)
+        return FollowListResponse(
+            count=total_count,
+            followers_count=followers_count,
+            following_count=following_count,
+            students=items,
+        )
 
     @classmethod
     async def get_following(
@@ -222,7 +268,13 @@ class SocialService:
             for p in profiles
         ]
 
-        return FollowListResponse(count=total_count, students=items)
+        followers_count, following_count = await MemberRepository.get_social_counts(db, target_member.id)
+        return FollowListResponse(
+            count=total_count,
+            followers_count=followers_count,
+            following_count=following_count,
+            students=items,
+        )
 
     @classmethod
     async def get_student_followers(
