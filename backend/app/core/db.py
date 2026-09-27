@@ -221,10 +221,50 @@ async def ensure_database_integrity():
                 ) AND (mp.rating != 1200 OR mp.peak_rating != 1200 OR mp.attendance_count != 0)
             """))
 
+            # 5. Schema Evolution: Monotonic resource versions & table version columns
+            await session.execute(text("""
+                ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
+            """))
+            await session.execute(text("""
+                ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
+            """))
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS resource_versions (
+                    resource_id VARCHAR(120) PRIMARY KEY,
+                    version BIGINT NOT NULL DEFAULT 1,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+            """))
+
             await session.commit()
         except Exception as e:
             await session.rollback()
             print(f"Notice during ensure_database_integrity: {e}")
+
+
+async def get_next_resource_version(session: AsyncSession, resource_id: str) -> int:
+    """
+    Atomically advance and return the monotonic integer version for a resource in PostgreSQL.
+    Guarantees strict monotonicity across concurrent transactions.
+    """
+    stmt = text("""
+        INSERT INTO resource_versions (resource_id, version, updated_at)
+        VALUES (:resource_id, 1, NOW())
+        ON CONFLICT (resource_id) DO UPDATE
+        SET version = resource_versions.version + 1, updated_at = NOW()
+        RETURNING version;
+    """)
+    res = await session.execute(stmt, {"resource_id": resource_id})
+    val = res.scalar()
+    return int(val if val is not None else 1)
+
+
+async def get_current_resource_version(session: AsyncSession, resource_id: str) -> int:
+    """Read the current committed version for a resource in PostgreSQL."""
+    stmt = text("SELECT version FROM resource_versions WHERE resource_id = :resource_id")
+    res = await session.execute(stmt, {"resource_id": resource_id})
+    val = res.scalar()
+    return int(val if val is not None else 0)
 
 
 async def init_db():

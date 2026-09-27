@@ -67,6 +67,26 @@ async def record_outbox_event(
     return event
 
 
+async def record_cache_sync_event(
+    db: AsyncSession,
+    sync_event: Any,
+    priority: str = "high",
+) -> OutboxEvent:
+    """
+    Record a CacheSyncEvent in the transactional outbox table.
+    Guarantees that the cache sync job is enqueued if and only if the business transaction commits.
+    """
+    payload = sync_event.model_dump() if hasattr(sync_event, "model_dump") else dict(sync_event)
+    return await record_outbox_event(
+        db=db,
+        queue_name="cache_sync",
+        event_type=getattr(sync_event, "event_type", "cache_sync"),
+        aggregate_id=getattr(sync_event, "resource_id", None),
+        payload=payload,
+        priority=priority,
+    )
+
+
 async def relay_outbox_events(db: AsyncSession, batch_size: int = 50) -> int:
     """
     Poll and dispatch pending outbox events into Redis with at-least-once delivery.

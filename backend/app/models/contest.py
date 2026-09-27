@@ -48,6 +48,7 @@ class OfflineContest(Base):
     cadence = Column(String(20), default="weekly", nullable=False)  # weekly, biweekly, special
     edition = Column(Integer, nullable=True)  # e.g. 42, 18
     banner_url = Column(String(500), nullable=True)
+    version = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
     # Relationships

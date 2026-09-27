@@ -40,6 +40,7 @@ QUEUE_MAX_DEPTHS: Dict[str, int] = {
     "contest_lifecycle": 200,
     "webhooks": 2000,
     "maintenance": 100,
+    "cache_sync": 1000,
 }
 
 JOB_HASH_TTL_SECONDS = 86_400       # 24 hours — job status queryable for a full day

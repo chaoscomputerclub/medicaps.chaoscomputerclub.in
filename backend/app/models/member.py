@@ -42,6 +42,7 @@ class MemberProfile(Base):
     bio = Column(String(500), nullable=True)                                    # Student bio / tagline
     github_username = Column(String(100), nullable=True)                       # GitHub handle
     linkedin_url = Column(String(200), nullable=True)                          # LinkedIn profile / handle
+    version = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=now_utc, onupdate=now_utc, nullable=True)
 

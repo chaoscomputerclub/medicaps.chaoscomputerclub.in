@@ -32,6 +32,7 @@ from .assessment import (
 from .proof import TrustProof
 from .campus_pass import CampusPass
 from .announcement import Announcement
+from .version import ResourceVersion
 from app.core.queue.outbox import OutboxEvent
 
 __all__ = [
@@ -54,5 +55,6 @@ __all__ = [
     "TrustProof",
     "CampusPass",
     "Announcement",
+    "ResourceVersion",
     "OutboxEvent",
 ]

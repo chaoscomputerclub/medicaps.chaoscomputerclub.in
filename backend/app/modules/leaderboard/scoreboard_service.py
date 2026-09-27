@@ -8,7 +8,7 @@ from typing import List, Optional
 from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.cache import get_cache, set_cache
+from app.core.cache import get_cache, set_cache, single_flight
 from app.models.schemas import ScoreboardEntryResponse
 from app.lib.cache_keys import scoreboard_cache_key, TTL_SCOREBOARD
 from app.lib.pagination import normalize_pagination, inject_pagination_headers, slice_page
@@ -42,19 +42,23 @@ class ScoreboardService:
                 return slice_page(cached, safe_limit, safe_offset)
             return cached
 
-        contest = await ContestRepository.get_by_slug(db, slug)
-        if not contest:
-            raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+        async def _fetch():
+            contest = await ContestRepository.get_by_slug(db, slug)
+            if not contest:
+                raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        records = await LeaderboardRepository.get_contest_scoreboard_entries(
-            db,
-            contest_id=contest.id,
-            division=division,
-            department=department,
-        )
+            records = await LeaderboardRepository.get_contest_scoreboard_entries(
+                db,
+                contest_id=contest.id,
+                division=division,
+                department=department,
+            )
 
-        payload = [ScoreboardEntryResponse.model_validate(r).model_dump() for r in records]
-        await set_cache(cache_key, payload, ttl_seconds=TTL_SCOREBOARD)
+            data = [ScoreboardEntryResponse.model_validate(r).model_dump() for r in records]
+            await set_cache(cache_key, data, ttl_seconds=TTL_SCOREBOARD)
+            return data
+
+        payload = await single_flight.execute(cache_key, _fetch)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = f"public, max-age={TTL_SCOREBOARD}, stale-while-revalidate=10"
 
@@ -63,4 +67,4 @@ class ScoreboardService:
             inject_pagination_headers(response, len(payload), safe_limit, safe_offset)
             return slice_page(payload, safe_limit, safe_offset)
 
-        return records
+        return payload

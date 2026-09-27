@@ -217,6 +217,36 @@ class GlobalSseMultiplexer {
         this.handleRawMessage(e.data);
       };
 
+      const NAMED_EVENTS = [
+        "leaderboard.updated",
+        "leaderboard_updated",
+        "scoreboard.updated",
+        "scoreboard_updated",
+        "contest.updated",
+        "contest_status_changed",
+        "contest_concluded",
+        "contest_finished",
+        "contest_created",
+        "contest_updated",
+        "contest_deleted",
+        "contest_timer_reset",
+        "contest_registered",
+        "contest_unregistered",
+        "pass_checked_in",
+        "top30_qualified",
+        "submission_evaluated",
+        "assessment_finished",
+        "ratings_updated",
+        "member_profile_updated",
+        "resync_required",
+        "cache_sync",
+      ];
+      for (const evtName of NAMED_EVENTS) {
+        this.eventSource.addEventListener(evtName, (e: MessageEvent) => {
+          this.handleRawMessage(e.data);
+        });
+      }
+
       this.eventSource.onerror = () => {
         if (this.eventSource) {
           this.eventSource.close();
@@ -313,6 +343,7 @@ class GlobalSseMultiplexer {
         parsed.event === "contest_finished" ||
         parsed.event === "contest_created" ||
         parsed.event === "contest_updated" ||
+        parsed.event === "contest.updated" ||
         parsed.event === "contest_deleted" ||
         parsed.event === "contest_timer_reset" ||
         parsed.event === "contest_registered" ||
@@ -321,8 +352,13 @@ class GlobalSseMultiplexer {
         parsed.event === "submission_evaluated" ||
         parsed.event === "assessment_finished" ||
         parsed.event === "leaderboard_updated" ||
+        parsed.event === "leaderboard.updated" ||
+        parsed.event === "scoreboard_updated" ||
+        parsed.event === "scoreboard.updated" ||
         parsed.event === "ratings_updated" ||
-        parsed.event === "member_profile_updated"
+        parsed.event === "member_profile_updated" ||
+        parsed.event === "resync_required" ||
+        parsed.event === "cache_sync"
       ) {
         invalidateContestCaches();
       }

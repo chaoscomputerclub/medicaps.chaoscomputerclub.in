@@ -5,12 +5,13 @@ Provides sub-5ms caching, JSON serialization with datetime/UUID support,
 and graceful failover if Redis is ever temporarily unavailable.
 """
 
+import hashlib
 import json
 import logging
-import hashlib
 from datetime import date, datetime
 from typing import Any, Optional
 from uuid import UUID
+
 from app.core.redis import get_redis
 
 logger = logging.getLogger("ccc.cache")

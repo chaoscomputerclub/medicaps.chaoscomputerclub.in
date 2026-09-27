@@ -17,6 +17,7 @@ from app.workers.judge_worker import JudgeWorker
 from app.workers.contest_worker import ContestLifecycleWorker
 from app.workers.webhook_worker import WebhookWorker
 from app.workers.maintenance_worker import MaintenanceWorker
+from app.workers.cache_sync_worker import CacheSyncWorker
 
 logger = logging.getLogger("ccc.queue.manager")
 
@@ -33,6 +34,7 @@ class QueueManager:
             "contest_lifecycle": ContestLifecycleWorker(),
             "webhooks": WebhookWorker(),
             "maintenance": MaintenanceWorker(),
+            "cache_sync": CacheSyncWorker(),
         }
         self._is_started = False
 

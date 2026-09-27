@@ -52,3 +52,18 @@ async def get_queue_metrics(
 ):
     """Live observability probe into pending, processing, delayed, and dead-letter queue depths."""
     return await JobController.get_queue_metrics()
+
+
+@router.get(
+    "/admin/cache/metrics",
+    summary="Retrieve Real-Time Cache Synchronization Engine telemetry",
+)
+async def get_cache_sync_metrics(
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Live observability probe into CacheSyncEngine counters, hit rates, and SSE stream health."""
+    from app.core.cache.metrics import metrics as cache_metrics
+    return {
+        "status": "operational",
+        "cache_sync": cache_metrics.get_all_metrics(),
+    }

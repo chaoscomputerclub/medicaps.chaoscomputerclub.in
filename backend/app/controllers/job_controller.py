@@ -80,8 +80,10 @@ class JobController:
 
     @staticmethod
     async def get_queue_metrics() -> Dict[str, Any]:
-        metrics = await RedisQueueEngine.get_all_metrics()
+        queue_metrics = await RedisQueueEngine.get_all_metrics()
+        from app.core.cache.metrics import metrics as cache_metrics
         return {
             "status": "operational",
-            "queues": metrics,
+            "queues": queue_metrics,
+            "cache_sync": cache_metrics.get_all_metrics(),
         }

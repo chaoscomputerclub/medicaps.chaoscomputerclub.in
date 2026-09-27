@@ -2,21 +2,28 @@
 Chaos Computer Club — Medi-Caps Chapter
 services/event_broadcaster.py
 
-Real-Time Event Broadcaster & Webhook Dispatcher
+Real-Time Event Broadcaster & Webhook Dispatcher (SSE Engine v2)
 Provides:
-1. Low-latency Server-Sent Events (SSE) streaming for connected browser clients.
-2. In-memory async event channels with zero client polling overhead.
-3. Outbound webhook dispatching to external listeners / notification sinks.
-4. Redis Pub/Sub mirroring when Redis is available.
+1. Low-latency Server-Sent Events (SSE) streaming with standard W3C formatting (id:, event:, data:).
+2. Monotonic Last-Event-ID replay buffer (circular Redis ZSET) for reconnect recovery.
+3. Resync-Required backpressure signalling for slow clients.
+4. Outbound webhook dispatching via ChaosQueue.
+5. Multi-worker Redis Pub/Sub event relay with origin loopback suppression.
 """
+
+from __future__ import annotations
 
 import asyncio
 import json
 import logging
-from uuid import uuid4
-import httpx
-from typing import Dict, Set, Optional, Any
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Set, Tuple
+from uuid import uuid4
+
+import httpx
+
+from app.core.cache.metrics import metrics
+from app.core.redis import get_redis
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +31,15 @@ logger = logging.getLogger(__name__)
 _subscribers: Dict[str, Set[asyncio.Queue]] = {}
 _lock = asyncio.Lock()
 
-# Redis lets independent ASGI workers deliver the same event to their own SSE
-# subscribers. The origin marker prevents the publishing worker from faning out
-# the event twice when it receives its own pub/sub message.
 REDIS_EVENT_CHANNEL = "ccc:realtime:events"
+REPLAY_BUFFER_KEY_PREFIX = "ccc:sse:replay"
 _instance_id = uuid4().hex
 _redis_relay_task: Optional[asyncio.Task] = None
 
-# Outbound registered webhooks (configurable via env / settings)
 _outbound_webhooks: Set[str] = set()
 
 
-def register_outbound_webhook(url: str):
+def register_outbound_webhook(url: str) -> None:
     """Register an external webhook endpoint URL."""
     _outbound_webhooks.add(url.strip())
 
@@ -47,20 +51,28 @@ async def subscribe(channel: str = "global") -> asyncio.Queue:
         if channel not in _subscribers:
             _subscribers[channel] = set()
         _subscribers[channel].add(q)
+        total_active = sum(len(qs) for qs in _subscribers.values())
+        metrics.set_active_connections(total_active)
     return q
 
 
-async def unsubscribe(channel: str, q: asyncio.Queue):
+async def unsubscribe(channel: str, q: asyncio.Queue) -> None:
     """Unsubscribe a client connection."""
     async with _lock:
         if channel in _subscribers and q in _subscribers[channel]:
             _subscribers[channel].remove(q)
             if not _subscribers[channel]:
                 del _subscribers[channel]
+        total_active = sum(len(qs) for qs in _subscribers.values())
+        metrics.set_active_connections(total_active)
 
 
-async def _fan_out(raw_message: str, contest_slug: Optional[str]) -> None:
-    """Place an already serialized event in local SSE subscriber queues."""
+async def _fan_out(raw_message: str, contest_slug: Optional[str] = None) -> None:
+    """
+    Deliver message into local SSE subscriber queues with backpressure protection.
+    If a slow client's queue is completely full, we do NOT silently drop.
+    We remove the oldest message and inject a resync warning so the client knows it fell behind.
+    """
     target_channels = ["global"]
     if contest_slug:
         target_channels.append(f"contest:{contest_slug}")
@@ -68,7 +80,23 @@ async def _fan_out(raw_message: str, contest_slug: Optional[str]) -> None:
     async with _lock:
         for channel in target_channels:
             for queue in list(_subscribers.get(channel, set())):
-                if not queue.full():
+                if queue.full():
+                    metrics.inc_sse_buffer_overflow()
+                    metrics.inc_sse_slow_client()
+                    logger.warning("Subscriber queue full on '%s' (backpressure triggered)", channel)
+                    try:
+                        # Drop oldest to make room for resync notice
+                        queue.get_nowait()
+                        resync_notice = json.dumps({
+                            "event": "resync_required",
+                            "status": "resync_required",
+                            "reason": "buffer_overflow",
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                        })
+                        queue.put_nowait(resync_notice)
+                    except Exception:
+                        pass
+                else:
                     queue.put_nowait(raw_message)
 
 
@@ -76,12 +104,10 @@ async def broadcast_event(
     event_type: str,
     data: Dict[str, Any],
     contest_slug: Optional[str] = None,
-):
+) -> None:
     """
-    Broadcast a real-time event to:
-    1. Channel-specific subscribers (e.g. contest:{slug})
-    2. Global subscribers (channel: global)
-    3. External outbound webhooks (fire-and-forget)
+    Backwards-compatible event broadcaster.
+    Used for legacy endpoints and internal notifications.
     """
     payload = {
         "event": event_type,
@@ -91,20 +117,15 @@ async def broadcast_event(
     }
     raw_message = json.dumps(payload)
 
-    # Always deliver locally first. Redis is an inter-worker enhancement, not a
-    # prerequisite for an SSE event in a single-worker deployment.
     await _fan_out(raw_message, contest_slug)
 
-    # Optional: mirror to Redis pub/sub for other ASGI workers.
     try:
-        from app.core.redis import get_redis
-
+        redis = get_redis()
         relay_payload = {**payload, "_origin": _instance_id}
-        await get_redis().publish(REDIS_EVENT_CHANNEL, json.dumps(relay_payload))
+        await redis.publish(REDIS_EVENT_CHANNEL, json.dumps(relay_payload))
     except Exception as exc:
         logger.debug("Redis event publish unavailable: %s", exc)
 
-    # Outbound webhook delivery via dedicated async queue with automatic retries
     if _outbound_webhooks:
         try:
             from app.core.queue import RedisQueueEngine
@@ -117,8 +138,90 @@ async def broadcast_event(
                     backoff_base_seconds=2.0,
                 )
         except Exception as exc:
-            logger.debug("Queue unavailable for outbound webhook, falling back to direct dispatch: %s", exc)
+            logger.debug("Queue unavailable for outbound webhook, falling back: %s", exc)
             asyncio.create_task(_dispatch_outbound_webhooks(raw_message))
+
+
+async def broadcast_sync_event(event: Any) -> None:
+    """
+    Publish a strongly typed CacheSyncEvent to real-time subscribers.
+    Emits standard SSE format with monotonic version ID.
+    """
+    contest_slug = None
+    if getattr(event, "resource_type", "") == "contest" or "contest:" in getattr(event, "resource_id", ""):
+        parts = event.resource_id.split(":")
+        contest_slug = parts[1] if len(parts) > 1 else None
+
+    # Standard JSON envelope for browser and proxy consumers
+    payload = {
+        "id": getattr(event, "version", 1),
+        "event": getattr(event, "event_type", "cache_sync"),
+        "version": getattr(event, "version", 1),
+        "resource_type": getattr(event, "resource_type", "unknown"),
+        "resource_id": getattr(event, "resource_id", "global"),
+        "occurred_at": getattr(event, "occurred_at", datetime.now(timezone.utc).isoformat()),
+        "correlation_id": getattr(event, "correlation_id", ""),
+        "contest_slug": contest_slug,
+        "data": getattr(event, "payload", {}),
+    }
+    raw_message = json.dumps(payload)
+
+    # 1. Fan-out locally to in-process subscribers
+    await _fan_out(raw_message, contest_slug)
+
+    # 2. Replay buffer storage in Redis (ZSET scored by version)
+    channel = getattr(event, "sse_channel", "global") or "global"
+    replay_key = f"{REPLAY_BUFFER_KEY_PREFIX}:{channel.strip(':')}"
+    try:
+        redis = get_redis()
+        # Add to ZSET
+        await redis.zadd(replay_key, {raw_message: event.version})
+        # Keep bounded: trim to 100 items max
+        card = await redis.zcard(replay_key)
+        if card > 100:
+            await redis.zremrangebyrank(replay_key, 0, card - 101)
+        await redis.expire(replay_key, 86400)
+    except Exception as exc:
+        logger.debug("Replay buffer write error: %s", exc)
+
+    # 3. Publish to Redis Pub/Sub for other ASGI workers
+    try:
+        redis = get_redis()
+        relay_payload = {**payload, "_origin": _instance_id}
+        await redis.publish(REDIS_EVENT_CHANNEL, json.dumps(relay_payload))
+    except Exception as exc:
+        logger.debug("Redis sync event publish unavailable: %s", exc)
+
+
+async def get_replay_events(channel: str, last_event_id: int) -> Tuple[List[str], bool]:
+    """
+    Fetch missing events from the Redis circular replay buffer for reconnecting clients.
+    Returns: (events_list, resync_required)
+    """
+    replay_key = f"{REPLAY_BUFFER_KEY_PREFIX}:{channel.strip(':')}"
+    try:
+        redis = get_redis()
+        total_items = await redis.zcard(replay_key)
+        if total_items == 0:
+            return [], False
+
+        # Get the lowest available version score in buffer
+        min_items = await redis.zrange(replay_key, 0, 0, withscores=True)
+        if min_items:
+            min_score = int(min_items[0][1])
+            if last_event_id < min_score - 1:
+                # Client is too far behind — historical events were already pruned!
+                metrics.inc_sse_resync()
+                return [], True
+
+        # Fetch events strictly greater than last_event_id
+        missing_events = await redis.zrangebyscore(replay_key, f"({last_event_id}", "+inf")
+        if missing_events:
+            metrics.inc_sse_replay()
+        return list(missing_events), False
+    except Exception as exc:
+        logger.warning("Error fetching replay events for '%s' from v%d: %s", channel, last_event_id, exc)
+        return [], False
 
 
 async def redis_event_relay() -> None:
@@ -127,9 +230,8 @@ async def redis_event_relay() -> None:
     while True:
         pubsub = None
         try:
-            from app.core.redis import get_redis
-
-            pubsub = get_redis().pubsub()
+            redis = get_redis()
+            pubsub = redis.pubsub()
             await pubsub.subscribe(REDIS_EVENT_CHANNEL)
             reconnect_delay = 5.0
             async for message in pubsub.listen():
@@ -172,7 +274,7 @@ def start_redis_event_relay() -> asyncio.Task:
     return _redis_relay_task
 
 
-async def _dispatch_outbound_webhooks(raw_json: str):
+async def _dispatch_outbound_webhooks(raw_json: str) -> None:
     """Deliver webhook payload to external endpoints asynchronously."""
     async with httpx.AsyncClient(timeout=4.0) as client:
         for url in list(_outbound_webhooks):
