@@ -5,6 +5,8 @@ export interface UiState {
   activeModal: string | null;
   theme: "dark" | "light" | "system";
   isEditProfileOpen: boolean;
+  globalLoading: boolean;
+  globalLoadingLabel: string | null;
 }
 
 const initialState: UiState = {
@@ -12,6 +14,8 @@ const initialState: UiState = {
   activeModal: null,
   theme: "dark",
   isEditProfileOpen: false,
+  globalLoading: false,
+  globalLoadingLabel: null,
 };
 
 export const uiSlice = createSlice({
@@ -39,6 +43,18 @@ export const uiSlice = createSlice({
     closeEditProfileModal(state) {
       state.isEditProfileOpen = false;
     },
+    showGlobalLoader(state, action: PayloadAction<string | undefined>) {
+      state.globalLoading = true;
+      state.globalLoadingLabel = action.payload || null;
+    },
+    hideGlobalLoader(state) {
+      state.globalLoading = false;
+      state.globalLoadingLabel = null;
+    },
+    setGlobalLoading(state, action: PayloadAction<{ loading: boolean; label?: string | null | undefined }>) {
+      state.globalLoading = action.payload.loading;
+      state.globalLoadingLabel = action.payload.label || null;
+    },
   },
 });
 
@@ -50,6 +66,9 @@ export const {
   setTheme,
   openEditProfileModal,
   closeEditProfileModal,
+  showGlobalLoader,
+  hideGlobalLoader,
+  setGlobalLoading,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

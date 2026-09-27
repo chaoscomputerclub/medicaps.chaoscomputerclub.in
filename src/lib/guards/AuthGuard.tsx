@@ -9,6 +9,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { isAuthenticated, getToken, getStoredMember, silentRefreshToken } from "@/lib/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setTokenDirect } from "@/store/slices/authSlice";
+import { TacticalLoader } from "@/components/TacticalLoader";
 
 export function AuthGuard() {
   const location = useLocation();
@@ -59,10 +60,12 @@ export function AuthGuard() {
 
   if (authStatus === "checking") {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <TacticalLoader
+          variant="page"
+          label="AUTHENTICATING SESSION"
+          subtext="VERIFYING CIPHER KEYS & CREDENTIALS"
+        />
       </div>
     );
   }
@@ -118,10 +121,12 @@ export function GuestGuard() {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <TacticalLoader
+          variant="page"
+          label="INITIALIZING CHAOS ARENA"
+          subtext="AUTHENTICATING SESSION WITH CENTRAL NODE"
+        />
       </div>
     );
   }

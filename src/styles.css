@@ -367,4 +367,197 @@ textarea {
   contain-intrinsic-size: 0 160px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOOT SCREEN — Strix Design Paradigm
+   CSS for BootLoader.tsx. The rAF loop mutates inline styles freely; these
+   classes only set initial layout/paint.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes blink-hard {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: transparent;
+  overflow: hidden;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* Curtain halves — background iris panels */
+.boot-top,
+.boot-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #000;
+  z-index: 2;
+  will-change: clip-path, transform;
+}
+.boot-top    { top: 0; }
+.boot-bottom { bottom: 0; }
+
+/* Content wrapper — sits visibly in front of curtains */
+.boot-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  will-change: opacity, transform, filter;
+}
+
+/* Shared monospace uppercase style */
+.technical {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+/* Header */
+.boot-head {
+  position: absolute;
+  top: 28px;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Footer */
+.boot-foot {
+  position: absolute;
+  bottom: 28px;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Side telemetry panels */
+.boot-side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.boot-side-left  { left: 4%; }
+.boot-side-right { right: 4%; text-align: right; }
+
+/* Accent colors */
+.boot-ok   { font-style: normal; color: #CCFF00; }
+.boot-dim  { font-style: normal; color: #71717a; }
+.boot-cyan { color: #00e5ff; }
+
+/* Centre column */
+.boot-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 480px;
+  padding: 0 20px;
+}
+
+/* Overline: blink square | SYSTEM SYNCHRONIZING | STATUS */
+.boot-overline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  color: #71717a;
+}
+.boot-overline .boot-status-tag {
+  margin-left: auto;
+  color: #CCFF00;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+}
+
+/* Hard-blink lime square */
+.pulse-square {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  background: #CCFF00;
+  box-shadow: 0 0 6px #CCFF00, 0 0 14px rgba(204, 255, 0, 0.6);
+  animation: blink-hard 1.1s steps(1) infinite;
+}
+
+/* Tactical glowing breathing pulse animation */
+@keyframes ccc-neon-breathe {
+  0%, 100% {
+    filter: drop-shadow(0 0 14px rgba(204, 255, 0, 0.5)) drop-shadow(0 0 28px rgba(204, 255, 0, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 26px rgba(204, 255, 0, 0.85)) drop-shadow(0 0 52px rgba(204, 255, 0, 0.45));
+  }
+}
+
+.boot-glow-emblem {
+  animation: ccc-neon-breathe 2.4s ease-in-out infinite;
+}
+
+/* Logo SVG */
+.boot-mark {
+  width: min(290px, 64vw);
+  height: auto;
+  overflow: visible;
+}
+
+/* Data fragments */
+.data-fragments {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #00e5ff;
+  font-variant-numeric: tabular-nums;
+}
+.data-fragments span {
+  flex: 1;
+  text-align: center;
+}
+
+/* Spark glow */
+.mark-sparks circle {
+  filter: drop-shadow(0 0 6px #CCFF00) drop-shadow(0 0 12px #CCFF00);
+}
+
+/* Inline / Page loader wrapper */
+.boot-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 380px;
+  padding: 40px 20px;
+  position: relative;
+  background: radial-gradient(circle at center, rgba(204, 255, 0, 0.03) 0%, rgba(0, 0, 0, 0.8) 70%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Mobile: hide side panels + last fragment */
+@media (max-width: 640px) {
+  .boot-side { display: none; }
+  .data-fragments span:last-child { display: none; }
+}
 
