@@ -622,6 +622,7 @@ class MemberService:
                 "is_you": bool(current_member and str(current_member.id) == str(student.id)),
             },
             "recent_battles": battles[:10],
+            "recentBattles": battles[:10],
             "rating_history": detailed_rh,
             "ratingHistory": detailed_rh,
             "ratings": sparkline,

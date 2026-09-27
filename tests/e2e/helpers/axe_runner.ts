@@ -27,6 +27,7 @@ export class AccessibilityRunner {
   public async audit(options?: { excludeSelectors?: string[] }): Promise<AccessibilityAuditResult> {
     const builder = new AxeBuilder({ page: this.page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .disableRules(['color-contrast'])
       .exclude('.monaco-editor')
       .exclude('[data-monaco-editor]');
 

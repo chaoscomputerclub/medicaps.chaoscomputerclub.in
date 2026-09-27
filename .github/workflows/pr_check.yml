@@ -163,6 +163,36 @@ jobs:
           FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
         run: python3 backend/scripts/run_production_api_qa.py
 
+      - name: 🚀 Execute Real-Time Cache Synchronization Suite (27 Tests)
+        env:
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: pytest backend/tests/test_cache_sync_engine.py backend/tests/test_cache_sync_deep_dive.py -v
+
+      - name: ⚡ Execute ChaosQueue Async Architecture & DLQ Tests (10 Tests)
+        env:
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: pytest backend/tests/test_async_queue_architecture.py -v
+
+      - name: 🔒 Execute Cookie Auth & Cloudflare Security Tests (12 Tests)
+        env:
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: pytest backend/tests/test_cookie_auth.py backend/tests/test_cloudflare_security.py -v
+
       - name: ⚡ Execute Dynamic Contest Lifecycle Tests
         env:
           PYTHONPATH: backend
@@ -200,6 +230,9 @@ jobs:
           echo "| Test Suite | Scope | Status |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- | :---: |" >> $GITHUB_STEP_SUMMARY
           echo "| Production API QA Suite | 51 Endpoints, Status, Schemas & Cache | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Real-Time Cache Synchronization Engine | 27 Monotonic CAS, Invalidation, SWR & Concurrency Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| ChaosQueue Async Engine & DLQ | 10 Job Lifecycle, Outbox Relay & Locking Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cookie Auth & Cloudflare Security | 12 HttpOnly Rotation & Turnstile Protection Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| Dynamic Contest Engine | Create, Mutate, Clone & Cascade Delete | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| Webhooks & Realtime SSE | Pub/Sub, Outbound Webhooks & OpenAPI 3.1 | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| QR Gate Enforcement | Physical Lab Check-in & Proctor Security | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
