@@ -353,20 +353,18 @@ class AssessmentExecutionService:
             )
             reg_res = await db.execute(reg_stmt)
             reg = reg_res.scalars().first()
-            new_status = "submitted" if contest.status == "live" else (reg.status if reg else "confirmed")
             if not reg:
                 reg = ContestRegistration(
                     contest_id=contest.id,
                     member_id=current_member.id,
                     registered_at=now_utc(),
-                    status=new_status,
+                    status="submitted",
                     assessment_taken=True,
                     assessment_score=final_score,
                 )
                 db.add(reg)
             else:
-                if contest.status == "live":
-                    reg.status = "submitted"
+                reg.status = "submitted"
                 reg.assessment_taken = True
                 reg.assessment_score = final_score
 

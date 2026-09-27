@@ -166,7 +166,7 @@ class ContestExecutionService:
                 )
             if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
-                    current_member, contest, db
+                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
                 )
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
@@ -306,7 +306,7 @@ class ContestExecutionService:
                 )
             if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
-                    current_member, contest, db
+                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
                 )
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")

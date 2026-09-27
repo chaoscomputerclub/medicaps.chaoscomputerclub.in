@@ -42,8 +42,16 @@ for domain_router in (
 
 @api_router_v1.get("/meta", tags=["System"], summary="API surface metadata")
 async def api_meta():
+    from app.services.contest_lifecycle_service import (
+        ASSESSMENT_DURATION_MINUTES,
+        ASSESSMENT_WINDOW_HOURS,
+        FINALIST_SEATS,
+    )
+
     return {
         "version": "v1",
-        "contest_model": "pure_online_arena",
-        "duration_minutes": 120,
+        "contest_model": "two_round_funnel",
+        "assessment_window_hours": ASSESSMENT_WINDOW_HOURS,
+        "assessment_duration_minutes": ASSESSMENT_DURATION_MINUTES,
+        "finalist_seats": FINALIST_SEATS,
     }

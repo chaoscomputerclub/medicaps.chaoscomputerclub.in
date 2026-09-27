@@ -1,28 +1,14 @@
-# Chaos Computer Club Medi-Caps — Robots Configuration
-# https://medicaps.chaoscomputerclub.in
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
 
 User-agent: *
-# Public informational, legal, and verification routes
-Allow: /$
-Allow: /privacy
-Allow: /terms
-Allow: /data-deletion
-Allow: /about
-Allow: /contact
-Allow: /auth
-Allow: /leaderboard
-Allow: /problems
-
-# Protected inner platform and API routes
-Disallow: /dashboard
-Disallow: /profile
-Disallow: /settings
-Disallow: /admin/
-Disallow: /api/
-Disallow: /contests/*/arena
-Disallow: /contests/*/problems/
-Disallow: /contests/*/summary
-Disallow: /contests/*/submit
-Disallow: /my-contests
-
-Sitemap: https://medicaps.chaoscomputerclub.in/sitemap.xml
+Allow: /

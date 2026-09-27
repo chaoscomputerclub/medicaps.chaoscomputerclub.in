@@ -12,34 +12,83 @@ import {
 } from "@/organization/components/ui";
 import { fetchFullProfileData, type FullProfilePayload } from "@/organization/data/queries";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
+import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
+import { useSwrData, globalSwrStore } from "@/lib/cache/swrCache";
+import { useRealtimeEvents } from "@/lib/realtime";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchContestsThunk } from "@/store/slices/contestSlice";
 import { syncSocialCounts } from "@/store/slices/socialSlice";
-import {
-  useGetFullProfileQuery,
-  useGetPublicPortalDataQuery,
-  useGetContestsQuery,
-} from "@/store/api";
+import type { ContestSummary } from "@/features/contest/types";
 import { getFirstName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
-import { ContestActivityFeed } from "@/features/contest/feed";
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const currentMember = useAppSelector((s) => s.auth.member);
 
+  const { contests: rawContests, isLoading: contestsLoading } = useAppSelector((state) => state.contest);
+  const cachedContests = (globalSwrStore.get<any>("contests:list")?.data ?? []) as ContestSummary[];
+  const contests = rawContests && rawContests.length > 0 ? rawContests : cachedContests;
+
   const authed = isAuthenticated();
+  const { data: profile, loading: profileLoading, revalidate: revalidateProfile } = useSwrData<FullProfilePayload | null>(
+    authed ? "member:profile:full" : null,
+    () => fetchFullProfileData(),
+    { ttl: 5 * 60 * 1000, enabled: authed }
+  );
 
-  // Centralized RTK Query Server-State Caches
-  const { data: profileData, isLoading: profileLoading } = useGetFullProfileQuery(undefined, {
-    skip: !authed,
-  });
-  const { data: publicDataRaw, isLoading: publicLoading } = useGetPublicPortalDataQuery();
-  const { data: contestsData, isLoading: contestsLoading } = useGetContestsQuery();
+  const { data: publicDataRaw, loading: publicLoading, revalidate: revalidatePublic } = useSwrData<{
+    contests: OfflineContest[];
+    announcements: AnnouncementFeedItem[];
+    standings: any[];
+    problems: any[];
+  }>(
+    "public:portal:data",
+    () => getPublicPortalData(),
+    { ttl: 5 * 60 * 1000 }
+  );
 
-  const profile = profileData ?? null;
-  const contests = contestsData ?? [];
+  useEffect(() => {
+    dispatch(fetchContestsThunk(false));
+  }, [dispatch]);
+
+  useRealtimeEvents(
+    null,
+    (event) => {
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_status_changed" ||
+        event.event === "contest_finished" ||
+        event.event === "contest_created" ||
+        event.event === "contest_updated" ||
+        event.event === "top30_qualified" ||
+        event.event === "assessment_finished"
+      ) {
+        revalidateProfile();
+        revalidatePublic();
+        dispatch(fetchContestsThunk(true));
+      }
+    }
+  );
+
+  useEffect(() => {
+    const handleConcluded = () => {
+      revalidateProfile();
+      revalidatePublic();
+      dispatch(fetchContestsThunk(true));
+    };
+    window.addEventListener("contest:concluded", handleConcluded);
+    window.addEventListener("contest:cache_invalidated", handleConcluded);
+    window.addEventListener("contest:status_changed", handleConcluded);
+    return () => {
+      window.removeEventListener("contest:concluded", handleConcluded);
+      window.removeEventListener("contest:cache_invalidated", handleConcluded);
+      window.removeEventListener("contest:status_changed", handleConcluded);
+    };
+  }, [dispatch, revalidateProfile, revalidatePublic]);
+
   const publicData = publicDataRaw || { contests: [], announcements: [], standings: [], problems: [] };
 
   useEffect(() => {
@@ -83,8 +132,6 @@ export function DashboardPage() {
       tier: (profile?.member as any)?.tier,
       followers_count: (profile?.member as any)?.followers_count ?? currentMember.followers_count,
       following_count: (profile?.member as any)?.following_count ?? currentMember.following_count,
-      attendance_count: profile?.member?.attendance_count ?? currentMember.attendance_count ?? 0,
-      university_rank: profile?.member?.university_rank ?? currentMember.university_rank ?? null,
     } : {}),
   };
   const history = profile?.ratingHistory || [];
@@ -113,11 +160,9 @@ export function DashboardPage() {
         <div className="p-4 rounded-lg border border-white/8 bg-black">
           <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Campus Standings</span>
           <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
-            {(member?.attendance_count ?? 0) > 0 && member?.university_rank ? `#${member.university_rank}` : "#—"}
+            #{member?.university_rank || 1}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">
-            {(member?.attendance_count ?? 0) > 0 && member?.university_rank ? "Medi-Caps University" : "Unranked"}
-          </span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Medi-Caps University</span>
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black">
@@ -131,7 +176,7 @@ export function DashboardPage() {
         <div className="p-4 rounded-lg border border-white/8 bg-black">
           <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Contests Logged</span>
           <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
-            {member?.attendance_count ?? (member as any)?.contests_count ?? 0}
+            {history.length || (member as any)?.contests_count || 0}
           </strong>
           <span className="block text-[10px] font-mono text-zinc-400 mt-1">Verified Tournaments</span>
         </div>

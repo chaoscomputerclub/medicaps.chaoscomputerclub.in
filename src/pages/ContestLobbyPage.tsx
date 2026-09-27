@@ -121,11 +121,18 @@ export function ContestLobbyPage() {
     onCountdownExpire
   );
 
-  const isInProgress = false;
+  const isInProgress = Boolean(
+    resolvedRegistration?.can_resume_assessment ||
+    (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
+  );
   const isAssessmentSubmitted = Boolean(
-    resolvedContest?.is_submitted ||
-    resolvedRegistration?.status === "submitted" ||
-    resolvedRegistration?.status === "completed"
+    !isInProgress && (
+      resolvedContest?.is_submitted ||
+      resolvedRegistration?.status === "submitted" ||
+      resolvedRegistration?.assessment_taken ||
+      resolvedRegistration?.assessment_status === "submitted" ||
+      resolvedRegistration?.assessment_status === "completed"
+    )
   );
   const notYetOpen = isUpcoming && !isDevBypass;
   // Show skeleton when: loading detail with no data, OR registration is still resolving

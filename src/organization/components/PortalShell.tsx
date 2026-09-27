@@ -38,7 +38,7 @@ import {
 } from "./skeletons";
 
 const links = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/contests", label: "Contests", icon: Trophy, exact: false },
   { to: "/my-contests", label: "My Contests", icon: Bookmark, exact: false },
   { to: "/leaderboard", label: "Leaderboard", icon: BarChart2, exact: true },
@@ -208,7 +208,7 @@ export function PortalShell() {
     <div className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <img src="/logo.webp" alt="Chaos Computer Club" className="w-7 h-7 object-contain" />
           <div className="flex flex-col">
             <span className="font-sans font-bold text-xs tracking-wider text-white leading-none">CCC MEDI-CAPS</span>
@@ -241,7 +241,7 @@ export function PortalShell() {
       >
         {/* Brand Header */}
         <Link
-          to="/dashboard"
+          to="/"
           className="flex items-center gap-3 pb-4 mb-2 border-b border-white/8 group"
           onClick={() => dispatch(setSidebarOpen(false))}
         >

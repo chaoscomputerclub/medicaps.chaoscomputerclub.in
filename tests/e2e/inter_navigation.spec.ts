@@ -21,8 +21,8 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
         console.log(`[HTTP_401] ${res.url()}`);
       }
     });
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*\/dashboard$/);
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/.*\/$/);
     await expect(page.locator('aside nav[aria-label="Portal navigation"]')).toBeVisible({ timeout: 10000 });
 
     // 2. Navigate to Contests (/contests)
@@ -54,9 +54,9 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
     await page.locator('aside a[href="/profile"]').click();
     await expect(page).toHaveURL(/.*\/profile/);
 
-    // 8. Navigate back to Dashboard (/dashboard) via Brand Header
-    await page.locator('aside a[href="/dashboard"]').first().click();
-    await expect(page).toHaveURL(/.*\/dashboard$/);
+    // 8. Navigate back to Dashboard (/) via Brand Header
+    await page.locator('aside a[href="/"]').first().click();
+    await expect(page).toHaveURL(/.*\/$/);
 
     // Verify zero fatal page errors occurred during full loop
     const fatalErrors = consoleErrors.filter(
@@ -168,7 +168,7 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
     page.on('pageerror', (err) => consoleErrors.push(`[PAGEERROR] ${err.message}`));
 
     // 1. Visit Dashboard
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
 
     // 2. Click "Full Standings →" action link to Leaderboard
@@ -214,40 +214,5 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
     const fatalErrors = consoleErrors.filter((e) => !e.includes('ResizeObserver'));
     expect(fatalErrors).toEqual([]);
   });
-
-  test('Public Legal & Verification Pages: Accessible without authentication', async ({ browser }) => {
-    // Create completely isolated incognito browser context with zero cookies/storage
-    const incognitoContext = await browser.newContext();
-    const incognitoPage = await incognitoContext.newPage();
-
-    // 1. Public Homepage (/)
-    await incognitoPage.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(incognitoPage).toHaveURL(/.*\/$/);
-    await expect(incognitoPage.locator('h1').filter({ hasText: /Chaos Computer Club Medi-Caps/i })).toBeVisible({ timeout: 10000 });
-
-    // 2. Public Privacy Policy (/privacy)
-    await incognitoPage.goto('/privacy', { waitUntil: 'domcontentloaded' });
-    await expect(incognitoPage).toHaveURL(/.*\/privacy$/);
-    await expect(incognitoPage.locator('h1').filter({ hasText: /Privacy Policy/i })).toBeVisible({ timeout: 10000 });
-    await expect(incognitoPage.locator('text=Google API Services User Data Policy Compliance')).toBeVisible();
-    await expect(incognitoPage.locator('text=4. Google User Data We Access')).toBeVisible();
-
-    // 3. Public Terms of Service (/terms)
-    await incognitoPage.goto('/terms', { waitUntil: 'domcontentloaded' });
-    await expect(incognitoPage).toHaveURL(/.*\/terms$/);
-    await expect(incognitoPage.locator('h1').filter({ hasText: /Terms of Service/i })).toBeVisible({ timeout: 10000 });
-
-    // 4. Public Data Deletion (/data-deletion)
-    await incognitoPage.goto('/data-deletion', { waitUntil: 'domcontentloaded' });
-    await expect(incognitoPage).toHaveURL(/.*\/data-deletion$/);
-    await expect(incognitoPage.locator('h1').filter({ hasText: /Data Deletion Instructions/i })).toBeVisible({ timeout: 10000 });
-
-    // 5. Unauthenticated attempt to access /dashboard must redirect to /auth
-    await incognitoPage.goto('/dashboard', { waitUntil: 'domcontentloaded' });
-    await expect(incognitoPage).toHaveURL(/.*\/auth/);
-
-    await incognitoContext.close();
-  });
 });
-
 

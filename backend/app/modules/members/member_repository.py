@@ -89,24 +89,11 @@ class MemberRepository:
         univ_rank = 1
         dept_rank = 1
         rating = member.rating or 1200
-        peak = member.peak_rating or rating
-        m_id = member.id
 
         higher_univ = await db.scalar(
             select(func.count(MemberProfile.id)).where(
                 *rank_filter,
-                or_(
-                    MemberProfile.rating > rating,
-                    and_(
-                        MemberProfile.rating == rating,
-                        MemberProfile.peak_rating > peak,
-                    ),
-                    and_(
-                        MemberProfile.rating == rating,
-                        MemberProfile.peak_rating == peak,
-                        MemberProfile.id < m_id,
-                    ),
-                ),
+                MemberProfile.rating > rating,
             )
         )
         univ_rank = (higher_univ or 0) + 1
@@ -116,18 +103,7 @@ class MemberRepository:
                 select(func.count(MemberProfile.id)).where(
                     *rank_filter,
                     MemberProfile.department == member.department,
-                    or_(
-                        MemberProfile.rating > rating,
-                        and_(
-                            MemberProfile.rating == rating,
-                            MemberProfile.peak_rating > peak,
-                        ),
-                        and_(
-                            MemberProfile.rating == rating,
-                            MemberProfile.peak_rating == peak,
-                            MemberProfile.id < m_id,
-                        ),
-                    ),
+                    MemberProfile.rating > rating,
                 )
             )
             dept_rank = (higher_dept or 0) + 1

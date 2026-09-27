@@ -103,7 +103,9 @@ export function ContestOverviewPage() {
   const isSubmitted = Boolean(
     contest?.is_submitted ||
     registration?.status === "submitted" ||
-    registration?.status === "completed"
+    registration?.assessment_taken ||
+    registration?.assessment_status === "submitted" ||
+    registration?.assessment_status === "completed"
   );
 
   const onCountdownExpire = useCallback(() => {

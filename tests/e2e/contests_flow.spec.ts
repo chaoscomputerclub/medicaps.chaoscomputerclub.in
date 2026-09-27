@@ -59,7 +59,7 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
     await authenticateCadetSession(page);
 
     // 1. Visit Dashboard and retrieve contest banner details
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     const contestSection = page.locator('section').filter({
       hasText: /(?:Tournament Live|Next Campus Tournament)/i,
     });
