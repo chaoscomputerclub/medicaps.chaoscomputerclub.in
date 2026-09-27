@@ -477,7 +477,7 @@ export function ContestArenaPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Contest over: lock arena and auto-redirect to final results
+  // Contest over: lock arena and navigate to summary console for review
   useEffect(() => {
     if (remainingSeconds > 0 || isContestOver) return;
     setIsContestOver(true);
@@ -487,7 +487,7 @@ export function ContestArenaPage() {
       setRedirectCountdown(count);
       if (count <= 0) {
         clearInterval(tick);
-        navigate(`/contests/${contestSlug}/final-results`);
+        navigate(`/contests/${contestSlug}/summary`);
       }
     }, 1000);
     contestOverRedirectRef.current = tick;
@@ -2332,7 +2332,7 @@ export function ContestArenaPage() {
                 Contest Concluded
               </DialogTitle>
               <DialogDescription className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
-                The competition clock has expired. All submitted solutions are locked for final rating computation.
+                The competition clock has expired. Code execution is now locked. Proceed to the Contest Summary console to inspect your questions and finalize your submission.
               </DialogDescription>
             </div>
           </DialogHeader>
@@ -2341,12 +2341,22 @@ export function ContestArenaPage() {
             <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
               <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
             </div>
-            <Button
-              onClick={() => navigate(`/contests/${contestSlug}/final-results`)}
-              variant="default"
-            >
-              View Final Results →
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button
+                onClick={() => navigate(`/contests/${contestSlug}/summary`)}
+                variant="default"
+                className="w-full"
+              >
+                Proceed to Summary →
+              </Button>
+              <Button
+                onClick={() => navigate(`/contests/${contestSlug}/results`)}
+                variant="outline"
+                className="w-full"
+              >
+                View Standings
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

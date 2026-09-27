@@ -298,20 +298,8 @@ class AssessmentService:
             session.submitted_at = None
             session.anti_cheat_violations = 0
             await db.commit()
-        elif remaining_seconds <= 0 and session.status == "in_progress":
-            session.status = "submitted"
-            session.submitted_at = expires_at
-            if contest:
-                reg_stmt = select(ContestRegistration).where(
-                    ContestRegistration.contest_id == contest.id,
-                    ContestRegistration.member_id == current_member.id,
-                )
-                reg_res = await db.execute(reg_stmt)
-                reg = reg_res.scalars().first()
-                if reg:
-                    reg.assessment_taken = True
-                    reg.assessment_score = session.total_score
-            await db.commit()
+        # Note: When remaining_seconds <= 0, coding workspace is locked, but session is NOT
+        # auto-submitted without explicit user confirmation on the Contest Summary page.
 
         # 5. Fetch Problems
         p_result = await db.execute(

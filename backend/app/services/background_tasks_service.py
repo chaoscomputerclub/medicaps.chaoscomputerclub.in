@@ -67,11 +67,12 @@ async def _sweep_expired_sessions(session_factory: async_sessionmaker) -> None:
             expired_slugs: list[str] = []
             for s in sessions:
                 deadline = session_deadline(s.started_at)
-                if _utcnow() > deadline:
+                # Allow a 24-hour grace period for candidates to review summary console and submit explicitly
+                if _utcnow() > (deadline + timedelta(hours=24)):
                     s.status = "submitted"
                     s.submitted_at = s.submitted_at or deadline
                     logger.info(
-                        "sweeper: auto-submitting session %s (member=%s, expired=%s)",
+                        "sweeper: finalizing abandoned session %s (member=%s, deadline=%s)",
                         s.id, s.member_id, deadline.isoformat(),
                     )
                     assess_res = await db.execute(

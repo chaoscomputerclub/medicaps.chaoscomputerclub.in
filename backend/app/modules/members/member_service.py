@@ -5,7 +5,7 @@ modules/members/member_service.py — Member Profile & Performance Application S
 
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Request, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -362,6 +362,7 @@ class MemberService:
         member_dto["attendance_total"] = total_contests
         member_dto["university_rank"] = univ_rank
         member_dto["department_rank"] = dept_rank
+        member_dto["active_members"] = all_members_count
         member_dto["percentile"] = percentile
         member_dto["followers_count"] = followers_count
         member_dto["following_count"] = following_count
@@ -370,6 +371,18 @@ class MemberService:
         # Structured rating history points with ISO date strings for frontend AreaChart
         detailed_rating_history = []
         if rh_rows:
+            first_rh, first_contest = rh_rows[0]
+            first_date = first_rh.contested_at or (first_contest.starts_at if first_contest else None)
+            base_date = (first_date - timedelta(days=1)) if first_date else (current_member.created_at or datetime.now(timezone.utc))
+            detailed_rating_history.append({
+                "contest": "Initial Baseline",
+                "contest_slug": "",
+                "date": base_date.isoformat(),
+                "rank": 1,
+                "old_rating": 1200,
+                "new_rating": first_rh.old_rating or 1200,
+                "delta": 0,
+            })
             for rh, contest in rh_rows:
                 detailed_rating_history.append({
                     "contest": rh.contest_title or (contest.title if contest else "Contest Session"),
@@ -382,6 +395,23 @@ class MemberService:
                 })
         elif rating_history:
             detailed_rating_history = list(reversed(rating_history))
+            if detailed_rating_history:
+                first_item = detailed_rating_history[0]
+                first_dt = None
+                try:
+                    first_dt = datetime.fromisoformat(first_item["date"])
+                except Exception:
+                    pass
+                base_date = (first_dt - timedelta(days=1)) if first_dt else (current_member.created_at or datetime.now(timezone.utc))
+                detailed_rating_history.insert(0, {
+                    "contest": "Initial Baseline",
+                    "contest_slug": "",
+                    "date": base_date.isoformat(),
+                    "rank": 1,
+                    "old_rating": 1200,
+                    "new_rating": first_item.get("old_rating", 1200),
+                    "delta": 0,
+                })
         else:
             init_date = (current_member.created_at or datetime.now(timezone.utc)).isoformat()
             detailed_rating_history = [{
@@ -461,6 +491,18 @@ class MemberService:
         detailed_rh = []
         if rh_records:
             sparkline = [1200] + [r.new_rating for r in rh_records]
+            first_r = rh_records[0]
+            first_date = first_r.contested_at
+            base_date = (first_date - timedelta(days=1)) if first_date else (student.created_at or datetime.now(timezone.utc))
+            detailed_rh.append({
+                "contest": "Initial Baseline",
+                "contest_slug": "",
+                "date": base_date.isoformat(),
+                "rank": 1,
+                "old_rating": 1200,
+                "new_rating": first_r.old_rating or 1200,
+                "delta": 0,
+            })
             for r in rh_records:
                 detailed_rh.append({
                     "contest": r.contest_title or "Contest Session",
@@ -484,6 +526,23 @@ class MemberService:
                     "old_rating": (student.rating or 1200) - (b.get("delta") or 0),
                     "new_rating": student.rating or 1200,
                     "delta": b.get("delta") or 0,
+                })
+            if detailed_rh:
+                first_b = detailed_rh[0]
+                first_dt = None
+                try:
+                    first_dt = datetime.fromisoformat(first_b["date"])
+                except Exception:
+                    pass
+                base_date = (first_dt - timedelta(days=1)) if first_dt else (student.created_at or datetime.now(timezone.utc))
+                detailed_rh.insert(0, {
+                    "contest": "Initial Baseline",
+                    "contest_slug": "",
+                    "date": base_date.isoformat(),
+                    "rank": 1,
+                    "old_rating": 1200,
+                    "new_rating": first_b.get("old_rating", 1200),
+                    "delta": 0,
                 })
 
         if not detailed_rh:

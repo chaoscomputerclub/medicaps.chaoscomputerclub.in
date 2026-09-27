@@ -17,7 +17,7 @@ import {
 import type { RatingHistoryPoint } from "../data/types";
 
 export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)[] }) {
-  const chartData = (data || []).map((d, idx) => {
+  const rawChartData = (data || []).map((d, idx) => {
     if (typeof d === "number") {
       return {
         contest: idx === 0 ? "Initial Baseline" : `Contest Round ${idx}`,
@@ -36,6 +36,20 @@ export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)
       new_rating: d?.new_rating ?? (d as any)?.rating ?? 1200,
     };
   });
+
+  // Guarantee baseline starting point (1200) if not present or single contest point
+  const chartData = [...rawChartData];
+  const firstPoint = chartData[0];
+  if (chartData.length === 1 && firstPoint && firstPoint.contest !== "Initial Baseline") {
+    const firstDateMs = new Date(firstPoint.date).getTime();
+    const baselineDate = new Date(firstDateMs - 86400000).toISOString();
+    chartData.unshift({
+      contest: "Initial Baseline",
+      date: baselineDate,
+      new_rating: (firstPoint as any).old_rating ?? 1200,
+      delta: 0,
+    } as any);
+  }
 
   const ratings = chartData
     .map((d) => d.new_rating)
@@ -101,6 +115,9 @@ export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)
             labelFormatter={(v, payload) => {
               const item = payload?.[0]?.payload;
               const contestName = item?.contest;
+              if (contestName === "Initial Baseline") {
+                return "Initial Rating Baseline (1,200)";
+              }
               if (!v) return contestName || "Rating Point";
               const dateObj = new Date(v);
               const formattedDate = isNaN(dateObj.getTime())

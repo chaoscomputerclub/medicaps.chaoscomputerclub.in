@@ -91,24 +91,9 @@ async def require_active_assessment_session(
     expires_at = started_at + timedelta(minutes=duration_min)
 
     if now_utc() > expires_at:
-        session.status = "submitted"
-        session.submitted_at = expires_at
-        if contest:
-            reg_res = await db.execute(
-                select(ContestRegistration).where(
-                    ContestRegistration.contest_id == contest.id,
-                    ContestRegistration.member_id == current_member.id,
-                )
-            )
-            reg = reg_res.scalars().first()
-            if reg:
-                reg.status = "submitted"
-                reg.assessment_taken = True
-                reg.assessment_score = session.total_score
-        await db.commit()
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Assessment duration has expired. Your submission has been finalized.",
+            detail="Assessment duration has expired. New code runs and submissions are locked.",
         )
 
     return session, assessment, contest
