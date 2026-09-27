@@ -26,10 +26,21 @@ const RED = "\x1b[31m";
 const CYAN = "\x1b[36m";
 const GRAY = "\x1b[90m";
 
-const API_BASE = process.env.API_BASE || "https://medicaps-api.chaoscomputerclub.in/api";
+const API_BASE = process.env.API_BASE || "http://127.0.0.1:8000/api";
+
+const PROD_FINGERPRINTS = ["143.198.38.205", "medicaps-api.", "medicaps.chaoscomputerclub.in"];
 
 async function request(endpoint, options = {}, retries = 2) {
   const url = endpoint.startsWith("http") ? endpoint : `${API_BASE}${endpoint}`;
+  const method = (options.method || "GET").toUpperCase();
+
+  // Guard against any mutation against production
+  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    if (PROD_FINGERPRINTS.some((fp) => url.toLowerCase().includes(fp))) {
+      throw new Error(`[SAFETY GUARD] Blocked ${method} request to production endpoint: ${url}`);
+    }
+  }
+
   const start = performance.now();
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {

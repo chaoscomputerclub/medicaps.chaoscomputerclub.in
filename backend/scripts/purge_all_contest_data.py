@@ -12,6 +12,10 @@ import os
 # Add parent directory to sys.path so app modules import cleanly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# ── Production safety guard ────────────────────────────────────────────────
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
+
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import purge_all_contest_data
 

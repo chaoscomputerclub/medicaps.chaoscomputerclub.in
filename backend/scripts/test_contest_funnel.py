@@ -14,11 +14,16 @@ import asyncio
 import os
 import sys
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select, delete
 
 BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
+
+# ── Production safety guard ────────────────────────────────────────────────
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
+
+from sqlalchemy import select, delete
 
 from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db

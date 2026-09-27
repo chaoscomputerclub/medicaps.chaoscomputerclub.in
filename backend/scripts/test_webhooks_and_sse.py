@@ -10,6 +10,10 @@ import os
 # Add backend directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# ── Production safety guard ────────────────────────────────────────────────
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
+
 from httpx import AsyncClient, ASGITransport
 from main import app
 from app.services.event_broadcaster import subscribe, unsubscribe, broadcast_event

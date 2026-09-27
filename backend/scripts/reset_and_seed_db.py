@@ -9,6 +9,10 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# ── Production safety guard ────────────────────────────────────────────────
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
+
 from app.core.db import engine, Base
 import app.models.db_models  # noqa: F401
 

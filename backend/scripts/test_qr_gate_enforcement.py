@@ -16,6 +16,10 @@ from datetime import datetime, timezone, timedelta
 # Add backend directory to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+# ── Production safety guard ────────────────────────────────────────────────
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
+
 from app.core.db import AsyncSessionLocal
 from app.core.config import settings
 from app.models.db_models import OfflineContest, MemberProfile, CampusPass, Assessment, AssessmentSession

@@ -16,6 +16,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
+# ── Production safety guard — MUST execute before any app imports ──────────
+# This script creates a QA bot member, creates contests, and deletes them.
+# It must NEVER run against a production database outside CI.
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
+
 # Project root for GSD planning records
 PROJECT_ROOT = BASE_DIR.parent
 PLANNING_QA_DIR = PROJECT_ROOT / ".planning" / "qa"

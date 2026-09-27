@@ -1,0 +1,125 @@
+name: Manual Backend Integration & E2E API QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_full_contract_suite:
+        description: "Run 51-endpoint API contract QA suite"
+        type: boolean
+        default: true
+      run_contest_lifecycle:
+        description: "Run dynamic contest lifecycle test"
+        type: boolean
+        default: true
+      run_webhooks_and_sse:
+        description: "Run webhooks & SSE tests"
+        type: boolean
+        default: true
+      run_qr_gate_tests:
+        description: "Run strict QR gate enforcement tests"
+        type: boolean
+        default: true
+
+concurrency:
+  group: manual-integration-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ephemeral-integration-gate:
+    name: Ephemeral Service Container QA Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ccc_medicaps
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      - name: 📦 Install Backend Python Dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: 🔑 Generate Ephemeral Asymmetric RSA 256 Keys
+        run: |
+          mkdir -p backend/keys
+          openssl genrsa -out backend/keys/jwt_private_key.pem 2048
+          openssl rsa -in backend/keys/jwt_private_key.pem -pubout -out backend/keys/jwt_public_key.pem
+          chmod 600 backend/keys/jwt_private_key.pem
+
+      - name: 🛡️ In-Process API Contract QA Suite (51 Tests)
+        if: ${{ inputs.run_full_contract_suite }}
+        env:
+          CI: "true"
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: python3 backend/scripts/run_production_api_qa.py
+
+      - name: ⚡ Dynamic Contest Lifecycle Tests
+        if: ${{ inputs.run_contest_lifecycle }}
+        env:
+          CI: "true"
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: python3 backend/scripts/test_dynamic_contest_api.py
+
+      - name: 📡 Realtime Pub/Sub, Webhook & SSE Tests
+        if: ${{ inputs.run_webhooks_and_sse }}
+        env:
+          CI: "true"
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: python3 backend/scripts/test_webhooks_and_sse.py
+
+      - name: 🎟️ Strict QR Gate Enforcement Tests
+        if: ${{ inputs.run_qr_gate_tests }}
+        env:
+          CI: "true"
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "true"
+        run: python3 backend/scripts/test_qr_gate_enforcement.py
