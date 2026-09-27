@@ -39,8 +39,12 @@ class ContestArenaProblemResponse(BaseModel):
     constraints: Optional[str] = None
     time_limit: Optional[float] = 2.0
     memory_limit: Optional[int] = 256
+    execution_mode: Optional[str] = "FUNCTION"
+    function_signature: Optional[Dict[str, Any]] = None
+
     starter_codes: Optional[Dict[str, str]] = None
     sample_testcases: Optional[List[Dict[str, Any]]] = None
+
 
 
 class ContestArenaResponse(BaseModel):

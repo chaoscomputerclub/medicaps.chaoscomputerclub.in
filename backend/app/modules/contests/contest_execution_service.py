@@ -5,7 +5,7 @@ modules/contests/contest_execution_service.py — Arena Code Sandbox Execution &
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,8 +22,14 @@ from app.models.db_models import (
     MemberProfile,
     OfflineContest,
     ScoreboardEntry,
+    Problem,
+    ProblemVersion,
+    ProblemTestCase,
     now_utc,
 )
+from app.engine.contracts import FunctionSignature, EvaluationConfig, DataType
+from app.engine.adapters import get_adapter, OutputEvaluator
+
 from app.modules.contests.contest_repository import ContestRepository
 from app.services.contest_eligibility_service import (
     is_member_eligible_for_live_contest,
@@ -49,6 +55,87 @@ class ArenaSubmitRequest(BaseModel):
 
 class ContestExecutionService:
     """Handles code execution, sandbox test case runs, scoring, and scoreboard updates."""
+
+    @classmethod
+    async def _resolve_problem_execution_contract(
+        cls,
+        problem: ContestProblem,
+        db: AsyncSession,
+    ) -> Tuple[Optional[FunctionSignature], Optional[EvaluationConfig], List[Dict[str, Any]], List[Dict[str, Any]], float, int]:
+        fn_sig = None
+        eval_cfg = None
+        visible_cases = []
+        hidden_cases = []
+        time_limit = getattr(problem, "time_limit", 2.0) or 2.0
+        memory_limit = getattr(problem, "memory_limit", 256) or 256
+
+        # Check master problem link
+        master_prob_id = getattr(problem, "problem_id", None)
+        master_ver = getattr(problem, "problem_version", None) or 1
+
+        if master_prob_id:
+            tc_stmt = select(ProblemTestCase).where(
+                ProblemTestCase.problem_id == master_prob_id,
+                ProblemTestCase.version == master_ver,
+                ProblemTestCase.is_active == True,
+            ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
+            vault_cases = (await db.scalars(tc_stmt)).all()
+            if vault_cases:
+                for vc in vault_cases:
+                    c_dict = {
+                        "testcase_id": vc.testcase_id,
+                        "input": vc.input_data,
+                        "expected_output": vc.expected_output,
+                        "explanation": vc.explanation,
+                        "weight": vc.weight,
+                    }
+                    if vc.is_hidden:
+                        hidden_cases.append(c_dict)
+                    else:
+                        visible_cases.append(c_dict)
+
+            # Master problem signature
+            master_prob = await db.get(Problem, master_prob_id)
+            if master_prob:
+                raw_sig = getattr(problem, "function_signature", None) or master_prob.function_signature
+                if raw_sig:
+                    try:
+                        fn_sig = FunctionSignature(**raw_sig)
+                    except Exception:
+                        pass
+                raw_eval = getattr(problem, "evaluation_config", None) or master_prob.evaluation_config
+                if raw_eval:
+                    try:
+                        eval_cfg = EvaluationConfig(**raw_eval)
+                    except Exception:
+                        pass
+                if not getattr(problem, "time_limit", None) and master_prob.time_limit:
+                    time_limit = master_prob.time_limit
+                if not getattr(problem, "memory_limit", None) and master_prob.memory_limit:
+                    memory_limit = master_prob.memory_limit
+
+        # Fallback to inline fields on ContestProblem
+        if not visible_cases and not hidden_cases:
+            visible_cases = getattr(problem, "sample_testcases", None) or []
+            hidden_cases = getattr(problem, "hidden_testcases", None) or []
+
+        if not fn_sig:
+            raw_sig = getattr(problem, "function_signature", None)
+            if raw_sig:
+                try:
+                    fn_sig = FunctionSignature(**raw_sig)
+                except Exception:
+                    pass
+
+        if not eval_cfg:
+            raw_eval = getattr(problem, "evaluation_config", None)
+            if raw_eval:
+                try:
+                    eval_cfg = EvaluationConfig(**raw_eval)
+                except Exception:
+                    pass
+
+        return fn_sig, eval_cfg, visible_cases, hidden_cases, time_limit, memory_limit
 
     @staticmethod
     async def run_arena_code(
@@ -88,66 +175,106 @@ class ContestExecutionService:
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
 
+        fn_sig, eval_cfg, sample_list, _, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
+        lang_str = str(payload.language).lower()
+        adapter = get_adapter(lang_str) if fn_sig else None
+
         if payload.custom_stdin is not None:
             tcs = [TestCaseSchema(id="custom", stdin=payload.custom_stdin, expected_output="")]
+            raw_cases = [{"input": payload.custom_stdin, "expected_output": ""}]
         else:
-            sample_list = getattr(problem, "sample_testcases", None) or []
-            tcs = [
-                TestCaseSchema(
-                    id=f"sample_{i+1}",
-                    name=f"Sample Test {i+1}",
-                    stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
-                    expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
+            tcs = []
+            raw_cases = sample_list if sample_list else []
+            for i, s in enumerate(raw_cases):
+                inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
+                if adapter and isinstance(inp, dict):
+                    stdin_payload = adapter.serialize_input(fn_sig, inp)
+                else:
+                    stdin_payload = str(inp)
+
+                exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
+                tcs.append(
+                    TestCaseSchema(
+                        id=f"sample_{i+1}",
+                        name=f"Sample Test {i+1}",
+                        stdin=stdin_payload,
+                        expected_output=str(exp_out),
+                    )
                 )
-                for i, s in enumerate(sample_list)
-            ]
             if not tcs:
                 tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
+                raw_cases = [{"input": "", "expected_output": ""}]
 
-        from app.engine.harness import prepare_solution_code
-        exec_code = prepare_solution_code(
-            code=payload.code,
-            language=payload.language,
-            problem_index=problem.problem_index,
-            starter_codes=getattr(problem, "starter_codes", None) or {},
-        )
+        if adapter and fn_sig:
+            exec_code = adapter.generate_wrapper(fn_sig, payload.code)
+        else:
+            from app.engine.harness import prepare_solution_code
+            exec_code = prepare_solution_code(
+                code=payload.code,
+                language=payload.language,
+                problem_index=problem.problem_index,
+                starter_codes=getattr(problem, "starter_codes", None) or {},
+                function_signature=fn_sig,
+            )
 
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=payload.language,
             code=exec_code,
             testcases=tcs,
-            time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
-            memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
+            time_limit=time_limit,
+            memory_limit_mb=memory_limit,
             comparison_mode=ComparisonMode.TRIMMED,
         )
 
+        # Post-process evaluation with typed contract when function mode is active
+        testcase_results = []
+        passed_count = 0
+        for i, tr in enumerate(exec_result.testcase_results):
+            raw_case = raw_cases[i] if i < len(raw_cases) else {}
+            exp_val = raw_case.get("expected_output") if raw_case.get("expected_output") is not None else raw_case.get("output", "")
+
+            # If no sandbox crash/timeout, evaluate output
+            if tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
+                if fn_sig:
+                    passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
+                    tr.passed = passed
+                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
+                else:
+                    tr.passed = (tr.stdout or "").strip() == str(exp_val).strip()
+                    tr.verdict = "ACCEPTED" if tr.passed else "WRONG_ANSWER"
+
+            if tr.passed:
+                passed_count += 1
+
+            testcase_results.append({
+                "testcase_id": tr.testcase_id,
+                "name": tr.name,
+                "passed": tr.passed,
+                "verdict": tr.verdict,
+                "stdout": tr.stdout,
+                "expected_output": str(exp_val),
+                "stdin": (tcs[i].stdin if i < len(tcs) else ""),
+                "stderr": tr.stderr,
+                "compile_output": tr.compile_output,
+                "wall_time_ms": tr.wall_time_ms,
+            })
+
+        all_passed = (passed_count == len(testcase_results)) and len(testcase_results) > 0
+        final_verdict = "ACCEPTED" if all_passed else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
+
         return {
             "success": exec_result.success,
-            "verdict": exec_result.verdict,
+            "verdict": final_verdict,
             "stdout": exec_result.stdout,
             "stderr": exec_result.stderr,
             "compile_output": exec_result.compile_output,
             "time": exec_result.time,
             "memory": exec_result.memory,
-            "passed_testcases": exec_result.passed_testcases,
-            "total_testcases": exec_result.total_testcases,
+            "passed_testcases": passed_count,
+            "total_testcases": len(testcase_results),
             "score": exec_result.score,
-            "testcase_results": [
-                {
-                    "testcase_id": tr.testcase_id,
-                    "name": tr.name,
-                    "passed": tr.passed,
-                    "verdict": tr.verdict,
-                    "stdout": tr.stdout,
-                    "expected_output": tr.expected_output,
-                    "stdin": (tcs[i].stdin if i < len(tcs) else ""),
-                    "stderr": tr.stderr,
-                    "compile_output": tr.compile_output,
-                    "wall_time_ms": tr.wall_time_ms,
-                }
-                for i, tr in enumerate(exec_result.testcase_results)
-            ],
+            "testcase_results": testcase_results,
         }
 
     @staticmethod
@@ -188,46 +315,77 @@ class ContestExecutionService:
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
 
-        samples = getattr(problem, "sample_testcases", None) or []
-        hidden = getattr(problem, "hidden_testcases", None) or []
+        fn_sig, eval_cfg, samples, hidden, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
+        adapter = get_adapter(lang_str) if fn_sig else None
         all_raw = samples + hidden
 
         all_tcs: list[TestCaseSchema] = []
         for i, s in enumerate(all_raw):
+            inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
+            if adapter and isinstance(inp, dict):
+                stdin_payload = adapter.serialize_input(fn_sig, inp)
+            else:
+                stdin_payload = str(inp)
+
+            exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
             all_tcs.append(
                 TestCaseSchema(
                     id=f"tc_{i+1}",
                     name=f"Test {i+1}",
-                    stdin=s.get("stdin") if s.get("stdin") is not None else s.get("input", ""),
-                    expected_output=s.get("expected_output") if s.get("expected_output") is not None else s.get("output", ""),
+                    stdin=stdin_payload,
+                    expected_output=str(exp_out),
                     hidden=(i >= len(samples)),
-                    weight=1.0,
+                    weight=float(s.get("weight", 1.0) or 1.0),
                 )
             )
         if not all_tcs:
             all_tcs = [TestCaseSchema(id="tc_1", name="Test 1", stdin="", expected_output="")]
 
-        from app.engine.harness import prepare_solution_code
-        exec_code = prepare_solution_code(
-            code=payload.code,
-            language=payload.language,
-            problem_index=problem.problem_index,
-            starter_codes=getattr(problem, "starter_codes", None) or {},
-        )
+        if adapter and fn_sig:
+            exec_code = adapter.generate_wrapper(fn_sig, payload.code)
+        else:
+            from app.engine.harness import prepare_solution_code
+            exec_code = prepare_solution_code(
+                code=payload.code,
+                language=payload.language,
+                problem_index=problem.problem_index,
+                starter_codes=getattr(problem, "starter_codes", None) or {},
+                function_signature=fn_sig,
+            )
 
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=payload.language,
             code=exec_code,
             testcases=all_tcs,
-            time_limit=getattr(problem, "time_limit", 2.0) or 2.0,
-            memory_limit_mb=getattr(problem, "memory_limit", 256) or 256,
+            time_limit=time_limit,
+            memory_limit_mb=memory_limit,
             comparison_mode=ComparisonMode.TRIMMED,
         )
 
-        is_accepted = exec_result.passed_testcases == exec_result.total_testcases
-        verdict_str = "ACCEPTED" if is_accepted else (exec_result.verdict or "WRONG_ANSWER")
-        points_awarded = problem.points if is_accepted else int(problem.points * (exec_result.passed_testcases / max(1, exec_result.total_testcases)))
+        # Post-process evaluation with typed contract when function mode is active
+        passed_count = 0
+        for i, tr in enumerate(exec_result.testcase_results):
+            raw_case = all_raw[i] if i < len(all_raw) else {}
+            exp_val = raw_case.get("expected_output") if raw_case.get("expected_output") is not None else raw_case.get("output", "")
+
+            if tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
+                if fn_sig:
+                    passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
+                    tr.passed = passed
+                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
+                else:
+                    tr.passed = (tr.stdout or "").strip() == str(exp_val).strip()
+                    tr.verdict = "ACCEPTED" if tr.passed else "WRONG_ANSWER"
+
+            if tr.passed:
+                passed_count += 1
+
+        is_accepted = (passed_count == len(all_tcs)) and len(all_tcs) > 0
+        verdict_str = "ACCEPTED" if is_accepted else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
+        total_tc = max(1, len(all_tcs))
+        points_awarded = problem.points if is_accepted else int(problem.points * (passed_count / total_tc))
+
 
         sub = ContestSubmission(
             contest_id=contest.id,

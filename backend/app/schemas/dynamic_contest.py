@@ -22,6 +22,8 @@ class TestCaseCreateSchema(BaseModel):
 class ProblemCreateSchema(BaseModel):
     problem_index: str = Field(..., description="Problem index identifier: A, B, C, D, E, F")
     title: str = Field(..., min_length=2, max_length=120, description="Problem title")
+    slug: Optional[str] = Field(None, description="Problem URL slug or unique identifier (e.g. packet-collision)")
+    function_name: Optional[str] = Field(None, description="Target function name for solution boilerplate (e.g. packetCollision, solve)")
     topic: Optional[str] = Field("Algorithms", max_length=60, description="Core topic: Graph, DP, Greedy, etc.")
     difficulty: str = Field("MEDIUM", description="EASY, MEDIUM, HARD")
     points: int = Field(100, ge=10, le=1000, description="Points awarded for solving this problem")
@@ -31,9 +33,16 @@ class ProblemCreateSchema(BaseModel):
     constraints: Optional[str] = Field(None, description="Time/Memory and mathematical constraints")
     time_limit: float = Field(2.0, ge=0.1, le=10.0, description="Execution time limit in seconds")
     memory_limit: int = Field(256, ge=16, le=1024, description="Memory limit in megabytes")
+    problem_id: Optional[str] = Field(None, description="Optional foreign key to master Problem entity")
+    problem_version: Optional[int] = Field(None, description="Problem version snapshot to pin")
+    execution_mode: Optional[str] = Field("FUNCTION", description="FUNCTION or STDIN_STDOUT")
+    function_signature: Optional[Dict[str, Any]] = Field(None, description="Structured FunctionSignature contract")
+    evaluation_config: Optional[Dict[str, Any]] = Field(None, description="Result match strategy and tolerance")
+    sandbox_config: Optional[Dict[str, Any]] = Field(None, description="Execution sandbox configuration")
     starter_codes: Dict[str, str] = Field(default_factory=dict, description="Boilerplate code per language: python, cpp, java, javascript")
     sample_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Visible sample testcases with optional explanations")
     hidden_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Hidden evaluation testcases for official grading")
+
 
     @field_validator("time_limit", mode="before")
     @classmethod

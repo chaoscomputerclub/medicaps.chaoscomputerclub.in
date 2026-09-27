@@ -121,21 +121,33 @@ def prepare_solution_code(
     problem_index: Optional[str] = None,
     method_name: Optional[str] = None,
     starter_codes: Optional[Dict[str, str]] = None,
+    function_signature: Optional[Any] = None,
 ) -> str:
     """
     Inspects candidate solution code. If it's a function or class Solution,
     wraps/appends the appropriate execution driver harness.
 
-    method_name: explicitly supplied function name (highest priority).
-    starter_codes: admin-defined starter code dict; function name extracted from it
-                   when method_name is not supplied.
+    function_signature: structured FunctionSignature or dict. When present, delegates to LanguageAdapter.
+    method_name: explicitly supplied function name.
+    starter_codes: admin-defined starter code dict; function name extracted when method_name not supplied.
     """
     lang = (language or "").lower().strip()
+
+    if function_signature:
+        from app.engine.contracts import FunctionSignature
+        from app.engine.adapters import get_adapter
+        try:
+            sig = function_signature if isinstance(function_signature, FunctionSignature) else FunctionSignature(**function_signature)
+            adapter = get_adapter(lang)
+            return adapter.generate_wrapper(sig, code)
+        except Exception:
+            pass
 
     # Resolve the expected function name dynamically
     fn_name = method_name
     if not fn_name and starter_codes:
         fn_name = extract_function_name(starter_codes, lang)
+
 
     if lang in {"python", "py", "python3"}:
         return _prepare_python_solution(code, fn_name=fn_name)

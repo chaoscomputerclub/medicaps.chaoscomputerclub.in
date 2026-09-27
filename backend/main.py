@@ -14,15 +14,16 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, PlainTextResponse
 from app.core.config import settings
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
 from app.core.queue import queue_manager
-from app.routers import admin, admin_contests, admin_qa, assessment, auth, contests, events, feed, jobs, leaderboard, passes, scoreboards, social, storage, verify, webhooks
+from app.routers import admin, admin_contests, admin_problems, admin_qa, assessment, auth, contests, events, feed, jobs, leaderboard, passes, scoreboards, social, storage, verify, webhooks
 from app.api.v1.router import api_router_v1
+
 
 
 @asynccontextmanager
@@ -107,6 +108,15 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+
+# ── Strix Domain Ownership Verification ───────────────────────────────────────
+@app.get("/.well-known/strix-verify.txt", response_class=PlainTextResponse, include_in_schema=False)
+@app.get("/api/.well-known/strix-verify.txt", response_class=PlainTextResponse, include_in_schema=False)
+async def strix_verify():
+    """Returns domain verification token for Strix AI pentest scanner."""
+    return "strix-verify-14cbf970e04612b8f26f423d9d0167d8"
+
+
 # ── Production Healthcheck ────────────────────────────────────────────────────
 @app.get("/api/health", tags=["System"])
 async def health_check():
@@ -166,7 +176,10 @@ app.webhooks.include_router(webhooks.webhooks_router)
 # Admin maintenance routes (not exposed publicly in prod; protect via network policy)
 app.include_router(admin.router, prefix=settings.API_PREFIX)
 app.include_router(admin_contests.router, prefix=settings.API_PREFIX)
+app.include_router(admin_problems.router, prefix=settings.API_PREFIX)
+app.include_router(admin_problems.router)  # Direct /admin/problems mount
 app.include_router(admin_qa.router, prefix=settings.API_PREFIX)
+
 
 # Versioned surface — preferred for all new clients (/api/v1/).
 app.include_router(api_router_v1, prefix=f"{settings.API_PREFIX}/v1")

@@ -76,7 +76,16 @@ class ContestProblem(Base):
     first_ac_seconds = Column(Integer, nullable=True)
     editorial_summary = Column(Text, nullable=True)
 
-    # Rich Arena Problem Fields
+    # Master Problem Linkage & Versioning (Section 20 & 21)
+    problem_id = Column(String(36), ForeignKey("problems.id", ondelete="SET NULL"), nullable=True, index=True)
+    problem_version = Column(Integer, nullable=True)
+    points_override = Column(Integer, nullable=True)
+
+    # Rich Arena Problem & Execution Contract Fields
+    execution_mode = Column(String(20), default="FUNCTION", nullable=True)
+    function_signature = Column(JSON, default=dict, nullable=True)
+    evaluation_config = Column(JSON, default=dict, nullable=True)
+    sandbox_config = Column(JSON, default=dict, nullable=True)
     difficulty = Column(String(20), default="MEDIUM", nullable=True)
     description = Column(Text, nullable=True)
     input_format = Column(Text, nullable=True)
@@ -90,7 +99,9 @@ class ContestProblem(Base):
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="problems")
+    master_problem = relationship("Problem", foreign_keys=[problem_id])
     submissions = relationship("ContestSubmission", back_populates="problem", cascade="all, delete-orphan", passive_deletes=True)
+
 
 
 class ContestSubmission(Base):

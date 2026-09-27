@@ -23,6 +23,7 @@ from .assessment import (
     AssessmentSession,
     AssessmentSubmission,
 )
+from .problem import Problem, ProblemVersion, ProblemTestCase
 from .proof import TrustProof
 from .campus_pass import CampusPass
 from .announcement import Announcement
@@ -43,6 +44,10 @@ __all__ = [
     "ContestSubmission",
     "ScoreboardEntry",
     "ContestRegistration",
+    # Problems & Function Contracts
+    "Problem",
+    "ProblemVersion",
+    "ProblemTestCase",
     # Online Assessments
     "Assessment",
     "AssessmentProblem",
@@ -53,3 +58,4 @@ __all__ = [
     "CampusPass",
     "Announcement",
 ]
+

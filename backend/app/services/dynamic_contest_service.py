@@ -114,17 +114,24 @@ class DynamicContestService:
         return slug or "contest"
 
     @staticmethod
-    def _default_starter_codes(problem_title: str) -> Dict[str, str]:
+    def _default_starter_codes(
+        problem_title: str,
+        function_name: Optional[str] = None,
+        slug: Optional[str] = None,
+    ) -> Dict[str, str]:
         """Generate default starter code templates with problem-specific function name."""
-        words = re.findall(r"[a-zA-Z0-9]+", problem_title)
-        if words:
-            first = words[0].lower()
-            rest = "".join(w.capitalize() for w in words[1:])
-            fn_name = first + rest
-            if not fn_name[0].isalpha():
-                fn_name = "solve" + fn_name
+        if function_name and function_name.strip():
+            fn_name = function_name.strip()
         else:
-            fn_name = "solve"
+            words = re.findall(r"[a-zA-Z0-9]+", problem_title)
+            if words:
+                first = words[0].lower()
+                rest = "".join(w.capitalize() for w in words[1:])
+                fn_name = first + rest
+                if not fn_name[0].isalpha():
+                    fn_name = "solve" + fn_name
+            else:
+                fn_name = "solve"
 
         py_template = (
             f"# {problem_title}\n"
@@ -182,14 +189,18 @@ class DynamicContestService:
             "    return 0;\n"
             "}\n"
         )
-        return {
+        codes = {
             "python": py_template,
             "cpp": cpp_template,
             "c": c_template,
             "java": java_template,
             "javascript": js_template,
             "typescript": ts_template,
+            "function_name": fn_name,
         }
+        if slug:
+            codes["slug"] = slug
+        return codes
 
 
     @staticmethod
@@ -472,10 +483,13 @@ class DynamicContestService:
             )
             assessment_problems = ap_res.scalars().all()
             for ap in assessment_problems:
+                ap_codes = ap.starter_codes or {}
                 assessment_problems_list.append({
                     "id": ap.id,
                     "assessment_id": ap.assessment_id,
                     "problem_index": ap.problem_index,
+                    "slug": ap_codes.get("slug") or ap_codes.get("__slug__"),
+                    "function_name": ap_codes.get("function_name"),
                     "title": ap.title,
                     "difficulty": ap.difficulty,
                     "points": ap.points,
@@ -485,17 +499,20 @@ class DynamicContestService:
                     "constraints": ap.constraints,
                     "time_limit": ap.time_limit,
                     "memory_limit": ap.memory_limit,
-                    "starter_codes": ap.starter_codes or {},
+                    "starter_codes": ap_codes,
                     "sample_testcases": ap.sample_testcases or [],
                     "hidden_testcases": ap.hidden_testcases or [],
                 })
 
         cp_list = []
         for cp in contest_problems:
+            cp_codes = cp.starter_codes or {}
             cp_list.append({
                 "id": cp.id,
                 "contest_id": cp.contest_id,
                 "problem_index": cp.problem_index,
+                "slug": cp_codes.get("slug") or cp_codes.get("__slug__"),
+                "function_name": cp_codes.get("function_name"),
                 "title": cp.title,
                 "topic": cp.topic,
                 "points": cp.points,
@@ -506,7 +523,7 @@ class DynamicContestService:
                 "constraints": cp.constraints,
                 "time_limit": cp.time_limit,
                 "memory_limit": cp.memory_limit,
-                "starter_codes": cp.starter_codes or {},
+                "starter_codes": cp_codes,
                 "sample_testcases": cp.sample_testcases or [],
                 "hidden_testcases": cp.hidden_testcases or [],
                 "solved_count": cp.solved_count,
@@ -630,7 +647,19 @@ class DynamicContestService:
         idx = problem_data.problem_index
         sample_tcs = [tc.model_dump() for tc in problem_data.sample_testcases]
         hidden_tcs = [tc.model_dump() for tc in problem_data.hidden_testcases]
-        starter_codes = problem_data.starter_codes if problem_data.starter_codes else DynamicContestService._default_starter_codes(problem_data.title)
+        starter_codes = (
+            dict(problem_data.starter_codes)
+            if problem_data.starter_codes
+            else DynamicContestService._default_starter_codes(
+                problem_data.title,
+                problem_data.function_name,
+                problem_data.slug,
+            )
+        )
+        if problem_data.function_name and "function_name" not in starter_codes:
+            starter_codes["function_name"] = problem_data.function_name
+        if problem_data.slug and "slug" not in starter_codes:
+            starter_codes["slug"] = problem_data.slug
 
         norm_target = (target or "both").strip().lower()
 
@@ -654,6 +683,15 @@ class DynamicContestService:
                 cp.constraints = problem_data.constraints
                 cp.time_limit = problem_data.time_limit
                 cp.memory_limit = problem_data.memory_limit
+                cp.problem_id = problem_data.problem_id
+                cp.problem_version = problem_data.problem_version
+                cp.execution_mode = problem_data.execution_mode or "FUNCTION"
+                if problem_data.function_signature:
+                    cp.function_signature = problem_data.function_signature
+                if problem_data.evaluation_config:
+                    cp.evaluation_config = problem_data.evaluation_config
+                if problem_data.sandbox_config:
+                    cp.sandbox_config = problem_data.sandbox_config
                 cp.starter_codes = starter_codes
                 cp.sample_testcases = sample_tcs
                 cp.hidden_testcases = hidden_tcs
@@ -672,11 +710,18 @@ class DynamicContestService:
                     constraints=problem_data.constraints,
                     time_limit=problem_data.time_limit,
                     memory_limit=problem_data.memory_limit,
+                    problem_id=problem_data.problem_id,
+                    problem_version=problem_data.problem_version,
+                    execution_mode=problem_data.execution_mode or "FUNCTION",
+                    function_signature=problem_data.function_signature or {},
+                    evaluation_config=problem_data.evaluation_config or {},
+                    sandbox_config=problem_data.sandbox_config or {},
                     starter_codes=starter_codes,
                     sample_testcases=sample_tcs,
                     hidden_testcases=hidden_tcs,
                 )
                 db.add(cp)
+
 
         # 2. Update/Create AssessmentProblem (if target is 'both' or 'assessment')
         if norm_target in ("both", "assessment"):

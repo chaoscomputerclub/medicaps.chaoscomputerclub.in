@@ -29,6 +29,7 @@ from .assessment import (
     AssessmentSession,
     AssessmentSubmission,
 )
+from .problem import Problem, ProblemVersion, ProblemTestCase
 from .proof import TrustProof
 from .campus_pass import CampusPass
 from .announcement import Announcement
@@ -48,6 +49,9 @@ __all__ = [
     "ContestSubmission",
     "ScoreboardEntry",
     "ContestRegistration",
+    "Problem",
+    "ProblemVersion",
+    "ProblemTestCase",
     "Assessment",
     "AssessmentProblem",
     "AssessmentSession",
@@ -58,3 +62,4 @@ __all__ = [
     "ResourceVersion",
     "OutboxEvent",
 ]
+

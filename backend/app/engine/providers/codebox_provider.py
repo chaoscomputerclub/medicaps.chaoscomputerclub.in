@@ -352,7 +352,8 @@ class CodeboxProvider(JudgeProvider):
                 total_testcases=len(testcases),
             )
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
+        async with httpx.AsyncClient(timeout=self.timeout, limits=limits) as client:
             tasks = [
                 self._execute_single_tc(
                     client=client,

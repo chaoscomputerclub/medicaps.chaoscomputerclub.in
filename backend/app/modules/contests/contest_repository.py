@@ -5,7 +5,7 @@ modules/contests/contest_repository.py — Data Persistence & Query Repository f
 
 import logging
 from typing import Any, Dict, List, Optional, Sequence, Tuple
-from sqlalchemy import delete, desc, func, select, text
+from sqlalchemy import delete, desc, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -35,7 +35,18 @@ class ContestRepository:
         with_problems: bool = False,
         with_assessment: bool = False,
     ) -> Optional[OfflineContest]:
-        stmt = select(OfflineContest).where(OfflineContest.slug == slug)
+        raw_slug = slug.strip()
+        slug_norm = raw_slug.lower().replace(" ", "-")
+        slug_title = raw_slug.lower().replace("-", " ")
+        stmt = select(OfflineContest).where(
+            or_(
+                OfflineContest.slug == raw_slug,
+                OfflineContest.slug == slug_norm,
+                func.lower(OfflineContest.title) == raw_slug.lower(),
+                func.lower(OfflineContest.title) == slug_title,
+                OfflineContest.slug.ilike(slug_norm),
+            )
+        )
         if with_problems:
             stmt = stmt.options(selectinload(OfflineContest.problems))
         if with_assessment:

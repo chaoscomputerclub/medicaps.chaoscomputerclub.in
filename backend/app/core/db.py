@@ -236,6 +236,105 @@ async def ensure_database_integrity():
                 );
             """))
 
+            # 6. Schema Evolution: Problem Authoring & Function Execution Contract Tables
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS problems (
+                    id VARCHAR(36) PRIMARY KEY,
+                    problem_index VARCHAR(5) NOT NULL DEFAULT 'A',
+                    title VARCHAR(120) NOT NULL,
+                    slug VARCHAR(80) UNIQUE NOT NULL,
+                    difficulty VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
+                    topic VARCHAR(60) NOT NULL DEFAULT 'Algorithms',
+                    points INTEGER NOT NULL DEFAULT 100,
+                    description TEXT NOT NULL,
+                    constraints TEXT,
+                    input_format TEXT,
+                    output_format TEXT,
+                    execution_mode VARCHAR(20) NOT NULL DEFAULT 'FUNCTION',
+                    function_signature JSON NOT NULL DEFAULT '{}'::json,
+                    starter_code JSON NOT NULL DEFAULT '{}'::json,
+                    time_limit DOUBLE PRECISION NOT NULL DEFAULT 2.0,
+                    memory_limit INTEGER NOT NULL DEFAULT 256,
+                    evaluation_config JSON NOT NULL DEFAULT '{}'::json,
+                    sandbox_config JSON NOT NULL DEFAULT '{}'::json,
+                    reference_solution JSON DEFAULT '{}'::json,
+                    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+                    version INTEGER NOT NULL DEFAULT 1,
+                    created_by VARCHAR(36),
+                    updated_by VARCHAR(36),
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+            """))
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS problem_versions (
+                    id VARCHAR(36) PRIMARY KEY,
+                    problem_id VARCHAR(36) NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+                    version INTEGER NOT NULL,
+                    title VARCHAR(120) NOT NULL,
+                    slug VARCHAR(80) NOT NULL,
+                    difficulty VARCHAR(20) NOT NULL,
+                    topic VARCHAR(60) NOT NULL,
+                    points INTEGER NOT NULL,
+                    description TEXT NOT NULL,
+                    constraints TEXT,
+                    input_format TEXT,
+                    output_format TEXT,
+                    execution_mode VARCHAR(20) NOT NULL,
+                    function_signature JSON NOT NULL,
+                    starter_code JSON NOT NULL,
+                    time_limit DOUBLE PRECISION NOT NULL,
+                    memory_limit INTEGER NOT NULL,
+                    evaluation_config JSON NOT NULL,
+                    sandbox_config JSON NOT NULL,
+                    reference_solution JSON,
+                    created_by VARCHAR(36),
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    CONSTRAINT uq_problem_versions_id_version UNIQUE (problem_id, version)
+                );
+            """))
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS problem_testcases (
+                    id VARCHAR(36) PRIMARY KEY,
+                    problem_id VARCHAR(36) NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+                    version INTEGER NOT NULL DEFAULT 1,
+                    testcase_id VARCHAR(50) NOT NULL,
+                    input_data JSON NOT NULL,
+                    expected_output JSON NOT NULL,
+                    explanation TEXT,
+                    weight DOUBLE PRECISION NOT NULL DEFAULT 1.0,
+                    is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
+                    "order" INTEGER NOT NULL DEFAULT 0,
+                    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                    content_hash VARCHAR(64),
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    CONSTRAINT uq_problem_testcase_id_ver UNIQUE (problem_id, version, testcase_id)
+                );
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS problem_id VARCHAR(36) REFERENCES problems(id) ON DELETE SET NULL;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS problem_version INTEGER;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS points_override INTEGER;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS execution_mode VARCHAR(20) DEFAULT 'FUNCTION';
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS function_signature JSON DEFAULT '{}'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS evaluation_config JSON DEFAULT '{}'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS sandbox_config JSON DEFAULT '{}'::json;
+            """))
+
+
             await session.commit()
         except Exception as e:
             await session.rollback()
