@@ -56,17 +56,8 @@ export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)
     .filter((n) => typeof n === "number" && !isNaN(n));
   const minVal = ratings.length > 0 ? Math.min(...ratings) : 1200;
   const maxVal = ratings.length > 0 ? Math.max(...ratings) : 1200;
-  const targetMilestone =
-    maxVal >= 2000
-      ? { y: 2200, label: "----ROOT ACCESS----", color: "#f43f5e" }
-      : maxVal >= 1800
-      ? { y: 2000, label: "----ROOT ACCESS----", color: "#f43f5e" }
-      : maxVal >= 1600
-      ? { y: 1800, label: "----ARCHITECT----", color: "#CCFF00" }
-      : { y: 1600, label: "----NETRUNNER----", color: "#38bdf8" };
-
   const yMin = Math.max(800, Math.floor((minVal - 150) / 100) * 100);
-  const yMax = Math.min(3000, Math.max(targetMilestone.y, Math.ceil((maxVal + 200) / 100) * 100));
+  const yMax = Math.min(3000, Math.ceil((maxVal + 200) / 100) * 100);
 
   return (
     <div
@@ -96,17 +87,20 @@ export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)
             tickLine={false}
           />
           <YAxis domain={[yMin, yMax]} stroke="#71717a" fontSize={11} tickLine={false} />
-          {targetMilestone && yMax >= targetMilestone.y && yMin <= targetMilestone.y && (
+          {yMax >= 1800 && yMin <= 1800 && (
             <ReferenceLine
-              y={targetMilestone.y}
-              stroke={targetMilestone.color}
+              y={1800}
+              stroke="#CCFF00"
               strokeDasharray="4 4"
-              label={{
-                value: targetMilestone.label,
-                fill: targetMilestone.color,
-                fontSize: 10,
-                fontWeight: 600,
-              }}
+              label={{ value: "MASTER", fill: "#CCFF00", fontSize: 10 }}
+            />
+          )}
+          {yMax >= 1600 && yMin <= 1600 && yMax < 1800 && (
+            <ReferenceLine
+              y={1600}
+              stroke="#38bdf8"
+              strokeDasharray="4 4"
+              label={{ value: "SPECIALIST", fill: "#38bdf8", fontSize: 10 }}
             />
           )}
           <Tooltip

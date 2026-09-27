@@ -354,9 +354,8 @@ class MemberService:
         percentile = round((1.0 - (univ_rank / max(1, all_members_count))) * 100, 1)
         percentile = max(0.0, min(99.9, percentile))
 
-        from app.services.rating_service import get_rating_tier, get_tier_label
-        tier_code = get_rating_tier(current_member.rating or 1200)
-        tier = get_tier_label(tier_code)
+        from app.services.rating_service import get_rating_tier
+        tier = get_rating_tier(current_member.rating or 1200)
 
         member_dto = to_member_public(current_member).model_dump()
         member_dto["attendance_count"] = attended
@@ -600,9 +599,8 @@ class MemberService:
             for p in tp_rows.scalars().all()
         ]
 
-        from app.services.rating_service import get_rating_tier, get_tier_label
-        tier_code = get_rating_tier(student.rating or 1200)
-        tier = get_tier_label(tier_code)
+        from app.services.rating_service import get_rating_tier
+        tier = get_rating_tier(student.rating or 1200)
         achievements = [
             {"id": "tier_badge", "title": tier, "icon": "🏆", "description": f"Reached official university tier {tier}."},
         ]
