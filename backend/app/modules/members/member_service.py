@@ -360,10 +360,10 @@ class MemberService:
         member_dto = to_member_public(current_member).model_dump()
         member_dto["attendance_count"] = attended
         member_dto["attendance_total"] = total_contests
-        member_dto["university_rank"] = univ_rank
-        member_dto["department_rank"] = dept_rank
+        member_dto["university_rank"] = univ_rank if attended > 0 else None
+        member_dto["department_rank"] = dept_rank if attended > 0 else None
         member_dto["active_members"] = all_members_count
-        member_dto["percentile"] = percentile
+        member_dto["percentile"] = percentile if (attended > 0 and univ_rank) else None
         member_dto["followers_count"] = followers_count
         member_dto["following_count"] = following_count
         member_dto["tier"] = tier

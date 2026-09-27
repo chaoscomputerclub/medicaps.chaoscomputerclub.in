@@ -93,9 +93,7 @@ export function ContestSummaryPage() {
     backendVerified.isSubmitted ||
     (isCurrentSlug && (
       registration?.status === "submitted" ||
-      registration?.assessment_taken ||
-      registration?.assessment_status === "submitted" ||
-      registration?.assessment_status === "completed"
+      registration?.status === "completed"
     ))
   );
 
@@ -141,11 +139,7 @@ export function ContestSummaryPage() {
 
         const isSub = Boolean(
           reg?.status === "submitted" ||
-          reg?.assessment_taken ||
-          reg?.assessment_status === "submitted" ||
-          reg?.assessment_status === "completed" ||
-          assessData?.session?.status === "submitted" ||
-          assessData?.session?.status === "completed"
+          reg?.status === "completed"
         );
 
         const verifiedScore = typeof reg?.assessment_score === "number" && reg.assessment_score > 0
@@ -297,9 +291,7 @@ export function ContestSummaryPage() {
                 ...prev,
                 isSubmitted: Boolean(
                   reg.status === "submitted" ||
-                  reg.assessment_taken ||
-                  reg.assessment_status === "submitted" ||
-                  reg.assessment_status === "completed"
+                  reg.status === "completed"
                 ),
                 contestStatus: reg.contest_status || "finished",
                 score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
@@ -331,9 +323,7 @@ export function ContestSummaryPage() {
               ...prev,
               isSubmitted: Boolean(
                 reg.status === "submitted" ||
-                reg.assessment_taken ||
-                reg.assessment_status === "submitted" ||
-                reg.assessment_status === "completed"
+                reg.status === "completed"
               ),
               contestStatus: reg.contest_status || "finished",
               score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
@@ -419,7 +409,7 @@ export function ContestSummaryPage() {
             </span>
             <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-zinc-900 text-[10px] font-mono text-zinc-400">
               <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
-              LIVE ASSESSMENT
+              LIVE CONTEST
             </span>
           </div>
         </div>
@@ -482,7 +472,7 @@ export function ContestSummaryPage() {
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-zinc-300">
             <span className="size-1.5 rounded-full bg-lime-400" />
-            Service: <span className="text-white">svc-contest-assessment</span>
+            Service: <span className="text-white">svc-contest-arena</span>
           </span>
           <span className="text-zinc-600 hidden sm:inline">|</span>
           <span className="hidden sm:inline text-zinc-400">
@@ -490,7 +480,7 @@ export function ContestSummaryPage() {
           </span>
           <span className="text-zinc-600 hidden md:inline">|</span>
           <span className="hidden md:inline text-zinc-400">
-            Runtime: <span className="text-zinc-200">Air-Gapped Sandbox</span>
+            Runtime: <span className="text-zinc-200">Isolated Execution Sandbox</span>
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -506,7 +496,7 @@ export function ContestSummaryPage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
-                Official Contest Assessment
+                Official Online Contest
               </span>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mt-1">
                 {contestTitle}

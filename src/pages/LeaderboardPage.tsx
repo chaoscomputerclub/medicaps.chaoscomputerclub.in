@@ -2,10 +2,7 @@ import { useState, useMemo, useEffect, useTransition } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy, UserPlus } from "lucide-react";
-import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import { LeaderboardSkeleton, LeaderboardRowSkeleton } from "@/organization/components/skeletons";
-import { useSwrData, invalidateSwrCache } from "@/lib/cache/swrCache";
-import { useRealtimeEvents } from "@/lib/realtime";
 import { useChunkedList } from "@/hooks/useChunkedList";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,6 +19,7 @@ import { resolveAvatarUrl } from "@/lib/utils";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { prefetchProfileRoute } from "@/AppRoutes";
+import { useGetUniversityLeaderboardQuery } from "@/store/api";
 
 function Spark({ data }: { data: number[] }) {
   if (!data || data.length < 2) return <span className="inline-block h-1.5 w-12 rounded bg-zinc-900" aria-hidden="true" />;
@@ -44,52 +42,11 @@ export function LeaderboardPage() {
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [isPending, startTransition] = useTransition();
 
-  const { data: rawData, loading, revalidate } = useSwrData(
-    "leaderboard:university",
-    getUniversityLeaderboardData,
-    { staleTime: 5000, persistSession: false }
-  );
+  const { data: rawData, isLoading: loading } = useGetUniversityLeaderboardQuery();
 
   const currentMember = useAppSelector((s) => s.auth.member);
   const currentMemberId = currentMember?.id;
   const followingIds = useAppSelector((s) => s.social.followingIds);
-
-  useRealtimeEvents(
-    null,
-    (event) => {
-      if (
-        event.event === "contest_concluded" ||
-        event.event === "contest_status_changed" ||
-        event.event === "contest_finished" ||
-        event.event === "leaderboard_updated" ||
-        event.event === "ratings_updated" ||
-        event.event === "assessment_finished" ||
-        event.event === "submission_evaluated" ||
-        event.event === "top30_qualified" ||
-        event.event === "member_profile_updated"
-      ) {
-        invalidateSwrCache("leaderboard:*");
-        void dispatch(fetchCurrentUserThunk());
-        void revalidate();
-      }
-    }
-  );
-
-  useEffect(() => {
-    const handleRefresh = () => {
-      invalidateSwrCache("leaderboard:*");
-      void dispatch(fetchCurrentUserThunk());
-      void revalidate();
-    };
-    window.addEventListener("contest:concluded", handleRefresh);
-    window.addEventListener("contest:cache_invalidated", handleRefresh);
-    window.addEventListener("leaderboard:invalidate", handleRefresh);
-    return () => {
-      window.removeEventListener("contest:concluded", handleRefresh);
-      window.removeEventListener("contest:cache_invalidated", handleRefresh);
-      window.removeEventListener("leaderboard:invalidate", handleRefresh);
-    };
-  }, [dispatch, revalidate]);
 
   const data = rawData || [];
 
@@ -107,7 +64,7 @@ export function LeaderboardPage() {
     delayMs: 16,
   });
 
-  if (loading && (!rawData || rawData.length === 0)) {
+  if (loading && data.length === 0) {
     return <LeaderboardSkeleton />;
   }
 
@@ -197,7 +154,7 @@ export function LeaderboardPage() {
                   // Optimistically bind to currentMember when SSE updates authSlice in real time
                   const displayRating = isYou && currentMember?.rating ? currentMember.rating : x.rating;
                   const displayPeak = isYou && currentMember?.peak_rating ? currentMember.peak_rating : x.peak_rating;
-                  const displayRank = isYou && currentMember?.university_rank ? currentMember.university_rank : x.university_rank;
+                  const displayRank = x.university_rank;
                   const attendanceCount = isYou && currentMember?.attendance_count !== undefined ? currentMember.attendance_count : (x.attendance_count ?? 0);
                   const attendanceTotal = isYou && currentMember?.attendance_total ? currentMember.attendance_total : (x.attendance_total && x.attendance_total > 0 ? x.attendance_total : Math.max(1, attendanceCount));
 

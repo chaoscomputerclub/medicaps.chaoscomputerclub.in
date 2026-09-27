@@ -138,13 +138,8 @@ export function ContestArenaPage() {
 
   const isAlreadySubmitted = Boolean(
     registration?.status === "submitted" ||
-    registration?.assessment_taken ||
-    registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed" ||
-    participation?.assessment_submitted ||
-    participation?.outcome === "submitted" ||
-    participation?.outcome === "qualified" ||
-    (participation as any)?.assessment_status === "submitted"
+    registration?.status === "completed" ||
+    participation?.outcome === "submitted"
   );
 
   useEffect(() => {

@@ -1,0 +1,21 @@
+{
+  "name": "Chaos Computer Club Medi-Caps",
+  "short_name": "CCC Medi-Caps",
+  "description": "The official competitive programming and cybersecurity arena of Medi-Caps University.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo.webp",
+      "sizes": "192x192 512x512",
+      "type": "image/webp"
+    }
+  ]
+}

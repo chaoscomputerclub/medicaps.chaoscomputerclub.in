@@ -35,30 +35,7 @@ export function contestPhase(
 ): ContestPhase {
   if (contest.status === "finished") return "complete";
   if (contest.status === "live") return "final_live";
-
-  const opens = assessmentOpensAt(contest).getTime();
-  const closes = assessmentClosesAt(contest).getTime();
-
-  const isInProgress = Boolean(
-    registration?.can_resume_assessment ||
-    (registration?.assessment_status === "in_progress" && !registration?.assessment_taken)
-  );
-
-  const isSubmitted =
-    !isInProgress &&
-    (registration?.assessment_status === "submitted" ||
-      registration?.assessment_status === "completed" ||
-      registration?.assessment_taken);
-
-  if (isSubmitted) {
-    return "assessment_submitted";
-  }
-  if (isInProgress) {
-    return "assessment_open";
-  }
-  if (now < opens) return "registration_open";
-  if (now <= closes) return "assessment_open";
-  return "assessment_closed";
+  return "registration_open";
 }
 
 export function formatCountdown(msRemaining: number): string {

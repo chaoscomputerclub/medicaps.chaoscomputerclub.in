@@ -171,7 +171,7 @@ export interface Member {
   followers_count?: number;
   following_count?: number;
   tier?: string | null;
-  university_rank?: number;
+  university_rank?: number | null;
 }
 
 export interface UpdateProfilePayload {

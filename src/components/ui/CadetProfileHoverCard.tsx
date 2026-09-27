@@ -11,8 +11,7 @@ import {
 import { resolveAvatarUrl } from "@/lib/utils";
 import { toggleFollowThunk, closeSocialDrawer } from "@/store/slices/socialSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { getStudentProfileData } from "@/organization/data/portal.functions";
-import { swrFetch } from "@/lib/cache/swrCache";
+import { useGetStudentProfileQuery } from "@/store/api";
 import { toast } from "sonner";
 import { prefetchProfileRoute } from "@/AppRoutes";
 
@@ -106,37 +105,19 @@ export function CadetProfileHoverCard({
   const followingIds = useAppSelector((s) => s.social.followingIds);
   const actionPendingId = useAppSelector((s) => s.social.actionPendingId);
 
-  const [fetchedData, setFetchedData] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [isUnfollowHovered, setIsUnfollowHovered] = useState(false);
 
   // Check if we need to fetch additional profile details on hover
   const hasFullData =
     Boolean(profile?.rating !== undefined && profile?.university_rank !== undefined);
 
-  const fetchProfileDetails = useCallback(async () => {
-    if (!cleanHandle || hasFullData || fetchedData) return;
-    setIsLoading(true);
-    try {
-      const data = await swrFetch(
-        `student:profile:${cleanHandle}`,
-        () => getStudentProfileData(cleanHandle),
-        { ttl: 5 * 60 * 1000, staleTime: 60 * 1000 }
-      );
-      if (data) {
-        setFetchedData(data);
-      }
-    } catch (err) {
-      console.warn("Failed to fetch student profile on hover:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cleanHandle, hasFullData, fetchedData]);
+  const { data: fetchedData, isLoading } = useGetStudentProfileQuery(cleanHandle, {
+    skip: !isOpen || hasFullData || !cleanHandle,
+  });
 
   const handleOpenChange = (open: boolean) => {
-    if (open && !hasFullData && !fetchedData) {
-      fetchProfileDetails();
-    }
+    setIsOpen(open);
   };
 
   if (!cleanHandle) {
@@ -145,7 +126,7 @@ export function CadetProfileHoverCard({
 
   // Merge profile prop with any fetched data
   const memberObj = fetchedData?.member;
-  const ratingHistory = fetchedData?.ratingHistory || fetchedData?.history || [];
+  const ratingHistory = fetchedData?.ratingHistory || (fetchedData as any)?.history || [];
 
   const effectiveId = profile?.id || memberObj?.id;
   const fullName = profile?.full_name ?? memberObj?.full_name ?? null;
@@ -157,7 +138,7 @@ export function CadetProfileHoverCard({
   const attendanceCount =
     profile?.attendance_count ??
     memberObj?.attendance_count ??
-    (fetchedData?.battles?.length || 0);
+    ((fetchedData as any)?.battles?.length || 0);
 
   const ratingsList =
     profile?.ratings ??

@@ -78,9 +78,9 @@ export function GuestGuard() {
   const location = useLocation();
   const dispatch = useAppDispatch();
 
-  // If already authenticated, redirect immediately
+  // If already authenticated, redirect immediately to protected dashboard
   if (isAuthenticated()) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Only check silent refresh on /auth if past session indicators exist in storage
@@ -127,7 +127,7 @@ export function GuestGuard() {
   }
 
   if (isAuthenticated()) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;

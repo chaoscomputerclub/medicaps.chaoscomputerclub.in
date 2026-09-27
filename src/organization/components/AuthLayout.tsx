@@ -121,12 +121,26 @@ export function AuthLayout({
       </div>
 
       {/* ── Viewport bottom footer ── */}
-      <footer className="mt-10">
+      <footer className="mt-10 flex items-center gap-3 text-xs text-zinc-500 font-mono">
+        <Link
+          to="/privacy"
+          className="transition-colors hover:text-zinc-300"
+        >
+          Privacy Policy
+        </Link>
+        <span>•</span>
         <Link
           to="/terms"
-          className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+          className="transition-colors hover:text-zinc-300"
         >
           Terms of Service
+        </Link>
+        <span>•</span>
+        <Link
+          to="/data-deletion"
+          className="transition-colors hover:text-zinc-300"
+        >
+          Data Deletion
         </Link>
       </footer>
     </main>

@@ -35,14 +35,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
 import { FaLinkedinIn } from "react-icons/fa";
 
-import {
-  getMemberProfileData,
-  getStudentProfileData,
-  getRatingDistribution,
-} from "@/organization/data/portal.functions";
 import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
-import { useSwrData } from "@/lib/cache/swrCache";
+import {
+  useGetFullProfileQuery,
+  useGetStudentProfileQuery,
+  useGetRatingDistributionQuery,
+} from "@/store/api";
 import {
   AlertDialog,
   AlertDialogPopup,
@@ -83,14 +82,11 @@ export function ProfilePage() {
 
   const {
     data: ownProfileData,
-    loading: ownLoading,
-    revalidate: revalidateOwnProfile,
-    mutate: mutateOwnProfile,
-  } = useSwrData(
-    isViewingSelf && isAuthenticated() ? "member:profile:full" : null,
-    () => getMemberProfileData(true),
-    { ttl: 2 * 60 * 1000, enabled: isViewingSelf && isAuthenticated() }
-  );
+    isLoading: ownLoading,
+    refetch: revalidateOwnProfile,
+  } = useGetFullProfileQuery(undefined, {
+    skip: !isViewingSelf || !isAuthenticated(),
+  });
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -112,19 +108,7 @@ export function ProfilePage() {
     setIsUploadingAvatar(true);
     const tid = toast.loading("Uploading photo…");
     try {
-      const res = await dispatch(uploadAvatarThunk(file)).unwrap();
-      if (mutateOwnProfile) {
-        mutateOwnProfile((prev: any) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            member: {
-              ...prev.member,
-              avatar_url: res.avatar_url,
-            },
-          };
-        });
-      }
+      await dispatch(uploadAvatarThunk(file)).unwrap();
       toast.success("Profile photo updated!", { id: tid });
       await dispatch(fetchCurrentUserThunk());
       if (revalidateOwnProfile) await revalidateOwnProfile();
@@ -140,18 +124,6 @@ export function ProfilePage() {
     const tid = toast.loading("Removing photo…");
     try {
       await dispatch(removeAvatarThunk()).unwrap();
-      if (mutateOwnProfile) {
-        mutateOwnProfile((prev: any) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            member: {
-              ...prev.member,
-              avatar_url: null,
-            },
-          };
-        });
-      }
       toast.success("Profile photo removed", { id: tid });
       await dispatch(fetchCurrentUserThunk());
       if (revalidateOwnProfile) await revalidateOwnProfile();
@@ -164,19 +136,13 @@ export function ProfilePage() {
 
   const {
     data: studentProfileData,
-    loading: studentLoading,
-    revalidate: revalidateStudentProfile,
-  } = useSwrData(
-    `student:profile:${targetHandle}`,
-    () => getStudentProfileData(targetHandle),
-    { ttl: 5 * 60 * 1000, enabled: !isViewingSelf }
-  );
+    isLoading: studentLoading,
+    refetch: revalidateStudentProfile,
+  } = useGetStudentProfileQuery(targetHandle, {
+    skip: isViewingSelf || !targetHandle,
+  });
 
-  const { data: distribution, loading: distLoading } = useSwrData(
-    "leaderboard:distribution",
-    () => getRatingDistribution(),
-    { ttl: 10 * 60 * 1000 }
-  );
+  const { data: distribution, isLoading: distLoading } = useGetRatingDistributionQuery();
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -634,7 +600,7 @@ export function ProfilePage() {
         <div>
           <RatingDistributionCard
             member={m}
-            distribution={distribution}
+            distribution={distribution || null}
             loading={distLoading && !distribution}
           />
         </div>

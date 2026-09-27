@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { contestApi } from "@/features/contest/api";
-import { useSwrData } from "@/lib/cache/swrCache";
+import {
+  useGetContestRankingQuery,
+  useGetContestDetailQuery,
+  useGetContestRegistrationQuery,
+} from "@/store/api";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { ArrowLeft, Award, Clock, Crown, Lock, Search, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,22 +22,19 @@ export function ContestResultsPage() {
   const query = searchParams.get("query") || "";
   const [deptFilter, setDeptFilter] = useState<string>("all");
 
-  const { data: rankingData, loading: rankLoading, revalidate: revalidateRanking } = useSwrData<AssessmentRanking>(
-    `contest:ranking:${contestSlug}`,
-    () => contestApi.ranking(contestSlug),
-    { ttl: 30 * 1000 }
+  const { data: rankingData, isLoading: rankLoading, refetch: revalidateRanking } = useGetContestRankingQuery(
+    contestSlug,
+    { skip: !contestSlug }
   );
 
-  const { data: contest, loading: contestLoading, revalidate: revalidateContest } = useSwrData(
-    `contest:detail:${contestSlug}`,
-    () => contestApi.detail(contestSlug),
-    { ttl: 2 * 60 * 1000 }
+  const { data: contest, isLoading: contestLoading, refetch: revalidateContest } = useGetContestDetailQuery(
+    contestSlug,
+    { skip: !contestSlug }
   );
 
-  const { data: registration, revalidate: revalidateRegistration } = useSwrData(
-    `contest:registration:${contestSlug}`,
-    () => contestApi.registrationStatus(contestSlug),
-    { ttl: 2 * 60 * 1000 }
+  const { data: registration, refetch: revalidateRegistration } = useGetContestRegistrationQuery(
+    contestSlug,
+    { skip: !contestSlug }
   );
 
   useRealtimeEvents(

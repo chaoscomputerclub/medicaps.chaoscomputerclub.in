@@ -18,62 +18,31 @@ import { SectionHeader, PageHeader } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyContestsSkeleton } from "@/organization/components/skeletons";
-import { useSwrData } from "@/lib/cache/swrCache";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
-import { useRealtimeEvents } from "@/lib/realtime";
+import { useAppSelector } from "@/store/hooks";
+import { useGetMyParticipationsQuery } from "@/store/api";
 
 export function MyContestsPage() {
-  const dispatch = useAppDispatch();
-  const { myParticipations, isLoadingParticipations } = useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
-
-  const { data: rawData, loading: rawLoading } = useSwrData(
-    "system:contests:history",
-    () => contestSystemService.getHistory(),
-    { ttl: 5 * 60 * 1000, staleTime: 30000, persistSession: true }
-  );
-
-  useEffect(() => {
-    if (member && myParticipations.length === 0) {
-      void dispatch(fetchMyParticipationsThunk());
-    }
-  }, [member, myParticipations.length, dispatch]);
-
-  useRealtimeEvents(null, (event) => {
-    if (
-      event.event === "contest_registered" ||
-      event.event === "contest_unregistered" ||
-      event.event === "contest_status_changed" ||
-      event.event === "contest_concluded" ||
-      event.event === "contest_finished" ||
-      event.event === "top30_qualified" ||
-      event.event === "assessment_finished"
-    ) {
-      if (member) {
-        void dispatch(fetchMyParticipationsThunk(true));
-      }
-    }
+  const { data: myParticipationsData, isLoading: loading } = useGetMyParticipationsQuery(undefined, {
+    skip: !member,
   });
 
-  const data = myParticipations && myParticipations.length > 0 ? myParticipations : ((rawData as any[]) || []);
-  const loading = rawLoading && data.length === 0;
+  const data = myParticipationsData ?? [];
   const [filter, setFilter] = useState<"all" | "registered" | "live" | "completed">("all");
   const [isPending, startTransition] = useTransition();
 
-  if (loading && !rawData) {
+  if (loading && data.length === 0) {
     return <MyContestsSkeleton />;
   }
 
-  const qualifiedCount = data.filter((x) => x.outcome === "qualified").length;
   const registeredCount = data.filter((x) => x.status === "upcoming" || x.outcome === "registered").length;
   const liveCount = data.filter((x) => x.status === "live" || x.outcome === "live").length;
-  const completedCount = data.filter((x) => x.status === "finished" || x.outcome === "qualified" || x.outcome === "not_qualified").length;
+  const completedCount = data.filter((x) => x.status === "finished" || (x as any).outcome === "submitted" || (x as any).status === "submitted" || (x as any).status === "completed" || (x as any).is_submitted || x.outcome === "qualified" || x.outcome === "not_qualified").length;
 
   const filteredContests = data.filter((item) => {
     if (filter === "registered") return item.status === "upcoming" || item.outcome === "registered";
     if (filter === "live") return item.status === "live" || item.outcome === "live";
-    if (filter === "completed") return item.status === "finished" || item.outcome === "qualified" || item.outcome === "not_qualified";
+    if (filter === "completed") return item.status === "finished" || (item as any).outcome === "submitted" || (item as any).status === "submitted" || (item as any).status === "completed" || (item as any).is_submitted || item.outcome === "qualified" || item.outcome === "not_qualified";
     return true;
   });
 
@@ -154,9 +123,15 @@ export function MyContestsPage() {
         ) : (
           <div className="divide-y divide-white/6">
             {filteredContests.map((c) => {
+              const isAttemptSubmitted = Boolean(
+                (c as any).is_submitted ||
+                c.outcome === "submitted" ||
+                (c as any).status === "submitted" ||
+                (c as any).status === "completed"
+              );
               const isUpcoming = c.status === "upcoming" || c.outcome === "registered";
               const isLive = c.status === "live" || c.outcome === "live";
-              const isQualified = c.outcome === "qualified";
+              const isCompleted = c.status === "finished" || isAttemptSubmitted;
               const isPending = c.outcome === "pending";
 
               return (
@@ -167,7 +142,7 @@ export function MyContestsPage() {
                   {/* Left: Details */}
                   <div className="flex items-start gap-3.5">
                     <div className="shrink-0 mt-0.5">
-                      {isQualified ? (
+                      {isCompleted ? (
                         <div className="size-9 rounded-md bg-lime-400/10 border border-lime-400/30 flex items-center justify-center text-lime-400">
                           <CheckCircle2 size={18} />
                         </div>
@@ -195,10 +170,10 @@ export function MyContestsPage() {
                         <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-white/8">
                           {c.season}
                         </span>
-                        {isQualified && (
+                        {isCompleted && (
                           <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
                             <ShieldCheck size={10} />
-                            Ranked
+                            Completed
                           </span>
                         )}
                         {isUpcoming && (
@@ -291,18 +266,18 @@ export function MyContestsPage() {
                     </dl>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {isLive && !c.assessment_submitted && c.score === null ? (
+                      {isLive && !isAttemptSubmitted ? (
                         <Button
                           asChild
                           variant="outline"
                           size="sm"
                         >
-                          <Link to={`/contests/${c.contest_slug}/lobby`}>
+                          <Link to={`/contests/${c.contest_slug}/arena`}>
                             <Play className="w-3 h-3 fill-current" />
-                            <span>Assessment</span>
+                            <span>Enter Arena</span>
                           </Link>
                         </Button>
-                      ) : isUpcoming && !c.assessment_submitted ? (
+                      ) : isUpcoming && !isAttemptSubmitted ? (
                         <Button
                           variant="outline"
                           size="sm"

@@ -7,12 +7,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CalendarClock, Flag, Play, Trophy } from "lucide-react";
 import { contestApi } from "./api";
-import {
-  cadenceLabel,
-  formatWhen,
-} from "./lifecycle";
+import { cadenceLabel, formatWhen } from "./lifecycle";
 import type { ContestSummary } from "./types";
 import { ContestActivityFeedSkeleton } from "@/organization/components/skeletons";
+import { useGetContestsQuery } from "@/store/api";
 
 type FeedEvent = {
   key: string;
@@ -77,24 +75,7 @@ function eventsFor(contest: ContestSummary): FeedEvent[] {
 }
 
 export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
-  const [contests, setContests] = useState<ContestSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    contestApi.list()
-      .then((data) => {
-        if (active) {
-          setContests(data || []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load contest feed:", err);
-        if (active) setLoading(false);
-      });
-    return () => { active = false; };
-  }, []);
+  const { data: contests = [], isLoading: loading } = useGetContestsQuery();
 
   const now = Date.now();
 

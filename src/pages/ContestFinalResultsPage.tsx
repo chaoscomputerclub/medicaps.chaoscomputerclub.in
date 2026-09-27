@@ -5,8 +5,10 @@
 
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { contestApi } from "@/features/contest/api";
-import { useSwrData } from "@/lib/cache/swrCache";
+import {
+  useGetContestFinalStandingsQuery,
+  useGetContestDetailQuery,
+} from "@/store/api";
 import { useRealtimeEvents } from "@/lib/realtime";
 
 import { ArrowLeft, Award, Medal, Trophy } from "lucide-react";
@@ -32,16 +34,14 @@ import { ContestFinalResultsSkeleton } from "@/organization/components/skeletons
 export function ContestFinalResultsPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
 
-  const { data: finalRows, loading: rowsLoading, revalidate: revalidateRows } = useSwrData<FinalStandingRow[]>(
-    `contest:final_standings:${contestSlug}`,
-    () => contestApi.finalStandings(contestSlug),
-    { ttl: 30 * 1000 }
+  const { data: finalRows, isLoading: rowsLoading, refetch: revalidateRows } = useGetContestFinalStandingsQuery(
+    contestSlug,
+    { skip: !contestSlug }
   );
 
-  const { data: contest, loading: contestLoading, revalidate: revalidateContest } = useSwrData(
-    `contest:detail:${contestSlug}`,
-    () => contestApi.detail(contestSlug),
-    { ttl: 2 * 60 * 1000 }
+  const { data: contest, isLoading: contestLoading, refetch: revalidateContest } = useGetContestDetailQuery(
+    contestSlug,
+    { skip: !contestSlug }
   );
 
   useRealtimeEvents(

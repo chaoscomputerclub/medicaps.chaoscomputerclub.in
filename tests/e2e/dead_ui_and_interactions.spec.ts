@@ -9,6 +9,7 @@ test.describe('Dead-UI & Interactive Element Heuristic Audit', () => {
 
   test('Home Page: Verify all primary navigation and action buttons are responsive', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('main').waitFor({ state: 'visible', timeout: 10000 });
     const detector = new DeadUIDetector(page);
 
     // Identify interactive buttons on the home landing

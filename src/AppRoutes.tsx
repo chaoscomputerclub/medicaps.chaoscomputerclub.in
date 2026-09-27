@@ -25,19 +25,17 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthPage } from "./pages/AuthPage";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
+import type { Member } from "@/lib/auth";
 import {
   fetchContestDetailThunk,
-  fetchContestsThunk,
   fetchCampusPassThunk,
-  fetchMyParticipationsThunk,
   removeContestFromState,
   applyRealtimeEvent,
 } from "@/store/slices/contestSlice";
 import { syncSocialCounts, syncCadetSocialCounts } from "@/store/slices/socialSlice";
-import { useRealtimeEvents } from "@/lib/realtime";
 import { invalidateSwrCache } from "@/lib/cache/swrCache";
-
+import { useRealtimeSync } from "@/realtime";
+import type { ServerEventEnvelope } from "@/realtime/eventTypes";
 const CONTEST_MUTATION_EVENTS = [
   "contest_created",
   "contest_updated",
@@ -60,93 +58,95 @@ const CONTEST_MUTATION_EVENTS = [
 function ContestRealtimeSynchronizer() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const currentContestSlugRef = React.useRef<string | undefined>(undefined);
+  const currentMemberRef = React.useRef<Member | null>(null);
+
   const currentContestSlug = useAppSelector((state) => state.contest.currentContest?.slug);
   const currentMember = useAppSelector((state) => state.auth.member);
 
-  useRealtimeEvents(
-    null,
-    (event) => {
-      if (!CONTEST_MUTATION_EVENTS.includes(event.event)) return;
+  // Keep refs in sync so the stable event handler always sees the latest values
+  currentContestSlugRef.current = currentContestSlug;
+  currentMemberRef.current = currentMember as any;
 
-      const contestSlug = event.contest_slug ?? event.data?.contest_slug;
+  useEffect(() => {
+    /**
+     * Listen to ccc:realtime_event — the window bridge already broadcast by globalEventRouter.route().
+     * This guarantees ZERO additional EventSource connections; RTK Query cache invalidation
+     * from the router handles data refetching. This synchronizer handles only legacy Redux
+     * slice mutations, SWR cache invalidation, social count sync, and navigation side-effects
+     * that RTK Query cannot express as tag invalidations.
+     */
+    const handleCccEvent = (e: Event) => {
+      const event = (e as CustomEvent).detail as ServerEventEnvelope;
+      if (!event?.event) return;
 
-      // 1. Immediately apply real-time mutation to synchronous Redux state
-      dispatch(applyRealtimeEvent({ event, currentMember }));
+      const eventName = event.event;
+      if (!CONTEST_MUTATION_EVENTS.includes(eventName)) return;
 
-      // 2. Refresh global contests list and user participation history
-      void dispatch(fetchContestsThunk(true));
-      if (currentMember) {
-        void dispatch(fetchMyParticipationsThunk(true));
+      const contestSlug = event.contest_slug ?? (event.data as any)?.contest_slug ?? (event.payload as any)?.contest_slug;
+      const member = currentMemberRef.current;
+
+      // 1. Apply real-time mutation to synchronous Redux contestSlice state
+      dispatch(applyRealtimeEvent({ event: event as any, currentMember: member }));
+
+      if (member) {
+        // 2. Sync SWR cache patterns that RTK Query doesn't cover
         if (
-          event.event === "contest_concluded" ||
-          event.event === "contest_finished" ||
-          event.event === "contest_status_changed" ||
-          event.event === "assessment_finished" ||
-          event.event === "leaderboard_updated" ||
-          event.event === "ratings_updated" ||
-          event.event === "member_profile_updated"
+          eventName === "contest_concluded" ||
+          eventName === "contest_finished" ||
+          eventName === "contest_status_changed" ||
+          eventName === "assessment_finished" ||
+          eventName === "leaderboard_updated" ||
+          eventName === "ratings_updated" ||
+          eventName === "member_profile_updated"
         ) {
           invalidateSwrCache("leaderboard:*");
           invalidateSwrCache("student:profile:*");
           invalidateSwrCache("member:profile:*");
-          void dispatch(fetchCurrentUserThunk());
 
-          if (event.event === "member_profile_updated" && event.data) {
+          // 3. Social count sync for profile events (RTK Query can't dispatch Redux socialSlice)
+          if (eventName === "member_profile_updated" && event.data) {
+            const d = event.data as any;
             const isTargetMe =
-              (event.data.member_id && currentMember?.id === event.data.member_id) ||
-              (event.data.handle && currentMember?.handle?.toLowerCase() === event.data.handle.toLowerCase());
+              (d.member_id && member.id === d.member_id) ||
+              (d.handle && member.handle?.toLowerCase() === d.handle.toLowerCase());
             const isFollowerMe =
-              (event.data.follower_id && currentMember?.id === event.data.follower_id) ||
-              (event.data.follower_handle && currentMember?.handle?.toLowerCase() === event.data.follower_handle.toLowerCase());
+              (d.follower_id && member.id === d.follower_id) ||
+              (d.follower_handle && member.handle?.toLowerCase() === d.follower_handle.toLowerCase());
 
-            if (isTargetMe && typeof event.data.followers_count === "number") {
-              dispatch(
-                syncSocialCounts({
-                  followersCount: event.data.followers_count,
-                  followingCount: event.data.following_count,
-                })
-              );
-            } else if (event.data.handle || event.data.member_id) {
-              const targetKey = event.data.handle || event.data.member_id;
-              dispatch(
-                syncCadetSocialCounts({
-                  handleOrId: targetKey,
-                  followersCount: event.data.followers_count,
-                  followingCount: event.data.following_count,
-                })
-              );
+            if (isTargetMe && typeof d.followers_count === "number") {
+              dispatch(syncSocialCounts({ followersCount: d.followers_count, followingCount: d.following_count }));
+            } else if (d.handle || d.member_id) {
+              dispatch(syncCadetSocialCounts({ handleOrId: d.handle || d.member_id, followersCount: d.followers_count, followingCount: d.following_count }));
             }
-
-            if (isFollowerMe && typeof event.data.my_following_count === "number") {
-              dispatch(
-                syncSocialCounts({
-                  followingCount: event.data.my_following_count,
-                })
-              );
+            if (isFollowerMe && typeof d.my_following_count === "number") {
+              dispatch(syncSocialCounts({ followingCount: d.my_following_count }));
             }
           }
         }
       }
 
-      // 3. Handle route or detail sync if user is currently viewing the affected contest
-      if (!contestSlug || contestSlug !== currentContestSlug) return;
-      if (event.event === "contest_deleted") {
+      // 4. Navigation side-effects for currently-viewed contest
+      const activeSlug = currentContestSlugRef.current;
+      if (!contestSlug || contestSlug !== activeSlug) return;
+      if (eventName === "contest_deleted") {
         dispatch(removeContestFromState(contestSlug));
         navigate("/contests", { replace: true });
         return;
       }
       void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
       if (
-        event.event === "pass_checked_in" ||
-        event.event === "top30_qualified" ||
-        event.event === "contest_status_changed"
+        eventName === "pass_checked_in" ||
+        eventName === "top30_qualified" ||
+        eventName === "contest_status_changed"
       ) {
         void dispatch(fetchCampusPassThunk(contestSlug));
       }
-    },
-    CONTEST_MUTATION_EVENTS,
-    true
-  );
+    };
+
+    window.addEventListener("ccc:realtime_event", handleCccEvent);
+    return () => window.removeEventListener("ccc:realtime_event", handleCccEvent);
+  }, [dispatch, navigate]); // dispatch and navigate are stable refs
 
   return null;
 }
@@ -171,9 +171,20 @@ export const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDeta
 export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
 export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
 export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "TermsPage");
+export const LandingHomePage = lazyWithRetry(() => import("./pages/LandingHomePage"), "LandingHomePage");
+export const PrivacyPage = lazyWithRetry(() => import("./pages/PrivacyPage"), "PrivacyPage");
+export const DataDeletionPage = lazyWithRetry(() => import("./pages/DataDeletionPage"), "DataDeletionPage");
+export const AboutPage = lazyWithRetry(() => import("./pages/AboutPage"), "AboutPage");
+export const ContactPage = lazyWithRetry(() => import("./pages/ContactPage"), "ContactPage");
 
 export const routePreloaders: Record<string, () => Promise<any>> = {
-  "/": () => DashboardPage.preload(),
+  "/": () => LandingHomePage.preload(),
+  "/privacy": () => PrivacyPage.preload(),
+  "/terms": () => TermsPage.preload(),
+  "/data-deletion": () => DataDeletionPage.preload(),
+  "/about": () => AboutPage.preload(),
+  "/contact": () => ContactPage.preload(),
+  "/dashboard": () => DashboardPage.preload(),
   "/contests": () => ContestsHubPage.preload(),
   "/my-contests": () => MyContestsPage.preload(),
   "/leaderboard": () => LeaderboardPage.preload(),
@@ -187,11 +198,11 @@ export const routePreloaders: Record<string, () => Promise<any>> = {
  * instantly from cache instead of showing a skeleton on first visit.
  */
 const routeDataPrefetchers: Record<string, () => void> = {
-  "/contests": () => {
+  "/dashboard": () => {
+    getMemberProfileData().catch(() => {});
     getPublicPortalData().catch(() => {});
   },
-  "/": () => {
-    getMemberProfileData().catch(() => {});
+  "/contests": () => {
     getPublicPortalData().catch(() => {});
   },
   "/leaderboard": () => {
@@ -273,19 +284,71 @@ function ContestResultsRedirect() {
 
 function PortalLegacyRedirect() {
   const location = useLocation();
-  const target = location.pathname.replace(/^\/portal/, "") || "/";
+  const target = location.pathname.replace(/^\/portal/, "") || "/dashboard";
   return <Navigate to={`${target}${location.search}${location.hash}`} replace />;
 }
 
 export function AppRoutes() {
   // Mount the global delegated prefetch listener once — covers every <a> in the app
   usePrefetchOnIntent();
+  // Centralized Application-Level Realtime SSE Connection & RTK Query Cache Sync
+  useRealtimeSync();
 
   return (
     <>
       <ContestRealtimeSynchronizer />
       <Routes>
-      {/* Guest-only Authentication Route — immediate, zero secondary network waterfall */}
+      {/* ── Public Informational & Legal Routes (Accessible without Authentication) ── */}
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <LandingHomePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <PrivacyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/data-deletion"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <DataDeletionPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <AboutPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <ContactPage />
+          </Suspense>
+        }
+      />
+
+      {/* Guest-only Authentication Route — redirects to /dashboard if already logged in */}
       <Route element={<GuestGuard />}>
         <Route
           path="/auth"
@@ -297,30 +360,23 @@ export function AppRoutes() {
         />
       </Route>
 
-      {/* Standalone Legal & Governance Pages (No navbar, no shell) */}
-      <Route
-        path="/terms"
-        element={
-          <Suspense fallback={<div className="min-h-screen bg-black" />}>
-            <TermsPage />
-          </Suspense>
-        }
-      />
-
       {/* Backward-Compatible Redirects for /portal */}
-      <Route path="/portal" element={<Navigate to="/" replace />} />
+      <Route path="/portal" element={<Navigate to="/dashboard" replace />} />
       <Route path="/portal/*" element={<PortalLegacyRedirect />} />
 
-      {/* Strictly Protected Inner Platform Routes Mounted on Root (/) */}
+      {/* Direct Shortlink for Profiles: /u/:handle */}
+      <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
+
+      {/* ── Strictly Protected Inner Platform Routes (Require Active Authentication) ── */}
       <Route element={<AuthGuard />}>
         {/* Assessment Workspace route redirected to contest flow */}
         <Route path="/assessments/:contestSlug" element={<ContestRedirect />} />
 
-        {/* Root Shell Route — Statically mounted shell with independent route suspenses */}
-        <Route path="/" element={<PortalShell />}>
-          {/* Dashboard index */}
+        {/* Portal Shell Route — Layout shell wrapping all authenticated member workspace views */}
+        <Route element={<PortalShell />}>
+          {/* Member Dashboard */}
           <Route
-            index
+            path="/dashboard"
             element={
               <Suspense fallback={<DashboardSkeleton />}>
                 <DashboardPage />
@@ -330,7 +386,7 @@ export function AppRoutes() {
 
           {/* Contests Hub & Details */}
           <Route
-            path="contests"
+            path="/contests"
             element={
               <Suspense fallback={<ContestsHubSkeleton />}>
                 <ContestsHubPage />
@@ -338,7 +394,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug"
+            path="/contests/:contestSlug"
             element={
               <Suspense fallback={<ContestDetailSkeleton />}>
                 <ContestOverviewPage />
@@ -346,7 +402,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug/lobby"
+            path="/contests/:contestSlug/lobby"
             element={
               <Suspense fallback={<ContestLobbySkeleton />}>
                 <ContestLobbyPage />
@@ -354,7 +410,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug/problems/:problemSlug"
+            path="/contests/:contestSlug/problems/:problemSlug"
             element={
               <Suspense fallback={<AssessmentStudioSkeleton />}>
                 <ContestArenaPage />
@@ -362,7 +418,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug/problems"
+            path="/contests/:contestSlug/problems"
             element={
               <Suspense fallback={<AssessmentStudioSkeleton />}>
                 <ContestArenaPage />
@@ -370,7 +426,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug/arena"
+            path="/contests/:contestSlug/arena"
             element={
               <Suspense fallback={<AssessmentStudioSkeleton />}>
                 <ContestArenaPage />
@@ -378,7 +434,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug/summary"
+            path="/contests/:contestSlug/summary"
             element={
               <Suspense fallback={<ContestSummarySkeleton />}>
                 <ContestSummaryPage />
@@ -386,19 +442,19 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="contests/:contestSlug/submit"
+            path="/contests/:contestSlug/submit"
             element={
               <Suspense fallback={<ContestSummarySkeleton />}>
                 <ContestSummaryPage />
               </Suspense>
             }
           />
-          <Route path="contests/:contestSlug/assessment" element={<ContestRedirect />} />
-          <Route path="contests/:contestSlug/offline" element={<ContestResultsRedirect />} />
-          <Route path="contests/:contestSlug/qualified" element={<ContestResultsRedirect />} />
-          <Route path="contests/:contestSlug/final-results" element={<ContestResultsRedirect />} />
+          <Route path="/contests/:contestSlug/assessment" element={<ContestRedirect />} />
+          <Route path="/contests/:contestSlug/offline" element={<ContestResultsRedirect />} />
+          <Route path="/contests/:contestSlug/qualified" element={<ContestResultsRedirect />} />
+          <Route path="/contests/:contestSlug/final-results" element={<ContestResultsRedirect />} />
           <Route
-            path="contests/:contestSlug/results"
+            path="/contests/:contestSlug/results"
             element={
               <Suspense fallback={<ContestResultsSkeleton />}>
                 <ContestResultsPage />
@@ -408,7 +464,7 @@ export function AppRoutes() {
 
           {/* My Contests Ledger */}
           <Route
-            path="my-contests"
+            path="/my-contests"
             element={
               <Suspense fallback={<MyContestsSkeleton />}>
                 <MyContestsPage />
@@ -418,7 +474,7 @@ export function AppRoutes() {
 
           {/* University Leaderboard */}
           <Route
-            path="leaderboard"
+            path="/leaderboard"
             element={
               <Suspense fallback={<LeaderboardSkeleton />}>
                 <LeaderboardPage />
@@ -428,7 +484,7 @@ export function AppRoutes() {
 
           {/* Problem Archive & Editorials */}
           <Route
-            path="problems"
+            path="/problems"
             element={
               <Suspense fallback={<ProblemArchiveSkeleton />}>
                 <ProblemArchivePage />
@@ -436,7 +492,7 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="problems/:problemSlug"
+            path="/problems/:problemSlug"
             element={
               <Suspense fallback={<ProblemDetailSkeleton />}>
                 <ProblemDetailPage />
@@ -445,11 +501,11 @@ export function AppRoutes() {
           />
 
           {/* Deprecated Proof Verification route redirects to Dashboard */}
-          <Route path="verify" element={<Navigate to="/" replace />} />
+          <Route path="/verify" element={<Navigate to="/dashboard" replace />} />
 
           {/* Member & Student Profiles */}
           <Route
-            path="profile"
+            path="/profile"
             element={
               <Suspense fallback={<ProfileSkeleton />}>
                 <ProfilePage />
@@ -457,18 +513,17 @@ export function AppRoutes() {
             }
           />
           <Route
-            path="profile/:handle"
+            path="/profile/:handle"
             element={
               <Suspense fallback={<ProfileSkeleton />}>
                 <ProfilePage />
               </Suspense>
             }
           />
-          <Route path="u/:handle" element={<ProfileHandleRedirect />} />
 
           {/* Account & Security Settings */}
           <Route
-            path="settings"
+            path="/settings"
             element={
               <Suspense fallback={<SettingsSkeleton />}>
                 <SettingsPage />
@@ -478,10 +533,7 @@ export function AppRoutes() {
         </Route>
       </Route>
 
-      {/* Direct Shortlink for Profiles: /u/:handle */}
-      <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
-
-      {/* Catch-all fallback to root */}
+      {/* Catch-all fallback to public homepage */}
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

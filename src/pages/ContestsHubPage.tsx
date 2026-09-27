@@ -26,11 +26,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestsThunk, registerContestThunk, unregisterContestThunk, fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
-import { contestApi } from "@/features/contest/api";
-import { invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
+import { registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
+import {
+  useGetContestsQuery,
+  useGetUniversityLeaderboardQuery,
+  useGetMyParticipationsQuery,
+} from "@/store/api";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
-import { getUniversityLeaderboardData } from "@/organization/data/portal.functions";
 import type { LeaderboardEntry } from "@/organization/data/types";
 import { ContestsHubSkeleton } from "@/organization/components/skeletons";
 import { toast } from "sonner";
@@ -156,76 +158,40 @@ function ContestCountdownBadge({
 export function ContestsHubPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const {
-    contests: rawContests,
-    isLoading,
-    myParticipations,
-    isLoadingParticipations,
-    registeringSlugs,
-  } = useAppSelector((state) => state.contest);
-  const cachedContests = (globalSwrStore.get<any>("contests:list")?.data ?? []) as ContestSummary[];
-  const contests = rawContests && rawContests.length > 0 ? rawContests : cachedContests;
+  const registeringSlugs = useAppSelector((state) => state.contest.registeringSlugs);
   const member = useAppSelector((state) => state.auth.member);
+
+  // Centralized RTK Query Server State
+  const { data: contestsData, isLoading, refetch: refetchContests } = useGetContestsQuery();
+  const { data: leadersData, refetch: refetchLeaders } = useGetUniversityLeaderboardQuery();
+  const {
+    data: participationsData,
+    isLoading: isLoadingParticipations,
+    refetch: refetchParticipations,
+  } = useGetMyParticipationsQuery(undefined, {
+    skip: !member,
+  });
+
+  const contests = contestsData ?? [];
+  const leaders = leadersData ?? [];
+  const myParticipations = participationsData ?? [];
 
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") as "past" | "my") || "past";
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
   const deferredSearchQuery = useDeferredValue(searchQuery);
-  const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 8;
 
-  const refreshHubData = useCallback(
-    (force = false) => {
-      if (force) {
-        invalidateSwrCache("contests:*");
-        invalidateSwrCache("contest:*");
-        invalidateSwrCache("passes:*");
-        invalidateSwrCache("system:contests:*");
-      }
-      void dispatch(fetchContestsThunk(force));
-      void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
-      if (member) {
-        void dispatch(fetchMyParticipationsThunk(force));
-      }
-    },
-    [dispatch, member]
-  );
-
-  // Real-time synchronization across clients, assessment finishes, and contest status updates
-  useRealtimeEvents(
-    undefined,
-    (event) => {
-      if (
-        event.event === "contest_status_changed" ||
-        event.event === "contest_concluded" ||
-        event.event === "contest_finished" ||
-        event.event === "contest_updated" ||
-        event.event === "contest_created" ||
-        event.event === "contest_deleted" ||
-        event.event === "contest_registered" ||
-        event.event === "contest_unregistered" ||
-        event.event === "pass_checked_in" ||
-        event.event === "assessment_finished" ||
-        event.event === "submission_evaluated" ||
-        event.event === "top30_qualified"
-      ) {
-        refreshHubData(true);
-      }
-    },
-    undefined,
-    true
-  );
-
-  useEffect(() => {
-    void dispatch(fetchContestsThunk(false));
-    void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
+  const refreshHubData = useCallback((_force?: boolean) => {
+    refetchContests();
+    refetchLeaders();
     if (member) {
-      void dispatch(fetchMyParticipationsThunk(false));
+      refetchParticipations();
     }
-  }, [dispatch, member]);
+  }, [refetchContests, refetchLeaders, refetchParticipations, member]);
 
   const hasLiveContests = useMemo(
     () => contests.some((c) => c.status === "live"),
@@ -472,12 +438,9 @@ export function ContestsHubPage() {
                   const isLive = contest.status === "live";
                   const isUserCompleted = Boolean(
                     contest.is_submitted ||
-                    participation?.assessment_submitted ||
                     participation?.outcome === "submitted" ||
-                    participation?.outcome === "qualified" ||
-                    participation?.outcome === "not_qualified" ||
-                    (participation as any)?.assessment_status === "submitted" ||
-                    (participation as any)?.assessment_status === "completed"
+                    (participation as any)?.status === "submitted" ||
+                    (participation as any)?.status === "completed"
                   );
                   const startsAtFormatted = new Date(contest.starts_at).toLocaleString(
                     "en-IN",
@@ -1069,9 +1032,9 @@ export function ContestsHubPage() {
                 ) : (
                   paginatedMyParticipations.map((record) => {
                     const isSubmitted = Boolean(
-                      record.assessment_submitted ||
                       record.outcome === "submitted" ||
-                      record.outcome === "qualified"
+                      (record as any)?.status === "submitted" ||
+                      (record as any)?.status === "completed"
                     );
                     const targetUrl = isSubmitted
                       ? `/contests/${record.contest_slug}/results`

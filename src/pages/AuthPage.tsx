@@ -146,7 +146,7 @@ export function AuthPage() {
       const isOnboarded =
         onboardedParam === "true" || onboardedParam === "0" || params.get("onboarding") === "0";
       if (isOnboarded) {
-        void preloadFullProfile(tokenParam).then(() => navigate("/"));
+        void preloadFullProfile(tokenParam).then(() => navigate("/dashboard"));
       } else {
         dispatch(setStep("onboarding"));
       }
@@ -162,7 +162,7 @@ export function AuthPage() {
         .unwrap()
         .then((m) => {
           if (m.is_onboarded) {
-            navigate("/");
+            navigate("/dashboard");
           } else {
             if (m.email) dispatch(setEmail(m.email));
             if (m.full_name) dispatch(setName(m.full_name));
@@ -177,7 +177,7 @@ export function AuthPage() {
     if (authed) {
       dispatch(fetchCurrentUserThunk()).unwrap().then((m) => {
         if (m.is_onboarded) {
-          navigate("/");
+          navigate("/dashboard");
         } else {
           if (m.email) dispatch(setEmail(m.email));
           if (m.full_name) dispatch(setName(m.full_name));
@@ -219,7 +219,7 @@ export function AuthPage() {
       const res = result.payload;
       if (!res.is_new_user && res.member?.is_onboarded) {
         await preloadFullProfile(res.access_token);
-        navigate("/");
+        navigate("/dashboard");
       }
     }
   }
@@ -245,7 +245,7 @@ export function AuthPage() {
     const result = await dispatch(completeOnboardingThunk({ handle: h, full_name: name.trim() }));
     if (completeOnboardingThunk.fulfilled.match(result)) {
       await preloadFullProfile();
-      navigate("/");
+      navigate("/dashboard");
     }
   }
 

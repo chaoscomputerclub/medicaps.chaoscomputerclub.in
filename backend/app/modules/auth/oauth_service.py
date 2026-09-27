@@ -77,7 +77,6 @@ class OAuthService:
             f"&redirect_uri={redirect_uri}"
             f"&response_type=code"
             f"&scope=openid%20email%20profile"
-            f"&access_type=offline"
             f"&prompt=select_account"
             f"&state={state}"
             f"&hd=medicaps.ac.in"

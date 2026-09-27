@@ -111,25 +111,11 @@ class ContestRepository:
             select(
                 ContestRegistration.contest_id,
                 ContestRegistration.status,
-                ContestRegistration.assessment_taken,
             ).where(ContestRegistration.member_id == member_id)
         )
-        for cid, r_stat, a_taken in user_regs.all():
+        for cid, r_stat in user_regs.all():
             registered_contest_ids.add(cid)
-            if r_stat in ("submitted", "completed") or a_taken:
-                submitted_contest_ids.add(cid)
-
-        sess_stmt = (
-            select(Assessment.contest_id)
-            .join(AssessmentSession, AssessmentSession.assessment_id == Assessment.id)
-            .where(
-                AssessmentSession.member_id == member_id,
-                AssessmentSession.status.in_(["submitted", "completed", "expired", "disqualified"]),
-            )
-        )
-        sess_res = await db.execute(sess_stmt)
-        for (cid,) in sess_res.all():
-            if cid:
+            if r_stat in ("submitted", "completed"):
                 submitted_contest_ids.add(cid)
 
         return registered_contest_ids, submitted_contest_ids
