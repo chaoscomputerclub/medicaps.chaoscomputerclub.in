@@ -56,6 +56,17 @@ import {
   AlertDialogCancel,
 } from "@/components/animate-ui/primitives/base/alert-dialog";
 
+function formatTierDisplay(tier?: string): string {
+  if (!tier) return "1★ Explorer";
+  const clean = tier.trim();
+  if (clean === "1_star" || clean === "1_STAR") return "1★ Explorer";
+  if (clean === "2_star" || clean === "2_STAR" || clean.includes("Candidate")) return "2★ Operative";
+  if (clean === "3_star" || clean === "3_STAR" || clean.includes("Specialist")) return "3★ Netrunner";
+  if (clean === "4_star" || clean === "4_STAR" || (clean.includes("Master") && !clean.includes("Grandmaster"))) return "4★ Architect";
+  if (clean === "5_star" || clean === "5_STAR" || clean.includes("Grandmaster")) return "5★ Root Access";
+  return clean;
+}
+
 export function ProfilePage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -278,10 +289,10 @@ export function ProfilePage() {
       {
         id: "tier_badge",
         code: "TIER",
-        title: m.tier || "1★ Explorer",
-        name: m.tier || "1★ Explorer",
+        title: formatTierDisplay(m.tier),
+        name: formatTierDisplay(m.tier),
         icon: "🏆",
-        description: `Reached official university tier ${m.tier || "1★ Explorer"}.`,
+        description: `Reached official university tier ${formatTierDisplay(m.tier)}.`,
         earned: true,
       },
     ];
@@ -528,7 +539,7 @@ export function ProfilePage() {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
-              <TierBadge>{m.tier || "1★ Explorer"}</TierBadge>
+              <TierBadge>{formatTierDisplay(m.tier)}</TierBadge>
               {(m.department || (isSelfUser ? currentMember?.department : null)) ? (
                 <>
                   <span>·</span>

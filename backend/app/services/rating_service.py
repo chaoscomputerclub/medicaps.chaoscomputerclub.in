@@ -23,10 +23,10 @@ def get_rating_tier(rating: int) -> str:
 
 def get_tier_label(tier: str) -> str:
     labels = {
-        "5_star": "5★ Grandmaster",
-        "4_star": "4★ Master",
-        "3_star": "3★ Specialist",
-        "2_star": "2★ Candidate",
+        "5_star": "5★ Root Access",
+        "4_star": "4★ Architect",
+        "3_star": "3★ Netrunner",
+        "2_star": "2★ Operative",
         "1_star": "1★ Explorer",
     }
     return labels.get(tier, "1★ Explorer")

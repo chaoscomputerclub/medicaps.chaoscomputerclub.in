@@ -3,7 +3,15 @@ export type Division = "division_1" | "division_2" | "division_3" | "overall";
 export type Department = "CSE" | "IT" | "AIDS" | "Cyber Security";
 export type Batch = "2022-26" | "2023-27" | "2024-28";
 export type RatingTier =
-  "5★ Grandmaster" | "4★ Master" | "3★ Specialist" | "2★ Candidate" | "1★ Explorer";
+  | "5★ Root Access"
+  | "4★ Architect"
+  | "3★ Netrunner"
+  | "2★ Operative"
+  | "1★ Explorer"
+  | "5★ Grandmaster"
+  | "4★ Master"
+  | "3★ Specialist"
+  | "2★ Candidate";
 export type ProblemTelemetry = {
   index: string;
   solved: boolean;
