@@ -30,8 +30,8 @@ import { uploadAvatarThunk, removeAvatarThunk, fetchCurrentUserThunk } from "@/s
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { RatingChart } from "@/organization/components/RatingChart";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/design-system/Button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/design-system/Avatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
 import { FaLinkedinIn } from "react-icons/fa";
 
@@ -45,16 +45,15 @@ import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import {
   AlertDialog,
-  AlertDialogPopup,
+  AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogPortal,
-  AlertDialogBackdrop,
   AlertDialogAction,
   AlertDialogCancel,
-} from "@/components/animate-ui/primitives/base/alert-dialog";
+  AlertDialogOverlay,
+} from "@/components/design-system/AlertDialog";
 
 export function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -72,7 +71,6 @@ export function ProfilePage() {
   const [followLoading, setFollowLoading] = useState(false);
   const [showRemoveAvatarModal, setShowRemoveAvatarModal] = useState(false);
 
-  // Determine if viewing own profile or another student's profile
   const isViewingSelf =
     !handle ||
     (handle && handle.toLowerCase() === "me") ||
@@ -110,7 +108,7 @@ export function ProfilePage() {
     }
 
     setIsUploadingAvatar(true);
-    const tid = toast.loading("Uploading photo…");
+    const tid = toast.loading("Uploading photo\u2026");
     try {
       const res = await dispatch(uploadAvatarThunk(file)).unwrap();
       if (mutateOwnProfile) {
@@ -137,7 +135,7 @@ export function ProfilePage() {
 
   const handleAvatarRemove = async () => {
     setShowRemoveAvatarModal(false);
-    const tid = toast.loading("Removing photo…");
+    const tid = toast.loading("Removing photo\u2026");
     try {
       await dispatch(removeAvatarThunk()).unwrap();
       if (mutateOwnProfile) {
@@ -243,10 +241,10 @@ export function ProfilePage() {
   if (!m) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center mb-4 text-zinc-500">
+        <div className="w-12 h-12 rounded-none border border-white/10 bg-black flex items-center justify-center mb-4 text-zinc-500">
           <User className="size-6" />
         </div>
-        <h2 className="text-lg font-bold text-white mb-2">Member Profile Not Found</h2>
+        <h2 className="text-lg font-semibold text-white mb-2">Member Profile Not Found</h2>
         <p className="text-sm text-zinc-400 max-w-md mb-6">
           The requested cadet profile could not be found or you may need to sign in.
         </p>
@@ -263,7 +261,6 @@ export function ProfilePage() {
   let achievements = activeData?.achievements || [];
   const proofs = activeData?.proofs || [];
 
-  // If achievements array is empty but member is a valid cadet, synthesize baseline achievements
   if (achievements.length === 0 && m) {
     achievements = [
       {
@@ -271,17 +268,17 @@ export function ProfilePage() {
         code: "INIT",
         title: "Cadet Commissioned",
         name: "Cadet Commissioned",
-        icon: "⚡",
+        icon: "\u26A1",
         description: "Verified member of Chaos Computer Club Medi-Caps Chapter.",
         earned: true,
       },
       {
         id: "tier_badge",
         code: "TIER",
-        title: m.tier || "1★ Explorer",
-        name: m.tier || "1★ Explorer",
-        icon: "🏆",
-        description: `Reached official university tier ${m.tier || "1★ Explorer"}.`,
+        title: m.tier || "1\u2605 Explorer",
+        name: m.tier || "1\u2605 Explorer",
+        icon: "\uD83C\uDFC6",
+        description: `Reached official university tier ${m.tier || "1\u2605 Explorer"}.`,
         earned: true,
       },
     ];
@@ -291,7 +288,7 @@ export function ProfilePage() {
         code: "CORE",
         title: "CCC Core Organizer",
         name: "CCC Core Organizer",
-        icon: "🛡️",
+        icon: "\uD83D\uDEE1\uFE0F",
         description: "Official Chapter Organizer and Proctor.",
         earned: true,
       });
@@ -305,15 +302,15 @@ export function ProfilePage() {
   );
 
   const rawEnrollment =
-    (m.enrollment_number && m.enrollment_number !== "—" && m.enrollment_number !== "N/A" ? m.enrollment_number : null) ||
-    (m.enrollment_no && m.enrollment_no !== "—" && m.enrollment_no !== "N/A" ? m.enrollment_no : null) ||
-    (m.enrollment && m.enrollment !== "—" && m.enrollment !== "N/A" ? m.enrollment : null) ||
-    (m.prn && m.prn !== "N/A" && m.prn !== "—" ? m.prn : null) ||
-    (isSelfUser && currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "—" ? currentMember.prn : null) ||
+    (m.enrollment_number && m.enrollment_number !== "\u2014" && m.enrollment_number !== "N/A" ? m.enrollment_number : null) ||
+    (m.enrollment_no && m.enrollment_no !== "\u2014" && m.enrollment_no !== "N/A" ? m.enrollment_no : null) ||
+    (m.enrollment && m.enrollment !== "\u2014" && m.enrollment !== "N/A" ? m.enrollment : null) ||
+    (m.prn && m.prn !== "N/A" && m.prn !== "\u2014" ? m.prn : null) ||
+    (isSelfUser && currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "\u2014" ? currentMember.prn : null) ||
     (isSelfUser && m.email && m.email.includes("@") && /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
       ? m.email.split("@")[0].toUpperCase()
       : null);
-  const enrollmentNo = rawEnrollment || "—";
+  const enrollmentNo = rawEnrollment || "\u2014";
 
   const rawFullName =
     m.full_name ||
@@ -397,224 +394,218 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      {/* Profile Header Card */}
-      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-lg border border-white/8 bg-black p-6 sm:p-7">
-        <div className="flex items-start gap-5">
-          {/* Avatar Container */}
-          <div className="relative group shrink-0">
-            <Avatar className="size-16 sm:size-20 rounded-lg border border-white/10 bg-black overflow-hidden">
-              {resolvedAvatar ? (
-                <AvatarImage
-                  src={resolvedAvatar}
-                  alt={displayName}
-                  className="object-cover rounded-lg"
-                />
-              ) : null}
-              <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-mono font-semibold text-lg flex items-center justify-center w-full h-full">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-start justify-between gap-6 p-6 sm:p-7">
+          <div className="flex items-start gap-5 flex-1">
+            <div className="relative group shrink-0">
+              <Avatar className="size-16 sm:size-20 rounded-none border border-white/10 bg-black overflow-hidden">
+                {resolvedAvatar ? (
+                  <AvatarImage src={resolvedAvatar} alt={displayName} className="object-cover rounded-none" />
+                ) : null}
+                <AvatarFallback className="rounded-none bg-lime-400/10 text-lime-400 font-mono font-semibold text-lg flex items-center justify-center w-full h-full">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
 
-            {isSelfUser && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
-                  disabled={isUploadingAvatar}
-                  aria-label="Change photo"
-                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-sans text-xs font-semibold p-1 text-center"
-                >
-                  {isUploadingAvatar ? (
-                    <Loader2 className="size-4 animate-spin text-lime-400" />
-                  ) : (
-                    <>
-                      <Camera className="size-3.5" />
-                      <span>Upload</span>
-                    </>
-                  )}
-                </button>
-              </>
-            )}
-          </div>
-
-          {isSelfUser && (
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-          )}
-
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Cadet Dossier
-              </span>
-            </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
-                {displayName}
-              </h1>
-
-              {isSelfUser ? (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Button
+              {isSelfUser && (
+                <>
+                  <button
                     type="button"
                     onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
                     disabled={isUploadingAvatar}
-                    variant="outline"
-                    size="sm"
+                    aria-label="Change photo"
+                    className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-none flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-sans text-xs font-semibold p-1 text-center"
                   >
-                    {isUploadingAvatar ? <Loader2 size={11} className="animate-spin" /> : <Camera size={11} />}
-                    <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
-                  </Button>
-
-                  {resolvedAvatar && (
-                    <Button
-                      type="button"
-                      onClick={() => setShowRemoveAvatarModal(true)}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <Trash2 size={10} />
-                      <span>Remove</span>
-                    </Button>
-                  )}
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Link to="/settings">
-                      <Edit3 size={11} />
-                      <span>Settings</span>
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    onClick={handleFollowToggle}
-                    disabled={isPendingFollowAction}
-                    variant={isFollowing ? "secondary" : "outline"}
-                    size="sm"
-                  >
-                    {isFollowing ? (
-                      <>
-                        {isPendingFollowAction ? <Loader2 size={11} className="animate-spin" /> : <UserCheck size={11} />}
-                        <span>Following</span>
-                      </>
+                    {isUploadingAvatar ? (
+                      <Loader2 className="size-4 animate-spin text-lime-400" />
                     ) : (
                       <>
-                        {isPendingFollowAction ? <Loader2 size={11} className="animate-spin" /> : <UserPlus size={11} />}
-                        <span>Follow</span>
+                        <Camera className="size-3.5" />
+                        <span>Upload</span>
                       </>
                     )}
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    size="icon-sm"
-                  >
-                    {copied ? <Check size={11} className="text-lime-400" /> : <Share2 size={11} />}
-                  </Button>
-                </div>
+                  </button>
+                </>
               )}
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
-              <TierBadge>{m.tier || "1★ Explorer"}</TierBadge>
-              {(m.department || (isSelfUser ? currentMember?.department : null)) ? (
-                <>
-                  <span>·</span>
-                  <span className="text-zinc-300">{m.department || currentMember?.department}</span>
-                </>
-              ) : null}
-              {(m.batch || (isSelfUser ? currentMember?.batch : null)) ? (
-                <>
-                  <span>·</span>
-                  <span className="text-zinc-500">{m.batch || currentMember?.batch}</span>
-                </>
-              ) : null}
-              <span>·</span>
-              <span className="text-lime-400">@{displayHandle || "cadet"}</span>
-            </div>
-
-            {m.bio && (
-              <p className="text-xs text-zinc-400 max-w-xl pt-0.5 leading-relaxed font-sans">
-                {m.bio}
-              </p>
+            {isSelfUser && (
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
             )}
 
-            {/* Campus Social & Peer Telemetry */}
-            <div className="flex items-center gap-2.5 flex-wrap pt-2.5">
-              <SocialFollowStats
-                targetId={m.id}
-                targetHandle={m.handle}
-                targetName={m.full_name || m.handle}
-                initialFollowersCount={m.followers_count ?? activeData?.stats?.followers_count}
-                initialFollowingCount={m.following_count ?? activeData?.stats?.following_count}
-                isSelf={isSelfUser}
-              />
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                  Cadet Dossier
+                </span>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
+                  {displayName}
+                </h1>
 
-              {m.github_username && (
-                <a
-                  href={`https://github.com/${m.github_username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded"
-                >
-                  <Github size={11} />
-                  <span>{m.github_username}</span>
-                </a>
+                {isSelfUser ? (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
+                      disabled={isUploadingAvatar}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {isUploadingAvatar ? <Loader2 size={11} className="animate-spin" /> : <Camera size={11} />}
+                      <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
+                    </Button>
+
+                    {resolvedAvatar && (
+                      <Button
+                        type="button"
+                        onClick={() => setShowRemoveAvatarModal(true)}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 size={10} />
+                        <span>Remove</span>
+                      </Button>
+                    )}
+
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Link to="/settings">
+                        <Edit3 size={11} />
+                        <span>Settings</span>
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleFollowToggle}
+                      disabled={isPendingFollowAction}
+                      variant={isFollowing ? "secondary" : "outline"}
+                      size="sm"
+                    >
+                      {isFollowing ? (
+                        <>
+                          {isPendingFollowAction ? <Loader2 size={11} className="animate-spin" /> : <UserCheck size={11} />}
+                          <span>Following</span>
+                        </>
+                      ) : (
+                        <>
+                          {isPendingFollowAction ? <Loader2 size={11} className="animate-spin" /> : <UserPlus size={11} />}
+                          <span>Follow</span>
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleCopyLink}
+                      variant="outline"
+                      size="icon-sm"
+                    >
+                      {copied ? <Check size={11} className="text-lime-400" /> : <Share2 size={11} />}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
+                <TierBadge>{m.tier || "1\u2605 Explorer"}</TierBadge>
+                {(m.department || (isSelfUser ? currentMember?.department : null)) ? (
+                  <>
+                    <span>\u00B7</span>
+                    <span className="text-zinc-300">{m.department || currentMember?.department}</span>
+                  </>
+                ) : null}
+                {(m.batch || (isSelfUser ? currentMember?.batch : null)) ? (
+                  <>
+                    <span>\u00B7</span>
+                    <span className="text-zinc-500">{m.batch || currentMember?.batch}</span>
+                  </>
+                ) : null}
+                <span>\u00B7</span>
+                <span className="text-lime-400">@{displayHandle || "cadet"}</span>
+              </div>
+
+              {m.bio && (
+                <p className="text-xs text-zinc-400 max-w-xl pt-0.5 leading-relaxed font-sans">
+                  {m.bio}
+                </p>
               )}
-              {m.linkedin_url && (
-                <a
-                  href={
-                    
-                    m.linkedin_url.startsWith("http")
-                      ? m.linkedin_url
-                      : `https://linkedin.com/in/${m.linkedin_url}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded"
-                >
-                  <FaLinkedinIn size={11} />
-                  <span>LinkedIn</span>
-                </a>
-              )}
+
+              <div className="flex items-center gap-2.5 flex-wrap pt-2.5">
+                <SocialFollowStats
+                  targetId={m.id}
+                  targetHandle={m.handle}
+                  targetName={m.full_name || m.handle}
+                  initialFollowersCount={m.followers_count ?? activeData?.stats?.followers_count}
+                  initialFollowingCount={m.following_count ?? activeData?.stats?.following_count}
+                  isSelf={isSelfUser}
+                />
+
+                {m.github_username && (
+                  <a
+                    href={`https://github.com/${m.github_username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded-none"
+                  >
+                    <Github size={11} />
+                    <span>{m.github_username}</span>
+                  </a>
+                )}
+                {m.linkedin_url && (
+                  <a
+                    href={
+                      
+                      m.linkedin_url.startsWith("http")
+                        ? m.linkedin_url
+                        : `https://linkedin.com/in/${m.linkedin_url}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded-none"
+                  >
+                    <FaLinkedinIn size={11} />
+                    <span>LinkedIn</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <dl className="flex sm:flex-col gap-3 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6">
-          <div>
-            <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Enrollment No.</dt>
-            <dd className="text-white font-medium tabular-nums">{enrollmentNo}</dd>
-          </div>
-          <div>
-            <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Email</dt>
-            <dd className="text-zinc-300">
-              {isSelfUser
-                ? (m.email || currentMember?.email || "—")
-                : (m.email || "Protected (Campus Only)")}
-            </dd>
-          </div>
-        </dl>
-      </header>
+          <dl className="flex sm:flex-col gap-3 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6">
+            <div>
+              <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Enrollment No.</dt>
+              <dd className="text-white font-medium tabular-nums">{enrollmentNo}</dd>
+            </div>
+            <div>
+              <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Email</dt>
+              <dd className="text-zinc-300">
+                {isSelfUser
+                  ? (m.email || currentMember?.email || "\u2014")
+                  : (m.email || "Protected (Campus Only)")}
+              </dd>
+            </div>
+          </dl>
+        </CardHeader>
+      </Card>
 
-      {/* 4 Metric Bento Strip */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Metric label="Rating" value={m.rating} detail={`Peak: ${m.peak_rating}`} />
         <Metric
           label="Rank"
-          value={(m.attendance_count ?? 0) > 0 && m.university_rank ? `#${m.university_rank}` : "#—"}
+          value={(m.attendance_count ?? 0) > 0 && m.university_rank ? `#${m.university_rank}` : "#\u2014"}
           detail={(m.attendance_count ?? 0) > 0 && m.university_rank ? `of ${m.active_members || distribution?.total || 1} cadets` : "Unranked"}
         />
         <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />
@@ -623,137 +614,142 @@ export function ProfilePage() {
           value={`${m.attendance_count}/${m.attendance_total}`}
           detail="Official attendance"
         />
-      </section>
+      </div>
 
-      {/* Trajectory & Distribution */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="01 // Rating History" index="TRAJECTORY" title="Competitive Trajectory" />
-          <RatingChart data={history} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardContent className="space-y-4">
+              <SectionHeader kicker="01 // Rating History" index="TRAJECTORY" title="Competitive Trajectory" />
+              <RatingChart data={history} />
+            </CardContent>
+          </Card>
         </div>
         <div>
-          <RatingDistributionCard
-            member={m}
-            distribution={distribution}
-            loading={distLoading && !distribution}
-          />
+          <Card>
+            <CardContent>
+              <RatingDistributionCard
+                member={m}
+                distribution={distribution}
+                loading={distLoading && !distribution}
+              />
+            </CardContent>
+          </Card>
         </div>
-      </section>
+      </div>
 
-      {/* Contest Battle Logs */}
-      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-        <SectionHeader kicker="02 // Record" index="CONTESTS" title="Attended Tournaments" />
-        <div className="divide-y divide-white/6 font-mono text-xs">
-          {battles.length === 0 ? (
-            <div className="text-center py-8 text-zinc-600">
-              No recorded tournaments on file.
-            </div>
-          ) : (
-            battles.map((b: any) => (
-              <article key={b.certificate_id} className="py-3 flex items-center justify-between flex-wrap gap-3">
-                <time className="text-zinc-500">
-                  {new Date(b.date).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </time>
-                <div>
-                  {b.contest_slug || b.slug ? (
-                    <Link
-                      to={`/contests/${b.contest_slug || b.slug}/results`}
-                      className="font-semibold text-white hover:text-lime-400 transition-colors block"
-                    >
-                      {b.contest}
-                    </Link>
-                  ) : (
-                    <h3 className="font-semibold text-white">{b.contest}</h3>
-                  )}
-                  {b.certificate_id ? (
-                    <span className="text-[10px] text-zinc-500 font-mono block">
-                      {b.certificate_id}
-                    </span>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-zinc-400">Rank <strong className="text-white font-semibold tabular-nums">#{b.rank}</strong></span>
-                  <span className="text-zinc-400">Solved <strong className="text-white font-semibold tabular-nums">{b.solved}</strong></span>
-                  <em className={b.delta >= 0 ? "text-lime-400 not-italic font-semibold tabular-nums" : "text-red-400 not-italic font-semibold tabular-nums"}>
-                    {b.delta > 0 ? "+" : ""}{b.delta}
-                  </em>
-                </div>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
+      <Card>
+        <CardContent className="space-y-4">
+          <SectionHeader kicker="02 // Record" index="CONTESTS" title="Attended Tournaments" />
+          <div className="divide-y divide-white/6 font-mono text-xs">
+            {battles.length === 0 ? (
+              <div className="text-center py-8 text-zinc-600">
+                No recorded tournaments on file.
+              </div>
+            ) : (
+              battles.map((b: any) => (
+                <article key={b.certificate_id} className="py-3 flex items-center justify-between flex-wrap gap-3">
+                  <time className="text-zinc-500">
+                    {new Date(b.date).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </time>
+                  <div>
+                    {b.contest_slug || b.slug ? (
+                      <Link
+                        to={`/contests/${b.contest_slug || b.slug}/results`}
+                        className="font-semibold text-white hover:text-lime-400 transition-colors block"
+                      >
+                        {b.contest}
+                      </Link>
+                    ) : (
+                      <h3 className="font-semibold text-white">{b.contest}</h3>
+                    )}
+                    {b.certificate_id ? (
+                      <span className="text-[10px] text-zinc-500 font-mono block">
+                        {b.certificate_id}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-zinc-400">Rank <strong className="text-white font-semibold tabular-nums">#{b.rank}</strong></span>
+                    <span className="text-zinc-400">Solved <strong className="text-white font-semibold tabular-nums">{b.solved}</strong></span>
+                    <em className={b.delta >= 0 ? "text-lime-400 not-italic font-semibold tabular-nums" : "text-red-400 not-italic font-semibold tabular-nums"}>
+                      {b.delta > 0 ? "+" : ""}{b.delta}
+                    </em>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Achievements Ledger */}
-      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-        <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
-          {achievements.length === 0 ? (
-            <div className="text-center py-8 text-zinc-600 col-span-full">
-              No achievements unlocked yet.
-            </div>
-          ) : (
-            achievements.map((a: any) => (
-              <article
-                key={a.code || a.id || a.name || a.title}
-                className={`p-3.5 rounded-lg border ${
-                  a.earned !== false ? "border-lime-400/30 bg-black" : "border-white/6 bg-black opacity-40"
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  {a.earned !== false ? <Award className="size-3.5 text-lime-400" /> : <LockKeyhole className="size-3.5 text-zinc-500" />}
-                  <span className="text-[9px] uppercase tracking-wider text-zinc-500">{a.code || a.id || "ACH"}</span>
-                </div>
-                <h3 className="font-semibold text-white">{a.name || a.title}</h3>
-                <p className="text-zinc-400 text-[11px] mt-0.5 leading-relaxed">{a.description}</p>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
+      <Card>
+        <CardContent className="space-y-4">
+          <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+            {achievements.length === 0 ? (
+              <div className="text-center py-8 text-zinc-600 col-span-full">
+                No achievements unlocked yet.
+              </div>
+            ) : (
+              achievements.map((a: any) => (
+                <article
+                  key={a.code || a.id || a.name || a.title}
+                  className={`p-3.5 rounded-none border ${
+                    a.earned !== false ? "border-lime-400/30 bg-black" : "border-white/6 bg-black opacity-40"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    {a.earned !== false ? <Award className="size-3.5 text-lime-400" /> : <LockKeyhole className="size-3.5 text-zinc-500" />}
+                    <span className="text-[9px] uppercase tracking-wider text-zinc-500">{a.code || a.id || "ACH"}</span>
+                  </div>
+                  <h3 className="font-semibold text-white">{a.name || a.title}</h3>
+                  <p className="text-zinc-400 text-[11px] mt-0.5 leading-relaxed">{a.description}</p>
+                </article>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Trust Footer */}
-      <footer className="flex items-center gap-2.5 p-4 rounded-lg border border-white/8 bg-black text-zinc-500 font-mono text-xs">
+      <footer className="flex items-center gap-2.5 p-4 rounded-none border border-white/8 bg-black text-zinc-500 font-mono text-xs">
         <Zap className="size-3.5 text-lime-400 shrink-0" />
         <p>
           Ratings and achievements derive exclusively from physically proctored campus tournaments.
         </p>
       </footer>
 
-      {/* Remove Avatar Confirmation Modal */}
       <AlertDialog open={showRemoveAvatarModal} onOpenChange={setShowRemoveAvatarModal}>
-        <AlertDialogPortal>
-          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
-            <AlertDialogHeader className="space-y-2 text-left">
-              <AlertDialogTitle className="text-base font-semibold text-white">
-                Remove profile photo?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Are you sure you want to remove your custom profile photo? This will revert your avatar to your initials placeholder.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+        <AlertDialogOverlay className="fixed inset-0 z-50 bg-black/80" />
+        <AlertDialogContent className="bg-zinc-950 text-white p-6 max-w-md rounded-none shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.12)]">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <AlertDialogTitle className="text-base font-semibold text-white">
+              Remove profile photo?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+              Are you sure you want to remove your custom profile photo? This will revert your avatar to your initials placeholder.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
-              <AlertDialogCancel
-                onClick={() => setShowRemoveAvatarModal(false)}
-                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleAvatarRemove}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Remove Photo
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
+          <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+            <AlertDialogCancel
+              onClick={() => setShowRemoveAvatarModal(false)}
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-none cursor-pointer"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleAvatarRemove}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-none cursor-pointer"
+            >
+              Remove Photo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );
