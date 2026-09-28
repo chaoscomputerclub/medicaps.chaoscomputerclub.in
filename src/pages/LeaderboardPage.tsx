@@ -9,6 +9,7 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { useChunkedList } from "@/hooks/useChunkedList";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -135,7 +136,6 @@ export function LeaderboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      {/* Clean minimal header — no ELO MATRIX / Verified Elo badges */}
       <header className="rounded-lg border border-white/8 bg-black p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
@@ -148,11 +148,18 @@ export function LeaderboardPage() {
             Unified standings across Medi-Caps University computing departments.
           </p>
         </div>
-        <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-zinc-950 px-5 py-3.5 min-w-[160px] shrink-0">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
-          <strong className="font-mono text-lg font-bold text-white mt-0.5">2025–2026</strong>
-          <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount} ranked cadets</small>
-          <div className="flex items-center gap-1.5 mt-1.5 font-mono text-[9px] uppercase tracking-wider text-emerald-400">
+        <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-zinc-950 px-5 py-3.5 min-w-[160px] shrink-0 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
+            <strong className="font-mono text-lg font-bold text-white">2025–2026</strong>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <small className="font-mono tabular-nums text-lime-400">{totalCount} ranked cadets</small>
+            <Badge variant="default" className="font-mono text-[10px] uppercase tracking-wider">
+              Live
+            </Badge>
+          </div>
+          <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-emerald-400">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
@@ -162,7 +169,6 @@ export function LeaderboardPage() {
         </div>
       </header>
 
-      {/* Table Container */}
       <div className="overflow-hidden rounded-lg border border-white/8 bg-zinc-950">
         <div className="overflow-x-auto">
           <Table>
@@ -194,7 +200,6 @@ export function LeaderboardPage() {
                     x.id === currentMemberId ||
                     Boolean(x.handle && currentMember?.handle && x.handle.toLowerCase() === currentMember.handle.toLowerCase());
 
-                  // Optimistically bind to currentMember when SSE updates authSlice in real time
                   const displayRating = isYou && currentMember?.rating ? currentMember.rating : x.rating;
                   const displayPeak = isYou && currentMember?.peak_rating ? currentMember.peak_rating : x.peak_rating;
                   const displayRank = isYou && currentMember?.university_rank ? currentMember.university_rank : x.university_rank;
@@ -215,7 +220,6 @@ export function LeaderboardPage() {
                         isYou ? "bg-lime-400/[0.04] hover:bg-lime-400/[0.07]" : ""
                       }`}
                     >
-                      {/* Rank + Change */}
                       <TableCell className="pl-5 py-3">
                         <div className="flex items-center gap-1.5 font-mono">
                           <strong className="text-xs font-bold tabular-nums text-white w-5 text-right">
@@ -237,7 +241,6 @@ export function LeaderboardPage() {
                         </div>
                       </TableCell>
 
-                      {/* Avatar + Handle HoverCard */}
                       <TableCell className="py-3">
                         <CadetProfileHoverCard
                           handle={x.handle}
@@ -257,7 +260,6 @@ export function LeaderboardPage() {
                             to={`/profile/${x.handle}`}
                             className="flex items-center gap-3 cursor-pointer group/row min-w-0"
                           >
-                            {/* Avatar always visible */}
                             <Avatar className="size-9 shrink-0 rounded-full border border-white/10 group-hover/row:border-lime-400/40 transition-colors overflow-hidden">
                               <AvatarImage
                                 src={resolveAvatarUrl(x.avatar_url ?? null)}
@@ -282,22 +284,18 @@ export function LeaderboardPage() {
                         </CadetProfileHoverCard>
                       </TableCell>
 
-                      {/* Trend sparkline */}
                       <TableCell className="py-3 hidden md:table-cell">
                         <Spark data={x.ratings ?? []} />
                       </TableCell>
 
-                      {/* Rating */}
                       <TableCell className="py-3 font-mono font-bold text-sm tabular-nums text-lime-400">
                         {displayRating}
                       </TableCell>
 
-                      {/* Peak */}
                       <TableCell className="py-3 font-mono text-xs tabular-nums text-zinc-400 hidden sm:table-cell">
                         {displayPeak}
                       </TableCell>
 
-                      {/* Attendance */}
                       <TableCell className="py-3 pr-5 hidden sm:table-cell">
                         <span className="font-mono text-xs tabular-nums text-zinc-400">
                           {attendanceCount}/{attendanceTotal}
@@ -311,7 +309,6 @@ export function LeaderboardPage() {
           </Table>
         </div>
 
-        {/* Pagination Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/8 bg-black/40 px-5 py-3.5">
           <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
             <span>
@@ -327,7 +324,6 @@ export function LeaderboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Page Size */}
             <div className="flex items-center gap-1.5 font-sans text-sm text-zinc-400">
               <span>Rows:</span>
               <div className="flex items-center border border-white/8 rounded-md overflow-hidden">
@@ -348,7 +344,6 @@ export function LeaderboardPage() {
               </div>
             </div>
 
-            {/* Prev / Next */}
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"

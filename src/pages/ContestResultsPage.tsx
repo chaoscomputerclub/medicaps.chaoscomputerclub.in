@@ -6,6 +6,7 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { ArrowLeft, Award, Clock, Crown, Lock, Search, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
@@ -87,7 +88,6 @@ export function ContestResultsPage() {
 
   const myRow = myHandle ? ranking.rows.find((row) => row.handle === myHandle) : undefined;
 
-  // Extract distinct departments for filtering
   const departments = Array.from(
     new Set(ranking.rows.map((r) => r.department).filter(Boolean))
   ) as string[];
@@ -108,7 +108,6 @@ export function ContestResultsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-      {/* Back button */}
       <Link
         to={`/contests/${contestSlug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
@@ -116,9 +115,8 @@ export function ContestResultsPage() {
         <ArrowLeft className="size-3.5" /> Back to {contest?.title ?? "Contest"}
       </Link>
 
-      {/* Your Standing Hero */}
       {myRow ? (
-        <div className="relative overflow-hidden rounded-lg border border-white/10 bg-black p-6">
+        <div className="relative overflow-hidden rounded-lg border border-white/8 bg-black p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-lime-400/40 bg-lime-400/10 text-center font-mono text-lime-400">
@@ -131,16 +129,16 @@ export function ContestResultsPage() {
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="default" className="gap-1.5">
                     <Trophy className="size-3 text-lime-400" />
                     Verified Finish
-                  </span>
+                  </Badge>
                   {myRow.rank <= 3 && (
-                    <span className="inline-flex items-center gap-1 rounded border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                    <Badge variant="default" className="gap-1.5 border-amber-400/30 bg-amber-400/10 text-amber-300">
                       <Crown className="size-3 text-amber-400" />
                       Podium
-                    </span>
+                    </Badge>
                   )}
                 </div>
                 <p className="text-lg font-semibold text-white font-mono tabular-nums">
@@ -152,7 +150,6 @@ export function ContestResultsPage() {
               </div>
             </div>
 
-            {/* CTA */}
             <div className="flex items-center gap-2 shrink-0">
               <Button asChild variant="outline" size="sm">
                 <Link to="/leaderboard">University Leaderboard →</Link>
@@ -165,16 +162,15 @@ export function ContestResultsPage() {
           kicker="01 // Leaderboard"
           index="STANDINGS"
           badge={
-            <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+            <Badge variant="default" className="gap-1.5">
               <Trophy className="size-3 text-lime-400" />
               Official Standings
-            </span>
+            </Badge>
           }
           title={contest ? `${contest.title} Standings` : "Contest Standings"}
           description="Official contest standings. Ranked by total points, then penalty time."
         />
       )}
-
 
       {contest?.status === "upcoming" ? (
         <div className="rounded-lg border border-amber-500/30 bg-zinc-950 p-8 text-center space-y-4 font-mono">
@@ -206,10 +202,9 @@ export function ContestResultsPage() {
         </div>
       ) : (
         <>
-          {/* Filters + Search */}
           <div className="flex flex-wrap items-center gap-3">
             {departments.length > 1 && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-wrap">
                 <Button
                   variant={deptFilter === "all" ? "default" : "outline"}
                   size="sm"
@@ -246,7 +241,6 @@ export function ContestResultsPage() {
             </div>
           </div>
 
-          {/* Standings Table */}
           <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
             <Table>
               <TableHeader>
@@ -281,7 +275,6 @@ export function ContestResultsPage() {
         </>
       )}
 
-      {/* Bottom Actions */}
       <div className="flex flex-wrap items-center gap-3 pt-2">
         <Button asChild variant="outline" size="sm">
           <Link to={`/contests/${contestSlug}`}>Contest Details</Link>
@@ -348,16 +341,25 @@ function RankRow({
         {row.penalty_minutes}m
       </TableCell>
       <TableCell className="text-right">
-        <span className={cn(
-          "rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider font-semibold",
-          isPodium
-            ? "border border-amber-400/30 bg-amber-400/10 text-amber-300"
-            : row.status === "in_progress"
-            ? "border border-blue-500/30 bg-blue-500/10 text-blue-400"
-            : "border border-white/8 bg-black text-zinc-400"
-        )}>
+        <Badge
+          variant={
+            isPodium
+              ? "default"
+              : row.status === "in_progress"
+              ? "secondary"
+              : "outline"
+          }
+          className={cn(
+            "rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider font-semibold",
+            isPodium
+              ? "border-amber-400/30 bg-amber-400/10 text-amber-300"
+              : row.status === "in_progress"
+              ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+              : "border-white/8 bg-black text-zinc-400"
+          )}
+        >
           {isPodium ? "Podium" : row.status === "in_progress" ? "In Progress" : "Ranked"}
-        </span>
+        </Badge>
       </TableCell>
     </TableRow>
   );
