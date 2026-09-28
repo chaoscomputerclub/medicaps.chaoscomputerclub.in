@@ -32,17 +32,42 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  Badge,
+  BadgeProps,
+  Skeleton,
+  SkeletonCard,
+  Separator,
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/design-system";
 import { useRealtimeEvents } from "@/lib/realtime";
-import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { slugifyProblem } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
 import { contestApi } from "@/features/contest/api";
 import { AuthorChallengeModal } from "@/organization/components/AuthorChallengeModal";
 
-/** Compute human-readable duration from two ISO datetime strings. */
 function contestDuration(startsAt: string, endsAt: string): string {
   try {
     const diffMs = new Date(endsAt).getTime() - new Date(startsAt).getTime();
@@ -57,6 +82,21 @@ function contestDuration(startsAt: string, endsAt: string): string {
     return "—";
   }
 }
+
+const CountdownUnit = ({ value, label }: { value: number; label: string }) => (
+  <div className="flex flex-col items-center bg-white/5 p-2 rounded-none border border-white/5">
+    <span className="font-mono text-xl font-bold tabular-nums text-white">
+      {String(value).padStart(2, "0")}
+    </span>
+    <span className="text-[9px] font-mono uppercase text-zinc-500">{label}</span>
+  </div>
+);
+
+const StatusBadge = ({ variant, children, className, ...props }: BadgeProps & { variant?: BadgeProps["variant"] }) => (
+  <Badge variant={variant} className={className} {...props}>
+    {children}
+  </Badge>
+);
 
 export function ContestOverviewPage() {
   const { contestSlug = "" } = useParams<{ contestSlug: string }>();
@@ -74,6 +114,7 @@ export function ContestOverviewPage() {
   const hasProctorKey = typeof localStorage !== "undefined" && Boolean(localStorage.getItem("ccc_proctor_key"));
   const canAuthor = Boolean(currentMember?.is_core_member) || hasProctorKey;
   const [isAuthorModalOpen, setIsAuthorModalOpen] = useState(false);
+  const [showUnregisterConfirm, setShowUnregisterConfirm] = useState(false);
 
   const refreshDetail = useCallback((force = false) => {
     if (!contestSlug) return;
@@ -90,7 +131,6 @@ export function ContestOverviewPage() {
     refreshDetail(false);
   }, [refreshDetail]);
 
-  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
   const cachedContest = !rawContest && contestSlug
     ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
     : null;
@@ -127,7 +167,6 @@ export function ContestOverviewPage() {
   );
   const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
 
-  // Real-time status update: always stream — must receive upcoming→live→finished transitions instantly
   useRealtimeEvents(
     contestSlug,
     (event) => {
@@ -176,6 +215,7 @@ export function ContestOverviewPage() {
       if (unregisterContestThunk.fulfilled.match(res)) {
         toast.success("Successfully unregistered from the contest.");
         refreshDetail(true);
+        setShowUnregisterConfirm(false);
       } else {
         toast.error(String(res.payload || "Failed to unregister"));
       }
@@ -184,11 +224,30 @@ export function ContestOverviewPage() {
     }
   };
 
-  if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
+  if (isLoadingDetail && !contest) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8">
+        <SkeletonCard className="w-full" />
+        <SkeletonCard className="w-full" />
+        <SkeletonCard className="w-full" />
+        <SkeletonCard className="w-full" />
+      </div>
+    );
+  }
+
   if (!contest) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
-        Contest not found.
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-20 text-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="py-12 text-center">
+            <FileText className="size-12 text-zinc-600 mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-white mb-2">Contest Not Found</h3>
+            <p className="text-xs text-zinc-500">The contest you're looking for doesn't exist or has been removed.</p>
+            <Link to="/contests" className="mt-4 inline-block font-mono text-xs text-lime-400 hover:underline">
+              Back to Contests Hub
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -203,55 +262,49 @@ export function ContestOverviewPage() {
     timeZoneName: "short",
   });
 
-  // Derive duration dynamically from API timestamps — never hardcoded
   const durationLabel = contestDuration(contest.starts_at, contest.ends_at);
-
-  // Use real problem_count from API; fall back to problems array length
   const problemCount = contest.problem_count || problems.length || 4;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      {/* Back Navigation */}
+    <div className="page-wrap">
       <div>
         <Link
           to="/contests"
-          className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors duration-150"
         >
           <ArrowLeft className="size-3.5" /> Back to Contests Hub
         </Link>
       </div>
 
-      {/* ── HERO BANNER ── */}
-      <div className="rounded-lg border border-white/8 bg-black p-6 sm:p-8 space-y-6">
+      <Card className="p-6 sm:p-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-lime-400 flex items-center gap-1">
-                <Flame className="size-3 text-lime-400" /> Rated Contest
-              </span>
-              <span className="font-mono text-xs text-zinc-500">
+              <StatusBadge variant="default" className="flex items-center gap-1">
+                <Flame className="size-3" />
+                Rated Contest
+              </StatusBadge>
+              <Badge variant="neutral" className="text-[10px]">
                 Edition #{contest.edition ?? 1}
-              </span>
+              </Badge>
               {isLive && (
-                <span className="rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-red-400 flex items-center gap-1">
-                  <span className="size-1.5 rounded-full bg-red-400 animate-pulse" /> LIVE NOW
-                </span>
+                <StatusBadge variant="danger" className="flex items-center gap-1">
+                  <span className="size-1.5 rounded-full bg-red-400 animate-pulse" />
+                  LIVE NOW
+                </StatusBadge>
               )}
               {isFinished && (
-                <span className="rounded border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                <StatusBadge variant="neutral">
                   CONCLUDED
-                </span>
+                </StatusBadge>
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              {contest.title}
-            </h1>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <h1 className="display-heading">{contest.title}</h1>
+            <p className="body-text">
               {contest.summary || "Official Medi-Caps University algorithmic programming tournament. Solve challenges under strict timing constraints to increase your university rating."}
             </p>
 
-            {/* Quick Meta Row */}
             <div className="flex flex-wrap items-center gap-5 pt-1 text-xs font-mono text-zinc-400">
               <span className="flex items-center gap-1.5 text-zinc-300">
                 <Calendar className="size-3.5 text-lime-400" />
@@ -272,9 +325,8 @@ export function ContestOverviewPage() {
             </div>
           </div>
 
-          {/* Right Side: Countdown Card */}
-          <div className="rounded-lg border border-white/8 bg-black p-4 md:min-w-[260px] text-center space-y-3 shrink-0">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 block">
+          <div className="rounded-none border border-white/8 bg-black p-4 md:min-w-[260px] text-center space-y-3 shrink-0">
+            <span className="mono-label block">
               {isLive ? "Contest Closes In" : isFinished ? "Contest Status" : "Contest Starts In"}
             </span>
 
@@ -284,26 +336,18 @@ export function ContestOverviewPage() {
               </div>
             ) : (
               <div className="grid grid-cols-4 gap-1.5">
-                {[
-                  { val: countdown.days, label: "Days" },
-                  { val: countdown.hours, label: "Hrs" },
-                  { val: countdown.minutes, label: "Min" },
-                  { val: countdown.seconds, label: "Sec" },
-                ].map(({ val, label }) => (
-                  <div key={label} className="flex flex-col items-center bg-white/5 p-2 rounded">
-                    <span className="font-mono text-xl font-bold tabular-nums text-white">
-                      {String(val).padStart(2, "0")}
-                    </span>
-                    <span className="text-[9px] font-mono uppercase text-zinc-500">{label}</span>
-                  </div>
-                ))}
+                <CountdownUnit value={countdown.days} label="Days" />
+                <CountdownUnit value={countdown.hours} label="Hrs" />
+                <CountdownUnit value={countdown.minutes} label="Min" />
+                <CountdownUnit value={countdown.seconds} label="Sec" />
               </div>
             )}
           </div>
         </div>
 
-        {/* ── PRIMARY ACTION STRIP ── */}
-        <div className="pt-4 border-t border-white/8 flex flex-wrap items-center justify-between gap-4">
+        <Separator className="my-4" />
+
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <AnimatePresence mode="wait" initial={false}>
               {isSubmitted ? (
@@ -315,25 +359,17 @@ export function ContestOverviewPage() {
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-wrap items-center gap-3"
                 >
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-lime-500/30 bg-lime-950/40 text-lime-400 font-sans text-xs font-semibold">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-none border border-lime-500/30 bg-lime-950/40 text-lime-400 font-sans text-xs font-semibold">
                     <CheckCircle2 className="size-4 text-lime-400" />
-                    <span>Attempt Submitted · Retakes Not Permitted</span>
+                    <span>Attempt Submitted &middot; Retakes Not Permitted</span>
                   </div>
-                  <Button
-                    asChild
-                    variant="default"
-                    size="hero"
-                  >
+                  <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/results`}>
                       <Trophy className="size-4 mr-1.5" />
                       <span>View Standings</span>
                     </Link>
                   </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="hero"
-                  >
+                  <Button asChild variant="outline" size="hero">
                     <Link to={`/contests/${contestSlug}/summary`}>
                       <FileText className="size-4 mr-1.5" />
                       <span>View Summary</span>
@@ -348,11 +384,7 @@ export function ContestOverviewPage() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Button
-                    asChild
-                    variant="default"
-                    size="hero"
-                  >
+                  <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/lobby`}>
                       <Play className="size-4 fill-current mr-1.5" />
                       <span>Enter Contest Arena</span>
@@ -367,11 +399,7 @@ export function ContestOverviewPage() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Button
-                    asChild
-                    variant="default"
-                    size="hero"
-                  >
+                  <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/results`}>
                       <Trophy className="size-4 mr-1.5" />
                       <span>View Final Standings</span>
@@ -387,35 +415,45 @@ export function ContestOverviewPage() {
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-wrap items-center gap-3"
                 >
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-sans text-xs font-semibold">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-none border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-sans text-xs font-semibold">
                     <CheckCircle2 className="size-4 text-emerald-400" />
-                    <span>Registered · Arena unlocks at start time</span>
+                    <span>Registered &middot; Arena unlocks at start time</span>
                   </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="hero"
-                  >
+                  <Button asChild variant="outline" size="hero">
                     <Link to={`/contests/${contestSlug}/lobby`}>
                       <Clock className="size-4 mr-1.5" />
                       <span>Enter Waiting Room</span>
                     </Link>
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleUnregister}
-                    disabled={isRegistering}
-                  >
-                    {isRegistering ? (
-                      <span className="inline-flex items-center gap-1.5">
-                        <Loader2 className="size-3.5 animate-spin" />
-                        <span>Unregistering...</span>
-                      </span>
-                    ) : (
-                      <span>Unregister</span>
-                    )}
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" disabled={isRegistering}>
+                        {isRegistering ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Loader2 className="size-3.5 animate-spin" />
+                            <span>Unregistering...</span>
+                          </span>
+                        ) : (
+                          <span>Unregister</span>
+                        )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogPortal>
+                      <AlertDialogOverlay />
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Unregister from Contest</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to unregister from "{contest.title}"? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel onClick={() => setShowUnregisterConfirm(false)}>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleUnregister}>Unregister</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialogPortal>
+                  </AlertDialog>
                 </motion.div>
               ) : (
                 <motion.div
@@ -452,35 +490,35 @@ export function ContestOverviewPage() {
             <span className="flex items-center gap-1">
               <ShieldCheck className="size-3.5 text-lime-400" /> Open to all students
             </span>
-            <span>•</span>
+            <span>&#8226;</span>
             <span className="flex items-center gap-1">
               <TrendingUp className="size-3.5 text-lime-400" /> Elo Rated
             </span>
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* ── OFFICIAL ANNOUNCEMENTS BANNER ── */}
-      <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.04] p-4 flex items-start gap-3.5">
-        <div className="size-8 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5 text-amber-400">
-          <Megaphone className="size-4" />
-        </div>
-        <div className="space-y-1 text-sm font-sans flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">📢 Official Announcements</span>
-            <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 uppercase tracking-wide">
-              Mandatory Notice
-            </span>
+      <Card className="border-amber-500/20 bg-amber-500/[0.04] p-4">
+        <div className="flex items-start gap-3.5">
+          <div className="size-8 rounded-none bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5 text-amber-400">
+            <Megaphone className="size-4" />
           </div>
-          <p className="text-zinc-400 leading-relaxed text-xs">
-            Users must register prior to start to participate. The waiting lobby unlocks before contest launch with synchronized server time. All challenges unlock simultaneously across all workstations. We hope you enjoy this contest!
-          </p>
+          <div className="space-y-1 text-sm font-sans flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-white">Official Announcements</span>
+              <Badge variant="warning" className="text-[10px]">
+                Mandatory Notice
+              </Badge>
+            </div>
+            <p className="caption-text">
+              Users must register prior to start to participate. The waiting lobby unlocks before contest launch with synchronized server time. All challenges unlock simultaneously across all workstations. We hope you enjoy this contest!
+            </p>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      {/* ── LIVE / FINISHED / PROCTOR PROBLEM SET TABLE ── */}
-      {(!isUpcoming || canAuthor) && (
-        <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+      {!isUpcoming || canAuthor ? (
+        <Card className="p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/8 pb-3">
             <div className="flex items-center gap-2">
               <Code2 className="size-4 text-lime-400" />
@@ -497,7 +535,7 @@ export function ContestOverviewPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => setIsAuthorModalOpen(true)}
-                  className="h-7 text-xs font-mono border-white/10 text-lime-400 hover:bg-lime-400/10 cursor-pointer"
+                  className="h-7 text-xs font-mono border-white/10 text-lime-400 hover:bg-lime-400/10"
                 >
                   <Plus className="w-3 h-3 mr-1" />
                   <span>Author Challenge</span>
@@ -509,25 +547,25 @@ export function ContestOverviewPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-white/8 hover:bg-transparent">
-                <TableHead className="w-12 font-sans text-[10px] uppercase text-zinc-500">#</TableHead>
-                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">Title</TableHead>
-                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">Score</TableHead>
-                <TableHead className="text-right font-sans text-[10px] uppercase text-zinc-500">Action</TableHead>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Score</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {problems.length === 0 ? (
                 <TableRow className="border-white/4">
-                  <TableCell colSpan={4} className="py-10 text-center font-sans text-xs text-zinc-500">
+                  <TableCell colSpan={4} className="py-10 text-center">
                     <div className="space-y-3 max-w-md mx-auto">
                       <p className="text-zinc-400">
-                        No challenges authored for contest &quot;{contest?.title || contestSlug}&quot; yet.
+                        No challenges authored for contest &ldquo;{contest?.title || contestSlug}&rdquo; yet.
                       </p>
                       {canAuthor && (
                         <Button
                           size="sm"
                           onClick={() => setIsAuthorModalOpen(true)}
-                          className="bg-lime-400 hover:bg-lime-300 text-black font-mono font-bold text-xs cursor-pointer shadow-sm"
+                          className="bg-lime-400 hover:bg-lime-300 text-black font-mono font-bold text-xs shadow-sm"
                         >
                           <Plus className="w-3.5 h-3.5 mr-1" />
                           <span>Author First Challenge</span>
@@ -557,7 +595,7 @@ export function ContestOverviewPage() {
                           className="border-white/10 text-zinc-400 hover:text-white"
                         >
                           <Link to={`/contests/${contestSlug}/summary`}>
-                            Review →
+                            Review &rarr;
                           </Link>
                         </Button>
                       ) : (
@@ -571,7 +609,7 @@ export function ContestOverviewPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            Solve →
+                            Solve &rarr;
                           </Link>
                         </Button>
                       )}
@@ -582,24 +620,20 @@ export function ContestOverviewPage() {
             </TableBody>
           </Table>
 
-          {/* View Standings */}
           <div className="pt-3 border-t border-white/8 flex items-center justify-end text-xs font-sans text-zinc-500">
             <Link
               to={`/contests/${contestSlug}/results`}
               className="text-lime-400 hover:underline flex items-center gap-1 font-semibold"
             >
-              View Standings →
+              View Standings &rarr;
             </Link>
           </div>
-        </div>
-      )}
+        </Card>
+      ) : null}
 
-      {/* ── CONTEST REGULATIONS, VIOLATIONS & INTEGRITY ── */}
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left Column: Important Notes & Prohibited Actions */}
         <div className="lg:col-span-7 space-y-6">
-          {/* 📌 Important Notes */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+          <Card className="p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-white/8 pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-base">📌</span>
@@ -612,7 +646,7 @@ export function ContestOverviewPage() {
 
             <ol className="space-y-4 font-sans text-xs leading-relaxed text-zinc-400">
               <li className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-lime-400/10 text-lime-400 font-bold text-[11px] border border-lime-400/20">
                   1
                 </span>
                 <div>
@@ -624,7 +658,7 @@ export function ContestOverviewPage() {
               </li>
 
               <li className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-lime-400/10 text-lime-400 font-bold text-[11px] border border-lime-400/20">
                   2
                 </span>
                 <div>
@@ -636,7 +670,7 @@ export function ContestOverviewPage() {
               </li>
 
               <li className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-lime-400/10 text-lime-400 font-bold text-[11px] border border-lime-400/20">
                   3
                 </span>
                 <div>
@@ -648,7 +682,7 @@ export function ContestOverviewPage() {
               </li>
 
               <li className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-lime-400/10 text-lime-400 font-bold text-[11px] border border-lime-400/20">
                   4
                 </span>
                 <div>
@@ -660,7 +694,7 @@ export function ContestOverviewPage() {
               </li>
 
               <li className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-lime-400/10 text-lime-400 font-bold text-[11px] border border-lime-400/20">
                   5
                 </span>
                 <div>
@@ -672,21 +706,20 @@ export function ContestOverviewPage() {
               </li>
 
               <li className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded bg-lime-400/10 text-lime-400 font-bold text-[11px]">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-lime-400/10 text-lime-400 font-bold text-[11px] border border-lime-400/20">
                   6
                 </span>
                 <div>
                   <strong className="text-white block pb-0.5">Provisional Rating for New Participants</strong>
                   <span>
-                    New users’ first five contests operate under a provisional rating system to accurately establish competitive standing; beginning from their sixth contest, rating adjustments fully reflect on the global university leaderboard.
+                    New users&rsquo; first five contests operate under a provisional rating system to accurately establish competitive standing; beginning from their sixth contest, rating adjustments fully reflect on the global university leaderboard.
                   </span>
                 </div>
               </li>
             </ol>
-          </div>
+          </Card>
 
-          {/* 🚨 Contest Violations & Prohibited Actions */}
-          <div className="rounded-lg border border-red-500/20 bg-zinc-950/70 p-6 space-y-4">
+          <Card className="border-red-500/20 bg-zinc-950/70 p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-white/8 pb-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="size-4 text-red-400" />
@@ -694,9 +727,9 @@ export function ContestOverviewPage() {
                   Contest Violations & Prohibited Actions
                 </h2>
               </div>
-              <span className="rounded bg-red-500/10 border border-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-400 uppercase tracking-wide">
+              <Badge variant="danger" className="text-[10px]">
                 Strict Zero-Tolerance
-              </span>
+              </Badge>
             </div>
 
             <p className="text-xs font-sans text-zinc-300">
@@ -719,7 +752,7 @@ export function ContestOverviewPage() {
               <li className="flex items-start gap-2.5">
                 <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Platform Disturbances:</strong> Creating unwanted disturbances, network attacks, or automated tooling that interrupts other users' participation.
+                  <strong className="text-white">Platform Disturbances:</strong> Creating unwanted disturbances, network attacks, or automated tooling that interrupts other users&rsquo; participation.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
@@ -735,13 +768,11 @@ export function ContestOverviewPage() {
                 </span>
               </li>
             </ul>
-          </div>
+          </Card>
         </div>
 
-        {/* Right Column: Zero-Tolerance Penalties, Fair Play Whistleblowing & Waiting Lobby */}
         <div className="lg:col-span-5 space-y-6">
-          {/* ⚖️ Enforcement & Penalties */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+          <Card className="p-6 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/8 pb-3">
               <Scale className="size-4 text-lime-400" />
               <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
@@ -754,34 +785,33 @@ export function ContestOverviewPage() {
             </p>
 
             <div className="space-y-3 pt-1">
-              <div className="rounded-md border border-white/8 bg-zinc-950 p-3.5 space-y-1.5">
+              <Card className="border border-white/8 bg-zinc-950 p-3.5 space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 uppercase">
+                  <Badge variant="warning" className="text-[10px]">
                     First Violation
-                  </span>
+                  </Badge>
                   <span className="text-xs font-semibold text-white">Temporary Ban & Reset</span>
                 </div>
                 <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
                   Contest score resets to zero, complete disqualification from the tournament edition, and a contest and discuss ban for 1 month.
                 </p>
-              </div>
+              </Card>
 
-              <div className="rounded-md border border-red-500/20 bg-red-950/20 p-3.5 space-y-1.5">
+              <Card className="border-red-500/20 bg-red-950/20 p-3.5 space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 uppercase">
+                  <Badge variant="danger" className="text-[10px]">
                     Second Violation
-                  </span>
+                  </Badge>
                   <span className="text-xs font-semibold text-white">Permanent Deactivation</span>
                 </div>
                 <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
                   Contest score resets to zero, permanent account deactivation without appeal, and formal referral to the University Academic Disciplinary Committee.
                 </p>
-              </div>
+              </Card>
             </div>
-          </div>
+          </Card>
 
-          {/* 🛡️ Community Whistleblowing & Fair Play */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+          <Card className="p-6 space-y-4">
             <div className="flex items-center gap-2 border-b border-white/8 pb-3">
               <Flag className="size-4 text-lime-400" />
               <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
@@ -793,17 +823,16 @@ export function ContestOverviewPage() {
               We encourage all participants to contribute to maintaining the justice and fairness of our contests. Cadets who discover coordinated cheating, AI leakage, or identical submissions can file violation reports to proctors.
             </p>
 
-            <div className="rounded-md border border-lime-400/20 bg-lime-400/[0.03] p-3 text-xs font-sans text-zinc-300 space-y-1">
+            <Card className="border-lime-400/20 bg-lime-400/[0.03] p-3 space-y-1">
               <span className="font-semibold text-lime-400 block">Verified Reporting Recognition:</span>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
                 Participants who submit verified violation reports that successfully uncover cheating rings will receive official recognition on the CCC Academic Honor Roll.
               </p>
-            </div>
-          </div>
+            </Card>
+          </Card>
 
-          {/* 🔒 Waiting Room / Arena Gate Status (when upcoming) */}
           {isUpcoming && (
-            <div className="rounded-lg border border-white/8 bg-zinc-950/80 p-6 space-y-4">
+            <Card className="border-white/8 bg-zinc-950/80 p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-white/8 pb-3">
                 <div className="flex items-center gap-2">
                   <Lock className="size-4 text-lime-400" />
@@ -811,9 +840,9 @@ export function ContestOverviewPage() {
                     Challenge Vault Status
                   </h3>
                 </div>
-                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+                <Badge variant="warning" className="text-[10px]">
                   Locked Until Start
-                </span>
+                </Badge>
               </div>
 
               <p className="text-xs font-sans text-zinc-400 leading-relaxed">
@@ -829,12 +858,7 @@ export function ContestOverviewPage() {
                     </span>
                     <span className="text-[11px] text-zinc-500">Synced Clock Active</span>
                   </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="default"
-                    className="w-full"
-                  >
+                  <Button asChild variant="outline" size="default" className="w-full">
                     <Link to={`/contests/${contestSlug}/lobby`}>
                       <span>Enter Waiting Room</span>
                       <ArrowRight className="size-3.5 ml-1" />
@@ -864,7 +888,7 @@ export function ContestOverviewPage() {
                   </Button>
                 </div>
               )}
-            </div>
+            </Card>
           )}
         </div>
       </div>
