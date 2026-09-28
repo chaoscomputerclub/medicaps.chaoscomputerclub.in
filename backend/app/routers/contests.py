@@ -198,6 +198,16 @@ async def get_contest_arena_data(
     )
 
 
+@router.get("/{slug}/submissions/mine")
+async def get_my_contest_submissions(
+    slug: str,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return the authenticated member's arena attempt and submission history."""
+    return await ContestController.get_my_contest_submissions(slug, current_member, db)
+
+
 @router.post("/{slug}/arena/run")
 async def run_contest_arena_code(
     slug: str,
@@ -241,15 +251,57 @@ async def submit_contest_arena_code(
 @router.post("/{slug}/finish")
 async def finish_contest_endpoint(
     slug: str,
+    request: Request,
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
     """Candidate finishes and officially submits the contest attempt."""
-    from app.controllers.assessment_controller import AssessmentController
-    return await AssessmentController.finish_assessment(
-        contest_slug=slug,
+    idempotency_key = request.headers.get("Idempotency-Key") or request.headers.get("X-Idempotency-Key")
+    return await ContestController.finish_contest_attempt(
+        slug=slug,
         current_member=current_member,
         db=db,
+        idempotency_key=idempotency_key,
+    )
+
+
+@router.post("/{slug}/finalize")
+async def finalize_contest_endpoint(
+    slug: str,
+    request: Request,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Candidate explicitly finalizes the contest attempt (alias for /finish)."""
+    idempotency_key = request.headers.get("Idempotency-Key") or request.headers.get("X-Idempotency-Key")
+    return await ContestController.finish_contest_attempt(
+        slug=slug,
+        current_member=current_member,
+        db=db,
+        idempotency_key=idempotency_key,
+    )
+
+
+@router.post("/{slug}/attempts/{attempt_id}/finalize")
+async def finalize_contest_attempt_by_id_endpoint(
+    slug: str,
+    attempt_id: str,
+    request: Request,
+    current_member: MemberProfile = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Candidate explicitly finalizes an active contest attempt by contest identifier and attempt ID.
+    Strictly authenticates member, verifies attempt ownership, validates attempt status,
+    and performs an atomic conditional transition to finalized without re-judging.
+    """
+    idempotency_key = request.headers.get("Idempotency-Key") or request.headers.get("X-Idempotency-Key")
+    return await ContestController.finish_contest_attempt(
+        slug=slug,
+        current_member=current_member,
+        db=db,
+        attempt_id=attempt_id,
+        idempotency_key=idempotency_key,
     )
 
 

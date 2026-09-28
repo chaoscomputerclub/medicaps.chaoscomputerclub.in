@@ -122,12 +122,15 @@ export function ContestLobbyPage() {
   );
 
   const isInProgress = Boolean(
+    resolvedRegistration?.contest_attempt_status === "in_progress" ||
     resolvedRegistration?.can_resume_assessment ||
     (resolvedRegistration?.assessment_status === "in_progress" && !resolvedRegistration?.assessment_taken)
   );
   const isAssessmentSubmitted = Boolean(
     !isInProgress && (
       resolvedContest?.is_submitted ||
+      resolvedRegistration?.contest_attempt_status === "finalized" ||
+      resolvedRegistration?.contest_attempt_status === "expired" ||
       resolvedRegistration?.status === "submitted" ||
       resolvedRegistration?.assessment_taken ||
       resolvedRegistration?.assessment_status === "submitted" ||

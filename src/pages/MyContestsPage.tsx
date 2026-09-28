@@ -291,15 +291,15 @@ export function MyContestsPage() {
                     </dl>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {isLive && !c.assessment_submitted && c.score === null ? (
+                      {isLive && c.contest_attempt_status !== "finalized" && c.contest_attempt_status !== "expired" ? (
                         <Button
                           asChild
                           variant="outline"
                           size="sm"
                         >
-                          <Link to={`/contests/${c.contest_slug}/lobby`}>
+                          <Link to={`/contests/${c.contest_slug}/arena`}>
                             <Play className="w-3 h-3 fill-current" />
-                            <span>Assessment</span>
+                            <span>Enter Arena</span>
                           </Link>
                         </Button>
                       ) : isUpcoming && !c.assessment_submitted ? (

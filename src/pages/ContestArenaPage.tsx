@@ -24,6 +24,7 @@ import {
   Copy,
   Cpu,
   FileText,
+  Flag,
   GripHorizontal,
   GripVertical,
   Layout,
@@ -79,6 +80,7 @@ import {
   fetchMyParticipationsThunk,
   runArenaCodeThunk,
   submitArenaCodeThunk,
+  finishContestThunk,
   clearArenaResults,
 } from "@/store/slices/contestSlice";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
@@ -130,21 +132,15 @@ export function ContestArenaPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error, registration, myParticipations } =
+  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error, registration } =
     useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
 
-  const participation = myParticipations.find((p) => p.contest_slug === contestSlug);
-
   const isAlreadySubmitted = Boolean(
-    registration?.status === "submitted" ||
-    registration?.assessment_taken ||
-    registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed" ||
-    participation?.assessment_submitted ||
-    participation?.outcome === "submitted" ||
-    participation?.outcome === "qualified" ||
-    (participation as any)?.assessment_status === "submitted"
+    arenaData?.attempt_status === "finalized" ||
+    arenaData?.attempt_status === "expired" ||
+    registration?.contest_attempt_status === "finalized" ||
+    registration?.contest_attempt_status === "expired"
   );
 
   useEffect(() => {
@@ -212,6 +208,8 @@ export function ContestArenaPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showFinishModal, setShowFinishModal] = useState(false);
+  const [isFinishingContest, setIsFinishingContest] = useState(false);
   const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(`ccc_solved_${contestSlug}`);
@@ -445,17 +443,24 @@ export function ContestArenaPage() {
   useEffect(() => {
     if (arenaData?.ends_at) {
       const endMs = new Date(arenaData.ends_at).getTime();
-      const diff = Math.floor((endMs - Date.now()) / 1000);
+      const serverOffsetMs = arenaData.server_time
+        ? Date.now() - new Date(arenaData.server_time).getTime()
+        : 0;
+      const currentServerTimeMs = Date.now() - serverOffsetMs;
+      const diff = Math.floor((endMs - currentServerTimeMs) / 1000);
       setRemainingSeconds(diff > 0 ? diff : 0);
     }
-  }, [arenaData?.ends_at]);
+  }, [arenaData?.ends_at, arenaData?.server_time]);
 
   // Real-time arena clock push
   useRealtimeEvents(contestSlug, (event) => {
     const evSlug = event.contest_slug || event.data?.contest_slug;
     if (evSlug && evSlug !== contestSlug) return;
 
-    if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
+    if (event.event === "contest_attempt_finalized") {
+      dispatch(fetchContestArenaThunk(contestSlug));
+      dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+    } else if (event.event === "arena_timer_reset" && event.data?.remaining_seconds !== undefined) {
       setRemainingSeconds(event.data.remaining_seconds);
       toast.info("Contest clock synchronized by Chief Proctor.");
     } else if (
@@ -640,6 +645,9 @@ export function ContestArenaPage() {
           problem_id: activeProblem.id,
           language: selectedLanguage,
           code: currentCode,
+          request_id: typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         },
       })
     );
@@ -692,6 +700,45 @@ export function ContestArenaPage() {
     selectedLanguage,
     currentCode,
   ]);
+
+  const handleConfirmFinishContest = useCallback(async () => {
+    if (isFinishingContest) return;
+    setIsFinishingContest(true);
+    try {
+      const res = await dispatch(finishContestThunk(contestSlug)).unwrap();
+      const status = res?.status?.toLowerCase();
+      const isSuccess = Boolean(
+        res?.success && (
+          status === "finalized" ||
+          status === "expired" ||
+          status === "submitted" ||
+          status === "completed" ||
+          res?.already_finalized ||
+          res?.already_submitted ||
+          String(res?.message || "").toLowerCase().includes("already")
+        )
+      );
+
+      if (isSuccess || String(res?.message || "").toLowerCase().includes("already")) {
+        toast.success(res?.message || "Contest attempt finalized.");
+        setShowFinishModal(false);
+        navigate(`/contests/${contestSlug}/results`, { replace: true });
+      } else {
+        toast.error(res?.message || "Failed to finalize contest attempt.");
+      }
+    } catch (err: any) {
+      const errMsg = typeof err === "string" ? err : err?.message || "";
+      if (errMsg.toLowerCase().includes("already")) {
+        toast.info(errMsg || "Contest attempt has already been finalized.");
+        setShowFinishModal(false);
+        navigate(`/contests/${contestSlug}/results`, { replace: true });
+      } else {
+        toast.error(errMsg || "Failed to finalize contest attempt.");
+      }
+    } finally {
+      setIsFinishingContest(false);
+    }
+  }, [contestSlug, dispatch, navigate, isFinishingContest]);
 
   // Global Keyboard Shortcuts (⌘' Run, ⌘⏎ Submit, ⌥← Prev, ⌥→ Next)
   useEffect(() => {
@@ -750,10 +797,9 @@ export function ContestArenaPage() {
     const errLower = (error || "").toLowerCase();
     const isSubmitted =
       isAlreadySubmitted ||
-      errLower.includes("already been submitted") ||
-      errLower.includes("already submitted") ||
-      errLower.includes("retake") ||
-      errLower.includes("attempt concluded");
+      errLower.includes("contest attempt is finalized") ||
+      errLower.includes("contest attempt has expired") ||
+      errLower.includes("contest attempt is expired");
 
     if (isSubmitted) {
       return (
@@ -1146,6 +1192,22 @@ export function ContestArenaPage() {
             <Send className="size-3 fill-current" />
             <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
             <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">⌘⏎</span>
+          </Button>
+
+          <div className="h-4 w-px bg-white/10 mx-0.5 hidden sm:block" />
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isRunningCode || isSubmittingCode || isContestOver || isFinishingContest}
+            onClick={() => setShowFinishModal(true)}
+            className="border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/70"
+            title="Officially conclude and finalize your contest attempt"
+          >
+            <Flag className="size-3" />
+            <span className="hidden sm:inline">Finish Contest</span>
+            <span className="sm:hidden">Finish</span>
           </Button>
         </div>
 
@@ -2677,6 +2739,65 @@ export function ContestArenaPage() {
             >
               <span>Proceed to Summary</span>
               <ArrowRight className="size-3.5 ml-1" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Explicit Contest Finalization Confirmation Dialog */}
+      <Dialog open={showFinishModal} onOpenChange={setShowFinishModal}>
+        <DialogContent className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-2xl">
+          <DialogHeader className="space-y-3 text-left">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+                <AlertTriangle className="size-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-semibold text-white tracking-tight font-sans">
+                  Finish contest?
+                </DialogTitle>
+                <p className="text-xs text-zinc-400 font-mono">
+                  Official attempt finalization
+                </p>
+              </div>
+            </div>
+            <DialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed pt-1">
+              After finishing:
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs text-zinc-300">
+            <div className="flex items-start gap-2">
+              <span className="text-red-400 font-bold">•</span>
+              <span>You cannot submit more solutions.</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-red-400 font-bold">•</span>
+              <span>Your current scores will become final.</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-red-400 font-bold">•</span>
+              <span>You cannot reopen this attempt.</span>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row items-center justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowFinishModal(false)}
+              disabled={isFinishingContest}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isFinishingContest}
+              onClick={handleConfirmFinishContest}
+              className="bg-red-600 hover:bg-red-500 text-white font-semibold"
+            >
+              {isFinishingContest ? "Finalizing…" : "Finish Contest"}
             </Button>
           </DialogFooter>
         </DialogContent>

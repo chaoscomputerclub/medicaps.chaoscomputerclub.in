@@ -20,6 +20,7 @@ import {
   Lock,
   Megaphone,
   Play,
+  Plus,
   Scale,
   Shield,
   ShieldAlert,
@@ -38,6 +39,8 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { slugifyProblem } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
+import { contestApi } from "@/features/contest/api";
+import { AuthorChallengeModal } from "@/organization/components/AuthorChallengeModal";
 
 /** Compute human-readable duration from two ISO datetime strings. */
 function contestDuration(startsAt: string, endsAt: string): string {
@@ -66,7 +69,11 @@ export function ContestOverviewPage() {
     isLoadingDetail,
     registeringSlugs,
   } = useAppSelector((state) => state.contest);
+  const currentMember = useAppSelector((state) => state.auth.member);
   const isRegistering = Boolean(registeringSlugs[contestSlug]);
+  const hasProctorKey = typeof localStorage !== "undefined" && Boolean(localStorage.getItem("ccc_proctor_key"));
+  const canAuthor = Boolean(currentMember?.is_core_member) || hasProctorKey;
+  const [isAuthorModalOpen, setIsAuthorModalOpen] = useState(false);
 
   const refreshDetail = useCallback((force = false) => {
     if (!contestSlug) return;
@@ -102,6 +109,8 @@ export function ContestOverviewPage() {
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
   const isSubmitted = Boolean(
     contest?.is_submitted ||
+    registration?.contest_attempt_status === "finalized" ||
+    registration?.contest_attempt_status === "expired" ||
     registration?.status === "submitted" ||
     registration?.assessment_taken ||
     registration?.assessment_status === "submitted" ||
@@ -469,8 +478,8 @@ export function ContestOverviewPage() {
         </div>
       </div>
 
-      {/* ── LIVE / FINISHED PROBLEM SET TABLE ── */}
-      {!isUpcoming && (
+      {/* ── LIVE / FINISHED / PROCTOR PROBLEM SET TABLE ── */}
+      {(!isUpcoming || canAuthor) && (
         <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/8 pb-3">
             <div className="flex items-center gap-2">
@@ -479,9 +488,22 @@ export function ContestOverviewPage() {
                 Problem Set
               </h2>
             </div>
-            <span className="text-xs font-sans text-zinc-500">
-              {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-sans text-zinc-500">
+                {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
+              </span>
+              {canAuthor && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsAuthorModalOpen(true)}
+                  className="h-7 text-xs font-mono border-white/10 text-lime-400 hover:bg-lime-400/10 cursor-pointer"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  <span>Author Challenge</span>
+                </Button>
+              )}
+            </div>
           </div>
 
           <Table>
@@ -497,7 +519,21 @@ export function ContestOverviewPage() {
               {problems.length === 0 ? (
                 <TableRow className="border-white/4">
                   <TableCell colSpan={4} className="py-10 text-center font-sans text-xs text-zinc-500">
-                    Problems will appear here once contest opens.
+                    <div className="space-y-3 max-w-md mx-auto">
+                      <p className="text-zinc-400">
+                        No challenges authored for contest &quot;{contest?.title || contestSlug}&quot; yet.
+                      </p>
+                      {canAuthor && (
+                        <Button
+                          size="sm"
+                          onClick={() => setIsAuthorModalOpen(true)}
+                          className="bg-lime-400 hover:bg-lime-300 text-black font-mono font-bold text-xs cursor-pointer shadow-sm"
+                        >
+                          <Plus className="w-3.5 h-3.5 mr-1" />
+                          <span>Author First Challenge</span>
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -832,6 +868,20 @@ export function ContestOverviewPage() {
           )}
         </div>
       </div>
+
+      {canAuthor && (
+        <AuthorChallengeModal
+          isOpen={isAuthorModalOpen}
+          onClose={() => setIsAuthorModalOpen(false)}
+          contestSlug={contestSlug}
+          existingProblemsCount={problems.length}
+          onSave={async (payload) => {
+            await contestApi.authorProblem(contestSlug, payload);
+            toast.success(`Problem ${payload.problem_index} ("${payload.title}") published to arena!`);
+            refreshDetail(true);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -252,7 +252,7 @@ export function AssessmentWorkspacePage() {
       if (window.opener) {
         window.close();
       } else {
-        navigate(`/contests/${contestSlug}`);
+        navigate(`/contests/${contestSlug}/results`);
       }
     }
   }

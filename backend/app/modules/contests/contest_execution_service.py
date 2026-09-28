@@ -4,6 +4,7 @@ modules/contests/contest_execution_service.py — Arena Code Sandbox Execution &
 """
 
 import logging
+import hashlib
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from fastapi import HTTPException
@@ -18,6 +19,7 @@ from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
 from app.models.db_models import (
     ContestProblem,
+    ContestAttempt,
     ContestSubmission,
     MemberProfile,
     OfflineContest,
@@ -36,6 +38,7 @@ from app.services.contest_eligibility_service import (
     is_contest_attempt_submitted,
 )
 from app.services.event_broadcaster import broadcast_event
+from app.modules.contests.contest_attempt_service import get_attempt
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +54,7 @@ class ArenaSubmitRequest(BaseModel):
     problem_id: str
     language: Language
     code: str
+    request_id: Optional[str] = None
 
 
 class ContestExecutionService:
@@ -151,6 +155,17 @@ class ContestExecutionService:
         if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to execute code in contest arena.")
 
+        attempt = await get_attempt(db, contest.id, current_member.id)
+        if not attempt:
+            raise HTTPException(status_code=409, detail="Open the contest arena to start an attempt before running code.")
+        if attempt.status != "in_progress":
+            raise HTTPException(status_code=403, detail=f"Contest attempt is {attempt.status}.")
+        attempt_ends_at = attempt.ends_at
+        if attempt_ends_at.tzinfo is None:
+            attempt_ends_at = attempt_ends_at.replace(tzinfo=timezone.utc)
+        if now_utc() >= attempt_ends_at:
+            raise HTTPException(status_code=403, detail="Contest attempt has expired.")
+
         is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
         if is_sub:
             raise HTTPException(
@@ -164,9 +179,11 @@ class ContestExecutionService:
                     status_code=403,
                     detail="Contest has not started yet. Code execution unlocks at start time.",
                 )
+            if contest.status == "finished":
+                raise HTTPException(status_code=403, detail="Contest has concluded.")
             if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
-                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+                    current_member, contest, db
                 )
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
@@ -174,6 +191,8 @@ class ContestExecutionService:
         problem = await ContestRepository.get_problem_by_id(db, payload.problem_id)
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
+        if problem.contest_id != contest.id:
+            raise HTTPException(status_code=404, detail="Problem does not belong to this contest.")
 
         fn_sig, eval_cfg, sample_list, _, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
         lang_str = str(payload.language).lower()
@@ -291,6 +310,53 @@ class ContestExecutionService:
         if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to submit code in contest arena.")
 
+        # Lock contest then attempt for the full submission transaction. A finish
+        # request takes the same locks, so submit-vs-finish has one DB-defined order.
+        contest_lock_result = await db.execute(
+            select(OfflineContest).where(OfflineContest.id == contest.id).with_for_update()
+        )
+        contest = contest_lock_result.scalars().first()
+        attempt = await get_attempt(db, contest.id, current_member.id, for_update=True)
+        if not attempt:
+            raise HTTPException(status_code=409, detail="Open the contest arena to start an attempt before submitting.")
+        if attempt.status != "in_progress":
+            raise HTTPException(status_code=403, detail=f"Contest attempt is {attempt.status}.")
+        attempt_ends_at = attempt.ends_at
+        if attempt_ends_at.tzinfo is None:
+            attempt_ends_at = attempt_ends_at.replace(tzinfo=timezone.utc)
+        if now_utc() >= attempt_ends_at:
+            raise HTTPException(status_code=403, detail="Contest attempt has expired.")
+
+        if contest.status == "upcoming":
+            raise HTTPException(status_code=403, detail="Contest has not started yet.")
+        if contest.status == "finished" and not (settings.DEV_MODE and slug.startswith("dev-")):
+            raise HTTPException(status_code=403, detail="Contest has concluded.")
+
+        request_key = payload.request_id or hashlib.sha256(
+            f"{payload.problem_id}\0{payload.language}\0{payload.code}".encode("utf-8")
+        ).hexdigest()
+        prior_result = await db.execute(
+            select(ContestSubmission).where(
+                ContestSubmission.attempt_id == attempt.id,
+                ContestSubmission.idempotency_key == request_key,
+            )
+        )
+        prior_submission = prior_result.scalars().first()
+        if prior_submission:
+            return {
+                "submission_id": prior_submission.id,
+                "success": prior_submission.verdict == "ACCEPTED",
+                "verdict": prior_submission.verdict,
+                "passed_testcases": prior_submission.passed_testcases,
+                "total_testcases": prior_submission.total_testcases,
+                "points_awarded": prior_submission.points_awarded,
+                "execution_time": prior_submission.execution_time,
+                "memory": prior_submission.memory_used,
+                "message": "This submission request was already processed.",
+                "idempotent_replay": True,
+                "testcase_results": [],
+            }
+
         is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
         if is_sub:
             raise HTTPException(
@@ -298,24 +364,23 @@ class ContestExecutionService:
                 detail=sub_reason or "Contest attempt has already been submitted. Further code submissions are locked.",
             )
 
-        if not (settings.DEV_MODE and slug.startswith("dev-")):
-            if contest.status == "upcoming":
-                raise HTTPException(
-                    status_code=403,
-                    detail="Contest has not started yet. Submissions unlock at start time.",
-                )
-            if contest.status == "live":
-                is_eligible, reason = await is_member_eligible_for_live_contest(
-                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
-                )
-                if not is_eligible:
-                    raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
+        if contest.status == "live":
+            is_eligible, reason = await is_member_eligible_for_live_contest(
+                current_member,
+                contest,
+                db,
+            )
+            if not is_eligible:
+                raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
 
         problem = await ContestRepository.get_problem_by_id(db, payload.problem_id)
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
+        if problem.contest_id != contest.id:
+            raise HTTPException(status_code=404, detail="Problem does not belong to this contest.")
 
         fn_sig, eval_cfg, samples, hidden, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
+        lang_str = payload.language.value if hasattr(payload.language, "value") else str(payload.language)
         adapter = get_adapter(lang_str) if fn_sig else None
         all_raw = samples + hidden
 
@@ -386,9 +451,16 @@ class ContestExecutionService:
         total_tc = max(1, len(all_tcs))
         points_awarded = problem.points if is_accepted else int(problem.points * (passed_count / total_tc))
 
+        if contest.status != "live" and not (settings.DEV_MODE and slug.startswith("dev-")):
+            raise HTTPException(status_code=403, detail="Contest has concluded.")
+        if now_utc() >= attempt_ends_at and not (settings.DEV_MODE and slug.startswith("dev-")):
+            raise HTTPException(status_code=403, detail="Contest attempt has expired.")
+
 
         sub = ContestSubmission(
             contest_id=contest.id,
+            attempt_id=attempt.id,
+            idempotency_key=request_key,
             problem_id=problem.id,
             member_id=current_member.id,
             handle=current_member.handle or f"cadet_{current_member.id[:6]}",

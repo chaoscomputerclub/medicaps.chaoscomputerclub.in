@@ -18,6 +18,8 @@ import type {
   ContestArenaData,
   ArenaRunResult,
   ArenaSubmitResult,
+  MyContestSubmissions,
+  ContestFinalizeResponse,
 } from "./types";
 
 export class ContestApiError extends Error {
@@ -221,6 +223,7 @@ export const contestApi = {
             can_enter_live_contest: Boolean(raw["can_enter_live_contest"]),
             eligibility_message: raw["eligibility_message"] ?? null,
             is_dev_bypass: Boolean(raw["is_dev_bypass"]),
+            contest_attempt_status: (raw["contest_attempt_status"] ?? null) as RegistrationStatus["contest_attempt_status"],
             remaining_seconds: raw["remaining_seconds"] ?? null,
             anti_cheat_violations: raw["anti_cheat_violations"] ?? 0,
             max_violations: raw["max_violations"] ?? 3,
@@ -465,13 +468,9 @@ export const contestApi = {
           rating_delta: item["rating_delta"] ?? null,
           participants: Number(item["participants"] ?? 0),
           outcome: (item["outcome"] ?? "registered") as ParticipationRecord["outcome"],
-          assessment_submitted: Boolean(
-            item["assessment_submitted"] ||
-            (item["score"] !== null && item["score"] !== undefined) ||
-            item["outcome"] === "submitted" ||
-            item["outcome"] === "qualified"
-          ),
+          assessment_submitted: Boolean(item["assessment_submitted"]),
           assessment_score: item["assessment_score"] ?? item["score"] ?? null,
+          contest_attempt_status: (item["contest_attempt_status"] ?? null) as ParticipationRecord["contest_attempt_status"],
         }));
       },
       {
@@ -487,6 +486,12 @@ export const contestApi = {
     return await request<ContestArenaData>(`/contests/${encodeURIComponent(slug)}/arena`);
   },
 
+  async myContestSubmissions(slug: string): Promise<MyContestSubmissions> {
+    return await request<MyContestSubmissions>(`/contests/${encodeURIComponent(slug)}/submissions/mine`, {
+      cache: "no-store",
+    });
+  },
+
   async runArenaCode(slug: string, payload: { problem_id: string; language: string; code: string; custom_stdin?: string }): Promise<ArenaRunResult> {
     return await request<ArenaRunResult>(`/contests/${encodeURIComponent(slug)}/arena/run`, {
       method: "POST",
@@ -494,7 +499,7 @@ export const contestApi = {
     });
   },
 
-  async submitArenaCode(slug: string, payload: { problem_id: string; language: string; code: string }): Promise<ArenaSubmitResult> {
+  async submitArenaCode(slug: string, payload: { problem_id: string; language: string; code: string; request_id: string }): Promise<ArenaSubmitResult> {
     const res = await request<ArenaSubmitResult>(`/contests/${encodeURIComponent(slug)}/arena/submit`, {
       method: "POST",
       body: JSON.stringify(payload),
@@ -504,17 +509,66 @@ export const contestApi = {
     return res;
   },
 
-  async finishContest(slug: string): Promise<{ success: boolean; message: string; total_score?: number }> {
-    const res = await request<{ success: boolean; message: string; total_score?: number }>(
-      `/assessment/${encodeURIComponent(slug)}/finish`,
-      { method: "POST" }
-    );
+  async finalizeAttempt(slug: string, attemptId?: string): Promise<ContestFinalizeResponse> {
+    const idempotencyKey = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const url = attemptId
+      ? `/contests/${encodeURIComponent(slug)}/attempts/${encodeURIComponent(attemptId)}/finalize`
+      : `/contests/${encodeURIComponent(slug)}/finalize`;
+
+    let res: ContestFinalizeResponse;
+    try {
+      res = await request<ContestFinalizeResponse>(url, {
+        method: "POST",
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+        },
+      });
+    } catch (err: any) {
+      if (err?.status === 404 || String(err?.message || "").includes("404")) {
+        res = await request<ContestFinalizeResponse>(`/contests/${encodeURIComponent(slug)}/finish`, {
+          method: "POST",
+          headers: {
+            "Idempotency-Key": idempotencyKey,
+          },
+        });
+      } else {
+        throw err;
+      }
+    }
     invalidateSwrCache("contests:*");
     invalidateSwrCache(`contest:*:${slug}*`);
     invalidateSwrCache(`contest:reg_status:${slug}*`);
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("assessment:status_changed"));
+      window.dispatchEvent(
+        new CustomEvent("contest:attempt_finalized", { detail: { contest_slug: slug, ...res } })
+      );
     }
+    return res;
+  },
+
+  async finishContest(slug: string): Promise<ContestFinalizeResponse> {
+    return this.finalizeAttempt(slug);
+  },
+
+  async authorProblem(slug: string, payload: any): Promise<any> {
+    const res = await request<any>(`/contests/${encodeURIComponent(slug)}/problems`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    invalidateSwrCache("contests:*");
+    invalidateSwrCache(`contest:*:${slug}*`);
+    return res;
+  },
+
+  async deleteProblem(slug: string, problemIndex: string): Promise<any> {
+    const res = await request<any>(`/contests/${encodeURIComponent(slug)}/problems/${encodeURIComponent(problemIndex)}`, {
+      method: "DELETE",
+    });
+    invalidateSwrCache("contests:*");
+    invalidateSwrCache(`contest:*:${slug}*`);
     return res;
   },
 };

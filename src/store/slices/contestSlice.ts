@@ -202,6 +202,18 @@ export const submitArenaCodeThunk = createAsyncThunk(
   }
 );
 
+export const finishContestThunk = createAsyncThunk(
+  "contest/finishContest",
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const res = await contestApi.finishContest(slug);
+      return { slug, ...res };
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to finalize contest");
+    }
+  }
+);
+
 export const contestSlice = createSlice({
   name: "contest",
   initialState,
@@ -381,6 +393,22 @@ export const contestSlice = createSlice({
           }
           break;
         }
+        case "contest_attempt_finalized": {
+          if (isCurrentMember) {
+            const finalStatus = (event.data?.status ?? "finalized") as "finalized" | "expired";
+            if (state.arenaData && (slug === state.currentContest?.slug || slug === state.arenaData.slug)) {
+              state.arenaData.attempt_status = finalStatus;
+            }
+            if (state.registration && slug === state.registration.contest_slug) {
+              state.registration.contest_attempt_status = finalStatus;
+            }
+            const part = state.myParticipations.find((p) => p.contest_slug === slug);
+            if (part) {
+              part.contest_attempt_status = finalStatus;
+            }
+          }
+          break;
+        }
       }
     },
   },
@@ -543,6 +571,22 @@ export const contestSlice = createSlice({
     });
     builder.addCase(submitArenaCodeThunk.rejected, (state) => {
       state.isSubmittingCode = false;
+    });
+
+    // Finish Contest
+    builder.addCase(finishContestThunk.fulfilled, (state, action) => {
+      const slug = action.payload.slug;
+      const finalStatus = action.payload.status;
+      if (state.arenaData && (state.currentContest?.slug === slug || state.arenaData.slug === slug)) {
+        state.arenaData.attempt_status = finalStatus;
+      }
+      if (state.registration && state.registration.contest_slug === slug) {
+        state.registration.contest_attempt_status = finalStatus;
+      }
+      const part = state.myParticipations.find((p) => p.contest_slug === slug);
+      if (part) {
+        part.contest_attempt_status = finalStatus;
+      }
     });
   },
 });

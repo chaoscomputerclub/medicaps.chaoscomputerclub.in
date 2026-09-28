@@ -103,6 +103,14 @@ class ContestController:
         )
 
     @staticmethod
+    async def get_my_contest_submissions(
+        slug: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> Dict[str, Any]:
+        return await ContestService.get_my_contest_submissions(slug, current_member, db)
+
+    @staticmethod
     async def register_for_contest(
         slug: str,
         current_member: MemberProfile,
@@ -165,6 +173,24 @@ class ContestController:
         )
 
     @staticmethod
+    async def finish_contest_attempt(
+        slug: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+        attempt_id: Optional[str] = None,
+        idempotency_key: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        from app.modules.contests.contest_attempt_service import finalize_attempt
+
+        return await finalize_attempt(
+            slug=slug,
+            member=current_member,
+            db=db,
+            expected_attempt_id=attempt_id,
+            idempotency_key=idempotency_key,
+        )
+
+    @staticmethod
     async def run_arena_code(
         slug: str,
         payload: ArenaRunRequest,
@@ -199,6 +225,7 @@ class ContestController:
                     "member_id": current_member.id,
                     "code": payload.code,
                     "language": str(payload.language),
+                    "request_id": payload.request_id,
                 },
                 priority=JobPriority.HIGH,
                 idempotency_key=f"sub:arena:{slug}:{payload.problem_id}:{current_member.id}:{code_hash}",

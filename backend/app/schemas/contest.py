@@ -60,6 +60,10 @@ class ContestArenaResponse(BaseModel):
     chief_proctors: List[str]
     problems: List[ContestArenaProblemResponse]
     server_time: str
+    attempt_id: Optional[str] = None
+    attempt_status: Optional[str] = None
+    attempt_started_at: Optional[str] = None
+    attempt_ends_at: Optional[str] = None
 
 
 class ContestSummaryResponse(BaseModel):
@@ -169,3 +173,4 @@ class ArenaSubmitRequest(BaseModel):
     problem_id: str
     language: str
     code: str
+    request_id: Optional[str] = None

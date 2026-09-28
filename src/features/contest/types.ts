@@ -66,6 +66,7 @@ export type RegistrationStatus = {
   can_enter_live_contest: boolean;
   eligibility_message: string | null;
   is_dev_bypass?: boolean;
+  contest_attempt_status?: "in_progress" | "finalized" | "expired" | null | undefined;
   remaining_seconds?: number | null;
   anti_cheat_violations?: number;
   max_violations?: number;
@@ -142,6 +143,7 @@ export type ParticipationRecord = {
   outcome: "registered" | "live" | "qualified" | "not_qualified" | "pending" | "submitted";
   assessment_submitted?: boolean;
   assessment_score?: number | null;
+  contest_attempt_status?: "in_progress" | "finalized" | "expired" | null | undefined;
 };
 
 /** Phase of the two-round funnel, derived from contest + registration state. */
@@ -192,6 +194,11 @@ export type ContestArenaData = {
   is_proctored: boolean;
   is_faculty_proctored?: boolean;
   problems: ContestArenaProblem[];
+  attempt_id?: string;
+  attempt_status?: "in_progress" | "finalized" | "expired";
+  attempt_started_at?: string;
+  attempt_ends_at?: string;
+  server_time?: string;
 };
 
 export type ArenaRunResult = {
@@ -230,6 +237,7 @@ export type ArenaSubmitResult = {
   time?: number;
   memory?: number;
   message: string;
+  idempotent_replay?: boolean;
   compile_output?: string;
   stderr?: string;
   testcase_results?: Array<{
@@ -246,3 +254,41 @@ export type ArenaSubmitResult = {
     wall_time_ms: number;
   }>;
 };
+
+export type MyContestSubmissions = {
+  contest_slug: string;
+  attempt: null | {
+    id: string;
+    status: "in_progress" | "finalized" | "expired";
+    started_at: string;
+    ends_at: string;
+    finalized_at: string | null;
+    final_score: number | null;
+  };
+  score: number;
+  submissions: Array<{
+    id: string;
+    attempt_id: string | null;
+    problem_id: string;
+    verdict: string;
+    points_awarded: number;
+    passed_testcases: number;
+    total_testcases: number;
+    submitted_at: string;
+  }>;
+};
+
+export type ContestFinalizeResponse = {
+  success: boolean;
+  message: string;
+  status: "finalized" | "expired" | "submitted" | "completed" | string;
+  attempt_id?: string;
+  contest_id?: string;
+  contest_slug?: string;
+  total_score?: number;
+  score?: number;
+  finalized_at?: string;
+  already_finalized?: boolean;
+  already_submitted?: boolean;
+};
+

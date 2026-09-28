@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useMemo, useCallback, useRef, useTransition, useDeferredValue } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -6,7 +8,6 @@ import {
   Clock,
   Users,
   ArrowRight,
-  ExternalLink,
   Code2,
   Sparkles,
   Flame,
@@ -22,9 +23,9 @@ import {
   RotateCcw,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/design-system";
+import { Input } from "@/components/design-system";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/design-system";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestsThunk, registerContestThunk, unregisterContestThunk, fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
 import { contestApi } from "@/features/contest/api";
@@ -37,9 +38,16 @@ import { toast } from "sonner";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import LightRays from "./LightRays";
-import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/ui/animated-tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/design-system";
 import { prefetchContestRoute } from "@/AppRoutes";
 import { useRealtimeEvents } from "@/lib/realtime";
+import { Badge } from "@/components/design-system";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/design-system";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/design-system";
+import { Skeleton, SkeletonText, SkeletonCard, SkeletonRow, SkeletonAvatar } from "@/components/design-system";
+import { EmptyState } from "@/components/design-system";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "@/components/design-system";
+import { Separator } from "@/components/design-system";
 
 function useCountdown(
   targetIsoDate: string | null | undefined,
@@ -115,41 +123,41 @@ function ContestCountdownBadge({
   if (isLive) {
     if (cdEnds.isExpired) {
       return (
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-zinc-400 shadow-sm">
-          <span>ROUND CONCLUDED</span>
-        </div>
+        <Badge variant="neutral" className="rounded-none px-3 py-1.5 gap-1.5">
+          <span className="font-mono text-xs">ROUND CONCLUDED</span>
+        </Badge>
       );
     }
     const { days, hours, minutes, seconds } = cdEnds;
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-red-400 tabular-nums shadow-sm">
-        <Clock className="size-3 text-red-400 animate-pulse" />
-        <span>
+      <Badge variant="danger" className="rounded-none px-3 py-1.5 gap-1.5">
+        <Clock className="size-3 animate-pulse" />
+        <span className="font-mono tabular-nums text-xs">
           Closes {days > 0 ? `${days}d ` : ""}
           {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
         </span>
-      </div>
+      </Badge>
     );
   }
 
   if (cdStarts.isExpired) {
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-lime-400 tabular-nums shadow-sm">
+      <Badge variant="success" className="rounded-none px-3 py-1.5 gap-1.5">
         <span className="size-1.5 rounded-full bg-lime-400 animate-ping" />
-        <span>STARTING NOW</span>
-      </div>
+        <span className="font-mono text-xs">STARTING NOW</span>
+      </Badge>
     );
   }
 
   const { days, hours, minutes, seconds } = cdStarts;
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-white tabular-nums shadow-sm transition-colors group-hover:border-lime-400/40">
+    <Badge variant="subtle" className="rounded-none px-3 py-1.5 gap-1.5 group hover:border-lime-400/40 transition-colors">
       <Clock className="size-3 text-lime-400 transition-transform duration-300 group-hover:rotate-45" />
-      <span>
+      <span className="font-mono tabular-nums text-xs">
         {days > 0 ? `${days}d ` : ""}
         {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
       </span>
-    </div>
+    </Badge>
   );
 }
 
@@ -194,7 +202,6 @@ export function ContestsHubPage() {
     [dispatch, member]
   );
 
-  // Real-time synchronization across clients, assessment finishes, and contest status updates
   useRealtimeEvents(
     undefined,
     (event) => {
@@ -365,7 +372,6 @@ export function ContestsHubPage() {
     return filteredMyParticipations.slice(start, start + itemsPerPage);
   }, [filteredMyParticipations, currentPage]);
 
-  // Top 3 Podium & Cadet Standing
   const rank1 = leaders[0] || null;
   const rank2 = leaders[1] || null;
   const rank3 = leaders[2] || null;
@@ -385,11 +391,22 @@ export function ContestsHubPage() {
     };
   }, [leaders, member]);
 
-  if (isLoading && contests.length === 0) return <ContestsHubSkeleton />;
+  if (isLoading && contests.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8">
+        <div className="flex flex-col space-y-8">
+          <SkeletonCard className="h-64" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <SkeletonCard className="lg:col-span-5 h-[600px]" />
+            <SkeletonCard className="lg:col-span-7 h-[600px]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen text-zinc-100 pb-16">
-      {/* ─── CONTEST ROOT PAGE BACKGROUND (LIGHT RAYS) ─── */}
       <div
         className="pointer-events-none absolute -top-4 md:-top-8 -left-4 md:-left-8 w-[calc(100%+2rem)] md:w-[calc(100%+4rem)] h-[520px] overflow-hidden z-0"
         style={{
@@ -412,11 +429,8 @@ export function ContestsHubPage() {
         />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-10">
-
-        {/* ─── HERO SECTION ─────────────────────────────── */}
-        <div className="flex flex-col items-center text-center space-y-3 pt-2 pb-2">
-          {/* Interactive Floating Trophy */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-10">
+        <div className="flex flex-col items-center text-center space-y-6 pt-4 pb-4">
           <div className="relative group cursor-pointer">
             <div className="absolute -inset-4 rounded-full bg-lime-400/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             <img
@@ -426,35 +440,36 @@ export function ContestsHubPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+          <div className="space-y-3">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white font-sans">
               CCC Medi-Caps Contest
             </h1>
-            <p className="text-sm sm:text-base text-zinc-400 font-sans max-w-lg mx-auto">
+            <p className="text-sm md:text-base text-zinc-400 font-sans max-w-lg mx-auto">
               Weekly competitive programming arena. Solve algorithmic challenges, elevate your rating, and claim the championship!
             </p>
-            <div className="group inline-flex items-center gap-2 text-xs font-mono text-zinc-400 bg-white/[0.03] border border-white/8 hover:border-lime-400/30 rounded-full px-3.5 py-1.5 mt-1 transition-all duration-200">
-              <Trophy className="size-3.5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-              <span>Official Medi-Caps Chapter Championship Trophy</span>
-            </div>
+            <Badge variant="subtle" className="gap-2">
+              <Trophy className="size-3.5 text-lime-400" />
+              <span className="font-mono text-xs">Official Medi-Caps Chapter Championship Trophy</span>
+            </Badge>
           </div>
 
-          {/* ─── UPCOMING CONTEST HERO CARDS (LEETCODE STYLE - LARGER SIZE) ───────────── */}
           <div className="w-full pt-4 max-w-5xl mx-auto">
             {upcomingContests.length === 0 ? (
-              <div className="rounded-lg border border-white/10 bg-zinc-950/80 backdrop-blur-xl p-10 text-center space-y-3 group hover:border-white/20 transition-all duration-200">
+              <Card className="p-10 text-center space-y-4 group hover:border-white/20 transition-colors">
                 <Trophy className="size-10 text-zinc-600 mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-lime-400" />
-                <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
-                <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
-                  New official rounds will be announced shortly. Practice in the Problem Archive in the meantime.
-                </p>
-                <Button asChild variant="outline" size="sm" className="mt-3 group/btn">
+                <div className="space-y-2">
+                  <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
+                  <p className="text-xs md:text-sm text-zinc-500 max-w-md mx-auto">
+                    New official rounds will be announced shortly. Practice in the Problem Archive in the meantime.
+                  </p>
+                </div>
+                <Button asChild variant="outline" size="sm" className="mt-3">
                   <Link to="/problems" className="flex items-center gap-1.5">
                     <span>Problem Archive</span>
                     <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
                   </Link>
                 </Button>
-              </div>
+              </Card>
             ) : (
               <div
                 className={`grid gap-6 ${
@@ -472,12 +487,10 @@ export function ContestsHubPage() {
                   const isLive = contest.status === "live";
                   const isUserCompleted = Boolean(
                     contest.is_submitted ||
-                    participation?.assessment_submitted ||
-                    participation?.outcome === "submitted" ||
-                    participation?.outcome === "qualified" ||
-                    participation?.outcome === "not_qualified" ||
-                    (participation as any)?.assessment_status === "submitted" ||
-                    (participation as any)?.assessment_status === "completed"
+                    participation?.contest_attempt_status === "finalized" ||
+                    participation?.contest_attempt_status === "expired" ||
+                    (contest.status === "finished" && participation) ||
+                    (!isLive && participation?.assessment_submitted)
                   );
                   const startsAtFormatted = new Date(contest.starts_at).toLocaleString(
                     "en-IN",
@@ -492,15 +505,13 @@ export function ContestsHubPage() {
                   );
 
                   return (
-                    <div
+                    <Card
                       key={contest.slug}
                       data-testid="hero-contest-card"
                       onClick={() => navigate(isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`)}
-                      className="group relative flex flex-col justify-between rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
+                      className="group relative flex flex-col justify-between cursor-pointer transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)]"
                     >
-                      {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
-                      <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-gradient-to-br from-zinc-900/90 via-black to-zinc-950 overflow-hidden border-b border-white/8">
-                        {/* Mesh grid backdrop */}
+                      <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-gradient-to-br from-zinc-900/90 via-black to-zinc-950 border-b border-white/8 overflow-hidden">
                         <div
                           className="absolute inset-0 opacity-20 pointer-events-none"
                           style={{
@@ -510,26 +521,25 @@ export function ContestsHubPage() {
                           }}
                         />
 
-                        {/* Top Row: Live Indicator, Completed Badge & Countdown */}
                         <div className="relative z-10 flex items-center justify-between w-full">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             {isLive ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-red-400">
+                              <Badge variant="danger" className="rounded-none gap-1.5">
                                 <span className="size-2 rounded-full bg-red-500 animate-ping" />
-                                <span>LIVE NOW</span>
-                              </span>
+                                <span className="font-mono text-[10px] uppercase tracking-wider">LIVE NOW</span>
+                              </Badge>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400">
+                              <Badge variant="subtle" className="rounded-none gap-1.5">
                                 <Calendar className="size-3 text-zinc-400" />
-                                <span>OFFICIAL ROUND</span>
-                              </span>
+                                <span className="font-mono text-[10px] uppercase tracking-wider">OFFICIAL ROUND</span>
+                              </Badge>
                             )}
 
                             {isUserCompleted && (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/70 backdrop-blur-sm px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-400 shadow-sm">
-                                <CheckCircle2 className="size-3 text-emerald-400" />
-                                <span>ATTEMPT SUBMITTED</span>
-                              </span>
+                              <Badge variant="success" className="rounded-none gap-1.5">
+                                <CheckCircle2 className="size-3" />
+                                <span className="font-mono text-[10px] uppercase tracking-wider">ATTEMPT SUBMITTED</span>
+                              </Badge>
                             )}
                           </div>
 
@@ -540,7 +550,6 @@ export function ContestsHubPage() {
                           />
                         </div>
 
-                        {/* Center Typography */}
                         <div className="relative z-10 my-auto py-2">
                           <div className="min-w-0">
                             <Link
@@ -559,12 +568,10 @@ export function ContestsHubPage() {
                           </div>
                         </div>
 
-                        {/* Banner bottom accent bar */}
                         <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-lime-400/40 to-transparent" />
                       </div>
 
-                      {/* Card Lower Info & Action Bar - Spacious & Click-Friendly */}
-                      <div className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-black/60 border-t border-white/6">
+                      <CardFooter className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-black/60 border-t border-white/8">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 font-mono text-xs sm:text-sm text-zinc-400 truncate">
                             <Calendar className="size-4 text-zinc-500 shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:text-lime-400" />
@@ -575,7 +582,6 @@ export function ContestsHubPage() {
                           </span>
                         </div>
 
-                        {/* Action CTA: Single Toggle Button (isolated from card click) */}
                         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {isUserCompleted ? (
                             <Button
@@ -642,41 +648,35 @@ export function ContestsHubPage() {
                             </Button>
                           )}
                         </div>
-                      </div>
-                    </div>
+                      </CardFooter>
+                    </Card>
                   );
                 })}
               </div>
             )}
 
-            {/* Sub-hero note with animated sparkles */}
-            <div className="group flex items-center justify-center gap-2 text-xs sm:text-sm font-mono text-zinc-500 mt-6 cursor-default">
+            <div className="group flex items-center justify-center gap-2 text-xs md:text-sm font-mono text-zinc-500 mt-6 cursor-default">
               <Sparkles className="size-4 text-lime-400 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-125" />
               <span className="group-hover:text-zinc-400 transition-colors">
-                Campus Competitive Programming Arena • Medi-Caps University Cadets
+                Campus Competitive Programming Arena · Medi-Caps University Cadets
               </span>
             </div>
           </div>
         </div>
 
-        {/* ─── TWO-COLUMN SPLIT SECTION (LARGER BOXES & PADDING) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-          {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
-          <div className="lg:col-span-5 rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
+          <Card className="lg:col-span-5 p-6 sm:p-7 shadow-2xl space-y-6 h-full min-h-[600px]">
+            <CardHeader className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
               <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-              <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+              <CardTitle className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider">
                 University Standings
-              </h3>
-            </div>
+              </CardTitle>
+            </CardHeader>
 
-            {/* ─── CADET'S PERSONAL STANDING STRIP (LARGER BOX) ── */}
             {myStanding && myStanding.entry && (
-              <div className="p-4 sm:p-5 rounded-lg border border-lime-400/30 bg-lime-400/[0.04] flex items-center justify-between gap-3 group hover:border-lime-400/60 transition-all duration-200">
+              <Card className="p-4 sm:p-5 border-lime-400/30 bg-lime-400/[0.04] flex items-center justify-between gap-3 group hover:border-lime-400/60 transition-all duration-200">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-lime-400/15 border border-lime-400/40 font-mono text-base font-bold text-lime-400 shadow-sm">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-none bg-lime-400/15 border border-lime-400/40 font-mono text-base font-bold text-lime-400 shadow-sm">
                     #{myStanding.rank}
                   </div>
                   <div className="min-w-0">
@@ -702,12 +702,10 @@ export function ContestsHubPage() {
                     <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
                   </Link>
                 </CadetProfileHoverCard>
-              </div>
+              </Card>
             )}
 
-            {/* ─── TOP 3 PODIUM DISPLAY (FIXED OVERLAP & CIRCULAR AVATARS) ───────────────── */}
-            <div className="grid grid-cols-3 gap-3 items-end pt-6 pb-4 border-b border-white/6">
-              {/* Rank 2 (Left - Silver, Larger Box) */}
+            <div className="grid grid-cols-3 gap-3 items-end pt-6 pb-4 border-b border-white/8">
               {rank2 ? (
                 <CadetProfileHoverCard
                   handle={rank2.handle}
@@ -717,7 +715,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank2.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-none border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 shadow-lg font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
@@ -735,7 +733,7 @@ export function ContestsHubPage() {
                       <p className="text-xs sm:text-sm font-bold text-white group-hover:text-zinc-200 transition-colors truncate font-sans max-w-full" title={rank2?.handle || "Cadet 2"}>
                         {rank2?.handle || "Cadet 2"}
                       </p>
-                      <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
+                      <span className="inline-block mt-1.5 rounded-none bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
                         {rank2?.rating ?? 1200}
                       </span>
                       <span className="block font-mono text-[10px] text-zinc-500 mt-1">
@@ -745,12 +743,11 @@ export function ContestsHubPage() {
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[225px] opacity-40">
+                <div className="flex flex-col items-center justify-center p-4 rounded-none border border-white/5 bg-black/20 min-h-[225px] opacity-40">
                   <span className="font-mono text-xs text-zinc-600">Rank #2</span>
                 </div>
               )}
 
-              {/* Rank 1 (Center - Elevated Champion, Proper Z-Index & Breathing Room) */}
               {rank1 ? (
                 <CadetProfileHoverCard
                   handle={rank1.handle}
@@ -760,7 +757,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank1.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-lg border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-none border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-6 pb-3 flex flex-col items-center">
                       <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 drop-shadow-[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
@@ -788,12 +785,11 @@ export function ContestsHubPage() {
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[245px] opacity-40">
+                <div className="flex flex-col items-center justify-center p-4 rounded-none border border-white/5 bg-black/20 min-h-[245px] opacity-40">
                   <span className="font-mono text-xs text-zinc-600">Rank #1</span>
                 </div>
               )}
 
-              {/* Rank 3 (Right - Bronze, Larger Box) */}
               {rank3 ? (
                 <CadetProfileHoverCard
                   handle={rank3.handle}
@@ -803,7 +799,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank3.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-none border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 shadow-lg font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
@@ -821,7 +817,7 @@ export function ContestsHubPage() {
                       <p className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate font-sans max-w-full" title={rank3?.handle || "Cadet 3"}>
                         {rank3?.handle || "Cadet 3"}
                       </p>
-                      <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
+                      <span className="inline-block mt-1.5 rounded-none bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
                         {rank3?.rating ?? 1200}
                       </span>
                       <span className="block font-mono text-[10px] text-zinc-500 mt-1">
@@ -831,14 +827,13 @@ export function ContestsHubPage() {
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[225px] opacity-40">
+                <div className="flex flex-col items-center justify-center p-4 rounded-none border border-white/5 bg-black/20 min-h-[225px] opacity-40">
                   <span className="font-mono text-xs text-zinc-600">Rank #3</span>
                 </div>
               )}
             </div>
 
-            {/* ─── RANKS 4 TO 10 LIST (LARGER ROWS & AVATARS) ───────────────── */}
-            <div className="divide-y divide-white/5 space-y-1">
+            <CardContent className="pt-0 divide-y divide-white/10 space-y-1">
               {otherRankers.length === 0 ? (
                 <p className="py-6 text-center text-xs sm:text-sm font-mono text-zinc-500">
                   Compete in weekly rounds to claim ranks 4–10.
@@ -856,10 +851,10 @@ export function ContestsHubPage() {
                     >
                       <Link
                         to={`/profile/${leader.handle}`}
-                        className="group flex items-center justify-between py-3.5 px-4 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px] cursor-pointer"
+                        className="group flex items-center justify-between py-3.5 px-4 rounded-none border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px] cursor-pointer"
                       >
                         <div className="flex items-center gap-3.5 min-w-0">
-                          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-none bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
                             {String(rankNum).padStart(2, "0")}
                           </span>
 
@@ -896,10 +891,9 @@ export function ContestsHubPage() {
                   );
                 })
               )}
-            </div>
+            </CardContent>
 
-            {/* Footer: Show Full Leaderboard */}
-            <div className="pt-3 text-center border-t border-white/6">
+            <CardFooter className="pt-3 text-center border-t border-white/8">
               <Link
                 to="/leaderboard"
                 className="group inline-flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-zinc-400 hover:text-lime-400 transition-colors"
@@ -907,274 +901,311 @@ export function ContestsHubPage() {
                 <span>View Full University Leaderboard</span>
                 <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
               </Link>
-            </div>
-          </div>
+            </CardFooter>
+          </Card>
 
-          {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
-          <div className="lg:col-span-7 rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
-            {/* Header: Animated Tabs & Search */}
-            <Tabs
-              value={activeTab}
-              onValueChange={(v) => {
-                startTransition(() => {
-                  setSearchParams({ tab: v });
-                  setCurrentPage(1);
-                });
-              }}
-              className="gap-0"
-            >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
-              <TabsList>
-                <TabsTab value="past" id="tab-past-contests">Past Contests</TabsTab>
-                <TabsTab value="my" id="tab-my-contests">
-                  My Contests{myParticipations.length > 0 && ` (${myParticipations.length})`}
-                </TabsTab>
-              </TabsList>
-
-              {/* Search Filter */}
-              <div className="relative w-full sm:w-64 group">
-                <Search className="size-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 group-hover:text-lime-400" />
-                <Input
-                  type="text"
-                  placeholder="Filter rounds..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
+          <Card className="lg:col-span-7 p-6 sm:p-7 shadow-2xl space-y-6 h-full min-h-[600px]">
+            <CardHeader className="border-b border-white/8 pb-4">
+              <Tabs
+                value={activeTab}
+                onValueChange={(v) => {
+                  startTransition(() => {
+                    setSearchParams({ tab: v });
                     setCurrentPage(1);
-                  }}
-                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-black/70 border-white/10 focus-visible:ring-1 focus-visible:ring-lime-400 font-mono rounded-md"
-                />
-              </div>
-            </div>
+                  });
+                }}
+                className="gap-0"
+              >
+                <TabsList className="gap-0" aria-label="Contest view">
+                  <TabsTrigger value="past" id="tab-past-contests">Past Contests</TabsTrigger>
+                  <TabsTrigger value="my" id="tab-my-contests">
+                    My Contests{myParticipations.length > 0 && ` (${myParticipations.length})`}
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsPanels className="pt-4">
-              {/* Panel 1: Past Contests */}
-              <TabsPanel value="past">
-              <div className="space-y-3.5">
-                {paginatedPastContests.length === 0 ? (
-                  <div className="group flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5 hover:border-white/15 transition-all">
-                    <div className="flex size-14 items-center justify-center rounded-lg border border-white/10 bg-zinc-900 transition-transform duration-300 group-hover:scale-110">
-                      <Code2 className="size-7 text-zinc-500 group-hover:text-lime-400 transition-colors" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold text-white font-sans">
-                        No Concluded Rounds Yet
-                      </p>
-                      <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                        Past weekly round challenges and editorial solutions will appear here for practice.
-                      </p>
-                    </div>
-                    <Button asChild size="default" variant="outline" className="group/btn">
-                      <Link to="/problems" className="flex items-center gap-1.5">
-                        <span>Explore Problem Archive</span>
-                        <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                      </Link>
-                    </Button>
-                  </div>
-                ) : (
-                  paginatedPastContests.map((contest) => {
-                    const formattedDate = new Date(contest.starts_at).toLocaleString("en-IN", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
+                <div className="relative w-full sm:w-64 group mt-4 sm:mt-0 sm:absolute sm:right-0 sm:top-0">
+                  <Search className="size-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 group-hover:text-lime-400" />
+                  <Input
+                    type="text"
+                    placeholder="Filter rounds..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-black/70 border-white/10 focus-visible:ring-1 focus-visible:ring-lime-400 font-mono rounded-none"
+                    aria-label="Filter contests"
+                  />
+                </div>
+              </Tabs>
+            </CardHeader>
 
-                    // Check if cadet participated
-                    const record = myParticipations.find((p) => p.contest_slug === contest.slug);
-                    const cadetSolved = record?.score !== null && record?.score !== undefined ? Math.round(Number(record.score) / 25) : null;
-
-                    return (
-                      <div
-                        key={contest.slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px] content-auto-card"
-                      >
-                        {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br from-zinc-800 to-zinc-950 font-mono text-sm font-bold text-lime-400 shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:border-lime-400/40">
-                            <Trophy className="size-6 text-lime-400/80 group-hover:text-lime-400 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
-                          </div>
-
-                          <div className="min-w-0">
-                            <Link
-                              to={`/contests/${contest.slug}`}
-                              className="text-base sm:text-lg font-bold text-white group-hover:text-lime-400 transition-colors truncate flex items-center gap-2 font-sans"
-                            >
-                              <span className="truncate">{contest.title}</span>
-                              <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
-                            </Link>
-                            <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1 truncate">
-                              {formattedDate} · {contest.registered_count} cadets
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Right: Solved Status & Virtual Action */}
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span
-                            className={`rounded-full px-3.5 py-1.5 font-mono text-xs sm:text-sm font-semibold tabular-nums border ${
-                              cadetSolved !== null && cadetSolved > 0
-                                ? "bg-lime-400/15 border-lime-400/30 text-lime-400"
-                                : "bg-zinc-900 border-white/10 text-zinc-400"
-                            }`}
-                          >
-                            {cadetSolved !== null
-                              ? `${cadetSolved}/${contest.problem_count ?? 4} Solved`
-                              : `${contest.problem_count ?? 4} Problem${(contest.problem_count ?? 4) === 1 ? "" : "s"}`}
-                          </span>
-
-                          <Button
-                            asChild
-                            size="sm"
-                            variant="ghost"
-                            className="border border-white/10 hover:border-lime-400 group-hover:shadow-sm"
-                          >
-                            <Link to={`/contests/${contest.slug}`} className="flex items-center gap-1.5">
-                              <Play className="size-3.5 fill-current transition-transform duration-200 group-hover:scale-110" />
-                              <span>Virtual</span>
+            <CardContent className="pt-4">
+              <Tabs
+                value={activeTab}
+                onValueChange={(v) => {
+                  startTransition(() => {
+                    setSearchParams({ tab: v });
+                    setCurrentPage(1);
+                  });
+                }}
+                className="gap-0"
+              >
+                <TabsList className="hidden" />
+                <TabsContent value="past">
+                  <div className="space-y-3">
+                    {paginatedPastContests.length === 0 ? (
+                      <EmptyState
+                        title="No Concluded Rounds Yet"
+                        body="Past weekly round challenges and editorial solutions will appear here for practice."
+                        icon={<Code2 className="size-7 text-zinc-500" />}
+                        action={
+                          <Button asChild size="default" variant="outline">
+                            <Link to="/problems" className="flex items-center gap-1.5">
+                              <span>Explore Problem Archive</span>
+                              <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
                             </Link>
                           </Button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-              </TabsPanel>
+                        }
+                      />
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[60px]">Rank</TableHead>
+                            <TableHead>Contest</TableHead>
+                            <TableHead className="w-[180px] text-right">Date & Cadets</TableHead>
+                            <TableHead className="w-[160px] text-right">Solved</TableHead>
+                            <TableHead className="w-[100px]"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedPastContests.map((contest, idx) => {
+                            const formattedDate = new Date(contest.starts_at).toLocaleString("en-IN", {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            });
 
-              {/* Panel 2: My Contests */}
-              <TabsPanel value="my">
-              <div className="space-y-3.5">
-                {!member ? (
-                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5">
-                    <p className="text-base font-semibold text-white">Login Required</p>
-                    <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                      Sign in to view your contest participation history and ratings.
-                    </p>
-                    <Button asChild size="default" className="group/btn">
-                      <Link to="/auth" className="flex items-center gap-1.5">
-                        <span>Sign In</span>
-                        <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                      </Link>
-                    </Button>
+                            const record = myParticipations.find((p) => p.contest_slug === contest.slug);
+                            const cadetSolved = record?.score !== null && record?.score !== undefined ? Math.round(Number(record.score) / 25) : null;
+
+                            return (
+                              <TableRow key={contest.slug} className="content-auto-card">
+                                <TableCell className="font-mono text-sm font-bold text-zinc-400 tabular-nums">
+                                  {String(idx + 1).padStart(2, "0")}
+                                </TableCell>
+                                <TableCell>
+                                  <Link
+                                    to={`/contests/${contest.slug}`}
+                                    className="font-bold text-white hover:text-lime-400 transition-colors truncate flex items-center gap-2 font-sans"
+                                  >
+                                    <span className="truncate">{contest.title}</span>
+                                    <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
+                                  </Link>
+                                  <p className="text-xs font-mono text-zinc-500 mt-1 truncate">
+                                    {formattedDate} · {contest.registered_count} cadets
+                                  </p>
+                                </TableCell>
+                                <TableCell className="font-mono text-xs text-zinc-400 text-right">
+                                  {formattedDate}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Badge
+                                    variant={
+                                      cadetSolved !== null && cadetSolved > 0
+                                        ? "success"
+                                        : "neutral"
+                                    }
+                                    size="sm"
+                                    className="rounded-none px-2.5 py-1 font-mono text-xs tabular-nums"
+                                  >
+                                    {cadetSolved !== null
+                                      ? `${cadetSolved}/{contest.problem_count ?? 4} Solved`
+                                      : `${contest.problem_count ?? 4} Problem{(contest.problem_count ?? 4) === 1 ? "" : "s"}`}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    asChild
+                                    size="icon"
+                                    variant="ghost"
+                                    className="border border-white/10 hover:border-lime-400 group-hover:shadow-sm"
+                                  >
+                                    <Link to={`/contests/${contest.slug}`} className="flex items-center gap-1.5">
+                                      <Play className="size-3.5 fill-current transition-transform duration-200 group-hover:scale-110" />
+                                      <span className="sr-only">Virtual Contest</span>
+                                    </Link>
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
                   </div>
-                ) : paginatedMyParticipations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5">
-                    <p className="text-base font-semibold text-white">No Participations Yet</p>
-                    <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                      You haven't participated in any contests yet. Register for Weekly Contest 1 above!
-                    </p>
-                  </div>
-                ) : (
-                  paginatedMyParticipations.map((record) => {
-                    const isSubmitted = Boolean(
-                      record.assessment_submitted ||
-                      record.outcome === "submitted" ||
-                      record.outcome === "qualified"
-                    );
-                    const targetUrl = isSubmitted
-                      ? `/contests/${record.contest_slug}/results`
-                      : `/contests/${record.contest_slug}`;
+                </TabsContent>
 
-                    return (
-                      <div
-                        key={record.contest_slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px] content-auto-card"
-                      >
-                        <div className="min-w-0">
-                          <Link
-                            to={targetUrl}
-                            className="text-base sm:text-lg font-bold text-white hover:text-lime-400 transition-colors truncate flex items-center gap-2 font-sans"
-                          >
-                            <span className="truncate">{record.contest_title}</span>
-                            <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
-                          </Link>
-                          <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1">
-                            Score: {record.score ?? 0} pts · Rank: #{record.rank ?? "--"}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-3 shrink-0">
-                          {record.outcome === "qualified" ? (
-                            <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-bold uppercase text-lime-400">
-                              Qualified
-                            </span>
-                          ) : isSubmitted ? (
-                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold uppercase text-emerald-400">
-                              Submitted
-                            </span>
-                          ) : null}
-                          <Button
-                            asChild
-                            size="sm"
-                            variant="ghost"
-                            className="border border-white/10 hover:bg-white/10 hover:text-white"
-                          >
-                            <Link to={targetUrl} className="flex items-center gap-1.5">
-                              <span>Results</span>
-                              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                <TabsContent value="my">
+                  <div className="space-y-3">
+                    {!member ? (
+                      <EmptyState
+                        title="Login Required"
+                        body="Sign in to view your contest participation history and ratings."
+                        icon={<Code2 className="size-7 text-zinc-500" />}
+                        action={
+                          <Button asChild size="default">
+                            <Link to="/auth" className="flex items-center gap-1.5">
+                              <span>Sign In</span>
+                              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
                             </Link>
                           </Button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-              </TabsPanel>
-            </TabsPanels>
-            </Tabs>
+                        }
+                      />
+                    ) : paginatedMyParticipations.length === 0 ? (
+                      <EmptyState
+                        title="No Participations Yet"
+                        body="You haven't participated in any contests yet. Register for an upcoming round above!"
+                        icon={<Code2 className="size-7 text-zinc-500" />}
+                      />
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[60px]">Rank</TableHead>
+                            <TableHead>Contest</TableHead>
+                            <TableHead className="w-[180px] text-right">Score & Rank</TableHead>
+                            <TableHead className="w-[120px] text-center">Status</TableHead>
+                            <TableHead className="w-[100px]"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedMyParticipations.map((record) => {
+                            const isSubmitted = Boolean(
+                              record.contest_attempt_status === "finalized" ||
+                              record.contest_attempt_status === "expired" ||
+                              record.status === "finished" ||
+                              (record.status !== "live" && record.assessment_submitted)
+                            );
+                            const targetUrl = isSubmitted
+                              ? `/contests/${record.contest_slug}/results`
+                              : `/contests/${record.contest_slug}`;
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/6">
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="group text-zinc-400 hover:text-white disabled:opacity-30"
-                >
-                  <ChevronLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
-                </Button>
+                            return (
+                              <TableRow key={record.contest_slug} className="content-auto-card">
+                                <TableCell className="font-mono text-sm font-bold text-zinc-400 tabular-nums">
+                                  {record.rank ? `#${record.rank}` : "—"}
+                                </TableCell>
+                                <TableCell>
+                                  <Link
+                                    to={targetUrl}
+                                    className="font-bold text-white hover:text-lime-400 transition-colors truncate flex items-center gap-2 font-sans"
+                                  >
+                                    <span className="truncate">{record.contest_title}</span>
+                                    <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
+                                  </Link>
+                                  <p className="text-xs font-mono text-zinc-500 mt-1">
+                                    Score: {record.score ?? 0} pts · Rank: #{record.rank ?? "--"}
+                                  </p>
+                                </TableCell>
+                                <TableCell className="font-mono text-xs text-zinc-400 text-right">
+                                  {record.score ?? 0} pts
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {record.outcome === "qualified" ? (
+                                    <Badge variant="success" size="sm" className="rounded-none">
+                                      Qualified
+                                    </Badge>
+                                  ) : isSubmitted ? (
+                                    <Badge variant="success" size="sm" className="rounded-none bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+                                      Submitted
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="neutral" size="sm" className="rounded-none">
+                                      Pending
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    asChild
+                                    size="sm"
+                                    variant="ghost"
+                                    className="border border-white/10 hover:border-lime-400"
+                                  >
+                                    <Link to={targetUrl} className="flex items-center gap-1.5">
+                                      <span>Results</span>
+                                      <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                                    </Link>
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-                  <Button
-                    key={pg}
-                    size="icon-sm"
-                    variant={pg === currentPage ? "default" : "ghost"}
-                    onClick={() => setCurrentPage(pg)}
-                    className={pg !== currentPage ? "text-zinc-400 hover:text-white" : "shadow-sm"}
-                  >
-                    {pg}
-                  </Button>
-                ))}
-
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="group text-zinc-400 hover:text-white disabled:opacity-30"
-                >
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </Button>
-              </div>
-            )}
-          </div>
+              {totalPages > 1 && (
+                <Pagination className="mt-6 pt-4 border-t border-white/8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage((p) => Math.max(1, p - 1));
+                        }}
+                        disabled={currentPage === 1}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+                      <PaginationItem key={pg}>
+                        <PaginationLink
+                          href="#"
+                          isActive={pg === currentPage}
+                          size="icon"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(pg);
+                          }}
+                        >
+                          {pg}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage((p) => Math.min(totalPages, p + 1));
+                        }}
+                        disabled={currentPage === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* ─── ABOUT THE CHAMPIONSHIP TROPHY ─────────────── */}
-        <div className="group rounded-lg border border-white/8 bg-zinc-950/60 backdrop-blur-md p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/15 transition-all duration-200">
+        <Card className="p-7 sm:p-8 text-center max-w-3xl mx-auto group hover:border-white/15 transition-colors">
           <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold text-lime-400 uppercase tracking-widest">
             <Trophy className="size-4 sm:size-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
             <span>About the Medi-Caps Chapter Trophy</span>
           </div>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans max-w-2xl mx-auto mt-2">
             The Chaos Computer Club Championship Trophy is awarded to the highest-ranking cadet at Medi-Caps University across rated competitive programming rounds. It recognizes campus leadership in algorithms, data structures, and speed.
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   );

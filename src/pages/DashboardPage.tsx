@@ -1,8 +1,7 @@
-import { DashboardSkeleton } from "@/organization/components/skeletons";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { ArrowRight, MapPin, Radio } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/design-system/Button";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";
 import {
@@ -22,6 +21,8 @@ import { syncSocialCounts } from "@/store/slices/socialSlice";
 import type { ContestSummary } from "@/features/contest/types";
 import { getFirstName } from "@/lib/utils";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
+import { Card, CardContent } from "@/components/design-system/Card";
+import { Badge } from "@/components/design-system/Badge";
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -119,7 +120,36 @@ export function DashboardPage() {
     !publicDataRaw &&
     contests.length === 0
   ) {
-    return <DashboardSkeleton />;
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
+          <div className="animate-pulse space-y-2">
+            <div className="h-6 w-32 bg-zinc-900 border border-white/8 rounded-none" />
+            <div className="h-4 w-48 bg-zinc-900 border border-white/8 rounded-none" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4">
+                <div className="h-3 w-24 bg-zinc-900 border border-white/8 rounded-none mb-2" />
+                <div className="h-8 w-16 bg-zinc-900 border border-white/8 rounded-none mb-1" />
+                <div className="h-3 w-20 bg-zinc-900 border border-white/8 rounded-none" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card className="animate-pulse">
+          <CardContent className="p-5 h-64" />
+        </Card>
+        <Card className="animate-pulse">
+          <CardContent className="p-5 h-64" />
+        </Card>
+        <Card className="animate-pulse">
+          <CardContent className="p-5 h-48" />
+        </Card>
+      </div>
+    );
   }
 
   const member = {
@@ -157,136 +187,164 @@ export function DashboardPage() {
 
       {/* Telemetry Bento Strip (4 Columns) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Campus Standings</span>
-          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
-            #{member?.university_rank || 1}
-          </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Medi-Caps University</span>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <span className="mono-label">Campus Standings</span>
+            <strong className="metric-value mt-1 block">#{member?.university_rank || 1}</strong>
+            <span className="mono-label mt-1">Medi-Caps University</span>
+          </CardContent>
+        </Card>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Global Rating</span>
-          <strong className="block text-2xl font-mono font-bold text-lime-400 mt-1 tabular-nums">
-            {member?.rating ?? 1200}
-          </strong>
-          <span className="block text-[10px] font-mono text-lime-400/80 mt-1">{member?.tier || "1★ Explorer"}</span>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <span className="mono-label">Global Rating</span>
+            <strong className="metric-value mt-1 block text-lime-400">{member?.rating ?? 1200}</strong>
+            <span className="mono-label mt-1 text-lime-400/80">{member?.tier || "1★ Explorer"}</span>
+          </CardContent>
+        </Card>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Contests Logged</span>
-          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
-            {history.length || (member as any)?.contests_count || 0}
-          </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Verified Tournaments</span>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <span className="mono-label">Contests Logged</span>
+            <strong className="metric-value mt-1 block">{history.length || (member as any)?.contests_count || 0}</strong>
+            <span className="mono-label mt-1">Verified Tournaments</span>
+          </CardContent>
+        </Card>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Accepted Solutions</span>
-          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
-            {(member as any)?.solved_count || 0}
-          </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Problem Archive</span>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <span className="mono-label">Accepted Solutions</span>
+            <strong className="metric-value mt-1 block">{(member as any)?.solved_count || 0}</strong>
+            <span className="mono-label mt-1">Problem Archive</span>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Live Contest Banner or Next Contest Alert */}
       {live ? (
-        <section className="rounded-lg border border-lime-400/40 bg-black p-6 relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <StatusDot status="live" />
-                <span className="font-mono text-xs text-lime-400 uppercase tracking-wider">Tournament Live</span>
+        <Card className="border-lime-400/40">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <StatusDot status="live" />
+                  <span className="mono-label">Tournament Live</span>
+                </div>
+                <h2 className="text-xl md:text-2xl font-semibold text-white font-sans">{live.title}</h2>
+                <p className="text-xs text-zinc-400 max-w-2xl leading-normal">{live.summary}</p>
+                <div className="flex flex-wrap items-center gap-4 mono-label pt-1">
+                  <span className="flex items-center gap-1.5 text-zinc-400">
+                    <MapPin className="w-3.5 h-3.5 text-lime-400" />
+                    {live.venue}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-zinc-400">
+                    <Radio className="w-3.5 h-3.5 text-cyan-400" />
+                    Division {live.division || "Open"}
+                  </span>
+                  <span className="text-zinc-500">
+                    {live.problem_count} Problems · {live.registered_count} Registered
+                  </span>
+                </div>
               </div>
-              <h2 className="text-xl md:text-2xl font-semibold text-white font-sans">{live.title}</h2>
-              <p className="text-xs text-zinc-400 max-w-2xl leading-normal">{live.summary}</p>
-              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-500 pt-1">
-                <span className="flex items-center gap-1.5 text-zinc-400">
-                  <MapPin className="w-3.5 h-3.5 text-lime-400" />
-                  {live.venue}
-                </span>
-                <span className="flex items-center gap-1.5 text-zinc-400">
-                  <Radio className="w-3.5 h-3.5 text-cyan-400" />
-                  Division {live.division || "Open"}
-                </span>
-                <span className="text-zinc-500">
-                  {live.problem_count} Problems · {live.registered_count} Registered
-                </span>
+              <div className="shrink-0">
+                <Button asChild variant="outline">
+                  <Link to={`/contests/${live.slug}`}>
+                    Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </Link>
+                </Button>
               </div>
             </div>
-            <div className="shrink-0">
-              <Button asChild variant="outline">
-                <Link to={`/contests/${live.slug}`}>
-                  Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
       ) : next ? (
-        <section className="rounded-lg border border-white/8 bg-black p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <StatusDot status="upcoming" />
-              <span className="font-mono text-xs text-zinc-400 uppercase tracking-wider">Next Campus Tournament</span>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <StatusDot status="upcoming" />
+                  <span className="mono-label">Next Campus Tournament</span>
+                </div>
+                <h2 className="text-lg md:text-xl font-semibold text-white font-sans">{next.title}</h2>
+                <p className="text-xs text-zinc-400 max-w-xl">{next.summary}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 mono-label shrink-0">
+                <div>
+                  <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
+                  <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
+                </div>
+                <Button asChild variant="outline">
+                  <Link to={`/contests/${next.slug}`}>
+                    View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <h2 className="text-lg md:text-xl font-semibold text-white font-sans">{next.title}</h2>
-            <p className="text-xs text-zinc-400 max-w-xl">{next.summary}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 font-mono text-xs shrink-0">
-            <div>
-              <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
-              <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
-            </div>
-            <Button asChild variant="outline">
-              <Link to={`/contests/${next.slug}`}>
-                View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-10 text-center space-y-3">
+            <Trophy className="size-10 text-zinc-600 mx-auto" />
+            <p className="text-base font-semibold text-white">No Active Contests</p>
+            <p className="text-xs text-zinc-500 max-w-md mx-auto">
+              There aren't any contests available right now. Check back soon for upcoming tournaments.
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/contests" className="flex items-center gap-1.5">
+                <span>Explore Contests</span>
+                <ArrowRight className="size-3.5" />
               </Link>
             </Button>
-          </div>
-        </section>
-      ) : null}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Rating Analytics */}
-      <section className="p-5 rounded-lg border border-white/8 bg-black">
-        <SectionHeader
-          kicker="Rating Trajectory"
-          index="Progress"
-          title="University Elo Progression"
-          action={
-            <Link to="/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
-              Profile Dossier →
-            </Link>
-          }
-        />
-        <RatingChart data={history} />
-      </section>
+      <Card>
+        <CardContent className="p-5">
+          <SectionHeader
+            kicker="Rating Trajectory"
+            index="Progress"
+            title="University Elo Progression"
+            action={
+              <Link to="/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+                Profile Dossier →
+              </Link>
+            }
+          />
+          <RatingChart data={history} />
+        </CardContent>
+      </Card>
 
       {/* Campus Scoreboard Radar */}
-      <section className="p-5 rounded-lg border border-white/8 bg-black">
-        <SectionHeader
-          kicker="Standings Radar"
-          index="Live"
-          title="Campus Scoreboard"
-          action={
-            <Link to="/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
-              Full Standings →
-            </Link>
-          }
-        />
-        <ScoreboardMatrix entries={publicData.standings} problems={publicData.problems} />
-      </section>
+      <Card>
+        <CardContent className="p-5">
+          <SectionHeader
+            kicker="Standings Radar"
+            index="Live"
+            title="Campus Scoreboard"
+            action={
+              <Link to="/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+                Full Standings →
+              </Link>
+            }
+          />
+          <ScoreboardMatrix entries={publicData.standings} problems={publicData.problems} />
+        </CardContent>
+      </Card>
 
       {/* Live Campus Activity Stream */}
-      <section className="p-5 rounded-lg border border-white/8 bg-black">
-        <SectionHeader
-          kicker="Network Feed"
-          index="Telemetry"
-          title="Live Activity Stream"
-        />
-        <ContestActivityFeed limit={6} />
-      </section>
+      <Card>
+        <CardContent className="p-5">
+          <SectionHeader
+            kicker="Network Feed"
+            index="Telemetry"
+            title="Live Activity Stream"
+          />
+          <ContestActivityFeed limit={6} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -49,7 +49,7 @@ import { ContestSummarySkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
 import type { ContestArenaProblem } from "@/features/contest/types";
 import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
-import { getToken, fetchAssessmentData } from "@/lib/auth";
+import { getToken } from "@/lib/auth";
 import { useRealtimeEvents } from "@/lib/realtime";
 
 function formatTimer(totalSeconds: number): string {
@@ -92,8 +92,8 @@ export function ContestSummaryPage() {
   const isAlreadySubmitted = Boolean(
     backendVerified.isSubmitted ||
     (isCurrentSlug && (
-      registration?.status === "submitted" ||
-      registration?.assessment_taken ||
+      registration?.contest_attempt_status === "finalized" ||
+      registration?.contest_attempt_status === "expired" ||
       registration?.assessment_status === "submitted" ||
       registration?.assessment_status === "completed"
     ))
@@ -127,32 +127,30 @@ export function ContestSummaryPage() {
         void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
         void dispatch(fetchContestArenaThunk(contestSlug));
 
-        const [reg, assessData] = await Promise.all([
+        const [reg, ownData] = await Promise.all([
           contestApi.registrationStatus(contestSlug, true).catch(() => null),
-          fetchAssessmentData(contestSlug).catch(() => null),
+          contestApi.myContestSubmissions(contestSlug).catch(() => null),
         ]);
         if (isCancelled) return;
 
         let verifiedSubmissions: Record<string, { verdict: string; score: number; code?: string }> = {};
-        if (assessData?.submissions && typeof assessData.submissions === "object") {
-          verifiedSubmissions = assessData.submissions;
-          setServerSubmissions(verifiedSubmissions);
+        for (const sub of ownData?.submissions ?? []) {
+          const existing = verifiedSubmissions[sub.problem_id];
+          if (!existing || sub.points_awarded > existing.score) {
+            verifiedSubmissions[sub.problem_id] = { verdict: sub.verdict, score: sub.points_awarded };
+          }
         }
+        setServerSubmissions(verifiedSubmissions);
 
-        const isSub = Boolean(
-          reg?.status === "submitted" ||
-          reg?.assessment_taken ||
-          reg?.assessment_status === "submitted" ||
-          reg?.assessment_status === "completed" ||
-          assessData?.session?.status === "submitted" ||
-          assessData?.session?.status === "completed"
-        );
+        const attemptStatus = ownData?.attempt?.status ?? reg?.contest_attempt_status ?? reg?.assessment_status;
+        const isSub =
+          attemptStatus === "finalized" ||
+          attemptStatus === "expired" ||
+          attemptStatus === "submitted" ||
+          attemptStatus === "completed" ||
+          Boolean(reg?.assessment_taken && (reg?.assessment_status === "submitted" || reg?.assessment_status === "completed"));
 
-        const verifiedScore = typeof reg?.assessment_score === "number" && reg.assessment_score > 0
-          ? reg.assessment_score
-          : typeof assessData?.session?.total_score === "number"
-          ? assessData.session.total_score
-          : 0;
+        const verifiedScore = ownData?.attempt?.final_score ?? ownData?.score ?? 0;
 
         setBackendVerified({
           isLoading: false,
@@ -325,18 +323,22 @@ export function ContestSummaryPage() {
       // Zero-Trust Client Policy: Validate status with backend and update UI state without auto-redirecting
       void (async () => {
         try {
-          const reg = await contestApi.registrationStatus(contestSlug, true);
-          if (reg) {
+          const [reg, ownData] = await Promise.all([
+            contestApi.registrationStatus(contestSlug, true),
+            contestApi.myContestSubmissions(contestSlug),
+          ]);
+          if (reg || ownData) {
             setBackendVerified((prev) => ({
               ...prev,
-              isSubmitted: Boolean(
-                reg.status === "submitted" ||
-                reg.assessment_taken ||
-                reg.assessment_status === "submitted" ||
-                reg.assessment_status === "completed"
-              ),
-              contestStatus: reg.contest_status || "finished",
-              score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
+              isSubmitted:
+                ownData?.attempt?.status === "finalized" ||
+                ownData?.attempt?.status === "expired" ||
+                ownData?.attempt?.status === "submitted" ||
+                ownData?.attempt?.status === "completed" ||
+                reg?.assessment_status === "submitted" ||
+                reg?.assessment_status === "completed",
+              contestStatus: reg?.contest_status || "finished",
+              score: ownData?.attempt?.final_score ?? ownData?.score ?? prev.score,
               checked: true,
             }));
           }
@@ -344,22 +346,38 @@ export function ContestSummaryPage() {
       })();
     };
     window.addEventListener("contest:concluded", handleConcluded);
+    window.addEventListener("contest:attempt_finalized", handleConcluded);
     return () => {
       window.removeEventListener("contest:concluded", handleConcluded);
+      window.removeEventListener("contest:attempt_finalized", handleConcluded);
     };
   }, [contestSlug]);
 
   const handleFinalSubmit = async () => {
+    if (isSubmittingFinal) return;
     setIsSubmittingFinal(true);
     try {
-      const res = await contestApi.finishContest(contestSlug);
-      if (res && (res.success || (res as any).status === "submitted" || (res as any).already_submitted)) {
-        toast.success(res.message || "Contest successfully submitted!");
+      const res = await contestApi.finalizeAttempt(contestSlug);
+      const status = res?.status?.toLowerCase();
+      const isSuccess = Boolean(
+        res?.success && (
+          status === "finalized" ||
+          status === "expired" ||
+          status === "submitted" ||
+          status === "completed" ||
+          res?.already_finalized ||
+          res?.already_submitted ||
+          String(res?.message || "").toLowerCase().includes("already")
+        )
+      );
+
+      if (isSuccess || String(res?.message || "").toLowerCase().includes("already")) {
+        toast.success(res?.message || "Contest attempt finalized.");
         setShowSubmitModal(false);
         setBackendVerified((prev) => ({
           ...prev,
           isSubmitted: true,
-          score: typeof res.total_score === "number" ? res.total_score : prev.score,
+          score: typeof res?.total_score === "number" ? res.total_score : (typeof res?.score === "number" ? res.score : prev.score),
         }));
         await Promise.all([
           dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true })),
@@ -368,10 +386,18 @@ export function ContestSummaryPage() {
         ]);
         navigate(`/contests/${contestSlug}/results`, { replace: true });
       } else {
-        toast.error(res?.message || "Failed to finalize contest submission.");
+        toast.error(res?.message || "Failed to finalize contest submission. Please try again.");
       }
     } catch (err: any) {
-      toast.error(err?.message || "Failed to finalize contest submission.");
+      const errMsg = String(err?.message || "");
+      if (errMsg.toLowerCase().includes("already")) {
+        toast.info(errMsg || "Contest attempt has already been finalized.");
+        setShowSubmitModal(false);
+        setBackendVerified((prev) => ({ ...prev, isSubmitted: true }));
+        navigate(`/contests/${contestSlug}/results`, { replace: true });
+      } else {
+        toast.error(errMsg || "Failed to finalize contest submission. Please try again.");
+      }
     } finally {
       setIsSubmittingFinal(false);
     }
@@ -696,9 +722,9 @@ export function ContestSummaryPage() {
                 size="default"
                 className="w-full sm:w-auto"
               >
-                <Link to={`/contests/${contestSlug}`}>
+                <Link to="/">
                   <ArrowLeft className="size-3.5 mr-1.5" />
-                  <span>Return to Contest Overview</span>
+                  <span>Return to Home</span>
                 </Link>
               </Button>
 
@@ -793,7 +819,7 @@ export function ContestSummaryPage() {
                 Confirm Final Contest Submission?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed">
-                Once submitted, your test attempt will be finalized and evaluated against the full testcase judge. You will no longer be able to edit your solutions for this contest.
+                Once submitted, your contest attempt will be officially concluded and finalized with your current scores. You will no longer be able to run code or submit solutions for this contest.
               </AlertDialogDescription>
             </AlertDialogHeader>
 

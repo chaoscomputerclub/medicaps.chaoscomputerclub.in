@@ -60,6 +60,7 @@ class OfflineContest(Base):
     trust_proofs = relationship("TrustProof", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
     campus_passes = relationship("CampusPass", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
     submissions = relationship("ContestSubmission", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
+    attempts = relationship("ContestAttempt", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class ContestProblem(Base):
@@ -104,12 +105,36 @@ class ContestProblem(Base):
 
 
 
+class ContestAttempt(Base):
+    """One server-authoritative live arena attempt for a member and contest."""
+    __tablename__ = "contest_attempts"
+
+    id = Column(String(36), primary_key=True, default=get_uuid)
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(20), default="in_progress", nullable=False)  # in_progress, finalized, expired
+    started_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+    ends_at = Column(DateTime(timezone=True), nullable=False)
+    finalized_at = Column(DateTime(timezone=True), nullable=True)
+    final_score = Column(Integer, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("contest_id", "member_id", name="uq_contest_attempt_member"),
+        Index("ix_contest_attempts_contest_status", "contest_id", "status"),
+    )
+
+    contest = relationship("OfflineContest", back_populates="attempts")
+    submissions = relationship("ContestSubmission", back_populates="attempt")
+
+
 class ContestSubmission(Base):
     """Live Contest Arena Solution Code Submission."""
     __tablename__ = "contest_submissions"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
     contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False, index=True)
+    attempt_id = Column(String(36), ForeignKey("contest_attempts.id", ondelete="CASCADE"), nullable=True, index=True)
+    idempotency_key = Column(String(64), nullable=True)
     problem_id = Column(String(36), ForeignKey("contest_problems.id", ondelete="CASCADE"), nullable=False, index=True)
     member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     handle = Column(String(50), nullable=False)
@@ -127,10 +152,12 @@ class ContestSubmission(Base):
         Index("ix_contest_submissions_contest_problem_verdict", "contest_id", "problem_id", "verdict"),
         Index("ix_contest_submissions_contest_member_submitted", "contest_id", "member_id", "submitted_at"),
         Index("ix_contest_submissions_member_problem_verdict", "member_id", "problem_id", "verdict"),
+        UniqueConstraint("attempt_id", "idempotency_key", name="uq_contest_submission_attempt_key"),
     )
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="submissions")
+    attempt = relationship("ContestAttempt", back_populates="submissions")
     problem = relationship("ContestProblem", back_populates="submissions")
     member = relationship("MemberProfile", back_populates="contest_submissions")
 
@@ -169,7 +196,7 @@ class ScoreboardEntry(Base):
 
 
 class ContestRegistration(Base):
-    """Candidate workstation registration for an offline contest & screening assessment."""
+    """Candidate registration and Phase 1 screening state, separate from arena attempts."""
     __tablename__ = "contest_registrations"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
@@ -194,4 +221,3 @@ class ContestRegistration(Base):
     # Relationships
     contest = relationship("OfflineContest", back_populates="registrations")
     member = relationship("MemberProfile", back_populates="contest_registrations")
-

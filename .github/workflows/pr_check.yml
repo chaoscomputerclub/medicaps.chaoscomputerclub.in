@@ -183,6 +183,16 @@ jobs:
           FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
         run: pytest backend/tests/test_cookie_auth.py backend/tests/test_cloudflare_security.py -v
 
+      - name: 🏆 Execute Contest Attempt Lifecycle & Problem Contract Tests
+        env:
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: pytest backend/tests/test_contest_attempt_lifecycle.py backend/tests/test_problem_function_contract.py -v
+
       - name: 📋 Post Backend Gate Summary
         if: always()
         run: |
@@ -193,3 +203,4 @@ jobs:
           echo "| Real-Time Cache Synchronization Engine | 27 Monotonic CAS, Invalidation, SWR & Concurrency Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| ChaosQueue Async Engine & DLQ | 10 Job Lifecycle, Outbox Relay & Locking Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| Cookie Auth & Cloudflare Security | 12 HttpOnly Rotation & Turnstile Protection Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Contest Attempt Lifecycle & Contracts | Invariant & Idempotent Attempt Finalization Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY

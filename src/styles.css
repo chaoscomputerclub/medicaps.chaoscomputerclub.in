@@ -1,5 +1,4 @@
 /* Self-hosted Inter variable font — Latin subset only (48 KB vs 218 KB for all subsets) */
-/* Direct @font-face so only 1 woff2 request is made, not 7 subset files */
 @font-face {
   font-family: 'Inter Variable';
   font-style: normal;
@@ -8,31 +7,58 @@
   src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2-variations');
-  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
-}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @theme {
+  /* ── Core Surfaces ── */
+  --color-canvas: #000000;
+  --color-surface: #000000;
+  --color-surface-elevated: #050505;
+  --color-surface-hover: #0f0f0f;
+  --color-surface-active: #18181b;
+
+  /* ── Borders ── */
+  --color-border-hairline: rgba(255, 255, 255, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.12);
+  --color-border-active: rgba(255, 255, 255, 0.18);
+  --color-border-accent: #CCFF00;
+
+  /* ── Text ── */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-text-inverse: #000000;
+
+  /* ── Brand & Accent ── */
+  --color-accent: #CCFF00;
+  --color-accent-hover: #d8ff33;
+  --color-accent-subtle: rgba(204, 255, 0, 0.08);
+  --color-accent-ink: #000000;
+  --color-cyan: #00e5ff;
+
+  /* ── Semantic Status ── */
+  --color-success: #CCFF00;
+  --color-success-bg: rgba(204, 255, 0, 0.1);
+  --color-success-border: rgba(204, 255, 0, 0.3);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-warning-border: rgba(245, 158, 11, 0.3);
+  --color-danger: #ff3344;
+  --color-danger-bg: rgba(255, 51, 68, 0.1);
+  --color-danger-border: rgba(255, 51, 68, 0.3);
+  --color-info: #00e5ff;
+  --color-info-bg: rgba(0, 229, 255, 0.1);
+  --color-info-border: rgba(0, 229, 255, 0.3);
+
+  /* ── Standard UI Mappings ── */
   --color-background: #000000;
   --color-foreground: #ffffff;
   --color-card: #000000;
   --color-card-foreground: #ffffff;
   --color-popover: #000000;
   --color-popover-foreground: #ffffff;
-
-  --color-lime-300: #d8ff33;
-  --color-lime-400: #CCFF00;
-  --color-lime-500: #b3e600;
-  --color-lime-600: #99cc00;
-  --color-lime-950: #0a1400;
-
   --color-primary: #CCFF00;
   --color-primary-foreground: #000000;
   --color-secondary: #000000;
@@ -43,40 +69,47 @@
   --color-accent-foreground: #000000;
   --color-destructive: #ff3344;
   --color-destructive-foreground: #ffffff;
-  --color-success: #10b981;
-  --color-success-foreground: #000000;
-  --color-signal-green: #00E676;
   --color-border: rgba(255, 255, 255, 0.08);
   --color-input: rgba(255, 255, 255, 0.12);
   --color-ring: #CCFF00;
 
-  --color-canvas: #000000;
-  --color-surface: #000000;
-  --color-surface-1: #000000;
-  --color-surface-2: #000000;
-  --color-surface-3: #050505;
-
+  /* ── Typography ── */
   --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* font-mono is intentionally set to sans-serif — monospace is UI-only for code editors & problem statements */
   --font-mono: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-code: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --font-vscode: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
 
+  /* ── Spacing Scale (4px base) ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Border Radius ── */
+  --radius-none: 0;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 12px;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-modal: 0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --shadow-focus: 0 0 0 2px #CCFF00;
 }
 
 :root {
   color-scheme: dark;
-  --background: #000000;
-  --foreground: #ffffff;
   --bg: #000000;
   --surface: #000000;
-  --surface-1: #000000;
-  --surface-2: #000000;
-  --surface-3: #050505;
+  --surface-elevated: #050505;
+  --surface-hover: #0f0f0f;
+  --surface-active: #18181b;
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
   --muted: #71717a;
@@ -87,16 +120,10 @@
   --cyan: #00e5ff;
   --radius: 8px;
   --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* font-mono remapped to sans — monospace only lives in code editors & problem statements */
-  --font-mono: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-code: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --font-vscode: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
   background-color: #000000;
@@ -104,6 +131,8 @@ html {
   color-scheme: dark;
   scroll-behavior: smooth;
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -112,17 +141,15 @@ body {
   color: #ffffff;
   font-family: var(--font-sans);
   min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global focus-visible rings in Electric Lime (for interactive buttons, links, controls) */
+/* Global focus-visible rings in Electric Lime */
 :focus-visible {
   outline: 2px solid #CCFF00 !important;
   outline-offset: 2px !important;
 }
 
-/* Inputs, textareas, and OTP slots own their focused border — suppress duplicate outer focus outlines */
+/* Suppress duplicate focus outlines on inputs */
 input:focus,
 input:focus-visible,
 textarea:focus,
@@ -137,18 +164,14 @@ textarea:focus-visible,
   box-shadow: none !important;
 }
 
-/* Selection in Electric Lime for general UI */
+/* Selection in Electric Lime */
 ::selection {
   background-color: #CCFF00;
   color: #000000;
 }
 
 /* Base Interface Typography */
-input,
-button,
-select,
-.font-sans,
-.tabular-nums {
+input, button, select, .font-sans, .tabular-nums {
   font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
@@ -160,7 +183,6 @@ button {
 }
 
 /* Authentic VS Code Monospace Typography for Code, Editors, and Pre Blocks */
-/* Scoped to editor containers & problem statement — rest of UI uses sans-serif */
 .monaco-editor,
 [class*="monaco-editor"],
 [data-editor-container] pre,
@@ -186,46 +208,90 @@ input.font-mono {
 }
 
 /* Mobile Touch Actions */
-button,
-a,
-input,
-select,
-textarea {
+button, a, input, select, textarea {
   touch-action: manipulation;
 }
 
 /* Subtle Hairline Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #000000;
-}
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #000000; }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #CCFF00;
-}
+::-webkit-scrollbar-thumb:hover { background: #CCFF00; }
 
-/* High-level design bridges mapped via pure Tailwind @apply */
+/* ── Design System Component Primitives ── */
 @layer components {
+  /* Layout */
   .page-wrap {
     @apply max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8;
   }
   .page-header {
     @apply flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6 mb-8;
   }
+  .section-header {
+    @apply flex items-end justify-between gap-4 border-b border-white/8 pb-4 mb-6;
+  }
+
+  /* Typography */
   .kicker {
     @apply font-sans text-[10px] font-semibold uppercase tracking-widest text-lime-400;
   }
-  .panel {
-    @apply p-6 rounded-lg border border-white/8 bg-black;
+  .display-heading {
+    @apply text-3xl md:text-4xl font-bold tracking-tight text-white font-sans;
   }
-  .section-heading {
-    @apply flex items-end justify-between gap-4 border-b border-white/8 pb-4 mb-6;
+  .section-title {
+    @apply text-lg font-semibold tracking-tight text-white font-sans;
+  }
+  .card-title {
+    @apply text-base font-semibold tracking-tight text-white font-sans;
+  }
+  .body-text {
+    @apply text-sm leading-relaxed text-zinc-300 font-sans;
+  }
+  .caption-text {
+    @apply text-xs leading-relaxed text-zinc-400 font-sans;
+  }
+  .label-text {
+    @apply text-xs font-medium text-zinc-300 font-sans;
+  }
+  .mono-label {
+    @apply font-mono text-[10px] uppercase tracking-wider text-zinc-500;
+  }
+  .mono-value {
+    @apply font-mono tabular-nums text-white;
+  }
+
+  /* Surfaces */
+  .surface {
+    @apply bg-black border border-white/8 rounded-lg;
+  }
+  .surface-elevated {
+    @apply bg-zinc-950 border border-white/8 rounded-lg;
+  }
+  .surface-hover {
+    @apply hover:bg-white/[0.02] transition-colors duration-150;
+  }
+
+  /* Badges */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans font-medium border;
+  }
+  .status-badge-success {
+    @apply text-lime-400 bg-lime-400/10 border-lime-400/30;
+  }
+  .status-badge-warning {
+    @apply text-amber-400 bg-amber-400/10 border-amber-400/30;
+  }
+  .status-badge-danger {
+    @apply text-red-400 bg-red-400/10 border-red-400/30;
+  }
+  .status-badge-info {
+    @apply text-cyan-400 bg-cyan-400/10 border-cyan-400/30;
+  }
+  .status-badge-neutral {
+    @apply text-zinc-400 bg-zinc-900 border-white/10;
   }
   .tier-badge {
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-sans font-semibold uppercase tracking-wider bg-lime-400/8 border border-lime-400/25 text-lime-400;
@@ -233,138 +299,120 @@ textarea {
   .mono-tag {
     @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-sans font-medium tracking-wide bg-black border border-white/10 text-zinc-300;
   }
+
+  /* Metrics */
   .metric {
     @apply p-4 rounded-lg border border-white/8 bg-black;
   }
-  .signal-green-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-500/30;
+  .metric-value {
+    @apply text-2xl font-bold font-mono tabular-nums text-white;
   }
-  .signal-green-banner {
-    @apply flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2 text-xs font-sans text-emerald-400;
+  .metric-label {
+    @apply block text-[10px] font-mono uppercase tracking-wider text-zinc-400;
   }
-}
 
-/* ─────────────────────────────────────────────
-   Strix Auth Flow Micro-Transitions
-   Hardware-accelerated (transform, opacity only)
-   ───────────────────────────────────────────── */
-
-/* Kill the input-otp library's hidden input focus ring — our slot border owns the active state */
-[data-input-otp] {
-  outline: none !important;
-  box-shadow: none !important;
-}
-[data-input-otp-placeholder] {
-  outline: none !important;
-}
-
-@keyframes auth-slide-forward {
-  0% {
-    opacity: 0;
-    transform: translate3d(18px, 0, 0);
+  /* Tables */
+  .data-table {
+    @apply w-full border-collapse;
   }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
+  .data-table th {
+    @apply px-4 py-3 text-left font-mono text-[10px] uppercase tracking-wider text-zinc-500 font-semibold border-b border-white/8;
   }
-}
-
-@keyframes auth-slide-backward {
-  0% {
-    opacity: 0;
-    transform: translate3d(-18px, 0, 0);
+  .data-table td {
+    @apply px-4 py-3 text-sm text-zinc-300 border-b border-white/4;
   }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
+  .data-table tr:hover td {
+    @apply bg-white/[0.02];
   }
-}
 
-@keyframes auth-title-fade {
-  from {
-    opacity: 0.3;
-    transform: translateY(3px);
+  /* Empty States */
+  .empty-state {
+    @apply flex flex-col items-center justify-center p-12 text-center border border-white/8 rounded-lg bg-black;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .empty-state-icon {
+    @apply text-2xl text-zinc-600 font-mono mb-2;
   }
-}
-
-.auth-transition-forward {
-  animation: auth-slide-forward 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-.auth-transition-backward {
-  animation: auth-slide-backward 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-.auth-title-transition {
-  animation: auth-title-fade 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-/* ─────────────────────────────────────────────
-   Double-Bezel Modal Fluid Dynamics
-   Agency-Tier Mass & Spring Choreography
-   ───────────────────────────────────────────── */
-
-@keyframes modal-backdrop-enter {
-  from {
-    opacity: 0;
+  .empty-state-title {
+    @apply text-sm font-semibold text-white;
   }
-  to {
-    opacity: 1;
+  .empty-state-body {
+    @apply text-xs text-zinc-500 max-w-md mt-1;
+  }
+
+  /* Skeletons */
+  .skeleton,
+  .skeleton-text,
+  .skeleton-text-short,
+  .skeleton-card,
+  .skeleton-avatar,
+  .skeleton-row {
+    @apply bg-zinc-900 border border-white/8 rounded animate-pulse;
+  }
+  .skeleton-text {
+    @apply h-4 w-full;
+  }
+  .skeleton-text-short {
+    @apply h-4 w-1/3;
+  }
+  .skeleton-card {
+    @apply p-6;
+  }
+  .skeleton-avatar {
+    @apply size-10 rounded-full;
+  }
+  .skeleton-row {
+    @apply flex items-center gap-4;
   }
 }
 
-@keyframes modal-core-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.modal-backdrop-animate {
-  animation: modal-backdrop-enter 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: opacity;
-}
-
-.modal-core-animate {
-  animation: modal-core-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
-  will-change: transform, opacity;
-}
-
+/* ── Motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .auth-transition-forward,
-  .auth-transition-backward,
-  .auth-title-transition,
-  .modal-backdrop-animate,
-  .modal-core-animate {
-    animation: none !important;
-    transform: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* ─────────────────────────────────────────────
-   High-Performance Rendering Utilities
-   Content-Visibility & Containment Optimization
-   ───────────────────────────────────────────── */
-
-.content-auto-row {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 56px;
+/* Hardware-accelerated transitions only */
+.transition-gpu {
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 150ms;
 }
 
-.content-auto-card {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 160px;
+/* Auth Flow Micro-Transitions */
+@keyframes slide-forward {
+  from { opacity: 0; transform: translate3d(18px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
+@keyframes slide-backward {
+  from { opacity: 0; transform: translate3d(-18px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes title-fade {
+  from { opacity: 0.3; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-forward { animation: slide-forward 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
+.slide-backward { animation: slide-backward 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
+.title-fade { animation: title-fade 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
 
+/* Modal Animations */
+@keyframes modal-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-core-enter {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-backdrop-animate { animation: modal-backdrop-enter 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity; }
+.modal-core-animate { animation: modal-core-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) forwards; will-change: transform, opacity; }
 
+/* High-Performance Rendering Utilities */
+.content-auto-row { content-visibility: auto; contain-intrinsic-size: 0 56px; }
+.content-auto-card { content-visibility: auto; contain-intrinsic-size: 0 160px; }
+
+/* ── Utility: Optical Alignment ── */
+.optical-center { position: relative; left: 50%; transform: translateX(-50%); }

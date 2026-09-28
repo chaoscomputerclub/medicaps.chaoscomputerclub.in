@@ -16,6 +16,7 @@ from app.models.db_models import (
     ContestProblem,
     ContestRegistration,
     ContestSubmission,
+    ContestAttempt,
     MemberProfile,
     OfflineContest,
     ScoreboardEntry,
@@ -110,27 +111,17 @@ class ContestRepository:
         user_regs = await db.execute(
             select(
                 ContestRegistration.contest_id,
-                ContestRegistration.status,
-                ContestRegistration.assessment_taken,
             ).where(ContestRegistration.member_id == member_id)
         )
-        for cid, r_stat, a_taken in user_regs.all():
+        for (cid,) in user_regs.all():
             registered_contest_ids.add(cid)
-            if r_stat in ("submitted", "completed") or a_taken:
-                submitted_contest_ids.add(cid)
-
-        sess_stmt = (
-            select(Assessment.contest_id)
-            .join(AssessmentSession, AssessmentSession.assessment_id == Assessment.id)
-            .where(
-                AssessmentSession.member_id == member_id,
-                AssessmentSession.status.in_(["submitted", "completed", "expired", "disqualified"]),
+        attempt_result = await db.execute(
+            select(ContestAttempt.contest_id).where(
+                ContestAttempt.member_id == member_id,
+                ContestAttempt.status.in_(["finalized", "expired"]),
             )
         )
-        sess_res = await db.execute(sess_stmt)
-        for (cid,) in sess_res.all():
-            if cid:
-                submitted_contest_ids.add(cid)
+        submitted_contest_ids.update(cid for (cid,) in attempt_result.all())
 
         return registered_contest_ids, submitted_contest_ids
 
@@ -151,7 +142,12 @@ class ContestRepository:
     async def get_my_participations(
         db: AsyncSession,
         member_id: str,
-    ) -> Tuple[Sequence[Tuple[ContestRegistration, OfflineContest]], Dict[str, ScoreboardEntry], Sequence[Tuple[AssessmentSession, Assessment]]]:
+    ) -> Tuple[
+        Sequence[Tuple[ContestRegistration, OfflineContest]],
+        Dict[str, ScoreboardEntry],
+        Sequence[Tuple[AssessmentSession, Assessment]],
+        Dict[str, ContestAttempt],
+    ]:
         reg_query = (
             select(ContestRegistration, OfflineContest)
             .join(OfflineContest, ContestRegistration.contest_id == OfflineContest.id)
@@ -177,7 +173,11 @@ class ContestRepository:
         sess_res = await db.execute(sess_query)
         sessions = sess_res.all()
 
-        return registrations, scoreboards, sessions
+        attempt_query = select(ContestAttempt).where(ContestAttempt.member_id == member_id)
+        attempt_res = await db.execute(attempt_query)
+        attempts = {a.contest_id: a for a in attempt_res.scalars().all()}
+
+        return registrations, scoreboards, sessions, attempts
 
     @staticmethod
     async def get_contest_problems(

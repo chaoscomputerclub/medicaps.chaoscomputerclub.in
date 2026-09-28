@@ -333,6 +333,21 @@ async def ensure_database_integrity():
             await session.execute(text("""
                 ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS sandbox_config JSON DEFAULT '{}'::json;
             """))
+            await session.execute(text("""
+                ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS attempt_id VARCHAR(36)
+                REFERENCES contest_attempts(id) ON DELETE CASCADE;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS idempotency_key VARCHAR(64);
+            """))
+            await session.execute(text("""
+                CREATE INDEX IF NOT EXISTS ix_contest_submissions_attempt_id ON contest_submissions (attempt_id);
+            """))
+            await session.execute(text("""
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_contest_submission_attempt_key
+                ON contest_submissions (attempt_id, idempotency_key)
+                WHERE idempotency_key IS NOT NULL;
+            """))
 
 
             await session.commit()

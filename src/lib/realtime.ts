@@ -236,6 +236,7 @@ class GlobalSseMultiplexer {
         "top30_qualified",
         "submission_evaluated",
         "assessment_finished",
+        "contest_attempt_finalized",
         "ratings_updated",
         "member_profile_updated",
         "resync_required",

@@ -18,6 +18,7 @@ from .member import (
 )
 from .contest import (
     OfflineContest,
+    ContestAttempt,
     ContestProblem,
     ContestSubmission,
     ScoreboardEntry,
@@ -45,6 +46,7 @@ __all__ = [
     "RatingHistory",
     "StudentFollow",
     "OfflineContest",
+    "ContestAttempt",
     "ContestProblem",
     "ContestSubmission",
     "ScoreboardEntry",
@@ -62,4 +64,3 @@ __all__ = [
     "ResourceVersion",
     "OutboxEvent",
 ]
-

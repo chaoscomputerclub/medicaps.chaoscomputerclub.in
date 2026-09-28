@@ -55,6 +55,7 @@ class JudgeWorker(BaseQueueWorker):
             problem_id=problem_id,
             language=language,
             code=code,
+            request_id=payload.get("request_id"),
         )
 
         logger.info(

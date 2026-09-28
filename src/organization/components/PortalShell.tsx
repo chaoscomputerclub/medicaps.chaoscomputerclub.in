@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, useRef, Suspense } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/design-system/Avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, setSidebarOpen } from "@/store/slices/uiSlice";
 import { logout, fetchCurrentUserThunk } from "@/store/slices/authSlice";
@@ -27,8 +27,8 @@ import {
   ContestSummarySkeleton,
   ContestResultsSkeleton,
   ContestFinalResultsSkeleton,
-  LeaderboardSkeleton,
   MyContestsSkeleton,
+  LeaderboardSkeleton,
   ProblemArchiveSkeleton,
   ProblemDetailSkeleton,
   ProfileSkeleton,
@@ -36,6 +36,7 @@ import {
   DashboardSkeleton,
   AssessmentStudioSkeleton,
 } from "./skeletons";
+import { Button } from "@/components/design-system/Button";
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -50,45 +51,19 @@ function PortalRouteSkeleton() {
   const { pathname } = useLocation();
   const cleanPath = pathname.replace(/\/+$/, "") || "/";
 
-  if (cleanPath === "/contests") {
-    return <ContestsHubSkeleton />;
-  }
-  if (cleanPath.includes("/summary") || cleanPath.includes("/submit")) {
-    return <ContestSummarySkeleton />;
-  }
-  if (cleanPath.includes("/lobby")) {
-    return <ContestLobbySkeleton />;
-  }
-  if (cleanPath.includes("/arena") || cleanPath.includes("/problems/")) {
-    return <AssessmentStudioSkeleton />;
-  }
-  if (cleanPath.includes("/final-results")) {
-    return <ContestFinalResultsSkeleton />;
-  }
-  if (cleanPath.includes("/results")) {
-    return <ContestResultsSkeleton />;
-  }
-  if (cleanPath.startsWith("/contests/")) {
-    return <ContestDetailSkeleton />;
-  }
-  if (cleanPath.startsWith("/my-contests")) {
-    return <MyContestsSkeleton />;
-  }
-  if (cleanPath.startsWith("/leaderboard")) {
-    return <LeaderboardSkeleton />;
-  }
-  if (cleanPath === "/problems") {
-    return <ProblemArchiveSkeleton />;
-  }
-  if (cleanPath.startsWith("/problems/")) {
-    return <ProblemDetailSkeleton />;
-  }
-  if (cleanPath.startsWith("/settings")) {
-    return <SettingsSkeleton />;
-  }
-  if (cleanPath.startsWith("/profile") || cleanPath.startsWith("/u/")) {
-    return <ProfileSkeleton />;
-  }
+  if (cleanPath === "/contests") return <ContestsHubSkeleton />;
+  if (cleanPath.includes("/summary") || cleanPath.includes("/submit")) return <ContestSummarySkeleton />;
+  if (cleanPath.includes("/lobby")) return <ContestLobbySkeleton />;
+  if (cleanPath.includes("/arena") || cleanPath.includes("/problems/")) return <AssessmentStudioSkeleton />;
+  if (cleanPath.includes("/final-results")) return <ContestFinalResultsSkeleton />;
+  if (cleanPath.includes("/results")) return <ContestResultsSkeleton />;
+  if (cleanPath.startsWith("/contests/")) return <ContestDetailSkeleton />;
+  if (cleanPath.startsWith("/my-contests")) return <MyContestsSkeleton />;
+  if (cleanPath.startsWith("/leaderboard")) return <LeaderboardSkeleton />;
+  if (cleanPath === "/problems") return <ProblemArchiveSkeleton />;
+  if (cleanPath.startsWith("/problems/")) return <ProblemDetailSkeleton />;
+  if (cleanPath.startsWith("/settings")) return <SettingsSkeleton />;
+  if (cleanPath.startsWith("/profile") || cleanPath.startsWith("/u/")) return <ProfileSkeleton />;
   return <DashboardSkeleton />;
 }
 
@@ -117,9 +92,7 @@ export function PortalShell() {
 
   useEffect(() => {
     const token = getToken();
-    if (!token) {
-      return;
-    }
+    if (!token) return;
     dispatch(fetchMySocialStatsThunk());
     dispatch(fetchCurrentUserThunk());
   }, [dispatch]);
@@ -162,7 +135,6 @@ export function PortalShell() {
     ready: boolean;
   }>({ top: 0, height: 36, opacity: 0, ready: false });
 
-  // Active indicator positioning
   useEffect(() => {
     const activeItem = links.find((item) =>
       item.exact
@@ -215,14 +187,14 @@ export function PortalShell() {
             <span className="font-sans text-[8px] text-zinc-500 tracking-widest mt-0.5">TOURNAMENT ARENA</span>
           </div>
         </Link>
-        <button
-          type="button"
-          className="text-zinc-400 hover:text-white p-1.5 rounded-md hover:bg-zinc-900 transition-colors"
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => dispatch(toggleSidebar())}
           aria-label="Toggle navigation"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        </Button>
       </header>
 
       {/* Backdrop overlay for mobile drawer */}
@@ -256,7 +228,7 @@ export function PortalShell() {
           </div>
         </Link>
 
-        {/* Navigation Links with Premium SaaS Sliding Active Pill */}
+        {/* Navigation Links with Premium Sliding Active Pill */}
         <nav
           ref={navRef}
           aria-label="Portal navigation"
@@ -265,7 +237,7 @@ export function PortalShell() {
           {/* Animated Active Sliding Indicator Pill */}
           <div
             aria-hidden="true"
-            className={`absolute left-0 right-0 pointer-events-none rounded-md bg-white/[0.06] border border-white/10 ${
+            className={`absolute left-0 right-0 pointer-events-none rounded-none bg-white/[0.06] border border-white/10 ${
               indicatorStyle.ready
                 ? "transition-[transform,opacity] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 : "transition-none"
@@ -298,7 +270,7 @@ export function PortalShell() {
                 onClick={() => {
                   if (open) dispatch(setSidebarOpen(false));
                 }}
-                className={`relative z-10 flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs font-sans select-none group transition-colors duration-150 ${
+                className={`relative z-10 flex items-center gap-2.5 px-2.5 py-2 rounded-none text-xs font-sans select-none group transition-colors duration-150 ${
                   active
                     ? "text-white font-medium"
                     : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
@@ -346,15 +318,15 @@ export function PortalShell() {
               </span>
             </div>
           </Link>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={handleLogout}
             aria-label="Sign out"
             title="Sign out of CCC Portal"
-            className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md hover:bg-zinc-900 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
           >
             <LogOut size={16} />
-          </button>
+          </Button>
         </div>
       </aside>
 

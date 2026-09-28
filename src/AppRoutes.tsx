@@ -29,7 +29,6 @@ import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import {
   fetchContestDetailThunk,
   fetchContestsThunk,
-  fetchCampusPassThunk,
   fetchMyParticipationsThunk,
   removeContestFromState,
   applyRealtimeEvent,
@@ -50,6 +49,7 @@ const CONTEST_MUTATION_EVENTS = [
   "contest_unregistered",
   "pass_checked_in",
   "assessment_finished",
+  "contest_attempt_finalized",
   "submission_evaluated",
   "top30_qualified",
   "leaderboard_updated",
@@ -136,13 +136,6 @@ function ContestRealtimeSynchronizer() {
         return;
       }
       void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
-      if (
-        event.event === "pass_checked_in" ||
-        event.event === "top30_qualified" ||
-        event.event === "contest_status_changed"
-      ) {
-        void dispatch(fetchCampusPassThunk(contestSlug));
-      }
     },
     CONTEST_MUTATION_EVENTS,
     true
