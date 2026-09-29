@@ -243,3 +243,72 @@ class TestContestStateMachineAndFlowIsolation:
         assert is_sub is True
         assert "Contest attempt has already been submitted" in reason
 
+
+class TestDynamicParameterResolution:
+    def test_valid_anagram_all_dynamic_formats(self):
+        """LeetCode-style multi-format parameter resolution: maps 8 distinct input shapes into {s: '...', t: '...'}."""
+        from app.engine.adapters.base import resolve_dynamic_input
+        from app.engine.adapters import get_adapter
+
+        sig = FunctionSignature(
+            name="isAnagram",
+            return_type=DataType.BOOLEAN,
+            parameters=[
+                ParameterDefinition(name="s", type=DataType.STRING),
+                ParameterDefinition(name="t", type=DataType.STRING),
+            ],
+        )
+        adapter = get_adapter("javascript")
+
+        formats = [
+            {"raw": '["anagram","nagaram"]'},
+            ["anagram", "nagaram"],
+            '["anagram","nagaram"]',
+            's = "anagram", t = "nagaram"',
+            '"anagram"\n"nagaram"',
+            {"s": "anagram", "t": "nagaram"},
+            {"args": ["anagram", "nagaram"]},
+            {"0": "anagram", "1": "nagaram"},
+        ]
+
+        for tc in formats:
+            resolved = resolve_dynamic_input(sig, tc)
+            assert resolved == {"s": "anagram", "t": "nagaram"}, f"Failed for {tc}: got {resolved}"
+            ser = adapter.serialize_input(sig, tc)
+            assert json.loads(ser) == {"s": "anagram", "t": "nagaram"}
+
+    def test_two_sum_dynamic_formats(self):
+        """Array + scalar parameters: maps [[2,7,11,15], 9] into {nums: [2,7,11,15], target: 9}."""
+        from app.engine.adapters.base import resolve_dynamic_input
+
+        sig = FunctionSignature(
+            name="twoSum",
+            return_type=DataType.INTEGER_ARRAY,
+            parameters=[
+                ParameterDefinition(name="nums", type=DataType.INTEGER_ARRAY),
+                ParameterDefinition(name="target", type=DataType.INTEGER),
+            ],
+        )
+
+        assert resolve_dynamic_input(sig, [[2, 7, 11, 15], 9]) == {"nums": [2, 7, 11, 15], "target": 9}
+        assert resolve_dynamic_input(sig, {"raw": "[[2, 7, 11, 15], 9]"}) == {"nums": [2, 7, 11, 15], "target": 9}
+        assert resolve_dynamic_input(sig, "nums = [2,7,11,15], target = 9") == {"nums": [2, 7, 11, 15], "target": 9}
+        assert resolve_dynamic_input(sig, "[2, 7, 11, 15]\n9") == {"nums": [2, 7, 11, 15], "target": 9}
+
+    def test_single_array_parameter(self):
+        """Single array parameter: maps [1,2,3] to {head: [1,2,3]} without splitting across elements."""
+        from app.engine.adapters.base import resolve_dynamic_input
+
+        sig = FunctionSignature(
+            name="reverseList",
+            return_type=DataType.INTEGER_ARRAY,
+            parameters=[
+                ParameterDefinition(name="head", type=DataType.INTEGER_ARRAY),
+            ],
+        )
+
+        assert resolve_dynamic_input(sig, [1, 2, 3, 4, 5]) == {"head": [1, 2, 3, 4, 5]}
+        assert resolve_dynamic_input(sig, "[1, 2, 3, 4, 5]") == {"head": [1, 2, 3, 4, 5]}
+        assert resolve_dynamic_input(sig, {"raw": "[1, 2, 3, 4, 5]"}) == {"head": [1, 2, 3, 4, 5]}
+
+

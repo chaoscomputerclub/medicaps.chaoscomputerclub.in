@@ -8,8 +8,24 @@ from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from app.engine.contracts import FunctionSignature, DataType
+from app.engine.binder import InputBinder, InputBindingError, BoundArgument
+
+
+def resolve_dynamic_input(signature: FunctionSignature, raw_input: Any) -> Dict[str, Any]:
+    """
+    Backward-compatible dynamic parameter resolution helper.
+    Delegates directly to InputBinder to produce a canonical {param_name: value} dictionary.
+    """
+    if not signature or not signature.parameters:
+        return {}
+    try:
+        bound_args = InputBinder.bind(signature, raw_input)
+        return InputBinder.to_dict(bound_args)
+    except InputBindingError:
+        # If binding fails due to partial/empty data, provide empty/null mapping safely
+        return {p.name: None for p in signature.parameters}
 
 
 class BaseLanguageAdapter(ABC):
@@ -31,19 +47,14 @@ class BaseLanguageAdapter(ABC):
         """
         pass
 
-    def serialize_input(self, signature: FunctionSignature, input_dict: Dict[str, Any]) -> str:
+    def serialize_input(self, signature: FunctionSignature, raw_input: Any) -> str:
         """
-        Serializes structured input argument dictionary into stdin payload for the driver.
-        By default, serializes as a canonical JSON object {param_name: value}.
+        Serializes any dynamic structured or positional testcase input representation into
+        a canonical JSON payload for the language driver.
+        Uses InputBinder to guarantee strict positional binding and typed validation.
         """
-        # Ensure ordered argument dictionary according to signature
-        ordered_args = {}
-        for param in signature.parameters:
-            if param.name in input_dict:
-                ordered_args[param.name] = input_dict[param.name]
-            else:
-                ordered_args[param.name] = None
-        return json.dumps(ordered_args)
+        bound_args = InputBinder.bind(signature, raw_input)
+        return InputBinder.to_serialized_payload(bound_args)
 
     def validate_contract(self, signature: FunctionSignature) -> List[str]:
         """Validates if the signature can be compiled and executed in this language."""

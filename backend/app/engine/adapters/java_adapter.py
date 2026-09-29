@@ -6,46 +6,48 @@ Generates typed Java Solution class templates and trusted Main driver runner.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Dict, List
 from app.engine.adapters.base import BaseLanguageAdapter
-from app.engine.contracts import DataType, FunctionSignature
+from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
 
 
 class JavaAdapter(BaseLanguageAdapter):
     language_name = "java"
 
     @staticmethod
-    def _map_type(dt: DataType) -> str:
-        mapping = {
-            DataType.INTEGER: "int",
-            DataType.LONG: "long",
-            DataType.FLOAT: "float",
-            DataType.DOUBLE: "double",
-            DataType.BOOLEAN: "boolean",
-            DataType.STRING: "String",
-            DataType.INTEGER_ARRAY: "int[]",
-            DataType.LONG_ARRAY: "long[]",
-            DataType.FLOAT_ARRAY: "float[]",
-            DataType.DOUBLE_ARRAY: "double[]",
-            DataType.STRING_ARRAY: "String[]",
-            DataType.BOOLEAN_ARRAY: "boolean[]",
-            DataType.INTEGER_2D_ARRAY: "int[][]",
-            DataType.LONG_2D_ARRAY: "long[][]",
-            DataType.FLOAT_2D_ARRAY: "float[][]",
-            DataType.DOUBLE_2D_ARRAY: "double[][]",
-            DataType.STRING_2D_ARRAY: "String[][]",
-            DataType.OBJECT: "java.util.Map<String, Object>",
-            DataType.MAP: "java.util.Map<String, Object>",
-        }
-        return mapping.get(dt, "int")
+    def _map_type(type_input: Any) -> str:
+        try:
+            td = parse_type_descriptor(type_input)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 1:
+                    base = "int" if td.base == "int" else ("double" if td.base == "float" else ("String" if td.base == "string" else ("boolean" if td.base == "boolean" else "int")))
+                    return f"{base}[]"
+                elif td.dimensions == 2:
+                    base = "int" if td.base == "int" else ("double" if td.base == "float" else ("String" if td.base == "string" else "int"))
+                    return f"{base}[][]"
+            if td.base == "int":
+                return "int"
+            elif td.base == "float":
+                return "double"
+            elif td.base == "boolean":
+                return "boolean"
+            elif td.base == "string":
+                return "String"
+            elif td.base == "object":
+                return "java.util.Map<String, Object>"
+            return "int"
+        except Exception:
+            return "int"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_type(signature.return_type)
 
         if not signature.parameters:
             return (
-                "class Solution {\n"
+                f"class {class_name} {{\n"
                 f"    public {ret_type} {fn_name}() {{\n"
                 "        \n"
                 "    }\n"
@@ -59,7 +61,7 @@ class JavaAdapter(BaseLanguageAdapter):
         params_str = ",\n".join(param_lines)
 
         return (
-            "class Solution {\n"
+            f"class {class_name} {{\n"
             f"    public {ret_type} {fn_name}(\n"
             f"{params_str}\n"
             "    ) {\n"
@@ -72,7 +74,8 @@ class JavaAdapter(BaseLanguageAdapter):
         if "public static void main" in user_code:
             return user_code
 
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_type(signature.return_type)
 
         # Build parameter parsers
@@ -81,16 +84,13 @@ class JavaAdapter(BaseLanguageAdapter):
         for idx, p in enumerate(signature.parameters):
             pname = f"_arg_{p.name}"
             call_args.append(pname)
-            decl_lines.append(self._build_param_extraction(p.type, pname, idx))
+            decl_lines.append(self._build_param_extraction(p.type, pname, idx, p.name))
 
         args_str = ", ".join(call_args)
         invoke_str = f"            var result = sol.{fn_name}({args_str});\n"
         invoke_str += "            _printResult(result);\n"
 
         driver = r"""
-import java.util.*;
-import java.io.*;
-
 public class Main {
     static void _printResult(Object res) {
         if (res == null) {
@@ -141,6 +141,45 @@ public class Main {
         }
         if (cur.length() > 0) chunks.add(cur.toString().trim());
         return chunks;
+    }
+
+    static String _findParam(String src, String name, int fallbackIdx, List<String> chunks) {
+        String pat = "\"" + name + "\"";
+        int p = src.indexOf(pat);
+        if (p != -1) {
+            p += pat.length();
+            while (p < src.length() && (Character.isWhitespace(src.charAt(p)) || src.charAt(p) == ':')) p++;
+            if (p < src.length()) {
+                char ch = src.charAt(p);
+                if (ch == '[' || ch == '{') {
+                    char closeCh = (ch == '[') ? ']' : '}';
+                    int depth = 0;
+                    int start = p;
+                    for (; p < src.length(); p++) {
+                        if (src.charAt(p) == ch) depth++;
+                        else if (src.charAt(p) == closeCh) {
+                            depth--;
+                            if (depth == 0) { p++; break; }
+                        }
+                    }
+                    return src.substring(start, p);
+                } else if (ch == '"') {
+                    int start = p++;
+                    while (p < src.length() && src.charAt(p) != '"') {
+                        if (src.charAt(p) == '\\' && p + 1 < src.length()) p++;
+                        p++;
+                    }
+                    if (p < src.length()) p++;
+                    return src.substring(start, p);
+                } else {
+                    int start = p;
+                    while (p < src.length() && src.charAt(p) != ',' && src.charAt(p) != '}' && !Character.isWhitespace(src.charAt(p))) p++;
+                    return src.substring(start, p);
+                }
+            }
+        }
+        if (fallbackIdx < chunks.size()) return chunks.get(fallbackIdx);
+        return "";
     }
 
     static int _toInt(String s) {
@@ -221,26 +260,25 @@ public class Main {
         List<String> chunks = _extractChunks(fullInput);
 
 """
-        body = "\n".join(decl_lines) + f"\n\n        Solution sol = new Solution();\n{invoke_str}    }}\n}}\n"
-        return user_code + "\n\n" + driver + body
+        body = "\n".join(decl_lines) + f"\n\n        {class_name} sol = new {class_name}();\n{invoke_str}    }}\n}}\n"
+        sanitized_code = re.sub(rf"\bpublic\s+class\s+{re.escape(class_name)}\b", f"class {class_name}", user_code)
+        header = "// CCC Trusted Judge Execution Driver (Java)\nimport java.util.*;\nimport java.io.*;\n\n"
+        return f"{header}{sanitized_code}\n\n{driver}{body}"
 
-    def _build_param_extraction(self, dt: DataType, pname: str, idx: int) -> str:
-        chunk_expr = f'(chunks.size() > {idx} ? chunks.get({idx}) : "")'
-        t_val = dt.value
-
-        if t_val == DataType.INTEGER.value:
-            return f"        int {pname} = _toInt({chunk_expr});"
-        elif t_val == DataType.LONG.value:
-            return f"        long {pname} = _toLong({chunk_expr});"
-        elif t_val in (DataType.FLOAT.value, DataType.DOUBLE.value):
-            return f"        double {pname} = _toDouble({chunk_expr});"
-        elif t_val == DataType.BOOLEAN.value:
-            return f"        boolean {pname} = _toBool({chunk_expr});"
-        elif t_val == DataType.STRING.value:
-            return f"        String {pname} = _toString({chunk_expr});"
-        elif t_val in (DataType.INTEGER_ARRAY.value, DataType.LONG_ARRAY.value):
-            return f"        int[] {pname} = _toIntArray({chunk_expr});"
-        elif t_val in (DataType.INTEGER_2D_ARRAY.value, DataType.LONG_2D_ARRAY.value):
-            return f"        int[][] {pname} = _toInt2DArray({chunk_expr});"
-        else:
-            return f"        int {pname} = _toInt({chunk_expr});"
+    def _build_param_extraction(self, type_input: Any, pname: str, idx: int, orig_name: str) -> str:
+        find_expr = f'_findParam(fullInput, "{orig_name}", {idx}, chunks)'
+        try:
+            td = parse_type_descriptor(type_input)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 2:
+                    return f"        int[][] {pname} = _toInt2DArray({find_expr});"
+                return f"        int[] {pname} = _toIntArray({find_expr});"
+            if td.base == "string":
+                return f"        String {pname} = _toString({find_expr});"
+            if td.base == "boolean":
+                return f"        boolean {pname} = _toBool({find_expr});"
+            if td.base == "float":
+                return f"        double {pname} = _toDouble({find_expr});"
+            return f"        int {pname} = _toInt({find_expr});"
+        except Exception:
+            return f"        int {pname} = _toInt({find_expr});"

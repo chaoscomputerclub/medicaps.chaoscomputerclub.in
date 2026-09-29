@@ -167,8 +167,8 @@ class LanguageDefinition:
         if self.requires_compile and self.binary_filename:
             bin_path = str(workspace / self.binary_filename)
             if self.language == Language.JAVA:
-                # Java executes class Solution from workspace directory
-                return [self.runtime, *self.runtime_arguments, "Solution"]
+                # Java executes class Main from workspace directory
+                return [self.runtime, *self.runtime_arguments, "Main"]
             return [bin_path, *self.runtime_arguments]
         
         src = str(workspace / self.filename)
@@ -262,8 +262,8 @@ LANGUAGE_DEFINITIONS: Dict[Language, LanguageDefinition] = {
         language=Language.JAVA,
         display_name="Java (OpenJDK 17/21)",
         source_extension=".java",
-        filename="Solution.java",
-        binary_filename="Solution.class",
+        filename="Main.java",
+        binary_filename="Main.class",
         requires_compile=True,
         compiler=_HOST_JAVAC,
         compiler_arguments=[],

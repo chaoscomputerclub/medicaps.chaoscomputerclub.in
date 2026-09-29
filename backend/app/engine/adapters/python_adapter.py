@@ -6,46 +6,46 @@ Generates typed Solution class starter templates and trusted driver harnesses.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from app.engine.adapters.base import BaseLanguageAdapter
-from app.engine.contracts import DataType, FunctionSignature
+from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
 
 
 class PythonAdapter(BaseLanguageAdapter):
     language_name = "python"
 
     @staticmethod
-    def _map_type(dt: DataType) -> str:
-        mapping = {
-            DataType.INTEGER: "int",
-            DataType.LONG: "int",
-            DataType.FLOAT: "float",
-            DataType.DOUBLE: "float",
-            DataType.BOOLEAN: "bool",
-            DataType.STRING: "str",
-            DataType.INTEGER_ARRAY: "list[int]",
-            DataType.LONG_ARRAY: "list[int]",
-            DataType.FLOAT_ARRAY: "list[float]",
-            DataType.DOUBLE_ARRAY: "list[float]",
-            DataType.STRING_ARRAY: "list[str]",
-            DataType.BOOLEAN_ARRAY: "list[bool]",
-            DataType.INTEGER_2D_ARRAY: "list[list[int]]",
-            DataType.LONG_2D_ARRAY: "list[list[int]]",
-            DataType.FLOAT_2D_ARRAY: "list[list[float]]",
-            DataType.DOUBLE_2D_ARRAY: "list[list[float]]",
-            DataType.STRING_2D_ARRAY: "list[list[str]]",
-            DataType.OBJECT: "dict",
-            DataType.MAP: "dict",
-        }
-        return mapping.get(dt, "Any")
+    def _map_type(type_input: Any) -> str:
+        try:
+            td = parse_type_descriptor(type_input)
+            base_map = {
+                "int": "int",
+                "float": "float",
+                "boolean": "bool",
+                "string": "str",
+                "object": "dict",
+                "void": "None",
+            }
+            py_base = base_map.get(td.base, "Any")
+            if td.kind == TypeKind.ARRAY:
+                res = py_base
+                for _ in range(td.dimensions):
+                    res = f"list[{res}]"
+                return res
+            if td.is_nullable:
+                return f"Optional[{py_base}]"
+            return py_base
+        except Exception:
+            return "Any"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_type(signature.return_type)
 
         if not signature.parameters:
             return (
-                "class Solution:\n"
+                f"class {class_name}:\n"
                 f"    def {fn_name}(self) -> {ret_type}:\n"
                 "        pass\n"
             )
@@ -57,7 +57,7 @@ class PythonAdapter(BaseLanguageAdapter):
         params_str = ",\n".join(param_lines)
 
         return (
-            "class Solution:\n"
+            f"class {class_name}:\n"
             f"    def {fn_name}(\n"
             "        self,\n"
             f"{params_str}\n"
@@ -74,7 +74,8 @@ class PythonAdapter(BaseLanguageAdapter):
         if has_script_main:
             return user_code
 
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         param_names = [p.name for p in signature.parameters]
         param_names_repr = json.dumps(param_names)
 
@@ -101,7 +102,6 @@ if __name__ == '__main__':
             else:
                 args = [parsed]
         except Exception:
-            # Fallback for plain scalar or line-based inputs
             lines = [l.strip() for l in raw.splitlines() if l.strip()]
             param_names = {param_names_repr}
             if len(lines) == len(param_names) and len(param_names) > 1:
@@ -114,13 +114,22 @@ if __name__ == '__main__':
             else:
                 args = [raw]
 
-    if 'Solution' not in globals():
-        sys.stderr.write("Judge Error: class Solution not found in contestant submission.\\n")
+    target_cls = globals().get('{class_name}')
+    if not target_cls:
+        # Fallback to Solution if class_name was not found
+        target_cls = globals().get('Solution')
+    if not target_cls:
+        sys.stderr.write("Judge Error: class {class_name} not found in contestant submission.\\n")
         sys.exit(1)
 
-    sol = Solution()
+    try:
+        sol = target_cls()
+    except Exception as e:
+        sys.stderr.write(f"Judge Error: Could not instantiate class {class_name}: {{e}}\\n")
+        sys.exit(1)
+
     if not hasattr(sol, "{fn_name}"):
-        sys.stderr.write("Judge Error: method '{fn_name}' not found on Solution class.\\n")
+        sys.stderr.write("Judge Error: method '{fn_name}' not found on class {class_name}.\\n")
         sys.exit(1)
 
     target_method = getattr(sol, "{fn_name}")
@@ -130,7 +139,7 @@ if __name__ == '__main__':
         if isinstance(result, bool):
             print("true" if result else "false")
         elif isinstance(result, (list, tuple, dict)):
-            print(json.dumps(result))
+            print(json.dumps(result, ensure_ascii=False))
         elif result is None:
             print("null")
         else:

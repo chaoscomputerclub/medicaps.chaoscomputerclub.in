@@ -92,7 +92,7 @@ import {
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
-import { slugifyProblem, resolveAvatarUrl, formatFullName, sanitizeCodeSnippet } from "@/lib/utils";
+import { slugifyProblem, resolveAvatarUrl, formatFullName, sanitizeCodeSnippet, formatTestcaseInput } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
@@ -1410,7 +1410,7 @@ export function ContestArenaPage() {
                               <div className="space-y-1">
                                 <span className="text-[10px] text-zinc-500">Input</span>
                                 <pre className="p-2.5 rounded bg-black border border-white/6 text-zinc-200 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
-                                  {st.stdin}
+                                  {formatTestcaseInput(st.stdin || (st as any).input)}
                                 </pre>
                               </div>
                               <div className="space-y-1">
@@ -1788,7 +1788,10 @@ export function ContestArenaPage() {
                               Input
                             </span>
                             <pre className="p-2.5 bg-zinc-950 border border-white/10 rounded text-[13px] font-mono text-zinc-200 overflow-x-auto selection:bg-lime-400 selection:text-black leading-relaxed">
-                              {activeProblem.sample_testcases[activeTestcaseIndex].stdin}
+                              {formatTestcaseInput(
+                                activeProblem.sample_testcases[activeTestcaseIndex].stdin ||
+                                  (activeProblem.sample_testcases[activeTestcaseIndex] as any).input,
+                              )}
                             </pre>
                           </div>
                           <div>
@@ -1960,8 +1963,8 @@ export function ContestArenaPage() {
                                         <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                           Input
                                         </span>
-                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
-                                          {curTc.input}
+                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto whitespace-pre-wrap">
+                                          {formatTestcaseInput(curTc.input)}
                                         </pre>
                                       </div>
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -2095,8 +2098,8 @@ export function ContestArenaPage() {
                                         <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
                                           Input
                                         </span>
-                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
-                                          {curTc.stdin}
+                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto whitespace-pre-wrap">
+                                          {formatTestcaseInput(curTc.stdin)}
                                         </pre>
                                       </div>
                                     )}

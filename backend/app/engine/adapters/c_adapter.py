@@ -9,63 +9,57 @@ import json
 import re
 from typing import Any, Dict, List
 from app.engine.adapters.base import BaseLanguageAdapter
-from app.engine.contracts import DataType, FunctionSignature
+from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
 
 
 class CAdapter(BaseLanguageAdapter):
     language_name = "c"
 
     @staticmethod
-    def _map_c_ret_type(dt: DataType) -> str:
-        mapping = {
-            DataType.INTEGER: "int",
-            DataType.LONG: "long long",
-            DataType.FLOAT: "float",
-            DataType.DOUBLE: "double",
-            DataType.BOOLEAN: "bool",
-            DataType.STRING: "char*",
-            DataType.INTEGER_ARRAY: "int*",
-            DataType.LONG_ARRAY: "long long*",
-            DataType.FLOAT_ARRAY: "float*",
-            DataType.DOUBLE_ARRAY: "double*",
-            DataType.STRING_ARRAY: "char**",
-            DataType.BOOLEAN_ARRAY: "bool*",
-            DataType.INTEGER_2D_ARRAY: "int**",
-            DataType.LONG_2D_ARRAY: "long long**",
-            DataType.STRING_2D_ARRAY: "char***",
-        }
-        return mapping.get(dt, "int")
+    def _map_c_ret_type(type_input: Any) -> str:
+        try:
+            td = parse_type_descriptor(type_input)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 1:
+                    base = "int*" if td.base == "int" else ("double*" if td.base == "float" else ("char**" if td.base == "string" else "int*"))
+                    return base
+                elif td.dimensions == 2:
+                    return "int**"
+            if td.base == "int":
+                return "int"
+            elif td.base == "float":
+                return "double"
+            elif td.base == "boolean":
+                return "bool"
+            elif td.base == "string":
+                return "char*"
+            elif td.base == "void":
+                return "void"
+            return "int"
+        except Exception:
+            return "int"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        fn_name = signature.name
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_c_ret_type(signature.return_type)
 
         params_parts: List[str] = []
         for p in signature.parameters:
-            t = p.type
             name = p.name
-            if t == DataType.INTEGER:
-                params_parts.append(f"int {name}")
-            elif t == DataType.LONG:
-                params_parts.append(f"long long {name}")
-            elif t == DataType.FLOAT:
-                params_parts.append(f"float {name}")
-            elif t == DataType.DOUBLE:
-                params_parts.append(f"double {name}")
-            elif t == DataType.BOOLEAN:
-                params_parts.append(f"bool {name}")
-            elif t == DataType.STRING:
+            td = parse_type_descriptor(p.type)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 2:
+                    params_parts.append(f"int** {name}, int {name}Size, int* {name}ColSize")
+                elif td.base == "string":
+                    params_parts.append(f"char** {name}, int {name}Size")
+                else:
+                    params_parts.append(f"int* {name}, int {name}Size")
+            elif td.base == "string":
                 params_parts.append(f"char* {name}")
-            elif t == DataType.INTEGER_ARRAY:
-                params_parts.append(f"int* {name}, int {name}Size")
-            elif t == DataType.LONG_ARRAY:
-                params_parts.append(f"long long* {name}, int {name}Size")
-            elif t == DataType.STRING_ARRAY:
-                params_parts.append(f"char** {name}, int {name}Size")
-            elif t == DataType.INTEGER_2D_ARRAY:
-                params_parts.append(f"int** {name}, int {name}Size, int* {name}ColSize")
-            elif t == DataType.LONG_2D_ARRAY:
-                params_parts.append(f"long long** {name}, int {name}Size, int* {name}ColSize")
+            elif td.base == "boolean":
+                params_parts.append(f"bool {name}")
+            elif td.base == "float":
+                params_parts.append(f"double {name}")
             else:
                 params_parts.append(f"int {name}")
 
@@ -81,55 +75,46 @@ class CAdapter(BaseLanguageAdapter):
         )
 
     def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:
-        fn_name = signature.name
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_c_ret_type(signature.return_type)
+        ret_td = parse_type_descriptor(signature.return_type)
 
         # Build parameter parsing and invocation logic
         parse_lines: List[str] = []
         call_args: List[str] = []
 
         for p in signature.parameters:
-            t = p.type
             name = p.name
-            if t == DataType.INTEGER:
-                parse_lines.append(f'    int _{name} = _ccc_read_int(&cur, "{name}");')
-                call_args.append(f"_{name}")
-            elif t == DataType.LONG:
-                parse_lines.append(f'    long long _{name} = _ccc_read_long(&cur, "{name}");')
-                call_args.append(f"_{name}")
-            elif t == DataType.FLOAT or t == DataType.DOUBLE:
-                parse_lines.append(f'    double _{name} = _ccc_read_double(&cur, "{name}");')
-                call_args.append(f"_{name}")
-            elif t == DataType.BOOLEAN:
-                parse_lines.append(f'    bool _{name} = _ccc_read_bool(&cur, "{name}");')
-                call_args.append(f"_{name}")
-            elif t == DataType.STRING:
+            td = parse_type_descriptor(p.type)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 2:
+                    parse_lines.append(f"    int _{name}Size = 0;")
+                    parse_lines.append(f"    int* _{name}ColSize = NULL;")
+                    parse_lines.append(f'    int** _{name} = _ccc_read_int_2d_arr(&cur, "{name}", &_{name}Size, &_{name}ColSize);')
+                    call_args.append(f"_{name}, _{name}Size, _{name}ColSize")
+                elif td.base == "string":
+                    parse_lines.append(f"    int _{name}Size = 0;")
+                    parse_lines.append(f'    char** _{name} = _ccc_read_str_arr(&cur, "{name}", &_{name}Size);')
+                    call_args.append(f"_{name}, _{name}Size")
+                else:
+                    parse_lines.append(f"    int _{name}Size = 0;")
+                    parse_lines.append(f'    int* _{name} = _ccc_read_int_arr(&cur, "{name}", &_{name}Size);')
+                    call_args.append(f"_{name}, _{name}Size")
+            elif td.base == "string":
                 parse_lines.append(f'    char* _{name} = _ccc_read_str(&cur, "{name}");')
                 call_args.append(f"_{name}")
-            elif t == DataType.INTEGER_ARRAY:
-                parse_lines.append(f"    int _{name}Size = 0;")
-                parse_lines.append(f'    int* _{name} = _ccc_read_int_arr(&cur, "{name}", &_{name}Size);')
-                call_args.append(f"_{name}, _{name}Size")
-            elif t == DataType.INTEGER_2D_ARRAY:
-                parse_lines.append(f"    int _{name}Size = 0;")
-                parse_lines.append(f"    int* _{name}ColSize = NULL;")
-                parse_lines.append(f'    int** _{name} = _ccc_read_int_2d_arr(&cur, "{name}", &_{name}Size, &_{name}ColSize);')
-                call_args.append(f"_{name}, _{name}Size, _{name}ColSize")
+            elif td.base == "boolean":
+                parse_lines.append(f'    bool _{name} = _ccc_read_bool(&cur, "{name}");')
+                call_args.append(f"_{name}")
+            elif td.base == "float":
+                parse_lines.append(f'    double _{name} = _ccc_read_double(&cur, "{name}");')
+                call_args.append(f"_{name}")
             else:
                 parse_lines.append(f'    int _{name} = _ccc_read_int(&cur, "{name}");')
                 call_args.append(f"_{name}")
 
-        # For array-returning functions, ALWAYS pass &_returnSize as final out-param.
-        # The user's function sets *returnSize before returning the allocated array.
-        # Hardcoding to 2 (previous bug) caused wrong-answer for any array != length 2.
         ret_size_decl = ""
-        if signature.return_type in (
-            DataType.INTEGER_ARRAY,
-            DataType.LONG_ARRAY,
-            DataType.STRING_ARRAY,
-            DataType.FLOAT_ARRAY,
-            DataType.DOUBLE_ARRAY,
-        ) or "int*" in ret_type or "long long*" in ret_type:
+        if ret_td.kind == TypeKind.ARRAY or "int*" in ret_type:
             ret_size_decl = "    int _returnSize = 0;\n"
             call_args.append("&_returnSize")
 
@@ -147,21 +132,12 @@ class CAdapter(BaseLanguageAdapter):
             print_call = f'    printf("%s\\n", result ? "true" : "false");'
         elif ret_type == "char*":
             print_call = f'    printf("%s\\n", result ? result : "");'
-        elif ret_type == "int*" or signature.return_type == DataType.INTEGER_ARRAY:
+        elif ret_td.kind == TypeKind.ARRAY:
             print_call = (
                 '    printf("[");\n'
                 '    for (int _i = 0; _i < _returnSize; _i++) {\n'
                 '        if (_i > 0) printf(", ");\n'
                 '        printf("%d", result[_i]);\n'
-                '    }\n'
-                '    printf("]\\n");'
-            )
-        elif ret_type == "long long*" or signature.return_type == DataType.LONG_ARRAY:
-            print_call = (
-                '    printf("[");\n'
-                '    for (int _i = 0; _i < _returnSize; _i++) {\n'
-                '        if (_i > 0) printf(", ");\n'
-                '        printf("%lld", result[_i]);\n'
                 '    }\n'
                 '    printf("]\\n");'
             )
@@ -218,103 +194,130 @@ static bool _ccc_read_bool(const char** p, const char* key) {{
 static char* _ccc_read_str(const char** p, const char* key) {{
     const char* k = _ccc_find_key(*p, key);
     if (!k) return strdup("");
-    if (*k == '"') k++;
-    const char* end = strchr(k, '"');
-    if (!end) return strdup(k);
-    int len = (int)(end - k);
-    char* s = (char*)malloc(len + 1);
-    strncpy(s, k, len);
-    s[len] = '\\0';
-    return s;
+    const char* start = strchr(k, '"');
+    if (!start) return strdup("");
+    start++;
+    const char* end = strchr(start, '"');
+    if (!end) return strdup("");
+    int len = (int)(end - start);
+    char* buf = (char*)malloc(len + 1);
+    strncpy(buf, start, len);
+    buf[len] = '\\0';
+    return buf;
 }}
 
 static int* _ccc_read_int_arr(const char** p, const char* key, int* size) {{
-    const char* k = _ccc_find_key(*p, key);
     *size = 0;
-    if (!k || *k != '[') return NULL;
-    k++;
-    int cap = 128;
+    const char* k = _ccc_find_key(*p, key);
+    if (!k) return NULL;
+    const char* start = strchr(k, '[');
+    if (!start) return NULL;
+    start++;
+    int cap = 16;
     int* arr = (int*)malloc(cap * sizeof(int));
-    while (*k && *k != ']') {{
-        while (*k && (isspace((unsigned char)*k) || *k == ',')) k++;
-        if (*k == ']') break;
-        char* next_p;
-        long val = strtol(k, &next_p, 10);
-        if (next_p == k) break;
-        k = next_p;
+    const char* cur = start;
+    while (*cur && *cur != ']') {{
+        while (*cur && (*cur == ',' || isspace((unsigned char)*cur))) cur++;
+        if (*cur == ']' || !*cur) break;
         if (*size >= cap) {{
             cap *= 2;
             arr = (int*)realloc(arr, cap * sizeof(int));
         }}
-        arr[(*size)++] = (int)val;
+        arr[(*size)++] = atoi(cur);
+        while (*cur && *cur != ',' && *cur != ']' && !isspace((unsigned char)*cur)) cur++;
     }}
     return arr;
 }}
 
-static int** _ccc_read_int_2d_arr(const char** p, const char* key, int* size, int** col_size) {{
-    const char* k = _ccc_find_key(*p, key);
+static char** _ccc_read_str_arr(const char** p, const char* key, int* size) {{
     *size = 0;
-    if (!k || *k != '[') return NULL;
-    k++;
-    int cap = 128;
-    int** rows = (int**)malloc(cap * sizeof(int*));
-    *col_size = (int*)malloc(cap * sizeof(int));
-    while (*k && *k != ']') {{
-        while (*k && (isspace((unsigned char)*k) || *k == ',')) k++;
-        if (*k == '[') {{
-            k++;
-            int row_cap = 16, row_size = 0;
-            int* row = (int*)malloc(row_cap * sizeof(int));
-            while (*k && *k != ']') {{
-                while (*k && (isspace((unsigned char)*k) || *k == ',')) k++;
-                if (*k == ']') break;
-                char* next_p;
-                long val = strtol(k, &next_p, 10);
-                if (next_p == k) break;
-                k = next_p;
-                if (row_size >= row_cap) {{
-                    row_cap *= 2;
-                    row = (int*)realloc(row, row_cap * sizeof(int));
-                }}
-                row[row_size++] = (int)val;
-            }}
-            if (*k == ']') k++;
+    const char* k = _ccc_find_key(*p, key);
+    if (!k) return NULL;
+    const char* start = strchr(k, '[');
+    if (!start) return NULL;
+    start++;
+    int cap = 8;
+    char** arr = (char**)malloc(cap * sizeof(char*));
+    const char* cur = start;
+    while (*cur && *cur != ']') {{
+        while (*cur && (*cur == ',' || isspace((unsigned char)*cur))) cur++;
+        if (*cur == ']' || !*cur) break;
+        if (*cur == '"') {{
+            cur++;
+            const char* end = strchr(cur, '"');
+            if (!end) break;
+            int len = (int)(end - cur);
+            char* s = (char*)malloc(len + 1);
+            strncpy(s, cur, len);
+            s[len] = '\\0';
             if (*size >= cap) {{
                 cap *= 2;
-                rows = (int**)realloc(rows, cap * sizeof(int*));
-                *col_size = (int*)realloc(*col_size, cap * sizeof(int));
+                arr = (char**)realloc(arr, cap * sizeof(char*));
             }}
-            rows[*size] = row;
-            (*col_size)[*size] = row_size;
-            (*size)++;
+            arr[(*size)++] = s;
+            cur = end + 1;
         }} else {{
-            k++;
+            cur++;
         }}
     }}
-    return rows;
+    return arr;
+}}
+
+static int** _ccc_read_int_2d_arr(const char** p, const char* key, int* rows, int** colSizes) {{
+    *rows = 0;
+    *colSizes = NULL;
+    const char* k = _ccc_find_key(*p, key);
+    if (!k) return NULL;
+    const char* start = strstr(k, "[[");
+    if (!start) return NULL;
+    start++;
+    int cap = 8;
+    int** arr = (int**)malloc(cap * sizeof(int*));
+    *colSizes = (int*)malloc(cap * sizeof(int));
+    const char* cur = start;
+    while (*cur && *cur != ']') {{
+        while (*cur && (*cur == ',' || isspace((unsigned char)*cur))) cur++;
+        if (*cur == '[') {{
+            int r_size = 0;
+            int r_cap = 8;
+            int* r_arr = (int*)malloc(r_cap * sizeof(int));
+            cur++;
+            while (*cur && *cur != ']') {{
+                while (*cur && (*cur == ',' || isspace((unsigned char)*cur))) cur++;
+                if (*cur == ']' || !*cur) break;
+                if (r_size >= r_cap) {{
+                    r_cap *= 2;
+                    r_arr = (int*)realloc(r_arr, r_cap * sizeof(int));
+                }}
+                r_arr[r_size++] = atoi(cur);
+                while (*cur && *cur != ',' && *cur != ']' && !isspace((unsigned char)*cur)) cur++;
+            }}
+            if (*cur == ']') cur++;
+            if (*rows >= cap) {{
+                cap *= 2;
+                arr = (int**)realloc(arr, cap * sizeof(int*));
+                *colSizes = (int*)realloc(*colSizes, cap * sizeof(int));
+            }}
+            (*colSizes)[*rows] = r_size;
+            arr[(*rows)++] = r_arr;
+        }} else {{
+            cur++;
+        }}
+    }}
+    return arr;
 }}
 
 int main(void) {{
-    static char buf[16777216];  /* 16 MB — up from 1 MB to handle large test cases */
-    size_t total = 0;
-    int c;
-    while ((c = getchar()) != EOF && total < sizeof(buf) - 1) {{
-        buf[total++] = (char)c;
-    }}
-    buf[total] = '\\0';
-    /* Detect and report overflow instead of silently corrupting data */
-    if (c != EOF) {{
-        fprintf(stderr, "Judge Error: stdin exceeds 16 MB buffer limit.\\n");
-        return 1;
-    }}
-    if (total == 0) return 0;
-
+    char* buf = (char*)malloc(1024 * 1024);
+    size_t n = fread(buf, 1, 1024 * 1024 - 1, stdin);
+    buf[n] = '\\0';
     const char* cur = buf;
+
 {parse_block}
-
-{ret_size_decl}    {ret_type} result = {fn_name}({args_str});
+{ret_size_decl}
+    {ret_type} result = {fn_name}({args_str});
 {print_call}
-
+    free(buf);
     return 0;
 }}
 """

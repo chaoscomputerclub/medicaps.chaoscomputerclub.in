@@ -5,7 +5,7 @@ from app.engine.executors.base import BaseExecutor
 
 class JavaExecutor(BaseExecutor):
     language = Language.JAVA
-    filename = "Solution.java"
-    compile_command = ["javac", "Solution.java"]
-    run_command = ["java", "-Xmx256m", "Solution"]
+    filename = "Main.java"
+    compile_command = ["javac", "Main.java"]
+    run_command = ["java", "-Xmx256m", "Main"]
     requires_compile = True

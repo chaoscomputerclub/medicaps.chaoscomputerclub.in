@@ -29,6 +29,7 @@ from app.models.db_models import (
     now_utc,
 )
 from app.engine.contracts import FunctionSignature, EvaluationConfig, DataType
+from app.engine.binder import InputBinder, InputBindingError
 from app.engine.adapters import OutputEvaluator
 from app.engine.harness import prepare_solution_code
 from app.engine.judge import JudgeEngine
@@ -185,16 +186,29 @@ class ContestExecutionService:
             raise HTTPException(status_code=400, detail=str(e))
         adapter = LanguageRegistry.get_adapter(lang_enum) if fn_sig else None
 
+        tc_binding_errors: dict[int, str] = {}
         if payload.custom_stdin is not None:
-            tcs = [TestCaseSchema(id="custom", stdin=payload.custom_stdin, expected_output="")]
+            if adapter and fn_sig:
+                try:
+                    custom_payload = adapter.serialize_input(fn_sig, payload.custom_stdin)
+                except InputBindingError as e:
+                    custom_payload = ""
+                    tc_binding_errors[0] = str(e)
+            else:
+                custom_payload = payload.custom_stdin
+            tcs = [TestCaseSchema(id="custom", stdin=custom_payload, expected_output="")]
             raw_cases = [{"input": payload.custom_stdin, "expected_output": ""}]
         else:
             tcs = []
             raw_cases = sample_list if sample_list else []
             for i, s in enumerate(raw_cases):
                 inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
-                if adapter and isinstance(inp, dict):
-                    stdin_payload = adapter.serialize_input(fn_sig, inp)
+                if adapter and fn_sig:
+                    try:
+                        stdin_payload = adapter.serialize_input(fn_sig, inp)
+                    except InputBindingError as e:
+                        stdin_payload = ""
+                        tc_binding_errors[i] = str(e)
                 else:
                     stdin_payload = str(inp)
 
@@ -241,8 +255,11 @@ class ContestExecutionService:
             raw_case = raw_cases[i] if i < len(raw_cases) else {}
             exp_val = raw_case.get("expected_output") if raw_case.get("expected_output") is not None else raw_case.get("output", "")
 
-            # If no sandbox crash/timeout, evaluate output
-            if tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
+            if i in tc_binding_errors:
+                tr.passed = False
+                tr.verdict = "INPUT_FORMAT_ERROR"
+                tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
+            elif tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
                 if fn_sig:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
                     if not passed:
@@ -274,7 +291,18 @@ class ContestExecutionService:
             })
 
         all_passed = (passed_count == len(testcase_results)) and len(testcase_results) > 0
-        final_verdict = "ACCEPTED" if all_passed else "WRONG_ANSWER"
+        final_verdict = "ACCEPTED" if all_passed else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
+
+        logger.info(
+            "Arena Code Run Completed: problem_id=%s, lang=%s, fn=%s, params=%d, passed=%d/%d, verdict=%s",
+            problem.id,
+            lang_enum.value,
+            fn_sig.name if fn_sig else "none",
+            len(fn_sig.parameters) if fn_sig else 0,
+            passed_count,
+            len(testcase_results),
+            final_verdict,
+        )
 
         return {
             "success": all_passed,  # BUG FIX: was exec_result.success (stale, pre-post-processing)
@@ -353,10 +381,15 @@ class ContestExecutionService:
         all_raw = samples + hidden
 
         all_tcs: list[TestCaseSchema] = []
+        tc_binding_errors: dict[int, str] = {}
         for i, s in enumerate(all_raw):
             inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
-            if adapter and isinstance(inp, dict):
-                stdin_payload = adapter.serialize_input(fn_sig, inp)
+            if adapter and fn_sig:
+                try:
+                    stdin_payload = adapter.serialize_input(fn_sig, inp)
+                except InputBindingError as e:
+                    stdin_payload = ""
+                    tc_binding_errors[i] = str(e)
             else:
                 stdin_payload = str(inp)
 
@@ -403,7 +436,11 @@ class ContestExecutionService:
             raw_case = all_raw[i] if i < len(all_raw) else {}
             exp_val = raw_case.get("expected_output") if raw_case.get("expected_output") is not None else raw_case.get("output", "")
 
-            if tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
+            if i in tc_binding_errors:
+                tr.passed = False
+                tr.verdict = "INPUT_FORMAT_ERROR"
+                tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
+            elif tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
                 if fn_sig:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
                     if not passed:
@@ -424,6 +461,8 @@ class ContestExecutionService:
         total_tc = max(1, len(all_tcs))
         points_awarded = problem.points if is_accepted else int(problem.points * (passed_count / total_tc))
 
+        exec_result.passed_testcases = passed_count
+        exec_result.total_testcases = len(all_tcs)
 
         sub = ContestSubmission(
             contest_id=contest.id,
@@ -433,8 +472,8 @@ class ContestExecutionService:
             language=lang_enum.value,
             code=payload.code,
             verdict=verdict_str,
-            passed_testcases=exec_result.passed_testcases,
-            total_testcases=exec_result.total_testcases,
+            passed_testcases=passed_count,
+            total_testcases=len(all_tcs),
             execution_time=exec_result.time or 0.0,
             memory_used=exec_result.memory or 0,
             points_awarded=points_awarded,
@@ -552,17 +591,30 @@ class ContestExecutionService:
                 "wall_time_ms": tr.wall_time_ms,
             })
 
+        logger.info(
+            "Arena Code Submission Evaluated: submission_id=%s, problem_id=%s, lang=%s, fn=%s, params=%d, passed=%d/%d, verdict=%s, points=%d",
+            sub.id,
+            problem.id,
+            lang_enum.value,
+            fn_sig.name if fn_sig else "none",
+            len(fn_sig.parameters) if fn_sig else 0,
+            passed_count,
+            len(all_tcs),
+            verdict_str,
+            points_awarded,
+        )
+
         return {
             "submission_id": sub.id,
             "success": exec_result.success,
             "verdict": verdict_str,
-            "passed_testcases": exec_result.passed_testcases,
-            "total_testcases": exec_result.total_testcases,
+            "passed_testcases": passed_count,
+            "total_testcases": len(all_tcs),
             "points_awarded": points_awarded,
             "execution_time": exec_result.time,
             "memory": exec_result.memory,
             "compile_output": exec_result.compile_output,
             "stderr": exec_result.stderr,
-            "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({exec_result.passed_testcases}/{exec_result.total_testcases} testcases passed)",
+            "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({passed_count}/{len(all_tcs)} testcases passed)",
             "testcase_results": submit_tc_results,
         }

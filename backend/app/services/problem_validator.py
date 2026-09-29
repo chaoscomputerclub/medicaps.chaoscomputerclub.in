@@ -18,7 +18,9 @@ from app.engine.contracts import (
     SandboxConfig,
     StructuredTestCase,
     validate_value_type,
+    parse_type_descriptor,
 )
+from app.engine.binder import InputBinder, InputBindingError
 from app.engine.adapters import get_adapter, OutputEvaluator
 
 
@@ -72,15 +74,21 @@ class ProblemValidator:
 
         parsed_sig: Optional[FunctionSignature] = None
         if exec_mode == "FUNCTION":
-            fn_name = (raw_sig.get("name") or problem_data.get("function_name") or "").strip()
+            fn_name = (raw_sig.get("function_name") or raw_sig.get("name") or problem_data.get("function_name") or "").strip()
+            class_name = (raw_sig.get("class_name") or problem_data.get("class_name") or "Solution").strip()
+
             if not fn_name:
                 errors.append("Function name is required for FUNCTION execution mode.")
             else:
                 try:
-                    # Validate identifier
                     FunctionSignature.validate_function_name(fn_name)
                 except Exception as e:
                     errors.append(f"Invalid function name '{fn_name}': {e}")
+
+            try:
+                FunctionSignature.validate_class_name(class_name)
+            except Exception as e:
+                errors.append(f"Invalid class name '{class_name}': {e}")
 
             raw_params = raw_sig.get("parameters") or []
             parsed_params: List[ParameterDefinition] = []
@@ -97,43 +105,50 @@ class ProblemValidator:
                 param_names_seen.add(p_name)
 
                 try:
-                    p_type = DataType(p_type_val)
-                except Exception:
-                    errors.append(f"Parameter '{p_name}' has unrecognized data type '{p_type_val}'.")
+                    parse_type_descriptor(p_type_val)
+                except Exception as e:
+                    errors.append(f"Parameter '{p_name}' has invalid data type '{p_type_val}': {e}")
                     continue
 
                 try:
-                    parsed_params.append(ParameterDefinition(name=p_name, type=p_type))
+                    parsed_params.append(ParameterDefinition(name=p_name, type=p_type_val))
                 except Exception as e:
                     errors.append(f"Parameter '{p_name}' definition error: {e}")
 
             ret_type_val = raw_sig.get("return_type", "integer")
             try:
-                ret_type = DataType(ret_type_val)
-            except Exception:
-                errors.append(f"Unrecognized return type '{ret_type_val}'.")
-                ret_type = DataType.INTEGER
+                parse_type_descriptor(ret_type_val)
+            except Exception as e:
+                errors.append(f"Unrecognized return type '{ret_type_val}': {e}")
 
             if fn_name and not errors:
                 try:
                     parsed_sig = FunctionSignature(
+                        class_name=class_name,
                         name=fn_name,
+                        function_name=fn_name,
                         parameters=parsed_params,
-                        return_type=ret_type,
+                        return_type=ret_type_val,
                     )
                 except Exception as e:
                     errors.append(f"Function signature validation failed: {e}")
 
-        # 3. Starter Code Coverage
+        # 3. Starter Code Coverage & Validation against Contract
         starter_code = problem_data.get("starter_code") or {}
         required_langs = ["python", "cpp", "c", "java", "javascript", "typescript"]
         for lang in required_langs:
             code_snippet = starter_code.get(lang, "").strip()
             if not code_snippet:
                 if parsed_sig:
-                    warnings.append(f"Starter code for '{lang}' was missing; can be auto-generated from signature.")
+                    warnings.append(f"Starter code for '{lang}' was missing; will be auto-generated from signature.")
                 else:
                     errors.append(f"Missing starter code for required language '{lang}'.")
+            elif parsed_sig:
+                # Check starter code compatibility with declared method name
+                if parsed_sig.name not in code_snippet and parsed_sig.function_name not in code_snippet:
+                    errors.append(
+                        f"Starter code for '{lang}' is incompatible: method '{parsed_sig.name}' not found in template."
+                    )
 
         # 4. Resource & Sandbox Bounds
         time_limit = float(problem_data.get("time_limit", 2.0) or 2.0)
@@ -147,16 +162,14 @@ class ProblemValidator:
         # 5. Visible Testcase Suite
         if not visible_testcases:
             errors.append("At least 1 visible sample testcase must be provided.")
-        elif len(visible_testcases) < 3:
-            warnings.append(f"Recommended 3 visible sample testcases (current count: {len(visible_testcases)}).")
+        elif len(visible_testcases) < 2:
+            warnings.append(f"Recommended at least 2 visible sample testcases (current count: {len(visible_testcases)}).")
 
         # 6. Hidden Testcase Vault
         if not hidden_testcases:
-            errors.append("At least 1 hidden edge-case testcase must be stored in the cryptographic vault.")
-        elif len(hidden_testcases) < 15:
-            warnings.append(f"Collegiate standard recommends at least 15 hidden testcases for robust evaluation (current count: {len(hidden_testcases)}).")
+            errors.append("At least 1 hidden edge-case testcase must be stored in the vault.")
 
-        # 7. Testcase Structure & Type Compatibility Checks
+        # 7. Testcase Structure & Type Compatibility Checks via InputBinder
         all_cases = [("visible", c) for c in visible_testcases] + [("hidden", c) for c in hidden_testcases]
         tc_ids_seen = set()
 
@@ -170,31 +183,26 @@ class ProblemValidator:
                 tc_ids_seen.add(tc_id)
 
             if parsed_sig:
-                tc_input = tc.get("input_data") or tc.get("input") or {}
-                # In function mode, input must be a dictionary mapping parameter names to values
-                if not isinstance(tc_input, dict):
-                    errors.append(f"Testcase '{tc_id}' input must be a structured JSON dictionary mapping parameter names to values.")
-                else:
-                    for p in parsed_sig.parameters:
-                        if p.name not in tc_input:
-                            errors.append(f"Testcase '{tc_id}' is missing required parameter '{p.name}'.")
-                        else:
-                            val = tc_input[p.name]
-                            valid, err_msg = validate_value_type(val, p.type)
-                            if not valid:
-                                errors.append(f"Testcase '{tc_id}' parameter '{p.name}' invalid: {err_msg}")
+                tc_input = tc.get("input_data") if tc.get("input_data") is not None else tc.get("input")
+                try:
+                    # Validate positional binding, argument count, and parameter types
+                    InputBinder.bind(parsed_sig, tc_input)
+                except InputBindingError as e:
+                    errors.append(f"Testcase '{tc_id}' input error: {e.message}")
 
                 # Validate expected_output matches return_type
-                expected_out = tc.get("expected_output")
-                if expected_out is None and tc.get("output") is not None:
-                    expected_out = tc.get("output")
-
+                expected_out = tc.get("expected_output") if tc.get("expected_output") is not None else tc.get("output")
                 if expected_out is None:
                     errors.append(f"Testcase '{tc_id}' must provide an 'expected_output'.")
                 else:
                     valid, err_msg = validate_value_type(expected_out, parsed_sig.return_type)
                     if not valid:
-                        errors.append(f"Testcase '{tc_id}' expected_output invalid for return type {parsed_sig.return_type.value}: {err_msg}")
+                        # Check parse_raw_output before declaring error
+                        p_ok, _, _ = OutputEvaluator.parse_raw_output(str(expected_out), parsed_sig.return_type)
+                        if not p_ok:
+                            errors.append(
+                                f"Testcase '{tc_id}' expected_output invalid for return type {parsed_sig.return_type}: {err_msg}"
+                            )
 
         # 8. Reference Solution Execution (Optional verification)
         ref_solutions = problem_data.get("reference_solution") or {}
@@ -243,8 +251,8 @@ class ProblemValidator:
         tc_schemas: List[TestCaseSchema] = []
         for idx, tc in enumerate(testcases):
             tc_id = tc.get("testcase_id") or tc.get("id") or f"tc_{idx+1}"
-            raw_input = tc.get("input_data") or tc.get("input") or {}
-            serialized_stdin = adapter.serialize_input(signature, raw_input) if isinstance(raw_input, dict) else str(raw_input)
+            raw_input = tc.get("input_data") if tc.get("input_data") is not None else (tc.get("input") or "")
+            serialized_stdin = adapter.serialize_input(signature, raw_input)
             tc_schemas.append(
                 TestCaseSchema(
                     id=tc_id,

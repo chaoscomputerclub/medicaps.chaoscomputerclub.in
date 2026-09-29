@@ -97,3 +97,24 @@ export function sanitizeCodeSnippet(code?: string | null): string {
   return clean;
 }
 
+/**
+ * Formats a raw testcase input string or JSON into clean LeetCode-style display:
+ * e.g. {"s": "anagram", "t": "nagaram"} -> s = "anagram"\nt = "nagaram"
+ */
+export function formatTestcaseInput(raw?: string | null): string {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      if (parsed.raw && typeof parsed.raw === "string") {
+        return formatTestcaseInput(parsed.raw);
+      }
+      return Object.entries(parsed)
+        .map(([k, v]) => `${k} = ${JSON.stringify(v)}`)
+        .join("\n");
+    }
+  } catch {}
+  return trimmed;
+}
+

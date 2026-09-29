@@ -8,46 +8,46 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List
 from app.engine.adapters.base import BaseLanguageAdapter
-from app.engine.contracts import DataType, FunctionSignature
+from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
 
 
 class TypeScriptAdapter(BaseLanguageAdapter):
     language_name = "typescript"
 
     @staticmethod
-    def _map_ts_type(dt: DataType) -> str:
-        mapping = {
-            DataType.INTEGER: "number",
-            DataType.LONG: "number",
-            DataType.FLOAT: "number",
-            DataType.DOUBLE: "number",
-            DataType.BOOLEAN: "boolean",
-            DataType.STRING: "string",
-            DataType.INTEGER_ARRAY: "number[]",
-            DataType.LONG_ARRAY: "number[]",
-            DataType.FLOAT_ARRAY: "number[]",
-            DataType.DOUBLE_ARRAY: "number[]",
-            DataType.STRING_ARRAY: "string[]",
-            DataType.BOOLEAN_ARRAY: "boolean[]",
-            DataType.INTEGER_2D_ARRAY: "number[][]",
-            DataType.LONG_2D_ARRAY: "number[][]",
-            DataType.FLOAT_2D_ARRAY: "number[][]",
-            DataType.DOUBLE_2D_ARRAY: "number[][]",
-            DataType.STRING_2D_ARRAY: "string[][]",
-            DataType.OBJECT: "Record<string, any>",
-            DataType.MAP: "Record<string, any>",
-        }
-        return mapping.get(dt, "any")
+    def _map_ts_type(type_input: Any) -> str:
+        try:
+            td = parse_type_descriptor(type_input)
+            base_map = {
+                "int": "number",
+                "float": "number",
+                "boolean": "boolean",
+                "string": "string",
+                "object": "Record<string, any>",
+                "void": "void",
+            }
+            ts_base = base_map.get(td.base, "any")
+            if td.kind == TypeKind.ARRAY:
+                res = ts_base
+                for _ in range(td.dimensions):
+                    res = f"{res}[]"
+                return res
+            if td.is_nullable:
+                return f"{ts_base} | null"
+            return ts_base
+        except Exception:
+            return "any"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_ts_type(signature.return_type)
 
         params_list = [f"{p.name}: {self._map_ts_type(p.type)}" for p in signature.parameters]
         params_str = ", ".join(params_list)
 
         return (
-            "class Solution {\n"
+            f"class {class_name} {{\n"
             f"    {fn_name}({params_str}): {ret_type} {{\n"
             "        \n"
             "    }\n"
@@ -55,10 +55,10 @@ class TypeScriptAdapter(BaseLanguageAdapter):
         )
 
     def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         param_names = [p.name for p in signature.parameters]
-        param_args = [f'parsed["{p}"]' for p in param_names]
-        args_str = ", ".join(param_args)
+        param_names_repr = json.dumps(param_names)
 
         driver = f"""
 
@@ -69,14 +69,32 @@ class TypeScriptAdapter(BaseLanguageAdapter):
         const raw = fs.readFileSync(0, 'utf-8').trim();
         if (!raw) return;
         const parsed = JSON.parse(raw);
-        const sol = new Solution();
-        if (typeof sol['{fn_name}'] !== 'function') {{
-            console.error('Error: Solution has no method named "{fn_name}"');
+        const paramNames = {param_names_repr};
+
+        let args = [];
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) && paramNames.length > 0) {{
+            args = paramNames.map(p => parsed[p]);
+        }} else if (Array.isArray(parsed)) {{
+            args = parsed;
+        }} else {{
+            args = [parsed];
+        }}
+
+        let targetCls = (typeof {class_name} === 'function') ? {class_name} : (typeof Solution === 'function' ? Solution : null);
+        if (!targetCls) {{
+            console.error('Error: Class {class_name} not found');
             process.exit(1);
         }}
-        const result = sol['{fn_name}']({args_str});
+        const sol = new targetCls();
+        if (typeof sol['{fn_name}'] !== 'function') {{
+            console.error('Error: Method "{fn_name}" not found on {class_name}');
+            process.exit(1);
+        }}
+        const result = sol['{fn_name}'](...args);
         if (result === undefined || result === null) {{
             console.log('null');
+        }} else if (typeof result === 'boolean') {{
+            console.log(result ? 'true' : 'false');
         }} else {{
             console.log(JSON.stringify(result));
         }}

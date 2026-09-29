@@ -8,39 +8,37 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List
 from app.engine.adapters.base import BaseLanguageAdapter
-from app.engine.contracts import DataType, FunctionSignature
+from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
 
 
 class JavaScriptAdapter(BaseLanguageAdapter):
     language_name = "javascript"
 
     @staticmethod
-    def _map_jsdoc_type(dt: DataType) -> str:
-        mapping = {
-            DataType.INTEGER: "number",
-            DataType.LONG: "number",
-            DataType.FLOAT: "number",
-            DataType.DOUBLE: "number",
-            DataType.BOOLEAN: "boolean",
-            DataType.STRING: "string",
-            DataType.INTEGER_ARRAY: "number[]",
-            DataType.LONG_ARRAY: "number[]",
-            DataType.FLOAT_ARRAY: "number[]",
-            DataType.DOUBLE_ARRAY: "number[]",
-            DataType.STRING_ARRAY: "string[]",
-            DataType.BOOLEAN_ARRAY: "boolean[]",
-            DataType.INTEGER_2D_ARRAY: "number[][]",
-            DataType.LONG_2D_ARRAY: "number[][]",
-            DataType.FLOAT_2D_ARRAY: "number[][]",
-            DataType.DOUBLE_2D_ARRAY: "number[][]",
-            DataType.STRING_2D_ARRAY: "string[][]",
-            DataType.OBJECT: "Object",
-            DataType.MAP: "Object",
-        }
-        return mapping.get(dt, "any")
+    def _map_jsdoc_type(type_input: Any) -> str:
+        try:
+            td = parse_type_descriptor(type_input)
+            base_map = {
+                "int": "number",
+                "float": "number",
+                "boolean": "boolean",
+                "string": "string",
+                "object": "Object",
+                "void": "void",
+            }
+            js_base = base_map.get(td.base, "any")
+            if td.kind == TypeKind.ARRAY:
+                res = js_base
+                for _ in range(td.dimensions):
+                    res = f"{res}[]"
+                return res
+            return js_base
+        except Exception:
+            return "any"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_jsdoc_type(signature.return_type)
 
         jsdoc_lines = ["    /**"]
@@ -55,7 +53,7 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         params_str = ", ".join(param_names)
 
         return (
-            "class Solution {\n"
+            f"class {class_name} {{\n"
             f"{jsdoc_str}\n"
             f"    {fn_name}({params_str}) {{\n"
             "        \n"
@@ -73,7 +71,8 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         if has_script_main:
             return user_code
 
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         param_names = [p.name for p in signature.parameters]
         param_names_repr = json.dumps(param_names)
 
@@ -111,11 +110,24 @@ class JavaScriptAdapter(BaseLanguageAdapter):
     }}
 
     let targetFn = null;
-    if (typeof Solution === 'function') {{
+    let targetClass = null;
+    try {{
+        if (typeof {class_name} === 'function') {{
+            targetClass = {class_name};
+        }} else if (typeof Solution === 'function') {{
+            targetClass = Solution;
+        }}
+    }} catch(e) {{
         try {{
-            const inst = new Solution();
-            if (typeof inst.{fn_name} === 'function') {{
-                targetFn = inst.{fn_name}.bind(inst);
+            if (typeof Solution === 'function') targetClass = Solution;
+        }} catch(e2) {{}}
+    }}
+
+    if (targetClass) {{
+        try {{
+            const inst = new targetClass();
+            if (typeof inst['{fn_name}'] === 'function') {{
+                targetFn = inst['{fn_name}'].bind(inst);
             }}
         }} catch(e) {{}}
     }}
@@ -125,7 +137,7 @@ class JavaScriptAdapter(BaseLanguageAdapter):
     }}
 
     if (!targetFn) {{
-        console.error("Judge Error: Method '{fn_name}' or class Solution not found.");
+        console.error("Judge Error: Method '{fn_name}' or class {class_name} not found.");
         process.exit(1);
     }}
 
@@ -140,10 +152,10 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         }} else {{
             console.log(result);
         }}
-    }} catch(err) {{
-        console.error("Runtime Error in '{fn_name}':", err);
+    }} catch (err) {{
+        console.error(`Runtime Exception in '{fn_name}': ${{err.stack || err}}`);
         process.exit(1);
     }}
 }})();
 """
-        return user_code + "\n\n" + driver
+        return user_code + "\n" + driver

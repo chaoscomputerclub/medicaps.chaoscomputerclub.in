@@ -8,46 +8,46 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List
 from app.engine.adapters.base import BaseLanguageAdapter
-from app.engine.contracts import DataType, FunctionSignature
+from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
 
 
 class CppAdapter(BaseLanguageAdapter):
     language_name = "cpp"
 
     @staticmethod
-    def _map_type(dt: DataType, is_param: bool = False) -> str:
-        # Pass vectors by reference for params
+    def _map_type(type_input: Any, is_param: bool = False) -> str:
         ref = "&" if is_param else ""
-        mapping = {
-            DataType.INTEGER: "int",
-            DataType.LONG: "long long",
-            DataType.FLOAT: "float",
-            DataType.DOUBLE: "double",
-            DataType.BOOLEAN: "bool",
-            DataType.STRING: f"string{ref}",
-            DataType.INTEGER_ARRAY: f"vector<int>{ref}",
-            DataType.LONG_ARRAY: f"vector<long long>{ref}",
-            DataType.FLOAT_ARRAY: f"vector<float>{ref}",
-            DataType.DOUBLE_ARRAY: f"vector<double>{ref}",
-            DataType.STRING_ARRAY: f"vector<string>{ref}",
-            DataType.BOOLEAN_ARRAY: f"vector<bool>{ref}",
-            DataType.INTEGER_2D_ARRAY: f"vector<vector<int>>{ref}",
-            DataType.LONG_2D_ARRAY: f"vector<vector<long long>>{ref}",
-            DataType.FLOAT_2D_ARRAY: f"vector<vector<float>>{ref}",
-            DataType.DOUBLE_2D_ARRAY: f"vector<vector<double>>{ref}",
-            DataType.STRING_2D_ARRAY: f"vector<vector<string>>{ref}",
-            DataType.OBJECT: f"unordered_map<string, string>{ref}",
-            DataType.MAP: f"unordered_map<string, string>{ref}",
-        }
-        return mapping.get(dt, "int")
+        try:
+            td = parse_type_descriptor(type_input)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 1:
+                    base = "int" if td.base == "int" else ("double" if td.base == "float" else ("string" if td.base == "string" else ("bool" if td.base == "boolean" else "int")))
+                    return f"vector<{base}>{ref}"
+                elif td.dimensions == 2:
+                    base = "int" if td.base == "int" else ("double" if td.base == "float" else ("string" if td.base == "string" else "int"))
+                    return f"vector<vector<{base}>>{ref}"
+            if td.base == "int":
+                return "int"
+            elif td.base == "float":
+                return "double"
+            elif td.base == "boolean":
+                return "bool"
+            elif td.base == "string":
+                return f"string{ref}"
+            elif td.base == "object":
+                return f"unordered_map<string, string>{ref}"
+            return f"int{ref}"
+        except Exception:
+            return f"int{ref}"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        fn_name = signature.name
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_type(signature.return_type, is_param=False)
 
         if not signature.parameters:
             return (
-                "class Solution {\n"
+                f"class {class_name} {{\n"
                 "public:\n"
                 f"    {ret_type} {fn_name}() {{\n"
                 "        \n"
@@ -62,7 +62,7 @@ class CppAdapter(BaseLanguageAdapter):
         params_str = ",\n".join(param_lines)
 
         return (
-            "class Solution {\n"
+            f"class {class_name} {{\n"
             "public:\n"
             f"    {ret_type} {fn_name}(\n"
             f"{params_str}\n"
@@ -75,6 +75,10 @@ class CppAdapter(BaseLanguageAdapter):
     def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:
         if "int main(" in user_code or "int main (" in user_code:
             return user_code
+
+        class_name = signature.class_name or "Solution"
+        fn_name = signature.name or signature.function_name or "solution"
+        ret_type = self._map_type(signature.return_type, is_param=False)
 
         headers = [
             "#include <iostream>",
@@ -89,11 +93,8 @@ class CppAdapter(BaseLanguageAdapter):
         header_block = "\n".join(headers) + "\n\n"
 
         wrapped_code = user_code
-        if "class Solution" not in user_code:
-            wrapped_code = f"class Solution {{\npublic:\n{user_code}\n}};\n"
-
-        fn_name = signature.name
-        ret_type = self._map_type(signature.return_type, is_param=False)
+        if f"class {class_name}" not in user_code and "class Solution" not in user_code:
+            wrapped_code = f"class {class_name} {{\npublic:\n{user_code}\n}};\n"
 
         # Build parameter parsers
         decl_lines = []
@@ -318,7 +319,6 @@ inline vector<int> _ccc_to_vector_int(const string& raw, const string& full_inpu
     return res;
 }
 
-// Added: long long array parser (was missing, causing LONG_ARRAY to use int and silently truncate)
 inline vector<long long> _ccc_to_vector_long(const string& raw, const string& full_input) {
     const string& src = (raw.find('[') != string::npos) ? raw : full_input;
     vector<long long> res;
@@ -374,33 +374,26 @@ int main() {
     string _full_input, _line;
     while (getline(cin, _line)) { _full_input += _line + "\n"; }
     vector<string> _chunks = _ccc_extract_chunks(_full_input);
-
 """
-        body = "\n".join(decl_lines) + f"\n\n    Solution _sol;\n{invoke_str}    return 0;\n}}\n"
+        body = "\n".join(decl_lines) + f"\n\n    {class_name} _sol;\n{invoke_str}    return 0;\n}}\n"
         return header_block + wrapped_code + "\n" + driver + body
 
-    def _build_param_extraction(self, dt: DataType, ptype: str, pname: str, idx: int, orig_name: str) -> str:
+    def _build_param_extraction(self, type_input: Any, ptype: str, pname: str, idx: int, orig_name: str) -> str:
         chunk_expr = f'_ccc_find_param(_full_input, "{orig_name}", {idx}, _chunks)'
-        t_val = dt.value
-
-        if t_val == DataType.INTEGER.value:
+        try:
+            td = parse_type_descriptor(type_input)
+            if td.kind == TypeKind.ARRAY:
+                if td.dimensions == 2:
+                    return f"    vector<vector<int>> {pname} = _ccc_to_vector_vector_int({chunk_expr}, _full_input);"
+                if td.base == "string":
+                    return f"    vector<string> {pname} = _ccc_to_vector_string({chunk_expr}, _full_input);"
+                return f"    vector<int> {pname} = _ccc_to_vector_int({chunk_expr}, _full_input);"
+            if td.base == "string":
+                return f"    string {pname} = _ccc_to_string({chunk_expr});"
+            if td.base == "boolean":
+                return f"    bool {pname} = _ccc_to_bool({chunk_expr});"
+            if td.base == "float":
+                return f"    double {pname} = _ccc_to_double({chunk_expr});"
             return f"    int {pname} = _ccc_to_int({chunk_expr});"
-        elif t_val == DataType.LONG.value:
-            return f"    long long {pname} = _ccc_to_long_long({chunk_expr});"
-        elif t_val in (DataType.FLOAT.value, DataType.DOUBLE.value):
-            return f"    double {pname} = _ccc_to_double({chunk_expr});"
-        elif t_val == DataType.BOOLEAN.value:
-            return f"    bool {pname} = _ccc_to_bool({chunk_expr});"
-        elif t_val == DataType.STRING.value:
-            return f"    string {pname} = _ccc_to_string({chunk_expr});"
-        elif t_val == DataType.INTEGER_ARRAY.value:
-            return f"    vector<int> {pname} = _ccc_to_vector_int({chunk_expr}, _full_input);"
-        elif t_val == DataType.LONG_ARRAY.value:
-            # BUG WAS HERE: was using vector<int>, silently truncating longs
-            return f"    vector<long long> {pname} = _ccc_to_vector_long({chunk_expr}, _full_input);"
-        elif t_val == DataType.STRING_ARRAY.value:
-            return f"    vector<string> {pname} = _ccc_to_vector_string({chunk_expr}, _full_input);"
-        elif t_val in (DataType.INTEGER_2D_ARRAY.value, DataType.LONG_2D_ARRAY.value):
-            return f"    vector<vector<int>> {pname} = _ccc_to_vector_vector_int({chunk_expr}, _full_input);"
-        else:
+        except Exception:
             return f"    int {pname} = _ccc_to_int({chunk_expr});"

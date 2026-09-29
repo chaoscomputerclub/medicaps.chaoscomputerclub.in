@@ -25,6 +25,7 @@ from app.models.db_models import (
     MemberProfile,
     OfflineContest,
     ScoreboardEntry,
+    Problem,
     now_utc,
 )
 from app.models.schemas import (
@@ -946,6 +947,12 @@ class ContestService:
         arena_problems = []
         for p in problems:
             desc = getattr(p, "description", None) or fallback_descriptions.get(p.problem_index, f"Problem {p.problem_index}: {p.title}")
+            fn_sig = getattr(p, "function_signature", None)
+            if not fn_sig and getattr(p, "problem_id", None):
+                master = await db.get(Problem, p.problem_id)
+                if master and master.function_signature:
+                    fn_sig = master.function_signature
+
             arena_problems.append({
                 "id": p.id,
                 "contest_id": p.contest_id,
@@ -960,6 +967,8 @@ class ContestService:
                 "constraints": getattr(p, "constraints", None) or "Time Limit: 2.0s · Memory: 256MB",
                 "time_limit": getattr(p, "time_limit", 2.0) or 2.0,
                 "memory_limit": getattr(p, "memory_limit", 256) or 256,
+                "execution_mode": getattr(p, "execution_mode", "FUNCTION") or "FUNCTION",
+                "function_signature": fn_sig,
                 "starter_codes": _clean_starter_codes(getattr(p, "starter_codes", None)),
                 "sample_testcases": getattr(p, "sample_testcases", None) or [],
             })
