@@ -71,7 +71,7 @@ export const AlertDialogContent = React.forwardRef<
   <AlertDialogPrimitive.Content
     ref={ref}
     className={cn(
-      "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 grid w-full max-w-md gap-4 border border-white/10 bg-zinc-950 p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.12)] rounded-none text-white",
+      "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 grid w-full max-w-md gap-4 border border-white/10 bg-zinc-950 p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.12)] rounded-none text-white overscroll-contain",
       className,
     )}
     {...props}
@@ -124,7 +124,7 @@ export const AlertDialogAction = React.forwardRef<
   <AlertDialogPrimitive.Action
     ref={ref}
     data-slot="alert-dialog-action"
-    className={cn("rounded-none font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer px-4 py-2", className)}
+    className={cn("rounded-none font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black", className)}
     {...props}
   />
 ));
@@ -137,7 +137,7 @@ export const AlertDialogCancel = React.forwardRef<
   <AlertDialogPrimitive.Cancel
     ref={ref}
     data-slot="alert-dialog-cancel"
-    className={cn("rounded-none font-mono text-xs font-semibold border border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer px-4 py-2", className)}
+    className={cn("rounded-none font-mono text-xs font-semibold border border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white cursor-pointer px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black", className)}
     {...props}
   />
 ));

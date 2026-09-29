@@ -34,13 +34,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 grid w-full max-w-lg gap-4 border border-white/10 bg-zinc-950 p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.12)] duration-200 rounded-none text-white max-h-[90vh] overflow-y-auto",
+        "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 grid w-full max-w-lg gap-4 border border-white/10 bg-zinc-950 p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.12)] duration-200 rounded-none text-white max-h-[90vh] overflow-y-auto overscroll-contain",
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-none p-1 opacity-70 cursor-pointer transition-all hover:opacity-100 hover:text-lime-400 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-none p-1 opacity-70 cursor-pointer transition-colors duration-150 hover:opacity-100 hover:text-lime-400 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
