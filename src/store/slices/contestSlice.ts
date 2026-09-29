@@ -12,6 +12,7 @@ import type {
   ParticipationRecord,
 } from "@/features/contest/types";
 import type { RealtimeEvent } from "@/lib/realtime";
+import { sanitizeCodeSnippet } from "@/lib/utils";
 
 export interface ContestState {
   contests: ContestSummary[];
@@ -416,7 +417,15 @@ export const contestSlice = createSlice({
       }
       state.currentContest = contest;
       state.registration = registration;
-      state.problems = action.payload.problems;
+      const rawProblems = action.payload.problems || [];
+      state.problems = rawProblems.map((p: any) => {
+        if (!p || !p.starter_codes || typeof p.starter_codes !== "object") return p;
+        const cleaned: Record<string, string> = {};
+        for (const [lang, code] of Object.entries(p.starter_codes)) {
+          cleaned[lang] = sanitizeCodeSnippet(code as string);
+        }
+        return { ...p, starter_codes: cleaned };
+      });
     });
     builder.addCase(fetchContestDetailThunk.rejected, (state, action) => {
       state.isLoadingDetail = false;
@@ -435,7 +444,18 @@ export const contestSlice = createSlice({
     });
     builder.addCase(fetchContestArenaThunk.fulfilled, (state, action) => {
       state.isLoadingArena = false;
-      state.arenaData = action.payload;
+      const arena = action.payload;
+      if (arena && Array.isArray(arena.problems)) {
+        arena.problems = arena.problems.map((p: any) => {
+          if (!p || !p.starter_codes || typeof p.starter_codes !== "object") return p;
+          const cleaned: Record<string, string> = {};
+          for (const [lang, code] of Object.entries(p.starter_codes)) {
+            cleaned[lang] = sanitizeCodeSnippet(code as string);
+          }
+          return { ...p, starter_codes: cleaned };
+        });
+      }
+      state.arenaData = arena;
     });
     builder.addCase(fetchContestArenaThunk.rejected, (state, action) => {
       state.isLoadingArena = false;

@@ -116,6 +116,22 @@ class DynamicContestService:
         return slug or "contest"
 
     @staticmethod
+    def _clean_starter_codes(starter_codes: Any) -> Dict[str, Any]:
+        """Normalize escaped newlines and tabs from input starter code dicts."""
+        if not isinstance(starter_codes, dict):
+            return {}
+        cleaned = {}
+        for k, v in starter_codes.items():
+            if isinstance(v, str):
+                s = v
+                if "\\n" in s or "\\r" in s or "\\t" in s:
+                    s = s.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "    ")
+                cleaned[k] = s
+            else:
+                cleaned[k] = v
+        return cleaned
+
+    @staticmethod
     def _default_starter_codes(
         problem_title: str,
         function_name: Optional[str] = None,
@@ -302,7 +318,7 @@ class DynamicContestService:
         # 3. Create Problem Challenges (Mirrored for Contest Arena & Assessment)
         created_problems = []
         for p in payload.problems:
-            starter_codes = (
+            starter_codes = DynamicContestService._clean_starter_codes(
                 dict(p.starter_codes)
                 if p.starter_codes
                 else DynamicContestService._default_starter_codes(p.title, p.function_name, p.slug)
@@ -845,7 +861,7 @@ class DynamicContestService:
         idx = problem_data.problem_index
         sample_tcs = [tc.model_dump() for tc in problem_data.sample_testcases]
         hidden_tcs = [tc.model_dump() for tc in problem_data.hidden_testcases]
-        starter_codes = (
+        starter_codes = DynamicContestService._clean_starter_codes(
             dict(problem_data.starter_codes)
             if problem_data.starter_codes
             else DynamicContestService._default_starter_codes(

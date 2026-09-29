@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 
 from app.core.cache import delete_cache_pattern, get_cache, set_cache
 from app.core.config import settings
@@ -21,6 +21,7 @@ from app.models.db_models import (
     CampusPass,
     ContestProblem,
     ContestRegistration,
+    ContestSubmission,
     MemberProfile,
     OfflineContest,
     ScoreboardEntry,
@@ -38,6 +39,21 @@ from app.services.contest_eligibility_service import (
 from app.services.event_broadcaster import broadcast_event
 
 logger = logging.getLogger(__name__)
+
+
+def _clean_starter_codes(starter_codes: Any) -> Dict[str, Any]:
+    if not isinstance(starter_codes, dict):
+        return {}
+    cleaned = {}
+    for k, v in starter_codes.items():
+        if isinstance(v, str):
+            s = v
+            if "\\n" in s or "\\r" in s or "\\t" in s:
+                s = s.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "    ")
+            cleaned[k] = s
+        else:
+            cleaned[k] = v
+    return cleaned
 
 
 class ContestService:
@@ -311,6 +327,92 @@ class ContestService:
         return payload
 
     @staticmethod
+    async def get_problem_submissions(
+        slug: str,
+        problem_id: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> List[Dict[str, Any]]:
+        contest = await ContestRepository.get_by_slug(db, slug)
+        if not contest:
+            raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+        # Resolve problem by UUID or problem_index
+        stmt = (
+            select(ContestSubmission)
+            .where(
+                ContestSubmission.contest_id == contest.id,
+                ContestSubmission.member_id == current_member.id,
+            )
+        )
+        if problem_id:
+            sub_p_stmt = select(ContestProblem.id).where(
+                ContestProblem.contest_id == contest.id,
+                (ContestProblem.id == problem_id) | (ContestProblem.problem_index == problem_id.upper())
+            )
+            stmt = stmt.where(
+                (ContestSubmission.problem_id == problem_id) | (ContestSubmission.problem_id.in_(sub_p_stmt))
+            )
+
+        stmt = stmt.order_by(ContestSubmission.submitted_at.desc()).limit(50)
+        res = await db.execute(stmt)
+        subs = res.scalars().all()
+        return [
+            {
+                "id": str(s.id),
+                "problem_id": s.problem_id,
+                "verdict": s.verdict,
+                "time": s.execution_time or 0.0,
+                "memory": s.memory_used or 0,
+                "language": s.language,
+                "timestamp": s.submitted_at.strftime("%H:%M") if s.submitted_at else "",
+                "passed_testcases": s.passed_testcases or 0,
+                "total_testcases": s.total_testcases or 0,
+                "points_awarded": s.points_awarded or 0,
+                "code": s.code or "",
+            }
+            for s in subs
+        ]
+
+    @staticmethod
+    async def get_all_contest_submissions(
+        slug: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> List[Dict[str, Any]]:
+        contest = await ContestRepository.get_by_slug(db, slug)
+        if not contest:
+            raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+        stmt = (
+            select(ContestSubmission)
+            .where(
+                ContestSubmission.contest_id == contest.id,
+                ContestSubmission.member_id == current_member.id,
+            )
+            .order_by(ContestSubmission.submitted_at.desc())
+            .limit(100)
+        )
+        res = await db.execute(stmt)
+        subs = res.scalars().all()
+        return [
+            {
+                "id": str(s.id),
+                "problem_id": s.problem_id,
+                "verdict": s.verdict,
+                "time": s.execution_time or 0.0,
+                "memory": s.memory_used or 0,
+                "language": s.language,
+                "timestamp": s.submitted_at.strftime("%H:%M") if s.submitted_at else "",
+                "passed_testcases": s.passed_testcases or 0,
+                "total_testcases": s.total_testcases or 0,
+                "points_awarded": s.points_awarded or 0,
+                "code": s.code or "",
+            }
+            for s in subs
+        ]
+
+    @staticmethod
     async def get_registration_status(
         slug: str,
         response: Response,
@@ -488,12 +590,20 @@ class ContestService:
             eligibility_message = "This contest has officially concluded."
 
         is_submitted, _ = await is_contest_attempt_submitted(current_member, contest, db)
-        if is_submitted or assessment_taken or (reg and (reg.status in ("submitted", "completed") or reg.assessment_taken)):
-            assessment_taken = True
-            can_take_assessment = False
-            can_resume_assessment = False
-            can_enter_live_contest = False
-            eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
+        if contest_status == "live":
+            is_live_submitted = is_submitted or (reg and reg.status in ("submitted", "completed"))
+            if is_live_submitted:
+                can_take_assessment = False
+                can_resume_assessment = False
+                can_enter_live_contest = False
+                eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
+        else:
+            if is_submitted or assessment_taken or (reg and (reg.status in ("submitted", "completed") or reg.assessment_taken)):
+                assessment_taken = True
+                can_take_assessment = False
+                can_resume_assessment = False
+                can_enter_live_contest = False
+                eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
 
         return {
             "registered": is_registered,
@@ -513,7 +623,7 @@ class ContestService:
             "is_checked_in": is_checked_in,
             "check_in_status": check_in_status,
             "can_take_assessment": can_take_assessment and not is_submitted,
-            "can_enter_live_contest": can_enter_live_contest and not is_submitted and not assessment_taken,
+            "can_enter_live_contest": can_enter_live_contest and not (is_submitted or (reg and reg.status in ("submitted", "completed"))),
             "eligibility_message": eligibility_message,
             "is_dev_bypass": is_dev_bypass,
         }
@@ -850,7 +960,7 @@ class ContestService:
                 "constraints": getattr(p, "constraints", None) or "Time Limit: 2.0s · Memory: 256MB",
                 "time_limit": getattr(p, "time_limit", 2.0) or 2.0,
                 "memory_limit": getattr(p, "memory_limit", 256) or 256,
-                "starter_codes": getattr(p, "starter_codes", None) or {},
+                "starter_codes": _clean_starter_codes(getattr(p, "starter_codes", None)),
                 "sample_testcases": getattr(p, "sample_testcases", None) or [],
             })
 

@@ -466,10 +466,9 @@ export const contestApi = {
           participants: Number(item["participants"] ?? 0),
           outcome: (item["outcome"] ?? "registered") as ParticipationRecord["outcome"],
           assessment_submitted: Boolean(
-            item["assessment_submitted"] ||
-            (item["score"] !== null && item["score"] !== undefined) ||
-            item["outcome"] === "submitted" ||
-            item["outcome"] === "qualified"
+            item["assessment_submitted"] === true ||
+            item["status"] === "submitted" ||
+            item["outcome"] === "submitted"
           ),
           assessment_score: item["assessment_score"] ?? item["score"] ?? null,
         }));
@@ -502,6 +501,14 @@ export const contestApi = {
     invalidateSwrCache(`contest:ranking:${slug}*`);
     invalidateSwrCache(`contest:final_standings:${slug}*`);
     return res;
+  },
+
+  async problemSubmissions(slug: string, problemId: string): Promise<any[]> {
+    return await request<any[]>(`/contests/${encodeURIComponent(slug)}/problems/${encodeURIComponent(problemId)}/submissions`);
+  },
+
+  async contestSubmissions(slug: string): Promise<any[]> {
+    return await request<any[]>(`/contests/${encodeURIComponent(slug)}/submissions`);
   },
 
   async finishContest(slug: string): Promise<{ success: boolean; message: string; total_score?: number }> {

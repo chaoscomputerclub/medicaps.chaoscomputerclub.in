@@ -57,6 +57,22 @@ class ProblemCreateSchema(BaseModel):
     hidden_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Hidden evaluation testcases for official grading")
 
 
+    @field_validator("starter_codes", mode="before")
+    @classmethod
+    def normalize_starter_codes(cls, v: Any) -> Dict[str, Any]:
+        if not isinstance(v, dict):
+            return {}
+        cleaned = {}
+        for lang, code in v.items():
+            if isinstance(code, str):
+                c = code
+                if "\\n" in c or "\\r" in c or "\\t" in c:
+                    c = c.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "    ")
+                cleaned[lang] = c
+            else:
+                cleaned[lang] = code
+        return cleaned
+
     @field_validator("time_limit", mode="before")
     @classmethod
     def validate_time_limit(cls, v: Any) -> float:

@@ -43,6 +43,10 @@ async def is_contest_attempt_submitted(
     if not member or not contest:
         return False, ""
 
+    from app.core.security import is_privileged_test_member
+    if is_privileged_test_member(member):
+        return False, ""
+
     # 1. Check ContestRegistration record
     reg_res = await db.execute(
         select(ContestRegistration).where(
@@ -51,7 +55,16 @@ async def is_contest_attempt_submitted(
         )
     )
     reg = reg_res.scalars().first()
-    if reg and (reg.status in ("submitted", "completed") or reg.assessment_taken):
+    if reg and reg.status in ("submitted", "completed"):
+        return True, "Contest attempt has already been submitted. Retakes are not permitted."
+
+    # In live contest mode, only explicit live submission (reg.status in 'submitted', 'completed')
+    # locks out the competitor. Screening assessment completion (reg.assessment_taken) must never
+    # block qualified finalists from entering and solving in the live arena.
+    if contest.status == "live":
+        return False, ""
+
+    if reg and reg.assessment_taken:
         return True, "Contest attempt has already been submitted. Retakes are not permitted."
 
     # 2. Check AssessmentSession record for any assessment linked to this contest

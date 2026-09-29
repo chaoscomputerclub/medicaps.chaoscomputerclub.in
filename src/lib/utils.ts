@@ -80,3 +80,20 @@ export function slugifyProblem(title?: string | null, index?: string | null): st
   }
   return "problem-a";
 }
+
+/**
+ * Sanitizes code snippets / starter code strings by unescaping literal escaped
+ * linebreaks (\n, \r\n) and tabs (\t), ensuring code displays cleanly in Monaco editor.
+ */
+export function sanitizeCodeSnippet(code?: string | null): string {
+  if (!code || typeof code !== "string") return "";
+  let clean = code;
+  if (clean.includes("\\n") || clean.includes("\\r") || clean.includes("\\t")) {
+    clean = clean
+      .replace(/\\r\\n/g, "\n")
+      .replace(/\\n/g, "\n")
+      .replace(/\\t/g, "    ");
+  }
+  return clean;
+}
+

@@ -92,7 +92,7 @@ import {
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
 import { useRealtimeEvents } from "@/lib/realtime";
-import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
+import { slugifyProblem, resolveAvatarUrl, formatFullName, sanitizeCodeSnippet } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
@@ -162,14 +162,8 @@ export function ContestArenaPage() {
   const participation = myParticipations.find((p) => p.contest_slug === contestSlug);
 
   const isAlreadySubmitted = Boolean(
-    registration?.status === "submitted" ||
-    registration?.assessment_taken ||
-    registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed" ||
-    participation?.assessment_submitted ||
-    participation?.outcome === "submitted" ||
-    participation?.outcome === "qualified" ||
-    (participation as any)?.assessment_status === "submitted",
+    !member?.is_core_member &&
+    (registration?.status === "submitted" || registration?.status === "completed")
   );
 
   useEffect(() => {
@@ -308,12 +302,32 @@ export function ContestArenaPage() {
 
   useEffect(() => {
     if (!activeProblem?.id || !contestSlug) return;
+    let cancelled = false;
+
     try {
       const saved = localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
-      setSubmissionHistory(saved ? JSON.parse(saved) : []);
+      if (saved) setSubmissionHistory(JSON.parse(saved));
     } catch {
       setSubmissionHistory([]);
     }
+
+    contestApi
+      .problemSubmissions(contestSlug, activeProblem.id)
+      .then((serverSubs) => {
+        if (cancelled || !Array.isArray(serverSubs) || serverSubs.length === 0) return;
+        setSubmissionHistory(serverSubs);
+        try {
+          localStorage.setItem(
+            `ccc_submissions_${contestSlug}_${activeProblem.id}`,
+            JSON.stringify(serverSubs.slice(0, 20)),
+          );
+        } catch {}
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeProblem?.id, contestSlug]);
 
   const handlePrevProblem = useCallback(() => {
@@ -533,19 +547,21 @@ export function ContestArenaPage() {
     : "";
 
   // Load durable code: state -> validated localStorage -> official problem starter_code
+  // Load durable code: state -> validated localStorage -> official problem starter_code
   const getInitialCode = (): string => {
     if (codeMap[problemKey]) {
+      const code = sanitizeCodeSnippet(codeMap[problemKey]);
       const isLegacy =
-        codeMap[problemKey].includes("def main():") ||
-        codeMap[problemKey].includes("sys.stdin.read()") ||
-        codeMap[problemKey].includes("TODO: Calculate valid mirror pairs") ||
-        codeMap[problemKey].includes("def solve(") ||
-        codeMap[problemKey].includes("int solve(") ||
-        codeMap[problemKey].includes("var solve =") ||
-        codeMap[problemKey].includes("function solve(") ||
-        (selectedLanguage === "python" && !codeMap[problemKey].includes("class Solution"));
+        code.includes("def main():") ||
+        code.includes("sys.stdin.read()") ||
+        code.includes("TODO: Calculate valid mirror pairs") ||
+        code.includes("def solve(") ||
+        code.includes("int solve(") ||
+        code.includes("var solve =") ||
+        code.includes("function solve(") ||
+        (selectedLanguage === "python" && !code.includes("class Solution"));
       if (!isLegacy) {
-        return codeMap[problemKey];
+        return code;
       }
     }
     if (problemStorageKey && typeof window !== "undefined") {
@@ -564,29 +580,30 @@ export function ContestArenaPage() {
         }
         const saved = localStorage.getItem(problemStorageKey);
         if (saved) {
+          const sanitizedSaved = sanitizeCodeSnippet(saved);
           // If saved code contains old competitive programming script or generic placeholder, purge it
           const isLegacy =
-            saved.includes("def main():") ||
-            saved.includes("sys.stdin.read()") ||
-            saved.includes("TODO: Calculate valid mirror pairs") ||
-            saved.includes("def solve(") ||
-            saved.includes("int solve(") ||
-            saved.includes("var solve =") ||
-            saved.includes("function solve(") ||
-            (selectedLanguage === "python" && !saved.includes("class Solution"));
+            sanitizedSaved.includes("def main():") ||
+            sanitizedSaved.includes("sys.stdin.read()") ||
+            sanitizedSaved.includes("TODO: Calculate valid mirror pairs") ||
+            sanitizedSaved.includes("def solve(") ||
+            sanitizedSaved.includes("int solve(") ||
+            sanitizedSaved.includes("var solve =") ||
+            sanitizedSaved.includes("function solve(") ||
+            (selectedLanguage === "python" && !sanitizedSaved.includes("class Solution"));
           if (isLegacy) {
             localStorage.removeItem(problemStorageKey);
           } else {
-            return saved;
+            return sanitizedSaved;
           }
         }
       } catch {}
     }
 
-    return (
+    const starter =
       activeProblem?.starter_codes?.[selectedLanguage] ??
-      getFallbackStarter(selectedLanguage, activeProblem?.title)
-    );
+      getFallbackStarter(selectedLanguage, activeProblem?.title);
+    return sanitizeCodeSnippet(starter);
   };
 
   const currentCode = getInitialCode();
@@ -601,9 +618,10 @@ export function ContestArenaPage() {
   };
 
   const handleResetStarter = () => {
-    const defaultStarter =
+    const rawStarter =
       activeProblem?.starter_codes?.[selectedLanguage] ||
       getFallbackStarter(selectedLanguage, activeProblem?.title);
+    const defaultStarter = sanitizeCodeSnippet(rawStarter);
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
     if (typeof window !== "undefined") {
       try {
@@ -798,11 +816,12 @@ export function ContestArenaPage() {
   if (isAlreadySubmitted || !arenaData) {
     const errLower = (error || "").toLowerCase();
     const isSubmitted =
-      isAlreadySubmitted ||
-      errLower.includes("already been submitted") ||
-      errLower.includes("already submitted") ||
-      errLower.includes("retake") ||
-      errLower.includes("attempt concluded");
+      !member?.is_core_member &&
+      (isAlreadySubmitted ||
+        errLower.includes("already been submitted") ||
+        errLower.includes("already submitted") ||
+        errLower.includes("retake") ||
+        errLower.includes("attempt concluded"));
 
     if (isSubmitted) {
       return (

@@ -89,6 +89,32 @@ class ContestController:
         )
 
     @staticmethod
+    async def get_problem_submissions(
+        slug: str,
+        problem_id: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> List[Dict[str, Any]]:
+        return await ContestService.get_problem_submissions(
+            slug=slug,
+            problem_id=problem_id,
+            current_member=current_member,
+            db=db,
+        )
+
+    @staticmethod
+    async def get_all_contest_submissions(
+        slug: str,
+        current_member: MemberProfile,
+        db: AsyncSession,
+    ) -> List[Dict[str, Any]]:
+        return await ContestService.get_all_contest_submissions(
+            slug=slug,
+            current_member=current_member,
+            db=db,
+        )
+
+    @staticmethod
     async def get_registration_status(
         slug: str,
         response: Response,

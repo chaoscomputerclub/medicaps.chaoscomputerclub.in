@@ -114,6 +114,36 @@ async def get_contest_problems(
     )
 
 
+@router.get("/{slug}/problems/{problem_id}/submissions")
+async def get_problem_submissions(
+    slug: str,
+    problem_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: MemberProfile = Depends(get_current_member),
+):
+    """Retrieve verified submission history for the candidate on a specific problem."""
+    return await ContestController.get_problem_submissions(
+        slug=slug,
+        problem_id=problem_id,
+        current_member=current_member,
+        db=db,
+    )
+
+
+@router.get("/{slug}/submissions")
+async def get_all_contest_submissions(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+    current_member: MemberProfile = Depends(get_current_member),
+):
+    """Retrieve all verified submissions for the candidate in this contest."""
+    return await ContestController.get_all_contest_submissions(
+        slug=slug,
+        current_member=current_member,
+        db=db,
+    )
+
+
 @router.get("/{slug}/registration-status")
 async def get_registration_status(
     slug: str,
