@@ -28,22 +28,41 @@ PaginationItem.displayName = "PaginationItem";
 
 type PaginationLinkProps = {
   isActive?: boolean;
+  disabled?: boolean;
 } & Pick<ButtonProps, "size"> &
   React.ComponentProps<"a">;
 
-const PaginationLink = ({ className, isActive, size = "icon", ...props }: PaginationLinkProps) => (
-  <a
-    aria-current={isActive ? "page" : undefined}
-    className={cn(
-      buttonVariants({
-        variant: isActive ? "outline" : "ghost",
-        size,
-      }),
-      className,
-    )}
-    {...props}
-  />
-);
+const PaginationLink = ({ className, isActive, disabled, size = "icon", ...props }: PaginationLinkProps) => {
+  if (disabled) {
+    return (
+      <span
+        className={cn(
+          buttonVariants({
+            variant: "ghost",
+            size,
+          }),
+          className,
+          "opacity-50 cursor-not-allowed pointer-events-none",
+        )}
+        {...props}
+      />
+    );
+  }
+  
+  return (
+    <a
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        buttonVariants({
+          variant: isActive ? "outline" : "ghost",
+          size,
+        }),
+        className,
+      )}
+      {...props}
+    />
+  );
+};
 PaginationLink.displayName = "PaginationLink";
 
 const PaginationPrevious = ({
