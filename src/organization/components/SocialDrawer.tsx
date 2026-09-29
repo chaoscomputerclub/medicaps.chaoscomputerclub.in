@@ -6,16 +6,8 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Check,
-  Loader2,
-  Search,
-  UserCheck,
-  UserMinus,
-  UserPlus,
-  Users,
-  X,
-} from "lucide-react";
+import { Check, Search, UserCheck, UserMinus, UserPlus, Users, X } from "lucide-react";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   closeSocialDrawer,
@@ -30,16 +22,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { cn, resolveAvatarUrl } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
-import { Tabs, TabsList, TabsTab } from "@/components/ui/animated-tabs";
+import { Tabs, TabsList, TabsTab } from "@/components/animate-ui/components/base/tabs";
 
 export function SocialDrawer() {
   const dispatch = useAppDispatch();
@@ -80,14 +67,10 @@ export function SocialDrawer() {
   });
 
   const displayedFollowersTabCount =
-    drawerType === "followers"
-      ? (loadingList ? "..." : studentsList.length)
-      : followersCount;
+    drawerType === "followers" ? (loadingList ? "..." : studentsList.length) : followersCount;
 
   const displayedFollowingTabCount =
-    drawerType === "following"
-      ? (loadingList ? "..." : studentsList.length)
-      : followingCount;
+    drawerType === "following" ? (loadingList ? "..." : studentsList.length) : followingCount;
 
   return (
     <Sheet
@@ -96,7 +79,10 @@ export function SocialDrawer() {
         if (!open) dispatch(closeSocialDrawer());
       }}
     >
-      <SheetContent side="right" className="w-full max-w-md bg-black border-l border-white/[0.08] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md shadow-[0_0_80px_rgba(0,0,0,0.95)]">
+      <SheetContent
+        side="right"
+        className="w-full max-w-md bg-black border-l border-white/[0.08] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md shadow-[0_0_80px_rgba(0,0,0,0.95)]"
+      >
         {/* Top ambient accent highlight */}
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-lime-400/50 to-transparent pointer-events-none z-20" />
 
@@ -126,10 +112,7 @@ export function SocialDrawer() {
             className="mt-4 gap-0"
           >
             <TabsList className="w-full grid grid-cols-2 p-1 bg-white/[0.03] border border-white/[0.08] rounded-lg gap-1">
-              <TabsTab
-                value="followers"
-                className="w-full py-2 text-xs"
-              >
+              <TabsTab value="followers" className="w-full py-2 text-xs">
                 <Users size={13} className="shrink-0" />
                 <span>Followers</span>
                 <span
@@ -143,10 +126,7 @@ export function SocialDrawer() {
                   {displayedFollowersTabCount}
                 </span>
               </TabsTab>
-              <TabsTab
-                value="following"
-                className="w-full py-2 text-xs"
-              >
+              <TabsTab value="following" className="w-full py-2 text-xs">
                 <UserCheck size={13} className="shrink-0" />
                 <span>Following</span>
                 <span
@@ -342,17 +322,11 @@ export function SocialDrawer() {
                           toast.error(typeof err === "string" ? err : "Action failed");
                         }
                       }}
-                      variant={
-                        isFollowing
-                          ? isHovered
-                            ? "destructive"
-                            : "secondary"
-                          : "default"
-                      }
+                      variant={isFollowing ? (isHovered ? "destructive" : "secondary") : "default"}
                       size="sm"
                     >
                       {isPending ? (
-                        <Loader2 size={11} className="animate-spin" />
+                        <WanderingEyes size="inline" className="h-3" />
                       ) : isFollowing ? (
                         isHovered ? (
                           <>

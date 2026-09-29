@@ -57,9 +57,10 @@ class JudgeProvider(abc.ABC):
     ) -> Any:
         """Default batch execution falling back to in-process executor."""
         from app.engine.executors.factory import get_executor
-        from app.engine.enums import Language, ComparisonMode
+        from app.engine.enums import ComparisonMode
+        from app.engine.languages import LanguageRegistry
 
-        lang = Language(language) if isinstance(language, str) else language
+        lang = LanguageRegistry.normalize(language)
         executor = get_executor(lang)
         cmp_mode = comparison_mode or ComparisonMode.TRIMMED
         return await executor.execute_batch(

@@ -16,7 +16,7 @@ import {
 import { contestSystemService } from "@/organization/data/contest-system";
 import { SectionHeader, PageHeader } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTab } from "@/components/animate-ui/components/base/tabs";
 import { MyContestsSkeleton } from "@/organization/components/skeletons";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -104,20 +104,24 @@ export function MyContestsPage() {
       />
 
       {/* Segmented Filter Controls */}
-      <Tabs value={filter} onValueChange={(val: any) => startTransition(() => setFilter(val))} className="my-4">
-        <TabsList className="h-auto flex-wrap gap-1 rounded-md border border-white/8 bg-black p-1">
-          <TabsTrigger value="all" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
+      <Tabs
+        value={filter}
+        onValueChange={(val: any) => startTransition(() => setFilter(val))}
+        className="my-4 gap-0"
+      >
+        <TabsList className="h-auto flex-wrap gap-1">
+          <TabsTab value="all" className="font-mono text-xs uppercase">
             All (<span className="tabular-nums">{data.length}</span>)
-          </TabsTrigger>
-          <TabsTrigger value="registered" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
+          </TabsTab>
+          <TabsTab value="registered" className="font-mono text-xs uppercase">
             Registered (<span className="tabular-nums">{registeredCount}</span>)
-          </TabsTrigger>
-          <TabsTrigger value="live" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
+          </TabsTab>
+          <TabsTab value="live" className="font-mono text-xs uppercase">
             Live (<span className="tabular-nums">{liveCount}</span>)
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="rounded font-mono text-xs uppercase text-zinc-400 data-[state=active]:bg-lime-400 data-[state=active]:text-black transition-colors">
+          </TabsTab>
+          <TabsTab value="completed" className="font-mono text-xs uppercase">
             Completed (<span className="tabular-nums">{completedCount}</span>)
-          </TabsTrigger>
+          </TabsTab>
         </TabsList>
       </Tabs>
 

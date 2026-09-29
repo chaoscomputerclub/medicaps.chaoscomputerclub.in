@@ -6,33 +6,24 @@ import logging
 
 from app.engine.enums import Language
 from app.engine.executors.factory import get_executor
+from app.engine.languages import LanguageRegistry
 from app.engine.schemas import TestCaseSchema
 
 from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
 
 logger = logging.getLogger("ccc.judge.local")
 
-_LANGUAGES = {
-    "python": Language.PYTHON,
-    "python3": Language.PYTHON,
-    "cpp": Language.CPP,
-    "c++": Language.CPP,
-    "java": Language.JAVA,
-    "javascript": Language.JAVASCRIPT,
-    "js": Language.JAVASCRIPT,
-    "typescript": Language.JAVASCRIPT,
-}
-
 
 class LocalSandboxProvider(JudgeProvider):
     name = "local"
 
     async def run(self, request: ProviderRunRequest) -> ProviderRunResult:
-        language = _LANGUAGES.get(request.language.lower())
-        if language is None:
+        try:
+            language = LanguageRegistry.normalize(request.language)
+        except Exception as exc:
             return ProviderRunResult(
                 verdict="internal_error",
-                diagnostics=[f"unsupported language {request.language!r}"],
+                diagnostics=[f"unsupported language {request.language!r}: {exc}"],
             )
 
         executor = get_executor(language)
@@ -58,7 +49,9 @@ class LocalSandboxProvider(JudgeProvider):
             stderr=(case.stderr if case else result.stderr) or "",
             compile_output=result.compile_output or "",
             exit_code=int(case.exit_code if case else result.exit_code),
-            time_ms=int(case.runtime_ms if case else result.time),
+            # result.time is stored in SECONDS (wall_time_ms/1000.0 in base executor)
+            # case.runtime_ms is already milliseconds — do NOT mix units
+            time_ms=int(case.runtime_ms if case else result.time * 1000),
             memory_kb=int((case.peak_memory_mb if case else result.memory) * 1024),
             timed_out=str(result.verdict).lower().endswith("time_limit_exceeded"),
             passed=bool(case.passed) if case else result.score > 0,

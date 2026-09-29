@@ -13,7 +13,8 @@ from sqlalchemy import select, func
 
 from app.core.cache import delete_cache_pattern
 from app.core.config import settings
-from app.engine.enums import ComparisonMode, Language
+from app.engine.enums import ComparisonMode
+from app.engine.languages import Language, LanguageRegistry, LanguageContaminationError, UnsupportedLanguageError
 from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
 from app.models.db_models import (
@@ -28,7 +29,7 @@ from app.models.db_models import (
     now_utc,
 )
 from app.engine.contracts import FunctionSignature, EvaluationConfig, DataType
-from app.engine.adapters import get_adapter, OutputEvaluator
+from app.engine.adapters import OutputEvaluator
 
 from app.modules.contests.contest_repository import ContestRepository
 from app.services.contest_eligibility_service import (
@@ -42,14 +43,14 @@ logger = logging.getLogger(__name__)
 
 class ArenaRunRequest(BaseModel):
     problem_id: str
-    language: Language
+    language: Any
     code: str
     custom_stdin: Optional[str] = None
 
 
 class ArenaSubmitRequest(BaseModel):
     problem_id: str
-    language: Language
+    language: Any
     code: str
 
 
@@ -176,8 +177,11 @@ class ContestExecutionService:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
 
         fn_sig, eval_cfg, sample_list, _, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
-        lang_str = str(payload.language).lower()
-        adapter = get_adapter(lang_str) if fn_sig else None
+        try:
+            lang_enum = LanguageRegistry.normalize(payload.language)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        adapter = LanguageRegistry.get_adapter(lang_enum) if fn_sig else None
 
         if payload.custom_stdin is not None:
             tcs = [TestCaseSchema(id="custom", stdin=payload.custom_stdin, expected_output="")]
@@ -211,15 +215,17 @@ class ContestExecutionService:
             from app.engine.harness import prepare_solution_code
             exec_code = prepare_solution_code(
                 code=payload.code,
-                language=payload.language,
+                language=lang_enum,
                 problem_index=problem.problem_index,
                 starter_codes=getattr(problem, "starter_codes", None) or {},
                 function_signature=fn_sig,
             )
 
+        LanguageRegistry.validate_source(lang_enum, exec_code)
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
-            language=payload.language,
+            language=lang_enum,
             code=exec_code,
             testcases=tcs,
             time_limit=time_limit,
@@ -238,11 +244,21 @@ class ContestExecutionService:
             if tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
                 if fn_sig:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
+                    if not passed:
+                        # Fallback: if OutputEvaluator fails (e.g., mismatched declared type),
+                        # use JudgeEngine semantic comparison (handles [0, 1] vs [0,1] etc.)
+                        from app.engine.judge import JudgeEngine
+                        from app.engine.enums import ComparisonMode
+                        passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
                     tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
                 else:
-                    tr.passed = (tr.stdout or "").strip() == str(exp_val).strip()
-                    tr.verdict = "ACCEPTED" if tr.passed else "WRONG_ANSWER"
+                    # No function signature: use semantic comparison, not plain string equality
+                    from app.engine.judge import JudgeEngine
+                    from app.engine.enums import ComparisonMode
+                    passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
+                    tr.passed = passed
+                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
 
             if tr.passed:
                 passed_count += 1
@@ -261,10 +277,10 @@ class ContestExecutionService:
             })
 
         all_passed = (passed_count == len(testcase_results)) and len(testcase_results) > 0
-        final_verdict = "ACCEPTED" if all_passed else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
+        final_verdict = "ACCEPTED" if all_passed else "WRONG_ANSWER"
 
         return {
-            "success": exec_result.success,
+            "success": all_passed,  # BUG FIX: was exec_result.success (stale, pre-post-processing)
             "verdict": final_verdict,
             "stdout": exec_result.stdout,
             "stderr": exec_result.stderr,
@@ -315,8 +331,28 @@ class ContestExecutionService:
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
 
+        # Idempotency / debounce check: prevent duplicate submissions within 2 seconds
+        recent_sub_stmt = select(ContestSubmission).where(
+            ContestSubmission.contest_id == contest.id,
+            ContestSubmission.problem_id == problem.id,
+            ContestSubmission.member_id == current_member.id,
+        ).order_by(ContestSubmission.submitted_at.desc()).limit(1)
+        recent_sub = (await db.scalars(recent_sub_stmt)).first()
+        if recent_sub and recent_sub.code == payload.code:
+            now_time = now_utc()
+            sub_time = recent_sub.submitted_at.replace(tzinfo=timezone.utc) if recent_sub.submitted_at.tzinfo is None else recent_sub.submitted_at
+            if (now_time - sub_time).total_seconds() < 2.0:
+                raise HTTPException(
+                    status_code=429,
+                    detail="Duplicate submission detected. Please wait a moment before submitting again."
+                )
+
         fn_sig, eval_cfg, samples, hidden, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
-        adapter = get_adapter(lang_str) if fn_sig else None
+        try:
+            lang_enum = LanguageRegistry.normalize(payload.language)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        adapter = LanguageRegistry.get_adapter(lang_enum) if fn_sig else None
         all_raw = samples + hidden
 
         all_tcs: list[TestCaseSchema] = []
@@ -347,15 +383,17 @@ class ContestExecutionService:
             from app.engine.harness import prepare_solution_code
             exec_code = prepare_solution_code(
                 code=payload.code,
-                language=payload.language,
+                language=lang_enum,
                 problem_index=problem.problem_index,
                 starter_codes=getattr(problem, "starter_codes", None) or {},
                 function_signature=fn_sig,
             )
 
+        LanguageRegistry.validate_source(lang_enum, exec_code)
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
-            language=payload.language,
+            language=lang_enum,
             code=exec_code,
             testcases=all_tcs,
             time_limit=time_limit,
@@ -372,11 +410,19 @@ class ContestExecutionService:
             if tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
                 if fn_sig:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
+                    if not passed:
+                        # Fallback: semantic comparison if OutputEvaluator fails type parsing
+                        from app.engine.judge import JudgeEngine
+                        from app.engine.enums import ComparisonMode
+                        passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
                     tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
                 else:
-                    tr.passed = (tr.stdout or "").strip() == str(exp_val).strip()
-                    tr.verdict = "ACCEPTED" if tr.passed else "WRONG_ANSWER"
+                    from app.engine.judge import JudgeEngine
+                    from app.engine.enums import ComparisonMode
+                    passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
+                    tr.passed = passed
+                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
 
             if tr.passed:
                 passed_count += 1
@@ -392,7 +438,7 @@ class ContestExecutionService:
             problem_id=problem.id,
             member_id=current_member.id,
             handle=current_member.handle or f"cadet_{current_member.id[:6]}",
-            language=str(payload.language),
+            language=lang_enum.value,
             code=payload.code,
             verdict=verdict_str,
             passed_testcases=exec_result.passed_testcases,

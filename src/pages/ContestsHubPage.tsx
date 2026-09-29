@@ -37,7 +37,7 @@ import { toast } from "sonner";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import LightRays from "./LightRays";
-import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/ui/animated-tabs";
+import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/animate-ui/components/base/tabs";
 import { prefetchContestRoute } from "@/AppRoutes";
 import { useRealtimeEvents } from "@/lib/realtime";
 

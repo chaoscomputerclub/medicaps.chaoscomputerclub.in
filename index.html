@@ -14,24 +14,69 @@
   </head>
   <body class="bg-black text-white antialiased selection:bg-lime-400 selection:text-black min-h-screen">
     <div id="root">
-      <div style="min-height:100vh;background:#000000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#ffffff;user-select:none;">
-        <div style="position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
-          <img src="/logo.webp" alt="CCC" style="width:44px;height:44px;object-fit:contain;border-radius:10px;position:relative;z-index:1;" />
-          <div style="position:absolute;inset:-6px;border:1.5px solid rgba(204,255,0,0.4);border-radius:16px;animation:ccc-pulse 1.8s cubic-bezier(0.4,0,0.6,1) infinite;"></div>
-        </div>
-        <div style="font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:0.18em;color:#CCFF00;margin-bottom:6px;text-transform:uppercase;font-weight:600;">
-          Chaos Computer Club
-        </div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.08em;margin-bottom:18px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">
-          Medi-Caps University Chapter
-        </div>
-        <div style="width:130px;height:2px;background:rgba(255,255,255,0.08);border-radius:9999px;overflow:hidden;position:relative;">
-          <div style="position:absolute;top:0;left:0;bottom:0;width:35%;background:#CCFF00;border-radius:9999px;animation:ccc-scan 1.2s cubic-bezier(0.65,0,0.35,1) infinite;"></div>
-        </div>
+      <div style="min-height:100vh;background:#000000;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;">
+        <span
+          role="status"
+          aria-label="Loading"
+          style="--eye-size:52px;--gap:9px;--eye-bg:rgba(255,255,255,0.16);--pupil-color:#ffffff;position:relative;display:inline-flex;aspect-ratio:9/4;height:52px;align-items:center;justify-content:center;vertical-align:middle;"
+        >
+          <span
+            aria-hidden="true"
+            style="display:inline-flex;align-items:center;justify-content:center;gap:var(--gap);"
+          >
+            <span
+              class="wandering-eye-ball"
+              style="width:var(--eye-size);height:var(--eye-size);border-radius:9999px;display:inline-block;background-color:var(--eye-bg);background-image:radial-gradient(circle calc(var(--eye-size)*0.32),var(--pupil-color) 100%,transparent 0);background-repeat:no-repeat;animation:loading-ui-wandering-eyes-move 10s infinite,loading-ui-wandering-eyes-blink 10s infinite;"
+            ></span>
+            <span
+              class="wandering-eye-ball"
+              style="width:var(--eye-size);height:var(--eye-size);border-radius:9999px;display:inline-block;background-color:var(--eye-bg);background-image:radial-gradient(circle calc(var(--eye-size)*0.32),var(--pupil-color) 100%,transparent 0);background-repeat:no-repeat;animation:loading-ui-wandering-eyes-move 10s infinite,loading-ui-wandering-eyes-blink 10s infinite;"
+            ></span>
+          </span>
+          <span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;">Loading</span>
+        </span>
+        <p class="text-shimmer">Loading</p>
       </div>
       <style>
-        @keyframes ccc-pulse { 0%, 100% { opacity: 0.25; transform: scale(0.98); } 50% { opacity: 0.85; transform: scale(1.04); } }
-        @keyframes ccc-scan { 0% { left: -35%; width: 25%; } 50% { left: 35%; width: 45%; } 100% { left: 100%; width: 25%; } }
+        @keyframes loading-ui-wandering-eyes-move {
+          0%, 10% { background-position: 0 0; }
+          13%, 40% { background-position: calc(var(--eye-size) * 0.3125 * -1) 0; }
+          43%, 70% { background-position: calc(var(--eye-size) * 0.3125) 0; }
+          73%, 90% { background-position: 0 calc(var(--eye-size) * 0.3125); }
+          93%, 100% { background-position: 0 0; }
+        }
+        @keyframes loading-ui-wandering-eyes-blink {
+          0%, 10%, 12%, 20%, 22%, 40%, 42%, 60%, 62%, 70%, 72%, 90%, 92%, 98%, 100% { height: var(--eye-size); }
+          11%, 21%, 41%, 61%, 71%, 91%, 99% { height: calc(var(--eye-size) * 0.375); }
+        }
+        .text-shimmer {
+          position: relative;
+          display: inline-block;
+          background-size: 250% 100%, auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-repeat: no-repeat, padding-box;
+          --spread: 14px;
+          --base-color: rgba(255, 255, 255, 0.4);
+          --base-gradient-color: #ffffff;
+          --bg: linear-gradient(90deg, #0000 calc(50% - var(--spread)), var(--base-gradient-color), #0000 calc(50% + var(--spread)));
+          background-image: var(--bg), linear-gradient(var(--base-color), var(--base-color));
+          animation: text-shimmer-move 2s linear infinite;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 11px;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          margin-top: 20px;
+          margin-bottom: 0;
+        }
+        @keyframes text-shimmer-move {
+          0% { background-position: 100% center; }
+          100% { background-position: 0% center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .wandering-eye-ball, .text-shimmer { animation: none !important; }
+        }
       </style>
     </div>
     <script type="module" src="/src/main.tsx"></script>

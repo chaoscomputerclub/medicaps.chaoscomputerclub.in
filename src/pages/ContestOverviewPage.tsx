@@ -1,6 +1,10 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestDetailThunk, registerContestThunk, unregisterContestThunk } from "@/store/slices/contestSlice";
+import {
+  fetchContestDetailThunk,
+  registerContestThunk,
+  unregisterContestThunk,
+} from "@/store/slices/contestSlice";
 import { useEffect, useState, useCallback } from "react";
 import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
 import {
@@ -16,7 +20,6 @@ import {
   FileText,
   Flame,
   Flag,
-  Loader2,
   Lock,
   Megaphone,
   Play,
@@ -29,10 +32,18 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
@@ -68,35 +79,41 @@ export function ContestOverviewPage() {
   } = useAppSelector((state) => state.contest);
   const isRegistering = Boolean(registeringSlugs[contestSlug]);
 
-  const refreshDetail = useCallback((force = false) => {
-    if (!contestSlug) return;
-    if (force) {
-      invalidateSwrCache("contests:*");
-      invalidateSwrCache(`contest:*:${contestSlug}*`);
-      invalidateSwrCache("system:contests:*");
-      invalidateSwrCache("passes:*");
-    }
-    dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
-  }, [contestSlug, dispatch]);
+  const refreshDetail = useCallback(
+    (force = false) => {
+      if (!contestSlug) return;
+      if (force) {
+        invalidateSwrCache("contests:*");
+        invalidateSwrCache(`contest:*:${contestSlug}*`);
+        invalidateSwrCache("system:contests:*");
+        invalidateSwrCache("passes:*");
+      }
+      dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
+    },
+    [contestSlug, dispatch],
+  );
 
   useEffect(() => {
     refreshDetail(false);
   }, [refreshDetail]);
 
   // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
-  const cachedContest = !rawContest && contestSlug
-    ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
-    : null;
+  const cachedContest =
+    !rawContest && contestSlug
+      ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
+      : null;
   const contest = rawContest ?? cachedContest;
 
-  const cachedRegistration = !rawRegistration && contestSlug
-    ? (globalSwrStore.get<any>(`contest:reg_status:${contestSlug}`)?.data ?? null)
-    : null;
+  const cachedRegistration =
+    !rawRegistration && contestSlug
+      ? (globalSwrStore.get<any>(`contest:reg_status:${contestSlug}`)?.data ?? null)
+      : null;
   const registration = rawRegistration ?? cachedRegistration;
 
-  const isRegistered = registration !== null && registration !== undefined
-    ? Boolean(registration.registered)
-    : Boolean(contest?.registered);
+  const isRegistered =
+    registration !== null && registration !== undefined
+      ? Boolean(registration.registered)
+      : Boolean(contest?.registered);
   const isLive = contest?.status === "live";
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;
@@ -105,17 +122,14 @@ export function ContestOverviewPage() {
     registration?.status === "submitted" ||
     registration?.assessment_taken ||
     registration?.assessment_status === "submitted" ||
-    registration?.assessment_status === "completed"
+    registration?.assessment_status === "completed",
   );
 
   const onCountdownExpire = useCallback(() => {
     refreshDetail(true);
   }, [refreshDetail]);
 
-  const countdown = useCountdown(
-    isLive ? contest?.ends_at : contest?.starts_at,
-    onCountdownExpire
-  );
+  const countdown = useCountdown(isLive ? contest?.ends_at : contest?.starts_at, onCountdownExpire);
   const isWaitingRoom = isUpcoming && countdown.totalSeconds <= 300 && countdown.totalSeconds > 0;
 
   // Real-time status update: always stream — must receive upcoming→live→finished transitions instantly
@@ -144,7 +158,7 @@ export function ContestOverviewPage() {
       }
     },
     undefined,
-    Boolean(contestSlug)
+    Boolean(contestSlug),
   );
 
   const handleRegister = async () => {
@@ -239,7 +253,8 @@ export function ContestOverviewPage() {
               {contest.title}
             </h1>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              {contest.summary || "Official Medi-Caps University algorithmic programming tournament. Solve challenges under strict timing constraints to increase your university rating."}
+              {contest.summary ||
+                "Official Medi-Caps University algorithmic programming tournament. Solve challenges under strict timing constraints to increase your university rating."}
             </p>
 
             {/* Quick Meta Row */}
@@ -258,7 +273,8 @@ export function ContestOverviewPage() {
               </span>
               <span className="flex items-center gap-1.5 text-zinc-300">
                 <Users className="size-3.5 text-lime-400" />
-                <span className="tabular-nums">{contest.registered_count.toLocaleString()}</span>&nbsp;Cadet{contest.registered_count === 1 ? "" : "s"} Registered
+                <span className="tabular-nums">{contest.registered_count.toLocaleString()}</span>
+                &nbsp;Cadet{contest.registered_count === 1 ? "" : "s"} Registered
               </span>
             </div>
           </div>
@@ -270,9 +286,7 @@ export function ContestOverviewPage() {
             </span>
 
             {isFinished ? (
-              <div className="py-2 font-mono text-sm font-bold text-zinc-400">
-                CONCLUDED
-              </div>
+              <div className="py-2 font-mono text-sm font-bold text-zinc-400">CONCLUDED</div>
             ) : (
               <div className="grid grid-cols-4 gap-1.5">
                 {[
@@ -310,21 +324,13 @@ export function ContestOverviewPage() {
                     <CheckCircle2 className="size-4 text-lime-400" />
                     <span>Attempt Submitted · Retakes Not Permitted</span>
                   </div>
-                  <Button
-                    asChild
-                    variant="default"
-                    size="hero"
-                  >
+                  <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/results`}>
                       <Trophy className="size-4 mr-1.5" />
                       <span>View Standings</span>
                     </Link>
                   </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="hero"
-                  >
+                  <Button asChild variant="outline" size="hero">
                     <Link to={`/contests/${contestSlug}/summary`}>
                       <FileText className="size-4 mr-1.5" />
                       <span>View Summary</span>
@@ -339,11 +345,7 @@ export function ContestOverviewPage() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Button
-                    asChild
-                    variant="default"
-                    size="hero"
-                  >
+                  <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/lobby`}>
                       <Play className="size-4 fill-current mr-1.5" />
                       <span>Enter Contest Arena</span>
@@ -358,11 +360,7 @@ export function ContestOverviewPage() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Button
-                    asChild
-                    variant="default"
-                    size="hero"
-                  >
+                  <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/results`}>
                       <Trophy className="size-4 mr-1.5" />
                       <span>View Final Standings</span>
@@ -382,11 +380,7 @@ export function ContestOverviewPage() {
                     <CheckCircle2 className="size-4 text-emerald-400" />
                     <span>Registered · Arena unlocks at start time</span>
                   </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="hero"
-                  >
+                  <Button asChild variant="outline" size="hero">
                     <Link to={`/contests/${contestSlug}/lobby`}>
                       <Clock className="size-4 mr-1.5" />
                       <span>Enter Waiting Room</span>
@@ -400,7 +394,7 @@ export function ContestOverviewPage() {
                   >
                     {isRegistering ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <Loader2 className="size-3.5 animate-spin" />
+                        <WanderingEyes size="sm" className="h-3.5" />
                         <span>Unregistering...</span>
                       </span>
                     ) : (
@@ -424,7 +418,7 @@ export function ContestOverviewPage() {
                   >
                     {isRegistering ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <Loader2 className="size-4 animate-spin mr-1.5" />
+                        <WanderingEyes size="sm" className="h-4 mr-1.5" />
                         <span>Registering...</span>
                       </span>
                     ) : (
@@ -464,7 +458,9 @@ export function ContestOverviewPage() {
             </span>
           </div>
           <p className="text-zinc-400 leading-relaxed text-xs">
-            Users must register prior to start to participate. The waiting lobby unlocks before contest launch with synchronized server time. All challenges unlock simultaneously across all workstations. We hope you enjoy this contest!
+            Users must register prior to start to participate. The waiting lobby unlocks before
+            contest launch with synchronized server time. All challenges unlock simultaneously
+            across all workstations. We hope you enjoy this contest!
           </p>
         </div>
       </div>
@@ -487,16 +483,27 @@ export function ContestOverviewPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-white/8 hover:bg-transparent">
-                <TableHead className="w-12 font-sans text-[10px] uppercase text-zinc-500">#</TableHead>
-                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">Title</TableHead>
-                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">Score</TableHead>
-                <TableHead className="text-right font-sans text-[10px] uppercase text-zinc-500">Action</TableHead>
+                <TableHead className="w-12 font-sans text-[10px] uppercase text-zinc-500">
+                  #
+                </TableHead>
+                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">
+                  Title
+                </TableHead>
+                <TableHead className="font-sans text-[10px] uppercase text-zinc-500">
+                  Score
+                </TableHead>
+                <TableHead className="text-right font-sans text-[10px] uppercase text-zinc-500">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {problems.length === 0 ? (
                 <TableRow className="border-white/4">
-                  <TableCell colSpan={4} className="py-10 text-center font-sans text-xs text-zinc-500">
+                  <TableCell
+                    colSpan={4}
+                    className="py-10 text-center font-sans text-xs text-zinc-500"
+                  >
                     Problems will appear here once contest opens.
                   </TableCell>
                 </TableRow>
@@ -506,9 +513,7 @@ export function ContestOverviewPage() {
                     <TableCell className="font-sans text-xs font-bold text-lime-400">
                       {p.problem_index}
                     </TableCell>
-                    <TableCell className="text-xs font-medium text-white">
-                      {p.title}
-                    </TableCell>
+                    <TableCell className="text-xs font-medium text-white">{p.title}</TableCell>
                     <TableCell className="font-sans text-xs text-zinc-400 tabular-nums">
                       {p.points} pts
                     </TableCell>
@@ -520,16 +525,10 @@ export function ContestOverviewPage() {
                           size="sm"
                           className="border-white/10 text-zinc-400 hover:text-white"
                         >
-                          <Link to={`/contests/${contestSlug}/summary`}>
-                            Review →
-                          </Link>
+                          <Link to={`/contests/${contestSlug}/summary`}>Review →</Link>
                         </Button>
                       ) : (
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                        >
+                        <Button asChild variant="outline" size="sm">
                           <Link
                             to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}
                             target="_blank"
@@ -580,9 +579,13 @@ export function ContestOverviewPage() {
                   1
                 </span>
                 <div>
-                  <strong className="text-white block pb-0.5">Contest Format & Fair Competition</strong>
+                  <strong className="text-white block pb-0.5">
+                    Contest Format & Fair Competition
+                  </strong>
                   <span>
-                    To provide a better contest and ensure fairness, our tournament guidelines follow rigorous collegiate competitive programming standards. All participants compete under identical clock synchronization and automated judge verification.
+                    To provide a better contest and ensure fairness, our tournament guidelines
+                    follow rigorous collegiate competitive programming standards. All participants
+                    compete under identical clock synchronization and automated judge verification.
                   </span>
                 </div>
               </li>
@@ -592,9 +595,13 @@ export function ContestOverviewPage() {
                   2
                 </span>
                 <div>
-                  <strong className="text-white block pb-0.5">5-Minute Wrong Submission Penalty</strong>
+                  <strong className="text-white block pb-0.5">
+                    5-Minute Wrong Submission Penalty
+                  </strong>
                   <span>
-                    A penalty time of 5 minutes will be applied for each incorrect submission. Penalty time is added to your total ranking time only for problems that are eventually solved during the active contest window.
+                    A penalty time of 5 minutes will be applied for each incorrect submission.
+                    Penalty time is added to your total ranking time only for problems that are
+                    eventually solved during the active contest window.
                   </span>
                 </div>
               </li>
@@ -604,9 +611,14 @@ export function ContestOverviewPage() {
                   3
                 </span>
                 <div>
-                  <strong className="text-white block pb-0.5">Hidden Test Cases During Contest</strong>
+                  <strong className="text-white block pb-0.5">
+                    Hidden Test Cases During Contest
+                  </strong>
                   <span>
-                    To ensure the fairness of the contest and prevent test case hardcoding or output guessing, the judge system will hide evaluation test cases during the active contest. When users submit incorrect submissions, the judge will display the verdict failure without disclosing hidden test case contents.
+                    To ensure the fairness of the contest and prevent test case hardcoding or output
+                    guessing, the judge system will hide evaluation test cases during the active
+                    contest. When users submit incorrect submissions, the judge will display the
+                    verdict failure without disclosing hidden test case contents.
                   </span>
                 </div>
               </li>
@@ -616,9 +628,13 @@ export function ContestOverviewPage() {
                   4
                 </span>
                 <div>
-                  <strong className="text-white block pb-0.5">Sequential Test Group Execution</strong>
+                  <strong className="text-white block pb-0.5">
+                    Sequential Test Group Execution
+                  </strong>
                   <span>
-                    Test cases will be executed in sequential groups within isolated micro-containers. Submissions must satisfy time limits and memory constraints across all sub-task batches.
+                    Test cases will be executed in sequential groups within isolated
+                    micro-containers. Submissions must satisfy time limits and memory constraints
+                    across all sub-task batches.
                   </span>
                 </div>
               </li>
@@ -630,7 +646,9 @@ export function ContestOverviewPage() {
                 <div>
                   <strong className="text-white block pb-0.5">Rating Adjustment Timeline</strong>
                   <span>
-                    The final Elo rating and university rank updates for this contest will be calculated and finalized within 24 to 48 hours following the conclusion of the contest and automated plagiarism screening.
+                    The final Elo rating and university rank updates for this contest will be
+                    calculated and finalized within 24 to 48 hours following the conclusion of the
+                    contest and automated plagiarism screening.
                   </span>
                 </div>
               </li>
@@ -640,9 +658,13 @@ export function ContestOverviewPage() {
                   6
                 </span>
                 <div>
-                  <strong className="text-white block pb-0.5">Provisional Rating for New Participants</strong>
+                  <strong className="text-white block pb-0.5">
+                    Provisional Rating for New Participants
+                  </strong>
                   <span>
-                    New users’ first five contests operate under a provisional rating system to accurately establish competitive standing; beginning from their sixth contest, rating adjustments fully reflect on the global university leaderboard.
+                    New users’ first five contests operate under a provisional rating system to
+                    accurately establish competitive standing; beginning from their sixth contest,
+                    rating adjustments fully reflect on the global university leaderboard.
                   </span>
                 </div>
               </li>
@@ -671,31 +693,43 @@ export function ContestOverviewPage() {
               <li className="flex items-start gap-2.5">
                 <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Multi-Account Submissions:</strong> One user submitting with multiple accounts during a contest is strictly forbidden. Multiple accounts belonging to the same user will be disqualified.
+                  <strong className="text-white">Multi-Account Submissions:</strong> One user
+                  submitting with multiple accounts during a contest is strictly forbidden. Multiple
+                  accounts belonging to the same user will be disqualified.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Cross-Account Code Sharing:</strong> Multiple accounts submitting identical or structurally similar (AST-isomorphic) code for the same problem.
+                  <strong className="text-white">Cross-Account Code Sharing:</strong> Multiple
+                  accounts submitting identical or structurally similar (AST-isomorphic) code for
+                  the same problem.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Platform Disturbances:</strong> Creating unwanted disturbances, network attacks, or automated tooling that interrupts other users' participation.
+                  <strong className="text-white">Platform Disturbances:</strong> Creating unwanted
+                  disturbances, network attacks, or automated tooling that interrupts other users'
+                  participation.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Ban className="size-3.5 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Public Discussion Leakage:</strong> Disclosing contest-related problem details, hints, starter solutions, or test cases in public chat channels or discussion boards before the contest concludes.
+                  <strong className="text-white">Public Discussion Leakage:</strong> Disclosing
+                  contest-related problem details, hints, starter solutions, or test cases in public
+                  chat channels or discussion boards before the contest concludes.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Bot className="size-3.5 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Generative AI & External Assistance:</strong> The use of code generation tools (e.g. ChatGPT, Claude, GitHub Copilot) or any external assistance for solving problems is strictly prohibited. This includes, but is not limited to, inputting problem statements, test cases, or starter code into external assistance tools.
+                  <strong className="text-white">Generative AI & External Assistance:</strong> The
+                  use of code generation tools (e.g. ChatGPT, Claude, GitHub Copilot) or any
+                  external assistance for solving problems is strictly prohibited. This includes,
+                  but is not limited to, inputting problem statements, test cases, or starter code
+                  into external assistance tools.
                 </span>
               </li>
             </ul>
@@ -714,7 +748,10 @@ export function ContestOverviewPage() {
             </div>
 
             <p className="text-xs font-sans text-zinc-300 leading-relaxed">
-              Chaos Computer Club heavily emphasizes the justice and fairness of our contests. We maintain absolutely <strong className="text-red-400 font-semibold">ZERO TOLERANCE</strong> for violation behaviors (such as plagiarism, cheating, or surrogate participation).
+              Chaos Computer Club heavily emphasizes the justice and fairness of our contests. We
+              maintain absolutely{" "}
+              <strong className="text-red-400 font-semibold">ZERO TOLERANCE</strong> for violation
+              behaviors (such as plagiarism, cheating, or surrogate participation).
             </p>
 
             <div className="space-y-3 pt-1">
@@ -726,7 +763,8 @@ export function ContestOverviewPage() {
                   <span className="text-xs font-semibold text-white">Temporary Ban & Reset</span>
                 </div>
                 <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
-                  Contest score resets to zero, complete disqualification from the tournament edition, and a contest and discuss ban for 1 month.
+                  Contest score resets to zero, complete disqualification from the tournament
+                  edition, and a contest and discuss ban for 1 month.
                 </p>
               </div>
 
@@ -738,7 +776,8 @@ export function ContestOverviewPage() {
                   <span className="text-xs font-semibold text-white">Permanent Deactivation</span>
                 </div>
                 <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
-                  Contest score resets to zero, permanent account deactivation without appeal, and formal referral to the University Academic Disciplinary Committee.
+                  Contest score resets to zero, permanent account deactivation without appeal, and
+                  formal referral to the University Academic Disciplinary Committee.
                 </p>
               </div>
             </div>
@@ -754,13 +793,18 @@ export function ContestOverviewPage() {
             </div>
 
             <p className="text-xs font-sans text-zinc-400 leading-relaxed">
-              We encourage all participants to contribute to maintaining the justice and fairness of our contests. Cadets who discover coordinated cheating, AI leakage, or identical submissions can file violation reports to proctors.
+              We encourage all participants to contribute to maintaining the justice and fairness of
+              our contests. Cadets who discover coordinated cheating, AI leakage, or identical
+              submissions can file violation reports to proctors.
             </p>
 
             <div className="rounded-md border border-lime-400/20 bg-lime-400/[0.03] p-3 text-xs font-sans text-zinc-300 space-y-1">
-              <span className="font-semibold text-lime-400 block">Verified Reporting Recognition:</span>
+              <span className="font-semibold text-lime-400 block">
+                Verified Reporting Recognition:
+              </span>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Participants who submit verified violation reports that successfully uncover cheating rings will receive official recognition on the CCC Academic Honor Roll.
+                Participants who submit verified violation reports that successfully uncover
+                cheating rings will receive official recognition on the CCC Academic Honor Roll.
               </p>
             </div>
           </div>
@@ -781,7 +825,8 @@ export function ContestOverviewPage() {
               </div>
 
               <p className="text-xs font-sans text-zinc-400 leading-relaxed">
-                All {problemCount} challenge statements and evaluation suites unlock simultaneously across all workstations at launch time.
+                All {problemCount} challenge statements and evaluation suites unlock simultaneously
+                across all workstations at launch time.
               </p>
 
               {isRegistered ? (
@@ -793,12 +838,7 @@ export function ContestOverviewPage() {
                     </span>
                     <span className="text-[11px] text-zinc-500">Synced Clock Active</span>
                   </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="default"
-                    className="w-full"
-                  >
+                  <Button asChild variant="outline" size="default" className="w-full">
                     <Link to={`/contests/${contestSlug}/lobby`}>
                       <span>Enter Waiting Room</span>
                       <ArrowRight className="size-3.5 ml-1" />
@@ -816,7 +856,7 @@ export function ContestOverviewPage() {
                   >
                     {isRegistering ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <Loader2 className="size-3.5 animate-spin" />
+                        <WanderingEyes size="sm" className="h-3.5" />
                         <span>Registering...</span>
                       </span>
                     ) : (

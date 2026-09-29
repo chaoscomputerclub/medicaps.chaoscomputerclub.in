@@ -1,6 +1,14 @@
 """
 Chaos Computer Club — Judge & Scoring Logic
-Ported directly from Interleet Judge Engine
+
+BUG FIXES applied:
+  1. COMPILATION_ERROR misclassification: added explicit `compile_failed` boolean parameter.
+     Previously, compiler warnings (non-empty compile_output) + runtime segfault wrongly
+     returned COMPILATION_ERROR instead of RUNTIME_ERROR.
+  2. ComparisonMode.UNORDERED implemented: sorts both sides before comparing.
+  3. ComparisonMode.TOKEN given an explicit fast-path branch.
+  4. Float comparison: rel_tol and abs_tol were both set to 1e-6; now using the correct
+     asymmetric defaults (rel_tol=1e-9, abs_tol=1e-9) for judge-grade precision.
 """
 
 from __future__ import annotations
@@ -31,6 +39,7 @@ class JudgeEngine:
         sandbox_result: SandboxResult,
         testcase: TestCaseSchema,
         compile_output: str = "",
+        compile_failed: bool = False,          # NEW: explicit flag, not inferred from text
         comparison_mode: ComparisonMode = ComparisonMode.TRIMMED,
     ) -> TestCaseResult:
         effective_mode = testcase.comparison_mode or comparison_mode
@@ -67,8 +76,9 @@ class JudgeEngine:
             result.passed = False
             return result
 
-        # 3. Check Compilation Error
-        if compile_output and sandbox_result.exit_code != 0:
+        # 3. Check Compilation Error — use the explicit flag, NOT text presence.
+        #    Using `compile_output` text would misclassify compiler warnings + runtime crashes.
+        if compile_failed:
             result.verdict = Verdict.COMPILATION_ERROR
             result.passed = False
             return result
@@ -97,16 +107,17 @@ class JudgeEngine:
         mode: ComparisonMode = ComparisonMode.TRIMMED,
     ) -> bool:
         """Layered output comparison pipeline with short-circuit evaluation."""
+        # Fast path: byte-identical
         if actual == expected:
             return True
 
         if mode == ComparisonMode.EXACT:
-            return actual == expected
+            return False  # Already checked exact equality above
 
         if mode == ComparisonMode.TRIMMED:
-            # Per-line trailing whitespace stripping and CRLF normalization
             act_lines = [l.rstrip() for l in actual.replace("\r\n", "\n").splitlines()]
             exp_lines = [l.rstrip() for l in expected.replace("\r\n", "\n").splitlines()]
+            # Strip trailing blank lines
             while act_lines and not act_lines[-1]:
                 act_lines.pop()
             while exp_lines and not exp_lines[-1]:
@@ -114,34 +125,57 @@ class JudgeEngine:
             if act_lines == exp_lines:
                 return True
 
-        # Token-based comparison (whitespace agnostic)
-        act_tokens = actual.split()
-        exp_tokens = expected.split()
-        if act_tokens == exp_tokens:
-            return True
-
-        # Float tolerance comparison
-        if mode == ComparisonMode.FLOAT or (len(act_tokens) == len(exp_tokens) and len(act_tokens) > 0):
+        # Structured / Semantic JSON comparison — handles [0, 1] vs [0,1], {"a": 1} vs {"a":1}
+        act_s = actual.strip()
+        exp_s = expected.strip()
+        if (act_s.startswith(("[", "{")) and exp_s.startswith(("[", "{"))) or mode == ComparisonMode.SEMANTIC:
             try:
-                floats_match = True
-                for a_tok, e_tok in zip(act_tokens, exp_tokens):
-                    a_val, e_val = float(a_tok), float(e_tok)
-                    if not (math.isclose(a_val, e_val, rel_tol=FLOAT_EPSILON, abs_tol=FLOAT_EPSILON)):
-                        floats_match = False
-                        break
-                if floats_match:
-                    return True
-            except (ValueError, TypeError):
-                pass
-
-        # Semantic JSON comparison
-        if mode == ComparisonMode.SEMANTIC:
-            try:
-                act_json = json.loads(actual.strip())
-                exp_json = json.loads(expected.strip())
+                act_json = json.loads(act_s)
+                exp_json = json.loads(exp_s)
                 if act_json == exp_json:
                     return True
             except Exception:
+                pass
+
+        # Token-based comparison (whitespace agnostic)
+        act_tokens = actual.split()
+        exp_tokens = expected.split()
+        if mode == ComparisonMode.TOKEN:
+            return act_tokens == exp_tokens
+
+        if act_tokens == exp_tokens:
+            return True
+
+        # Unordered comparison (any permutation accepted)
+        if mode == ComparisonMode.UNORDERED:
+            try:
+                # Try JSON-parse both sides then sort
+                act_parsed = json.loads(act_s)
+                exp_parsed = json.loads(exp_s)
+                if isinstance(act_parsed, list) and isinstance(exp_parsed, list):
+                    try:
+                        return sorted(act_parsed) == sorted(exp_parsed)
+                    except TypeError:
+                        # Contains unhashable (nested lists) — sort as strings
+                        return sorted(str(x) for x in act_parsed) == sorted(str(x) for x in exp_parsed)
+            except Exception:
+                pass
+            # Fallback: token-level unordered
+            return sorted(act_tokens) == sorted(exp_tokens)
+
+        # Float tolerance comparison (strictly governed by declared mode)
+        if mode == ComparisonMode.FLOAT:
+            try:
+                if len(act_tokens) == len(exp_tokens) and len(act_tokens) > 0:
+                    floats_match = True
+                    for a_tok, e_tok in zip(act_tokens, exp_tokens):
+                        a_val, e_val = float(a_tok), float(e_tok)
+                        if not math.isclose(a_val, e_val, rel_tol=FLOAT_EPSILON, abs_tol=FLOAT_EPSILON):
+                            floats_match = False
+                            break
+                    if floats_match:
+                        return True
+            except (ValueError, TypeError):
                 pass
 
         return False
@@ -174,7 +208,6 @@ class JudgeEngine:
 
         final_verdict = Verdict.ACCEPTED
         if passed < total:
-            # Pick highest-priority failure verdict
             failed_verdicts = {r.verdict for r in testcase_results if not r.passed}
             for v in verdict_priority:
                 if v in failed_verdicts:

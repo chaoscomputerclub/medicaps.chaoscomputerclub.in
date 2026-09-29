@@ -1,13 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserPlus, UserMinus, Loader2 } from "lucide-react";
+import { UserPlus, UserMinus } from "lucide-react";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { toggleFollowThunk, closeSocialDrawer } from "@/store/slices/socialSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -53,9 +50,7 @@ function Spark({ data }: { data: number[] }) {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
-  const pts = data
-    .map((v, i) => `${i * 18},${22 - ((v - min) / range) * 18}`)
-    .join(" ");
+  const pts = data.map((v, i) => `${i * 18},${22 - ((v - min) / range) * 18}`).join(" ");
   return (
     <svg
       viewBox="0 0 90 26"
@@ -111,8 +106,9 @@ export function CadetProfileHoverCard({
   const [isUnfollowHovered, setIsUnfollowHovered] = useState(false);
 
   // Check if we need to fetch additional profile details on hover
-  const hasFullData =
-    Boolean(profile?.rating !== undefined && profile?.university_rank !== undefined);
+  const hasFullData = Boolean(
+    profile?.rating !== undefined && profile?.university_rank !== undefined,
+  );
 
   const fetchProfileDetails = useCallback(async () => {
     if (!cleanHandle || hasFullData || fetchedData) return;
@@ -121,7 +117,7 @@ export function CadetProfileHoverCard({
       const data = await swrFetch(
         `student:profile:${cleanHandle}`,
         () => getStudentProfileData(cleanHandle),
-        { ttl: 5 * 60 * 1000, staleTime: 60 * 1000 }
+        { ttl: 5 * 60 * 1000, staleTime: 60 * 1000 },
       );
       if (data) {
         setFetchedData(data);
@@ -155,9 +151,7 @@ export function CadetProfileHoverCard({
   const tier = profile?.tier ?? memberObj?.tier ?? "Active";
   const universityRank = profile?.university_rank ?? memberObj?.university_rank ?? null;
   const attendanceCount =
-    profile?.attendance_count ??
-    memberObj?.attendance_count ??
-    (fetchedData?.battles?.length || 0);
+    profile?.attendance_count ?? memberObj?.attendance_count ?? (fetchedData?.battles?.length || 0);
 
   const ratingsList =
     profile?.ratings ??
@@ -169,20 +163,19 @@ export function CadetProfileHoverCard({
     profile?.is_self ||
     Boolean(
       currentMember &&
-        ((effectiveId && currentMember.id === effectiveId) ||
-          (currentMember.handle &&
-            currentMember.handle.toLowerCase() === cleanHandle.toLowerCase()))
+      ((effectiveId && currentMember.id === effectiveId) ||
+        (currentMember.handle && currentMember.handle.toLowerCase() === cleanHandle.toLowerCase())),
     );
 
   const hasFetchedFollowing = useAppSelector((s) => s.social.hasFetchedFollowing);
   const isFollowedInStore = Boolean(
     (effectiveId && followingIds.includes(effectiveId)) ||
-    (cleanHandle && followingIds.includes(cleanHandle))
+    (cleanHandle && followingIds.includes(cleanHandle)),
   );
 
   const isFollowing = hasFetchedFollowing
     ? isFollowedInStore
-    : (isFollowedInStore || Boolean(profile?.is_following));
+    : isFollowedInStore || Boolean(profile?.is_following);
 
   const isPending = effectiveId ? actionPendingId === effectiveId : false;
 
@@ -205,7 +198,7 @@ export function CadetProfileHoverCard({
         toggleFollowThunk({
           targetId: effectiveId || cleanHandle,
           targetHandle: cleanHandle,
-        })
+        }),
       ).unwrap();
 
       if (res.isFollowing) {
@@ -226,11 +219,7 @@ export function CadetProfileHoverCard({
   };
 
   return (
-    <HoverCard
-      openDelay={openDelay}
-      closeDelay={closeDelay}
-      onOpenChange={handleOpenChange}
-    >
+    <HoverCard openDelay={openDelay} closeDelay={closeDelay} onOpenChange={handleOpenChange}>
       <HoverCardTrigger asChild={asChild}>{children}</HoverCardTrigger>
 
       <HoverCardContent
@@ -261,14 +250,10 @@ export function CadetProfileHoverCard({
             <p className="font-sans text-base font-bold text-white leading-tight truncate">
               {fullName || `@${cleanHandle}`}
             </p>
-            <p className="font-mono text-xs text-zinc-400 mt-0.5 truncate">
-              @{cleanHandle}
-            </p>
+            <p className="font-mono text-xs text-zinc-400 mt-0.5 truncate">@{cleanHandle}</p>
             <p className="font-mono text-xs text-lime-400 tabular-nums mt-1 truncate">
               Rank&nbsp;
-              <span className="font-bold">
-                {universityRank ? `#${universityRank}` : "—"}
-              </span>
+              <span className="font-bold">{universityRank ? `#${universityRank}` : "—"}</span>
               &nbsp;·&nbsp;
               <span className="text-zinc-400">{tier}</span>
             </p>
@@ -278,9 +263,7 @@ export function CadetProfileHoverCard({
         {/* Stats Grid */}
         <div className="grid grid-cols-3 divide-x divide-white/6 border-t border-white/6 text-center">
           <div className="py-2.5 px-2">
-            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">
-              Rating
-            </p>
+            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Rating</p>
             {isLoading && !hasFullData ? (
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse mx-auto mt-1" />
             ) : (
@@ -291,9 +274,7 @@ export function CadetProfileHoverCard({
           </div>
 
           <div className="py-2.5 px-2">
-            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">
-              Peak
-            </p>
+            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Peak</p>
             {isLoading && !hasFullData ? (
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse mx-auto mt-1" />
             ) : (
@@ -304,9 +285,7 @@ export function CadetProfileHoverCard({
           </div>
 
           <div className="py-2.5 px-2">
-            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">
-              Rounds
-            </p>
+            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Rounds</p>
             {isLoading && !hasFullData ? (
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse mx-auto mt-1" />
             ) : (
@@ -336,18 +315,12 @@ export function CadetProfileHoverCard({
               onMouseEnter={() => setIsUnfollowHovered(true)}
               onMouseLeave={() => setIsUnfollowHovered(false)}
               onClick={handleFollowClick}
-              variant={
-                isFollowing
-                  ? isUnfollowHovered
-                    ? "destructive"
-                    : "secondary"
-                  : "default"
-              }
+              variant={isFollowing ? (isUnfollowHovered ? "destructive" : "secondary") : "default"}
               size="sm"
               className="flex-1"
             >
               {isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
+                <WanderingEyes size="sm" className="h-3.5" />
               ) : isFollowing ? (
                 isUnfollowHovered ? (
                   <>
@@ -369,16 +342,8 @@ export function CadetProfileHoverCard({
             </Button>
           )}
 
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className={isYou ? "flex-1" : "px-4"}
-          >
-            <Link
-              to={`/profile/${cleanHandle}`}
-              onClick={handleProfileNavigation}
-            >
+          <Button asChild variant="outline" size="sm" className={isYou ? "flex-1" : "px-4"}>
+            <Link to={`/profile/${cleanHandle}`} onClick={handleProfileNavigation}>
               View Profile
             </Link>
           </Button>

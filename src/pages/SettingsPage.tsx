@@ -17,7 +17,6 @@ import {
   Github,
   KeyRound,
   Laptop,
-  Loader2,
   Lock,
   LogOut,
   Monitor,
@@ -31,7 +30,15 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { cn, resolveAvatarUrl, formatFullName } from "@/lib/utils";
+import {
+  Tabs,
+  TabsList,
+  TabsTab,
+  TabsPanels,
+  TabsPanel,
+} from "@/components/animate-ui/components/base/tabs";
 import { isAuthenticated, getToken, clearToken, logout } from "@/lib/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -96,11 +103,11 @@ type SettingsTab = "profile" | "account" | "notifications" | "security" | "dange
 // ─── Nav definition ───────────────────────────────────────────────────────────
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ElementType; danger?: boolean }[] = [
-  { id: "profile",       label: "Public Profile",    icon: UserRound },
-  { id: "account",       label: "Account",           icon: AtSign },
-  { id: "notifications", label: "Notifications",     icon: Bell },
-  { id: "security",      label: "Security & Session", icon: ShieldCheck },
-  { id: "danger",        label: "Danger Zone",       icon: AlertTriangle, danger: true },
+  { id: "profile", label: "Public Profile", icon: UserRound },
+  { id: "account", label: "Account", icon: AtSign },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "security", label: "Security & Session", icon: ShieldCheck },
+  { id: "danger", label: "Danger Zone", icon: AlertTriangle, danger: true },
 ];
 
 // ─── Small shared UI pieces ───────────────────────────────────────────────────
@@ -120,19 +127,14 @@ function SettingSection({
     <section
       className={cn(
         "border rounded-lg",
-        danger ? "border-red-500/20 bg-black" : "border-white/8 bg-black"
+        danger ? "border-red-500/20 bg-black" : "border-white/8 bg-black",
       )}
     >
-      <div
-        className={cn(
-          "px-6 py-4 border-b",
-          danger ? "border-red-500/20" : "border-white/8"
-        )}
-      >
+      <div className={cn("px-6 py-4 border-b", danger ? "border-red-500/20" : "border-white/8")}>
         <h2
           className={cn(
             "text-sm font-semibold tracking-tight",
-            danger ? "text-red-400" : "text-white"
+            danger ? "text-red-400" : "text-white",
           )}
         >
           {title}
@@ -163,15 +165,12 @@ function SettingRow({
     <div
       className={cn(
         "flex flex-col sm:flex-row sm:items-start gap-4",
-        !borderless && "pb-5 border-b border-white/6"
+        !borderless && "pb-5 border-b border-white/6",
       )}
     >
       <div className="sm:w-48 shrink-0 pt-0.5">
         {htmlFor ? (
-          <Label
-            htmlFor={htmlFor}
-            className="text-xs font-medium text-zinc-200 cursor-pointer"
-          >
+          <Label htmlFor={htmlFor} className="text-xs font-medium text-zinc-200 cursor-pointer">
             {label}
           </Label>
         ) : (
@@ -192,10 +191,10 @@ function SaveIndicator({ status }: { status: "idle" | "saving" | "saved" | "erro
         "inline-flex items-center gap-1 text-[11px] font-sans ml-2 transition-opacity",
         status === "saving" && "text-zinc-400",
         status === "saved" && "text-lime-400",
-        status === "error" && "text-red-400"
+        status === "error" && "text-red-400",
       )}
     >
-      {status === "saving" && <Loader2 size={11} className="animate-spin" />}
+      {status === "saving" && <WanderingEyes size="inline" className="h-3 mr-1 text-zinc-400" />}
       {status === "saved" && <Check size={11} />}
       {status === "error" && <X size={11} />}
       {status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Error"}
@@ -220,7 +219,7 @@ function SaveButton({
       disabled={disabled || saving}
       onClick={onClick}
     >
-      {saving ? <Loader2 size={12} className="animate-spin mr-1.5" /> : null}
+      {saving ? <WanderingEyes size="inline" className="h-3 mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
     </Button>
   );
@@ -239,8 +238,7 @@ export function SettingsPage() {
 
   // Tab
   const raw = searchParams.get("tab") as SettingsTab;
-  const activeTab: SettingsTab =
-    raw && NAV_ITEMS.some((n) => n.id === raw) ? raw : "profile";
+  const activeTab: SettingsTab = raw && NAV_ITEMS.some((n) => n.id === raw) ? raw : "profile";
   const setActiveTab = (t: SettingsTab) => setSearchParams({ tab: t });
 
   const handleLogout = () => {
@@ -255,39 +253,6 @@ export function SettingsPage() {
       window.location.replace("/auth");
     }
   };
-
-  const settingsNavRef = useRef<HTMLElement | null>(null);
-  const settingsItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [settingsPillStyle, setSettingsPillStyle] = useState<{
-    top: number;
-    height: number;
-    opacity: number;
-    ready: boolean;
-  }>({ top: 0, height: 0, opacity: 0, ready: false });
-
-  useEffect(() => {
-    const updateSettingsPill = () => {
-      const navEl = settingsNavRef.current;
-      const activeEl = settingsItemRefs.current[activeTab];
-      if (navEl && activeEl) {
-        const navRect = navEl.getBoundingClientRect();
-        const activeRect = activeEl.getBoundingClientRect();
-        setSettingsPillStyle({
-          top: activeRect.top - navRect.top,
-          height: activeRect.height,
-          opacity: 1,
-          ready: true,
-        });
-      }
-    };
-    updateSettingsPill();
-    const raf = requestAnimationFrame(updateSettingsPill);
-    window.addEventListener("resize", updateSettingsPill);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", updateSettingsPill);
-    };
-  }, [activeTab]);
 
   // ── Form state ──
   const [fullName, setFullName] = useState("");
@@ -307,7 +272,9 @@ export function SettingsPage() {
   const [notifFollows, setNotifFollows] = useState(false);
 
   // ── Loading states ──
-  const [fieldStatus, setFieldStatusState] = useState<Record<string, "idle" | "saving" | "saved" | "error">>({});
+  const [fieldStatus, setFieldStatusState] = useState<
+    Record<string, "idle" | "saving" | "saved" | "error">
+  >({});
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -330,7 +297,7 @@ export function SettingsPage() {
     setLinkedin(member.linkedin_url || "");
     const url = member.avatar_url || "";
     setAvatarUrl(
-      url.startsWith("http") || url.startsWith("/media/") || url.startsWith("/") ? url : ""
+      url.startsWith("http") || url.startsWith("/media/") || url.startsWith("/") ? url : "",
     );
   }, [member]);
 
@@ -346,7 +313,10 @@ export function SettingsPage() {
 
   // Debounced handle check
   useEffect(() => {
-    const clean = handleInput.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    const clean = handleInput
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "");
     if (!member || clean === member.handle?.toLowerCase() || clean.length < 3) {
       dispatch(setHandleStatus("idle"));
       return;
@@ -357,15 +327,12 @@ export function SettingsPage() {
   }, [handleInput, member, dispatch]);
 
   // ── Field save helpers ──
-  const markField = useCallback(
-    (key: string, status: "saving" | "saved" | "error") => {
-      setFieldStatusState((p) => ({ ...p, [key]: status }));
-      if (status === "saved") {
-        setTimeout(() => setFieldStatusState((p) => ({ ...p, [key]: "idle" })), 2500);
-      }
-    },
-    []
-  );
+  const markField = useCallback((key: string, status: "saving" | "saved" | "error") => {
+    setFieldStatusState((p) => ({ ...p, [key]: status }));
+    if (status === "saved") {
+      setTimeout(() => setFieldStatusState((p) => ({ ...p, [key]: "idle" })), 2500);
+    }
+  }, []);
 
   const saveField = useCallback(
     async (key: string, payload: Record<string, any>) => {
@@ -381,7 +348,7 @@ export function SettingsPage() {
         toast.error(err || `Failed to update ${key}.`);
       }
     },
-    [member, dispatch, markField]
+    [member, dispatch, markField],
   );
 
   // ── Avatar upload ──
@@ -409,7 +376,7 @@ export function SettingsPage() {
         setIsUploadingAvatar(false);
       }
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -440,7 +407,10 @@ export function SettingsPage() {
 
   // ── Handle save ──
   const saveHandle = async () => {
-    const clean = handleInput.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    const clean = handleInput
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "");
     if (!clean || clean.length < 3 || clean === member?.handle || handleStatus === "taken") return;
     await saveField("handle", { handle: clean });
   };
@@ -452,14 +422,24 @@ export function SettingsPage() {
       timestamp: new Date().toISOString(),
       platform: "CCC Medi-Caps Chapter Portal",
       cadet: {
-        id: member.id, handle: member.handle, full_name: member.full_name,
-        email: member.email, prn: member.prn, department: member.department,
-        batch: member.batch, rating: member.rating, tier: member.tier,
-        bio: member.bio, github_username: member.github_username, linkedin_url: member.linkedin_url,
+        id: member.id,
+        handle: member.handle,
+        full_name: member.full_name,
+        email: member.email,
+        prn: member.prn,
+        department: member.department,
+        batch: member.batch,
+        rating: member.rating,
+        tier: member.tier,
+        bio: member.bio,
+        github_username: member.github_username,
+        linkedin_url: member.linkedin_url,
       },
     };
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    a.href = URL.createObjectURL(
+      new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+    );
     a.download = `ccc-${member.handle || "cadet"}-profile.json`;
     a.click();
     toast.success("Profile exported as JSON.");
@@ -479,7 +459,7 @@ export function SettingsPage() {
   };
 
   const isHandleChanged = Boolean(
-    member && handleInput.trim().toLowerCase() !== member.handle?.toLowerCase()
+    member && handleInput.trim().toLowerCase() !== member.handle?.toLowerCase(),
   );
 
   if (!member) return <SettingsSkeleton />;
@@ -501,12 +481,7 @@ export function SettingsPage() {
             Manage your competitive identity, security, and account preferences.
           </p>
         </div>
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="hidden sm:flex"
-        >
+        <Button asChild variant="outline" size="sm" className="hidden sm:flex">
           <Link to="/profile">
             View profile
             <ExternalLink size={11} className="opacity-60" />
@@ -514,101 +489,46 @@ export function SettingsPage() {
         </Button>
       </div>
 
-      <div className="flex gap-6 items-start">
-        {/* ── Left sidebar nav ─────────────────────────────────────────────── */}
-        <nav
-          ref={settingsNavRef}
-          className="relative hidden md:flex flex-col w-52 shrink-0 sticky top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black"
-          aria-label="Settings navigation"
-        >
-          {/* Animated Active Sliding Indicator */}
-          <div
-            aria-hidden="true"
-            className={cn(
-              "absolute left-1 right-1 pointer-events-none rounded-md",
-              settingsPillStyle.ready
-                ? "transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                : "transition-none",
-              activeTab === "danger"
-                ? "bg-red-500/10 border border-red-500/30"
-                : "bg-white/10 border border-white/15"
-            )}
-            style={{
-              transform: `translateY(${Math.max(0, settingsPillStyle.top - 4)}px)`,
-              height: settingsPillStyle.height ? `${settingsPillStyle.height}px` : "36px",
-              opacity: settingsPillStyle.opacity,
-            }}
-          >
-            {activeTab !== "danger" && (
-              <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-lime-400 rounded-r-full shadow-[0_0_6px_rgba(204,255,0,0.5)]" />
-            )}
-          </div>
-
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(val as SettingsTab)}
+        className="flex flex-col md:flex-row gap-6 items-start"
+      >
+        {/* ── Left sidebar nav (Responsive TabsList) ───────────────────────── */}
+        <TabsList className="flex flex-row md:flex-col w-full md:w-52 shrink-0 md:sticky md:top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black overflow-x-auto md:overflow-visible items-stretch no-scrollbar">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
-            const active = activeTab === item.id;
             return (
-              <button
+              <TabsTab
                 key={item.id}
-                ref={(el) => {
-                  settingsItemRefs.current[item.id] = el;
-                }}
-                type="button"
-                onClick={() => setActiveTab(item.id)}
+                value={item.id}
                 className={cn(
-                  "relative z-10 flex items-center gap-2.5 w-full px-3 py-2 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer select-none",
-                  active
-                    ? item.danger
-                      ? "text-red-400"
-                      : "text-white"
-                    : item.danger
+                  "relative z-10 flex items-center gap-2.5 w-auto md:w-full px-3 py-2 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer select-none justify-start",
+                  item.danger
                     ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/5"
-                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]",
                 )}
+                activeClassName={item.danger ? "text-red-400 font-semibold" : "text-white font-semibold"}
+                indicatorClassName={
+                  item.danger
+                    ? "bg-red-500/10 border border-red-500/30 shadow-none"
+                    : "bg-white/10 border border-white/15 shadow-none"
+                }
               >
                 <Icon size={14} className="shrink-0" />
-                <span>{item.label}</span>
-                {active && !item.danger && (
-                  <span className="size-1.5 rounded-full bg-lime-400 ml-auto shadow-[0_0_6px_rgba(204,255,0,0.6)]" />
+                <span className="truncate">{item.label}</span>
+                {activeTab === item.id && !item.danger && (
+                  <span className="hidden md:inline-block size-1.5 rounded-full bg-lime-400 ml-auto shadow-[0_0_6px_rgba(204,255,0,0.6)]" />
                 )}
-              </button>
+              </TabsTab>
             );
           })}
-        </nav>
+        </TabsList>
 
-        {/* Mobile tab strip */}
-        <div className="md:hidden w-full mb-4 flex gap-1 overflow-x-auto pb-1">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setActiveTab(item.id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-sm font-sans font-semibold whitespace-nowrap rounded-md border transition-colors",
-                  active
-                    ? item.danger
-                      ? "bg-red-500/10 text-red-400 border-red-500/30"
-                      : "bg-white/10 text-white border-white/20"
-                    : item.danger
-                    ? "text-red-400 border-white/8 bg-black"
-                    : "text-zinc-400 border-white/8 bg-black"
-                )}
-              >
-                <Icon size={12} />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Right content panel ──────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0 space-y-4">
-
+        {/* ── Right content panels ──────────────────────────────────────────── */}
+        <TabsPanels className="flex-1 min-w-0 space-y-4">
           {/* ═══════════════════ TAB: PUBLIC PROFILE ═══════════════════════ */}
-          {activeTab === "profile" && (
+          <TabsPanel value="profile" className="space-y-4">
             <>
               {/* Avatar */}
               <SettingSection
@@ -619,7 +539,11 @@ export function SettingsPage() {
                   {/* Avatar preview */}
                   <Avatar className="size-20 rounded-lg border border-white/10 bg-black shrink-0">
                     {avatarUrl ? (
-                      <AvatarImage src={resolveAvatarUrl(avatarUrl)} alt={fullName} className="object-cover rounded-lg" />
+                      <AvatarImage
+                        src={resolveAvatarUrl(avatarUrl)}
+                        alt={fullName}
+                        className="object-cover rounded-lg"
+                      />
                     ) : null}
                     <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-sans font-semibold text-xl">
                       {initials}
@@ -629,7 +553,10 @@ export function SettingsPage() {
                   <div className="flex-1 min-w-0 space-y-3">
                     {/* Drop zone */}
                     <div
-                      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                      }}
                       onDragLeave={() => setIsDragging(false)}
                       onDrop={handleDrop}
                       onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
@@ -637,21 +564,24 @@ export function SettingsPage() {
                         "rounded-lg border border-dashed px-5 py-6 text-center cursor-pointer transition-colors bg-black",
                         isDragging
                           ? "border-lime-400 bg-lime-400/5"
-                          : "border-white/10 hover:border-white/25 hover:bg-zinc-950"
+                          : "border-white/10 hover:border-white/25 hover:bg-zinc-950",
                       )}
                     >
                       {isUploadingAvatar ? (
                         <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs font-sans">
-                          <Loader2 size={13} className="animate-spin text-lime-400" />
+                          <WanderingEyes size="sm" className="h-4 text-lime-400" />
                           <span>Uploading…</span>
                         </div>
                       ) : (
                         <>
                           <Upload size={16} className="mx-auto text-zinc-500 mb-2" />
                           <p className="text-xs text-zinc-400 font-sans">
-                            <span className="text-lime-400 font-semibold">Click to upload</span> or drag &amp; drop
+                            <span className="text-lime-400 font-semibold">Click to upload</span> or
+                            drag &amp; drop
                           </p>
-                          <p className="text-[11px] text-zinc-600 mt-0.5 font-sans">PNG, JPG, WebP, GIF (max 10 MB)</p>
+                          <p className="text-[11px] text-zinc-600 mt-0.5 font-sans">
+                            PNG, JPG, WebP, GIF (max 10 MB)
+                          </p>
                         </>
                       )}
                     </div>
@@ -691,7 +621,9 @@ export function SettingsPage() {
                       id="s-fullname"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })
+                      }
                       placeholder="Full Name"
                       className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                     />
@@ -704,7 +636,11 @@ export function SettingsPage() {
                   </div>
                 </SettingRow>
 
-                <SettingRow label="Bio / Focus" htmlFor="s-bio" hint="Up to 500 characters. Share your competitive focus and learning trajectory.">
+                <SettingRow
+                  label="Bio / Focus"
+                  htmlFor="s-bio"
+                  hint="Up to 500 characters. Share your competitive focus and learning trajectory."
+                >
                   <div className="space-y-2">
                     <Textarea
                       id="s-bio"
@@ -716,7 +652,9 @@ export function SettingsPage() {
                       className="text-xs font-sans resize-none bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                     />
                     <div className="flex items-center justify-between font-sans">
-                      <span className="text-[11px] text-zinc-500 tabular-nums">{bio.length}/500</span>
+                      <span className="text-[11px] text-zinc-500 tabular-nums">
+                        {bio.length}/500
+                      </span>
                       <div className="flex items-center gap-1">
                         <SaveButton
                           onClick={() => saveField("bio", { bio: bio.trim() })}
@@ -738,13 +676,20 @@ export function SettingsPage() {
                       saveField("department", { department: finalVal });
                     }}
                   >
-                    <SelectTrigger id="s-dept" className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
+                    <SelectTrigger
+                      id="s-dept"
+                      className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                    >
                       <SelectValue placeholder="Select Department…" />
                     </SelectTrigger>
                     <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
-                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">Not Specified</SelectItem>
+                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">
+                        Not Specified
+                      </SelectItem>
                       {DEPARTMENTS.map((d) => (
-                        <SelectItem key={d.value} value={d.value} className="text-xs">{d.label}</SelectItem>
+                        <SelectItem key={d.value} value={d.value} className="text-xs">
+                          {d.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -759,13 +704,20 @@ export function SettingsPage() {
                       saveField("batch", { batch: finalVal });
                     }}
                   >
-                    <SelectTrigger id="s-batch" className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400">
+                    <SelectTrigger
+                      id="s-batch"
+                      className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                    >
                       <SelectValue placeholder="Select Graduation Batch…" />
                     </SelectTrigger>
                     <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
-                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">Not Specified</SelectItem>
+                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">
+                        Not Specified
+                      </SelectItem>
                       {BATCHES.map((b) => (
-                        <SelectItem key={b} value={b} className="text-xs">{b}</SelectItem>
+                        <SelectItem key={b} value={b} className="text-xs">
+                          {b}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -777,15 +729,25 @@ export function SettingsPage() {
                 title="Developer Links"
                 description="Connect your public developer profiles to display on your cadet dossier."
               >
-                <SettingRow label="GitHub" htmlFor="s-github" hint="Your GitHub username (without @).">
+                <SettingRow
+                  label="GitHub"
+                  htmlFor="s-github"
+                  hint="Your GitHub username (without @)."
+                >
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Github size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <Github
+                        size={13}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                      />
                       <Input
                         id="s-github"
                         value={github}
                         onChange={(e) => setGithub(e.target.value.replace(/^@/, ""))}
-                        onKeyDown={(e) => e.key === "Enter" && saveField("github", { github_username: github.trim() })}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          saveField("github", { github_username: github.trim() })
+                        }
                         placeholder="octocat"
                         className="h-9 pl-8 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                       />
@@ -810,15 +772,26 @@ export function SettingsPage() {
                   )}
                 </SettingRow>
 
-                <SettingRow label="LinkedIn" htmlFor="s-linkedin" hint="Full profile URL or handle." borderless>
+                <SettingRow
+                  label="LinkedIn"
+                  htmlFor="s-linkedin"
+                  hint="Full profile URL or handle."
+                  borderless
+                >
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <FaLinkedinIn size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <FaLinkedinIn
+                        size={13}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                      />
                       <Input
                         id="s-linkedin"
                         value={linkedin}
                         onChange={(e) => setLinkedin(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && saveField("linkedin", { linkedin_url: linkedin.trim() })}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          saveField("linkedin", { linkedin_url: linkedin.trim() })
+                        }
                         placeholder="https://linkedin.com/in/username"
                         className="h-9 pl-8 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
                       />
@@ -862,29 +835,43 @@ export function SettingsPage() {
                 </div>
               </SettingSection>
             </>
-          )}
+          </TabsPanel>
 
           {/* ═══════════════════ TAB: ACCOUNT ══════════════════════════════ */}
-          {activeTab === "account" && (
+          <TabsPanel value="account" className="space-y-4">
             <>
               <SettingSection
                 title="Username / Handle"
                 description="Your unique @handle used across leaderboards, contest submissions, and peer mentions."
               >
-                <SettingRow label="Handle alias" htmlFor="acc-handle" hint="Lowercase letters, numbers, and underscores only. Min 3 characters." borderless>
+                <SettingRow
+                  label="Handle alias"
+                  htmlFor="acc-handle"
+                  hint="Lowercase letters, numbers, and underscores only. Min 3 characters."
+                  borderless
+                >
                   <div className="space-y-2 max-w-xs">
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-sans text-xs">@</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-sans text-xs">
+                          @
+                        </span>
                         <Input
                           id="acc-handle"
                           value={handleInput}
-                          onChange={(e) => setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                          onChange={(e) =>
+                            setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
+                          }
                           className={cn(
                             "h-9 pl-7 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:ring-0",
-                            isHandleChanged && handleStatus === "available" && "border-emerald-500/60 focus-visible:border-emerald-500",
-                            isHandleChanged && handleStatus === "taken" && "border-red-500/60 focus-visible:border-red-500",
-                            (!isHandleChanged || handleStatus === "idle") && "focus-visible:border-lime-400"
+                            isHandleChanged &&
+                              handleStatus === "available" &&
+                              "border-emerald-500/60 focus-visible:border-emerald-500",
+                            isHandleChanged &&
+                              handleStatus === "taken" &&
+                              "border-red-500/60 focus-visible:border-red-500",
+                            (!isHandleChanged || handleStatus === "idle") &&
+                              "focus-visible:border-lime-400",
                           )}
                           placeholder="handle"
                         />
@@ -893,17 +880,32 @@ export function SettingsPage() {
                         type="button"
                         variant="outline"
                         size="sm"
-                        disabled={!isHandleChanged || handleInput.length < 3 || handleStatus !== "available" || fieldStatus["handle"] === "saving"}
+                        disabled={
+                          !isHandleChanged ||
+                          handleInput.length < 3 ||
+                          handleStatus !== "available" ||
+                          fieldStatus["handle"] === "saving"
+                        }
                         onClick={saveHandle}
                       >
-                        {fieldStatus["handle"] === "saving" ? <Loader2 size={12} className="animate-spin" /> : "Update"}
+                        {fieldStatus["handle"] === "saving" ? (
+                          <WanderingEyes size="inline" className="h-3 mr-1" />
+                        ) : (
+                          "Update"
+                        )}
                       </Button>
                     </div>
                     <div className="h-4 flex items-center">
-                      {!isHandleChanged && <span className="text-[11px] text-zinc-600">Current handle: <strong className="text-zinc-400 font-sans">@{member.handle}</strong></span>}
+                      {!isHandleChanged && (
+                        <span className="text-[11px] text-zinc-600">
+                          Current handle:{" "}
+                          <strong className="text-zinc-400 font-sans">@{member.handle}</strong>
+                        </span>
+                      )}
                       {isHandleChanged && handleStatus === "checking" && (
-                        <span className="flex items-center gap-1 text-[11px] text-zinc-500">
-                          <Loader2 size={10} className="animate-spin" /> Checking availability…
+                        <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                          <WanderingEyes size="inline" className="h-2.5 text-zinc-400" /> Checking
+                          availability…
                         </span>
                       )}
                       {isHandleChanged && handleStatus === "available" && (
@@ -949,24 +951,21 @@ export function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-zinc-300">Export profile as JSON</p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">Includes all contest entries, rating data, and cadet identity records.</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Includes all contest entries, rating data, and cadet identity records.
+                    </p>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExport}
-                  >
+                  <Button type="button" variant="outline" size="sm" onClick={handleExport}>
                     <Download size={13} />
                     Export
                   </Button>
                 </div>
               </SettingSection>
             </>
-          )}
+          </TabsPanel>
 
           {/* ═══════════════════ TAB: NOTIFICATIONS ═════════════════════════ */}
-          {activeTab === "notifications" && (
+          <TabsPanel value="notifications" className="space-y-4">
             <SettingSection
               title="Notification Preferences"
               description="Control what CCC platform alerts are dispatched to your institutional email."
@@ -998,7 +997,7 @@ export function SettingsPage() {
                   key={item.key}
                   className={cn(
                     "flex items-start justify-between gap-4 py-3",
-                    i < arr.length - 1 && "border-b border-white/8"
+                    i < arr.length - 1 && "border-b border-white/8",
                   )}
                 >
                   <div>
@@ -1016,10 +1015,10 @@ export function SettingsPage() {
                 </div>
               ))}
             </SettingSection>
-          )}
+          </TabsPanel>
 
           {/* ═══════════════════ TAB: SECURITY & SESSION ════════════════════ */}
-          {activeTab === "security" && (
+          <TabsPanel value="security" className="space-y-4">
             <>
               <SettingSection
                 title="Active Session"
@@ -1030,7 +1029,9 @@ export function SettingsPage() {
                     <Monitor size={18} className="text-lime-400 mt-0.5 shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-white">
-                        {typeof window !== "undefined" ? window.navigator.platform || "Workstation" : "Workstation"}
+                        {typeof window !== "undefined"
+                          ? window.navigator.platform || "Workstation"
+                          : "Workstation"}
                       </p>
                       <p className="text-[11px] text-zinc-500 mt-0.5">
                         Stateless HMAC-SHA256 JWT · Session storage
@@ -1041,22 +1042,17 @@ export function SettingsPage() {
                       </span>
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleLogout}
-                  >
+                  <Button type="button" variant="destructive" size="sm" onClick={handleLogout}>
                     <LogOut size={12} />
                     Sign out
                   </Button>
                 </div>
               </SettingSection>
             </>
-          )}
+          </TabsPanel>
 
           {/* ═══════════════════ TAB: DANGER ZONE ══════════════════════════ */}
-          {activeTab === "danger" && (
+          <TabsPanel value="danger" className="space-y-4">
             <SettingSection
               title="Danger Zone"
               description="Irreversible actions that permanently affect your account."
@@ -1066,17 +1062,13 @@ export function SettingsPage() {
                 <div>
                   <p className="text-sm font-semibold text-red-200">Delete this account</p>
                   <p className="text-[11px] text-red-300/70 mt-0.5 leading-relaxed">
-                    Permanently erases your rating record, contest history, and leaderboard standings.
-                    This cannot be undone.
+                    Permanently erases your rating record, contest history, and leaderboard
+                    standings. This cannot be undone.
                   </p>
                 </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="shrink-0"
-                    >
+                    <Button variant="destructive" size="sm" className="shrink-0">
                       <Trash2 size={13} className="mr-1.5" />
                       Delete account
                     </Button>
@@ -1094,11 +1086,17 @@ export function SettingsPage() {
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-zinc-400 text-xs leading-relaxed space-y-2">
                           <p>
-                            This will permanently delete <strong className="text-white">@{member.handle}</strong>{" "}
-                            and all associated records including contest history, rating certificates, and standings.
+                            This will permanently delete{" "}
+                            <strong className="text-white">@{member.handle}</strong> and all
+                            associated records including contest history, rating certificates, and
+                            standings.
                           </p>
                           <p>
-                            Type <code className="font-sans text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">{member.handle}</code> to confirm:
+                            Type{" "}
+                            <code className="font-sans text-lime-400 bg-white/5 px-1.5 py-0.5 border border-white/10 rounded">
+                              {member.handle}
+                            </code>{" "}
+                            to confirm:
                           </p>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -1118,11 +1116,21 @@ export function SettingsPage() {
                           Cancel
                         </AlertDialogClose>
                         <AlertDialogAction
-                          disabled={deleteConfirmText.trim().toLowerCase() !== member.handle?.toLowerCase() || isDeleting}
+                          disabled={
+                            deleteConfirmText.trim().toLowerCase() !==
+                              member.handle?.toLowerCase() || isDeleting
+                          }
                           onClick={handleDelete}
                           className="text-xs rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-40 px-4 py-2 cursor-pointer"
                         >
-                          {isDeleting ? <Loader2 className="animate-spin size-4" /> : "Permanently delete"}
+                          {isDeleting ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <WanderingEyes size="sm" />
+                              <span>Permanently deleting…</span>
+                            </span>
+                          ) : (
+                            "Permanently delete"
+                          )}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogPopup>
@@ -1130,9 +1138,9 @@ export function SettingsPage() {
                 </AlertDialog>
               </div>
             </SettingSection>
-          )}
-        </div>
-      </div>
+          </TabsPanel>
+        </TabsPanels>
+      </Tabs>
     </div>
   );
 }

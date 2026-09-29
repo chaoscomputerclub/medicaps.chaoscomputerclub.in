@@ -13,8 +13,8 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 
 declare global {
   interface Window {
@@ -60,9 +60,7 @@ export function CloudflareTurnstile({
   const widgetIdRef = useRef<string | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [activeSiteKey, setActiveSiteKey] = useState<string>(
-    siteKey ||
-    (import.meta.env["VITE_CLOUDFLARE_TURNSTILE_SITE_KEY"] as string | undefined) ||
-    ""
+    siteKey || (import.meta.env["VITE_CLOUDFLARE_TURNSTILE_SITE_KEY"] as string | undefined) || "",
   );
   const [retryCount, setRetryCount] = useState(0);
 
@@ -202,16 +200,14 @@ export function CloudflareTurnstile({
         // Shell: fixed 65px = Turnstile's height, so nothing shifts on load.
         "relative h-[65px] w-full overflow-hidden rounded-xl border bg-[#232323]",
         "transition-colors duration-200",
-        status === "error"
-          ? "border-amber-500/40"
-          : "border-white/[0.08] hover:border-white/15",
+        status === "error" ? "border-amber-500/40" : "border-white/[0.08] hover:border-white/15",
         className,
       )}
     >
       {/* Loader sits behind the iframe and is covered once the widget paints */}
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center gap-2 text-[12px] text-zinc-500">
-          <Loader2 className="size-3.5 animate-spin" />
+          <WanderingEyes size="sm" className="h-3.5 text-zinc-400" />
           <span>Verifying security…</span>
         </div>
       )}
@@ -235,10 +231,7 @@ export function CloudflareTurnstile({
       )}
 
       {/* -1px offsets push the iframe's own square border outside the clip */}
-      <div
-        ref={containerRef}
-        className="relative -m-px w-[calc(100%+2px)]"
-      />
+      <div ref={containerRef} className="relative -m-px w-[calc(100%+2px)]" />
     </div>
   );
 }

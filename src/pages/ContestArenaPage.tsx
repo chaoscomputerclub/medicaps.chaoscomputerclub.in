@@ -48,6 +48,14 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsList,
+  TabsTab,
+  TabsPanels,
+  TabsPanel,
+} from "@/components/animate-ui/components/base/tabs";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -104,7 +112,12 @@ export type ArenaLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "ty
 
 function getFallbackStarter(lang: ArenaLanguage, title?: string): string {
   const words = (title || "solve").match(/[a-zA-Z0-9]+/g) || ["solve"];
-  let fnName = words[0].toLowerCase() + words.slice(1).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join("");
+  let fnName =
+    words[0].toLowerCase() +
+    words
+      .slice(1)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join("");
   if (!/^[a-zA-Z]/.test(fnName)) fnName = "solve" + fnName;
 
   switch (lang) {
@@ -124,14 +137,26 @@ function getFallbackStarter(lang: ArenaLanguage, title?: string): string {
 }
 
 export function ContestArenaPage() {
-  const { contestSlug = "", problemSlug = "" } = useParams<{ contestSlug: string; problemSlug?: string }>();
+  const { contestSlug = "", problemSlug = "" } = useParams<{
+    contestSlug: string;
+    problemSlug?: string;
+  }>();
   const [searchParams] = useSearchParams();
   const problemParam = searchParams.get("problem");
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { arenaData, runResult, submitResult, isRunningCode, isSubmittingCode, isLoadingArena, error, registration, myParticipations } =
-    useAppSelector((state) => state.contest);
+  const {
+    arenaData,
+    runResult,
+    submitResult,
+    isRunningCode,
+    isSubmittingCode,
+    isLoadingArena,
+    error,
+    registration,
+    myParticipations,
+  } = useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
 
   const participation = myParticipations.find((p) => p.contest_slug === contestSlug);
@@ -144,7 +169,7 @@ export function ContestArenaPage() {
     participation?.assessment_submitted ||
     participation?.outcome === "submitted" ||
     participation?.outcome === "qualified" ||
-    (participation as any)?.assessment_status === "submitted"
+    (participation as any)?.assessment_status === "submitted",
   );
 
   useEffect(() => {
@@ -154,14 +179,18 @@ export function ContestArenaPage() {
   }, [member, dispatch]);
 
   const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
-  const displayName = formatFullName(member?.full_name) || member?.handle || member?.email?.split("@")[0] || "Competitor";
+  const displayName =
+    formatFullName(member?.full_name) ||
+    member?.handle ||
+    member?.email?.split("@")[0] ||
+    "Competitor";
   const userInitial = member?.full_name?.trim()
     ? member.full_name.trim().charAt(0).toUpperCase()
     : member?.handle?.trim()
-    ? member.handle.trim().charAt(0).toUpperCase()
-    : member?.email?.trim()
-    ? member.email.trim().charAt(0).toUpperCase()
-    : "U";
+      ? member.handle.trim().charAt(0).toUpperCase()
+      : member?.email?.trim()
+        ? member.email.trim().charAt(0).toUpperCase()
+        : "U";
 
   useEffect(() => {
     if (contestSlug) {
@@ -221,23 +250,27 @@ export function ContestArenaPage() {
     }
   });
 
-  const [activeProblemTab, setActiveProblemTab] = useState<"description" | "submissions">("description");
+  const [activeProblemTab, setActiveProblemTab] = useState<"description" | "submissions">(
+    "description",
+  );
   const [isProblemListOpen, setIsProblemListOpen] = useState(false);
   const [problemListTab, setProblemListTab] = useState<"problems" | "ranking">("problems");
 
   const { data: rankingData } = useSwrData<AssessmentRanking>(
     contestSlug ? `contest:ranking:${contestSlug}` : null,
     () => contestApi.ranking(contestSlug),
-    { ttl: 30 * 1000 }
+    { ttl: 30 * 1000 },
   );
 
   const totalEarnedPoints = problems.reduce(
     (acc, p) => (solvedProblemIds.has(p.id) ? acc + (p.points || 0) : acc),
-    0
+    0,
   );
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [activeSettingsTab, setActiveSettingsTab] = useState<"editor" | "shortcuts" | "timer">("editor");
+  const [activeSettingsTab, setActiveSettingsTab] = useState<"editor" | "shortcuts" | "timer">(
+    "editor",
+  );
   const [editorFontSize, setEditorFontSize] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("ccc_editor_fontsize");
@@ -519,9 +552,15 @@ export function ContestArenaPage() {
       try {
         // Clean up legacy unversioned keys if any
         if (activeProblem?.id) {
-          localStorage.removeItem(`ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
-          localStorage.removeItem(`ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
-          localStorage.removeItem(`ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(
+            `ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
+          localStorage.removeItem(
+            `ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
+          localStorage.removeItem(
+            `ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
         }
         const saved = localStorage.getItem(problemStorageKey);
         if (saved) {
@@ -570,10 +609,18 @@ export function ContestArenaPage() {
       try {
         if (problemStorageKey) localStorage.removeItem(problemStorageKey);
         if (activeProblem?.id) {
-          localStorage.removeItem(`ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
-          localStorage.removeItem(`ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
-          localStorage.removeItem(`ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
-          localStorage.removeItem(`ccc_code_v4_${contestSlug}_${activeProblem.id}_${selectedLanguage}`);
+          localStorage.removeItem(
+            `ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
+          localStorage.removeItem(
+            `ccc_code_v2_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
+          localStorage.removeItem(
+            `ccc_code_v3_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
+          localStorage.removeItem(
+            `ccc_code_v4_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
+          );
         }
       } catch {}
     }
@@ -602,7 +649,7 @@ export function ContestArenaPage() {
           code: currentCode,
           ...(activeTestcaseIndex === -1 ? { custom_stdin: customStdin } : {}),
         },
-      })
+      }),
     );
     if (runArenaCodeThunk.fulfilled.match(result)) {
       if (result.payload.verdict === "ACCEPTED") {
@@ -641,7 +688,7 @@ export function ContestArenaPage() {
           language: selectedLanguage,
           code: currentCode,
         },
-      })
+      }),
     );
     if (submitArenaCodeThunk.fulfilled.match(result)) {
       const res = result.payload;
@@ -661,7 +708,7 @@ export function ContestArenaPage() {
         try {
           localStorage.setItem(
             `ccc_submissions_${contestSlug}_${activeProblem.id}`,
-            JSON.stringify(updated.slice(0, 20))
+            JSON.stringify(updated.slice(0, 20)),
           );
         } catch {}
         return updated;
@@ -677,7 +724,9 @@ export function ContestArenaPage() {
         });
         toast.success(`Problem ${activeProblem.problem_index} Solved! +${res.points_awarded} pts`);
       } else {
-        toast.error(`Verdict: ${res.verdict} (${res.passed_testcases}/${res.total_testcases} passed)`);
+        toast.error(
+          `Verdict: ${res.verdict} (${res.passed_testcases}/${res.total_testcases} passed)`,
+        );
       }
     } else {
       toast.error(String(result.payload || "Submission failed"));
@@ -772,7 +821,9 @@ export function ContestArenaPage() {
                 Contest Already Submitted
               </h1>
               <p className="text-xs text-zinc-300 font-mono leading-relaxed">
-                You have officially finalized and submitted your contest attempt. In accordance with the fair competition protocol, retakes and further code executions are strictly prohibited.
+                You have officially finalized and submitted your contest attempt. In accordance with
+                the fair competition protocol, retakes and further code executions are strictly
+                prohibited.
               </p>
             </div>
 
@@ -792,7 +843,12 @@ export function ContestArenaPage() {
             </div>
 
             <div className="pt-1">
-              <Button asChild variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-300">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-zinc-500 hover:text-zinc-300"
+              >
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Back to Contest Overview</span>
@@ -816,9 +872,7 @@ export function ContestArenaPage() {
       errLower.includes("upcoming") ||
       errLower.includes("opens at");
 
-    const isNotFound =
-      errLower.includes("not found") ||
-      errLower.includes("404");
+    const isNotFound = errLower.includes("not found") || errLower.includes("404");
 
     const isProctorGate =
       errLower.includes("physical gate") ||
@@ -841,7 +895,8 @@ export function ContestArenaPage() {
                 Sign In to Enter Arena
               </h1>
               <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                You must be signed in with your Medi-Caps account to enter the contest workspace, run test cases, and submit solutions.
+                You must be signed in with your Medi-Caps account to enter the contest workspace,
+                run test cases, and submit solutions.
               </p>
             </div>
 
@@ -880,7 +935,8 @@ export function ContestArenaPage() {
                 Arena Has Not Started Yet
               </h1>
               <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                The competition arena and problem statements unlock automatically when the scheduled contest countdown reaches zero.
+                The competition arena and problem statements unlock automatically when the scheduled
+                contest countdown reaches zero.
               </p>
             </div>
 
@@ -915,11 +971,10 @@ export function ContestArenaPage() {
               <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-semibold">
                 404 Not Found
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white">
-                Contest Not Found
-              </h1>
+              <h1 className="text-xl font-semibold tracking-tight text-white">Contest Not Found</h1>
               <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                We could not find a contest matching &quot;{contestSlug}&quot;. It may have concluded or the URL may be incorrect.
+                We could not find a contest matching &quot;{contestSlug}&quot;. It may have
+                concluded or the URL may be incorrect.
               </p>
             </div>
 
@@ -952,7 +1007,8 @@ export function ContestArenaPage() {
                 On-Premise Check-in Required
               </h1>
               <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-                {error || "Physical gate check-in required. Your campus pass must be scanned by a lab proctor before entering the live arena."}
+                {error ||
+                  "Physical gate check-in required. Your campus pass must be scanned by a lab proctor before entering the live arena."}
               </p>
             </div>
 
@@ -965,14 +1021,8 @@ export function ContestArenaPage() {
                 <RotateCcw className="size-3 mr-1.5" />
                 <span>Re-check Status</span>
               </Button>
-              <Button
-                asChild
-                variant="ghost"
-                className="w-full"
-              >
-                <Link to={`/contests/${contestSlug}`}>
-                  Exit to Overview
-                </Link>
+              <Button asChild variant="ghost" className="w-full">
+                <Link to={`/contests/${contestSlug}`}>Exit to Overview</Link>
               </Button>
             </div>
           </div>
@@ -1009,14 +1059,8 @@ export function ContestArenaPage() {
               <RotateCcw className="size-3 mr-1.5" />
               <span>Retry Connection</span>
             </Button>
-            <Button
-              asChild
-              variant="ghost"
-              className="w-full"
-            >
-              <Link to={`/contests/${contestSlug}`}>
-                Back to Contest
-              </Link>
+            <Button asChild variant="ghost" className="w-full">
+              <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
             </Button>
           </div>
         </div>
@@ -1106,11 +1150,7 @@ export function ContestArenaPage() {
             </Button>
           </div>
 
-          <Button
-            asChild
-            variant="outline"
-            size="icon-sm"
-          >
+          <Button asChild variant="outline" size="icon-sm">
             <Link
               to={`/contests/${contestSlug}/results`}
               target="_blank"
@@ -1131,7 +1171,11 @@ export function ContestArenaPage() {
             disabled={isRunningCode || isSubmittingCode || isContestOver}
             onClick={handleRunCode}
           >
-            <Play className="size-3 fill-current" />
+            {isRunningCode ? (
+              <WanderingEyes size="inline" className="h-3 mr-1.5" />
+            ) : (
+              <Play className="size-3 fill-current" />
+            )}
             <span>{isRunningCode ? "Running…" : "Run"}</span>
             <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
           </Button>
@@ -1143,9 +1187,15 @@ export function ContestArenaPage() {
             disabled={isRunningCode || isSubmittingCode || isContestOver}
             onClick={handleSubmitCode}
           >
-            <Send className="size-3 fill-current" />
+            {isSubmittingCode ? (
+              <WanderingEyes size="inline" className="h-3 mr-1.5" />
+            ) : (
+              <Send className="size-3 fill-current" />
+            )}
             <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
-            <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">⌘⏎</span>
+            <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">
+              ⌘⏎
+            </span>
           </Button>
         </div>
 
@@ -1154,18 +1204,16 @@ export function ContestArenaPage() {
           {/* Layout Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                title="Adjust Workspace Layout"
-              >
+              <Button type="button" variant="outline" size="sm" title="Adjust Workspace Layout">
                 <Layout className="size-3.5 text-lime-400" />
                 <span className="hidden sm:inline">{isFocusMode ? "Focus" : "Default"}</span>
                 <ChevronDown className="size-3 text-zinc-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-zinc-950 border-white/10 text-white text-xs font-mono">
+            <DropdownMenuContent
+              align="end"
+              className="bg-zinc-950 border-white/10 text-white text-xs font-mono"
+            >
               <DropdownMenuItem
                 onClick={() => setIsFocusMode(false)}
                 className={`cursor-pointer ${!isFocusMode ? "text-lime-400 font-semibold" : "text-zinc-300"}`}
@@ -1233,43 +1281,34 @@ export function ContestArenaPage() {
             style={{ width: `${leftWidthPercent}%` }}
             className="flex flex-col bg-black border-r border-white/8 shrink-0 min-w-[280px] max-w-[calc(100%-300px)] h-full overflow-hidden"
           >
-            {/* Panel Tabs Header */}
-            <div className="h-9 shrink-0 px-3 border-b border-white/8 bg-black flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setActiveProblemTab("description")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer border ${
-                  activeProblemTab === "description"
-                    ? "bg-zinc-900 text-white border-lime-400/40"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
-                }`}
-              >
-                <FileText className="size-3.5 text-lime-400" />
-                <span>Description</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveProblemTab("submissions")}
-                className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer border ${
-                  activeProblemTab === "submissions"
-                    ? "bg-zinc-900 text-white border-lime-400/40"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5 border-transparent"
-                }`}
-              >
-                <RotateCcw className="size-3.5 text-zinc-400" />
-                <span>Submissions</span>
-                {submissionHistory.length > 0 && (
-                  <span className="size-4 rounded-full bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px] font-mono flex items-center justify-center">
-                    {submissionHistory.length}
-                  </span>
-                )}
-              </button>
-            </div>
+            <Tabs
+              value={activeProblemTab}
+              onValueChange={(v) => setActiveProblemTab(v as "description" | "submissions")}
+              className="h-full flex flex-col gap-0"
+            >
+              {/* Panel Tabs Header */}
+              <div className="h-9 shrink-0 px-3 border-b border-white/8 bg-black flex items-center">
+                <TabsList className="bg-transparent border-none p-0 gap-1 h-auto">
+                  <TabsTab value="description" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
+                    <FileText className="size-3.5" />
+                    <span>Description</span>
+                  </TabsTab>
+                  <TabsTab value="submissions" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
+                    <RotateCcw className="size-3.5" />
+                    <span>Submissions</span>
+                    {submissionHistory.length > 0 && (
+                      <span className="size-4 rounded-full bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px] font-mono flex items-center justify-center">
+                        {submissionHistory.length}
+                      </span>
+                    )}
+                  </TabsTab>
+                </TabsList>
+              </div>
 
-            {/* Panel Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6 text-zinc-200" data-problem-panel>
-              {activeProblemTab === "description" ? (
-                activeProblem ? (
+              {/* Panel Body */}
+              <TabsPanels className="flex-1 overflow-y-auto min-h-0" data-problem-panel>
+                <TabsPanel value="description" className="p-5 space-y-6 text-zinc-200">
+                  {activeProblem ? (
                   <>
                     {/* Problem Title & Badges */}
                     <div className="space-y-2 border-b border-white/8 pb-4">
@@ -1280,8 +1319,8 @@ export function ContestArenaPage() {
                             activeProblem.difficulty === "HARD"
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
                               : activeProblem.difficulty === "MEDIUM"
-                              ? "bg-amber-400/10 text-amber-400 border-amber-400/30"
-                              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                ? "bg-amber-400/10 text-amber-400 border-amber-400/30"
+                                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                           }`}
                         >
                           {activeProblem.difficulty || "EASY"}
@@ -1323,49 +1362,53 @@ export function ContestArenaPage() {
                     )}
 
                     {/* Examples Section */}
-                    {activeProblem.sample_testcases && activeProblem.sample_testcases.length > 0 && (
-                      <div className="space-y-3 pt-1">
-                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
-                          Sample Testcases
-                        </span>
-                        {activeProblem.sample_testcases.map((st, i) => (
-                          <div key={i} className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono">
-                            <div className="flex items-center justify-between text-zinc-400 font-semibold">
-                              <span>Example {i + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
-                                className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer font-mono"
-                              >
-                                {copiedKey === `tc_in_${i}` ? (
-                                  <Check className="size-3 text-lime-400" />
-                                ) : (
-                                  <Copy className="size-3" />
-                                )}
-                                <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
-                              </button>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-[10px] text-zinc-500">Input</span>
-                              <pre className="p-2.5 rounded bg-black border border-white/6 text-zinc-200 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
-                                {st.stdin}
-                              </pre>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="text-[10px] text-zinc-500">Expected Output</span>
-                              <pre className="p-2.5 rounded bg-black border border-white/6 text-lime-400 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
-                                {st.expected_output}
-                              </pre>
-                            </div>
-                            {st.explanation && (
-                              <div className="text-[11px] text-zinc-400 italic pt-1 font-mono">
-                                Note: {st.explanation}
+                    {activeProblem.sample_testcases &&
+                      activeProblem.sample_testcases.length > 0 && (
+                        <div className="space-y-3 pt-1">
+                          <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
+                            Sample Testcases
+                          </span>
+                          {activeProblem.sample_testcases.map((st, i) => (
+                            <div
+                              key={i}
+                              className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono"
+                            >
+                              <div className="flex items-center justify-between text-zinc-400 font-semibold">
+                                <span>Example {i + 1}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
+                                  className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer font-mono"
+                                >
+                                  {copiedKey === `tc_in_${i}` ? (
+                                    <Check className="size-3 text-lime-400" />
+                                  ) : (
+                                    <Copy className="size-3" />
+                                  )}
+                                  <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
+                                </button>
                               </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-zinc-500">Input</span>
+                                <pre className="p-2.5 rounded bg-black border border-white/6 text-zinc-200 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
+                                  {st.stdin}
+                                </pre>
+                              </div>
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-zinc-500">Expected Output</span>
+                                <pre className="p-2.5 rounded bg-black border border-white/6 text-lime-400 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
+                                  {st.expected_output}
+                                </pre>
+                              </div>
+                              {st.explanation && (
+                                <div className="text-[11px] text-zinc-400 italic pt-1 font-mono">
+                                  Note: {st.explanation}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                     {/* Constraints Section */}
                     {activeProblem.constraints && (
@@ -1381,18 +1424,25 @@ export function ContestArenaPage() {
                   </>
                 ) : (
                   <div className="text-zinc-500 font-mono text-xs">Select a question to begin.</div>
-                )
-              ) : (
-                /* Submissions History Tab */
-                <div className="space-y-4 font-mono">
+                )}
+                </TabsPanel>
+
+                {/* Submissions History Tab */}
+                <TabsPanel value="submissions" className="p-5 space-y-4 font-mono">
                   <div className="flex items-center justify-between border-b border-white/8 pb-3">
-                    <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Submissions History</h3>
-                    <span className="text-xs text-zinc-500">{submissionHistory.length} attempts</span>
+                    <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
+                      Submissions History
+                    </h3>
+                    <span className="text-xs text-zinc-500">
+                      {submissionHistory.length} attempts
+                    </span>
                   </div>
                   {submissionHistory.length === 0 ? (
                     <div className="p-8 text-center border border-dashed border-white/10 rounded-md text-zinc-500 text-xs space-y-1">
                       <p>No submissions for this question yet.</p>
-                      <p className="text-[11px] text-zinc-600">Click &quot;Submit&quot; to test all cases and record an official attempt.</p>
+                      <p className="text-[11px] text-zinc-600">
+                        Click &quot;Submit&quot; to test all cases and record an official attempt.
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -1421,9 +1471,9 @@ export function ContestArenaPage() {
                       ))}
                     </div>
                   )}
-                </div>
-              )}
-            </div>
+                </TabsPanel>
+              </TabsPanels>
+            </Tabs>
           </div>
         )}
 
@@ -1512,7 +1562,11 @@ export function ContestArenaPage() {
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
-                {isFullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+                {isFullscreen ? (
+                  <Minimize2 className="size-3.5" />
+                ) : (
+                  <Maximize2 className="size-3.5" />
+                )}
               </Button>
             </div>
           </div>
@@ -1700,7 +1754,10 @@ export function ContestArenaPage() {
                         <textarea
                           value={customStdin}
                           onChange={(e) => setCustomStdin(e.target.value)}
-                          placeholder={activeProblem?.sample_testcases?.[0]?.stdin || "Enter custom test inputs..."}
+                          placeholder={
+                            activeProblem?.sample_testcases?.[0]?.stdin ||
+                            "Enter custom test inputs..."
+                          }
                           className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-[13px] font-mono text-white resize-none focus:outline-none focus:border-lime-400/60 leading-relaxed"
                         />
                       </div>
@@ -1725,7 +1782,8 @@ export function ContestArenaPage() {
                           </div>
                           {activeProblem.sample_testcases[activeTestcaseIndex].explanation && (
                             <div className="text-[11px] font-mono text-zinc-400 italic">
-                              Note: {activeProblem.sample_testcases[activeTestcaseIndex].explanation}
+                              Note:{" "}
+                              {activeProblem.sample_testcases[activeTestcaseIndex].explanation}
                             </div>
                           )}
                         </div>
@@ -1735,7 +1793,16 @@ export function ContestArenaPage() {
                 ) : (
                   /* Output / Test Result Tab */
                   <div className="space-y-3">
-                    {!hasRunCode ? (
+                    {isRunningCode || isSubmittingCode ? (
+                      <div className="flex flex-col items-center justify-center py-12 space-y-3 font-mono">
+                        <WanderingEyes size="modal" className="text-lime-400" />
+                        <span className="text-xs text-zinc-400">
+                          {isRunningCode
+                            ? "Running testcases in sandbox…"
+                            : "Judging solution against evaluation suite…"}
+                        </span>
+                      </div>
+                    ) : !hasRunCode ? (
                       /* LeetCode Standard Empty State in Strix AI Dark Theme */
                       <div className="flex flex-col items-center justify-center py-12 text-zinc-500 space-y-2 font-mono">
                         <Terminal className="size-6 text-zinc-600" />
@@ -1759,7 +1826,8 @@ export function ContestArenaPage() {
                             )}
                             <span className="text-zinc-600">·</span>
                             <span className="text-zinc-300 font-mono text-xs tabular-nums">
-                              {submitResult.passed_testcases} / {submitResult.total_testcases} testcases passed
+                              {submitResult.passed_testcases} / {submitResult.total_testcases}{" "}
+                              testcases passed
                             </span>
                             {submitResult.points_awarded > 0 && (
                               <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 text-[11px] font-mono font-bold">
@@ -1770,7 +1838,9 @@ export function ContestArenaPage() {
 
                           <div className="flex items-center gap-3 text-xs font-mono text-zinc-400 tabular-nums">
                             {submitResult.execution_time !== undefined && (
-                              <span>Runtime: {Math.round(submitResult.execution_time * 1000)}ms</span>
+                              <span>
+                                Runtime: {Math.round(submitResult.execution_time * 1000)}ms
+                              </span>
                             )}
                             {submitResult.memory !== undefined && submitResult.memory > 0 && (
                               <span>Memory: {submitResult.memory}MB</span>
@@ -1786,14 +1856,18 @@ export function ContestArenaPage() {
                             }`}
                             style={{
                               width: `${Math.round(
-                                (submitResult.passed_testcases / Math.max(1, submitResult.total_testcases)) * 100
+                                (submitResult.passed_testcases /
+                                  Math.max(1, submitResult.total_testcases)) *
+                                  100,
                               )}%`,
                             }}
                           />
                         </div>
 
                         {/* Compiler Diagnostics if compilation error or compile output present */}
-                        {(submitResult.compile_output || (submitResult.verdict === "COMPILATION_ERROR" && submitResult.stderr)) && (
+                        {(submitResult.compile_output ||
+                          (submitResult.verdict === "COMPILATION_ERROR" &&
+                            submitResult.stderr)) && (
                           <div className="p-3 bg-black border border-rose-500/30 rounded font-mono text-xs space-y-1.5">
                             <div className="flex items-center gap-2 text-rose-400 font-semibold text-[11px] uppercase tracking-wider">
                               <AlertCircle className="size-3.5" />
@@ -1806,115 +1880,120 @@ export function ContestArenaPage() {
                         )}
 
                         {/* Submission Testcases Breakdown */}
-                        {submitResult.testcase_results && submitResult.testcase_results.length > 0 && (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {submitResult.testcase_results.map((tc, idx) => (
-                                <button
-                                  key={tc.testcase_id || idx}
-                                  type="button"
-                                  onClick={() => setActiveSubmitCaseIndex(idx)}
-                                  className={`px-2.5 py-1 rounded-md text-sm font-sans font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                                    activeSubmitCaseIndex === idx
-                                      ? "bg-zinc-800 text-white border border-white/10"
-                                      : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
-                                  }`}
-                                >
-                                  <span
-                                    className={`size-1.5 rounded-full ${
-                                      tc.passed ? "bg-lime-400" : "bg-rose-400"
+                        {submitResult.testcase_results &&
+                          submitResult.testcase_results.length > 0 && (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {submitResult.testcase_results.map((tc, idx) => (
+                                  <button
+                                    key={tc.testcase_id || idx}
+                                    type="button"
+                                    onClick={() => setActiveSubmitCaseIndex(idx)}
+                                    className={`px-2.5 py-1 rounded-md text-sm font-sans font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                      activeSubmitCaseIndex === idx
+                                        ? "bg-zinc-800 text-white border border-white/10"
+                                        : "text-zinc-400 hover:text-white bg-zinc-950 border border-transparent"
                                     }`}
-                                  />
-                                  <span>{tc.name || `Case ${idx + 1}`}</span>
-                                </button>
-                              ))}
-                            </div>
+                                  >
+                                    <span
+                                      className={`size-1.5 rounded-full ${
+                                        tc.passed ? "bg-lime-400" : "bg-rose-400"
+                                      }`}
+                                    />
+                                    <span>{tc.name || `Case ${idx + 1}`}</span>
+                                  </button>
+                                ))}
+                              </div>
 
-                            {submitResult.testcase_results[activeSubmitCaseIndex] && (() => {
-                              const curTc = submitResult.testcase_results[activeSubmitCaseIndex];
-                              if (curTc.is_hidden) {
-                                return (
-                                  <div className="p-3 bg-zinc-950 border border-white/10 rounded space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Lock className="size-4 text-zinc-500" />
-                                      <span className="font-semibold text-xs text-white">Hidden Evaluation Testcase</span>
-                                      {curTc.passed ? (
-                                        <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">
-                                          Passed
-                                        </Badge>
-                                      ) : (
-                                        <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px]">
-                                          Failed
-                                        </Badge>
+                              {submitResult.testcase_results[activeSubmitCaseIndex] &&
+                                (() => {
+                                  const curTc =
+                                    submitResult.testcase_results[activeSubmitCaseIndex];
+                                  if (curTc.is_hidden) {
+                                    return (
+                                      <div className="p-3 bg-zinc-950 border border-white/10 rounded space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <Lock className="size-4 text-zinc-500" />
+                                          <span className="font-semibold text-xs text-white">
+                                            Hidden Evaluation Testcase
+                                          </span>
+                                          {curTc.passed ? (
+                                            <Badge className="bg-lime-400/10 text-lime-400 border border-lime-400/30 text-[10px]">
+                                              Passed
+                                            </Badge>
+                                          ) : (
+                                            <Badge className="bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px]">
+                                              Failed
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                                          {curTc.passed
+                                            ? "Your solution passed this hidden verification case."
+                                            : "Your solution produced an incorrect result or runtime error on this hidden edge case."}
+                                        </p>
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <div className="space-y-2.5">
+                                      <div>
+                                        <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                          Input
+                                        </span>
+                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                          {curTc.input}
+                                        </pre>
+                                      </div>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                            Output
+                                          </span>
+                                          <pre
+                                            className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
+                                              curTc.passed
+                                                ? "border-lime-400/30 text-lime-400"
+                                                : "border-rose-500/30 text-rose-400"
+                                            }`}
+                                          >
+                                            {curTc.stdout || "(empty)"}
+                                          </pre>
+                                        </div>
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                            Expected
+                                          </span>
+                                          <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
+                                            {curTc.expected_output}
+                                          </pre>
+                                        </div>
+                                      </div>
+                                      {curTc.compile_output && (
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                            Compiler Output
+                                          </span>
+                                          <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
+                                            {curTc.compile_output}
+                                          </pre>
+                                        </div>
+                                      )}
+                                      {curTc.stderr && (
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                            Stderr
+                                          </span>
+                                          <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
+                                            {curTc.stderr}
+                                          </pre>
+                                        </div>
                                       )}
                                     </div>
-                                    <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-                                      {curTc.passed
-                                        ? "Your solution passed this hidden verification case."
-                                        : "Your solution produced an incorrect result or runtime error on this hidden edge case."}
-                                    </p>
-                                  </div>
-                                );
-                              }
-                              return (
-                                <div className="space-y-2.5">
-                                  <div>
-                                    <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-                                      Input
-                                    </span>
-                                    <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
-                                      {curTc.input}
-                                    </pre>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-                                        Output
-                                      </span>
-                                      <pre
-                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
-                                          curTc.passed
-                                            ? "border-lime-400/30 text-lime-400"
-                                            : "border-rose-500/30 text-rose-400"
-                                        }`}
-                                      >
-                                        {curTc.stdout || "(empty)"}
-                                      </pre>
-                                    </div>
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-                                        Expected
-                                      </span>
-                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
-                                        {curTc.expected_output}
-                                      </pre>
-                                    </div>
-                                  </div>
-                                  {curTc.compile_output && (
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
-                                        Compiler Output
-                                      </span>
-                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
-                                        {curTc.compile_output}
-                                      </pre>
-                                    </div>
-                                  )}
-                                  {curTc.stderr && (
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
-                                        Stderr
-                                      </span>
-                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
-                                        {curTc.stderr}
-                                      </pre>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        )}
+                                  );
+                                })()}
+                            </div>
+                          )}
                       </div>
                     ) : runResult ? (
                       /* Run Result Inspection */
@@ -1933,11 +2012,13 @@ export function ContestArenaPage() {
                                 <span>{runResult.verdict}</span>
                               </div>
                             )}
-                            {runResult.passed_testcases !== undefined && runResult.total_testcases !== undefined && (
-                              <span className="text-zinc-400 font-mono text-xs tabular-nums">
-                                {runResult.passed_testcases} / {runResult.total_testcases} sample cases passed
-                              </span>
-                            )}
+                            {runResult.passed_testcases !== undefined &&
+                              runResult.total_testcases !== undefined && (
+                                <span className="text-zinc-400 font-mono text-xs tabular-nums">
+                                  {runResult.passed_testcases} / {runResult.total_testcases} sample
+                                  cases passed
+                                </span>
+                              )}
                           </div>
                           {runResult.time !== undefined && (
                             <span className="text-zinc-500 text-xs font-mono tabular-nums">
@@ -1947,7 +2028,8 @@ export function ContestArenaPage() {
                         </div>
 
                         {/* Compiler Diagnostics if compilation error or compile output present */}
-                        {(runResult.compile_output || (runResult.verdict === "COMPILATION_ERROR" && runResult.stderr)) && (
+                        {(runResult.compile_output ||
+                          (runResult.verdict === "COMPILATION_ERROR" && runResult.stderr)) && (
                           <div className="p-3 bg-black border border-rose-500/30 rounded font-mono text-xs space-y-1.5">
                             <div className="flex items-center gap-2 text-rose-400 font-semibold text-[11px] uppercase tracking-wider">
                               <AlertCircle className="size-3.5" />
@@ -1984,73 +2066,76 @@ export function ContestArenaPage() {
                               ))}
                             </div>
 
-                            {runResult.testcase_results[activeRunCaseIndex] && (() => {
-                              const curTc = runResult.testcase_results[activeRunCaseIndex];
-                              return (
-                                <div className="space-y-2.5">
-                                  {curTc.stdin && (
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-                                        Input
-                                      </span>
-                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
-                                        {curTc.stdin}
-                                      </pre>
+                            {runResult.testcase_results[activeRunCaseIndex] &&
+                              (() => {
+                                const curTc = runResult.testcase_results[activeRunCaseIndex];
+                                return (
+                                  <div className="space-y-2.5">
+                                    {curTc.stdin && (
+                                      <div>
+                                        <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                          Input
+                                        </span>
+                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto">
+                                          {curTc.stdin}
+                                        </pre>
+                                      </div>
+                                    )}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                      <div>
+                                        <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                          Output
+                                        </span>
+                                        <pre
+                                          className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
+                                            curTc.passed
+                                              ? "border-lime-400/30 text-lime-400"
+                                              : "border-rose-500/30 text-rose-400"
+                                          }`}
+                                        >
+                                          {curTc.stdout || "(empty)"}
+                                        </pre>
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
+                                          Expected
+                                        </span>
+                                        <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
+                                          {curTc.expected_output}
+                                        </pre>
+                                      </div>
                                     </div>
-                                  )}
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-                                        Output
-                                      </span>
-                                      <pre
-                                        className={`p-2 bg-zinc-950 border rounded text-xs overflow-x-auto ${
-                                          curTc.passed
-                                            ? "border-lime-400/30 text-lime-400"
-                                            : "border-rose-500/30 text-rose-400"
-                                        }`}
-                                      >
-                                        {curTc.stdout || "(empty)"}
-                                      </pre>
-                                    </div>
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-                                        Expected
-                                      </span>
-                                      <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-lime-400 overflow-x-auto">
-                                        {curTc.expected_output}
-                                      </pre>
-                                    </div>
+                                    {curTc.compile_output && (
+                                      <div>
+                                        <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                          Compiler Output
+                                        </span>
+                                        <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
+                                          {curTc.compile_output}
+                                        </pre>
+                                      </div>
+                                    )}
+                                    {curTc.stderr && (
+                                      <div>
+                                        <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
+                                          Stderr
+                                        </span>
+                                        <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
+                                          {curTc.stderr}
+                                        </pre>
+                                      </div>
+                                    )}
                                   </div>
-                                  {curTc.compile_output && (
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
-                                        Compiler Output
-                                      </span>
-                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
-                                        {curTc.compile_output}
-                                      </pre>
-                                    </div>
-                                  )}
-                                  {curTc.stderr && (
-                                    <div>
-                                      <span className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold block mb-1">
-                                        Stderr
-                                      </span>
-                                      <pre className="p-2 bg-rose-950/20 border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
-                                        {curTc.stderr}
-                                      </pre>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })()}
+                                );
+                              })()}
                           </div>
                         ) : (
                           <div className="space-y-2">
                             {runResult.compile_output && (
                               <div>
-                                <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">Compiler Output</span>
+                                <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">
+                                  Compiler Output
+                                </span>
                                 <pre className="p-2 bg-black border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
                                   {runResult.compile_output}
                                 </pre>
@@ -2058,7 +2143,9 @@ export function ContestArenaPage() {
                             )}
                             {runResult.stdout && (
                               <div>
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Stdout</span>
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
+                                  Stdout
+                                </span>
                                 <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
                                   {runResult.stdout}
                                 </pre>
@@ -2066,7 +2153,9 @@ export function ContestArenaPage() {
                             )}
                             {runResult.stderr && (
                               <div>
-                                <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">Stderr</span>
+                                <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">
+                                  Stderr
+                                </span>
                                 <pre className="p-2 bg-black border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
                                   {runResult.stderr}
                                 </pre>
@@ -2106,7 +2195,9 @@ export function ContestArenaPage() {
               </button>
 
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
-                <span className={`size-1.5 rounded-full ${isContestOver ? "bg-red-500" : "bg-lime-400"}`} />
+                <span
+                  className={`size-1.5 rounded-full ${isContestOver ? "bg-red-500" : "bg-lime-400"}`}
+                />
                 <span>{isContestOver ? "Contest locked" : "Workstation online"}</span>
               </div>
             </div>
@@ -2200,7 +2291,9 @@ export function ContestArenaPage() {
                 <div className="flex items-center justify-between border-t border-white/5 pt-3">
                   <div>
                     <div className="text-zinc-200 font-medium">Word Wrap</div>
-                    <div className="text-[11px] text-zinc-500">Wrap long lines to fit editor viewport</div>
+                    <div className="text-[11px] text-zinc-500">
+                      Wrap long lines to fit editor viewport
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -2225,7 +2318,9 @@ export function ContestArenaPage() {
                 <div className="flex items-center justify-between border-t border-white/5 pt-3">
                   <div>
                     <div className="text-zinc-200 font-medium">Tab Indentation</div>
-                    <div className="text-[11px] text-zinc-500">Spaces per tab indentation level</div>
+                    <div className="text-[11px] text-zinc-500">
+                      Spaces per tab indentation level
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
                     {[2, 4].map((spaces) => (
@@ -2256,19 +2351,27 @@ export function ContestArenaPage() {
               <div className="space-y-2 font-mono text-xs">
                 <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
                   <span className="text-zinc-300">Run Code</span>
-                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-lime-400 border border-white/10 font-bold">⌘ ' / Ctrl + '</kbd>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-lime-400 border border-white/10 font-bold">
+                    ⌘ ' / Ctrl + '
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
                   <span className="text-zinc-300">Submit Solution</span>
-                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-lime-400 border border-white/10 font-bold">⌘ ⏎ / Ctrl + Enter</kbd>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-lime-400 border border-white/10 font-bold">
+                    ⌘ ⏎ / Ctrl + Enter
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
                   <span className="text-zinc-300">Previous Question</span>
-                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-white/10">⌥ ← / Alt + Left</kbd>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-white/10">
+                    ⌥ ← / Alt + Left
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
                   <span className="text-zinc-300">Next Question</span>
-                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-white/10">⌥ → / Alt + Right</kbd>
+                  <kbd className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-white/10">
+                    ⌥ → / Alt + Right
+                  </kbd>
                 </div>
               </div>
             )}
@@ -2288,18 +2391,15 @@ export function ContestArenaPage() {
                   </div>
                 </div>
                 <p className="text-zinc-500 text-[11px] leading-relaxed font-sans">
-                  The contest clock is synchronized to server time via WebSockets. Solutions submitted after the clock expires will not receive contest points.
+                  The contest clock is synchronized to server time via WebSockets. Solutions
+                  submitted after the clock expires will not receive contest points.
                 </p>
               </div>
             )}
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              onClick={() => setShowSettingsModal(false)}
-              className="w-full"
-            >
+            <Button type="button" onClick={() => setShowSettingsModal(false)} className="w-full">
               Done
             </Button>
           </DialogFooter>
@@ -2332,14 +2432,17 @@ export function ContestArenaPage() {
                 Contest Concluded
               </DialogTitle>
               <DialogDescription className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
-                The competition clock has expired. Code execution is now locked. Proceed to the Contest Summary console to inspect your questions and finalize your submission.
+                The competition clock has expired. Code execution is now locked. Proceed to the
+                Contest Summary console to inspect your questions and finalize your submission.
               </DialogDescription>
             </div>
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-4">
             <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
-              <span className="text-xl font-bold text-lime-400 tabular-nums">{redirectCountdown}</span>
+              <span className="text-xl font-bold text-lime-400 tabular-nums">
+                {redirectCountdown}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full">
               <Button
@@ -2380,9 +2483,7 @@ export function ContestArenaPage() {
         <div className="h-12 px-4 border-b border-white/8 flex items-center justify-between shrink-0 bg-black">
           <div className="flex items-center gap-2 min-w-0">
             <ListOrdered className="size-4 text-lime-400 shrink-0" />
-            <h2 className="font-semibold text-xs text-white truncate max-w-[220px]">
-              {title}
-            </h2>
+            <h2 className="font-semibold text-xs text-white truncate max-w-[220px]">{title}</h2>
             {arenaData?.status ? (
               <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
                 {arenaData.status} Arena
@@ -2405,32 +2506,22 @@ export function ContestArenaPage() {
         {/* Drawer Subheader: Problem List vs Standings Tabs + Score Badge */}
         <div className="px-4 py-2.5 border-b border-white/8 flex items-center justify-between gap-2 shrink-0 bg-black">
           {/* Sub-tabs: Challenges vs Standings */}
-          <div className="flex items-center gap-1 bg-zinc-950 p-0.5 rounded-md border border-white/10">
-            <button
-              type="button"
-              onClick={() => setProblemListTab("problems")}
-              className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-all cursor-pointer ${
-                problemListTab === "problems"
-                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 shadow-[0_0_10px_rgba(204,255,0,0.15)]"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              <ListOrdered className="size-3.5" />
-              <span>Challenges</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setProblemListTab("ranking")}
-              className={`flex items-center gap-1.5 px-3 py-1 text-sm font-sans font-semibold rounded-md transition-all cursor-pointer ${
-                problemListTab === "ranking"
-                  ? "bg-lime-400/10 text-lime-400 border border-lime-400/30 shadow-[0_0_10px_rgba(204,255,0,0.15)]"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              <BarChart2 className="size-3.5" />
-              <span>Standings</span>
-            </button>
-          </div>
+          <Tabs
+            value={problemListTab}
+            onValueChange={(v) => setProblemListTab(v as "problems" | "ranking")}
+            className="gap-0"
+          >
+            <TabsList className="bg-zinc-950 p-0.5 rounded-md border border-white/10 gap-1">
+              <TabsTab value="problems" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
+                <ListOrdered className="size-3.5" />
+                <span>Challenges</span>
+              </TabsTab>
+              <TabsTab value="ranking" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
+                <BarChart2 className="size-3.5" />
+                <span>Standings</span>
+              </TabsTab>
+            </TabsList>
+          </Tabs>
 
           {/* Points & Progress Pips */}
           <div className="flex items-center gap-2 font-mono">
@@ -2529,8 +2620,8 @@ export function ContestArenaPage() {
                         isHard
                           ? "text-rose-400 bg-rose-500/10 border-rose-500/30"
                           : isMed
-                          ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
-                          : "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+                            ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
+                            : "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
                       }`}
                     >
                       {diffLabel}
@@ -2558,7 +2649,8 @@ export function ContestArenaPage() {
                 Live Tournament Standings
               </span>
               <span className="text-lime-400 font-semibold tabular-nums">
-                {rankingData?.rows?.length || 0} {rankingData?.rows?.length === 1 ? "competitor" : "competitors"}
+                {rankingData?.rows?.length || 0}{" "}
+                {rankingData?.rows?.length === 1 ? "competitor" : "competitors"}
               </span>
             </div>
 
@@ -2575,10 +2667,10 @@ export function ContestArenaPage() {
                           idx === 0
                             ? "bg-lime-400/15 text-lime-400 border border-lime-400/30"
                             : idx === 1
-                            ? "bg-zinc-800 text-zinc-200 border border-white/10"
-                            : idx === 2
-                            ? "bg-zinc-900 text-zinc-400 border border-white/10"
-                            : "text-zinc-500"
+                              ? "bg-zinc-800 text-zinc-200 border border-white/10"
+                              : idx === 2
+                                ? "bg-zinc-900 text-zinc-400 border border-white/10"
+                                : "text-zinc-500"
                         }`}
                       >
                         {row.rank || idx + 1}
@@ -2602,11 +2694,7 @@ export function ContestArenaPage() {
             </div>
 
             <div className="pt-3 border-t border-white/8 shrink-0">
-              <Button
-                asChild
-                variant="outline"
-                className="w-full"
-              >
+              <Button asChild variant="outline" className="w-full">
                 <Link
                   to={`/contests/${contestSlug}/results`}
                   target="_blank"
@@ -2640,7 +2728,13 @@ export function ContestArenaPage() {
               </div>
             </div>
             <DialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed pt-1">
-              Your written code and test progress are automatically saved. Exiting will navigate you to the <strong className="text-white font-semibold">Contest Summary &amp; Submission Console</strong>, where you can inspect all attempted questions, check unattempted challenges, and officially submit your test.
+              Your written code and test progress are automatically saved. Exiting will navigate you
+              to the{" "}
+              <strong className="text-white font-semibold">
+                Contest Summary &amp; Submission Console
+              </strong>
+              , where you can inspect all attempted questions, check unattempted challenges, and
+              officially submit your test.
             </DialogDescription>
           </DialogHeader>
 
@@ -2653,18 +2747,12 @@ export function ContestArenaPage() {
             </div>
             <div className="flex items-center justify-between border-t border-white/6 pt-2">
               <span className="text-zinc-500">Time Remaining:</span>
-              <span className="font-semibold text-zinc-300">
-                {formatTimer(remainingSeconds)}
-              </span>
+              <span className="font-semibold text-zinc-300">{formatTimer(remainingSeconds)}</span>
             </div>
           </div>
 
           <DialogFooter className="flex flex-row items-center justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowExitModal(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setShowExitModal(false)}>
               Continue Solving
             </Button>
             <Button

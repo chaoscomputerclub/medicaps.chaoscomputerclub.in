@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { registerForContest, getToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
@@ -119,14 +120,18 @@ export function AssessmentWorkspacePage() {
   }, [member, dispatch]);
 
   const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
-  const displayName = formatFullName(member?.full_name) || member?.handle || member?.email?.split("@")[0] || "Competitor";
+  const displayName =
+    formatFullName(member?.full_name) ||
+    member?.handle ||
+    member?.email?.split("@")[0] ||
+    "Competitor";
   const userInitial = member?.full_name?.trim()
     ? member.full_name.trim().charAt(0).toUpperCase()
     : member?.handle?.trim()
-    ? member.handle.trim().charAt(0).toUpperCase()
-    : member?.email?.trim()
-    ? member.email.trim().charAt(0).toUpperCase()
-    : "U";
+      ? member.handle.trim().charAt(0).toUpperCase()
+      : member?.email?.trim()
+        ? member.email.trim().charAt(0).toUpperCase()
+        : "U";
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -198,9 +203,9 @@ export function AssessmentWorkspacePage() {
       codeInMap.includes("TODO: Calculate valid mirror pairs") ||
       (selectedLanguage === "python" && !codeInMap.includes("class Solution")));
   const currentCode = activeProblem
-    ? (!isCodeInMapLegacy && codeInMap
-        ? codeInMap
-        : activeProblem.starter_codes?.[selectedLanguage] ?? "")
+    ? !isCodeInMapLegacy && codeInMap
+      ? codeInMap
+      : (activeProblem.starter_codes?.[selectedLanguage] ?? "")
     : "";
 
   const activeSubmission = activeProblem ? submissionsMap[activeProblem.id] : null;
@@ -246,7 +251,9 @@ export function AssessmentWorkspacePage() {
     if (finishAssessmentThunk.fulfilled.match(action)) {
       try {
         localStorage.setItem("ccc:assessment_updated", String(Date.now()));
-        window.dispatchEvent(new CustomEvent("assessment:status_changed", { detail: { contestSlug } }));
+        window.dispatchEvent(
+          new CustomEvent("assessment:status_changed", { detail: { contestSlug } }),
+        );
       } catch {}
       toast.success("Assessment completed successfully.");
       if (window.opener) {
@@ -327,7 +334,9 @@ export function AssessmentWorkspacePage() {
             <div className="rounded-md bg-zinc-950 border border-white/8 p-4 space-y-2 font-mono text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500">Score recorded</span>
-                <span className="text-lime-400 font-semibold tabular-nums">{session.total_score ?? 0} pts</span>
+                <span className="text-lime-400 font-semibold tabular-nums">
+                  {session.total_score ?? 0} pts
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500">Status</span>
@@ -389,7 +398,8 @@ export function AssessmentWorkspacePage() {
               Assessment Opens Soon
             </h2>
             <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-              You are registered. The assessment workspace unseals automatically at the contest start time.
+              You are registered. The assessment workspace unseals automatically at the contest
+              start time.
             </p>
           </div>
           <div className="p-4 rounded-md border border-white/8 bg-zinc-950">
@@ -419,21 +429,29 @@ export function AssessmentWorkspacePage() {
   // ── Error / Gate Screen ─────────────────────────────────────────────────
   if (error && !assessment) {
     const isRegistrationErr = error.toLowerCase().includes("registration");
-    const isAuthErr = error.toLowerCase().includes("credential") || error.toLowerCase().includes("token") || error.toLowerCase().includes("login");
-    const isLifecycleErr = error.toLowerCase().includes("upcoming") || error.toLowerCase().includes("live") || error.toLowerCase().includes("top 30");
+    const isAuthErr =
+      error.toLowerCase().includes("credential") ||
+      error.toLowerCase().includes("token") ||
+      error.toLowerCase().includes("login");
+    const isLifecycleErr =
+      error.toLowerCase().includes("upcoming") ||
+      error.toLowerCase().includes("live") ||
+      error.toLowerCase().includes("top 30");
 
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
         <div className="max-w-md w-full p-6 rounded-lg bg-black border border-white/8 text-center space-y-4">
           <div className="size-12 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto">
-            {isLifecycleErr ? <Lock size={22} className="text-amber-400" /> : <ShieldAlert size={22} className="text-red-400" />}
+            {isLifecycleErr ? (
+              <Lock size={22} className="text-amber-400" />
+            ) : (
+              <ShieldAlert size={22} className="text-red-400" />
+            )}
           </div>
           <h2 className="text-base font-semibold font-mono text-white">
             {isLifecycleErr ? "Contest Arena Closed" : "Contest Access Gate"}
           </h2>
-          <p className="text-xs text-zinc-400 font-mono leading-relaxed">
-            {error}
-          </p>
+          <p className="text-xs text-zinc-400 font-mono leading-relaxed">{error}</p>
 
           <div className="pt-2 flex flex-col gap-2">
             {isLifecycleErr && (
@@ -458,9 +476,7 @@ export function AssessmentWorkspacePage() {
             )}
             {isAuthErr && (
               <Button asChild variant="outline" size="default" className="w-full">
-                <Link to={`/auth?redirect=/assessments/${contestSlug}`}>
-                  Sign In to Continue
-                </Link>
+                <Link to={`/auth?redirect=/assessments/${contestSlug}`}>Sign In to Continue</Link>
               </Button>
             )}
             <Button
@@ -528,7 +544,9 @@ export function AssessmentWorkspacePage() {
               }`}
             >
               <Clock size={12} className="text-lime-400" />
-              <span className="font-semibold tabular-nums">{formatTimer(session.remaining_seconds)}</span>
+              <span className="font-semibold tabular-nums">
+                {formatTimer(session.remaining_seconds)}
+              </span>
             </div>
           )}
 
@@ -540,7 +558,12 @@ export function AssessmentWorkspacePage() {
                   : "border-white/8 bg-zinc-950 text-zinc-500"
               }`}
             >
-              <ShieldAlert size={12} className={(session.anti_cheat_violations || 0) > 0 ? "text-amber-400" : "text-zinc-600"} />
+              <ShieldAlert
+                size={12}
+                className={
+                  (session.anti_cheat_violations || 0) > 0 ? "text-amber-400" : "text-zinc-600"
+                }
+              />
               <span className="tabular-nums">
                 Warning {session.anti_cheat_violations || 0} / {assessment?.max_violations || 3}
               </span>
@@ -575,7 +598,11 @@ export function AssessmentWorkspacePage() {
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            {isFullscreen ? <Minimize2 size={13} className="mr-1" /> : <Maximize2 size={13} className="mr-1" />}
+            {isFullscreen ? (
+              <Minimize2 size={13} className="mr-1" />
+            ) : (
+              <Maximize2 size={13} className="mr-1" />
+            )}
             <span className="hidden md:inline">{isFullscreen ? "Exit" : "Full"}</span>
           </Button>
 
@@ -586,7 +613,11 @@ export function AssessmentWorkspacePage() {
             disabled={isRunning || isSubmitting}
             onClick={handleRun}
           >
-            <Play size={12} className="text-lime-400 fill-lime-400 mr-1" />
+            {isRunning ? (
+              <WanderingEyes size="inline" className="h-3 mr-1.5" />
+            ) : (
+              <Play size={12} className="text-lime-400 fill-lime-400 mr-1" />
+            )}
             <span>{isRunning ? "Testing..." : "Run"}</span>
           </Button>
 
@@ -597,26 +628,22 @@ export function AssessmentWorkspacePage() {
             disabled={isRunning || isSubmitting}
             onClick={handleSubmit}
           >
-            <Send size={12} className="mr-1" />
+            {isSubmitting ? (
+              <WanderingEyes size="inline" className="h-3 mr-1.5" />
+            ) : (
+              <Send size={12} className="mr-1" />
+            )}
             <span>{isSubmitting ? "Judging..." : "Submit"}</span>
           </Button>
 
           {/* Exit Window */}
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setShowExitModal(true)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => setShowExitModal(true)}>
             <X size={12} className="mr-1" />
             <span className="hidden sm:inline">Exit</span>
           </Button>
 
           {/* Finish Button */}
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => setShowFinishModal(true)}
-          >
+          <Button size="sm" variant="destructive" onClick={() => setShowFinishModal(true)}>
             Finish
           </Button>
 
@@ -645,7 +672,10 @@ export function AssessmentWorkspacePage() {
       {/* Main 2-Pane Split View */}
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT PANE: Problem Statement */}
-        <div className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-6 bg-black" data-problem-panel>
+        <div
+          className="w-1/2 border-r border-white/8 overflow-y-auto p-6 space-y-6 bg-black"
+          data-problem-panel
+        >
           {activeProblem ? (
             <div className="space-y-6">
               {/* Problem Title & Points */}
@@ -728,7 +758,11 @@ export function AssessmentWorkspacePage() {
                           onClick={() => handleCopy(inputVal, idx)}
                           className="flex items-center gap-1 text-xs font-sans font-semibold text-zinc-400 hover:text-white cursor-pointer"
                         >
-                          {copiedIndex === idx ? <Check size={11} className="text-lime-400" /> : <Copy size={11} />}
+                          {copiedIndex === idx ? (
+                            <Check size={11} className="text-lime-400" />
+                          ) : (
+                            <Copy size={11} />
+                          )}
                           <span>{copiedIndex === idx ? "Copied" : "Copy Input"}</span>
                         </button>
                       </div>
@@ -758,7 +792,9 @@ export function AssessmentWorkspacePage() {
               </div>
             </div>
           ) : (
-            <div className="text-zinc-500 font-mono text-xs">Select a problem from the top bar.</div>
+            <div className="text-zinc-500 font-mono text-xs">
+              Select a problem from the top bar.
+            </div>
           )}
         </div>
 
@@ -866,7 +902,9 @@ export function AssessmentWorkspacePage() {
                   {activeProblem?.sample_testcases?.map((st, i) => (
                     <div key={i} className="p-2 rounded bg-zinc-950 border border-white/8">
                       <span className="text-zinc-500 text-[10px]">CASE {i + 1}</span>
-                      <pre className="text-zinc-300 mt-0.5 whitespace-pre-wrap">{st.stdin || (st as any).input}</pre>
+                      <pre className="text-zinc-300 mt-0.5 whitespace-pre-wrap">
+                        {st.stdin || (st as any).input}
+                      </pre>
                     </div>
                   ))}
                   <div className="space-y-1 pt-1">
@@ -885,8 +923,10 @@ export function AssessmentWorkspacePage() {
                 <div>
                   {isRunning || isSubmitting ? (
                     <div className="flex items-center gap-2 text-lime-400 py-6 justify-center">
-                      <Terminal size={14} className="animate-spin" />
-                      <span>{isRunning ? "Compiling and testing sandbox..." : "Judging solution..."}</span>
+                      <WanderingEyes size="sm" className="h-4" />
+                      <span>
+                        {isRunning ? "Compiling and testing sandbox..." : "Judging solution..."}
+                      </span>
                     </div>
                   ) : submitResult ? (
                     <div className="space-y-2">
@@ -897,18 +937,36 @@ export function AssessmentWorkspacePage() {
                           ) : (
                             <XCircle size={16} className="text-red-400" />
                           )}
-                          <span className={`font-semibold uppercase ${submitResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-white"}`}>{submitResult.verdict}</span>
+                          <span
+                            className={`font-semibold uppercase ${submitResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-white"}`}
+                          >
+                            {submitResult.verdict}
+                          </span>
                         </div>
                         <div className="text-[11px] text-zinc-400">
-                          Passed: <strong className="text-white">{submitResult.passed_testcases} / {submitResult.total_testcases}</strong> · Score: <strong className="text-emerald-400">{submitResult.score} pts</strong>
+                          Passed:{" "}
+                          <strong className="text-white">
+                            {submitResult.passed_testcases} / {submitResult.total_testcases}
+                          </strong>{" "}
+                          · Score:{" "}
+                          <strong className="text-emerald-400">{submitResult.score} pts</strong>
                         </div>
                       </div>
 
                       {submitResult.testcase_results?.map((tc: any, i: number) => (
-                        <div key={i} className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1">
+                        <div
+                          key={i}
+                          className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1"
+                        >
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-500">{tc.name || `Case ${i + 1}`}</span>
-                            <span className={tc.passed ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold"}>
+                            <span
+                              className={
+                                tc.passed
+                                  ? "text-emerald-400 font-semibold"
+                                  : "text-red-400 font-semibold"
+                              }
+                            >
                               {tc.verdict}
                             </span>
                           </div>
@@ -929,29 +987,49 @@ export function AssessmentWorkspacePage() {
                           ) : (
                             <AlertCircle size={16} className="text-amber-400" />
                           )}
-                          <span className={`font-semibold uppercase ${runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-white"}`}>{runResult.verdict}</span>
+                          <span
+                            className={`font-semibold uppercase ${runResult.verdict === "ACCEPTED" ? "text-emerald-400" : "text-white"}`}
+                          >
+                            {runResult.verdict}
+                          </span>
                         </div>
                         <div className="text-[11px] text-zinc-400">
-                          Passed: <strong className="text-white">{runResult.passed_testcases} / {runResult.total_testcases}</strong>
+                          Passed:{" "}
+                          <strong className="text-white">
+                            {runResult.passed_testcases} / {runResult.total_testcases}
+                          </strong>
                         </div>
                       </div>
 
                       {runResult.testcase_results?.map((tc: any, i: number) => (
-                        <div key={i} className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1">
+                        <div
+                          key={i}
+                          className="p-2 rounded bg-black border border-white/6 text-[11px] space-y-1"
+                        >
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-500">{tc.name || `Case ${i + 1}`}</span>
-                            <span className={tc.passed ? "text-emerald-400 font-semibold" : "text-amber-400 font-semibold"}>
+                            <span
+                              className={
+                                tc.passed
+                                  ? "text-emerald-400 font-semibold"
+                                  : "text-amber-400 font-semibold"
+                              }
+                            >
                               {tc.verdict}
                             </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-[10px]">
                             <div>
                               <span className="text-zinc-600">Your Output:</span>
-                              <pre className="p-1 rounded bg-black text-zinc-300 overflow-x-auto">{tc.stdout || "(no output)"}</pre>
+                              <pre className="p-1 rounded bg-black text-zinc-300 overflow-x-auto">
+                                {tc.stdout || "(no output)"}
+                              </pre>
                             </div>
                             <div>
                               <span className="text-zinc-600">Expected:</span>
-                              <pre className="p-1 rounded bg-black text-zinc-300 overflow-x-auto">{tc.expected_output}</pre>
+                              <pre className="p-1 rounded bg-black text-zinc-300 overflow-x-auto">
+                                {tc.expected_output}
+                              </pre>
                             </div>
                           </div>
                           {tc.stderr && (
@@ -993,7 +1071,8 @@ export function AssessmentWorkspacePage() {
               Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
             </div>
             <DialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed px-2 text-center">
-              {antiCheatWarningMessage || "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
+              {antiCheatWarningMessage ||
+                "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center">
@@ -1012,13 +1091,17 @@ export function AssessmentWorkspacePage() {
       <AlertDialog open={showFinishModal} onOpenChange={setShowFinishModal}>
         <AlertDialogPortal>
           <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+          <AlertDialogPopup
+            from="top"
+            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
+          >
             <AlertDialogHeader className="space-y-2 text-left">
               <AlertDialogTitle className="text-base font-semibold text-white">
                 Finalize & Submit Assessment?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Are you sure you want to finalize and submit your assessment session? All your code submissions will be graded and your attempt will be permanently locked.
+                Are you sure you want to finalize and submit your assessment session? All your code
+                submissions will be graded and your attempt will be permanently locked.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4 flex justify-end gap-2">
@@ -1043,13 +1126,17 @@ export function AssessmentWorkspacePage() {
       <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
         <AlertDialogPortal>
           <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+          <AlertDialogPopup
+            from="top"
+            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
+          >
             <AlertDialogHeader className="space-y-2 text-left">
               <AlertDialogTitle className="text-base font-semibold text-white">
                 Exit Assessment Workspace?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Your code and progress are automatically saved on this device. You can resume this contest session before the assessment window closes. Close assessment window now?
+                Your code and progress are automatically saved on this device. You can resume this
+                contest session before the assessment window closes. Close assessment window now?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4 flex justify-end gap-2">
@@ -1074,13 +1161,17 @@ export function AssessmentWorkspacePage() {
       <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
         <AlertDialogPortal>
           <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+          <AlertDialogPopup
+            from="top"
+            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
+          >
             <AlertDialogHeader className="space-y-2 text-left">
               <AlertDialogTitle className="text-base font-semibold text-white">
                 Reset to Default Starter Code?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                This will discard your current unsaved edits for this problem and restore the initial starter code template. This action cannot be undone.
+                This will discard your current unsaved edits for this problem and restore the
+                initial starter code template. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4 flex justify-end gap-2">

@@ -6,15 +6,10 @@ Inspired by Interleet Judge Engine
 from enum import Enum
 
 
-class Language(str, Enum):
-    PYTHON = "python"
-    CPP = "cpp"
-    C = "c"
-    JAVA = "java"
-    JAVASCRIPT = "javascript"
-    TYPESCRIPT = "typescript"
-    GO = "go"
-    RUST = "rust"
+# Language enum is defined authoritatively in languages.py alongside the registry.
+# Importing here so all other modules can continue using `from app.engine.enums import Language`
+# without any change — single source of truth, no dual-definition drift.
+from app.engine.languages import Language  # noqa: F401
 
 
 class Verdict(str, Enum):

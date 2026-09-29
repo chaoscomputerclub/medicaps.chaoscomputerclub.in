@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.core.cache import delete_cache_pattern
-from app.engine.enums import ComparisonMode, Language
+from app.engine.enums import ComparisonMode
+from app.engine.languages import Language, LanguageRegistry, LanguageContaminationError, UnsupportedLanguageError
 from app.engine.providers.factory import get_judge_provider
 from app.engine.schemas import TestCaseSchema
 from app.models.db_models import (
@@ -68,18 +69,23 @@ class AssessmentExecutionService:
                 for i, s in enumerate(sample_list)
             ]
 
+        try:
+            lang_enum = LanguageRegistry.normalize(language)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
         from app.engine.harness import prepare_solution_code
-        lang_str = language.value if hasattr(language, "value") else str(language)
         exec_code = prepare_solution_code(
             code=code,
-            language=lang_str,
+            language=lang_enum,
             problem_index=problem.problem_index,
             starter_codes=getattr(problem, "starter_codes", None) or {},
         )
+        LanguageRegistry.validate_source(lang_enum, exec_code)
 
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
-            language=lang_str,
+            language=lang_enum,
             code=exec_code,
             testcases=tcs,
             time_limit=problem.time_limit,
@@ -157,18 +163,23 @@ class AssessmentExecutionService:
                 )
             )
 
+        try:
+            lang_enum = LanguageRegistry.normalize(language)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
         from app.engine.harness import prepare_solution_code
-        lang_str = language.value if hasattr(language, "value") else str(language)
         exec_code = prepare_solution_code(
             code=code,
-            language=lang_str,
+            language=lang_enum,
             problem_index=problem.problem_index,
             starter_codes=getattr(problem, "starter_codes", None) or {},
         )
+        LanguageRegistry.validate_source(lang_enum, exec_code)
 
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
-            language=lang_str,
+            language=lang_enum,
             code=exec_code,
             testcases=all_tcs,
             time_limit=problem.time_limit,
@@ -176,14 +187,15 @@ class AssessmentExecutionService:
         )
 
         points_earned = round((exec_result.score / 100.0) * problem.points, 2)
+        verdict_val = exec_result.verdict.value if hasattr(exec_result.verdict, "value") else str(exec_result.verdict)
 
         submission = AssessmentSubmission(
             session_id=session.id,
             problem_id=problem.id,
             member_id=current_member.id,
-            language=language.value,
+            language=lang_enum.value,
             code=code,
-            verdict=exec_result.verdict.value,
+            verdict=verdict_val,
             score=points_earned,
             runtime_ms=round(exec_result.time * 1000.0, 2),
             memory_mb=exec_result.memory,

@@ -15,8 +15,12 @@ Supports:
 
 from __future__ import annotations
 
+import logging
 import re
 from typing import Optional, Dict, Any, List, Tuple
+from app.engine.languages import LanguageRegistry, Language, LanguageContaminationError
+
+logger = logging.getLogger("ccc.engine.harness")
 
 
 # ---------------------------------------------------------------------------
@@ -117,7 +121,7 @@ def _parse_fn_name(code: str, lang: str) -> Optional[str]:
 
 def prepare_solution_code(
     code: str,
-    language: str,
+    language: Any,
     problem_index: Optional[str] = None,
     method_name: Optional[str] = None,
     starter_codes: Optional[Dict[str, str]] = None,
@@ -131,38 +135,43 @@ def prepare_solution_code(
     method_name: explicitly supplied function name.
     starter_codes: admin-defined starter code dict; function name extracted when method_name not supplied.
     """
-    lang = (language or "").lower().strip()
+    lang_enum = LanguageRegistry.normalize(language)
+    lang = lang_enum.value
 
     if function_signature:
         from app.engine.contracts import FunctionSignature
-        from app.engine.adapters import get_adapter
         try:
             sig = function_signature if isinstance(function_signature, FunctionSignature) else FunctionSignature(**function_signature)
-            adapter = get_adapter(lang)
-            return adapter.generate_wrapper(sig, code)
-        except Exception:
-            pass
+            adapter = LanguageRegistry.get_adapter(lang_enum)
+            wrapped = adapter.generate_wrapper(sig, code)
+            LanguageRegistry.validate_source(lang_enum, wrapped)
+            return wrapped
+        except Exception as e:
+            logger.error("Failed to generate wrapper via adapter for %s: %s", lang, e)
+            raise
 
     # Resolve the expected function name dynamically
     fn_name = method_name
     if not fn_name and starter_codes:
         fn_name = extract_function_name(starter_codes, lang)
 
+    if lang_enum == Language.PYTHON:
+        prepared = _prepare_python_solution(code, fn_name=fn_name)
+    elif lang_enum == Language.JAVASCRIPT:
+        prepared = _prepare_javascript_solution(code, is_ts=False, fn_name=fn_name)
+    elif lang_enum == Language.TYPESCRIPT:
+        prepared = _prepare_javascript_solution(code, is_ts=True, fn_name=fn_name)
+    elif lang_enum == Language.CPP:
+        prepared = _prepare_cpp_solution(code, fn_name=fn_name, starter_codes=starter_codes)
+    elif lang_enum == Language.C:
+        prepared = _prepare_c_solution(code, fn_name=fn_name, starter_codes=starter_codes)
+    elif lang_enum == Language.JAVA:
+        prepared = _prepare_java_solution(code, fn_name=fn_name, starter_codes=starter_codes)
+    else:
+        prepared = code
 
-    if lang in {"python", "py", "python3"}:
-        return _prepare_python_solution(code, fn_name=fn_name)
-    elif lang in {"javascript", "js", "nodejs", "node"}:
-        return _prepare_javascript_solution(code, is_ts=False, fn_name=fn_name)
-    elif lang in {"typescript", "ts"}:
-        return _prepare_javascript_solution(code, is_ts=True, fn_name=fn_name)
-    elif lang in {"cpp", "c++", "cxx"}:
-        return _prepare_cpp_solution(code, fn_name=fn_name, starter_codes=starter_codes)
-    elif lang in {"c"}:
-        return _prepare_c_solution(code, fn_name=fn_name, starter_codes=starter_codes)
-    elif lang in {"java"}:
-        return _prepare_java_solution(code, fn_name=fn_name, starter_codes=starter_codes)
-
-    return code
+    LanguageRegistry.validate_source(lang_enum, prepared)
+    return prepared
 
 
 # ---------------------------------------------------------------------------

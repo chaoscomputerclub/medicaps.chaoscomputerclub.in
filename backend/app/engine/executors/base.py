@@ -139,6 +139,7 @@ class BaseExecutor(ABC):
                     sandbox_result=sandbox_res,
                     testcase=tc,
                     compile_output=compile_output,
+                    compile_failed=False,  # Compilation succeeded; we are in run phase
                     comparison_mode=comparison_mode,
                 )
                 testcase_results.append(tc_result)

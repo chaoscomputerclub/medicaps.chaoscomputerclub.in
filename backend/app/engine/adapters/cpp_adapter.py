@@ -191,6 +191,54 @@ inline vector<string> _ccc_extract_chunks(const string& input) {
     return chunks;
 }
 
+inline string _ccc_find_param(const string& src, const string& name, size_t fallback_idx, const vector<string>& chunks) {
+    string pat = "\"" + name + "\"";
+    size_t p = src.find(pat);
+    if (p != string::npos) {
+        p += pat.size();
+        while (p < src.size() && (isspace((unsigned char)src[p]) || src[p] == ':')) p++;
+        if (p < src.size()) {
+            if (src[p] == '[' || src[p] == '{') {
+                char open_ch = src[p];
+                char close_ch = (open_ch == '[') ? ']' : '}';
+                int depth = 0;
+                size_t start = p;
+                for (; p < src.size(); p++) {
+                    if (src[p] == open_ch) depth++;
+                    else if (src[p] == close_ch) {
+                        depth--;
+                        if (depth == 0) { p++; break; }
+                    }
+                }
+                return src.substr(start, p - start);
+            } else if (src[p] == '"') {
+                size_t start = p++;
+                while (p < src.size() && src[p] != '"') {
+                    if (src[p] == '\\' && p + 1 < src.size()) p++;
+                    p++;
+                }
+                if (p < src.size()) p++;
+                return src.substr(start, p - start);
+            } else {
+                size_t start = p;
+                while (p < src.size() && src[p] != ',' && src[p] != '}' && !isspace((unsigned char)src[p])) p++;
+                return src.substr(start, p - start);
+            }
+        }
+    }
+    size_t eq_pos = src.find(name + " =");
+    if (eq_pos == string::npos) eq_pos = src.find(name + "=");
+    if (eq_pos != string::npos) {
+        size_t start = src.find('=', eq_pos) + 1;
+        while (start < src.size() && isspace((unsigned char)src[start])) start++;
+        size_t end = src.find('\n', start);
+        if (end == string::npos) end = src.size();
+        return src.substr(start, end - start);
+    }
+    if (fallback_idx < chunks.size()) return chunks[fallback_idx];
+    return "";
+}
+
 inline int _ccc_to_int(const string& raw) {
     if (raw.empty()) return 0;
     string num;
@@ -270,6 +318,31 @@ inline vector<int> _ccc_to_vector_int(const string& raw, const string& full_inpu
     return res;
 }
 
+// Added: long long array parser (was missing, causing LONG_ARRAY to use int and silently truncate)
+inline vector<long long> _ccc_to_vector_long(const string& raw, const string& full_input) {
+    const string& src = (raw.find('[') != string::npos) ? raw : full_input;
+    vector<long long> res;
+    string num;
+    bool inside = false;
+    for (char c : src) {
+        if (c == '[') inside = true;
+        else if (c == ']') {
+            if (!num.empty()) { try { res.push_back(stoll(num)); } catch(...) {} num.clear(); }
+            inside = false;
+        } else if (inside && (isdigit((unsigned char)c) || c == '-')) {
+            num += c;
+        } else if (inside && (c == ',' || isspace((unsigned char)c))) {
+            if (!num.empty()) { try { res.push_back(stoll(num)); } catch(...) {} num.clear(); }
+        }
+    }
+    if (res.empty() && !raw.empty()) {
+        stringstream ss(raw);
+        long long v;
+        while (ss >> v) res.push_back(v);
+    }
+    return res;
+}
+
 inline vector<vector<int>> _ccc_to_vector_vector_int(const string& raw, const string& full_input) {
     const string& src = (raw.find("[[") != string::npos) ? raw : full_input;
     vector<vector<int>> res;
@@ -307,7 +380,7 @@ int main() {
         return header_block + wrapped_code + "\n" + driver + body
 
     def _build_param_extraction(self, dt: DataType, ptype: str, pname: str, idx: int, orig_name: str) -> str:
-        chunk_expr = f'(_chunks.size() > {idx} ? _chunks[{idx}] : "")'
+        chunk_expr = f'_ccc_find_param(_full_input, "{orig_name}", {idx}, _chunks)'
         t_val = dt.value
 
         if t_val == DataType.INTEGER.value:
@@ -320,8 +393,11 @@ int main() {
             return f"    bool {pname} = _ccc_to_bool({chunk_expr});"
         elif t_val == DataType.STRING.value:
             return f"    string {pname} = _ccc_to_string({chunk_expr});"
-        elif t_val in (DataType.INTEGER_ARRAY.value, DataType.LONG_ARRAY.value):
+        elif t_val == DataType.INTEGER_ARRAY.value:
             return f"    vector<int> {pname} = _ccc_to_vector_int({chunk_expr}, _full_input);"
+        elif t_val == DataType.LONG_ARRAY.value:
+            # BUG WAS HERE: was using vector<int>, silently truncating longs
+            return f"    vector<long long> {pname} = _ccc_to_vector_long({chunk_expr}, _full_input);"
         elif t_val == DataType.STRING_ARRAY.value:
             return f"    vector<string> {pname} = _ccc_to_vector_string({chunk_expr}, _full_input);"
         elif t_val in (DataType.INTEGER_2D_ARRAY.value, DataType.LONG_2D_ARRAY.value):

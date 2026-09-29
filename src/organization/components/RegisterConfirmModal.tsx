@@ -6,14 +6,8 @@
  */
 
 import { useState } from "react";
-import {
-  ShieldCheck,
-  Users,
-  MapPin,
-  Loader2,
-  CheckCircle2,
-  Sparkles,
-} from "lucide-react";
+import { ShieldCheck, Users, MapPin, CheckCircle2, Sparkles } from "lucide-react";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -95,9 +89,7 @@ export function RegisterConfirmModal({
             <h2 className="text-xl font-bold font-mono uppercase text-white mt-2 leading-snug">
               {contest.title}
             </h2>
-            <p className="text-xs text-zinc-400 mt-1">
-              {contest.summary}
-            </p>
+            <p className="text-xs text-zinc-400 mt-1">{contest.summary}</p>
           </div>
 
           {/* Key Facts Card */}
@@ -109,7 +101,8 @@ export function RegisterConfirmModal({
                   Live Algorithmic Arena
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  90-minute live contest. 4 algorithmic challenges testing data structures and optimization.
+                  90-minute live contest. 4 algorithmic challenges testing data structures and
+                  optimization.
                 </p>
               </div>
             </div>
@@ -121,7 +114,8 @@ export function RegisterConfirmModal({
                   Open Registration & Elo Rated
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Open to all Medi-Caps students. Performance officially impacts your campus ranking and Elo rating.
+                  Open to all Medi-Caps students. Performance officially impacts your campus ranking
+                  and Elo rating.
                 </p>
               </div>
             </div>
@@ -147,18 +141,15 @@ export function RegisterConfirmModal({
               className="mt-0.5 border-white/20 data-[state=checked]:bg-lime-400 data-[state=checked]:text-black"
             />
             <span className="text-xs text-zinc-300 leading-relaxed">
-              I certify that I am an enrolled Medi-Caps University student. I agree to abide by the university competition code of conduct and fair play integrity guidelines.
+              I certify that I am an enrolled Medi-Caps University student. I agree to abide by the
+              university competition code of conduct and fair play integrity guidelines.
             </span>
           </label>
         </div>
 
         {/* Modal Footer */}
         <DialogFooter className="p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row justify-end gap-3 space-x-0">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
 
@@ -169,7 +160,7 @@ export function RegisterConfirmModal({
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />
+                <WanderingEyes size="sm" className="h-3.5 mr-2" />
                 Registering...
               </>
             ) : (

@@ -12,12 +12,12 @@ import {
   Award,
   LockKeyhole,
   Zap,
-  Loader2,
   Camera,
   Trash2,
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
 import {
   fetchMySocialStatsThunk,
@@ -26,7 +26,11 @@ import {
   syncCadetSocialCounts,
 } from "@/store/slices/socialSlice";
 import { SocialFollowStats } from "@/organization/components/SocialFollowStats";
-import { uploadAvatarThunk, removeAvatarThunk, fetchCurrentUserThunk } from "@/store/slices/authSlice";
+import {
+  uploadAvatarThunk,
+  removeAvatarThunk,
+  fetchCurrentUserThunk,
+} from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { RatingChart } from "@/organization/components/RatingChart";
@@ -78,7 +82,7 @@ export function ProfilePage() {
     (handle && handle.toLowerCase() === "me") ||
     Boolean(
       currentMember?.handle &&
-        (handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase()
+      (handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase(),
     );
 
   const {
@@ -89,7 +93,7 @@ export function ProfilePage() {
   } = useSwrData(
     isViewingSelf && isAuthenticated() ? "member:profile:full" : null,
     () => getMemberProfileData(true),
-    { ttl: 2 * 60 * 1000, enabled: isViewingSelf && isAuthenticated() }
+    { ttl: 2 * 60 * 1000, enabled: isViewingSelf && isAuthenticated() },
   );
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -166,16 +170,15 @@ export function ProfilePage() {
     data: studentProfileData,
     loading: studentLoading,
     revalidate: revalidateStudentProfile,
-  } = useSwrData(
-    `student:profile:${targetHandle}`,
-    () => getStudentProfileData(targetHandle),
-    { ttl: 5 * 60 * 1000, enabled: !isViewingSelf }
-  );
+  } = useSwrData(`student:profile:${targetHandle}`, () => getStudentProfileData(targetHandle), {
+    ttl: 5 * 60 * 1000,
+    enabled: !isViewingSelf,
+  });
 
   const { data: distribution, loading: distLoading } = useSwrData(
     "leaderboard:distribution",
     () => getRatingDistribution(),
-    { ttl: 10 * 60 * 1000 }
+    { ttl: 10 * 60 * 1000 },
   );
 
   useEffect(() => {
@@ -185,16 +188,16 @@ export function ProfilePage() {
   }, [dispatch]);
 
   const activeData: any = isViewingSelf ? ownProfileData : studentProfileData;
-  const isLoading = isViewingSelf ? (ownLoading && !ownProfileData) : (studentLoading && !studentProfileData);
+  const isLoading = isViewingSelf
+    ? ownLoading && !ownProfileData
+    : studentLoading && !studentProfileData;
 
   const candidate = activeData?.member;
   const isCandidateValid = Boolean(
-    candidate &&
-      (candidate.id || candidate.handle || candidate.email) &&
-      candidate.id !== ""
+    candidate && (candidate.id || candidate.handle || candidate.email) && candidate.id !== "",
   );
 
-  const m = isCandidateValid ? candidate : (isViewingSelf ? currentMember : null);
+  const m = isCandidateValid ? candidate : isViewingSelf ? currentMember : null;
 
   useEffect(() => {
     if (m) {
@@ -208,7 +211,7 @@ export function ProfilePage() {
             syncSocialCounts({
               ...(typeof fc === "number" ? { followersCount: fc } : {}),
               ...(typeof fgc === "number" ? { followingCount: fgc } : {}),
-            })
+            }),
           );
         }
       } else if (m.handle || m.id) {
@@ -218,7 +221,7 @@ export function ProfilePage() {
             ...(typeof fc === "number" ? { followersCount: fc } : {}),
             ...(typeof fgc === "number" ? { followingCount: fgc } : {}),
             ...(typeof m.is_following === "boolean" ? { isFollowing: m.is_following } : {}),
-          })
+          }),
         );
       }
     }
@@ -301,16 +304,26 @@ export function ProfilePage() {
   const isSelfUser = Boolean(
     isViewingSelf ||
     (currentMember?.id && m.id === currentMember.id) ||
-    (currentMember?.handle && (m.handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase())
+    (currentMember?.handle &&
+      (m.handle || "").toLowerCase() === (currentMember.handle || "").toLowerCase()),
   );
 
   const rawEnrollment =
-    (m.enrollment_number && m.enrollment_number !== "—" && m.enrollment_number !== "N/A" ? m.enrollment_number : null) ||
-    (m.enrollment_no && m.enrollment_no !== "—" && m.enrollment_no !== "N/A" ? m.enrollment_no : null) ||
+    (m.enrollment_number && m.enrollment_number !== "—" && m.enrollment_number !== "N/A"
+      ? m.enrollment_number
+      : null) ||
+    (m.enrollment_no && m.enrollment_no !== "—" && m.enrollment_no !== "N/A"
+      ? m.enrollment_no
+      : null) ||
     (m.enrollment && m.enrollment !== "—" && m.enrollment !== "N/A" ? m.enrollment : null) ||
     (m.prn && m.prn !== "N/A" && m.prn !== "—" ? m.prn : null) ||
-    (isSelfUser && currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "—" ? currentMember.prn : null) ||
-    (isSelfUser && m.email && m.email.includes("@") && /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
+    (isSelfUser && currentMember?.prn && currentMember.prn !== "N/A" && currentMember.prn !== "—"
+      ? currentMember.prn
+      : null) ||
+    (isSelfUser &&
+    m.email &&
+    m.email.includes("@") &&
+    /^[a-zA-Z]{2}\d+/i.test(m.email.split("@")[0])
       ? m.email.split("@")[0].toUpperCase()
       : null);
   const enrollmentNo = rawEnrollment || "—";
@@ -320,7 +333,7 @@ export function ProfilePage() {
     (m.first_name ? `${m.first_name} ${m.last_name || ""}`.trim() : "") ||
     (isSelfUser ? (currentMember?.full_name ?? "") : "");
   const formattedFullName = formatFullName(rawFullName);
-  const displayHandle = m.handle || (isSelfUser ? (currentMember?.handle || "") : "");
+  const displayHandle = m.handle || (isSelfUser ? currentMember?.handle || "" : "");
   const displayName = formattedFullName || (displayHandle ? `@${displayHandle}` : "Cadet");
 
   const initials = formattedFullName
@@ -333,26 +346,21 @@ export function ProfilePage() {
         .toUpperCase()
     : (displayHandle.slice(0, 2) || "CC").toUpperCase();
 
-  const effectiveAvatar = isSelfUser
-    ? (m.avatar_url || currentMember?.avatar_url)
-    : m.avatar_url;
+  const effectiveAvatar = isSelfUser ? m.avatar_url || currentMember?.avatar_url : m.avatar_url;
   const resolvedAvatar = resolveAvatarUrl(effectiveAvatar);
 
   const isFollowedInStore =
     !isSelfUser &&
     (followingIds.includes(m.id) || (m.handle ? followingIds.includes(m.handle) : false));
 
-  const isFollowing =
-    isSelfUser
-      ? false
-      : hasFetchedFollowing
-        ? isFollowedInStore
-        : (isFollowedInStore || Boolean(m.is_following));
+  const isFollowing = isSelfUser
+    ? false
+    : hasFetchedFollowing
+      ? isFollowedInStore
+      : isFollowedInStore || Boolean(m.is_following);
 
   const isPendingFollowAction =
-    followLoading ||
-    actionPendingId === m.id ||
-    (m.handle ? actionPendingId === m.handle : false);
+    followLoading || actionPendingId === m.id || (m.handle ? actionPendingId === m.handle : false);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/profile/${m.handle}`;
@@ -376,7 +384,7 @@ export function ProfilePage() {
         toggleFollowThunk({
           targetId: m.id,
           targetHandle: m.handle,
-        })
+        }),
       ).unwrap();
 
       if (res.isFollowing) {
@@ -425,7 +433,7 @@ export function ProfilePage() {
                   className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-sans text-xs font-semibold p-1 text-center"
                 >
                   {isUploadingAvatar ? (
-                    <Loader2 className="size-4 animate-spin text-lime-400" />
+                    <WanderingEyes size="sm" className="h-4 text-lime-400" />
                   ) : (
                     <>
                       <Camera className="size-3.5" />
@@ -467,7 +475,11 @@ export function ProfilePage() {
                     variant="outline"
                     size="sm"
                   >
-                    {isUploadingAvatar ? <Loader2 size={11} className="animate-spin" /> : <Camera size={11} />}
+                    {isUploadingAvatar ? (
+                      <WanderingEyes size="inline" className="h-3 mr-1" />
+                    ) : (
+                      <Camera size={11} />
+                    )}
                     <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
                   </Button>
 
@@ -483,11 +495,7 @@ export function ProfilePage() {
                     </Button>
                   )}
 
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                  >
+                  <Button asChild variant="outline" size="sm">
                     <Link to="/settings">
                       <Edit3 size={11} />
                       <span>Settings</span>
@@ -505,22 +513,25 @@ export function ProfilePage() {
                   >
                     {isFollowing ? (
                       <>
-                        {isPendingFollowAction ? <Loader2 size={11} className="animate-spin" /> : <UserCheck size={11} />}
+                        {isPendingFollowAction ? (
+                          <WanderingEyes size="inline" className="h-3 mr-1" />
+                        ) : (
+                          <UserCheck size={11} />
+                        )}
                         <span>Following</span>
                       </>
                     ) : (
                       <>
-                        {isPendingFollowAction ? <Loader2 size={11} className="animate-spin" /> : <UserPlus size={11} />}
+                        {isPendingFollowAction ? (
+                          <WanderingEyes size="inline" className="h-3 mr-1" />
+                        ) : (
+                          <UserPlus size={11} />
+                        )}
                         <span>Follow</span>
                       </>
                     )}
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    size="icon-sm"
-                  >
+                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm">
                     {copied ? <Check size={11} className="text-lime-400" /> : <Share2 size={11} />}
                   </Button>
                 </div>
@@ -529,13 +540,13 @@ export function ProfilePage() {
 
             <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
               <TierBadge>{m.tier || "1★ Explorer"}</TierBadge>
-              {(m.department || (isSelfUser ? currentMember?.department : null)) ? (
+              {m.department || (isSelfUser ? currentMember?.department : null) ? (
                 <>
                   <span>·</span>
                   <span className="text-zinc-300">{m.department || currentMember?.department}</span>
                 </>
               ) : null}
-              {(m.batch || (isSelfUser ? currentMember?.batch : null)) ? (
+              {m.batch || (isSelfUser ? currentMember?.batch : null) ? (
                 <>
                   <span>·</span>
                   <span className="text-zinc-500">{m.batch || currentMember?.batch}</span>
@@ -576,7 +587,6 @@ export function ProfilePage() {
               {m.linkedin_url && (
                 <a
                   href={
-                    
                     m.linkedin_url.startsWith("http")
                       ? m.linkedin_url
                       : `https://linkedin.com/in/${m.linkedin_url}`
@@ -602,8 +612,8 @@ export function ProfilePage() {
             <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Email</dt>
             <dd className="text-zinc-300">
               {isSelfUser
-                ? (m.email || currentMember?.email || "—")
-                : (m.email || "Protected (Campus Only)")}
+                ? m.email || currentMember?.email || "—"
+                : m.email || "Protected (Campus Only)"}
             </dd>
           </div>
         </dl>
@@ -614,8 +624,14 @@ export function ProfilePage() {
         <Metric label="Rating" value={m.rating} detail={`Peak: ${m.peak_rating}`} />
         <Metric
           label="Rank"
-          value={(m.attendance_count ?? 0) > 0 && m.university_rank ? `#${m.university_rank}` : "#—"}
-          detail={(m.attendance_count ?? 0) > 0 && m.university_rank ? `of ${m.active_members || distribution?.total || 1} cadets` : "Unranked"}
+          value={
+            (m.attendance_count ?? 0) > 0 && m.university_rank ? `#${m.university_rank}` : "#—"
+          }
+          detail={
+            (m.attendance_count ?? 0) > 0 && m.university_rank
+              ? `of ${m.active_members || distribution?.total || 1} cadets`
+              : "Unranked"
+          }
         />
         <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />
         <Metric
@@ -628,7 +644,11 @@ export function ProfilePage() {
       {/* Trajectory & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
-          <SectionHeader kicker="01 // Rating History" index="TRAJECTORY" title="Competitive Trajectory" />
+          <SectionHeader
+            kicker="01 // Rating History"
+            index="TRAJECTORY"
+            title="Competitive Trajectory"
+          />
           <RatingChart data={history} />
         </div>
         <div>
@@ -645,12 +665,13 @@ export function ProfilePage() {
         <SectionHeader kicker="02 // Record" index="CONTESTS" title="Attended Tournaments" />
         <div className="divide-y divide-white/6 font-mono text-xs">
           {battles.length === 0 ? (
-            <div className="text-center py-8 text-zinc-600">
-              No recorded tournaments on file.
-            </div>
+            <div className="text-center py-8 text-zinc-600">No recorded tournaments on file.</div>
           ) : (
             battles.map((b: any) => (
-              <article key={b.certificate_id} className="py-3 flex items-center justify-between flex-wrap gap-3">
+              <article
+                key={b.certificate_id}
+                className="py-3 flex items-center justify-between flex-wrap gap-3"
+              >
                 <time className="text-zinc-500">
                   {new Date(b.date).toLocaleDateString("en-IN", {
                     day: "2-digit",
@@ -676,10 +697,23 @@ export function ProfilePage() {
                   ) : null}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-zinc-400">Rank <strong className="text-white font-semibold tabular-nums">#{b.rank}</strong></span>
-                  <span className="text-zinc-400">Solved <strong className="text-white font-semibold tabular-nums">{b.solved}</strong></span>
-                  <em className={b.delta >= 0 ? "text-lime-400 not-italic font-semibold tabular-nums" : "text-red-400 not-italic font-semibold tabular-nums"}>
-                    {b.delta > 0 ? "+" : ""}{b.delta}
+                  <span className="text-zinc-400">
+                    Rank{" "}
+                    <strong className="text-white font-semibold tabular-nums">#{b.rank}</strong>
+                  </span>
+                  <span className="text-zinc-400">
+                    Solved{" "}
+                    <strong className="text-white font-semibold tabular-nums">{b.solved}</strong>
+                  </span>
+                  <em
+                    className={
+                      b.delta >= 0
+                        ? "text-lime-400 not-italic font-semibold tabular-nums"
+                        : "text-red-400 not-italic font-semibold tabular-nums"
+                    }
+                  >
+                    {b.delta > 0 ? "+" : ""}
+                    {b.delta}
                   </em>
                 </div>
               </article>
@@ -701,12 +735,20 @@ export function ProfilePage() {
               <article
                 key={a.code || a.id || a.name || a.title}
                 className={`p-3.5 rounded-lg border ${
-                  a.earned !== false ? "border-lime-400/30 bg-black" : "border-white/6 bg-black opacity-40"
+                  a.earned !== false
+                    ? "border-lime-400/30 bg-black"
+                    : "border-white/6 bg-black opacity-40"
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  {a.earned !== false ? <Award className="size-3.5 text-lime-400" /> : <LockKeyhole className="size-3.5 text-zinc-500" />}
-                  <span className="text-[9px] uppercase tracking-wider text-zinc-500">{a.code || a.id || "ACH"}</span>
+                  {a.earned !== false ? (
+                    <Award className="size-3.5 text-lime-400" />
+                  ) : (
+                    <LockKeyhole className="size-3.5 text-zinc-500" />
+                  )}
+                  <span className="text-[9px] uppercase tracking-wider text-zinc-500">
+                    {a.code || a.id || "ACH"}
+                  </span>
                 </div>
                 <h3 className="font-semibold text-white">{a.name || a.title}</h3>
                 <p className="text-zinc-400 text-[11px] mt-0.5 leading-relaxed">{a.description}</p>
@@ -728,13 +770,17 @@ export function ProfilePage() {
       <AlertDialog open={showRemoveAvatarModal} onOpenChange={setShowRemoveAvatarModal}>
         <AlertDialogPortal>
           <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+          <AlertDialogPopup
+            from="top"
+            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
+          >
             <AlertDialogHeader className="space-y-2 text-left">
               <AlertDialogTitle className="text-base font-semibold text-white">
                 Remove profile photo?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Are you sure you want to remove your custom profile photo? This will revert your avatar to your initials placeholder.
+                Are you sure you want to remove your custom profile photo? This will revert your
+                avatar to your initials placeholder.
               </AlertDialogDescription>
             </AlertDialogHeader>
 

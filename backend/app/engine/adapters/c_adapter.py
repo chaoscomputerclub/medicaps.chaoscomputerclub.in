@@ -6,6 +6,7 @@ Generates typed C function prototypes with array size pointers and a fast truste
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Dict, List
 from app.engine.adapters.base import BaseLanguageAdapter
 from app.engine.contracts import DataType, FunctionSignature
@@ -118,6 +119,20 @@ class CAdapter(BaseLanguageAdapter):
                 parse_lines.append(f'    int _{name} = _ccc_read_int(&cur, "{name}");')
                 call_args.append(f"_{name}")
 
+        # For array-returning functions, ALWAYS pass &_returnSize as final out-param.
+        # The user's function sets *returnSize before returning the allocated array.
+        # Hardcoding to 2 (previous bug) caused wrong-answer for any array != length 2.
+        ret_size_decl = ""
+        if signature.return_type in (
+            DataType.INTEGER_ARRAY,
+            DataType.LONG_ARRAY,
+            DataType.STRING_ARRAY,
+            DataType.FLOAT_ARRAY,
+            DataType.DOUBLE_ARRAY,
+        ) or "int*" in ret_type or "long long*" in ret_type:
+            ret_size_decl = "    int _returnSize = 0;\n"
+            call_args.append("&_returnSize")
+
         parse_block = "\n".join(parse_lines)
         args_str = ", ".join(call_args)
 
@@ -126,12 +141,30 @@ class CAdapter(BaseLanguageAdapter):
             print_call = f'    printf("%d\\n", result);'
         elif ret_type == "long long":
             print_call = f'    printf("%lld\\n", result);'
-        elif ret_type == "double" or ret_type == "float":
+        elif ret_type in ("double", "float"):
             print_call = f'    printf("%.6f\\n", result);'
         elif ret_type == "bool":
             print_call = f'    printf("%s\\n", result ? "true" : "false");'
         elif ret_type == "char*":
             print_call = f'    printf("%s\\n", result ? result : "");'
+        elif ret_type == "int*" or signature.return_type == DataType.INTEGER_ARRAY:
+            print_call = (
+                '    printf("[");\n'
+                '    for (int _i = 0; _i < _returnSize; _i++) {\n'
+                '        if (_i > 0) printf(", ");\n'
+                '        printf("%d", result[_i]);\n'
+                '    }\n'
+                '    printf("]\\n");'
+            )
+        elif ret_type == "long long*" or signature.return_type == DataType.LONG_ARRAY:
+            print_call = (
+                '    printf("[");\n'
+                '    for (int _i = 0; _i < _returnSize; _i++) {\n'
+                '        if (_i > 0) printf(", ");\n'
+                '        printf("%lld", result[_i]);\n'
+                '    }\n'
+                '    printf("]\\n");'
+            )
         else:
             print_call = f'    printf("%d\\n", (int)result);'
 
@@ -262,19 +295,24 @@ static int** _ccc_read_int_2d_arr(const char** p, const char* key, int* size, in
 }}
 
 int main(void) {{
-    static char buf[1048576];
+    static char buf[16777216];  /* 16 MB — up from 1 MB to handle large test cases */
     size_t total = 0;
     int c;
     while ((c = getchar()) != EOF && total < sizeof(buf) - 1) {{
         buf[total++] = (char)c;
     }}
     buf[total] = '\\0';
+    /* Detect and report overflow instead of silently corrupting data */
+    if (c != EOF) {{
+        fprintf(stderr, "Judge Error: stdin exceeds 16 MB buffer limit.\\n");
+        return 1;
+    }}
     if (total == 0) return 0;
 
     const char* cur = buf;
 {parse_block}
 
-    {ret_type} result = {fn_name}({args_str});
+{ret_size_decl}    {ret_type} result = {fn_name}({args_str});
 {print_call}
 
     return 0;

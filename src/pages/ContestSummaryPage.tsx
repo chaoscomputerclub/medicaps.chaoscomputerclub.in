@@ -26,6 +26,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -43,7 +44,11 @@ import {
 } from "@/components/animate-ui/primitives/base/alert-dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestArenaThunk, fetchContestDetailThunk, fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
+import {
+  fetchContestArenaThunk,
+  fetchContestDetailThunk,
+  fetchMyParticipationsThunk,
+} from "@/store/slices/contestSlice";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { ContestSummarySkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
@@ -66,7 +71,7 @@ export function ContestSummaryPage() {
   const navigate = useNavigate();
 
   const { arenaData, isLoadingArena, currentContest, registration } = useAppSelector(
-    (state) => state.contest
+    (state) => state.contest,
   );
   const member = useAppSelector((state) => state.auth.member);
 
@@ -91,12 +96,11 @@ export function ContestSummaryPage() {
   const isCurrentSlug = currentContest?.slug === contestSlug;
   const isAlreadySubmitted = Boolean(
     backendVerified.isSubmitted ||
-    (isCurrentSlug && (
-      registration?.status === "submitted" ||
-      registration?.assessment_taken ||
-      registration?.assessment_status === "submitted" ||
-      registration?.assessment_status === "completed"
-    ))
+    (isCurrentSlug &&
+      (registration?.status === "submitted" ||
+        registration?.assessment_taken ||
+        registration?.assessment_status === "submitted" ||
+        registration?.assessment_status === "completed")),
   );
 
   useEffect(() => {
@@ -106,14 +110,18 @@ export function ContestSummaryPage() {
   }, [member, dispatch]);
 
   const resolvedAvatar = resolveAvatarUrl(member?.avatar_url);
-  const displayName = formatFullName(member?.full_name) || member?.handle || member?.email?.split("@")[0] || "Competitor";
+  const displayName =
+    formatFullName(member?.full_name) ||
+    member?.handle ||
+    member?.email?.split("@")[0] ||
+    "Competitor";
   const userInitial = member?.full_name?.trim()
     ? member.full_name.trim().charAt(0).toUpperCase()
     : member?.handle?.trim()
-    ? member.handle.trim().charAt(0).toUpperCase()
-    : member?.email?.trim()
-    ? member.email.trim().charAt(0).toUpperCase()
-    : "U";
+      ? member.handle.trim().charAt(0).toUpperCase()
+      : member?.email?.trim()
+        ? member.email.trim().charAt(0).toUpperCase()
+        : "U";
 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -133,7 +141,8 @@ export function ContestSummaryPage() {
         ]);
         if (isCancelled) return;
 
-        let verifiedSubmissions: Record<string, { verdict: string; score: number; code?: string }> = {};
+        let verifiedSubmissions: Record<string, { verdict: string; score: number; code?: string }> =
+          {};
         if (assessData?.submissions && typeof assessData.submissions === "object") {
           verifiedSubmissions = assessData.submissions;
           setServerSubmissions(verifiedSubmissions);
@@ -145,14 +154,15 @@ export function ContestSummaryPage() {
           reg?.assessment_status === "submitted" ||
           reg?.assessment_status === "completed" ||
           assessData?.session?.status === "submitted" ||
-          assessData?.session?.status === "completed"
+          assessData?.session?.status === "completed",
         );
 
-        const verifiedScore = typeof reg?.assessment_score === "number" && reg.assessment_score > 0
-          ? reg.assessment_score
-          : typeof assessData?.session?.total_score === "number"
-          ? assessData.session.total_score
-          : 0;
+        const verifiedScore =
+          typeof reg?.assessment_score === "number" && reg.assessment_score > 0
+            ? reg.assessment_score
+            : typeof assessData?.session?.total_score === "number"
+              ? assessData.session.total_score
+              : 0;
 
         setBackendVerified({
           isLoading: false,
@@ -175,9 +185,10 @@ export function ContestSummaryPage() {
 
   const activeArena = arenaData?.slug === contestSlug ? arenaData : null;
   const activeContest = currentContest?.slug === contestSlug ? currentContest : null;
-  const problems: ContestArenaProblem[] = activeArena?.problems && activeArena.problems.length > 0
-    ? activeArena.problems
-    : ((activeContest as any)?.problems || []);
+  const problems: ContestArenaProblem[] =
+    activeArena?.problems && activeArena.problems.length > 0
+      ? activeArena.problems
+      : (activeContest as any)?.problems || [];
 
   // Load solved problems from localStorage as secondary fallback
   const solvedProblemIds = useMemo(() => {
@@ -199,11 +210,11 @@ export function ContestSummaryPage() {
 
     problems.forEach((p) => {
       const serverSub = serverSubmissions[p.id];
-      const isServerAccepted = serverSub && (
-        serverSub.verdict === "Accepted" ||
-        serverSub.verdict === "ACCEPTED" ||
-        serverSub.score >= (p.points || 100)
-      );
+      const isServerAccepted =
+        serverSub &&
+        (serverSub.verdict === "Accepted" ||
+          serverSub.verdict === "ACCEPTED" ||
+          serverSub.score >= (p.points || 100));
 
       if (isServerAccepted || solvedProblemIds.has(p.id)) {
         map[p.id] = "solved";
@@ -299,7 +310,7 @@ export function ContestSummaryPage() {
                   reg.status === "submitted" ||
                   reg.assessment_taken ||
                   reg.assessment_status === "submitted" ||
-                  reg.assessment_status === "completed"
+                  reg.assessment_status === "completed",
                 ),
                 contestStatus: reg.contest_status || "finished",
                 score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
@@ -314,7 +325,7 @@ export function ContestSummaryPage() {
       }
     },
     undefined,
-    Boolean(contestSlug)
+    Boolean(contestSlug),
   );
 
   useEffect(() => {
@@ -333,7 +344,7 @@ export function ContestSummaryPage() {
                 reg.status === "submitted" ||
                 reg.assessment_taken ||
                 reg.assessment_status === "submitted" ||
-                reg.assessment_status === "completed"
+                reg.assessment_status === "completed",
               ),
               contestStatus: reg.contest_status || "finished",
               score: typeof reg.assessment_score === "number" ? reg.assessment_score : prev.score,
@@ -353,7 +364,10 @@ export function ContestSummaryPage() {
     setIsSubmittingFinal(true);
     try {
       const res = await contestApi.finishContest(contestSlug);
-      if (res && (res.success || (res as any).status === "submitted" || (res as any).already_submitted)) {
+      if (
+        res &&
+        (res.success || (res as any).status === "submitted" || (res as any).already_submitted)
+      ) {
         toast.success(res.message || "Contest successfully submitted!");
         setShowSubmitModal(false);
         setBackendVerified((prev) => ({
@@ -393,7 +407,11 @@ export function ContestSummaryPage() {
         {/* Left: Microservice Brand & Navigation */}
         <div className="flex items-center gap-3.5 min-w-0">
           <Link
-            to={isAlreadySubmitted ? `/contests/${contestSlug}` : `/contests/${contestSlug}/problems/${firstProblemSlug}`}
+            to={
+              isAlreadySubmitted
+                ? `/contests/${contestSlug}`
+                : `/contests/${contestSlug}/problems/${firstProblemSlug}`
+            }
             className="flex items-center gap-2 shrink-0 group"
             title={isAlreadySubmitted ? "Return to Contest Overview" : "Return to Contest Arena"}
           >
@@ -427,22 +445,33 @@ export function ContestSummaryPage() {
         {/* Right: Actions, Timer, Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           {/* Back to Arena / Overview Button */}
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-          >
-            <Link to={isAlreadySubmitted ? `/contests/${contestSlug}` : `/contests/${contestSlug}/problems/${firstProblemSlug}`}>
+          <Button asChild variant="outline" size="sm">
+            <Link
+              to={
+                isAlreadySubmitted
+                  ? `/contests/${contestSlug}`
+                  : `/contests/${contestSlug}/problems/${firstProblemSlug}`
+              }
+            >
               <ArrowLeft className="size-3.5 mr-1" />
-              <span className="hidden sm:inline">{isAlreadySubmitted ? "Back to" : "Back to"}</span> {isAlreadySubmitted ? "Overview" : "Workspace"}
+              <span className="hidden sm:inline">
+                {isAlreadySubmitted ? "Back to" : "Back to"}
+              </span>{" "}
+              {isAlreadySubmitted ? "Overview" : "Workspace"}
             </Link>
           </Button>
 
           {/* Live Timer Pill */}
           <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-white/10 bg-zinc-950 font-mono text-xs shadow-inner">
-            <Clock className={`size-3.5 ${remainingSeconds < 300 ? "text-red-400 animate-pulse" : "text-lime-400"}`} />
-            <span className="text-zinc-500 uppercase text-[10px] tracking-wider hidden lg:inline">Time Left:</span>
-            <span className={`font-semibold tabular-nums ${remainingSeconds < 300 ? "text-red-400" : "text-white"}`}>
+            <Clock
+              className={`size-3.5 ${remainingSeconds < 300 ? "text-red-400 animate-pulse" : "text-lime-400"}`}
+            />
+            <span className="text-zinc-500 uppercase text-[10px] tracking-wider hidden lg:inline">
+              Time Left:
+            </span>
+            <span
+              className={`font-semibold tabular-nums ${remainingSeconds < 300 ? "text-red-400" : "text-white"}`}
+            >
               {formatTimer(remainingSeconds)}
             </span>
           </div>
@@ -455,7 +484,11 @@ export function ContestSummaryPage() {
           >
             <Avatar className="size-7 rounded-full border border-white/15 bg-black shrink-0">
               {resolvedAvatar ? (
-                <AvatarImage src={resolvedAvatar} alt={displayName} className="size-full rounded-full object-cover" />
+                <AvatarImage
+                  src={resolvedAvatar}
+                  alt={displayName}
+                  className="size-full rounded-full object-cover"
+                />
               ) : null}
               <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center">
                 {userInitial}
@@ -467,10 +500,7 @@ export function ContestSummaryPage() {
           </Link>
 
           {/* Submit Contest Primary CTA */}
-          <Button
-            onClick={() => setShowSubmitModal(true)}
-            size="sm"
-          >
+          <Button onClick={() => setShowSubmitModal(true)} size="sm">
             <Send className="size-3.5 mr-1.5" />
             <span>Submit Contest</span>
           </Button>
@@ -516,10 +546,15 @@ export function ContestSummaryPage() {
             <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/8 bg-zinc-950">
                 <span className="size-1.5 rounded-full bg-lime-400" />
-                <span>Candidate: <strong className="text-white">{member?.handle || "Cadet"}</strong></span>
+                <span>
+                  Candidate: <strong className="text-white">{member?.handle || "Cadet"}</strong>
+                </span>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/8 bg-zinc-950">
-                <span>Earned: <strong className="text-lime-400 tabular-nums">{earnedPoints}</strong> / {totalPossiblePoints} Pts</span>
+                <span>
+                  Earned: <strong className="text-lime-400 tabular-nums">{earnedPoints}</strong> /{" "}
+                  {totalPossiblePoints} Pts
+                </span>
               </div>
             </div>
           </div>
@@ -528,36 +563,52 @@ export function ContestSummaryPage() {
         {/* HackerRank-style Metric Bento Grid */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
           <div className="p-4 rounded-lg border border-white/8 bg-zinc-950 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">Total Challenges</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              Total Challenges
+            </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-white tabular-nums">{problems.length}</span>
+              <span className="text-2xl font-bold font-mono text-white tabular-nums">
+                {problems.length}
+              </span>
               <FileText className="size-4 text-zinc-500" />
             </div>
             <span className="font-mono text-[10px] text-zinc-400">Problem statements</span>
           </div>
 
           <div className="p-4 rounded-lg border border-lime-400/20 bg-lime-400/5 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-lime-400">Solved &amp; Passed</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-lime-400">
+              Solved &amp; Passed
+            </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-lime-400 tabular-nums">{solvedCount}</span>
+              <span className="text-2xl font-bold font-mono text-lime-400 tabular-nums">
+                {solvedCount}
+              </span>
               <CheckCircle2 className="size-4 text-lime-400" />
             </div>
             <span className="font-mono text-[10px] text-lime-400/70">100% test cases accepted</span>
           </div>
 
           <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-500/5 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">In Progress</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">
+              In Progress
+            </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-amber-400 tabular-nums">{attemptedCount}</span>
+              <span className="text-2xl font-bold font-mono text-amber-400 tabular-nums">
+                {attemptedCount}
+              </span>
               <Code2 className="size-4 text-amber-400" />
             </div>
             <span className="font-mono text-[10px] text-amber-400/70">Draft code stored</span>
           </div>
 
           <div className="p-4 rounded-lg border border-white/8 bg-zinc-950 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">Unattempted</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              Unattempted
+            </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-zinc-400 tabular-nums">{unattemptedCount}</span>
+              <span className="text-2xl font-bold font-mono text-zinc-400 tabular-nums">
+                {unattemptedCount}
+              </span>
               <MinusCircle className="size-4 text-zinc-600" />
             </div>
             <span className="font-mono text-[10px] text-zinc-500">No submission yet</span>
@@ -598,8 +649,8 @@ export function ContestSummaryPage() {
                         isSolved
                           ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
                           : isAttempted
-                          ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
-                          : "border border-white/10 bg-zinc-900 text-zinc-400"
+                            ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
+                            : "border border-white/10 bg-zinc-900 text-zinc-400"
                       }`}
                     >
                       {problem.problem_index}
@@ -619,8 +670,8 @@ export function ContestSummaryPage() {
                             problem.difficulty === "HARD"
                               ? "border-red-500/30 text-red-400 bg-red-500/5"
                               : problem.difficulty === "MEDIUM"
-                              ? "border-amber-500/30 text-amber-400 bg-amber-500/5"
-                              : "border-emerald-500/30 text-emerald-400 bg-emerald-500/5"
+                                ? "border-amber-500/30 text-amber-400 bg-amber-500/5"
+                                : "border-emerald-500/30 text-emerald-400 bg-emerald-500/5"
                           }`}
                         >
                           {problem.difficulty || "MEDIUM"}
@@ -630,7 +681,10 @@ export function ContestSummaryPage() {
                       <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-500">
                         <span>{problem.topic || "Algorithmic"}</span>
                         <span>·</span>
-                        <span>Max Score: <strong className="text-zinc-300">{problem.points || 100} Pts</strong></span>
+                        <span>
+                          Max Score:{" "}
+                          <strong className="text-zinc-300">{problem.points || 100} Pts</strong>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -655,13 +709,15 @@ export function ContestSummaryPage() {
                     )}
 
                     {/* Action Button */}
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                    >
+                    <Button asChild variant="outline" size="sm">
                       <Link to={`/contests/${contestSlug}/problems/${problemSlug}`}>
-                        <span>{isSolved ? "Review Code" : isAttempted ? "Continue Solving" : "Solve Challenge"}</span>
+                        <span>
+                          {isSolved
+                            ? "Review Code"
+                            : isAttempted
+                              ? "Continue Solving"
+                              : "Solve Challenge"}
+                        </span>
                         <ArrowRight className="size-3 ml-1" />
                       </Link>
                     </Button>
@@ -684,30 +740,22 @@ export function ContestSummaryPage() {
                   Contest Attempt Concluded &amp; Submitted
                 </h3>
                 <p className="text-xs text-zinc-300 font-mono leading-relaxed">
-                  Your contest solutions have been officially submitted and recorded in the Medi-Caps Chapter contest ledger. In accordance with the fair competition protocol, retakes and further attempts are strictly locked.
+                  Your contest solutions have been officially submitted and recorded in the
+                  Medi-Caps Chapter contest ledger. In accordance with the fair competition
+                  protocol, retakes and further attempts are strictly locked.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
-              <Button
-                asChild
-                variant="outline"
-                size="default"
-                className="w-full sm:w-auto"
-              >
+              <Button asChild variant="outline" size="default" className="w-full sm:w-auto">
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Return to Contest Overview</span>
                 </Link>
               </Button>
 
-              <Button
-                asChild
-                variant="default"
-                size="default"
-                className="w-full sm:w-auto"
-              >
+              <Button asChild variant="default" size="default" className="w-full sm:w-auto">
                 <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy className="size-3.5 mr-1.5" />
                   <span>View Official Standings</span>
@@ -722,17 +770,18 @@ export function ContestSummaryPage() {
                 <Trophy className="size-5" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-white">
-                  Ready to Complete Contest?
-                </h3>
+                <h3 className="text-base font-semibold text-white">Ready to Complete Contest?</h3>
                 <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                   {unattemptedCount > 0 ? (
                     <span className="text-amber-400">
-                      You still have <strong>{unattemptedCount} unattempted question(s)</strong>. You can return to the coding workspace to complete them, or submit now if you are finished.
+                      You still have <strong>{unattemptedCount} unattempted question(s)</strong>.
+                      You can return to the coding workspace to complete them, or submit now if you
+                      are finished.
                     </span>
                   ) : (
                     <span>
-                      All challenges have been attempted and verified. Click below to officially submit your contest attempt and lock in your score.
+                      All challenges have been attempted and verified. Click below to officially
+                      submit your contest attempt and lock in your score.
                     </span>
                   )}
                 </p>
@@ -740,12 +789,7 @@ export function ContestSummaryPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
-              <Button
-                asChild
-                variant="outline"
-                size="default"
-                className="w-full sm:w-auto"
-              >
+              <Button asChild variant="outline" size="default" className="w-full sm:w-auto">
                 <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Return to Coding Workspace</span>
@@ -784,7 +828,10 @@ export function ContestSummaryPage() {
       <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
         <AlertDialogPortal>
           <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup from="top" className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl">
+          <AlertDialogPopup
+            from="top"
+            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
+          >
             <AlertDialogHeader className="space-y-2.5 text-left">
               <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
                 <AlertTriangle className="size-5" />
@@ -793,14 +840,17 @@ export function ContestSummaryPage() {
                 Confirm Final Contest Submission?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed">
-                Once submitted, your test attempt will be finalized and evaluated against the full testcase judge. You will no longer be able to edit your solutions for this contest.
+                Once submitted, your test attempt will be finalized and evaluated against the full
+                testcase judge. You will no longer be able to edit your solutions for this contest.
               </AlertDialogDescription>
             </AlertDialogHeader>
 
             <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500">Total Solved:</span>
-                <span className="font-semibold text-lime-400">{solvedCount} of {problems.length} Challenges</span>
+                <span className="font-semibold text-lime-400">
+                  {solvedCount} of {problems.length} Challenges
+                </span>
               </div>
               {unattemptedCount > 0 && (
                 <div className="flex items-center justify-between border-t border-white/6 pt-2">
@@ -810,7 +860,9 @@ export function ContestSummaryPage() {
               )}
               <div className="flex items-center justify-between border-t border-white/6 pt-2">
                 <span className="text-zinc-500">Estimated Points:</span>
-                <span className="font-semibold text-white">{earnedPoints} / {totalPossiblePoints} Pts</span>
+                <span className="font-semibold text-white">
+                  {earnedPoints} / {totalPossiblePoints} Pts
+                </span>
               </div>
             </div>
 
@@ -831,7 +883,7 @@ export function ContestSummaryPage() {
               >
                 {isSubmittingFinal ? (
                   <>
-                    <span className="size-3 border-2 border-black border-t-transparent rounded-full animate-spin mr-1.5" />
+                    <WanderingEyes size="sm" className="h-3.5 mr-1.5 text-black" />
                     <span>Submitting...</span>
                   </>
                 ) : (
