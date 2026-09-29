@@ -99,12 +99,7 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
     --exclude 'ccc_medicaps.db' \
     ${REMOTE_REPO}/backend/ ${REMOTE_API_DIR}/
 
-  # 2. Ensure official contest state is initialized with canonical schedule
-  echo '→ Updating official contest schedule in production DB...'
-  cd ${REMOTE_API_DIR}
-  venv/bin/python scripts/launch_official_contests.py || true
-
-  # 3. Restart FastAPI backend systemd service
+  # 2. Restart FastAPI backend systemd service (Zero database mutations on deployment)
   systemctl restart ccc-medicaps-api.service
   echo '→ Backend service restarted.'
 "

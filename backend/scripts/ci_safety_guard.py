@@ -121,7 +121,7 @@ def assert_safe_to_run(script_path: str) -> None:
     db_url = _database_url()
 
     # ── HARD BLOCK 1: Running directly on production droplet host ─────────────
-    if _is_running_on_production_droplet() and not _is_ci():
+    if _is_running_on_production_droplet():
         print(
             f"\n{'=' * 72}\n"
             f"  🚨  PRODUCTION SAFETY GUARD — EXECUTION BLOCKED ON LIVE HOST\n"

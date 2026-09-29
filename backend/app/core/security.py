@@ -142,9 +142,19 @@ def set_auth_cookies(
     """
     secure = is_connection_secure(request)
     domain = settings.COOKIE_DOMAIN or None
-    samesite = settings.COOKIE_SAMESITE
+    samesite = settings.COOKIE_SAMESITE or "lax"
 
-    # Short-lived Access Token Cookie (15 min)
+    # Avoid domain attribute on localhost requests to prevent browser rejection
+    if request:
+        host = request.headers.get("host", "").lower()
+        if "localhost" in host or "127.0.0.1" in host:
+            domain = None
+
+    # Browsers strictly require Secure=True if SameSite=None
+    if samesite.lower() == "none" and not secure:
+        samesite = "lax"
+
+    # Short-lived Access Token Cookie (15 min / configured minutes)
     access_max_age = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     response.set_cookie(
         key="access_token",
@@ -183,7 +193,15 @@ def clear_auth_cookies(
     """
     secure = is_connection_secure(request)
     domain = settings.COOKIE_DOMAIN or None
-    samesite = settings.COOKIE_SAMESITE
+    samesite = settings.COOKIE_SAMESITE or "lax"
+
+    if request:
+        host = request.headers.get("host", "").lower()
+        if "localhost" in host or "127.0.0.1" in host:
+            domain = None
+
+    if samesite.lower() == "none" and not secure:
+        samesite = "lax"
 
     for cookie_name in ("access_token", "refresh_token"):
         response.delete_cookie(

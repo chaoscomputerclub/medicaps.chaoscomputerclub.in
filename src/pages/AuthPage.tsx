@@ -130,7 +130,12 @@ export function AuthPage() {
     const tokenParam = params.get("token");
     const onboardedParam = params.get("is_onboarded") ?? params.get("onboarding");
     const emailParam = params.get("email");
+    const returnUrlParam = params.get("return_url");
     const errorParam = params.get("error");
+    const targetDest =
+      returnUrlParam && returnUrlParam.startsWith("/") && !returnUrlParam.startsWith("//")
+        ? returnUrlParam
+        : "/";
 
     if (errorParam) {
       if (errorParam === "unauthorized_domain") {
@@ -160,7 +165,7 @@ export function AuthPage() {
       const isOnboarded =
         onboardedParam === "true" || onboardedParam === "0" || params.get("onboarding") === "0";
       if (isOnboarded) {
-        void preloadFullProfile(tokenParam).then(() => navigate("/"));
+        void preloadFullProfile(tokenParam).then(() => navigate(targetDest));
       } else {
         dispatch(setStep("onboarding"));
       }
@@ -176,7 +181,7 @@ export function AuthPage() {
         .unwrap()
         .then((m) => {
           if (m.is_onboarded) {
-            navigate("/");
+            navigate(targetDest);
           } else {
             if (m.email) dispatch(setEmail(m.email));
             if (m.full_name) dispatch(setName(m.full_name));
@@ -246,7 +251,10 @@ export function AuthPage() {
       const res = result.payload;
       if (!res.is_new_user && res.member?.is_onboarded) {
         await preloadFullProfile(res.access_token);
-        navigate("/");
+        const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+        const returnDest = searchParams?.get("return_url");
+        const dest = returnDest && returnDest.startsWith("/") && !returnDest.startsWith("//") ? returnDest : "/";
+        navigate(dest);
       }
     }
   }
@@ -419,7 +427,9 @@ export function AuthPage() {
               variant="outline"
               size="lg"
               onClick={() => {
-                window.location.href = getGoogleLoginURL();
+                const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+                const returnDest = searchParams?.get("return_url") || "";
+                window.location.href = getGoogleLoginURL(returnDest);
               }}
               disabled={pending}
               className="w-full h-11 text-[14px] text-zinc-200 hover:text-white [&_span]:hover:text-white border-white/[0.08] hover:bg-white/[0.04] hover:border-white/20 gap-2.5 font-normal rounded-xl transition-colors duration-150"

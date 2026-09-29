@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 from app.core.config import settings
+from app.core.origins import validate_frontend_origin
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
@@ -30,6 +31,17 @@ from app.api.v1.router import api_router_v1
 async def lifespan(app: FastAPI):
     """Application lifespan: initialize database tables with zero static/mock data."""
     print(f"⚡ Starting {settings.PROJECT_NAME} (v{settings.VERSION})...")
+
+    # ── Environment & Origin Integrity Verification ──────────────────────────
+    from app.core.origins import is_localhost_origin
+    if settings.ENVIRONMENT.lower() == "production":
+        if is_localhost_origin(settings.FRONTEND_URL):
+            raise RuntimeError(
+                f"FATAL CONFIGURATION ERROR: Production backend cannot have localhost FRONTEND_URL ('{settings.FRONTEND_URL}'). "
+                "Must be configured to production domain, e.g. 'https://medicaps.chaoscomputerclub.in'."
+            )
+        print(f"✓ Production environment verified: FRONTEND_URL={settings.FRONTEND_URL}")
+
     await init_db()
     print("✓ Database verified & initialized successfully (clean state).")
 
@@ -95,16 +107,19 @@ app.add_middleware(
 async def global_exception_handler(request: Request, exc: Exception):
     logging.getLogger("uvicorn.error").exception(f"Unhandled error on {request.method} {request.url.path}: {exc}")
     origin = request.headers.get("origin")
-    allow_origin = origin if origin and ("localhost" in origin or "127.0.0.1" in origin or "chaoscomputerclub.in" in origin) else "*"
+    valid_origin = validate_frontend_origin(origin)
+
+    headers = {}
+    if valid_origin:
+        headers["Access-Control-Allow-Origin"] = valid_origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+        headers["Access-Control-Allow-Methods"] = "*"
+        headers["Access-Control-Allow-Headers"] = "*"
+
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal Server Error", "error": str(exc)},
-        headers={
-            "Access-Control-Allow-Origin": allow_origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
-        },
+        headers=headers,
     )
 
 

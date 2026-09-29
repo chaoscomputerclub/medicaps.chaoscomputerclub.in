@@ -72,3 +72,11 @@ graphify-out/
 .graphify*
 
 .codex/
+
+# Database Backups & Dumps (Mandatory Security Isolation)
+*.dump
+*.dump.gz
+*.sql.gz
+backups/
+backend/backups/
+!backend/migrations/*.sql

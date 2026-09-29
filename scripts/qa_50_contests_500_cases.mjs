@@ -14,8 +14,16 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BASE_URL = process.env.API_BASE_URL || 'https://medicaps-api.chaoscomputerclub.in/api';
+const BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:8000/api';
 const PROCTOR_KEY = process.env.PROCTOR_KEY || '1337';
+
+const PROD_FINGERPRINTS = ["143.198.38.205", "medicaps-api.", "medicaps.chaoscomputerclub.in", "chaoscomputerclub.in"];
+const IS_PROD_TARGET = PROD_FINGERPRINTS.some((fp) => BASE_URL.toLowerCase().includes(fp));
+
+if (IS_PROD_TARGET) {
+  console.log(`\n🚨 TARGET IS PRODUCTION: ${BASE_URL}`);
+  console.log(`   Simulations and destructive testing are strictly blocked against production.`);
+}
 
 const c = {
   reset: '\x1b[0m', bright: '\x1b[1m',
@@ -96,41 +104,46 @@ async function main() {
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 1: Tournament Simulation (10 meta-checks)
   // ══════════════════════════════════════════════════════════════════════════
-  console.log(`\n${c.yellow}⚡ Phase 1: 50-Contest, 110-Cadet Tournament Simulation${c.reset}`);
-  const simRes = await api('/admin/qa/simulate-tournament', 'POST', {
-    cadet_count: 110, contest_count: 50,
-    primary_handle: 'santusht', primary_email: 'santusht.en23@medicaps.ac.in',
-    primary_name: 'Santusht Kotai', primary_prn: 'EN23CS301927',
-  });
-  const sim = simRes.data || {};
-  check('P1-T01', 'Tournament simulation — HTTP 200', simRes.ok && sim.success === true,
-    `50 contests, 110 cadets, ${sim.total_finalists_qualified} finalists in ${simRes.latency.toFixed(0)}ms`,
-    `HTTP ${simRes.status}: ${JSON.stringify(sim).slice(0, 100)}`, simRes.latency);
-  check('P1-T02', '50 Contests created', sim.total_contests_created === 50,
-    `Created exactly 50 arena contests`, `Got ${sim.total_contests_created}`, 0.1);
-  check('P1-T03', '110 Cadets enrolled', sim.total_cadets === 110,
-    '110 unique Medi-Caps cadets seeded', `Got ${sim.total_cadets}`, 0.1);
-  check('P1-T04', '5,500 Screening evaluations', sim.total_screenings_evaluated === 5500,
-    '110 cadets × 50 contests', `Got ${sim.total_screenings_evaluated}`, 0.1);
-  check('P1-T05', '1,500 Top-30 finalist slots', sim.total_finalists_qualified === 1500,
-    '30 finalists × 50 contests', `Got ${sim.total_finalists_qualified}`, 0.1);
-  check('P1-T06', '200 Arena problems generated', sim.total_problems_generated === 200,
-    '4 problems × 50 contests', `Got ${sim.total_problems_generated}`, 0.1);
-  check('P1-T07', 'Santusht is Grandmaster+ (rating ≥2000)',
-    (sim.target_cadet?.rating || 0) >= 2000,
-    `Rating: ${sim.target_cadet?.rating} (${sim.target_cadet?.tier})`,
-    `Rating only ${sim.target_cadet?.rating}`, 0.1);
-  check('P1-T08', 'Santusht has podium finishes (≥5)',
-    (sim.target_cadet?.podiums || 0) >= 5,
-    `${sim.target_cadet?.podiums} podiums`, `Only ${sim.target_cadet?.podiums}`, 0.1);
-  check('P1-T09', 'Santusht attended all 50 contests',
-    sim.target_cadet?.contests_attended === 50,
-    `Attended all 50`, `Attended ${sim.target_cadet?.contests_attended}`, 0.1);
-  check('P1-T10', 'Contest sample present',
-    Array.isArray(sim.contests_sample) && sim.contests_sample.length >= 1,
-    `First: "${sim.contests_sample?.[0]?.title}"`, 'No sample', 0.1);
+  if (IS_PROD_TARGET) {
+    console.log(`\n${c.yellow}🔒 [PRODUCTION SAFEGUARD] Phase 1 tournament simulation is skipped against live production.${c.reset}`);
+    pass('P1-PROD-GUARD', 'Tournament simulation blocked against production', 'Production DB integrity guaranteed');
+  } else {
+    console.log(`\n${c.yellow}⚡ Phase 1: 50-Contest, 110-Cadet Tournament Simulation${c.reset}`);
+    const simRes = await api('/admin/qa/simulate-tournament', 'POST', {
+      cadet_count: 110, contest_count: 50,
+      primary_handle: 'santusht', primary_email: 'santusht.en23@medicaps.ac.in',
+      primary_name: 'Santusht Kotai', primary_prn: 'EN23CS301927',
+    });
+    const sim = simRes.data || {};
+    check('P1-T01', 'Tournament simulation — HTTP 200', simRes.ok && sim.success === true,
+      `50 contests, 110 cadets, ${sim.total_finalists_qualified} finalists in ${simRes.latency.toFixed(0)}ms`,
+      `HTTP ${simRes.status}: ${JSON.stringify(sim).slice(0, 100)}`, simRes.latency);
+    check('P1-T02', '50 Contests created', sim.total_contests_created === 50,
+      `Created exactly 50 arena contests`, `Got ${sim.total_contests_created}`, 0.1);
+    check('P1-T03', '110 Cadets enrolled', sim.total_cadets === 110,
+      '110 unique Medi-Caps cadets seeded', `Got ${sim.total_cadets}`, 0.1);
+    check('P1-T04', '5,500 Screening evaluations', sim.total_screenings_evaluated === 5500,
+      '110 cadets × 50 contests', `Got ${sim.total_screenings_evaluated}`, 0.1);
+    check('P1-T05', '1,500 Top-30 finalist slots', sim.total_finalists_qualified === 1500,
+      '30 finalists × 50 contests', `Got ${sim.total_finalists_qualified}`, 0.1);
+    check('P1-T06', '200 Arena problems generated', sim.total_problems_generated === 200,
+      '4 problems × 50 contests', `Got ${sim.total_problems_generated}`, 0.1);
+    check('P1-T07', 'Santusht is Grandmaster+ (rating ≥2000)',
+      (sim.target_cadet?.rating || 0) >= 2000,
+      `Rating: ${sim.target_cadet?.rating} (${sim.target_cadet?.tier})`,
+      `Rating only ${sim.target_cadet?.rating}`, 0.1);
+    check('P1-T08', 'Santusht has podium finishes (≥5)',
+      (sim.target_cadet?.podiums || 0) >= 5,
+      `${sim.target_cadet?.podiums} podiums`, `Only ${sim.target_cadet?.podiums}`, 0.1);
+    check('P1-T09', 'Santusht attended all 50 contests',
+      sim.target_cadet?.contests_attended === 50,
+      `Attended all 50`, `Attended ${sim.target_cadet?.contests_attended}`, 0.1);
+    check('P1-T10', 'Contest sample present',
+      Array.isArray(sim.contests_sample) && sim.contests_sample.length >= 1,
+      `First: "${sim.contests_sample?.[0]?.title}"`, 'No sample', 0.1);
 
-  if (!simRes.ok) { console.error('Simulation failed — aborting per-contest loop.'); process.exit(1); }
+    if (!simRes.ok) { console.error('Simulation failed — aborting per-contest loop.'); process.exit(1); }
+  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 2: Contest Catalogue (5 checks)

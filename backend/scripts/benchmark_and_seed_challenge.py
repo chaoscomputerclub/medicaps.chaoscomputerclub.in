@@ -9,9 +9,18 @@ import asyncio
 import heapq
 import json
 import logging
+import os
 import random
+import sys
 import time
 from typing import Any, Dict, List, Tuple
+
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
 
 from app.core.db import AsyncSessionLocal, engine
 from app.engine.contracts import DataType, FunctionSignature, ParameterDefinition, EvaluationConfig, MatchType

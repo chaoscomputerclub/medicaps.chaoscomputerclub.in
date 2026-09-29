@@ -417,14 +417,46 @@ export async function verifyOTP(
   });
 }
 
+// ── Environment & Origin Helpers ───────────────────────────────────────────
+
+export function getFrontendOrigin(): string {
+  if (typeof window !== "undefined" && window.location.origin) {
+    return window.location.origin.trim().replace(/\/+$/, "");
+  }
+  const envUrl =
+    typeof import.meta !== "undefined" && import.meta.env
+      ? (import.meta.env as Record<string, string>)["VITE_APP_URL"]
+      : undefined;
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, "");
+  }
+  return "https://medicaps.chaoscomputerclub.in";
+}
+
 // ── Google OAuth ───────────────────────────────────────────────────────────
 
-export function getGoogleLoginURL(): string {
+export function getGoogleLoginURL(returnPath?: string): string {
   const base = getApiBase();
-  if (base.startsWith("/")) {
-    return `${typeof window !== "undefined" ? window.location.origin : ""}${base}/auth/google/login`;
+  const origin = getFrontendOrigin();
+  const endpoint = base.startsWith("/")
+    ? `${origin}${base}/auth/google/login`
+    : `${base}/auth/google/login`;
+
+  try {
+    const url = new URL(endpoint, origin);
+    if (origin) {
+      url.searchParams.set("origin", origin);
+    }
+    if (returnPath && returnPath.startsWith("/") && !returnPath.startsWith("//")) {
+      url.searchParams.set("return_path", returnPath);
+    }
+    return url.toString();
+  } catch {
+    const delim = endpoint.includes("?") ? "&" : "?";
+    const originParam = origin ? `origin=${encodeURIComponent(origin)}` : "";
+    const returnParam = returnPath ? `&return_path=${encodeURIComponent(returnPath)}` : "";
+    return `${endpoint}${delim}${originParam}${returnParam}`;
   }
-  return `${base}/auth/google/login`;
 }
 
 // ── Onboarding ─────────────────────────────────────────────────────────────

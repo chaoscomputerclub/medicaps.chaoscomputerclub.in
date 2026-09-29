@@ -78,7 +78,17 @@ async def simulate_tournament(
 ):
     """
     Executes an end-to-end 50-contest simulation with 110 real cadets.
+    STRICTLY FORBIDDEN IN PRODUCTION.
     """
+    from fastapi import HTTPException
+    from app.core.safety import is_production_environment
+
+    if is_production_environment():
+        raise HTTPException(
+            status_code=403,
+            detail="Tournament simulation and synthetic data generation is strictly forbidden in production.",
+        )
+
     req = payload or TournamentSimulationRequest()
     return await AdminQAController.simulate_tournament(
         cadet_count=req.cadet_count,

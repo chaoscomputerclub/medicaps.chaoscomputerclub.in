@@ -29,8 +29,7 @@ from app.models.db_models import (
     AssessmentProblem,
     now_utc,
 )
-from app.core.cache import delete_cache_pattern
-from app.services.seed_service import purge_all_contest_data
+from app.core.safety import is_production_environment
 from app.services.contest_schedule_service import get_next_wednesday_schedule, IST
 
 
@@ -360,16 +359,14 @@ async def launch_contests(force: bool = False):
 
         now = datetime.now(timezone.utc)
 
-        # If canonical weekly contest already exists and is upcoming/live, preserve it
-        if existing_weekly and not force:
-            if existing_weekly.ends_at > now:
-                print("\n🔒 [IMMUTABLE TIMER ACTIVE]")
-                print(f"  ✓ Weekly: {existing_weekly.title} (Starts: {existing_weekly.starts_at})")
+        if existing_weekly:
+            print("\n🔒 [OFFICIAL CONTEST EXISTS]")
+            print(f"  ✓ Weekly: {existing_weekly.title} (Starts: {existing_weekly.starts_at}, Ends: {existing_weekly.ends_at})")
+            if not force:
                 return
-
-        print("\n🔹 Purging legacy contest records for clean canonical schedule...")
-        await purge_all_contest_data(db)
-        print("  ✓ Old contest data purged cleanly.")
+            if is_production_environment():
+                print("  ℹ Production mode: Preserving all existing user submissions and participant records.")
+            print("  ✓ Refreshing contest schedule without purging user data.")
 
         # =====================================================================
         # WEEKLY CONTEST 1 (Wednesday 3:00 PM – 4:30 PM IST)

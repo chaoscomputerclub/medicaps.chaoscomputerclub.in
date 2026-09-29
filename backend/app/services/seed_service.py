@@ -34,12 +34,17 @@ async def seed_initial_data(db: AsyncSession):
     return
 
 
+from app.core.safety import assert_destructive_allowed
+
 async def purge_all_contest_data(db: AsyncSession) -> dict:
     """
     Strictly purge all contest, assessment, problem, submission, pass,
     announcement, and scoreboard data from the database.
-    Preserves actual registered student accounts in MemberProfile.
+    STRICTLY FORBIDDEN IN PRODUCTION INFRASTRUCTURE.
     """
+    # ── FAIL-SAFE PRODUCTION BLOCK ─────────────────────────────────────────────
+    assert_destructive_allowed("purge_all_contest_data", script_name="seed_service.py")
+
     logger.warning("Initiating strict purge of all contest and assessment data...")
 
     tables = [
@@ -77,20 +82,6 @@ async def purge_all_contest_data(db: AsyncSession) -> dict:
         await db.flush()
     except Exception:
         pass
-
-    # 6. Reset all surviving MemberProfiles to baseline rating & zero attendance
-    try:
-        await db.execute(
-            update(MemberProfile).values(
-                rating=1200,
-                peak_rating=1200,
-                attendance_count=0,
-                attendance_total=0,
-            )
-        )
-        await db.flush()
-    except Exception as e:
-        logger.warning(f"Notice on resetting member profiles: {e}")
 
     await db.commit()
 

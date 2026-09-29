@@ -73,11 +73,7 @@ jobs:
               --exclude 'ccc_medicaps.db' \
               /root/projects/medicaps.chaoscomputerclub.in/backend/ /root/projects/ccc-medicaps-api/
 
-            echo '→ Syncing contest schedules...'
-            cd /root/projects/ccc-medicaps-api
-            venv/bin/python scripts/launch_official_contests.py || true
-
-            echo '→ Restarting backend service...'
+            echo '→ Restarting backend service (zero database mutations)...'
             systemctl restart ccc-medicaps-api.service
           "
 

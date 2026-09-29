@@ -84,70 +84,50 @@ async def ensure_database_integrity():
     """
     async with AsyncSessionLocal() as session:
         try:
-            # 1. Clean orphaned rating_history and ensure foreign key constraint
+            # 1. Foreign key constraint check (safe DDL only - no row deletion)
             fk_res = await session.execute(text("""
                 SELECT 1 FROM information_schema.table_constraints 
                 WHERE constraint_name = 'rating_history_contest_id_fkey'
             """))
             if not fk_res.scalar():
-                await session.execute(text("""
-                    DELETE FROM rating_history 
-                    WHERE contest_id IS NOT NULL 
-                      AND contest_id NOT IN (SELECT id FROM offline_contests)
-                """))
-                await session.execute(text("""
-                    ALTER TABLE rating_history 
-                    ADD CONSTRAINT rating_history_contest_id_fkey 
-                    FOREIGN KEY (contest_id) REFERENCES offline_contests(id) ON DELETE CASCADE
-                """))
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE rating_history 
+                        ADD CONSTRAINT rating_history_contest_id_fkey 
+                        FOREIGN KEY (contest_id) REFERENCES offline_contests(id) ON DELETE CASCADE
+                    """))
+                except Exception as fk_err:
+                    print(f"Notice on rating_history FK constraint: {fk_err}")
 
-            # 2. Clean orphaned trust_proofs
-            await session.execute(text("""
-                DELETE FROM trust_proofs 
-                WHERE contest_id IS NOT NULL 
-                  AND contest_id NOT IN (SELECT id FROM offline_contests)
-            """))
-
-            # 2b. Ensure unique constraint on scoreboard_entries (contest_id, member_id)
+            # 2. Unique constraint on scoreboard_entries (safe DDL only - no row deletion)
             sb_uq_res = await session.execute(text("""
                 SELECT 1 FROM information_schema.table_constraints 
                 WHERE constraint_name = 'uq_scoreboard_contest_member'
             """))
             if not sb_uq_res.scalar():
-                await session.execute(text("""
-                    DELETE FROM scoreboard_entries
-                    WHERE id NOT IN (
-                        SELECT DISTINCT ON (contest_id, member_id) id
-                        FROM scoreboard_entries
-                        WHERE member_id IS NOT NULL
-                        ORDER BY contest_id, member_id, score DESC, penalty_seconds ASC, id ASC
-                    ) AND member_id IS NOT NULL;
-                """))
-                await session.execute(text("""
-                    ALTER TABLE scoreboard_entries 
-                    ADD CONSTRAINT uq_scoreboard_contest_member 
-                    UNIQUE (contest_id, member_id);
-                """))
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE scoreboard_entries 
+                        ADD CONSTRAINT uq_scoreboard_contest_member 
+                        UNIQUE (contest_id, member_id);
+                    """))
+                except Exception as sb_err:
+                    print(f"Notice on scoreboard_entries unique constraint: {sb_err}")
 
-            # 2c. Ensure unique constraint on assessment_sessions (assessment_id, member_id)
+            # 3. Unique constraint on assessment_sessions (safe DDL only - no row deletion)
             sess_uq_res = await session.execute(text("""
                 SELECT 1 FROM information_schema.table_constraints 
                 WHERE constraint_name = 'uq_assessment_session_member'
             """))
             if not sess_uq_res.scalar():
-                await session.execute(text("""
-                    DELETE FROM assessment_sessions
-                    WHERE id NOT IN (
-                        SELECT DISTINCT ON (assessment_id, member_id) id
-                        FROM assessment_sessions
-                        ORDER BY assessment_id, member_id, started_at DESC, total_score DESC, id ASC
-                    );
-                """))
-                await session.execute(text("""
-                    ALTER TABLE assessment_sessions 
-                    ADD CONSTRAINT uq_assessment_session_member 
-                    UNIQUE (assessment_id, member_id);
-                """))
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE assessment_sessions 
+                        ADD CONSTRAINT uq_assessment_session_member 
+                        UNIQUE (assessment_id, member_id);
+                    """))
+                except Exception as sess_err:
+                    print(f"Notice on assessment_sessions unique constraint: {sess_err}")
 
             # 3. Ensure essential query & foreign key indexes
             index_statements = [
@@ -205,21 +185,6 @@ async def ensure_database_integrity():
             for stmt in index_statements:
                 await session.execute(text(stmt))
 
-            # 4. Data hygiene: Reset any member profiles with phantom ratings or attendance
-            # where no valid contest history or scoreboards exist
-            await session.execute(text("""
-                UPDATE member_profiles mp
-                SET rating = 1200, peak_rating = 1200, attendance_count = 0
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM rating_history rh
-                    JOIN offline_contests oc ON rh.contest_id = oc.id
-                    WHERE rh.member_id = mp.id
-                ) AND NOT EXISTS (
-                    SELECT 1 FROM scoreboard_entries se
-                    JOIN offline_contests oc ON se.contest_id = oc.id
-                    WHERE se.member_id = mp.id
-                ) AND (mp.rating != 1200 OR mp.peak_rating != 1200 OR mp.attendance_count != 0)
-            """))
 
             # 5. Schema Evolution: Monotonic resource versions & table version columns
             await session.execute(text("""

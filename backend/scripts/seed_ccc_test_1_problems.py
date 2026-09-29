@@ -6,7 +6,16 @@ into the Master Problem Vault and links them to CCC TEST 1 (Contest Arena & Asse
 
 import asyncio
 import logging
+import os
+import sys
 from typing import Any, Dict, List
+
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+
+from scripts.ci_safety_guard import assert_safe_to_run
+assert_safe_to_run(__file__)
 
 from sqlalchemy import select, update
 from app.core.db import AsyncSessionLocal

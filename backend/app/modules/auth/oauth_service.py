@@ -6,6 +6,7 @@ modules/auth/oauth_service.py — Google OAuth Service Restricted to @medicaps.a
 import logging
 import secrets
 from datetime import datetime, timezone
+import urllib.parse
 import httpx
 from fastapi import HTTPException, Request, status
 from fastapi.responses import RedirectResponse
@@ -21,6 +22,13 @@ from app.core.security import (
 )
 from app.modules.auth.auth_repository import AuthRepository
 from app.modules.auth.otp_service import is_allowed_organization_email
+
+from app.core.origins import (
+    validate_frontend_origin,
+    get_default_frontend_url,
+    encode_oauth_state,
+    decode_and_verify_oauth_state,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -38,26 +46,6 @@ def _get_redirect_uri(request: Request) -> str:
     return f"{scheme}://{host}/api/auth/google/callback"
 
 
-def _get_frontend_url(request: Request) -> str:
-    origin = request.headers.get("origin")
-    referer = request.headers.get("referer")
-    ref_origin = None
-    if referer:
-        try:
-            from urllib.parse import urlparse
-            p = urlparse(referer)
-            ref_origin = f"{p.scheme}://{p.netloc}"
-        except Exception:
-            pass
-
-    for candidate in (origin, ref_origin):
-        if candidate and any(
-            x in candidate for x in ("localhost", "127.0.0.1", "chaoscomputerclub.in", "sharexpress.in")
-        ):
-            return candidate.rstrip("/")
-    return getattr(settings, "FRONTEND_URL", "https://medicaps.chaoscomputerclub.in")
-
-
 class OAuthService:
     """Manages Google OAuth institutional authentication restricted to Medi-Caps University."""
 
@@ -69,8 +57,28 @@ class OAuthService:
                 detail="Google OAuth is not configured on this server.",
             )
 
+        # 1. Resolve and validate candidate frontend origin from query param or headers
+        candidate_origin = (
+            request.query_params.get("origin")
+            or request.query_params.get("frontend_origin")
+            or request.headers.get("origin")
+        )
+        if not candidate_origin:
+            referer = request.headers.get("referer")
+            if referer:
+                try:
+                    from urllib.parse import urlparse
+                    p = urlparse(referer)
+                    candidate_origin = f"{p.scheme}://{p.netloc}"
+                except Exception:
+                    pass
+
+        target_origin = validate_frontend_origin(candidate_origin) or get_default_frontend_url()
+        return_path = request.query_params.get("return_path") or request.query_params.get("return_url") or ""
+
+        # 2. Cryptographically sign the target origin and nonce into the OAuth state
         redirect_uri = _get_redirect_uri(request)
-        state = secrets.token_urlsafe(32)
+        state = encode_oauth_state(target_origin, return_path)
         google_auth_url = (
             "https://accounts.google.com/o/oauth2/v2/auth"
             f"?client_id={settings.GOOGLE_CLIENT_ID}"
@@ -97,16 +105,26 @@ class OAuthService:
     async def process_google_callback(request: Request, db: AsyncSession) -> RedirectResponse:
         code = request.query_params.get("code")
         error = request.query_params.get("error")
-        frontend_url = _get_frontend_url(request)
-
-        if error or not code:
-            return RedirectResponse(url=f"{frontend_url}/auth?error=google_cancelled")
-
         incoming_state = request.query_params.get("state")
         stored_state = request.cookies.get("ccc_oauth_state")
+
+        # 1. Verify signed state and extract the verified caller frontend origin
+        state_data = decode_and_verify_oauth_state(incoming_state)
+        frontend_url = state_data["origin"] if state_data else get_default_frontend_url()
+        return_path = state_data.get("return_path", "") if state_data else ""
+
+        # 2. CSRF cookie verification if cookie was retained across redirect
         if stored_state and incoming_state and stored_state != incoming_state:
             logger.warning("Google OAuth state mismatch: stored=%s incoming=%s", stored_state, incoming_state)
             return RedirectResponse(url=f"{frontend_url}/auth?error=state_mismatch")
+
+        # 3. If state decoding failed completely, reject as tampered / expired
+        if not state_data and not error and not code:
+            logger.warning("Google OAuth callback rejected: state could not be verified.")
+            return RedirectResponse(url=f"{frontend_url}/auth?error=state_mismatch")
+
+        if error or not code:
+            return RedirectResponse(url=f"{frontend_url}/auth?error=google_cancelled")
 
         redirect_uri = _get_redirect_uri(request)
 
@@ -183,8 +201,9 @@ class OAuthService:
         await store_refresh_token(refresh_token, member.id, member.email)
 
         needs_onboarding = is_new or not member.is_onboarded
+        return_param = f"&return_url={urllib.parse.quote(return_path)}" if return_path else ""
         redirect_res = RedirectResponse(
-            url=f"{frontend_url}/auth?token={jwt_token}&is_onboarded={'false' if needs_onboarding else 'true'}&onboarding={'1' if needs_onboarding else '0'}&email={member.email}&google_success=1"
+            url=f"{frontend_url}/auth?token={jwt_token}&is_onboarded={'false' if needs_onboarding else 'true'}&onboarding={'1' if needs_onboarding else '0'}&email={member.email}&google_success=1{return_param}"
         )
         set_auth_cookies(
             response=redirect_res,

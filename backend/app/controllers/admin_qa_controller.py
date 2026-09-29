@@ -49,6 +49,9 @@ class AdminQAController:
         primary_name: str,
         primary_prn: str,
     ) -> Dict[str, Any]:
+        from app.core.safety import assert_destructive_allowed
+        assert_destructive_allowed("simulate_tournament", script_name="admin_qa_controller.py")
+
         logger.info("⚡ [QA ADMIN] Executing 50-contest tournament simulation...")
         async with AsyncSessionLocal() as db:
             result = await TournamentQAService.simulate_50_contests(

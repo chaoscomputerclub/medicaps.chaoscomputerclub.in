@@ -1,0 +1,173 @@
+name: Controlled Database Migration & Backup Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      migration_version:
+        description: "Migration version to apply (leave 'all' to apply all pending)"
+        required: true
+        default: "all"
+      dry_run:
+        description: "Dry-run mode (scans and validates without executing DDL)"
+        type: boolean
+        required: true
+        default: false
+      allow_destructive:
+        description: "Authorize destructive operations (DROP TABLE, TRUNCATE, DROP COLUMN)"
+        type: boolean
+        required: true
+        default: false
+      confirm_destructive:
+        description: "Explicit confirmation phrase for destructive migrations (version string)"
+        required: false
+        default: ""
+
+concurrency:
+  group: production-database-migration
+  cancel-in-progress: false
+
+jobs:
+  pre-flight-and-backup:
+    name: 🛡️ Pre-Flight Scanner & Production Backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 🔍 Scan Migration Files for Destructive Statements
+        id: scanner
+        run: |
+          echo "Scanning migration scripts..."
+          python3 -c "
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, 'backend')
+          from scripts.migrate import get_available_migrations, scan_sql_for_destructive_statements
+
+          files = get_available_migrations()
+          has_destructive = False
+          for f in files:
+              content = f.read_text(encoding='utf-8')
+              findings = scan_sql_for_destructive_statements(content)
+              if findings:
+                  has_destructive = True
+                  print(f'⚠️ Found destructive SQL in {f.name}: {findings}')
+
+          if has_destructive and not ${{ inputs.allow_destructive }}:
+              print('❌ Destructive SQL found but allow_destructive is false. Halting workflow.')
+              sys.exit(1)
+          print('✅ Migration scanner validation passed.')
+          "
+
+      - name: 🔑 Configure SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST || '143.198.38.205' }}
+        run: |
+          mkdir -p "$HOME/.ssh"
+          echo "$SSH_PRIVATE_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          cat >> "$HOME/.ssh/config" <<EOF
+          Host production
+            HostName $SSH_HOST
+            User root
+            IdentityFile $HOME/.ssh/deploy_key
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
+          EOF
+          chmod 600 "$HOME/.ssh/config"
+
+      - name: 💾 Execute Point-in-Time Production Database Snapshot
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "→ Creating verified pre-migration backup on production server..."
+          ssh production "
+            set -e
+            cd /root/projects/ccc-medicaps-api
+            venv/bin/python scripts/db_backup.py --tag pre_migration --retention-days 30 --json
+          "
+
+  execute-migration:
+    name: 🚀 Execute Controlled Migration
+    needs: pre-flight-and-backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 🔑 Configure SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST || '143.198.38.205' }}
+        run: |
+          mkdir -p "$HOME/.ssh"
+          echo "$SSH_PRIVATE_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          cat >> "$HOME/.ssh/config" <<EOF
+          Host production
+            HostName $SSH_HOST
+            User root
+            IdentityFile $HOME/.ssh/deploy_key
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
+          EOF
+          chmod 600 "$HOME/.ssh/config"
+
+      - name: 🚀 Apply Migrations on Server
+        env:
+          TARGET_VERSION: ${{ inputs.migration_version }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          ALLOW_DESTRUCTIVE: ${{ inputs.allow_destructive }}
+          CONFIRM_DESTRUCTIVE: ${{ inputs.confirm_destructive }}
+        run: |
+          CMD_ARGS=""
+          if [ "$DRY_RUN" = "true" ]; then
+            CMD_ARGS="--dry-run"
+          fi
+          if [ "$TARGET_VERSION" != "all" ]; then
+            CMD_ARGS="$CMD_ARGS --version $TARGET_VERSION"
+          fi
+          if [ "$ALLOW_DESTRUCTIVE" = "true" ]; then
+            CMD_ARGS="$CMD_ARGS --allow-destructive --confirm-destructive $CONFIRM_DESTRUCTIVE"
+          fi
+
+          echo "→ Running controlled migration on production server..."
+          ssh production "
+            set -e
+            cd /root/projects/medicaps.chaoscomputerclub.in
+            git pull origin main
+
+            # Sync backend migration scripts
+            rsync -av --delete \
+              --exclude '.env' \
+              --exclude 'keys' \
+              --exclude 'venv' \
+              --exclude '__pycache__' \
+              --exclude '.pytest_cache' \
+              --exclude '*.db*' \
+              /root/projects/medicaps.chaoscomputerclub.in/backend/ /root/projects/ccc-medicaps-api/
+
+            cd /root/projects/ccc-medicaps-api
+            venv/bin/python scripts/migrate.py $CMD_ARGS
+          "
+
+      - name: 🩺 Validate Post-Migration Service Health
+        run: |
+          sleep 2
+          echo "→ Validating backend health after migration..."
+          STATUS=$(ssh production "curl -s http://127.0.0.1:8002/api/health" || echo "FAILED")
+          echo "Backend Health: $STATUS"
+
+          if [[ "$STATUS" != *"operational"* ]]; then
+            echo "❌ Post-migration health check failed!"
+            exit 1
+          fi
+          echo "✅ Post-migration health check verified live & operational!"

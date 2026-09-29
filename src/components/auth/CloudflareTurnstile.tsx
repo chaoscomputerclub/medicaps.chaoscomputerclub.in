@@ -15,6 +15,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
+import { getApiBase } from "@/lib/auth";
 
 declare global {
   interface Window {
@@ -74,7 +75,7 @@ export function CloudflareTurnstile({
     if (activeSiteKey) return;
     let isCancelled = false;
 
-    fetch("/api/auth/security-config")
+    fetch(`${getApiBase()}/auth/security-config`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch security config");
         return res.json();

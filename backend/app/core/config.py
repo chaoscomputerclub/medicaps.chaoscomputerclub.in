@@ -65,9 +65,19 @@ class Settings(BaseSettings):
     SMTP_FROM: str = os.getenv("SMTP_FROM") or os.getenv("SMTP_FROM_EMAIL", "")
     SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Arena Auth")
 
-    # URLs
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:8081")
-    BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000")
+    # URLs — Environment-aware, strictly defaults to production domain in production
+    FRONTEND_URL: str = os.getenv(
+        "FRONTEND_URL",
+        "https://medicaps.chaoscomputerclub.in"
+        if os.getenv("ENVIRONMENT", "production").lower() == "production"
+        else "http://localhost:8081",
+    )
+    BACKEND_URL: str = os.getenv(
+        "BACKEND_URL",
+        "https://medicaps-api.chaoscomputerclub.in/api"
+        if os.getenv("ENVIRONMENT", "production").lower() == "production"
+        else "http://localhost:8000/api",
+    )
 
     # Dynamic Development Testing & Restriction Controls
     DEV_BYPASS_RESTRICTIONS: bool = os.getenv("DEV_BYPASS_RESTRICTIONS", "false").lower() in ("true", "1", "yes")
@@ -116,11 +126,29 @@ class Settings(BaseSettings):
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
     MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "")
 
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() in ("production", "prod")
+
     class Config:
         case_sensitive = True
 
 
 settings = Settings()
+
+# Enforce Phase 7: DATABASE_URL Safety — Zero implicit fallback in production
+if settings.is_production:
+    raw_db_env = os.getenv("DATABASE_URL", "").strip()
+    if not raw_db_env:
+        raise RuntimeError(
+            "CRITICAL CONFIGURATION ERROR: DATABASE_URL must be explicitly configured "
+            "in production environment. Implicit defaults and dev fallbacks are strictly prohibited."
+        )
+    if "arena_dev" in settings.DATABASE_URL:
+        raise RuntimeError(
+            "CRITICAL CONFIGURATION ERROR: Development database fallback 'arena_dev' detected "
+            "in production environment. Production must specify a valid production DATABASE_URL."
+        )
 
 # Load key files if paths are explicitly specified or default keys/ directory exists
 if not settings.JWT_PRIVATE_KEY:
