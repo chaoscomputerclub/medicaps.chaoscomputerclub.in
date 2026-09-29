@@ -15,12 +15,12 @@ from pathlib import Path
 from typing import Optional
 from uuid import uuid4
 
-from app.engine.docker.pool import get_container, get_workspace_base
+from app.core.config import settings
+from app.engine.docker.pool import get_container, get_workspace_base, get_docker_client
 from app.engine.schemas import CompileResult, SandboxResult
 
 logger = logging.getLogger("ccc.docker.sandbox")
 
-MAX_OUTPUT_BYTES = 5 * 1024 * 1024  # 5MB output guard
 _DOCKER_THREAD_POOL = ThreadPoolExecutor(max_workers=16, thread_name_prefix="ccc-docker")
 
 
@@ -47,6 +47,36 @@ class CoreDockerSandbox:
         return ws_path
 
     @staticmethod
+    def spawn_isolated_container(image: str, workspace: Path) -> Optional[Any]:
+        """Spawn an isolated ephemeral container with only the submission workspace mounted."""
+        client = get_docker_client()
+        if not client:
+            return None
+        container_name = f"sub-{uuid4().hex[:12]}"
+        try:
+            return client.containers.run(
+                image=image,
+                command=["sleep", "300"],
+                name=container_name,
+                volumes={
+                    str(workspace): {"bind": "/workspace", "mode": "rw"}
+                },
+                network_disabled=True,
+                mem_limit="1024m",
+                memswap_limit="1024m",
+                nano_cpus=2_000_000_000,
+                pids_limit=1024,
+                security_opt=["no-new-privileges"],
+                cap_drop=["ALL"],
+                detach=True,
+                remove=False,
+                tmpfs={"/tmp": "size=256m,noexec,nosuid"},
+            )
+        except Exception as exc:
+            logger.warning("Failed to spawn isolated container for %s: %s", image, exc)
+            return None
+
+    @staticmethod
     def cleanup_workspace(workspace: Path) -> None:
         """Safely remove ephemeral workspace."""
         try:
@@ -61,6 +91,7 @@ class CoreDockerSandbox:
         command: list[str],
         workspace: Path,
         time_limit: float = 15.0,
+        container: Optional[Any] = None,
     ) -> CompileResult:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
@@ -70,6 +101,7 @@ class CoreDockerSandbox:
             command,
             workspace,
             time_limit,
+            container,
         )
 
     @staticmethod
@@ -78,27 +110,31 @@ class CoreDockerSandbox:
         command: list[str],
         workspace: Path,
         time_limit: float,
+        container: Optional[Any] = None,
     ) -> CompileResult:
         start = time.monotonic()
-        container = get_container(image)
-        if not container:
+        target_container = container or get_container(image)
+        if not target_container:
             return CompileResult(success=False, error=f"Container for {image} is unavailable.")
 
-        workspace_base = get_workspace_base()
-        try:
-            rel = workspace.relative_to(workspace_base)
-            container_ws = f"/workspace/{rel}"
-        except Exception:
+        if container:
             container_ws = "/workspace"
+        else:
+            workspace_base = get_workspace_base()
+            try:
+                rel = workspace.relative_to(workspace_base)
+                container_ws = f"/workspace/{rel}"
+            except Exception:
+                container_ws = "/workspace"
 
-        # Wrap command in timeout
+        # Wrap command in timeout with SIGKILL fallback (-k 1)
         if len(command) >= 3 and command[0] == "sh" and command[1] == "-c":
-            cmd_wrapped = ["sh", "-c", f"timeout {time_limit} {command[2]}"]
+            cmd_wrapped = ["sh", "-c", f"timeout -k 1 {time_limit} {command[2]}"]
         else:
             cmd_str = " ".join(command)
-            cmd_wrapped = ["sh", "-c", f"timeout {time_limit} {cmd_str}"]
+            cmd_wrapped = ["sh", "-c", f"timeout -k 1 {time_limit} {cmd_str}"]
         try:
-            res = container.exec_run(
+            res = target_container.exec_run(
                 cmd=cmd_wrapped,
                 workdir=container_ws,
                 stdout=True,
@@ -129,6 +165,7 @@ class CoreDockerSandbox:
         stdin_data: str = "",
         time_limit: float = 3.0,
         memory_limit_mb: int = 256,
+        container: Optional[Any] = None,
     ) -> SandboxResult:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
@@ -140,6 +177,7 @@ class CoreDockerSandbox:
             stdin_data,
             time_limit,
             memory_limit_mb,
+            container,
         )
 
     @staticmethod
@@ -150,22 +188,26 @@ class CoreDockerSandbox:
         stdin_data: str,
         time_limit: float,
         memory_limit_mb: int,
+        container: Optional[Any] = None,
     ) -> SandboxResult:
         start = time.monotonic()
-        container = get_container(image)
-        if not container:
+        target_container = container or get_container(image)
+        if not target_container:
             return SandboxResult(
                 stdout="",
                 stderr=f"Docker container {image} is not available.",
                 exit_code=1,
             )
 
-        workspace_base = get_workspace_base()
-        try:
-            rel = workspace.relative_to(workspace_base)
-            container_ws = f"/workspace/{rel}"
-        except Exception:
+        if container:
             container_ws = "/workspace"
+        else:
+            workspace_base = get_workspace_base()
+            try:
+                rel = workspace.relative_to(workspace_base)
+                container_ws = f"/workspace/{rel}"
+            except Exception:
+                container_ws = "/workspace"
 
         # Write stdin file
         stdin_file = workspace / "stdin.txt"
@@ -175,10 +217,10 @@ class CoreDockerSandbox:
         except Exception:
             pass
 
-        # Execution command wrapped in timeout, ulimit, and time profiling
+        # Execution command wrapped in timeout (with SIGKILL fallback -k 1), ulimit, and time profiling
         # Memory limit in kb
         mem_kb = int(memory_limit_mb * 1024)
-        cmd_wrapped = ["sh", "-c", f"ulimit -v {mem_kb}; /usr/bin/time -v timeout {time_limit} {run_cmd}"]
+        cmd_wrapped = ["sh", "-c", f"ulimit -v {mem_kb}; /usr/bin/time -v timeout -k 1 {time_limit} {run_cmd}"]
 
         try:
             res = container.exec_run(
@@ -217,8 +259,11 @@ class CoreDockerSandbox:
                 if "MemoryError" in stderr or "std::bad_alloc" in stderr or peak_memory_mb >= memory_limit_mb:
                     oom_killed = True
 
-            if len(stdout) > MAX_OUTPUT_BYTES:
-                stdout = stdout[:MAX_OUTPUT_BYTES] + "\n[Output truncated: exceeded 5MB limit]"
+            output_limit_exceeded = False
+            max_bytes = settings.OUTPUT_LIMIT_BYTES
+            if len(stdout) > max_bytes:
+                output_limit_exceeded = True
+                stdout = stdout[:max_bytes] + "\n[Output limit exceeded]"
 
             wall_time_ms = (time.monotonic() - start) * 1000
 
@@ -230,6 +275,7 @@ class CoreDockerSandbox:
                 peak_memory_mb=round(peak_memory_mb, 2),
                 timed_out=timed_out,
                 oom_killed=oom_killed,
+                output_limit_exceeded=output_limit_exceeded,
             )
         except Exception as exc:
             logger.exception("Container run error: %s", exc)

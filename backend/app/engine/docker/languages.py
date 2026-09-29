@@ -49,10 +49,10 @@ LANGUAGE_SPECS: Dict[Language, LanguageSpec] = {
     Language.JAVA: LanguageSpec(
         language=Language.JAVA,
         image="interleet-java:latest",
-        filename="Solution.java",
+        filename="Main.java",
         requires_compile=True,
-        compile_command=["sh", "-c", "javac Solution.java 2>&1"],
-        run_command="java -Xmx200m -Xss64m Solution < stdin.txt",
+        compile_command=["sh", "-c", "javac Main.java 2>&1"],
+        run_command="java -Xmx256m -Xss64m Main < stdin.txt",
     ),
     Language.JAVASCRIPT: LanguageSpec(
         language=Language.JAVASCRIPT,

@@ -7,6 +7,7 @@ from app.engine.executors.cpp_executor import CppExecutor
 from app.engine.executors.c_executor import CExecutor
 from app.engine.executors.java_executor import JavaExecutor
 from app.engine.executors.javascript_executor import JavaScriptExecutor
+from app.engine.executors.typescript_executor import TypeScriptExecutor
 from app.engine.languages import LanguageRegistry, UnsupportedLanguageError
 
 _EXECUTOR_MAP: dict[Language, type[BaseExecutor]] = {
@@ -15,6 +16,7 @@ _EXECUTOR_MAP: dict[Language, type[BaseExecutor]] = {
     Language.C: CExecutor,
     Language.JAVA: JavaExecutor,
     Language.JAVASCRIPT: JavaScriptExecutor,
+    Language.TYPESCRIPT: TypeScriptExecutor,
 }
 
 

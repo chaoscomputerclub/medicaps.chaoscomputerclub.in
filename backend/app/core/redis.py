@@ -41,6 +41,9 @@ def get_redis() -> aioredis.Redis:
     return _redis_client
 
 
+get_redis_client = get_redis
+
+
 async def close_redis() -> None:
     """Close the active Redis client."""
     global _redis_client, _redis_loop

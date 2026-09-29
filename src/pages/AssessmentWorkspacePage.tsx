@@ -32,7 +32,8 @@ import { registerForContest, getToken } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { resolveAvatarUrl, formatFullName } from "@/lib/utils";
+import { resolveAvatarUrl, formatFullName, formatTestcaseInput } from "@/lib/utils";
+import { ProblemStatementView } from "@/components/problem/ProblemStatementView";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import {
   Select,
@@ -677,120 +678,7 @@ export function AssessmentWorkspacePage() {
           data-problem-panel
         >
           {activeProblem ? (
-            <div className="space-y-6">
-              {/* Problem Title & Points */}
-              <div className="border-b border-white/8 pb-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400">
-                    Problem {activeProblem.problem_index}
-                  </span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-white/8 uppercase">
-                    {activeProblem.difficulty}
-                  </span>
-                  <span className="text-xs font-mono text-zinc-500 tabular-nums">
-                    {activeProblem.points} Pts
-                  </span>
-                </div>
-                <h1 className="text-lg font-semibold tracking-tight text-white">
-                  {activeProblem.title}
-                </h1>
-              </div>
-
-              {/* Description */}
-              <div className="text-xs font-sans text-zinc-300 leading-relaxed whitespace-pre-line">
-                {activeProblem.description}
-              </div>
-
-              {/* Input Format */}
-              {activeProblem.input_format && (
-                <div className="space-y-1.5">
-                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                    Input Format
-                  </h3>
-                  <div className="text-[13px] font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md leading-relaxed whitespace-pre-line">
-                    {activeProblem.input_format}
-                  </div>
-                </div>
-              )}
-
-              {/* Output Format */}
-              {activeProblem.output_format && (
-                <div className="space-y-1.5">
-                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                    Output Format
-                  </h3>
-                  <div className="text-[13px] font-mono text-zinc-300 bg-zinc-950 border border-white/8 p-3 rounded-md leading-relaxed whitespace-pre-line">
-                    {activeProblem.output_format}
-                  </div>
-                </div>
-              )}
-
-              {/* Constraints */}
-              {activeProblem.constraints && (
-                <div className="space-y-1.5">
-                  <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                    Constraints
-                  </h3>
-                  <pre className="text-[13px] font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                    {activeProblem.constraints}
-                  </pre>
-                </div>
-              )}
-
-              {/* Sample Examples */}
-              <div className="space-y-3 pt-2">
-                <h3 className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider">
-                  Sample Testcases
-                </h3>
-                {activeProblem.sample_testcases?.map((s, idx) => {
-                  const inputVal = s.stdin || (s as any).input || "";
-                  const outputVal = s.expected_output || (s as any).output || "";
-
-                  return (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2.5 text-xs font-mono"
-                    >
-                      <div className="flex items-center justify-between text-zinc-400 font-semibold">
-                        <span>Case {idx + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(inputVal, idx)}
-                          className="flex items-center gap-1 text-xs font-sans font-semibold text-zinc-400 hover:text-white cursor-pointer"
-                        >
-                          {copiedIndex === idx ? (
-                            <Check size={11} className="text-lime-400" />
-                          ) : (
-                            <Copy size={11} />
-                          )}
-                          <span>{copiedIndex === idx ? "Copied" : "Copy Input"}</span>
-                        </button>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-zinc-500 text-[10px]">Input</div>
-                        <pre className="p-2.5 rounded bg-black border border-white/6 text-[13px] text-zinc-200 overflow-x-auto whitespace-pre-wrap font-mono leading-relaxed">
-                          {inputVal}
-                        </pre>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-zinc-500 text-[10px]">Expected Output</div>
-                        <pre className="p-2.5 rounded bg-black border border-white/6 text-[13px] text-lime-400 overflow-x-auto whitespace-pre-wrap font-mono leading-relaxed">
-                          {outputVal}
-                        </pre>
-                      </div>
-
-                      {s.explanation && (
-                        <div className="text-zinc-500 text-[11px] italic pt-0.5 font-mono">
-                          {s.explanation}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <ProblemStatementView problem={activeProblem as any} />
           ) : (
             <div className="text-zinc-500 font-mono text-xs">
               Select a problem from the top bar.
@@ -903,7 +791,7 @@ export function AssessmentWorkspacePage() {
                     <div key={i} className="p-2 rounded bg-zinc-950 border border-white/8">
                       <span className="text-zinc-500 text-[10px]">CASE {i + 1}</span>
                       <pre className="text-zinc-300 mt-0.5 whitespace-pre-wrap">
-                        {st.stdin || (st as any).input}
+                        {formatTestcaseInput(st.stdin || (st as any).input, (activeProblem as any)?.function_signature)}
                       </pre>
                     </div>
                   ))}

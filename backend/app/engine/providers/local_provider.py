@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import logging
 
-from app.engine.enums import Language
+from app.core.config import settings
+from app.engine.enums import ComparisonMode, ExecutionStatus, Language, Verdict
 from app.engine.executors.factory import get_executor
 from app.engine.languages import LanguageRegistry
-from app.engine.schemas import TestCaseSchema
+from app.engine.schemas import ExecutionResult, TestCaseSchema
 
 from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
 
@@ -18,6 +19,11 @@ class LocalSandboxProvider(JudgeProvider):
     name = "local"
 
     async def run(self, request: ProviderRunRequest) -> ProviderRunResult:
+        if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+            return ProviderRunResult(
+                verdict="system_error",
+                diagnostics=["CRITICAL SECURITY VIOLATION: Unsandboxed local execution is prohibited by security policy. Docker sandbox required."],
+            )
         try:
             language = LanguageRegistry.normalize(request.language)
         except Exception as exc:
@@ -56,4 +62,31 @@ class LocalSandboxProvider(JudgeProvider):
             timed_out=str(result.verdict).lower().endswith("time_limit_exceeded"),
             passed=bool(case.passed) if case else result.score > 0,
             verdict=str(getattr(result.verdict, "value", result.verdict)),
+        )
+
+    async def execute_batch(
+        self,
+        language: str | Language,
+        code: str,
+        testcases: list[TestCaseSchema],
+        time_limit: float = 5.0,
+        memory_limit_mb: int = 256,
+        comparison_mode: ComparisonMode = ComparisonMode.TRIMMED,
+    ) -> ExecutionResult:
+        if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+            return ExecutionResult(
+                success=False,
+                status=ExecutionStatus.FAILED,
+                verdict=Verdict.SYSTEM_ERROR,
+                error="CRITICAL SECURITY VIOLATION: Unsandboxed local execution is prohibited by security policy. Docker sandbox required.",
+                total_testcases=len(testcases),
+            )
+        lang = LanguageRegistry.normalize(language)
+        executor = get_executor(lang)
+        return await executor.execute_batch(
+            code=code,
+            testcases=testcases,
+            time_limit=time_limit,
+            memory_limit_mb=memory_limit_mb,
+            comparison_mode=comparison_mode,
         )

@@ -80,17 +80,24 @@ class TypeScriptAdapter(BaseLanguageAdapter):
             args = [parsed];
         }}
 
+        let targetFn = null;
         let targetCls = (typeof {class_name} === 'function') ? {class_name} : (typeof Solution === 'function' ? Solution : null);
-        if (!targetCls) {{
-            console.error('Error: Class {class_name} not found');
+        if (targetCls) {{
+            try {{
+                const sol = new targetCls();
+                if (typeof sol['{fn_name}'] === 'function') {{
+                    targetFn = sol['{fn_name}'].bind(sol);
+                }}
+            }} catch(e) {{}}
+        }}
+        if (!targetFn && typeof {fn_name} === 'function') {{
+            targetFn = {fn_name};
+        }}
+        if (!targetFn) {{
+            console.error('Error: Method "{fn_name}" or class {class_name} not found');
             process.exit(1);
         }}
-        const sol = new targetCls();
-        if (typeof sol['{fn_name}'] !== 'function') {{
-            console.error('Error: Method "{fn_name}" not found on {class_name}');
-            process.exit(1);
-        }}
-        const result = sol['{fn_name}'](...args);
+        const result = targetFn(...args);
         if (result === undefined || result === null) {{
             console.log('null');
         }} else if (typeof result === 'boolean') {{

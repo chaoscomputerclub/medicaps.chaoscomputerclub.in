@@ -55,7 +55,7 @@ class JudgeEngine:
             category=testcase.category.value if testcase.category else None,
             stdout="" if testcase.hidden else display_stdout,
             expected_output="" if testcase.hidden else testcase.expected_output,
-            stderr=sandbox_result.stderr,
+            stderr="" if testcase.hidden else sandbox_result.stderr,
             compile_output=compile_output,
             wall_time_ms=sandbox_result.wall_time_ms,
             runtime_ms=sandbox_result.wall_time_ms,
@@ -64,32 +64,43 @@ class JudgeEngine:
             weight=testcase.weight,
         )
 
-        # 1. Check Memory Limit Exceeded
+        # 1. Check System / Infrastructure Error (fail-closed, NEVER downgrade to WRONG_ANSWER)
+        if sandbox_result.system_error:
+            result.verdict = Verdict.SYSTEM_ERROR
+            result.passed = False
+            return result
+
+        # 2. Check Output Limit Exceeded
+        if sandbox_result.output_limit_exceeded:
+            result.verdict = Verdict.OUTPUT_LIMIT_EXCEEDED
+            result.passed = False
+            return result
+
+        # 3. Check Memory Limit Exceeded
         if sandbox_result.oom_killed:
             result.verdict = Verdict.MEMORY_LIMIT_EXCEEDED
             result.passed = False
             return result
 
-        # 2. Check Time Limit Exceeded
+        # 4. Check Time Limit Exceeded
         if sandbox_result.timed_out:
             result.verdict = Verdict.TIME_LIMIT_EXCEEDED
             result.passed = False
             return result
 
-        # 3. Check Compilation Error — use the explicit flag, NOT text presence.
-        #    Using `compile_output` text would misclassify compiler warnings + runtime crashes.
+        # 5. Check Compilation Error — use the explicit flag, NOT text presence.
         if compile_failed:
             result.verdict = Verdict.COMPILATION_ERROR
             result.passed = False
             return result
 
-        # 4. Check Runtime Error
+        # 6. Check Runtime Error
         if sandbox_result.exit_code != 0:
             result.verdict = Verdict.RUNTIME_ERROR
             result.passed = False
             return result
 
-        # 5. Output comparison
+        # 7. Output comparison
         passed = JudgeEngine.compare(
             actual=sandbox_result.stdout,
             expected=testcase.expected_output,
@@ -185,7 +196,7 @@ class JudgeEngine:
         """Compute aggregate verdict and score for a submission."""
         if not testcase_results:
             return ScoringResult(
-                verdict=Verdict.INTERNAL_ERROR,
+                verdict=Verdict.SYSTEM_ERROR,
                 score=0.0,
                 passed=0,
                 total=0,
@@ -196,14 +207,16 @@ class JudgeEngine:
         max_time = max((r.wall_time_ms for r in testcase_results), default=0.0)
         max_mem = max((r.peak_memory_mb for r in testcase_results), default=0.0)
 
-        # Priority of failure verdicts
+        # Priority of failure verdicts: infrastructure and limit failures take precedence
         verdict_priority = [
+            Verdict.SYSTEM_ERROR,
             Verdict.COMPILATION_ERROR,
+            Verdict.OUTPUT_LIMIT_EXCEEDED,
             Verdict.TIME_LIMIT_EXCEEDED,
             Verdict.MEMORY_LIMIT_EXCEEDED,
             Verdict.RUNTIME_ERROR,
             Verdict.WRONG_ANSWER,
-            Verdict.INTERNAL_ERROR,
+            Verdict.CANCELLED,
         ]
 
         final_verdict = Verdict.ACCEPTED

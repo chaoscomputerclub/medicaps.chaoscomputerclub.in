@@ -85,6 +85,13 @@ class Settings(BaseSettings):
     DISABLE_MAIL_DISPATCH: bool = os.getenv("DISABLE_MAIL_DISPATCH", "false").lower() in ("true", "1", "yes")
     FEATURE_ASSESSMENT_AND_QR_ENABLED: bool = os.getenv("FEATURE_ASSESSMENT_AND_QR_ENABLED", "false").lower() in ("true", "1", "yes")
 
+    # Judge Sandbox Security & Isolation Policies
+    # In production, untrusted code MUST run in isolated Docker sandboxes.
+    # Unsandboxed host execution is strictly disabled by default (fail-closed).
+    ALLOW_UNSANDBOXED_EXECUTION: bool = os.getenv("ALLOW_UNSANDBOXED_EXECUTION", "false").lower() in ("true", "1", "yes")
+    JUDGE_PROVIDER: str = os.getenv("JUDGE_PROVIDER", "docker")
+    OUTPUT_LIMIT_BYTES: int = int(os.getenv("OUTPUT_LIMIT_BYTES", "65536"))  # 64 KB default output guard
+
     @property
     def is_dev_bypass_enabled(self) -> bool:
         """Returns True if any development restriction bypass mode is active."""

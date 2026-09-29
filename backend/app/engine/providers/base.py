@@ -55,10 +55,21 @@ class JudgeProvider(abc.ABC):
         memory_limit_mb: int = 256,
         comparison_mode: Any = None,
     ) -> Any:
-        """Default batch execution falling back to in-process executor."""
+        """Default batch execution falling back to in-process executor if allowed."""
+        from app.core.config import settings
+        from app.engine.enums import ComparisonMode, ExecutionStatus, Verdict
         from app.engine.executors.factory import get_executor
-        from app.engine.enums import ComparisonMode
         from app.engine.languages import LanguageRegistry
+        from app.engine.schemas import ExecutionResult
+
+        if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+            return ExecutionResult(
+                success=False,
+                status=ExecutionStatus.FAILED,
+                verdict=Verdict.SYSTEM_ERROR,
+                error="CRITICAL SECURITY VIOLATION: Unsandboxed host execution is prohibited by security policy. Docker sandbox required.",
+                total_testcases=len(testcases),
+            )
 
         lang = LanguageRegistry.normalize(language)
         executor = get_executor(lang)

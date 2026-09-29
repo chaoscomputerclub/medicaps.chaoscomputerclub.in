@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update, text
 
 from app.core.cache import delete_cache_pattern
 from app.core.config import settings
@@ -163,11 +163,23 @@ class ContestExecutionService:
             )
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
+            if contest.status in ("finished", "archived", "ended"):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Contest has ended. Code execution in arena is locked.",
+                )
             if contest.status == "upcoming":
                 raise HTTPException(
                     status_code=403,
                     detail="Contest has not started yet. Code execution unlocks at start time.",
                 )
+            if contest.ends_at:
+                contest_ends = contest.ends_at.replace(tzinfo=timezone.utc) if contest.ends_at.tzinfo is None else contest.ends_at
+                if now_utc() >= contest_ends:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Contest time limit has expired. Code execution in arena is locked.",
+                    )
             if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
                     current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
@@ -311,6 +323,9 @@ class ContestExecutionService:
             "stderr": exec_result.stderr,
             "compile_output": exec_result.compile_output,
             "time": exec_result.time,
+            "compile_time_ms": getattr(exec_result, "compile_time_ms", 0.0),
+            "execution_time_ms": getattr(exec_result, "execution_time_ms", 0.0),
+            "total_time_ms": getattr(exec_result, "total_time_ms", 0.0),
             "memory": exec_result.memory,
             "passed_testcases": passed_count,
             "total_testcases": len(testcase_results),
@@ -340,11 +355,23 @@ class ContestExecutionService:
             )
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
+            if contest.status in ("finished", "archived", "ended"):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Contest has ended. Submissions are locked.",
+                )
             if contest.status == "upcoming":
                 raise HTTPException(
                     status_code=403,
                     detail="Contest has not started yet. Submissions unlock at start time.",
                 )
+            if contest.ends_at:
+                contest_ends = contest.ends_at.replace(tzinfo=timezone.utc) if contest.ends_at.tzinfo is None else contest.ends_at
+                if now_utc() >= contest_ends:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Contest time limit has expired. Submissions are locked.",
+                    )
             if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
                     current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
@@ -356,7 +383,26 @@ class ContestExecutionService:
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
 
-        # Idempotency / debounce check: prevent duplicate submissions within 2 seconds
+        # Server-side atomic idempotency & debounce guard (prevents concurrent duplicate races)
+        import hashlib
+        from app.core.redis import get_redis_client
+        code_hash = hashlib.sha256((payload.code or "").strip().encode("utf-8")).hexdigest()[:16]
+        dedup_key = f"sub_debounce:{contest.id}:{problem.id}:{current_member.id}:{code_hash}"
+        try:
+            r = get_redis_client()
+            if r:
+                is_new = await r.set(dedup_key, "1", ex=2, nx=True)
+                if not is_new:
+                    raise HTTPException(
+                        status_code=429,
+                        detail="Duplicate concurrent submission detected. Please wait a moment before submitting again."
+                    )
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.debug("Redis dedup check skipped: %s", exc)
+
+        # Secondary DB debounce check for recent identical submission
         recent_sub_stmt = select(ContestSubmission).where(
             ContestSubmission.contest_id == contest.id,
             ContestSubmission.problem_id == problem.id,
@@ -492,13 +538,22 @@ class ContestExecutionService:
         is_first_solve_by_user = (prev_ac_count == 0) and is_accepted
 
         if is_first_solve_by_user:
-            problem.solved_count += 1
+            await db.execute(
+                update(ContestProblem)
+                .where(ContestProblem.id == problem.id)
+                .values(solved_count=ContestProblem.solved_count + 1)
+            )
+
+        # Acquire advisory transaction lock on contest scoreboard to serialize updates and eliminate deadlocks
+        await db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:cid))"), {"cid": f"scoreboard:{contest.id}"})
 
         contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
-        penalty_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
+        solve_elapsed_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
 
         sb_entry = await ContestRepository.get_scoreboard_entry(db, contest.id, current_member.id, for_update=True)
         if not sb_entry:
+            failed_attempts = 0 if is_accepted else 1
+            prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
             sb_entry = ScoreboardEntry(
                 contest_id=contest.id,
                 member_id=current_member.id,
@@ -510,11 +565,14 @@ class ContestExecutionService:
                 division="open",
                 score=points_awarded if is_accepted else 0,
                 solved=1 if is_accepted else 0,
-                penalty_seconds=penalty_secs if is_accepted else 0,
+                penalty_seconds=prob_penalty,
                 telemetry=[{
                     "problem_index": problem.problem_index,
                     "status": "solved" if is_accepted else "failed",
                     "attempts": 1,
+                    "failed_attempts": 0 if is_accepted else 1,
+                    "solve_time_seconds": solve_elapsed_secs if is_accepted else 0,
+                    "penalty_seconds": prob_penalty,
                     "is_first_ac": False,
                 }],
             )
@@ -528,23 +586,41 @@ class ContestExecutionService:
 
             if prob_item:
                 prob_item["attempts"] = prob_item.get("attempts", 0) + 1
-                if is_accepted and prob_item.get("status") != "solved":
-                    prob_item["status"] = "solved"
-                    sb_entry.score += points_awarded
-                    sb_entry.solved += 1
-                    sb_entry.penalty_seconds = penalty_secs
+                if is_accepted:
+                    if prob_item.get("status") != "solved":
+                        prob_item["status"] = "solved"
+                        failed_attempts = prob_item.get("attempts", 1) - 1
+                        prob_item["failed_attempts"] = failed_attempts
+                        prob_item["solve_time_seconds"] = solve_elapsed_secs
+                        prob_item["penalty_seconds"] = solve_elapsed_secs + (failed_attempts * 20 * 60)
+                        sb_entry.score += points_awarded
+                        sb_entry.solved += 1
+                else:
+                    if prob_item.get("status") != "solved":
+                        prob_item["status"] = "failed"
+                        prob_item["failed_attempts"] = prob_item.get("attempts", 1)
             else:
+                failed_attempts = 0 if is_accepted else 1
+                prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
                 telemetry_list.append({
                     "problem_index": problem.problem_index,
                     "status": "solved" if is_accepted else "failed",
                     "attempts": 1,
+                    "failed_attempts": failed_attempts,
+                    "solve_time_seconds": solve_elapsed_secs if is_accepted else 0,
+                    "penalty_seconds": prob_penalty,
                     "is_first_ac": False,
                 })
                 if is_accepted:
                     sb_entry.score += points_awarded
                     sb_entry.solved += 1
-                    sb_entry.penalty_seconds = penalty_secs
 
+            # Total penalty is the deterministic sum across all solved problems
+            sb_entry.penalty_seconds = sum(
+                item.get("penalty_seconds", 0)
+                for item in telemetry_list
+                if item.get("status") == "solved"
+            )
             sb_entry.telemetry = telemetry_list
 
         await db.flush()
@@ -573,6 +649,7 @@ class ContestExecutionService:
         except Exception as e:
             logger.debug("Broadcast error: %s", e)
 
+        # Build redacted testcase results for contestant privacy
         submit_tc_results = []
         for i, tr in enumerate(exec_result.testcase_results):
             tc = all_tcs[i] if i < len(all_tcs) else None
@@ -583,10 +660,10 @@ class ContestExecutionService:
                 "passed": tr.passed,
                 "verdict": tr.verdict,
                 "is_hidden": is_hidden,
-                "stdout": tr.stdout if not is_hidden else ("[Hidden output]" if not tr.passed else ""),
-                "expected_output": tr.expected_output if not is_hidden else "[Hidden]",
-                "input": tc.stdin if (tc and not is_hidden) else "[Hidden]",
-                "stderr": tr.stderr,
+                "stdout": "" if is_hidden else tr.stdout,
+                "expected_output": "[Hidden]" if is_hidden else tr.expected_output,
+                "input": "[Hidden]" if is_hidden else (tc.stdin if tc else ""),
+                "stderr": "" if is_hidden else tr.stderr,
                 "compile_output": tr.compile_output,
                 "wall_time_ms": tr.wall_time_ms,
             })
@@ -604,17 +681,25 @@ class ContestExecutionService:
             points_awarded,
         )
 
+        # CRITICAL PRIVACY: Never leak stderr if the failing testcase was hidden or if all tests were hidden
+        first_fail_idx = next((i for i, tr in enumerate(exec_result.testcase_results) if not tr.passed), None)
+        first_fail_is_hidden = all_tcs[first_fail_idx].hidden if (first_fail_idx is not None and first_fail_idx < len(all_tcs)) else False
+        safe_top_stderr = "" if (first_fail_is_hidden or all(tc.hidden for tc in all_tcs)) else (exec_result.stderr or "")
+
         return {
             "submission_id": sub.id,
-            "success": exec_result.success,
+            "success": is_accepted,
             "verdict": verdict_str,
             "passed_testcases": passed_count,
             "total_testcases": len(all_tcs),
             "points_awarded": points_awarded,
             "execution_time": exec_result.time,
+            "compile_time_ms": getattr(exec_result, "compile_time_ms", 0.0),
+            "execution_time_ms": getattr(exec_result, "execution_time_ms", 0.0),
+            "total_time_ms": getattr(exec_result, "total_time_ms", 0.0),
             "memory": exec_result.memory,
             "compile_output": exec_result.compile_output,
-            "stderr": exec_result.stderr,
+            "stderr": safe_top_stderr,
             "message": "Accepted! Solved problem awarded to scoreboard." if is_accepted else f"Verdict: {verdict_str} ({passed_count}/{len(all_tcs)} testcases passed)",
             "testcase_results": submit_tc_results,
         }

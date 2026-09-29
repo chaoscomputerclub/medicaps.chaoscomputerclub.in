@@ -6,6 +6,7 @@ import logging
 import os
 from functools import lru_cache
 
+from app.core.config import settings
 from .base import JudgeProvider
 
 logger = logging.getLogger("ccc.judge")
@@ -13,7 +14,7 @@ logger = logging.getLogger("ccc.judge")
 
 @lru_cache(maxsize=1)
 def get_judge_provider() -> JudgeProvider:
-    choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
+    choice = os.getenv("JUDGE_PROVIDER", settings.JUDGE_PROVIDER).strip().lower()
 
     if choice in {"codebox", "code_box", "codebox-engine"}:
         try:

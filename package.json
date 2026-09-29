@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 8081 --force",
+    "dev:remote": "VITE_BACKEND_PROXY_TARGET=https://medicaps.chaoscomputerclub.in vite dev --port 8081 --force",
     "dev:admin": "vite dev --config vite.admin.config.ts --port 8082 --force",
+    "dev:admin:remote": "VITE_BACKEND_PROXY_TARGET=https://medicaps.chaoscomputerclub.in vite dev --config vite.admin.config.ts --port 8082 --force",
+    "backend": "cd backend && .venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
     "build": "vite build",
     "build:admin": "vite build --config vite.admin.config.ts",
     "build:dev": "vite build --mode development",

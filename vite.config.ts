@@ -1,4 +1,4 @@
-import { type Plugin, defineConfig } from "vite";
+import { type Plugin, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -60,44 +60,48 @@ function pruneUnusedMonacoWorkersPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [
-    pruneUnusedMonacoWorkersPlugin(),
-    react(),
-    tailwindcss(),
-    tsconfigPaths(),
-    // Bundles Monaco workers locally — eliminates 60+ CDN requests and ~28 MB runtime load
-    // Only bundle workers for languages actually used in the judge: Python, C++, Java, JS
-    // editorWorkerService = core (required). TS worker is 13 MB — not needed for Python/C++/Java
-    (monacoEditorPlugin as any).default
-      ? (monacoEditorPlugin as any).default({
-          languageWorkers: ["editorWorkerService"],
-          publicPath: "monacoeditorwork",
-          globalAPI: false,
-        })
-      : (monacoEditorPlugin as any)({
-          languageWorkers: ["editorWorkerService"],
-          publicPath: "monacoeditorwork",
-          globalAPI: false,
-        }),
-  ],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
-  },
-  cacheDir: path.resolve(__dirname, "node_modules/.vite-student"),
-  server: {
-    port: 8081,
-    host: true,
-    proxy: {
-      "/api": {
-        target: "https://medicaps.chaoscomputerclub.in",
-        changeOrigin: true,
-        secure: false,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const target = env["VITE_BACKEND_PROXY_TARGET"] || process.env["VITE_BACKEND_PROXY_TARGET"] || "http://127.0.0.1:8000";
+
+  return {
+    plugins: [
+      pruneUnusedMonacoWorkersPlugin(),
+      react(),
+      tailwindcss(),
+      tsconfigPaths(),
+      // Bundles Monaco workers locally — eliminates 60+ CDN requests and ~28 MB runtime load
+      // Only bundle workers for languages actually used in the judge: Python, C++, Java, JS
+      // editorWorkerService = core (required). TS worker is 13 MB — not needed for Python/C++/Java
+      (monacoEditorPlugin as any).default
+        ? (monacoEditorPlugin as any).default({
+            languageWorkers: ["editorWorkerService"],
+            publicPath: "monacoeditorwork",
+            globalAPI: false,
+          })
+        : (monacoEditorPlugin as any)({
+            languageWorkers: ["editorWorkerService"],
+            publicPath: "monacoeditorwork",
+            globalAPI: false,
+          }),
+    ],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
       },
     },
-  },
+    cacheDir: path.resolve(__dirname, "node_modules/.vite-student"),
+    server: {
+      port: 8081,
+      host: true,
+      proxy: {
+        "/api": {
+          target,
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
   optimizeDeps: {
     include: [
       "react",
@@ -199,4 +203,5 @@ export default defineConfig({
       },
     },
   },
+};
 });

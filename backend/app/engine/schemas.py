@@ -59,6 +59,8 @@ class SandboxResult(BaseModel):
     peak_memory_mb: float = 0.0
     timed_out: bool = False
     oom_killed: bool = False
+    output_limit_exceeded: bool = False
+    system_error: bool = False
 
 
 class CompileResult(BaseModel):
@@ -73,7 +75,7 @@ class TestCaseResult(BaseModel):
     name: Optional[str] = None
     hidden: bool = False
     passed: bool = False
-    verdict: Verdict = Verdict.INTERNAL_ERROR
+    verdict: Verdict = Verdict.SYSTEM_ERROR
     category: Optional[str] = None
     stdout: str = ""
     expected_output: str = ""
@@ -99,7 +101,7 @@ class ExecutionResult(BaseModel):
     success: bool
     submission_id: str = Field(default_factory=lambda: str(uuid4()))
     status: ExecutionStatus = ExecutionStatus.COMPLETED
-    verdict: Verdict = Verdict.INTERNAL_ERROR
+    verdict: Verdict = Verdict.SYSTEM_ERROR
     stdout: str = ""
     stderr: str = ""
     compile_output: str = ""
@@ -110,5 +112,8 @@ class ExecutionResult(BaseModel):
     passed_testcases: int = 0
     total_testcases: int = 0
     score: float = 0.0
+    compile_time_ms: float = 0.0
+    execution_time_ms: float = 0.0
+    total_time_ms: float = 0.0
     error: Optional[str] = None
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

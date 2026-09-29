@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+from app.core.config import settings
 from app.engine.enums import ComparisonMode, ExecutionStatus, Language, Verdict
 from app.engine.judge import JudgeEngine
 from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
@@ -331,7 +332,17 @@ class CodeboxProvider(JudgeProvider):
 
         # Probe health or fallback
         if not await self.healthy():
-            logger.warning("Codebox engine unreachable at %s; falling back to local sandbox.", self.base_url)
+            if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+                logger.error("Codebox engine is unreachable and ALLOW_UNSANDBOXED_EXECUTION is False. Failing closed with SYSTEM_ERROR.")
+                return ExecutionResult(
+                    success=False,
+                    submission_id=submission_id,
+                    status=ExecutionStatus.FAILED,
+                    verdict=Verdict.SYSTEM_ERROR,
+                    error="CRITICAL INFRASTRUCTURE FAILURE: Codebox execution engine is unreachable. Unsandboxed host execution is prohibited by security policy.",
+                    total_testcases=len(testcases),
+                )
+            logger.warning("Codebox engine unreachable at %s; falling back to local sandbox (ALLOW_UNSANDBOXED_EXECUTION=True).", self.base_url)
             from app.engine.executors.factory import get_executor
             lang_enum = language if isinstance(language, Language) else Language(language)
             return await get_executor(lang_enum).execute_batch(

@@ -98,6 +98,12 @@ import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
 import type { AssessmentRanking } from "@/features/contest/types";
 
+import { ProblemStatementView } from "@/components/problem/ProblemStatementView";
+import {
+  generateCanonicalStarterCodes,
+  type FunctionSignatureContract,
+} from "@/lib/problemFormatter";
+
 const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 
 function formatTimer(totalSeconds: number): string {
@@ -110,30 +116,33 @@ function formatTimer(totalSeconds: number): string {
 
 export type ArenaLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "typescript";
 
-function getFallbackStarter(lang: ArenaLanguage, title?: string): string {
-  const words = (title || "solve").match(/[a-zA-Z0-9]+/g) || ["solve"];
+function getFallbackStarter(
+  lang: ArenaLanguage,
+  title?: string,
+  functionSignature?: FunctionSignatureContract | null,
+  functionName?: string
+): string {
+  if (functionSignature && functionSignature.parameters && functionSignature.parameters.length > 0) {
+    const starters = generateCanonicalStarterCodes(functionSignature);
+    if (starters[lang]) return starters[lang];
+  }
+
+  const words = (functionName || title || "solve").match(/[a-zA-Z0-9]+/g) || ["solve"];
   let fnName =
     words[0].toLowerCase() +
     words
       .slice(1)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
       .join("");
-  if (!/^[a-zA-Z]/.test(fnName)) fnName = "solve" + fnName;
+  if (!/^[a-zA-Z_]/.test(fnName)) fnName = "solve" + fnName;
 
-  switch (lang) {
-    case "python":
-      return `class Solution:\n    def ${fnName}(self) -> int:\n        # Write your solution here\n        pass\n`;
-    case "cpp":
-      return `#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    int ${fnName}() {\n        // Write your solution here\n        return 0;\n    }\n};\n`;
-    case "c":
-      return `#include <stdio.h>\n#include <stdlib.h>\n\nint ${fnName}() {\n    // Write your solution here\n    return 0;\n}\n`;
-    case "java":
-      return `class Solution {\n    public int ${fnName}() {\n        // Write your solution here\n        return 0;\n    }\n}\n`;
-    case "javascript":
-      return `/**\n * @return {number}\n */\nvar ${fnName} = function() {\n    // Write your solution here\n};\n`;
-    case "typescript":
-      return `function ${fnName}(): number {\n    // Write your solution here\n    return 0;\n}\n`;
-  }
+  const synthSig: FunctionSignatureContract = {
+    name: fnName,
+    parameters: [{ name: "nums", type: "integer[]" }],
+    return_type: "integer[]",
+  };
+  const starters = generateCanonicalStarterCodes(synthSig);
+  return starters[lang] || "";
 }
 
 export function ContestArenaPage() {
@@ -602,7 +611,12 @@ export function ContestArenaPage() {
 
     const starter =
       activeProblem?.starter_codes?.[selectedLanguage] ??
-      getFallbackStarter(selectedLanguage, activeProblem?.title);
+      getFallbackStarter(
+        selectedLanguage,
+        activeProblem?.title,
+        (activeProblem as any)?.function_signature,
+        (activeProblem as any)?.function_name
+      );
     return sanitizeCodeSnippet(starter);
   };
 
@@ -1328,122 +1342,10 @@ export function ContestArenaPage() {
               <TabsPanels className="flex-1 overflow-y-auto min-h-0" data-problem-panel>
                 <TabsPanel value="description" className="p-5 space-y-6 text-zinc-200">
                   {activeProblem ? (
-                  <>
-                    {/* Problem Title & Badges */}
-                    <div className="space-y-2 border-b border-white/8 pb-4">
-                      <div className="flex items-center gap-2">
-                        {/* Difficulty Badge */}
-                        <span
-                          className={`px-2 py-0.5 rounded font-mono text-[10px] uppercase font-semibold border ${
-                            activeProblem.difficulty === "HARD"
-                              ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
-                              : activeProblem.difficulty === "MEDIUM"
-                                ? "bg-amber-400/10 text-amber-400 border-amber-400/30"
-                                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                          }`}
-                        >
-                          {activeProblem.difficulty || "EASY"}
-                        </span>
-                        <span className="text-xs text-zinc-400 font-mono tabular-nums">
-                          {activeProblem.points} Points
-                        </span>
-                      </div>
-                      <h1 className="text-base font-semibold tracking-tight text-white font-sans">
-                        Q{activeProblem.problem_index}. {activeProblem.title}
-                      </h1>
-                    </div>
-
-                    {/* Problem Description */}
-                    <div className="text-sm font-sans text-zinc-200 leading-relaxed whitespace-pre-line">
-                      {activeProblem.description}
-                    </div>
-
-                    {activeProblem.input_format && (
-                      <div className="space-y-1.5">
-                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
-                          Input Format
-                        </span>
-                        <div className="bg-zinc-950 border border-white/8 rounded-md p-3 text-[13px] font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
-                          {activeProblem.input_format}
-                        </div>
-                      </div>
-                    )}
-
-                    {activeProblem.output_format && (
-                      <div className="space-y-1.5">
-                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
-                          Output Format
-                        </span>
-                        <div className="bg-zinc-950 border border-white/8 rounded-md p-3 text-[13px] font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
-                          {activeProblem.output_format}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Examples Section */}
-                    {activeProblem.sample_testcases &&
-                      activeProblem.sample_testcases.length > 0 && (
-                        <div className="space-y-3 pt-1">
-                          <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
-                            Sample Testcases
-                          </span>
-                          {activeProblem.sample_testcases.map((st, i) => (
-                            <div
-                              key={i}
-                              className="p-3.5 rounded-md bg-zinc-950 border border-white/8 space-y-2 text-xs font-mono"
-                            >
-                              <div className="flex items-center justify-between text-zinc-400 font-semibold">
-                                <span>Example {i + 1}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => copyToClipboard(st.stdin, `tc_in_${i}`)}
-                                  className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-white cursor-pointer font-mono"
-                                >
-                                  {copiedKey === `tc_in_${i}` ? (
-                                    <Check className="size-3 text-lime-400" />
-                                  ) : (
-                                    <Copy className="size-3" />
-                                  )}
-                                  <span>{copiedKey === `tc_in_${i}` ? "Copied" : "Copy"}</span>
-                                </button>
-                              </div>
-                              <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500">Input</span>
-                                <pre className="p-2.5 rounded bg-black border border-white/6 text-zinc-200 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
-                                  {formatTestcaseInput(st.stdin || (st as any).input)}
-                                </pre>
-                              </div>
-                              <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500">Expected Output</span>
-                                <pre className="p-2.5 rounded bg-black border border-white/6 text-lime-400 overflow-x-auto whitespace-pre-wrap text-[13px] font-mono leading-relaxed">
-                                  {st.expected_output}
-                                </pre>
-                              </div>
-                              {st.explanation && (
-                                <div className="text-[11px] text-zinc-400 italic pt-1 font-mono">
-                                  Note: {st.explanation}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                    {/* Constraints Section */}
-                    {activeProblem.constraints && (
-                      <div className="space-y-1.5 pt-1">
-                        <span className="font-mono text-[10px] uppercase font-semibold text-zinc-500 tracking-wider block">
-                          Constraints
-                        </span>
-                        <pre className="text-[13px] font-mono text-amber-300 bg-zinc-950 border border-white/8 p-3 rounded-md overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                          {activeProblem.constraints}
-                        </pre>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-zinc-500 font-mono text-xs">Select a question to begin.</div>
-                )}
+                    <ProblemStatementView problem={activeProblem as any} />
+                  ) : (
+                    <div className="text-zinc-500 font-mono text-xs">Select a question to begin.</div>
+                  )}
                 </TabsPanel>
 
                 {/* Submissions History Tab */}
@@ -1791,6 +1693,7 @@ export function ContestArenaPage() {
                               {formatTestcaseInput(
                                 activeProblem.sample_testcases[activeTestcaseIndex].stdin ||
                                   (activeProblem.sample_testcases[activeTestcaseIndex] as any).input,
+                                (activeProblem as any)?.function_signature
                               )}
                             </pre>
                           </div>
@@ -1964,7 +1867,7 @@ export function ContestArenaPage() {
                                           Input
                                         </span>
                                         <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto whitespace-pre-wrap">
-                                          {formatTestcaseInput(curTc.input)}
+                                          {formatTestcaseInput(curTc.input, (activeProblem as any)?.function_signature)}
                                         </pre>
                                       </div>
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -2099,7 +2002,7 @@ export function ContestArenaPage() {
                                           Input
                                         </span>
                                         <pre className="p-2 bg-zinc-950 border border-white/10 rounded text-xs text-zinc-200 overflow-x-auto whitespace-pre-wrap">
-                                          {formatTestcaseInput(curTc.stdin)}
+                                          {formatTestcaseInput(curTc.stdin, (activeProblem as any)?.function_signature)}
                                         </pre>
                                       </div>
                                     )}

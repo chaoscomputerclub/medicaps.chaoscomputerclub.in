@@ -89,9 +89,7 @@ def _create_persistent_container(client, image: str) -> Optional[Container]:
             image=image,
             command=["sleep", "infinity"],
             name=container_name,
-            volumes={
-                str(workspace_base): {"bind": "/workspace", "mode": "rw"}
-            },
+            volumes={},
             network_disabled=True,
             mem_limit="1024m",
             memswap_limit="1024m",

@@ -42,6 +42,7 @@ class CAdapter(BaseLanguageAdapter):
     def generate_starter_code(self, signature: FunctionSignature) -> str:
         fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_c_ret_type(signature.return_type)
+        ret_td = parse_type_descriptor(signature.return_type)
 
         params_parts: List[str] = []
         for p in signature.parameters:
@@ -62,6 +63,13 @@ class CAdapter(BaseLanguageAdapter):
                 params_parts.append(f"double {name}")
             else:
                 params_parts.append(f"int {name}")
+
+        # Array return requires int* returnSize parameter to return array length
+        if ret_td.kind == TypeKind.ARRAY or "int*" in ret_type:
+            if ret_td.dimensions == 2:
+                params_parts.append("int* returnSize, int** returnColumnSizes")
+            else:
+                params_parts.append("int* returnSize")
 
         params_str = ", ".join(params_parts)
         return (

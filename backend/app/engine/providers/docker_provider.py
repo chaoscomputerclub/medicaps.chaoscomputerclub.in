@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
+from app.core.config import settings
 from app.engine.docker.languages import get_language_spec
 from app.engine.docker.pool import get_container, get_docker_client, prewarm_containers
 from app.engine.docker.sandbox import CoreDockerSandbox
@@ -74,9 +75,20 @@ class DockerSandboxProvider(JudgeProvider):
         Direct in-process batch execution inside persistent Docker sandboxes.
         Falls back to LocalSandboxProvider if Docker daemon is not active.
         """
-        # Fallback check
+        submission_id = str(uuid4())
+        # Fallback check: strictly fail-closed unless unsandboxed execution is explicitly allowed
         if not await self.healthy():
-            logger.warning("Docker daemon is offline; falling back to local host sandbox.")
+            if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+                logger.error("Docker daemon is offline and ALLOW_UNSANDBOXED_EXECUTION is False. Failing closed with SYSTEM_ERROR.")
+                return ExecutionResult(
+                    success=False,
+                    submission_id=submission_id,
+                    status=ExecutionStatus.FAILED,
+                    verdict=Verdict.SYSTEM_ERROR,
+                    error="CRITICAL INFRASTRUCTURE FAILURE: Docker execution sandbox is offline. Unsandboxed host execution is prohibited by security policy.",
+                    total_testcases=len(testcases),
+                )
+            logger.warning("Docker daemon is offline; falling back to local host sandbox (ALLOW_UNSANDBOXED_EXECUTION=True).")
             from app.engine.executors.factory import get_executor
             lang_enum = language if isinstance(language, Language) else Language(language)
             return await get_executor(lang_enum).execute_batch(
@@ -89,10 +101,11 @@ class DockerSandboxProvider(JudgeProvider):
 
         spec = get_language_spec(language)
         workspace: Optional[Path] = None
-        submission_id = str(uuid4())
+        container = None
 
         try:
             workspace = CoreDockerSandbox.create_workspace()
+            container = CoreDockerSandbox.spawn_isolated_container(spec.image, workspace)
 
             # 1. Write source file
             source_file = workspace / spec.filename
@@ -102,16 +115,19 @@ class DockerSandboxProvider(JudgeProvider):
             except Exception:
                 pass
 
-            # 2. Compilation phase (C++, Java, TS, Go, Rust)
+            # 2. Compilation phase (C++, Java, TS, Go, Rust) — COMPILE ONCE per submission
             compile_output = ""
+            compile_time_ms = 0.0
             if spec.requires_compile and spec.compile_command:
                 comp_res = await CoreDockerSandbox.compile(
                     image=spec.image,
                     command=spec.compile_command,
                     workspace=workspace,
                     time_limit=15.0,
+                    container=container,
                 )
                 compile_output = comp_res.output or comp_res.error
+                compile_time_ms = comp_res.time_ms
                 if not comp_res.success:
                     return ExecutionResult(
                         success=False,
@@ -119,13 +135,15 @@ class DockerSandboxProvider(JudgeProvider):
                         status=ExecutionStatus.COMPLETED,
                         verdict=Verdict.COMPILATION_ERROR,
                         compile_output=compile_output,
+                        compile_time_ms=compile_time_ms,
+                        total_time_ms=compile_time_ms,
                         stderr=comp_res.error,
                         completed_at=datetime.now(timezone.utc),
                     )
 
-            # 3. Testcase execution
+            # 3. Testcase execution with early termination on hidden failures
             testcase_results: list[TestCaseResult] = []
-            total_time_ms = 0.0
+            total_exec_time_ms = 0.0
 
             for tc in testcases:
                 tc_time = tc.time_limit or time_limit
@@ -138,8 +156,9 @@ class DockerSandboxProvider(JudgeProvider):
                     stdin_data=tc.stdin or "",
                     time_limit=tc_time,
                     memory_limit_mb=tc_mem,
+                    container=container,
                 )
-                total_time_ms += sandbox_res.wall_time_ms
+                total_exec_time_ms += sandbox_res.wall_time_ms
 
                 tc_res = JudgeEngine.evaluate(
                     sandbox_result=sandbox_res,
@@ -148,6 +167,11 @@ class DockerSandboxProvider(JudgeProvider):
                     comparison_mode=comparison_mode,
                 )
                 testcase_results.append(tc_res)
+
+                # Early termination (fail-fast) on definitive failure for hidden testcases
+                if tc.hidden and not tc_res.passed:
+                    logger.info("Early termination triggered on failed hidden testcase: %s (verdict=%s)", tc.id, tc_res.verdict)
+                    break
 
             # 4. Aggregation
             scoring_res = JudgeEngine.score(testcase_results)
@@ -166,15 +190,23 @@ class DockerSandboxProvider(JudgeProvider):
                 compile_output=compile_output,
                 memory=scoring_res.max_memory_mb,
                 time=round(scoring_res.max_time_ms / 1000.0, 4),
+                compile_time_ms=round(compile_time_ms, 2),
+                execution_time_ms=round(total_exec_time_ms, 2),
+                total_time_ms=round(compile_time_ms + total_exec_time_ms, 2),
                 exit_code=testcase_results[0].exit_code if testcase_results else 0,
                 testcase_results=testcase_results,
                 passed_testcases=scoring_res.passed,
-                total_testcases=scoring_res.total,
+                total_testcases=len(testcases),
                 score=scoring_res.score,
                 completed_at=datetime.now(timezone.utc),
             )
 
         finally:
+            if container:
+                try:
+                    container.remove(force=True)
+                except Exception:
+                    pass
             if workspace:
                 CoreDockerSandbox.cleanup_workspace(workspace)
 

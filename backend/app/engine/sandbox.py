@@ -21,11 +21,11 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from app.core.config import settings
 from app.engine.schemas import CompileResult, SandboxResult
 
 logger = logging.getLogger(__name__)
 
-MAX_OUTPUT_BYTES = 2 * 1024 * 1024  # 2MB maximum stdout/stderr output cap
 _IS_LINUX = platform.system() == "Linux"
 
 
@@ -101,6 +101,12 @@ class Sandbox:
         time_limit: float = 15.0,
     ) -> CompileResult:
         """Compile source code in workspace using local compiler or Docker."""
+        if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+            return CompileResult(
+                success=False,
+                error="CRITICAL SECURITY VIOLATION: Unsandboxed host compilation is prohibited by security policy. Docker sandbox required.",
+            )
+
         start = time.monotonic()
         try:
             proc = await asyncio.create_subprocess_exec(
@@ -114,8 +120,9 @@ class Sandbox:
             try:
                 stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=time_limit)
                 elapsed_ms = (time.monotonic() - start) * 1000
-                stdout = stdout_b.decode("utf-8", errors="replace")[:MAX_OUTPUT_BYTES]
-                stderr = stderr_b.decode("utf-8", errors="replace")[:MAX_OUTPUT_BYTES]
+                max_bytes = settings.OUTPUT_LIMIT_BYTES
+                stdout = stdout_b.decode("utf-8", errors="replace")[:max_bytes]
+                stderr = stderr_b.decode("utf-8", errors="replace")[:max_bytes]
                 return CompileResult(
                     success=(proc.returncode == 0),
                     output=stdout,
@@ -124,7 +131,7 @@ class Sandbox:
                 )
             except asyncio.TimeoutError:
                 try:
-                    os.killpg(proc.pid, signal.SIGKILL)
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
                 except Exception:
                     try:
                         proc.kill()
@@ -149,6 +156,14 @@ class Sandbox:
         memory_limit_mb: int = 256,
     ) -> SandboxResult:
         """Run solution in workspace with stdin input, memory and timeout constraints."""
+        if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+            return SandboxResult(
+                stdout="",
+                stderr="CRITICAL SECURITY VIOLATION: Unsandboxed host execution is prohibited by security policy. Docker sandbox required.",
+                exit_code=125,
+                system_error=True,
+            )
+
         start = time.monotonic()
         timed_out = False
         oom_killed = False
@@ -178,11 +193,21 @@ class Sandbox:
                 wall_time_ms = (time.monotonic() - start) * 1000
                 exit_code = proc.returncode if proc.returncode is not None else 0
 
+                # Check Output Limit Exceeded
+                output_limit = settings.OUTPUT_LIMIT_BYTES
+                if (stdout_b and len(stdout_b) > output_limit) or (stderr_b and len(stderr_b) > output_limit):
+                    peak_mb = _read_peak_memory_mb(proc_pid)
+                    return SandboxResult(
+                        stdout=(stdout_b.decode("utf-8", errors="replace")[:2048] if stdout_b else "") + "\n[OUTPUT_LIMIT_EXCEEDED]",
+                        stderr="Execution aborted: output limit exceeded.",
+                        exit_code=0,
+                        wall_time_ms=round(wall_time_ms, 2),
+                        peak_memory_mb=peak_mb,
+                        output_limit_exceeded=True,
+                    )
+
                 stdout = stdout_b.decode("utf-8", errors="replace") if stdout_b else ""
                 stderr = stderr_b.decode("utf-8", errors="replace") if stderr_b else ""
-
-                if len(stdout) > MAX_OUTPUT_BYTES:
-                    stdout = stdout[:MAX_OUTPUT_BYTES] + "\n[Output truncated]"
 
                 # Exit code 137 = SIGKILL, typically OOM or ulimit kill
                 if exit_code == 137:
@@ -204,7 +229,7 @@ class Sandbox:
             except asyncio.TimeoutError:
                 timed_out = True
                 try:
-                    os.killpg(proc.pid, signal.SIGKILL)
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
                 except Exception:
                     try:
                         proc.kill()
@@ -229,4 +254,5 @@ class Sandbox:
                 stderr=str(exc),
                 exit_code=1,
                 wall_time_ms=(time.monotonic() - start) * 1000,
+                system_error=True,
             )

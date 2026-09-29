@@ -37,28 +37,25 @@ class JavaScriptAdapter(BaseLanguageAdapter):
             return "any"
 
     def generate_starter_code(self, signature: FunctionSignature) -> str:
-        class_name = signature.class_name or "Solution"
         fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_jsdoc_type(signature.return_type)
 
-        jsdoc_lines = ["    /**"]
+        jsdoc_lines = ["/**"]
         for p in signature.parameters:
             t = self._map_jsdoc_type(p.type)
-            jsdoc_lines.append(f"     * @param {{{t}}} {p.name}")
-        jsdoc_lines.append(f"     * @return {{{ret_type}}}")
-        jsdoc_lines.append("     */")
+            jsdoc_lines.append(f" * @param {{{t}}} {p.name}")
+        jsdoc_lines.append(f" * @return {{{ret_type}}}")
+        jsdoc_lines.append(" */")
         jsdoc_str = "\n".join(jsdoc_lines)
 
         param_names = [p.name for p in signature.parameters]
         params_str = ", ".join(param_names)
 
         return (
-            f"class {class_name} {{\n"
             f"{jsdoc_str}\n"
-            f"    {fn_name}({params_str}) {{\n"
-            "        \n"
-            "    }\n"
-            "}\n"
+            f"var {fn_name} = function({params_str}) {{\n"
+            "    \n"
+            "};\n"
         )
 
     def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:

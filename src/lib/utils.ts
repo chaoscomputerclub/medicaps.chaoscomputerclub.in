@@ -97,24 +97,18 @@ export function sanitizeCodeSnippet(code?: string | null): string {
   return clean;
 }
 
+import { formatExampleInput, type FunctionSignatureContract } from "./problemFormatter";
+
 /**
  * Formats a raw testcase input string or JSON into clean LeetCode-style display:
- * e.g. {"s": "anagram", "t": "nagaram"} -> s = "anagram"\nt = "nagaram"
+ * If functionSignature is passed, maps positional inputs to canonical parameter names:
+ * e.g. "[[2,7,11,15],9]" -> nums = [2,7,11,15], target = 9
  */
-export function formatTestcaseInput(raw?: string | null): string {
-  if (!raw || typeof raw !== "string") return "";
-  const trimmed = raw.trim();
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      if (parsed.raw && typeof parsed.raw === "string") {
-        return formatTestcaseInput(parsed.raw);
-      }
-      return Object.entries(parsed)
-        .map(([k, v]) => `${k} = ${JSON.stringify(v)}`)
-        .join("\n");
-    }
-  } catch {}
-  return trimmed;
+export function formatTestcaseInput(
+  raw?: string | null | any,
+  functionSignature?: FunctionSignatureContract | null
+): string {
+  if (raw === undefined || raw === null || raw === "") return "";
+  return formatExampleInput(functionSignature, raw);
 }
 

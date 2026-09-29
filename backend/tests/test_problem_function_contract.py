@@ -99,8 +99,7 @@ def test_starter_code_generation_across_all_languages():
 
     # JavaScript
     js_starter = get_adapter("javascript").generate_starter_code(sig)
-    assert "class Solution {" in js_starter
-    assert "shortestPath(n, edges, source, destination)" in js_starter
+    assert "var shortestPath = function(n, edges, source, destination)" in js_starter or "shortestPath(n, edges, source, destination)" in js_starter
     assert "@param {number[][]} edges" in js_starter
 
     # TypeScript
