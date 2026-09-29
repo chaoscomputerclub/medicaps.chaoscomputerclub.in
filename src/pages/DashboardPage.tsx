@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowRight, MapPin, Radio } from "lucide-react";
+import { ArrowRight, MapPin, Radio, Trophy } from "lucide-react";
 import { Button } from "@/components/design-system/Button";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { ScoreboardMatrix } from "@/organization/components/ScoreboardMatrix";

@@ -576,7 +576,7 @@ export const contestSlice = createSlice({
     // Finish Contest
     builder.addCase(finishContestThunk.fulfilled, (state, action) => {
       const slug = action.payload.slug;
-      const finalStatus = action.payload.status;
+      const finalStatus = (action.payload.status as "in_progress" | "finalized" | "expired") || "finalized";
       if (state.arenaData && (state.currentContest?.slug === slug || state.arenaData.slug === slug)) {
         state.arenaData.attempt_status = finalStatus;
       }

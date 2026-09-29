@@ -88,6 +88,7 @@ const SelectContent = React.forwardRef<
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
+);
 });
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 

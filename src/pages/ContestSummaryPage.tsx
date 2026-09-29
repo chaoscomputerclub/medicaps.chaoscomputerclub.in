@@ -333,8 +333,8 @@ export function ContestSummaryPage() {
               isSubmitted:
                 ownData?.attempt?.status === "finalized" ||
                 ownData?.attempt?.status === "expired" ||
-                ownData?.attempt?.status === "submitted" ||
-                ownData?.attempt?.status === "completed" ||
+                (ownData?.attempt?.status as string) === "submitted" ||
+                (ownData?.attempt?.status as string) === "completed" ||
                 reg?.assessment_status === "submitted" ||
                 reg?.assessment_status === "completed",
               contestStatus: reg?.contest_status || "finished",

@@ -31,6 +31,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RatingDistributionCard } from "@/organization/components/RatingDistributionCard";
 import { RatingChart } from "@/organization/components/RatingChart";
 import { Button } from "@/components/design-system/Button";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/design-system/Card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/design-system/Avatar";
 import { Metric, SectionHeader, TierBadge } from "@/organization/components/ui";
 import { FaLinkedinIn } from "react-icons/fa";
