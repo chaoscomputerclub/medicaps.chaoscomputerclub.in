@@ -30,6 +30,8 @@ from app.models.db_models import (
 )
 from app.engine.contracts import FunctionSignature, EvaluationConfig, DataType
 from app.engine.adapters import OutputEvaluator
+from app.engine.harness import prepare_solution_code
+from app.engine.judge import JudgeEngine
 
 from app.modules.contests.contest_repository import ContestRepository
 from app.services.contest_eligibility_service import (
@@ -212,7 +214,6 @@ class ContestExecutionService:
         if adapter and fn_sig:
             exec_code = adapter.generate_wrapper(fn_sig, payload.code)
         else:
-            from app.engine.harness import prepare_solution_code
             exec_code = prepare_solution_code(
                 code=payload.code,
                 language=lang_enum,
@@ -247,15 +248,11 @@ class ContestExecutionService:
                     if not passed:
                         # Fallback: if OutputEvaluator fails (e.g., mismatched declared type),
                         # use JudgeEngine semantic comparison (handles [0, 1] vs [0,1] etc.)
-                        from app.engine.judge import JudgeEngine
-                        from app.engine.enums import ComparisonMode
                         passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
                     tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
                 else:
                     # No function signature: use semantic comparison, not plain string equality
-                    from app.engine.judge import JudgeEngine
-                    from app.engine.enums import ComparisonMode
                     passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
                     tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
@@ -380,7 +377,6 @@ class ContestExecutionService:
         if adapter and fn_sig:
             exec_code = adapter.generate_wrapper(fn_sig, payload.code)
         else:
-            from app.engine.harness import prepare_solution_code
             exec_code = prepare_solution_code(
                 code=payload.code,
                 language=lang_enum,
@@ -412,14 +408,10 @@ class ContestExecutionService:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
                     if not passed:
                         # Fallback: semantic comparison if OutputEvaluator fails type parsing
-                        from app.engine.judge import JudgeEngine
-                        from app.engine.enums import ComparisonMode
                         passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
                     tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
                 else:
-                    from app.engine.judge import JudgeEngine
-                    from app.engine.enums import ComparisonMode
                     passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
                     tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
