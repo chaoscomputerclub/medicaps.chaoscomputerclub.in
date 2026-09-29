@@ -36,10 +36,11 @@ async def lifespan(app: FastAPI):
     from app.core.origins import is_localhost_origin
     if settings.ENVIRONMENT.lower() == "production":
         if is_localhost_origin(settings.FRONTEND_URL):
-            raise RuntimeError(
-                f"FATAL CONFIGURATION ERROR: Production backend cannot have localhost FRONTEND_URL ('{settings.FRONTEND_URL}'). "
-                "Must be configured to production domain, e.g. 'https://medicaps.chaoscomputerclub.in'."
+            print(
+                f"⚠ Warning: FRONTEND_URL was configured to localhost ('{settings.FRONTEND_URL}') in production. "
+                "Auto-correcting to canonical 'https://medicaps.chaoscomputerclub.in'."
             )
+            settings.FRONTEND_URL = "https://medicaps.chaoscomputerclub.in"
         print(f"✓ Production environment verified: FRONTEND_URL={settings.FRONTEND_URL}")
 
     await init_db()
