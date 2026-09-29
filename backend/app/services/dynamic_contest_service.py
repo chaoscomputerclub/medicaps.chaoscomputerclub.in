@@ -10,6 +10,7 @@ import logging
 import re
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Tuple
+from uuid import uuid4
 
 from fastapi import HTTPException, status
 from sqlalchemy import select, delete, desc, update, func
@@ -24,6 +25,7 @@ from app.models.contest import (
     ContestSubmission,
     ScoreboardEntry,
 )
+from app.models.problem import Problem, ProblemTestCase
 from app.models.assessment import (
     Assessment,
     AssessmentProblem,
@@ -300,9 +302,17 @@ class DynamicContestService:
         # 3. Create Problem Challenges (Mirrored for Contest Arena & Assessment)
         created_problems = []
         for p in payload.problems:
-            starter_codes = p.starter_codes if p.starter_codes else DynamicContestService._default_starter_codes(p.title)
+            starter_codes = (
+                dict(p.starter_codes)
+                if p.starter_codes
+                else DynamicContestService._default_starter_codes(p.title, p.function_name, p.slug)
+            )
             sample_tcs = [tc.model_dump() for tc in p.sample_testcases]
             hidden_tcs = [tc.model_dump() for tc in p.hidden_testcases]
+
+            resolved_pid, resolved_pver = await DynamicContestService._resolve_master_problem(
+                p, starter_codes, db
+            )
 
             # Assessment Problem
             ap = AssessmentProblem(
@@ -339,6 +349,12 @@ class DynamicContestService:
                 constraints=p.constraints,
                 time_limit=p.time_limit,
                 memory_limit=p.memory_limit,
+                problem_id=resolved_pid,
+                problem_version=resolved_pver,
+                execution_mode=p.execution_mode or "FUNCTION",
+                function_signature=p.function_signature or {},
+                evaluation_config=p.evaluation_config or {},
+                sandbox_config=p.sandbox_config or {},
                 starter_codes=starter_codes,
                 sample_testcases=sample_tcs,
                 hidden_testcases=hidden_tcs,
@@ -629,6 +645,188 @@ class DynamicContestService:
         }
 
     @staticmethod
+    async def _resolve_master_problem(
+        problem_data: ProblemCreateSchema,
+        starter_codes: Dict[str, Any],
+        db: AsyncSession,
+    ) -> Tuple[Optional[str], Optional[int]]:
+        """
+        Safely resolve a valid master Problem entity (UUID) and its pinned version to satisfy
+        the contest_problems foreign key constraint (contest_problems_problem_id_fkey).
+
+        Lookup order:
+          1. By problem_data.problem_id as Problem.id (UUID)
+          2. By problem_data.problem_id as Problem.slug
+          3. By problem_data.slug as Problem.slug
+          4. By problem_data.title as Problem.title
+
+        If found:
+          - Sync/update problem fields (title, description, topic, points, constraints, starter_code, etc.)
+          - Returns (master_problem.id, master_problem.version)
+
+        If not found:
+          - Auto-creates master Problem in 'problems' under an isolated savepoint.
+          - Populates its testcases in 'problem_testcases'.
+          - Returns (new_problem.id, new_problem.version)
+
+        If auto-creation or resolution encounters any error:
+          - Safe fallback returns (None, problem_data.problem_version or 1), ensuring
+            contest_problems insert NEVER fails due to a ForeignKeyViolationError.
+        """
+        master_problem: Optional[Problem] = None
+
+        # 1. Lookup by problem_id as id (UUID) or slug
+        if problem_data.problem_id:
+            try:
+                master_problem = await db.get(Problem, problem_data.problem_id)
+            except Exception:
+                master_problem = None
+            if not master_problem:
+                res = await db.execute(
+                    select(Problem).where(Problem.slug == problem_data.problem_id)
+                )
+                master_problem = res.scalars().first()
+
+        # 2. Lookup by slug
+        if not master_problem and problem_data.slug:
+            res = await db.execute(
+                select(Problem).where(Problem.slug == problem_data.slug)
+            )
+            master_problem = res.scalars().first()
+
+        # 3. Lookup by title
+        if not master_problem and problem_data.title:
+            res = await db.execute(
+                select(Problem).where(Problem.title == problem_data.title)
+            )
+            master_problem = res.scalars().first()
+
+        # If found, sync fields and return
+        if master_problem:
+            try:
+                master_problem.title = problem_data.title
+                master_problem.description = problem_data.description
+                master_problem.difficulty = problem_data.difficulty
+                master_problem.topic = problem_data.topic or master_problem.topic or "Algorithms"
+                master_problem.points = problem_data.points
+                if problem_data.constraints:
+                    master_problem.constraints = problem_data.constraints
+                if problem_data.input_format:
+                    master_problem.input_format = problem_data.input_format
+                if problem_data.output_format:
+                    master_problem.output_format = problem_data.output_format
+                if problem_data.execution_mode:
+                    master_problem.execution_mode = problem_data.execution_mode
+                if problem_data.function_signature:
+                    master_problem.function_signature = problem_data.function_signature
+                if starter_codes:
+                    master_problem.starter_code = starter_codes
+                master_problem.time_limit = problem_data.time_limit
+                master_problem.memory_limit = problem_data.memory_limit
+                if problem_data.evaluation_config:
+                    master_problem.evaluation_config = problem_data.evaluation_config
+                if problem_data.sandbox_config:
+                    master_problem.sandbox_config = problem_data.sandbox_config
+            except Exception as e:
+                logger.warning("Could not sync master problem fields: %s", e)
+            return master_problem.id, (master_problem.version or problem_data.problem_version or 1)
+
+        # 4. Auto-create master Problem under a nested savepoint
+        target_slug = (
+            problem_data.slug
+            or problem_data.problem_id
+            or re.sub(r"[^a-z0-9]+", "-", problem_data.title.lower()).strip("-")
+        )
+        if not target_slug:
+            target_slug = f"prob-{problem_data.problem_index.lower()}-{uuid4().hex[:8]}"
+
+        try:
+            async with db.begin_nested():
+                res = await db.execute(
+                    select(Problem).where(Problem.slug == target_slug)
+                )
+                existing = res.scalars().first()
+                if existing:
+                    return existing.id, (existing.version or problem_data.problem_version or 1)
+
+                eval_cfg = problem_data.evaluation_config or {
+                    "match_type": "EXACT_MATCH",
+                    "float_tolerance": 0,
+                    "ignore_whitespace": True,
+                    "ignore_case": False,
+                }
+                sandbox_cfg = problem_data.sandbox_config or {
+                    "time_limit_sec": problem_data.time_limit,
+                    "memory_limit_mb": problem_data.memory_limit,
+                    "network_enabled": False,
+                    "process_limit": 10,
+                    "output_limit_kb": 64,
+                }
+
+                master_problem = Problem(
+                    problem_index=problem_data.problem_index,
+                    title=problem_data.title,
+                    slug=target_slug,
+                    difficulty=problem_data.difficulty,
+                    topic=problem_data.topic or "Algorithms",
+                    points=problem_data.points,
+                    description=problem_data.description,
+                    constraints=problem_data.constraints,
+                    input_format=problem_data.input_format,
+                    output_format=problem_data.output_format,
+                    execution_mode=problem_data.execution_mode or "FUNCTION",
+                    function_signature=problem_data.function_signature or {},
+                    starter_code=starter_codes or {},
+                    time_limit=problem_data.time_limit,
+                    memory_limit=problem_data.memory_limit,
+                    evaluation_config=eval_cfg,
+                    sandbox_config=sandbox_cfg,
+                    status="PUBLISHED",
+                    version=problem_data.problem_version or 1,
+                )
+                db.add(master_problem)
+                await db.flush()
+
+                for idx_tc, st in enumerate(problem_data.sample_testcases, 1):
+                    raw_in = st.stdin or getattr(st, "input", "") or ""
+                    tc = ProblemTestCase(
+                        problem_id=master_problem.id,
+                        version=master_problem.version,
+                        testcase_id=f"SAMPLE-{idx_tc:02d}",
+                        input_data={"raw": raw_in},
+                        expected_output=st.expected_output,
+                        explanation=st.explanation,
+                        weight=getattr(st, "weight", 1.0) or 1.0,
+                        is_hidden=False,
+                        order=idx_tc,
+                    )
+                    db.add(tc)
+
+                for idx_tc, ht in enumerate(problem_data.hidden_testcases, 1):
+                    raw_in = ht.stdin or getattr(ht, "input", "") or ""
+                    tc = ProblemTestCase(
+                        problem_id=master_problem.id,
+                        version=master_problem.version,
+                        testcase_id=f"TC-{idx_tc:02d}",
+                        input_data={"raw": raw_in},
+                        expected_output=ht.expected_output,
+                        weight=getattr(ht, "weight", 1.0) or 1.0,
+                        is_hidden=True,
+                        order=idx_tc,
+                    )
+                    db.add(tc)
+
+                await db.flush()
+                return master_problem.id, master_problem.version
+        except Exception as e:
+            logger.warning(
+                "Could not auto-create master problem for '%s' (fallback to NULL problem_id): %s",
+                problem_data.title,
+                e,
+            )
+            return None, (problem_data.problem_version or 1)
+
+    @staticmethod
     async def add_or_update_problem(
         contest_slug: str,
         problem_data: ProblemCreateSchema,
@@ -665,6 +863,10 @@ class DynamicContestService:
 
         # 1. Update/Create ContestProblem (if target is 'both' or 'contest')
         if norm_target in ("both", "contest"):
+            resolved_pid, resolved_pver = await DynamicContestService._resolve_master_problem(
+                problem_data, starter_codes, db
+            )
+
             cp_res = await db.execute(
                 select(ContestProblem).where(
                     ContestProblem.contest_id == contest.id,
@@ -683,8 +885,8 @@ class DynamicContestService:
                 cp.constraints = problem_data.constraints
                 cp.time_limit = problem_data.time_limit
                 cp.memory_limit = problem_data.memory_limit
-                cp.problem_id = problem_data.problem_id
-                cp.problem_version = problem_data.problem_version
+                cp.problem_id = resolved_pid
+                cp.problem_version = resolved_pver
                 cp.execution_mode = problem_data.execution_mode or "FUNCTION"
                 if problem_data.function_signature:
                     cp.function_signature = problem_data.function_signature
@@ -710,8 +912,8 @@ class DynamicContestService:
                     constraints=problem_data.constraints,
                     time_limit=problem_data.time_limit,
                     memory_limit=problem_data.memory_limit,
-                    problem_id=problem_data.problem_id,
-                    problem_version=problem_data.problem_version,
+                    problem_id=resolved_pid,
+                    problem_version=resolved_pver,
                     execution_mode=problem_data.execution_mode or "FUNCTION",
                     function_signature=problem_data.function_signature or {},
                     evaluation_config=problem_data.evaluation_config or {},

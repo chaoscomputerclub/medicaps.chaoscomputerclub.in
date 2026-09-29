@@ -14,9 +14,22 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 class TestCaseCreateSchema(BaseModel):
     stdin: str = Field("", description="Standard input string passed to the solution")
+    input: Optional[str] = Field(None, description="Standard input string (alias for stdin)")
     expected_output: str = Field(..., description="Exact expected standard output string")
     explanation: Optional[str] = Field(None, description="Optional explanation for sample testcases")
     weight: Optional[float] = Field(1.0, description="Score weight for hidden testcase evaluation")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_testcase_input(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            inp = data.get("input") if data.get("input") is not None else data.get("stdin")
+            if inp is not None:
+                data["stdin"] = str(inp)
+                data["input"] = str(inp)
+            if "expected_output" in data and data["expected_output"] is not None:
+                data["expected_output"] = str(data["expected_output"])
+        return data
 
 
 class ProblemCreateSchema(BaseModel):
