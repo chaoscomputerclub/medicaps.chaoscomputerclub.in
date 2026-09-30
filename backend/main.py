@@ -1,5 +1,6 @@
 from app.middleware.contest_eligibility import ContestEligibilityMiddleware
 from app.middleware.cloudflare_security import CloudflareSecurityMiddleware
+from app.middleware.trace_id import TraceIdMiddleware
 """
 Chaos Computer Club India — Medi-Caps Chapter Backend
 FastAPI Main Application Entrypoint
@@ -94,6 +95,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# End-to-End Distributed Trace ID Middleware (Generates/propagates X-Request-ID)
+app.add_middleware(TraceIdMiddleware)
 
 # Cloudflare Edge & Client Security (Real IP, HSTS, COOP, Permissions, CF-Ray)
 app.add_middleware(CloudflareSecurityMiddleware)

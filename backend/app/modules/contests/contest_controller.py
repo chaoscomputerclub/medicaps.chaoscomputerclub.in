@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.contest_lifecycle import assert_submissions_open
 from app.core.user_concurrency import acquire_user_job_slot
+from app.middleware.trace_id import get_current_trace_id
 from app.models.db_models import MemberProfile
 from app.modules.contests.contest_service import ContestService
 from app.modules.contests.contest_execution_service import (
@@ -225,6 +226,7 @@ class ContestController:
             # Per-user concurrency gate: max 3 in-flight judge jobs per user
             await acquire_user_job_slot(current_member.id)
 
+            trace_id = get_current_trace_id()
             job = await RedisQueueEngine.enqueue(
                 queue_name="judge",
                 job_type="EVALUATE_ARENA_SUBMISSION",
@@ -237,11 +239,13 @@ class ContestController:
                     "_release_user_slot": True,  # signals JudgeWorker to call release
                 },
                 priority=JobPriority.HIGH,
+                correlation_id=trace_id,
                 idempotency_key=f"sub:arena:{slug}:{payload.problem_id}:{current_member.id}:{code_hash}",
             )
             return {
                 "success": True,
                 "job_id": job.id,
+                "trace_id": trace_id,
                 "status": "queued",
                 "message": "Submission received and queued for evaluation.",
                 "check_status_url": f"/api/jobs/{job.id}",
