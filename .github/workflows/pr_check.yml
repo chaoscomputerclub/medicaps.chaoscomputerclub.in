@@ -153,6 +153,17 @@ jobs:
       - name: 🔍 Python Code Compilation Check
         run: python3 -m compileall backend/app backend/main.py
 
+      - name: 🗄️ Initialize PostgreSQL Schema & Tables
+        env:
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: |
+          python3 -c "import asyncio; from app.core.db import init_db; asyncio.run(init_db())"
+
       - name: 🚀 Execute Real-Time Cache Synchronization Suite (27 Tests)
         env:
           PYTHONPATH: backend

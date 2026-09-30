@@ -82,6 +82,21 @@ async def ensure_database_integrity():
     across all tables in PostgreSQL. Eliminates any orphaned rating histories,
     trust proofs, or phantom profile ratings left by deleted contests.
     """
+    # 0. Core foundation: Monotonic resource versions table
+    async with AsyncSessionLocal() as session:
+        try:
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS resource_versions (
+                    resource_id VARCHAR(120) PRIMARY KEY,
+                    version BIGINT NOT NULL DEFAULT 1,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+            """))
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            print(f"Notice on resource_versions table creation: {e}")
+
     async with AsyncSessionLocal() as session:
         try:
             # 1. Foreign key constraint check (safe DDL only - no row deletion)
@@ -129,7 +144,7 @@ async def ensure_database_integrity():
                 except Exception as sess_err:
                     print(f"Notice on assessment_sessions unique constraint: {sess_err}")
 
-            # 3. Ensure essential query & foreign key indexes
+            # 4. Ensure essential query & foreign key indexes
             index_statements = [
                 "CREATE INDEX IF NOT EXISTS ix_rating_history_contest_id ON rating_history (contest_id)",
                 "CREATE INDEX IF NOT EXISTS ix_rating_history_member_id ON rating_history (member_id)",
@@ -183,23 +198,21 @@ async def ensure_database_integrity():
                 "CREATE INDEX IF NOT EXISTS ix_outbox_events_status_created ON outbox_events (status, created_at ASC)",
             ]
             for stmt in index_statements:
-                await session.execute(text(stmt))
+                try:
+                    await session.execute(text(stmt))
+                except Exception:
+                    pass
 
-
-            # 5. Schema Evolution: Monotonic resource versions & table version columns
-            await session.execute(text("""
-                ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
-            """))
-            await session.execute(text("""
-                ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
-            """))
-            await session.execute(text("""
-                CREATE TABLE IF NOT EXISTS resource_versions (
-                    resource_id VARCHAR(120) PRIMARY KEY,
-                    version BIGINT NOT NULL DEFAULT 1,
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                );
-            """))
+            # 5. Schema Evolution: Table version columns
+            try:
+                await session.execute(text("""
+                    ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
+                """))
+                await session.execute(text("""
+                    ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
+                """))
+            except Exception:
+                pass
 
             # 6. Schema Evolution: Problem Authoring & Function Execution Contract Tables
             await session.execute(text("""

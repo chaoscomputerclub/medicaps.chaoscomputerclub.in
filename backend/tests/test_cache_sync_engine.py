@@ -26,7 +26,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import AsyncSessionLocal, ensure_database_integrity, get_next_resource_version
+from app.core.db import AsyncSessionLocal, ensure_database_integrity, get_next_resource_version, init_db
 from app.core.cache import (
     CacheSyncEngine,
     CacheSyncEvent,
@@ -369,7 +369,7 @@ async def test_end_to_end_outbox_to_cache_sync():
     Full End-to-End Pipeline:
     PostgreSQL Transaction -> OutboxEvent -> ChaosQueue -> CacheSyncWorker -> Redis CAS -> SSE
     """
-    await ensure_database_integrity()
+    await init_db()
     res_id = f"contest:{uuid4().hex[:8]}"
     cache_key = f"cache:{res_id}"
     await set_cache(cache_key, {"title": "Old Contest State"}, ttl_seconds=60)
