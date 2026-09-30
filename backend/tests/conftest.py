@@ -15,3 +15,14 @@ async def setup_test_database():
         await init_db()
     except Exception as e:
         print(f"Notice during test database initialization: {e}")
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def cleanup_connections_per_test():
+    yield
+    from app.core.db import engine
+    try:
+        await engine.dispose()
+    except Exception:
+        pass
+

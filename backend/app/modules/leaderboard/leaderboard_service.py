@@ -77,7 +77,6 @@ class LeaderboardService:
 
             total_finished_contests = await LeaderboardRepository.get_total_finished_contests(db)
 
-            needs_commit = False
             rows = []
             for idx, m in enumerate(members):
                 current_rank = safe_offset + idx + 1
@@ -88,10 +87,6 @@ class LeaderboardService:
                     peak_rating_by_member.get(m.id, 1200),
                     verified_rating
                 )
-                if m.rating != verified_rating or m.peak_rating != verified_peak:
-                    m.rating = verified_rating
-                    m.peak_rating = verified_peak
-                    needs_commit = True
 
                 member_tier = get_rating_tier(verified_rating)
                 attendance_count = live_attendance_by_member.get(m.id) or m.attendance_count or 0
@@ -144,12 +139,6 @@ class LeaderboardService:
                         is_core_member=bool(getattr(m, "is_core_member", False)),
                     )
                 )
-
-            if needs_commit:
-                try:
-                    await db.commit()
-                except Exception:
-                    await db.rollback()
 
             rows_data = [r.model_dump() for r in rows]
             res_payload = {"items": rows_data, "total": total_count}

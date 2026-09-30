@@ -29,6 +29,11 @@ class Settings(BaseSettings):
         "DATABASE_URL",
         "postgresql+asyncpg://postgres:postgres@localhost:5432/arena_dev"
     )
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "20"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+    DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
+    DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "1800"))
+
 
     # JWT Authentication (RSA 256 / RS256 Asymmetric Cryptography)
     ALGORITHM: str = os.getenv("ALGORITHM", "RS256")

@@ -250,6 +250,12 @@ class ContestExecutionService:
 
         LanguageRegistry.validate_source(lang_enum, exec_code)
 
+        # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to sandbox execution.
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=lang_enum,
@@ -466,6 +472,13 @@ class ContestExecutionService:
 
         LanguageRegistry.validate_source(lang_enum, exec_code)
 
+        # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to isolated sandbox execution.
+        # Zero database connections are held during sandbox execution, compilation, or container runtime.
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=lang_enum,
@@ -627,8 +640,12 @@ class ContestExecutionService:
         await ContestRepository.re_rank_scoreboard(db, contest.id)
         await db.commit()
 
-        await delete_cache_pattern("cache:scoreboard*")
-        await delete_cache_pattern("cache:contest*")
+        # Granular Cache Invalidation — strictly scope to this contest and its scoreboard/status
+        await delete_cache_pattern(f"cache:scoreboard:{slug}*")
+        await delete_cache_pattern(f"cache:contest:detail:{slug}*")
+        await delete_cache_pattern(f"cache:contest:problems:{slug}*")
+        await delete_cache_pattern(f"cache:reg_status:{contest.id}*")
+        await delete_cache_pattern(f"cache:reg_status:{slug}*")
 
         try:
             await broadcast_event(

@@ -181,19 +181,6 @@ class AssessmentService:
 
         # If session already completed or submitted, return clean completed state without re-entry
         if session and session.status in ("submitted", "disqualified"):
-            # Ensure contest registration is in sync
-            if contest:
-                reg_stmt = select(ContestRegistration).where(
-                    ContestRegistration.contest_id == contest.id,
-                    ContestRegistration.member_id == current_member.id,
-                )
-                reg_res = await db.execute(reg_stmt)
-                reg = reg_res.scalars().first()
-                if reg and (not reg.assessment_taken or reg.assessment_score != session.total_score):
-                    reg.assessment_taken = True
-                    reg.assessment_score = session.total_score
-                    await db.commit()
-
             return {
                 "assessment": {
                     "id": assessment.id,

@@ -83,6 +83,12 @@ class AssessmentExecutionService:
         )
         LanguageRegistry.validate_source(lang_enum, exec_code)
 
+        # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to sandbox execution.
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(
             language=lang_enum,
@@ -176,6 +182,13 @@ class AssessmentExecutionService:
             starter_codes=getattr(problem, "starter_codes", None) or {},
         )
         LanguageRegistry.validate_source(lang_enum, exec_code)
+
+        # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to isolated sandbox execution.
+        # Zero database connections are held during sandbox execution, compilation, or container runtime.
+        try:
+            await db.rollback()
+        except Exception:
+            pass
 
         provider = get_judge_provider()
         exec_result = await provider.execute_batch(

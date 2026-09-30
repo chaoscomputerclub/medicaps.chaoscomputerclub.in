@@ -9,9 +9,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, func
 
-from app.core.cache import delete_cache_pattern, get_cache, set_cache
+from app.core.cache import delete_cache_pattern, get_cache, set_cache, single_flight
 from app.core.config import settings
 from app.lib.cache_keys import contest_list_cache_key, TTL_CONTESTS_LIST
 from app.lib.pagination import normalize_pagination, inject_pagination_headers, slice_page
@@ -82,24 +82,28 @@ class ContestService:
                 return slice_page(cached, safe_limit, safe_offset)
             return cached
 
-        all_contests = await ContestRepository.list_contests(db, status=status, division=division)
-        filtered_contests = [c for c in all_contests if c.slug not in ("dev-assessment-round", "dev-offline-final")]
+        async def _fetch():
+            all_contests = await ContestRepository.list_contests(db, status=status, division=division)
+            filtered_contests = [c for c in all_contests if c.slug not in ("dev-assessment-round", "dev-offline-final")]
 
-        registered_contest_ids = set()
-        submitted_contest_ids = set()
-        if current_member:
-            registered_contest_ids, submitted_contest_ids = await ContestRepository.get_user_registrations_and_submissions(
-                db, current_member.id
-            )
+            registered_contest_ids = set()
+            submitted_contest_ids = set()
+            if current_member:
+                registered_contest_ids, submitted_contest_ids = await ContestRepository.get_user_registrations_and_submissions(
+                    db, current_member.id
+                )
 
-        payload = []
-        for c in filtered_contests:
-            c_dict = OfflineContestResponse.model_validate(c).model_dump()
-            c_dict["registered"] = c.id in registered_contest_ids
-            c_dict["is_submitted"] = c.id in submitted_contest_ids
-            payload.append(c_dict)
+            payload = []
+            for c in filtered_contests:
+                c_dict = OfflineContestResponse.model_validate(c).model_dump()
+                c_dict["registered"] = c.id in registered_contest_ids
+                c_dict["is_submitted"] = c.id in submitted_contest_ids
+                payload.append(c_dict)
 
-        await set_cache(cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
+            await set_cache(cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
+            return payload
+
+        payload = await single_flight.execute(cache_key, _fetch)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 
@@ -181,9 +185,18 @@ class ContestService:
                 "offline_result": f"Certificate CCC-{contest.slug.upper()}" if (sb and sb.rank <= 30) else None,
             })
 
+        # Batch-load any extra contests referenced by sessions or scoreboards to eliminate N+1 queries
+        extra_contest_ids = (set(sessions_by_contest_id.keys()) | set(scoreboards.keys())) - seen_contest_ids
+        extra_contests_map: Dict[str, OfflineContest] = {}
+        if extra_contest_ids:
+            extra_contests_stmt = select(OfflineContest).where(OfflineContest.id.in_(extra_contest_ids))
+            extra_contests_res = await db.execute(extra_contests_stmt)
+            for c in extra_contests_res.scalars().all():
+                extra_contests_map[c.id] = c
+
         for contest_id, (sess, assess) in sessions_by_contest_id.items():
             if contest_id not in seen_contest_ids:
-                contest_row = await ContestRepository.get_by_id(db, contest_id)
+                contest_row = extra_contests_map.get(contest_id)
                 if contest_row:
                     seen_contest_ids.add(contest_id)
                     is_sess_submitted = sess.status in ["submitted", "completed", "expired"]
@@ -212,7 +225,7 @@ class ContestService:
 
         for contest_id, sb in scoreboards.items():
             if contest_id not in seen_contest_ids:
-                contest_row = await ContestRepository.get_by_id(db, contest_id)
+                contest_row = extra_contests_map.get(contest_id)
                 if contest_row:
                     seen_contest_ids.add(contest_id)
                     results.append({
@@ -257,29 +270,33 @@ class ContestService:
                 response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
             return cached
 
-        contest = await ContestRepository.get_by_slug(db, slug, with_problems=True, with_assessment=True)
-        if not contest:
-            raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+        async def _fetch():
+            contest = await ContestRepository.get_by_slug(db, slug, with_problems=True, with_assessment=True)
+            if not contest:
+                raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        is_registered = False
-        is_sub = False
-        if current_member:
-            reg = await ContestRepository.get_registration(db, contest.id, current_member.id)
-            is_registered = reg is not None
-            is_sub, _ = await is_contest_attempt_submitted(current_member, contest, db)
+            is_registered = False
+            is_sub = False
+            if current_member:
+                reg = await ContestRepository.get_registration(db, contest.id, current_member.id)
+                is_registered = reg is not None
+                is_sub, _ = await is_contest_attempt_submitted(current_member, contest, db)
 
-        payload = OfflineContestResponse.model_validate(contest).model_dump()
-        payload["registered"] = is_registered
-        payload["is_submitted"] = is_sub
-        if contest.status == "upcoming":
-            for p in payload.get("problems", []):
-                idx = p.get("problem_index", "")
-                p["title"] = f"Problem {idx} — sealed until contest starts"
-                p["topic"] = "—"
-                p["editorial_summary"] = None
-                p["first_ac_seconds"] = None
+            payload = OfflineContestResponse.model_validate(contest).model_dump()
+            payload["registered"] = is_registered
+            payload["is_submitted"] = is_sub
+            if contest.status == "upcoming":
+                for p in payload.get("problems", []):
+                    idx = p.get("problem_index", "")
+                    p["title"] = f"Problem {idx} — sealed until contest starts"
+                    p["topic"] = "—"
+                    p["editorial_summary"] = None
+                    p["first_ac_seconds"] = None
 
-        await set_cache(cache_key, payload, ttl_seconds=60)
+            await set_cache(cache_key, payload, ttl_seconds=60)
+            return payload
+
+        payload = await single_flight.execute(cache_key, _fetch)
         response.headers["X-Cache"] = "MISS"
         if current_member:
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -302,27 +319,31 @@ class ContestService:
             response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
             return cached
 
-        contest = await ContestRepository.get_by_slug(db, slug)
-        if not contest:
-            raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+        async def _fetch():
+            contest = await ContestRepository.get_by_slug(db, slug)
+            if not contest:
+                raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        if contest.status == "live":
-            is_eligible, reason = await is_member_eligible_for_live_contest(
-                current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
-            )
-            if not is_eligible:
-                raise HTTPException(status_code=403, detail=f"Access restricted: {reason}")
+            if contest.status == "live":
+                is_eligible, reason = await is_member_eligible_for_live_contest(
+                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+                )
+                if not is_eligible:
+                    raise HTTPException(status_code=403, detail=f"Access restricted: {reason}")
 
-        records = await ContestRepository.get_contest_problems(db, contest.id)
-        payload = [ContestProblemResponse.model_validate(p).model_dump() for p in records]
-        if contest.status == "upcoming":
-            for p in payload:
-                idx = p.get("problem_index", "")
-                p["title"] = f"Problem {idx} — sealed until contest starts"
-                p["topic"] = "—"
-                p["editorial_summary"] = None
-                p["first_ac_seconds"] = None
-        await set_cache(cache_key, payload, ttl_seconds=60)
+            records = await ContestRepository.get_contest_problems(db, contest.id)
+            payload = [ContestProblemResponse.model_validate(p).model_dump() for p in records]
+            if contest.status == "upcoming":
+                for p in payload:
+                    idx = p.get("problem_index", "")
+                    p["title"] = f"Problem {idx} — sealed until contest starts"
+                    p["topic"] = "—"
+                    p["editorial_summary"] = None
+                    p["first_ac_seconds"] = None
+            await set_cache(cache_key, payload, ttl_seconds=60)
+            return payload
+
+        payload = await single_flight.execute(cache_key, _fetch)
         response.headers["X-Cache"] = "MISS"
         response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
         return payload
@@ -447,187 +468,199 @@ class ContestService:
                 "eligibility_message": "Sign in to register or check your contest standing.",
             }
 
-        reg = await ContestRepository.get_registration(db, contest.id, current_member.id)
-        is_registered = reg is not None
+        cache_key = f"cache:reg_status:{contest.id}:{current_member.id}"
+        cached = await get_cache(cache_key)
+        if cached is not None:
+            response.headers["X-Cache"] = "HIT"
+            return cached
 
-        from sqlalchemy import select, desc
-        assessment_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
-        assessment = assessment_res.scalars().first()
-        if not assessment and contest.status == "live":
-            assess_season_res = await db.execute(
-                select(Assessment).where(
-                    (Assessment.slug == "medicaps-offline-open-2026") | (Assessment.is_active == True)
+        async def _fetch():
+            reg = await ContestRepository.get_registration(db, contest.id, current_member.id)
+            is_registered = reg is not None
+
+            from sqlalchemy import select, desc
+            assessment_res = await db.execute(select(Assessment).where(Assessment.contest_id == contest.id))
+            assessment = assessment_res.scalars().first()
+            if not assessment and contest.status == "live":
+                assess_season_res = await db.execute(
+                    select(Assessment).where(
+                        (Assessment.slug == "medicaps-offline-open-2026") | (Assessment.is_active == True)
+                    )
                 )
-            )
-            assessment = assess_season_res.scalars().first()
+                assessment = assess_season_res.scalars().first()
 
-        assessment_taken = False
-        assessment_score = 0.0
-        assessment_rank = None
-        assessment_session_status = None
-        is_top_30_qualified = False
-        can_resume_assessment = False
-        anti_cheat_violations = 0
-        max_violations = 3
-        remaining_seconds = 0
+            assessment_taken = False
+            assessment_score = 0.0
+            assessment_rank = None
+            assessment_session_status = None
+            is_top_30_qualified = False
+            can_resume_assessment = False
+            anti_cheat_violations = 0
+            max_violations = 3
+            remaining_seconds = 0
 
-        if assessment:
-            max_violations = assessment.max_violations
-            s_res = await db.execute(
-                select(AssessmentSession).where(
-                    AssessmentSession.assessment_id == assessment.id,
-                    AssessmentSession.member_id == current_member.id,
+            if assessment:
+                max_violations = assessment.max_violations
+                s_res = await db.execute(
+                    select(AssessmentSession).where(
+                        AssessmentSession.assessment_id == assessment.id,
+                        AssessmentSession.member_id == current_member.id,
+                    )
                 )
-            )
-            my_session = s_res.scalars().first()
-            if my_session:
-                assessment_score = my_session.total_score
-                assessment_session_status = my_session.status
-                anti_cheat_violations = my_session.anti_cheat_violations
+                my_session = s_res.scalars().first()
+                if my_session:
+                    assessment_score = my_session.total_score
+                    assessment_session_status = my_session.status
+                    anti_cheat_violations = my_session.anti_cheat_violations
 
-                started_at = my_session.started_at
-                if started_at.tzinfo is None:
-                    started_at = started_at.replace(tzinfo=timezone.utc)
-                duration = assessment.duration_minutes or 45
-                expires_at = started_at + timedelta(minutes=duration)
-                is_session_expired = now_utc() >= expires_at
+                    started_at = my_session.started_at
+                    if started_at.tzinfo is None:
+                        started_at = started_at.replace(tzinfo=timezone.utc)
+                    duration = assessment.duration_minutes or 45
+                    expires_at = started_at + timedelta(minutes=duration)
+                    is_session_expired = now_utc() >= expires_at
 
-                if my_session.status in ("submitted", "disqualified") or is_session_expired:
-                    assessment_taken = True
-                    can_resume_assessment = False
-                    remaining_seconds = 0
-                else:
-                    assessment_taken = False
-                    can_resume_assessment = True
-                    remaining_seconds = max(0, int((expires_at - now_utc()).total_seconds()))
+                    if my_session.status in ("submitted", "disqualified") or is_session_expired:
+                        assessment_taken = True
+                        can_resume_assessment = False
+                        remaining_seconds = 0
+                    else:
+                        assessment_taken = False
+                        can_resume_assessment = True
+                        remaining_seconds = max(0, int((expires_at - now_utc()).total_seconds()))
 
-                all_sessions_res = await db.execute(
-                    select(AssessmentSession)
-                    .where(
+                    # O(1) Indexed SQL count for candidate rank (eliminates table scans under high concurrency)
+                    rank_stmt = select(func.count(AssessmentSession.id)).where(
                         AssessmentSession.assessment_id == assessment.id,
                         AssessmentSession.status.in_(["in_progress", "submitted"]),
+                        (AssessmentSession.total_score > my_session.total_score) |
+                        (
+                            (AssessmentSession.total_score == my_session.total_score) &
+                            (AssessmentSession.total_penalty_seconds < my_session.total_penalty_seconds)
+                        )
                     )
-                    .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
-                )
-                all_sessions = all_sessions_res.scalars().all()
-                for rank_num, s in enumerate(all_sessions, start=1):
-                    if s.member_id == current_member.id:
-                        assessment_rank = rank_num
-                        break
+                    better_rank_count = (await db.scalar(rank_stmt)) or 0
+                    assessment_rank = better_rank_count + 1
 
-                is_top_30_qualified = (
-                    my_session.is_top_30_qualified or
-                    (assessment_rank is not None and assessment_rank <= 30)
-                )
+                    is_top_30_qualified = (
+                        my_session.is_top_30_qualified or
+                        (assessment_rank is not None and assessment_rank <= 30)
+                    )
 
-        pass_obj = await ContestRepository.get_campus_pass(db, contest.id, current_member.id)
-        check_in_status = pass_obj.check_in_status if pass_obj else "not_issued"
-        is_checked_in = check_in_status == "checked_in"
+            pass_obj = await ContestRepository.get_campus_pass(db, contest.id, current_member.id)
+            check_in_status = pass_obj.check_in_status if pass_obj else "not_issued"
+            is_checked_in = check_in_status == "checked_in"
 
-        from app.services.contest_lifecycle_service import assessment_available
-        assessment_window_open = False
-        if contest and contest.starts_at:
-            assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
+            from app.services.contest_lifecycle_service import assessment_available
+            assessment_window_open = False
+            if contest and contest.starts_at:
+                assessment_window_open, _ = assessment_available(contest_status, contest.starts_at)
 
-        is_dev_contest = slug.startswith("dev-")
-        is_dev_bypass = bool(settings.DEV_MODE and is_dev_contest)
+            is_dev_contest = slug.startswith("dev-")
+            is_dev_bypass = bool(settings.DEV_MODE and is_dev_contest)
 
-        can_take_assessment = (
-            contest_status == "upcoming"
-            and is_registered
-            and not assessment_taken
-            and assessment_window_open
-            and assessment_session_status not in ("submitted", "disqualified")
-        )
-        can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
+            can_take_assessment = (
+                contest_status == "upcoming"
+                and is_registered
+                and not assessment_taken
+                and assessment_window_open
+                and assessment_session_status not in ("submitted", "disqualified")
+            )
+            can_enter_live_contest = (contest_status == "live" and is_top_30_qualified and is_checked_in)
 
-        if not settings.FEATURE_ASSESSMENT_AND_QR_ENABLED:
-            can_take_assessment = False
-            can_resume_assessment = False
-            is_top_30_qualified = True
-            is_checked_in = True
-            check_in_status = "checked_in"
-            can_enter_live_contest = (contest_status == "live" and is_registered)
+            if not settings.FEATURE_ASSESSMENT_AND_QR_ENABLED:
+                can_take_assessment = False
+                can_resume_assessment = False
+                is_top_30_qualified = True
+                is_checked_in = True
+                check_in_status = "checked_in"
+                can_enter_live_contest = (contest_status == "live" and is_registered)
 
-            if contest_status == "upcoming":
-                if not is_registered:
-                    eligibility_message = "Registration is open. Register to participate in the contest."
+                if contest_status == "upcoming":
+                    if not is_registered:
+                        eligibility_message = "Registration is open. Register to participate in the contest."
+                    else:
+                        eligibility_message = "You are registered. The contest arena will unlock at the scheduled start time."
+                elif contest_status == "live":
+                    can_enter_live_contest = True
+                    eligibility_message = "Contest is live! Enter the arena now to start solving."
                 else:
-                    eligibility_message = "You are registered. The contest arena will unlock at the scheduled start time."
+                    eligibility_message = "This contest has officially concluded."
+            elif can_resume_assessment:
+                mins_left = remaining_seconds // 60
+                eligibility_message = f"⚠️ Assessment in progress ({mins_left}m remaining, Warning {anti_cheat_violations} of {max_violations}). Click 'Resume Contest' to continue."
+            elif contest_status == "upcoming":
+                if not is_registered:
+                    eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
+                elif assessment_taken:
+                    eligibility_message = f"Screening submitted. Score: {assessment_score} pts (Current Rank: #{assessment_rank or chr(0x2014)}). Top 30 cadets will advance when the contest goes LIVE."
+                elif not assessment_window_open:
+                    from app.services.contest_lifecycle_service import assessment_window, utcnow
+                    if contest and contest.starts_at:
+                        window = assessment_window(contest.starts_at)
+                        if utcnow() < window.opens_at:
+                            eligibility_message = f"Assessment window opens at {window.opens_at.strftime('%d %b %Y, %H:%M UTC')}. You can enter once it unlocks."
+                        else:
+                            eligibility_message = "The Round 1 assessment window has closed."
+                    else:
+                        eligibility_message = "Assessment window is not yet open."
+                else:
+                    eligibility_message = "Registration confirmed. Round 1 window is open — start your assessment now."
             elif contest_status == "live":
-                can_enter_live_contest = True
-                eligibility_message = "Contest is live! Enter the arena now to start solving."
+                if is_top_30_qualified:
+                    if is_checked_in or is_dev_bypass:
+                        eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Gate check-in verified. Enter the Live Contest Lab."
+                    else:
+                        eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Physical QR proctor scan required at lab entrance before entering arena."
+                else:
+                    eligibility_message = "🔒 Live Final is restricted strictly to Top 30 assessment qualifiers. You are currently not eligible."
             else:
                 eligibility_message = "This contest has officially concluded."
-        elif can_resume_assessment:
-            mins_left = remaining_seconds // 60
-            eligibility_message = f"⚠️ Assessment in progress ({mins_left}m remaining, Warning {anti_cheat_violations} of {max_violations}). Click 'Resume Contest' to continue."
-        elif contest_status == "upcoming":
-            if not is_registered:
-                eligibility_message = "Registration open. Register to take the Phase 1 Online Screening Assessment."
-            elif assessment_taken:
-                eligibility_message = f"Screening submitted. Score: {assessment_score} pts (Current Rank: #{assessment_rank or chr(0x2014)}). Top 30 cadets will advance when the contest goes LIVE."
-            elif not assessment_window_open:
-                from app.services.contest_lifecycle_service import assessment_window, utcnow
-                if contest and contest.starts_at:
-                    window = assessment_window(contest.starts_at)
-                    if utcnow() < window.opens_at:
-                        eligibility_message = f"Assessment window opens at {window.opens_at.strftime('%d %b %Y, %H:%M UTC')}. You can enter once it unlocks."
-                    else:
-                        eligibility_message = "The Round 1 assessment window has closed."
-                else:
-                    eligibility_message = "Assessment window is not yet open."
-            else:
-                eligibility_message = "Registration confirmed. Round 1 window is open — start your assessment now."
-        elif contest_status == "live":
-            if is_top_30_qualified:
-                if is_checked_in or is_dev_bypass:
-                    eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Gate check-in verified. Enter the Live Contest Lab."
-                else:
-                    eligibility_message = f"✓ Top 30 Qualified Finalist (Rank #{assessment_rank or 'Top 30'}). Physical QR proctor scan required at lab entrance before entering arena."
-            else:
-                eligibility_message = "🔒 Live Final is restricted strictly to Top 30 assessment qualifiers. You are currently not eligible."
-        else:
-            eligibility_message = "This contest has officially concluded."
 
-        is_submitted, _ = await is_contest_attempt_submitted(current_member, contest, db)
-        if contest_status == "live":
-            is_live_submitted = is_submitted or (reg and reg.status in ("submitted", "completed"))
-            if is_live_submitted:
-                can_take_assessment = False
-                can_resume_assessment = False
-                can_enter_live_contest = False
-                eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
-        else:
-            if is_submitted or assessment_taken or (reg and (reg.status in ("submitted", "completed") or reg.assessment_taken)):
-                assessment_taken = True
-                can_take_assessment = False
-                can_resume_assessment = False
-                can_enter_live_contest = False
-                eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
+            is_submitted, _ = await is_contest_attempt_submitted(current_member, contest, db)
+            if contest_status == "live":
+                is_live_submitted = is_submitted or (reg and reg.status in ("submitted", "completed"))
+                if is_live_submitted:
+                    can_take_assessment = False
+                    can_resume_assessment = False
+                    can_enter_live_contest = False
+                    eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
+            else:
+                if is_submitted or assessment_taken or (reg and (reg.status in ("submitted", "completed") or reg.assessment_taken)):
+                    assessment_taken = True
+                    can_take_assessment = False
+                    can_resume_assessment = False
+                    can_enter_live_contest = False
+                    eligibility_message = "Contest attempt has already been submitted. Retakes are not permitted."
 
-        return {
-            "registered": is_registered,
-            "contest_slug": slug,
-            "contest_status": contest_status,
-            "status": "submitted" if (is_submitted or (reg and reg.status == "submitted")) else (reg.status if reg else None),
-            "registered_at": reg.registered_at.isoformat() if reg else None,
-            "assessment_taken": assessment_taken,
-            "assessment_score": assessment_score,
-            "assessment_rank": assessment_rank,
-            "assessment_status": "submitted" if is_submitted else assessment_session_status,
-            "can_resume_assessment": can_resume_assessment and not is_submitted,
-            "anti_cheat_violations": anti_cheat_violations,
-            "max_violations": max_violations,
-            "remaining_seconds": 0 if is_submitted else remaining_seconds,
-            "is_top_30_qualified": is_top_30_qualified,
-            "is_checked_in": is_checked_in,
-            "check_in_status": check_in_status,
-            "can_take_assessment": can_take_assessment and not is_submitted,
-            "can_enter_live_contest": can_enter_live_contest and not (is_submitted or (reg and reg.status in ("submitted", "completed"))),
-            "eligibility_message": eligibility_message,
-            "is_dev_bypass": is_dev_bypass,
-        }
+            payload = {
+                "registered": is_registered,
+                "contest_slug": slug,
+                "contest_status": contest_status,
+                "status": "submitted" if (is_submitted or (reg and reg.status == "submitted")) else (reg.status if reg else None),
+                "registered_at": reg.registered_at.isoformat() if reg else None,
+                "assessment_taken": assessment_taken,
+                "assessment_score": assessment_score,
+                "assessment_rank": assessment_rank,
+                "assessment_status": "submitted" if is_submitted else assessment_session_status,
+                "can_resume_assessment": can_resume_assessment and not is_submitted,
+                "anti_cheat_violations": anti_cheat_violations,
+                "max_violations": max_violations,
+                "remaining_seconds": 0 if is_submitted else remaining_seconds,
+                "is_top_30_qualified": is_top_30_qualified,
+                "is_checked_in": is_checked_in,
+                "check_in_status": check_in_status,
+                "can_take_assessment": can_take_assessment and not is_submitted,
+                "can_enter_live_contest": can_enter_live_contest and not (is_submitted or (reg and reg.status in ("submitted", "completed"))),
+                "eligibility_message": eligibility_message,
+                "is_dev_bypass": is_dev_bypass,
+            }
+            await set_cache(cache_key, payload, ttl_seconds=10)
+            return payload
+
+        payload = await single_flight.execute(cache_key, _fetch)
+        response.headers["X-Cache"] = "MISS"
+        return payload
 
     @staticmethod
     async def register_for_contest(
@@ -938,6 +971,15 @@ class ContestService:
 
         problems = sorted(contest.problems, key=lambda p: p.problem_index)
 
+        # Batch-load master problem contracts to eliminate N+1 queries
+        needed_prob_ids = [p.problem_id for p in problems if not getattr(p, "function_signature", None) and getattr(p, "problem_id", None)]
+        master_probs_map: Dict[str, Problem] = {}
+        if needed_prob_ids:
+            master_stmt = select(Problem).where(Problem.id.in_(needed_prob_ids))
+            master_res = await db.execute(master_stmt)
+            for mp in master_res.scalars().all():
+                master_probs_map[mp.id] = mp
+
         fallback_descriptions = {
             "A": "At Medi-Caps University, campus pass numbers are issued as alphanumeric strings. Two passes are considered a 'mirror pair' if one string is the exact reverse of the other (e.g. 'AB' and 'BA'). Given a list of N pass strings, determine the total count of valid unordered mirror pairs (i < j where passes[i] is the reverse of passes[j]).",
             "B": "The Medi-Caps lab router has M megabits of total bandwidth to distribute among K competing lab processes. Process i requires at least min_i bandwidth and can consume at most max_i bandwidth, yielding utility = allocated_bandwidth * priority_i. Find the maximum total utility achievable such that the sum of allocated bandwidth does not exceed M and every process receives at least its minimum requirement. If the total minimum requirements exceed M, output -1.",
@@ -949,7 +991,7 @@ class ContestService:
             desc = getattr(p, "description", None) or fallback_descriptions.get(p.problem_index, f"Problem {p.problem_index}: {p.title}")
             fn_sig = getattr(p, "function_signature", None)
             if not fn_sig and getattr(p, "problem_id", None):
-                master = await db.get(Problem, p.problem_id)
+                master = master_probs_map.get(p.problem_id)
                 if master and master.function_signature:
                     fn_sig = master.function_signature
 
