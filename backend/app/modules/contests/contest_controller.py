@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.user_concurrency import acquire_user_job_slot
 from app.models.db_models import MemberProfile
 from app.modules.contests.contest_service import ContestService
 from app.modules.contests.contest_execution_service import (
@@ -216,6 +217,10 @@ class ContestController:
             import hashlib
             from app.core.queue import RedisQueueEngine, JobPriority
             code_hash = hashlib.sha256((payload.code or "").strip().encode()).hexdigest()[:12]
+
+            # Per-user concurrency gate: max 3 in-flight judge jobs per user
+            await acquire_user_job_slot(current_member.id)
+
             job = await RedisQueueEngine.enqueue(
                 queue_name="judge",
                 job_type="EVALUATE_ARENA_SUBMISSION",
@@ -225,6 +230,7 @@ class ContestController:
                     "member_id": current_member.id,
                     "code": payload.code,
                     "language": str(payload.language),
+                    "_release_user_slot": True,  # signals JudgeWorker to call release
                 },
                 priority=JobPriority.HIGH,
                 idempotency_key=f"sub:arena:{slug}:{payload.problem_id}:{current_member.id}:{code_hash}",

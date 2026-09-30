@@ -26,7 +26,13 @@ class JudgeWorker(BaseQueueWorker):
         payload = job.payload
 
         if job_type == "EVALUATE_ARENA_SUBMISSION":
-            return await self._evaluate_arena_submission(payload, db)
+            try:
+                return await self._evaluate_arena_submission(payload, db)
+            finally:
+                # Always release the per-user concurrency slot, even on failure
+                if payload.get("_release_user_slot") and payload.get("member_id"):
+                    from app.core.user_concurrency import release_user_job_slot
+                    await release_user_job_slot(str(payload["member_id"]))
         elif job_type == "EVALUATE_ASSESSMENT_SUBMISSION":
             return await self._evaluate_assessment_submission(payload, db)
 
