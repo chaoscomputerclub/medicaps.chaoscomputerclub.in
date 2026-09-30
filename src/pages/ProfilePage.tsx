@@ -49,16 +49,14 @@ import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import {
   AlertDialog,
-  AlertDialogPopup,
+  AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogPortal,
-  AlertDialogBackdrop,
   AlertDialogAction,
   AlertDialogCancel,
-} from "@/components/animate-ui/primitives/base/alert-dialog";
+} from "@/components/ui/alert-dialog";
 
 export function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -768,38 +766,32 @@ export function ProfilePage() {
 
       {/* Remove Avatar Confirmation Modal */}
       <AlertDialog open={showRemoveAvatarModal} onOpenChange={setShowRemoveAvatarModal}>
-        <AlertDialogPortal>
-          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup
-            from="top"
-            className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]"
-          >
-            <AlertDialogHeader className="space-y-2 text-left">
-              <AlertDialogTitle className="text-base font-semibold text-white">
-                Remove profile photo?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Are you sure you want to remove your custom profile photo? This will revert your
-                avatar to your initials placeholder.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <AlertDialogTitle className="text-base font-semibold text-white">
+              Remove profile photo?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+              Are you sure you want to remove your custom profile photo? This will revert your
+              avatar to your initials placeholder.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
-              <AlertDialogCancel
-                onClick={() => setShowRemoveAvatarModal(false)}
-                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleAvatarRemove}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Remove Photo
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
+          <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+            <AlertDialogCancel
+              onClick={() => setShowRemoveAvatarModal(false)}
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleAvatarRemove}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Remove Photo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );

@@ -29,19 +29,14 @@ import { Button } from "@/components/ui/button";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import {
   AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogPopup,
+  AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogPortal,
-  AlertDialogBackdrop,
-  AlertDialogClose,
   AlertDialogAction,
   AlertDialogCancel,
-  type AlertDialogFlipDirection,
-} from "@/components/animate-ui/primitives/base/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -826,76 +821,70 @@ export function ContestSummaryPage() {
 
       {/* Final Submission Confirmation Dialog */}
       <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-        <AlertDialogPortal>
-          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup
-            from="top"
-            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
-          >
-            <AlertDialogHeader className="space-y-2.5 text-left">
-              <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
-                <AlertTriangle className="size-5" />
-              </div>
-              <AlertDialogTitle className="text-base font-semibold text-white tracking-tight font-sans">
-                Confirm Final Contest Submission?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed">
-                Once submitted, your test attempt will be finalized and evaluated against the full
-                testcase judge. You will no longer be able to edit your solutions for this contest.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500">Total Solved:</span>
-                <span className="font-semibold text-lime-400">
-                  {solvedCount} of {problems.length} Challenges
-                </span>
-              </div>
-              {unattemptedCount > 0 && (
-                <div className="flex items-center justify-between border-t border-white/6 pt-2">
-                  <span className="text-zinc-500">Unattempted:</span>
-                  <span className="font-semibold text-amber-400">{unattemptedCount} Questions</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between border-t border-white/6 pt-2">
-                <span className="text-zinc-500">Estimated Points:</span>
-                <span className="font-semibold text-white">
-                  {earnedPoints} / {totalPossiblePoints} Pts
-                </span>
-              </div>
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+          <AlertDialogHeader className="space-y-2.5 text-left">
+            <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <AlertTriangle className="size-5" />
             </div>
+            <AlertDialogTitle className="text-base font-semibold text-white tracking-tight font-sans">
+              Confirm Final Contest Submission?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed">
+              Once submitted, your test attempt will be finalized and evaluated against the full
+              testcase judge. You will no longer be able to edit your solutions for this contest.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-            <AlertDialogFooter className="flex flex-row items-center justify-end gap-2 pt-2">
-              <AlertDialogCancel
-                disabled={isSubmittingFinal}
-                className="rounded-md font-mono text-xs border border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white mt-0 cursor-pointer px-4 py-2"
-              >
-                Continue Solving
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleFinalSubmit();
-                }}
-                disabled={isSubmittingFinal}
-                className="rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer px-4 py-2"
-              >
-                {isSubmittingFinal ? (
-                  <>
-                    <WanderingEyes size="sm" className="h-3.5 mr-1.5 text-black" />
-                    <span>Submitting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="size-3.5 mr-1.5" />
-                    <span>Yes, Submit Contest</span>
-                  </>
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
+          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-500">Total Solved:</span>
+              <span className="font-semibold text-lime-400">
+                {solvedCount} of {problems.length} Challenges
+              </span>
+            </div>
+            {unattemptedCount > 0 && (
+              <div className="flex items-center justify-between border-t border-white/6 pt-2">
+                <span className="text-zinc-500">Unattempted:</span>
+                <span className="font-semibold text-amber-400">{unattemptedCount} Questions</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-white/6 pt-2">
+              <span className="text-zinc-500">Estimated Points:</span>
+              <span className="font-semibold text-white">
+                {earnedPoints} / {totalPossiblePoints} Pts
+              </span>
+            </div>
+          </div>
+
+          <AlertDialogFooter className="flex flex-row items-center justify-end gap-2 pt-2">
+            <AlertDialogCancel
+              disabled={isSubmittingFinal}
+              className="rounded-md font-mono text-xs border border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white mt-0 cursor-pointer px-4 py-2"
+            >
+              Continue Solving
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleFinalSubmit();
+              }}
+              disabled={isSubmittingFinal}
+              className="rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer px-4 py-2"
+            >
+              {isSubmittingFinal ? (
+                <>
+                  <WanderingEyes size="sm" className="h-3.5 mr-1.5 text-black" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="size-3.5 mr-1.5" />
+                  <span>Yes, Submit Contest</span>
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );

@@ -52,16 +52,14 @@ import {
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
-  AlertDialogPopup,
+  AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogPortal,
-  AlertDialogBackdrop,
   AlertDialogAction,
   AlertDialogCancel,
-} from "@/components/animate-ui/primitives/base/alert-dialog";
+} from "@/components/ui/alert-dialog";
 const MonacoEditor = lazy(() => import("@/organization/components/MonacoEditor"));
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -977,107 +975,89 @@ export function AssessmentWorkspacePage() {
 
       {/* 1. Finalize Assessment Session Dialog */}
       <AlertDialog open={showFinishModal} onOpenChange={setShowFinishModal}>
-        <AlertDialogPortal>
-          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup
-            from="top"
-            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
-          >
-            <AlertDialogHeader className="space-y-2 text-left">
-              <AlertDialogTitle className="text-base font-semibold text-white">
-                Finalize & Submit Assessment?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Are you sure you want to finalize and submit your assessment session? All your code
-                submissions will be graded and your attempt will be permanently locked.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
-              <AlertDialogCancel
-                onClick={() => setShowFinishModal(false)}
-                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Continue Working
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleFinish}
-                className="bg-lime-400 hover:bg-lime-300 text-black font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Yes, Finalize Session
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <AlertDialogTitle className="text-base font-semibold text-white">
+              Finalize & Submit Assessment?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+              Are you sure you want to finalize and submit your assessment session? All your code
+              submissions will be graded and your attempt will be permanently locked.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+            <AlertDialogCancel
+              onClick={() => setShowFinishModal(false)}
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Continue Working
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleFinish}
+              className="bg-lime-400 hover:bg-lime-300 text-black font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Yes, Finalize Session
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
 
       {/* 2. Exit Assessment Workspace Dialog */}
       <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <AlertDialogPortal>
-          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup
-            from="top"
-            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
-          >
-            <AlertDialogHeader className="space-y-2 text-left">
-              <AlertDialogTitle className="text-base font-semibold text-white">
-                Exit Assessment Workspace?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                Your code and progress are automatically saved on this device. You can resume this
-                contest session before the assessment window closes. Close assessment window now?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
-              <AlertDialogCancel
-                onClick={() => setShowExitModal(false)}
-                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Stay in Assessment
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleExitWindow}
-                className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Yes, Exit
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <AlertDialogTitle className="text-base font-semibold text-white">
+              Exit Assessment Workspace?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+              Your code and progress are automatically saved on this device. You can resume this
+              contest session before the assessment window closes. Close assessment window now?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+            <AlertDialogCancel
+              onClick={() => setShowExitModal(false)}
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Stay in Assessment
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleExitWindow}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Yes, Exit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
 
       {/* 3. Reset Starter Code Dialog */}
       <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
-        <AlertDialogPortal>
-          <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
-          <AlertDialogPopup
-            from="top"
-            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
-          >
-            <AlertDialogHeader className="space-y-2 text-left">
-              <AlertDialogTitle className="text-base font-semibold text-white">
-                Reset to Default Starter Code?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
-                This will discard your current unsaved edits for this problem and restore the
-                initial starter code template. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="mt-4 flex justify-end gap-2">
-              <AlertDialogCancel
-                onClick={() => setShowResetModal(false)}
-                className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleResetStarter}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
-              >
-                Reset Code
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <AlertDialogTitle className="text-base font-semibold text-white">
+              Reset to Default Starter Code?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+              This will discard your current unsaved edits for this problem and restore the
+              initial starter code template. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+            <AlertDialogCancel
+              onClick={() => setShowResetModal(false)}
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetStarter}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+            >
+              Reset Code
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );
