@@ -74,9 +74,16 @@ async def lifespan(app: FastAPI):
     governor.start()
     print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
 
+    # ── Dynamic Autoscaler & Capacity Watcher ──────────────────────────────
+    from app.core.autoscaler import Autoscaler
+    autoscaler = Autoscaler.get_instance()
+    autoscaler.start()
+    print("✓ Dynamic Autoscaler started (interval=10s)")
+
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
+    await autoscaler.stop()
     await governor.stop()
     await queue_manager.stop_all(drain_timeout=15.0)
     for task in [*bg_tasks, realtime_relay_task]:

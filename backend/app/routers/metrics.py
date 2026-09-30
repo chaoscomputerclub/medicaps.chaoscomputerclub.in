@@ -113,5 +113,15 @@ async def prometheus_metrics() -> Response:
     except Exception:
         pass
 
+    # ─── 5. Autoscaler Telemetry ────────────────────────────────────────────────
+    try:
+        from app.core.autoscaler import Autoscaler
+        a_status = Autoscaler.get_instance().get_status()
+        out.append(_format_metric("ccc_autoscale_concurrency_current", "Current dynamic judge concurrency cap", "gauge", [f"ccc_autoscale_concurrency_current {a_status.get('current_concurrency', 4)}"]))
+        out.append(_format_metric("ccc_autoscale_pressure_ratio", "Current queue pressure ratio", "gauge", [f"ccc_autoscale_pressure_ratio {a_status.get('pressure_ratio', 0.0)}"]))
+        out.append(_format_metric("ccc_autoscale_alert_active", "1 if scaling alert is active, 0 otherwise", "gauge", [f"ccc_autoscale_alert_active {1 if a_status.get('scaling_alert_active') else 0}"]))
+    except Exception as exc:
+        logger.debug("Error collecting autoscale metrics: %s", exc)
+
     content = "".join(filter(None, out))
     return PlainTextResponse(content=content, media_type="text/plain; version=0.0.4; charset=utf-8")

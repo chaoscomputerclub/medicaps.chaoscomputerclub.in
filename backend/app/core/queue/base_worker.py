@@ -195,10 +195,11 @@ class BaseQueueWorker(ABC):
                 await asyncio.sleep(REAPER_INTERVAL_SECONDS)
                 if self.is_running:
                     await RedisQueueEngine.reap_orphaned_jobs(self.queue_name)
+                    await RedisQueueEngine.promote_aged_jobs(self.queue_name)
             except asyncio.CancelledError:
                 return
             except Exception as exc:
-                logger.warning("Reaper error on queue '%s': %s", self.queue_name, exc)
+                logger.warning("Reaper/Starvation error on queue '%s': %s", self.queue_name, exc)
 
     # ─── Execution ────────────────────────────────────────────────────────────
 

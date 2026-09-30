@@ -47,6 +47,7 @@ JOB_HASH_TTL_SECONDS = 86_400       # 24 hours — job status queryable for a fu
 DLQ_RETENTION_SECONDS = 604_800     # 7 days  — DLQ kept for a week for inspection
 IDEMPOTENCY_TTL_SECONDS = 3_600     # 1 hour  — aligned: long enough to cover all retries
 VISIBILITY_TIMEOUT_SECONDS = 300    # 5 min   — job stuck in processing → reaper re-queues it
+AGING_PROMOTION_THRESHOLD_SECONDS = 60.0  # 60s    — promote NORMAL/LOW jobs waiting > 60s
 MIGRATE_DELAYED_RATE_SECONDS = 0.5  # At most once per 0.5s per queue — prevents poll spam
 
 # Per-queue timestamp of last migrate_delayed run (in-process cache)
@@ -200,11 +201,13 @@ class RedisQueueEngine:
         # 3. Build Job Contract
         # If idempotency Lua wrote a placeholder_id, reuse it as the job id
         job_id = placeholder_id if idempotency_key else str(uuid4())
+        enriched_payload = dict(payload)
+        enriched_payload["_enqueued_at"] = time.time()
         job = JobContract(
             id=job_id,
             queue_name=queue_name,
             job_type=job_type,
-            payload=payload,
+            payload=enriched_payload,
             priority=priority,
             idempotency_key=idempotency_key,
             correlation_id=correlation_id or f"req-{uuid4().hex[:8]}",
@@ -467,6 +470,64 @@ class RedisQueueEngine:
         if requeued:
             logger.info("Reaper recovered %d orphaned job(s) in queue '%s'", requeued, queue_name)
         return requeued
+
+    # ─── Priority Starvation Promotion ────────────────────────────────────────
+
+    @classmethod
+    async def promote_aged_jobs(
+        cls,
+        queue_name: str,
+        max_age_seconds: float = AGING_PROMOTION_THRESHOLD_SECONDS,
+        batch_size: int = 20,
+    ) -> int:
+        """
+        Starvation Protection: Scan oldest pending jobs from the head (left).
+        If a NORMAL or LOW priority job has been waiting longer than max_age_seconds,
+        atomically promote it to the tail (right) of the dequeue order and upgrade its priority to HIGH.
+        """
+        redis = get_redis()
+        pending_key = cls._pending_key(queue_name)
+        now = time.time()
+        promoted = 0
+
+        # Jobs at the head (indices 0 to batch_size - 1) are the oldest NORMAL/LOW jobs
+        job_ids: List[str] = await redis.lrange(pending_key, 0, batch_size - 1)
+        for job_id in job_ids:
+            job = await cls.get_job(job_id)
+            if not job or job.priority == JobPriority.HIGH:
+                continue
+
+            try:
+                enqueued_ts = float(job.payload.get("_enqueued_at", 0.0))
+            except (ValueError, TypeError):
+                enqueued_ts = 0.0
+
+            if enqueued_ts <= 0.0:
+                try:
+                    from datetime import datetime
+                    created_dt = datetime.fromisoformat(job.created_at.replace("Z", "+00:00"))
+                    enqueued_ts = created_dt.timestamp()
+                except Exception:
+                    enqueued_ts = now
+
+            age = now - enqueued_ts
+            if age >= max_age_seconds:
+                # Remove from current position and push to the high-priority dequeue end (RIGHT)
+                removed = await redis.lrem(pending_key, 1, job_id)
+                if removed:
+                    job.priority = JobPriority.HIGH
+                    job.updated_at = now_utc_iso()
+                    job.payload["_promoted_from_starvation"] = True
+                    job.payload["_starvation_age_seconds"] = round(age, 2)
+                    await redis.set(cls._job_key(job.id), json.dumps(job.to_dict()), ex=JOB_HASH_TTL_SECONDS)
+                    await redis.rpush(pending_key, job.id)
+                    promoted += 1
+                    logger.warning(
+                        "⚡ [StarvationGuard] Promoted aged job %s [%s] in '%s' (waited %.1fs) to HIGH priority",
+                        job.id, job.job_type, queue_name, age,
+                    )
+
+        return promoted
 
     # ─── DLQ Replay (Atomic) ──────────────────────────────────────────────────
 
