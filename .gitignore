@@ -80,3 +80,8 @@ graphify-out/
 backups/
 backend/backups/
 !backend/migrations/*.sql
+
+# Node agent compiled binaries & identity
+judge-agent/bin/
+.node_identity
+**/.node_identity

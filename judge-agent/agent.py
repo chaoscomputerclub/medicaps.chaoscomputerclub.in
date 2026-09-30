@@ -1,27 +1,14 @@
 #!/usr/bin/env python3
 """
-CCC Judge Agent — Laptop / Remote Compute Node
-================================================
-Standalone Python service that:
-1. Registers itself with the cloud control plane
-2. Sends heartbeats every HEARTBEAT_INTERVAL_S seconds
-3. Polls the Redis judge queue and executes submissions via local Docker
-4. Reports results back to the cloud API
-5. Handles SIGTERM gracefully (drain + unregister)
+Chaos Computer Club — Portable Node Fabric
+agent.py — Universal Self-Adapting Compute Node Agent
 
-Usage:
-    CLOUD_API_URL=https://medicaps-api.chaoscomputerclub.in/api \
-    JUDGE_AGENT_SECRET=your-secret \
-    REDIS_URL=redis://143.198.38.205:6379 \
-    python3 agent.py
-
-Environment variables (all required in production):
-    CLOUD_API_URL         — Base URL of the FastAPI backend (no trailing slash)
-    JUDGE_AGENT_SECRET    — Shared secret set as JUDGE_AGENT_SECRET on the server
-    REDIS_URL             — Redis URL for the cloud Redis instance
-    AGENT_MAX_CONCURRENCY — Max parallel judge jobs (default: 4)
-    AGENT_HOSTNAME        — Override hostname (default: socket.gethostname())
-    AGENT_VERSION         — Override version string (default: "1.0.0")
+Bootstraps from any USB drive onto any host computer:
+1. Discovers hardware (CPU, RAM, architecture, container runtime)
+2. Adapts local concurrency dynamically
+3. Connects securely via outbound HTTPS to central control plane
+4. Claims and executes judge jobs in isolated RAM-backed Docker containers
+5. Handles network disconnections and graceful draining cleanly
 """
 
 from __future__ import annotations
@@ -30,465 +17,267 @@ import asyncio
 import json
 import logging
 import os
-import platform
 import signal
-import socket
-import subprocess
+import sys
 import time
-from typing import Any, Dict, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional, Set
 
 import httpx
-import redis.asyncio as aioredis
 
-# ─── Configuration ────────────────────────────────────────────────────────────
+from discovery import HardwareDiscovery
+from executor import DockerExecutor
+from network_manager import NetworkManager
+from resource_governor import LocalResourceGovernor
 
-CLOUD_API_URL: str = os.environ["CLOUD_API_URL"].rstrip("/")
-JUDGE_AGENT_SECRET: str = os.environ["JUDGE_AGENT_SECRET"]
-REDIS_URL: str = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379")
-AGENT_MAX_CONCURRENCY: int = int(os.environ.get("AGENT_MAX_CONCURRENCY", "4"))
-AGENT_HOSTNAME: str = os.environ.get("AGENT_HOSTNAME", socket.gethostname())
-AGENT_VERSION: str = os.environ.get("AGENT_VERSION", "1.0.0")
+# ─── Configuration & Defaults ────────────────────────────────────────────────
 
-HEARTBEAT_INTERVAL_S: float = float(os.environ.get("HEARTBEAT_INTERVAL_S", "5"))
-POLL_TIMEOUT_S: int = int(os.environ.get("POLL_TIMEOUT_S", "2"))
-JOB_QUEUE_KEY: str = "ccc:queue:judge:pending"
-PROCESSING_KEY: str = "ccc:queue:judge:processing"
-JOB_KEY_PREFIX: str = "ccc:job:"
+BASE_DIR = Path(__file__).resolve().parent
+STORAGE_DIR = Path(os.environ.get("CCC_STORAGE_DIR", str(BASE_DIR)))
+CLOUD_API_URL = os.environ.get("CLOUD_API_URL", "https://medicaps.chaoscomputerclub.in/api/v1").rstrip("/")
+JUDGE_AGENT_SECRET = os.environ.get("JUDGE_AGENT_SECRET", "ccc-agent-dev-secret")
+REDIS_URL = os.environ.get("REDIS_URL", "")
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(name)s — %(message)s",
+    format="%(asctime)s  %(levelname)-8s  [NodeFabric] %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
-logger = logging.getLogger("ccc.judge_agent")
-
-# ─── System Info ──────────────────────────────────────────────────────────────
-
-def _get_cpu_cores() -> int:
-    try:
-        import psutil
-        return psutil.cpu_count(logical=False) or 1
-    except ImportError:
-        return os.cpu_count() or 1
+logger = logging.getLogger("ccc.node.agent")
 
 
-def _get_cpu_threads() -> int:
-    try:
-        import psutil
-        return psutil.cpu_count(logical=True) or 1
-    except ImportError:
-        return os.cpu_count() or 1
-
-
-def _get_memory_mb() -> int:
-    try:
-        import psutil
-        return psutil.virtual_memory().total // (1024 * 1024)
-    except ImportError:
-        return 4096
-
-
-def _get_cpu_pct() -> float:
-    try:
-        import psutil
-        return psutil.cpu_percent(interval=0.1)
-    except ImportError:
-        return 0.0
-
-
-def _get_ram_free_mb() -> int:
-    try:
-        import psutil
-        return psutil.virtual_memory().available // (1024 * 1024)
-    except ImportError:
-        return 2048
-
-
-def _get_docker_version() -> str:
-    try:
-        result = subprocess.run(
-            ["docker", "version", "--format", "{{.Server.Version}}"],
-            capture_output=True, text=True, timeout=3,
-        )
-        return result.stdout.strip() or "unknown"
-    except Exception:
-        return "unknown"
-
-
-# ─── Agent ────────────────────────────────────────────────────────────────────
-
-class JudgeAgent:
-    """
-    Standalone judge agent for the gaming laptop (or any remote compute node).
-
-    Architecture:
-      - agent.py connects to cloud REDIS directly for job polling (low latency)
-      - agent.py calls CLOUD_API_URL for registration, heartbeat, results
-      - Docker sandbox executes on local daemon
-      - PostgreSQL is NEVER accessed directly from the agent
-    """
-
-    SUPPORTED_LANGUAGES = ["python", "javascript", "cpp", "java", "go", "rust", "c"]
+class PortableNodeAgent:
+    """Master node agent orchestrating discovery, telemetry, and distributed execution."""
 
     def __init__(self):
-        self._worker_id: Optional[str] = None
-        self._is_running = False
-        self._semaphore = asyncio.Semaphore(AGENT_MAX_CONCURRENCY)
-        self._active_tasks: set[asyncio.Task] = set()
-        self._redis: Optional[aioredis.Redis] = None
+        self.storage_dir = STORAGE_DIR
+        self.api_url = CLOUD_API_URL
+        self.secret = JUDGE_AGENT_SECRET
+        self.node_id = ""
+        self.capabilities: Dict[str, Any] = {}
+        
+        self.network = NetworkManager(target_url=self.api_url)
+        self.executor = DockerExecutor()
+        self.governor = LocalResourceGovernor(base_concurrency=4, max_concurrency=12)
+        
         self._http_client: Optional[httpx.AsyncClient] = None
-        self._shutdown_event = asyncio.Event()
+        self._is_running = True
+        self._is_draining = False
+        self._active_tasks: Set[asyncio.Task] = set()
 
-    # ─── HTTP helpers ────────────────────────────────────────────────────────
-
-    def _auth_headers(self) -> Dict[str, str]:
-        return {"Authorization": f"Bearer {JUDGE_AGENT_SECRET}"}
-
-    async def _post(self, path: str, data: dict) -> Optional[dict]:
-        try:
-            resp = await self._http_client.post(
-                f"{CLOUD_API_URL}{path}", json=data, headers=self._auth_headers(), timeout=10.0
-            )
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as exc:
-            logger.warning("POST %s failed: %s", path, exc)
-            return None
-
-    # ─── Registration ────────────────────────────────────────────────────────
+    def _headers(self) -> Dict[str, str]:
+        headers = {"Content-Type": "application/json"}
+        if self.secret:
+            headers["Authorization"] = f"Bearer {self.secret}"
+        return headers
 
     async def register(self) -> bool:
-        payload = {
-            "hostname": AGENT_HOSTNAME,
-            "cpu_cores": _get_cpu_cores(),
-            "cpu_threads": _get_cpu_threads(),
-            "memory_mb": _get_memory_mb(),
-            "max_concurrency": AGENT_MAX_CONCURRENCY,
-            "languages": self.SUPPORTED_LANGUAGES,
-            "agent_version": AGENT_VERSION,
-            "docker_version": _get_docker_version(),
-        }
-        result = await self._post("/workers/register", payload)
-        if result and "worker_id" in result:
-            self._worker_id = result["worker_id"]
-            logger.info("✅ Registered as worker: %s", self._worker_id)
-            return True
-        logger.error("❌ Registration failed: %s", result)
+        """Discover host capabilities and register with central control plane."""
+        self.capabilities = HardwareDiscovery.collect_capabilities(
+            storage_dir=self.storage_dir,
+            target_host=self.api_url.split("://")[-1].split("/")[0],
+        )
+        self.node_id = self.capabilities["node_id"]
+        self.governor.base_concurrency = self.capabilities["max_concurrency"]
+        self.governor.current_concurrency = self.capabilities["max_concurrency"]
+
+        logger.info(
+            "🔍 [Discovery] Host: %s (%s, %d logical threads, %d MB RAM, max_concurrency=%d)",
+            self.capabilities["hostname"],
+            self.capabilities["cpu"]["model"],
+            self.capabilities["cpu"]["logical_cores"],
+            self.capabilities["memory"]["total_mb"],
+            self.capabilities["max_concurrency"],
+        )
+
+        reg_url = f"{self.api_url}/nodes/register"
+        try:
+            resp = await self._http_client.post(reg_url, json=self.capabilities, headers=self._headers())
+            if resp.status_code in {200, 201}:
+                data = resp.json()
+                self.node_id = data.get("node_id", self.node_id)
+                logger.info("🛸 [Fabric] Node successfully registered with ID: %s", self.node_id)
+                return True
+            else:
+                logger.error("Registration failed with status %d: %s", resp.status_code, resp.text)
+        except Exception as exc:
+            logger.error("Failed to connect to %s for registration: %s", reg_url, exc)
         return False
 
-    # ─── Heartbeat ───────────────────────────────────────────────────────────
-
     async def _heartbeat_loop(self) -> None:
-        consecutive_failures = 0
+        """Send high-frequency resource telemetry to control plane every 5s."""
+        hb_url = f"{self.api_url}/nodes/{self.node_id}/heartbeat"
         while self._is_running:
             try:
-                await asyncio.sleep(HEARTBEAT_INTERVAL_S)
-                if not self._is_running:
-                    break
-                active_jobs = AGENT_MAX_CONCURRENCY - self._semaphore._value
-                result = await self._post(
-                    f"/workers/{self._worker_id}/heartbeat",
-                    {
-                        "cpu_pct": _get_cpu_pct(),
-                        "ram_free_mb": _get_ram_free_mb(),
-                        "running_jobs": active_jobs,
-                        "status": "healthy" if active_jobs < AGENT_MAX_CONCURRENCY else "busy",
-                    },
-                )
-                if result:
-                    consecutive_failures = 0
-                    logger.debug("💓 Heartbeat ack'd (running=%d)", active_jobs)
-                else:
-                    consecutive_failures += 1
-                    if consecutive_failures >= 6:
-                        logger.warning("⚠️  6 consecutive heartbeat failures — will re-register")
-                        await self.register()
-                        consecutive_failures = 0
+                self.governor.active_jobs = len(self._active_tasks)
+                self.governor.adjust_concurrency()
+                telemetry = self.governor.get_telemetry()
+                
+                payload = {
+                    "cpu_usage_pct": telemetry["cpu_usage_pct"],
+                    "memory_usage_pct": telemetry["memory_usage_pct"],
+                    "available_memory_mb": telemetry["available_memory_mb"],
+                    "running_jobs": telemetry["running_jobs"],
+                    "available_slots": telemetry["available_slots"],
+                    "network_status": "healthy" if self.network.is_connected else "disconnected",
+                    "docker_status": "healthy",
+                }
+
+                resp = await self._http_client.post(hb_url, json=payload, headers=self._headers())
+                if resp.status_code == 404:
+                    logger.warning("Node not recognized by control plane — re-registering...")
+                    await self.register()
+
             except asyncio.CancelledError:
                 return
             except Exception as exc:
-                logger.warning("Heartbeat error: %s", exc)
+                logger.debug("Heartbeat error: %s", exc)
 
-    # ─── Job Execution ───────────────────────────────────────────────────────
+            await asyncio.sleep(5.0)
 
-    async def _execute_job(self, job_id: str, job: dict) -> None:
-        """Execute one job from the queue inside a local Docker sandbox."""
-        async with self._semaphore:
-            job_type = job.get("job_type", "")
-            payload = job.get("payload", {})
-            start_ts = time.monotonic()
-            logger.info("⚡ Starting job %s (type=%s)", job_id[:8], job_type)
+    async def _claim_and_execute_loop(self) -> None:
+        """Poll outbound REST claim endpoint and dispatch sandboxed executions."""
+        claim_url = f"{self.api_url}/nodes/{self.node_id}/claim"
+        result_url = f"{self.api_url}/nodes/{self.node_id}/result"
 
-            result_data: Optional[dict] = None
-            error: Optional[str] = None
-            success = False
+        while self._is_running and not self._is_draining:
+            if not self.governor.can_accept_job():
+                await asyncio.sleep(0.5)
+                continue
 
             try:
-                if job_type == "EVALUATE_ARENA_SUBMISSION":
-                    result_data = await self._run_docker_judge(payload)
-                    success = True
-                elif job_type == "EVALUATE_ASSESSMENT_SUBMISSION":
-                    result_data = await self._run_docker_judge(payload)
-                    success = True
+                resp = await self._http_client.post(
+                    claim_url,
+                    json={"timeout_seconds": 2.0},
+                    headers=self._headers(),
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    job = data.get("job")
+                    if job:
+                        task = asyncio.create_task(
+                            self._handle_single_job(job, result_url),
+                            name=f"job-{job.get('id', 'unk')[:8]}",
+                        )
+                        self._active_tasks.add(task)
+                        task.add_done_callback(self._active_tasks.discard)
+                    else:
+                        # Queue empty — brief pause
+                        await asyncio.sleep(0.4)
                 else:
-                    error = f"Unknown job_type '{job_type}'"
-                    logger.warning("Unknown job type: %s", job_type)
-            except asyncio.TimeoutError:
-                error = "Job execution timed out"
-                logger.error("Job %s timed out", job_id[:8])
+                    await asyncio.sleep(1.0)
+
+            except asyncio.CancelledError:
+                return
             except Exception as exc:
-                error = str(exc)
-                logger.error("Job %s failed: %s", job_id[:8], exc)
+                logger.debug("Job claim loop warning: %s", exc)
+                await asyncio.sleep(2.0)
 
-            elapsed_ms = (time.monotonic() - start_ts) * 1000
-
-            # Acknowledge completion via cloud API
-            ack_path = f"/workers/{self._worker_id}/jobs/{job_id}/complete"
-            await self._post(ack_path, {
-                "job_id": job_id,
-                "success": success,
-                "result": result_data,
-                "error": error,
-                "execution_ms": elapsed_ms,
-            })
-
-            # Remove from processing list in Redis
-            if self._redis:
-                try:
-                    await self._redis.lrem(PROCESSING_KEY, 1, job_id)
-                except Exception:
-                    pass
-
-            logger.info(
-                "✓ Job %s done in %.0fms (success=%s)", job_id[:8], elapsed_ms, success
-            )
-
-    async def _run_docker_judge(self, payload: dict) -> dict:
-        """
-        Execute the submission via local Docker.
-        This replicates what DockerSandboxProvider does on the cloud,
-        but runs on the laptop's Docker daemon with its full CPU/GPU.
-        """
-        import subprocess
-        import tempfile
-        import json as jsonlib
-
-        language = payload.get("language", "python")
-        code = payload.get("code", "")
-        test_cases = payload.get("test_cases", [])  # pre-fetched by cloud before enqueue
-        time_limit = float(payload.get("time_limit", 5.0))
-        memory_limit_mb = int(payload.get("memory_limit_mb", 256))
-
-        # Map language to Docker image
-        image_map = {
-            "python": "ccc-judge-python:latest",
-            "javascript": "ccc-judge-node:latest",
-            "cpp": "ccc-judge-cpp:latest",
-            "java": "ccc-judge-java:latest",
-            "go": "ccc-judge-go:latest",
-        }
-        image = image_map.get(language.lower(), "ccc-judge-python:latest")
-
-        # Write code to temp file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".code", delete=False) as f:
-            f.write(code)
-            code_path = f.name
-
-        results = []
+    async def _handle_single_job(self, job: Dict[str, Any], result_url: str) -> None:
+        """Run sandboxed job and report verdict back to control plane."""
+        job_id = job.get("id", "unk")
+        payload = job.get("payload", {})
+        payload["job_id"] = job_id
+        
+        logger.info("⚡ [Worker] Starting execution for job %s [%s]", job_id, payload.get("language"))
+        start_time = time.time()
+        
         try:
-            for tc in test_cases[:50]:   # Hard cap: never run > 50 test cases per job
-                stdin_data = tc.get("input", "")
-                expected = tc.get("expected_output", "")
-                try:
-                    proc = await asyncio.wait_for(
-                        asyncio.create_subprocess_exec(
-                            "docker", "run", "--rm",
-                            "--network=none",
-                            f"--memory={memory_limit_mb}m",
-                            f"--memory-swap={memory_limit_mb}m",
-                            "--cpus=1.0",
-                            "--pids-limit=64",
-                            "--cap-drop=ALL",
-                            "--security-opt=no-new-privileges",
-                            "--user=1000:1000",
-                            "-i",
-                            image,
-                            stdin=asyncio.subprocess.PIPE,
-                            stdout=asyncio.subprocess.PIPE,
-                            stderr=asyncio.subprocess.PIPE,
-                        ),
-                        timeout=time_limit + 2,
-                    )
-                    stdout, stderr = await asyncio.wait_for(
-                        proc.communicate(input=(stdin_data + "\n" + code).encode()),
-                        timeout=time_limit + 2,
-                    )
-                    actual = stdout.decode("utf-8", errors="replace").strip()
-                    # Trim output to 64KB
-                    if len(actual) > 65536:
-                        actual = actual[:65536] + "\n[OUTPUT TRUNCATED]"
-                    verdict = "ACCEPTED" if actual == expected.strip() else "WRONG_ANSWER"
-                    results.append({"verdict": verdict, "actual": actual, "expected": expected.strip()})
-                except asyncio.TimeoutError:
-                    results.append({"verdict": "TIME_LIMIT_EXCEEDED", "actual": "", "expected": expected})
-                except Exception as exc:
-                    results.append({"verdict": "RUNTIME_ERROR", "actual": str(exc), "expected": expected})
-        finally:
+            exec_result = await self.executor.execute_submission(payload)
+            verdict = exec_result.get("verdict", "INTERNAL_ERROR")
+            runtime_ms = exec_result.get("runtime_ms", 0.0)
+            mem_mb = exec_result.get("memory_mb", 0.0)
+            tc_results = exec_result.get("testcase_results", [])
+
+            # Submit result back
+            result_payload = {
+                "job_id": job_id,
+                "verdict": verdict,
+                "runtime_ms": runtime_ms,
+                "memory_mb": mem_mb,
+                "testcase_results": tc_results,
+            }
+            await self._http_client.post(result_url, json=result_payload, headers=self._headers())
+            elapsed = round((time.time() - start_time) * 1000.0, 1)
+            logger.info("✓ [Worker] Job %s completed in %.1fms (Verdict: %s)", job_id, elapsed, verdict)
+
+        except Exception as exc:
+            logger.error("Job %s execution failed: %s", job_id, exc)
             try:
-                os.unlink(code_path)
+                await self._http_client.post(
+                    result_url,
+                    json={"job_id": job_id, "verdict": "SYSTEM_ERROR", "error": str(exc)},
+                    headers=self._headers(),
+                )
             except Exception:
                 pass
 
-        accepted = sum(1 for r in results if r["verdict"] == "ACCEPTED")
-        total = len(results)
-        return {
-            "results": results,
-            "accepted_count": accepted,
-            "total_count": total,
-            "verdict": "ACCEPTED" if accepted == total and total > 0 else "WRONG_ANSWER",
-        }
+    async def drain(self) -> None:
+        """Gracefully drain running jobs before shutdown."""
+        self._is_draining = True
+        logger.info("🛑 [Fabric] Entering DRAINING mode — stopping new jobs...")
+        
+        try:
+            await self._http_client.post(f"{self.api_url}/nodes/{self.node_id}/drain", headers=self._headers())
+        except Exception:
+            pass
 
-    # ─── Poll Loop ───────────────────────────────────────────────────────────
+        if self._active_tasks:
+            logger.info("Waiting for %d in-flight job(s) to finish...", len(self._active_tasks))
+            await asyncio.gather(*self._active_tasks, return_exceptions=True)
 
-    async def _poll_loop(self) -> None:
-        """Continuously poll Redis for judge jobs and execute them."""
-        while self._is_running:
-            await self._semaphore.acquire()
-            slot_released = False
-            try:
-                if not self._is_running:
-                    return
+        try:
+            await self._http_client.post(f"{self.api_url}/nodes/{self.node_id}/unregister", headers=self._headers())
+        except Exception:
+            pass
 
-                # BRPOPLPUSH: atomically dequeue + add to processing
-                job_id = await self._redis.brpoplpush(
-                    JOB_QUEUE_KEY, PROCESSING_KEY, timeout=POLL_TIMEOUT_S
-                )
-                if not job_id:
-                    self._semaphore.release()
-                    slot_released = True
-                    continue
-
-                if isinstance(job_id, bytes):
-                    job_id = job_id.decode()
-
-                # Fetch job data
-                raw = await self._redis.get(f"{JOB_KEY_PREFIX}{job_id}")
-                if not raw:
-                    logger.warning("Job %s not found in Redis — discarding", job_id)
-                    await self._redis.lrem(PROCESSING_KEY, 1, job_id)
-                    self._semaphore.release()
-                    slot_released = True
-                    continue
-
-                job = json.loads(raw)
-                # Mark lease timestamp (reaper will reclaim after 300s if we crash)
-                await self._redis.set(
-                    f"{JOB_KEY_PREFIX}{job_id}:leased_at",
-                    str(time.time()),
-                    ex=300,
-                )
-
-                task = asyncio.create_task(
-                    self._execute_job(job_id, job),
-                    name=f"job-{job_id[:8]}",
-                )
-                self._active_tasks.add(task)
-                task.add_done_callback(self._active_tasks.discard)
-                slot_released = True  # task owns the slot now via semaphore context
-
-            except asyncio.CancelledError:
-                return
-            except Exception as exc:
-                logger.error("Poll loop error: %s", exc)
-                await asyncio.sleep(1.0)
-            finally:
-                if not slot_released:
-                    self._semaphore.release()
-
-    # ─── Lifecycle ───────────────────────────────────────────────────────────
+        logger.info("✓ [Fabric] Node %s cleanly shut down.", self.node_id)
 
     async def run(self) -> None:
-        """Main entry point. Runs until SIGTERM."""
-        self._http_client = httpx.AsyncClient(timeout=15.0)
-        self._redis = aioredis.from_url(REDIS_URL, decode_responses=False)
+        """Main lifecycle entrypoint."""
+        self._http_client = httpx.AsyncClient(timeout=10.0)
+        
+        # Wait for control plane reachability
+        await self.network.wait_for_connectivity()
 
-        # Wait for Redis to be reachable
-        for attempt in range(10):
-            try:
-                await self._redis.ping()
-                logger.info("✅ Redis connected: %s", REDIS_URL)
-                break
-            except Exception as exc:
-                logger.warning("Redis not ready (attempt %d/10): %s", attempt + 1, exc)
-                await asyncio.sleep(3.0)
-        else:
-            raise RuntimeError(f"Cannot connect to Redis at {REDIS_URL}")
-
-        # Register with cloud
-        for attempt in range(10):
-            if await self.register():
-                break
-            logger.warning("Registration failed (attempt %d/10), retrying in 5s...", attempt + 1)
+        # Register hardware
+        registered = await self.register()
+        while not registered and self._is_running:
+            logger.warning("Retrying node registration in 5 seconds...")
             await asyncio.sleep(5.0)
-        else:
-            raise RuntimeError("Cannot register with cloud API — check CLOUD_API_URL and JUDGE_AGENT_SECRET")
+            registered = await self.register()
 
-        self._is_running = True
-        logger.info(
-            "🚀 Judge Agent running (concurrency=%d, hostname=%s, worker_id=%s)",
-            AGENT_MAX_CONCURRENCY, AGENT_HOSTNAME, self._worker_id,
-        )
-
-        poll_task = asyncio.create_task(self._poll_loop(), name="poll-loop")
         hb_task = asyncio.create_task(self._heartbeat_loop(), name="heartbeat")
+        claim_task = asyncio.create_task(self._claim_and_execute_loop(), name="claim-loop")
 
-        # Block until SIGTERM
-        await self._shutdown_event.wait()
-        logger.info("🛑 Shutdown signal received — draining...")
-
-        self._is_running = False
-
-        # Signal drain to control plane
-        await self._post(f"/workers/{self._worker_id}/drain", {})
-
-        # Cancel poll loop (stop accepting new jobs)
-        poll_task.cancel()
-        hb_task.cancel()
-
-        # Wait for active tasks to finish
-        if self._active_tasks:
-            logger.info("Waiting for %d active job(s) to complete...", len(self._active_tasks))
-            try:
-                await asyncio.wait_for(
-                    asyncio.gather(*list(self._active_tasks), return_exceptions=True),
-                    timeout=30.0,
-                )
-            except asyncio.TimeoutError:
-                logger.warning("Drain timed out — force-cancelling active jobs")
-
-        # Unregister cleanly
-        await self._post(f"/workers/{self._worker_id}/unregister", {})
-        logger.info("✅ Judge Agent shut down cleanly (worker_id=%s)", self._worker_id)
-
-        await self._http_client.aclose()
-        await self._redis.aclose()
-
-    def request_shutdown(self) -> None:
-        """Called on SIGTERM."""
-        self._shutdown_event.set()
+        # Keep alive until shutdown signal
+        try:
+            while self._is_running:
+                await asyncio.sleep(1.0)
+        finally:
+            hb_task.cancel()
+            claim_task.cancel()
+            await self.drain()
+            await self._http_client.aclose()
 
 
-# ─── Entrypoint ───────────────────────────────────────────────────────────────
+# ─── Process Bootstrap ───────────────────────────────────────────────────────
 
-async def main() -> None:
-    agent = JudgeAgent()
+def main():
+    agent = PortableNodeAgent()
 
-    loop = asyncio.get_running_loop()
-    loop.add_signal_handler(signal.SIGTERM, agent.request_shutdown)
-    loop.add_signal_handler(signal.SIGINT, agent.request_shutdown)
+    def handle_signal(sig, frame):
+        logger.info("Received signal %s — initiating shutdown", sig)
+        agent._is_running = False
 
-    await agent.run()
+    signal.signal(signal.SIGINT, handle_signal)
+    signal.signal(signal.SIGTERM, handle_signal)
+
+    try:
+        asyncio.run(agent.run())
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
