@@ -13,6 +13,7 @@ from sqlalchemy import select, func, update, text
 
 from app.core.cache import delete_cache_pattern
 from app.core.config import settings
+from app.core.contest_lifecycle import assert_submissions_open
 from app.engine.enums import ComparisonMode
 from app.engine.languages import Language, LanguageRegistry, LanguageContaminationError, UnsupportedLanguageError
 from app.engine.providers.factory import get_judge_provider
@@ -361,6 +362,7 @@ class ContestExecutionService:
             )
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
+            await assert_submissions_open(slug)
             if contest.status in ("finished", "archived", "ended"):
                 raise HTTPException(
                     status_code=403,

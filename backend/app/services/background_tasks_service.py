@@ -37,6 +37,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from app.core.contest_lifecycle import ContestLifecycleState, set_lifecycle_state
 from app.core.queue.lock import distributed_lock
 from app.core.queue.redis_queue import RedisQueueEngine
 from app.core.queue.outbox import relay_outbox_events
@@ -222,10 +223,13 @@ async def _auto_finish_contests(session_factory: async_sessionmaker) -> None:
 
                 logger.info("auto-finish: '%s' ended at %s — transitioning to finished", slug, ends_at.isoformat())
 
-                # 1. Mark as finished in database
+                # 1. Mark as finished in database and set lifecycle to DRAINING
                 contest.status = "finished"
                 await db.commit()
                 _auto_finish_done.add(slug)
+
+                # Real-time state gate: submissions reject immediately while queue drains
+                await set_lifecycle_state(slug, ContestLifecycleState.DRAINING)
 
                 await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
 
@@ -281,6 +285,9 @@ async def _auto_start_contests(session_factory: async_sessionmaker) -> None:
                     starts_at = starts_at.replace(tzinfo=timezone.utc)
 
                 if now < starts_at:
+                    # Warmup window: mark PRE_CONTEST within 30 minutes of start
+                    if 0 < (starts_at - now).total_seconds() <= 1800:
+                        await set_lifecycle_state(slug, ContestLifecycleState.PRE_CONTEST)
                     continue  # Not yet time to start
 
                 logger.info(
@@ -290,6 +297,9 @@ async def _auto_start_contests(session_factory: async_sessionmaker) -> None:
 
                 contest.status = "live"
                 await db.commit()
+
+                # Mark CONTEST_ACTIVE in Redis lifecycle state
+                await set_lifecycle_state(slug, ContestLifecycleState.CONTEST_ACTIVE)
 
                 await DynamicContestService._invalidate_contest_caches()
 

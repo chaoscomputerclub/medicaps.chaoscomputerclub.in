@@ -11,6 +11,7 @@ from typing import Any, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+from app.core.contest_lifecycle import ContestLifecycleState, set_lifecycle_state
 from app.core.queue.base_worker import BaseQueueWorker
 from app.core.queue.contracts import JobContract, NonRetryableError, RetryableError
 from app.core.queue.lock import distributed_lock
@@ -55,12 +56,18 @@ class ContestLifecycleWorker(BaseQueueWorker):
             if not contest:
                 raise NonRetryableError(f"Contest '{slug}' not found.")
 
+            # Mark contest state as FINALIZING in Redis
+            await set_lifecycle_state(slug, ContestLifecycleState.FINALIZING)
+
             logger.info("🏆 [ContestWorker] Applying final Elo ratings for contest '%s'", slug)
             rating_summary = await DynamicContestService._apply_final_ratings(contest, db)
             await db.commit()
 
             # Invalidate all affected caches
             await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
+
+            # Mark contest state as COMPLETE in Redis
+            await set_lifecycle_state(slug, ContestLifecycleState.COMPLETE)
 
             # Broadcast SSE notification
             try:

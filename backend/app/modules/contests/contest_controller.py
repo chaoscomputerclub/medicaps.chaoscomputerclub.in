@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.contest_lifecycle import assert_submissions_open
 from app.core.user_concurrency import acquire_user_job_slot
 from app.models.db_models import MemberProfile
 from app.modules.contests.contest_service import ContestService
@@ -217,6 +218,9 @@ class ContestController:
             import hashlib
             from app.core.queue import RedisQueueEngine, JobPriority
             code_hash = hashlib.sha256((payload.code or "").strip().encode()).hexdigest()[:12]
+
+            # Real-time contest lifecycle gate: PRE_CONTEST / DRAINING / FINALIZING / COMPLETE check
+            await assert_submissions_open(slug)
 
             # Per-user concurrency gate: max 3 in-flight judge jobs per user
             await acquire_user_job_slot(current_member.id)
