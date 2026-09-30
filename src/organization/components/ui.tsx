@@ -68,9 +68,9 @@ export function SectionHeader({
 }) {
   const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
   return (
-    <div className={cn("flex items-end justify-between gap-4 border-b border-white/8 pb-3 mb-5", className)}>
-      <div>
-        <div className="flex items-center gap-2">
+    <div className={cn("flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-4 border-b border-white/8 pb-3 mb-5 min-w-0", className)}>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
           <p className="text-[10px] font-mono font-semibold tracking-wider text-lime-400 uppercase">
             {formattedKicker}
           </p>
@@ -80,11 +80,11 @@ export function SectionHeader({
             </span>
           )}
         </div>
-        <h2 className="text-lg font-semibold tracking-tight text-white mt-1 font-sans">
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white mt-1 font-sans break-words">
           {title}
         </h2>
       </div>
-      {action && <div>{action}</div>}
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }

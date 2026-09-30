@@ -31,8 +31,8 @@ export function ScoreboardMatrix({
   const safeProblems = problems || [];
 
   return (
-    <div className="overflow-x-auto border border-white/10 bg-black rounded-none">
-      <table className="w-full text-left font-mono text-xs border-collapse">
+    <div className="w-full min-w-0 overflow-x-auto border border-white/10 bg-black rounded-none">
+      <table className="w-full min-w-[620px] text-left font-mono text-xs border-collapse">
         <thead className="bg-zinc-950 text-slate-400 text-[10px] uppercase tracking-wider border-b border-white/10">
           <tr>
             <th className="p-3 w-12 text-center">#</th>

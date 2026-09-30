@@ -104,6 +104,8 @@ html {
   color-scheme: dark;
   scroll-behavior: smooth;
   font-family: var(--font-sans);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -112,8 +114,15 @@ body {
   color: #ffffff;
   font-family: var(--font-sans);
   min-height: 100dvh;
+  max-width: 100%;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Global focus-visible rings in Electric Lime (for interactive buttons, links, controls) */

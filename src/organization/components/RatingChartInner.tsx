@@ -61,11 +61,11 @@ export function RatingChartInner({ data }: { data: (RatingHistoryPoint | number)
 
   return (
     <div
-      className="h-64 w-full"
+      className="h-64 w-full min-w-0 overflow-hidden"
       role="img"
       aria-label="Rating progression across offline contests"
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <AreaChart data={chartData} margin={{ top: 18, right: 12, bottom: 2, left: -16 }}>
           <defs>
             <linearGradient id="ratingFill" x1="0" y1="0" x2="0" y2="1">

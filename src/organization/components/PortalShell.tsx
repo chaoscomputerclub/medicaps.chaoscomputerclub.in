@@ -205,7 +205,7 @@ export function PortalShell() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black w-full max-w-full overflow-x-hidden">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
         <Link to="/" className="flex items-center gap-2.5">
@@ -359,7 +359,7 @@ export function PortalShell() {
       </aside>
 
       {/* Main Viewport */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8 relative overflow-x-clip">
+      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 sm:p-6 md:p-8 relative min-w-0 max-w-full overflow-x-hidden">
         <Suspense fallback={<PortalRouteSkeleton />}>
           <Outlet />
         </Suspense>

@@ -142,81 +142,81 @@ export function DashboardPage() {
   const greetingName = getFirstName(member?.full_name, member?.handle);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6 min-w-0 overflow-x-hidden">
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-white font-sans tracking-tight">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/8 pb-4 sm:pb-5 min-w-0">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-semibold text-white font-sans tracking-tight truncate">
             Dashboard
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <p className="text-xs text-zinc-400 mt-0.5 truncate">
             Welcome back, {greetingName}. Medi-Caps competitive programming arena.
           </p>
         </div>
       </div>
 
       {/* Telemetry Bento Strip (4 Columns) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Campus Standings</span>
-          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 min-w-0">
+        <div className="p-3 sm:p-4 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Campus Standings</span>
+          <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
             #{member?.university_rank || 1}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Medi-Caps University</span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-0.5 sm:mt-1 truncate">Medi-Caps University</span>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Global Rating</span>
-          <strong className="block text-2xl font-mono font-bold text-lime-400 mt-1 tabular-nums">
+        <div className="p-3 sm:p-4 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Global Rating</span>
+          <strong className="block text-xl sm:text-2xl font-mono font-bold text-lime-400 mt-1 tabular-nums truncate">
             {member?.rating ?? 1200}
           </strong>
-          <span className="block text-[10px] font-mono text-lime-400/80 mt-1">{member?.tier || "1★ Explorer"}</span>
+          <span className="block text-[10px] font-mono text-lime-400/80 mt-0.5 sm:mt-1 truncate">{member?.tier || "1★ Explorer"}</span>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Contests Logged</span>
-          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
+        <div className="p-3 sm:p-4 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Contests Logged</span>
+          <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
             {history.length || (member as any)?.contests_count || 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Verified Tournaments</span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-0.5 sm:mt-1 truncate">Verified Tournaments</span>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Accepted Solutions</span>
-          <strong className="block text-2xl font-mono font-bold text-white mt-1 tabular-nums">
+        <div className="p-3 sm:p-4 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Accepted Solutions</span>
+          <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
             {(member as any)?.solved_count || 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-400 mt-1">Problem Archive</span>
+          <span className="block text-[10px] font-mono text-zinc-400 mt-0.5 sm:mt-1 truncate">Problem Archive</span>
         </div>
       </div>
 
       {/* Live Contest Banner or Next Contest Alert */}
       {live ? (
-        <section className="rounded-lg border border-lime-400/40 bg-black p-6 relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2">
+        <section className="rounded-lg border border-lime-400/40 bg-black p-4 sm:p-6 relative overflow-hidden min-w-0">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 min-w-0">
+            <div className="space-y-2 min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <StatusDot status="live" />
                 <span className="font-mono text-xs text-lime-400 uppercase tracking-wider">Tournament Live</span>
               </div>
-              <h2 className="text-xl md:text-2xl font-semibold text-white font-sans">{live.title}</h2>
-              <p className="text-xs text-zinc-400 max-w-2xl leading-normal">{live.summary}</p>
-              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-zinc-500 pt-1">
+              <h2 className="text-xl md:text-2xl font-semibold text-white font-sans break-words">{live.title}</h2>
+              <p className="text-xs text-zinc-400 max-w-2xl leading-normal break-words">{live.summary}</p>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-mono text-zinc-500 pt-1">
                 <span className="flex items-center gap-1.5 text-zinc-400">
-                  <MapPin className="w-3.5 h-3.5 text-lime-400" />
-                  {live.venue}
+                  <MapPin className="w-3.5 h-3.5 text-lime-400 shrink-0" />
+                  <span className="truncate">{live.venue}</span>
                 </span>
                 <span className="flex items-center gap-1.5 text-zinc-400">
-                  <Radio className="w-3.5 h-3.5 text-cyan-400" />
-                  Division {live.division || "Open"}
+                  <Radio className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <span className="truncate">Division {live.division || "Open"}</span>
                 </span>
                 <span className="text-zinc-500">
                   {live.problem_count} Problems · {live.registered_count} Registered
                 </span>
               </div>
             </div>
-            <div className="shrink-0">
-              <Button asChild variant="outline">
+            <div className="shrink-0 w-full sm:w-auto">
+              <Button asChild variant="outline" className="w-full sm:w-auto justify-center">
                 <Link to={`/contests/${live.slug}`}>
                   Enter Live Arena <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
@@ -225,21 +225,21 @@ export function DashboardPage() {
           </div>
         </section>
       ) : next ? (
-        <section className="rounded-lg border border-white/8 bg-black p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-          <div className="space-y-1.5">
+        <section className="rounded-lg border border-white/8 bg-black p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5 min-w-0 overflow-hidden">
+          <div className="space-y-1.5 min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <StatusDot status="upcoming" />
               <span className="font-mono text-xs text-zinc-400 uppercase tracking-wider">Next Campus Tournament</span>
             </div>
-            <h2 className="text-lg md:text-xl font-semibold text-white font-sans">{next.title}</h2>
-            <p className="text-xs text-zinc-400 max-w-xl">{next.summary}</p>
+            <h2 className="text-lg md:text-xl font-semibold text-white font-sans break-words">{next.title}</h2>
+            <p className="text-xs text-zinc-400 max-w-xl break-words">{next.summary}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-4 font-mono text-xs shrink-0">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-mono text-xs shrink-0 w-full md:w-auto justify-between md:justify-end">
             <div>
               <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
               <strong className="block text-zinc-200 text-xs mt-0.5">{formatContestDate(next.starts_at)}</strong>
             </div>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="w-full sm:w-auto justify-center">
               <Link to={`/contests/${next.slug}`}>
                 View Contest <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
@@ -249,7 +249,7 @@ export function DashboardPage() {
       ) : null}
 
       {/* Rating Analytics */}
-      <section className="p-5 rounded-lg border border-white/8 bg-black">
+      <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
         <SectionHeader
           kicker="Rating Trajectory"
           index="Progress"
@@ -260,11 +260,13 @@ export function DashboardPage() {
             </Link>
           }
         />
-        <RatingChart data={history} />
+        <div className="w-full min-w-0 overflow-hidden">
+          <RatingChart data={history} />
+        </div>
       </section>
 
       {/* Campus Scoreboard Radar */}
-      <section className="p-5 rounded-lg border border-white/8 bg-black">
+      <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
         <SectionHeader
           kicker="Standings Radar"
           index="Live"
@@ -275,17 +277,21 @@ export function DashboardPage() {
             </Link>
           }
         />
-        <ScoreboardMatrix entries={publicData.standings} problems={publicData.problems} />
+        <div className="w-full min-w-0 overflow-hidden">
+          <ScoreboardMatrix entries={publicData.standings} problems={publicData.problems} />
+        </div>
       </section>
 
       {/* Live Campus Activity Stream */}
-      <section className="p-5 rounded-lg border border-white/8 bg-black">
+      <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden">
         <SectionHeader
           kicker="Network Feed"
           index="Telemetry"
           title="Live Activity Stream"
         />
-        <ContestActivityFeed limit={6} />
+        <div className="w-full min-w-0">
+          <ContestActivityFeed limit={6} />
+        </div>
       </section>
     </div>
   );

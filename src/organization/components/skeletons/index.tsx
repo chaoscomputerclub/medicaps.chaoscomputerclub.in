@@ -1527,24 +1527,24 @@ export function SettingsSkeleton() {
  */
 export function DashboardSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="w-full max-w-7xl mx-auto space-y-6 min-w-0 overflow-x-hidden animate-in fade-in duration-200">
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-5">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/8 pb-4 sm:pb-5 min-w-0">
+        <div className="space-y-1 min-w-0">
           <Skeleton className="h-7 w-36" />
           <Skeleton className="h-3 w-80 max-w-full" />
         </div>
       </div>
 
       {/* Telemetry Bento Strip (4 Columns) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 min-w-0">
         {[
           { labelW: "w-28", valW: "w-16", subW: "w-24" },
           { labelW: "w-24", valW: "w-20", subW: "w-20" },
           { labelW: "w-24", valW: "w-12", subW: "w-28" },
           { labelW: "w-28", valW: "w-12", subW: "w-24" },
         ].map((item, idx) => (
-          <div key={idx} className="p-4 rounded-lg border border-white/8 bg-black space-y-1.5">
+          <div key={idx} className="p-3 sm:p-4 rounded-lg border border-white/8 bg-black space-y-1.5 min-w-0 overflow-hidden">
             <Skeleton className={cn("h-2.5", item.labelW)} />
             <Skeleton className={cn("h-7", item.valW)} />
             <Skeleton className={cn("h-2.5", item.subW)} />
@@ -1553,8 +1553,8 @@ export function DashboardSkeleton() {
       </div>
 
       {/* Live Contest Banner / Next Contest Alert */}
-      <section className="rounded-lg border border-lime-400/20 bg-black p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <section className="rounded-lg border border-lime-400/20 bg-black p-4 sm:p-6 min-w-0 overflow-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 min-w-0">
           <div className="space-y-2.5 flex-1">
             <div className="flex items-center gap-2">
               <Skeleton className="size-2 rounded-full" />
