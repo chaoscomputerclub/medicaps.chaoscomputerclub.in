@@ -1,0 +1,217 @@
+"""
+Chaos Computer Club — Medi-Caps Chapter
+engine/providers/distributed_provider.py — Self-Adapting Distributed Fabric Provider
+
+Dispatches execution jobs to the distributed queue (ccc:queue:judge:pending) where
+portable compute nodes (e.g. cadet laptops, lab PCs running Go node-agent) claim
+and execute them inside in-memory RAM Docker sandboxes.
+
+Automatically falls back to local in-process DockerSandboxProvider if no compute
+nodes are registered or if remote execution times out.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import time
+from datetime import datetime, timezone
+from typing import Any, List, Optional
+from uuid import uuid4
+
+from app.core.config import settings
+from app.core.redis import get_redis
+from app.engine.enums import ComparisonMode, ExecutionStatus, Language, Verdict
+from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
+from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
+from .docker_provider import DockerSandboxProvider
+
+logger = logging.getLogger("ccc.judge.distributed")
+
+
+class DistributedFabricProvider(JudgeProvider):
+    name = "distributed"
+
+    def __init__(self, fallback_provider: Optional[JudgeProvider] = None) -> None:
+        self._fallback = fallback_provider or DockerSandboxProvider()
+
+    async def healthy(self) -> bool:
+        """Healthy if either distributed nodes exist or fallback engine is healthy."""
+        try:
+            redis = get_redis()
+            nodes = await redis.smembers("ccc:nodes:registered")
+            for nid in nodes:
+                raw_id = nid.decode() if isinstance(nid, bytes) else str(nid)
+                if await redis.exists(f"ccc:node:{raw_id}:heartbeat"):
+                    return True
+        except Exception:
+            pass
+        return await self._fallback.healthy()
+
+    async def run(self, request: ProviderRunRequest) -> ProviderRunResult:
+        """Single testcase run fallback."""
+        return await self._fallback.run(request)
+
+    async def execute_batch(
+        self,
+        language: str | Any,
+        code: str,
+        testcases: list[Any],
+        time_limit: float = 5.0,
+        memory_limit_mb: int = 256,
+        comparison_mode: Any = None,
+    ) -> ExecutionResult:
+        """
+        Executes a batch of testcases via the distributed compute fabric if nodes
+        are available, else transparently falls back to local Docker engine.
+        """
+        redis = get_redis()
+        online_nodes = await self._get_active_nodes(redis)
+
+        if not online_nodes:
+            logger.info("ℹ️ No active distributed nodes in fabric — executing on local Cloud Docker engine.")
+            return await self._fallback.execute_batch(
+                language=language,
+                code=code,
+                testcases=testcases,
+                time_limit=time_limit,
+                memory_limit_mb=memory_limit_mb,
+                comparison_mode=comparison_mode,
+            )
+
+        # Active compute nodes exist (e.g. laptop connected via USB)
+        job_id = str(uuid4())
+        lang_str = language.value if hasattr(language, "value") else str(language)
+
+        serialized_tcs = []
+        for i, tc in enumerate(testcases):
+            tc_id = getattr(tc, "id", f"tc_{i+1}")
+            stdin_val = getattr(tc, "stdin", "")
+            exp_val = getattr(tc, "expected_output", "")
+            serialized_tcs.append({
+                "id": str(tc_id),
+                "stdin": str(stdin_val),
+                "expected_output": str(exp_val),
+            })
+
+        job_payload = {
+            "id": job_id,
+            "status": "QUEUED",
+            "queue_name": "judge",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "payload": {
+                "language": lang_str,
+                "code": code,
+                "time_limit_ms": float(time_limit * 1000.0),
+                "memory_limit_mb": int(memory_limit_mb),
+                "testcases": serialized_tcs,
+            },
+        }
+
+        # 1. Enqueue job into distributed queue
+        await redis.set(f"ccc:job:{job_id}", json.dumps(job_payload), ex=86400)
+        await redis.rpush("ccc:queue:judge:pending", job_id)
+
+        logger.info(
+            "⚡ [Fabric] Job %s enqueued to distributed queue (Active Nodes: %s, Lang: %s, Testcases: %d)",
+            job_id, ", ".join(online_nodes), lang_str, len(serialized_tcs)
+        )
+
+        # 2. Await remote node execution with timeout
+        wait_timeout = max(10.0, float(time_limit * len(testcases)) + 8.0)
+        start_wait = time.time()
+
+        while time.time() - start_wait < wait_timeout:
+            raw_job = await redis.get(f"ccc:job:{job_id}")
+            if raw_job:
+                job_data = json.loads(raw_job)
+                if job_data.get("status") == "COMPLETED" and "result" in job_data:
+                    res_dict = job_data["result"]
+                    logger.info("✓ [Fabric] Job %s executed remotely on compute node %s", job_id, job_data.get("claimed_by_node"))
+                    return self._format_execution_result(res_dict, testcases, job_id)
+            await asyncio.sleep(0.15)
+
+        # Timeout reached: reclaim job from queue and fall back
+        logger.warning("⚠️ [Fabric] Remote execution timed out for job %s. Falling back to local Docker engine.", job_id)
+        await redis.lrem("ccc:queue:judge:pending", 1, job_id)
+        await redis.lrem("ccc:queue:judge:processing", 1, job_id)
+
+        return await self._fallback.execute_batch(
+            language=language,
+            code=code,
+            testcases=testcases,
+            time_limit=time_limit,
+            memory_limit_mb=memory_limit_mb,
+            comparison_mode=comparison_mode,
+        )
+
+    async def _get_active_nodes(self, redis: Any) -> List[str]:
+        """Returns list of node IDs whose heartbeats are currently active."""
+        node_ids = await redis.smembers("ccc:nodes:registered")
+        active = []
+        for nid in node_ids:
+            raw_id = nid.decode() if isinstance(nid, bytes) else str(nid)
+            is_alive = await redis.exists(f"ccc:node:{raw_id}:heartbeat")
+            if is_alive:
+                active.append(raw_id)
+        return active
+
+    def _format_execution_result(
+        self, res_dict: dict, testcases: list[Any], job_id: str
+    ) -> ExecutionResult:
+        """Converts node JSON result into typed ExecutionResult schema."""
+        raw_verdict = res_dict.get("verdict", "SYSTEM_ERROR")
+        try:
+            enum_verdict = Verdict(raw_verdict)
+        except Exception:
+            enum_verdict = Verdict.SYSTEM_ERROR
+
+        tc_results = []
+        passed_count = 0
+        raw_tc_list = res_dict.get("testcase_results", [])
+
+        for i, r in enumerate(raw_tc_list):
+            v_str = r.get("verdict", "SYSTEM_ERROR")
+            try:
+                tc_verdict = Verdict(v_str)
+            except Exception:
+                tc_verdict = Verdict.SYSTEM_ERROR
+
+            passed = bool(r.get("passed", False))
+            if passed:
+                passed_count += 1
+
+            tc_id = r.get("testcase_id") or (testcases[i].id if i < len(testcases) else f"tc_{i+1}")
+            tc_results.append(
+                TestCaseResult(
+                    testcase_id=str(tc_id),
+                    name=getattr(testcases[i], "name", None) if i < len(testcases) else None,
+                    hidden=getattr(testcases[i], "hidden", False) if i < len(testcases) else False,
+                    passed=passed,
+                    verdict=tc_verdict,
+                    stdout=r.get("stdout", ""),
+                    expected_output=r.get("expected_output", ""),
+                    stderr=r.get("stderr", ""),
+                    compile_output=r.get("compile_output", ""),
+                    wall_time_ms=float(r.get("wall_time_ms", 0.0)),
+                    runtime_ms=float(r.get("wall_time_ms", 0.0)),
+                )
+            )
+
+        total_tcs = len(tc_results) if tc_results else len(testcases)
+        all_passed = (passed_count == total_tcs) and total_tcs > 0
+
+        return ExecutionResult(
+            success=all_passed,
+            submission_id=job_id,
+            status=ExecutionStatus.COMPLETED,
+            verdict=enum_verdict if not all_passed else Verdict.ACCEPTED,
+            testcase_results=tc_results,
+            passed_testcases=passed_count,
+            total_testcases=total_tcs,
+            time=float(res_dict.get("runtime_ms", 0.0)) / 1000.0,
+            memory=float(res_dict.get("memory_mb", 0.0)),
+            compile_output=res_dict.get("compile_output", ""),
+            error=res_dict.get("error"),
+        )

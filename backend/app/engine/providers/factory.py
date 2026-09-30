@@ -16,23 +16,26 @@ logger = logging.getLogger("ccc.judge")
 def get_judge_provider() -> JudgeProvider:
     choice = os.getenv("JUDGE_PROVIDER", settings.JUDGE_PROVIDER).strip().lower()
 
-    if choice in {"codebox", "code_box", "codebox-engine"}:
+    # 1. Check if distributed fabric or standard docker/codebox is chosen
+    if choice in {"distributed", "fabric", "nodes", "docker", "codebox", "code_box", "codebox-engine", "core", "native", "interleet", "server"}:
         try:
-            from .codebox_provider import CodeboxProvider
+            from .distributed_provider import DistributedFabricProvider
+            fallback: JudgeProvider
+            if choice in {"codebox", "code_box", "codebox-engine"}:
+                try:
+                    from .codebox_provider import CodeboxProvider
+                    fallback = CodeboxProvider()
+                except Exception:
+                    from .docker_provider import DockerSandboxProvider
+                    fallback = DockerSandboxProvider()
+            else:
+                from .docker_provider import DockerSandboxProvider
+                fallback = DockerSandboxProvider()
 
-            logger.info("judge provider: codebox execution engine")
-            return CodeboxProvider()
+            logger.info("judge provider: self-adapting distributed fabric (fallback: %s)", fallback.name)
+            return DistributedFabricProvider(fallback_provider=fallback)
         except Exception as exc:
-            logger.warning("codebox provider unavailable (%s); falling back to local", exc)
-
-    if choice in {"docker", "core", "native", "interleet", "server", "interleet-docker"}:
-        try:
-            from .docker_provider import DockerSandboxProvider
-
-            logger.info("judge provider: core in-process docker execution engine")
-            return DockerSandboxProvider()
-        except Exception as exc:
-            logger.warning("docker provider unavailable (%s); falling back to local", exc)
+            logger.warning("distributed provider unavailable (%s); falling back to local", exc)
 
     if choice in {"judge0", "external", "remote"}:
         try:

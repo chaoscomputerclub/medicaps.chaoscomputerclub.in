@@ -5,37 +5,27 @@
 #          sudo systemctl start ccc-judge-agent
 
 [Unit]
-Description=CCC Judge Agent — Laptop Compute Node
+Description=Chaos Computer Club — Portable Compute Fabric Node Agent
 After=network-online.target docker.service
 Wants=network-online.target
 Requires=docker.service
 
 [Service]
 Type=simple
-User=ccc-agent
+User=santusht
 Group=docker
 WorkingDirectory=/opt/ccc-judge-agent
-ExecStart=/opt/ccc-judge-agent/venv/bin/python3 agent.py
+EnvironmentFile=-/opt/ccc-judge-agent/.env
+ExecStart=/opt/ccc-judge-agent/bin/node-agent-linux-amd64
 Restart=always
 RestartSec=5
 KillSignal=SIGTERM
-TimeoutStopSec=45
-
-# Environment — override these in /etc/ccc-judge-agent/env or EnvironmentFile
-EnvironmentFile=-/etc/ccc-judge-agent/env
-Environment=PYTHONUNBUFFERED=1
+TimeoutStopSec=25
 
 # Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=ccc-judge-agent
-
-# Hardening (systemd isolation)
-NoNewPrivileges=yes
-ProtectSystem=strict
-ProtectHome=yes
-PrivateTmp=yes
-ReadWritePaths=/tmp/interleet_workspaces
 
 [Install]
 WantedBy=multi-user.target
