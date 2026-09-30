@@ -472,7 +472,7 @@ export function SettingsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
-              (01 // Configuration)
+              (07 // Platform Configuration)
             </span>
           </div>
           <h1 className="text-xl font-semibold text-white tracking-tight">Settings</h1>

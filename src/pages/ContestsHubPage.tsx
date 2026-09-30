@@ -427,6 +427,11 @@ export function ContestsHubPage() {
           </div>
 
           <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400">
+                (02 // Tournament Arena)
+              </span>
+            </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
               CCC Medi-Caps Contest
             </h1>

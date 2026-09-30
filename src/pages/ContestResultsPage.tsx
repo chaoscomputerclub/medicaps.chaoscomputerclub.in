@@ -162,7 +162,7 @@ export function ContestResultsPage() {
         </div>
       ) : (
         <PageHeader
-          kicker="01 // Leaderboard"
+          kicker="01 // Contest Standings"
           index="STANDINGS"
           badge={
             <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">

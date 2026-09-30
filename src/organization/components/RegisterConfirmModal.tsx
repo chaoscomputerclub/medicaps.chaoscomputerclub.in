@@ -72,7 +72,7 @@ export function RegisterConfirmModal({
         <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
-              (01 // Registration Protocol)
+              (PROTOCOL // Registration Confirm)
             </span>
             <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
               Confirm Registration

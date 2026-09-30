@@ -64,7 +64,7 @@ export function ProblemDetailPage() {
       </Link>
 
       <PageHeader
-        kicker="03 // Problem Statement"
+        kicker="05 // Problem Statement"
         index={`PROBLEM ${problem.index} · ${problem.points} PTS`}
         title={problem.title}
         description={`${contest.title} · ${problem.topic} · ${problem.solved_count} verified solves.`}

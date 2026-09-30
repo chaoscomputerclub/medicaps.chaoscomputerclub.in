@@ -456,7 +456,7 @@ export function ProfilePage() {
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
-                (01 // Cadet Dossier)
+                (06 // Cadet Dossier)
               </span>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -722,7 +722,7 @@ export function ProfilePage() {
 
       {/* Achievements Ledger */}
       <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
-        <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
+        <SectionHeader kicker="03 // Milestones" index="HONORS" title="Achievement Ledger" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
           {achievements.length === 0 ? (
             <div className="text-center py-8 text-zinc-600 col-span-full">

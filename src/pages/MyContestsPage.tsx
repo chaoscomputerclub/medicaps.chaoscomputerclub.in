@@ -81,8 +81,8 @@ export function MyContestsPage() {
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       {/* Header with quick stats */}
       <PageHeader
-        kicker="04 // Participation Record"
-        index="DOSSIER"
+        kicker="03 // Participation Record"
+        index="RECORD"
         title="My Contests"
         description="All entered, active, and completed competitive programming tournaments."
         action={

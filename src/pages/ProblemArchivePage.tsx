@@ -55,7 +55,7 @@ export function ProblemArchivePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <PageHeader
-        kicker="03 // Problem Repository"
+        kicker="05 // Problem Repository"
         index="ARCHIVE"
         badge={
           <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">

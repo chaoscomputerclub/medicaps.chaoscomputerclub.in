@@ -262,7 +262,7 @@ export function ContestLobbyPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest text-[#CCFF00]">
-                (01 // Scheduled)
+                (LOBBY // Waiting Room)
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -359,7 +359,7 @@ export function ContestLobbyPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
-                (01 // Live Arena Lobby)
+                (LOBBY // Live Check-in)
               </span>
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-white">{resolvedContest.title}</h1>

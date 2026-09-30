@@ -139,7 +139,7 @@ export function LeaderboardPage() {
       <header className="rounded-lg border border-white/8 bg-black p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
-            (02 // Standings)
+            (04 // University Standings)
           </p>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white font-sans">
             University Leaderboard

@@ -96,7 +96,7 @@ export function SocialDrawer() {
               </span>
               <div>
                 <p className="font-sans text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
-                  (05 // Peer Network)
+                  (· // Peer Network)
                 </p>
                 <SheetTitle className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight mt-0.5">
                   {drawerTargetName || `@${drawerTargetHandle}`}
