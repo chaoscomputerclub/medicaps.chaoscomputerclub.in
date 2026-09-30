@@ -151,32 +151,34 @@ export const AlertDialogPopup = React.forwardRef<HTMLDivElement, AlertDialogPopu
 
     return (
       <AlertDialogPrimitive.Content asChild forceMount>
-        <motion.div
-          ref={ref}
-          key="alert-dialog-popup"
-          data-slot="alert-dialog-popup"
-          initial={{
-            opacity: 0,
-            filter: 'blur(4px)',
-            transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`,
-          }}
-          animate={{
-            opacity: 1,
-            filter: 'blur(0px)',
-            transform: `perspective(500px) ${rotateAxis}(0deg) scale(1)`,
-          }}
-          exit={{
-            opacity: 0,
-            filter: 'blur(4px)',
-            transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`,
-          }}
-          transition={transition}
-          className={cn(
-            'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-2xl rounded-lg',
-            className,
-          )}
-          {...props}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <motion.div
+            ref={ref}
+            key="alert-dialog-popup"
+            data-slot="alert-dialog-popup"
+            initial={{
+              opacity: 0,
+              filter: 'blur(4px)',
+              transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`,
+            }}
+            animate={{
+              opacity: 1,
+              filter: 'blur(0px)',
+              transform: `perspective(500px) ${rotateAxis}(0deg) scale(1)`,
+            }}
+            exit={{
+              opacity: 0,
+              filter: 'blur(4px)',
+              transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`,
+            }}
+            transition={transition}
+            className={cn(
+              'pointer-events-auto relative grid w-full max-w-lg gap-4 border bg-background p-6 shadow-2xl rounded-lg focus:outline-none',
+              className,
+            )}
+            {...props}
+          />
+        </div>
       </AlertDialogPrimitive.Content>
     );
   },

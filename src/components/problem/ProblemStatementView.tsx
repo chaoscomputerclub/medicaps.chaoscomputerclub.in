@@ -1,7 +1,7 @@
 import React from "react";
 import { Clock, Cpu, Award, Tag } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { ProblemExample } from "./ProblemExample";
+import { ReadmeRenderer } from "./ReadmeRenderer";
 import type { CanonicalProblem } from "@/lib/problemFormatter";
 
 export interface ProblemStatementViewProps {
@@ -84,11 +84,9 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Problem Description */}
-      <div className="space-y-3 text-[13.5px] leading-relaxed text-zinc-200">
-        <div className="whitespace-pre-line leading-relaxed selection:bg-lime-400/20 selection:text-white">
-          {problem.description}
-        </div>
+      {/* 2. Problem Description (Rich README / Markdown Renderer) */}
+      <div className="space-y-3">
+        <ReadmeRenderer content={problem.description} />
       </div>
 
       {/* 3. Input & Output Format (if specified) */}
@@ -99,8 +97,8 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
               <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
                 Input Format
               </span>
-              <div className="bg-zinc-950 border border-white/8 rounded-lg p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
-                {problem.input_format}
+              <div className="bg-zinc-950 border border-white/8 rounded-lg p-3 text-xs">
+                <ReadmeRenderer content={problem.input_format} />
               </div>
             </div>
           )}
@@ -110,8 +108,8 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
               <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
                 Output Format
               </span>
-              <div className="bg-zinc-950 border border-white/8 rounded-lg p-3 text-xs font-mono text-zinc-300 whitespace-pre-line leading-relaxed">
-                {problem.output_format}
+              <div className="bg-zinc-950 border border-white/8 rounded-lg p-3 text-xs">
+                <ReadmeRenderer content={problem.output_format} />
               </div>
             </div>
           )}
@@ -144,11 +142,14 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
           <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
             Constraints
           </span>
-          <div className="bg-zinc-950 border border-white/8 rounded-lg p-3.5 space-y-1.5 font-mono text-xs text-amber-300/90">
+          <div className="bg-zinc-950 border border-white/8 rounded-lg p-3.5 space-y-1.5 text-xs">
             <ul className="space-y-1 list-disc list-inside">
               {constraintsList.map((c, i) => (
-                <li key={i} className="leading-relaxed">
-                  <span className="text-zinc-200">{c.replace(/^-\s*/, "")}</span>
+                <li key={i} className="leading-relaxed text-zinc-200">
+                  <ReadmeRenderer
+                    content={c.replace(/^-\s*/, "")}
+                    className="inline text-zinc-200"
+                  />
                 </li>
               ))}
             </ul>
@@ -160,3 +161,4 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
 };
 
 export default ProblemStatementView;
+

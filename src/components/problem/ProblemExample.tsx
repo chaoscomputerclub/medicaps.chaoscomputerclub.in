@@ -6,6 +6,7 @@ import {
   type FunctionSignatureContract,
   type TestCaseItem,
 } from "@/lib/problemFormatter";
+import { ReadmeRenderer } from "./ReadmeRenderer";
 
 export interface ProblemExampleProps {
   index: number;
@@ -90,9 +91,10 @@ export const ProblemExample: React.FC<ProblemExampleProps> = ({
             <strong className="text-zinc-300 font-medium font-mono select-none block pb-0.5">
               Explanation:
             </strong>
-            <p className="text-zinc-400 whitespace-pre-wrap leading-relaxed select-text">
-              {testcase.explanation}
-            </p>
+            <ReadmeRenderer
+              content={testcase.explanation}
+              className="text-zinc-400 leading-relaxed select-text"
+            />
           </div>
         )}
       </div>

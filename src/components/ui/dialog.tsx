@@ -35,26 +35,23 @@ const DialogContent = React.forwardRef<
 >(({ className, children, style, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      style={{
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        ...style,
-      }}
-      className={cn(
-        "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 grid w-full max-w-lg gap-4 border border-white/10 bg-zinc-950 p-6 shadow-2xl duration-200 rounded-lg text-white max-h-[90vh] overflow-y-auto",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-1 opacity-70 cursor-pointer transition-all hover:opacity-100 hover:text-lime-400 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-lime-400 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto pointer-events-none">
+      <DialogPrimitive.Content
+        ref={ref}
+        style={style}
+        className={cn(
+          "pointer-events-auto relative w-full max-w-lg border border-white/10 bg-zinc-950 p-6 shadow-2xl duration-200 rounded-lg text-white max-h-[90vh] overflow-y-auto focus:outline-none",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-1 opacity-70 cursor-pointer transition-all hover:opacity-100 hover:text-lime-400 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-lime-400 disabled:pointer-events-none">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      </DialogPrimitive.Content>
+    </div>
   </DialogPortal>
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;

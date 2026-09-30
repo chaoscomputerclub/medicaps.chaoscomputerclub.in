@@ -367,4 +367,206 @@ textarea {
   contain-intrinsic-size: 0 160px;
 }
 
+/* ─────────────────────────────────────────────
+   LeetCode / README Markdown Typography Renderer
+   Tactical dark-terminal prose with Lime accents
+   ───────────────────────────────────────────── */
+
+.readme-renderer {
+  font-family: var(--font-sans);
+  color: #d4d4d8;
+  line-height: 1.65;
+}
+
+.readme-renderer h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  line-height: 1.3;
+}
+
+.readme-renderer h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  line-height: 1.35;
+}
+
+.readme-renderer h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #CCFF00;
+  margin-top: 0.85rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
+}
+
+.readme-renderer h4 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a1a1aa;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.readme-renderer p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.65;
+  color: #e4e4e7;
+}
+
+.readme-renderer p:first-child {
+  margin-top: 0;
+}
+
+.readme-renderer p:last-child {
+  margin-bottom: 0;
+}
+
+.readme-renderer strong,
+.readme-renderer b {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.readme-renderer em,
+.readme-renderer i {
+  font-style: italic;
+  color: #e4e4e7;
+}
+
+.readme-renderer code {
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #d8ff33;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  word-break: break-word;
+}
+
+.readme-renderer pre {
+  background: #09090b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #f4f4f5;
+}
+
+.readme-renderer pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.readme-renderer ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.readme-renderer ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.readme-renderer li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.6;
+  color: #d4d4d8;
+}
+
+.readme-renderer li::marker {
+  color: #CCFF00;
+}
+
+.readme-renderer blockquote {
+  border-left: 3px solid #CCFF00;
+  background: rgba(204, 255, 0, 0.03);
+  padding: 0.5rem 0.85rem;
+  margin: 0.75rem 0;
+  border-radius: 0 6px 6px 0;
+  color: #d4d4d8;
+  font-style: italic;
+}
+
+.readme-renderer table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.readme-renderer th {
+  background: #18181b;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.readme-renderer td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d4d4d8;
+}
+
+.readme-renderer tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.readme-renderer a {
+  color: #CCFF00;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.readme-renderer a:hover {
+  color: #d8ff33;
+}
+
+.readme-renderer hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 1rem 0;
+}
+
+.readme-renderer sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.readme-renderer sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  line-height: 0;
+}
+
 
