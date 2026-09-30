@@ -21,6 +21,7 @@ from app.routers import (
     storage,
     verify,
     workers,
+    metrics,
 )
 
 api_router_v1 = APIRouter()
@@ -38,6 +39,7 @@ for domain_router in (
     storage.router,
     jobs.router,
     workers.router,
+    metrics.router,
 ):
     api_router_v1.include_router(domain_router)
 
