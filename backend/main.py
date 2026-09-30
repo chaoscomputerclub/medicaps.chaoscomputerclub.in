@@ -22,8 +22,9 @@ from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
 from app.core.queue import queue_manager
-from app.routers import admin, admin_contests, admin_problems, admin_qa, assessment, auth, contests, events, feed, jobs, leaderboard, passes, scoreboards, social, storage, verify, webhooks
+from app.routers import admin, admin_contests, admin_problems, admin_qa, assessment, auth, contests, events, feed, jobs, leaderboard, passes, scoreboards, social, storage, verify, webhooks, workers
 from app.api.v1.router import api_router_v1
+from app.core.resource_governor import get_resource_governor
 
 
 
@@ -67,9 +68,15 @@ async def lifespan(app: FastAPI):
     else:
         print(f"✓ Judge engine provider '{judge_choice}' active.")
 
+    # ── Resource Governor (worker health sweep + autoscale signal loop) ─────
+    governor = get_resource_governor()
+    governor.start()
+    print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
+
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
+    await governor.stop()
     await queue_manager.stop_all(drain_timeout=15.0)
     for task in [*bg_tasks, realtime_relay_task]:
         task.cancel()
@@ -185,6 +192,7 @@ app.include_router(storage.router, prefix=settings.API_PREFIX)
 app.include_router(events.router, prefix=settings.API_PREFIX)
 app.include_router(webhooks.router, prefix=settings.API_PREFIX)
 app.include_router(jobs.router, prefix=settings.API_PREFIX)
+app.include_router(workers.router, prefix=settings.API_PREFIX)
 
 # OpenAPI 3.1.0 Webhooks specifications for Swagger / ReDoc docs UI
 app.webhooks.include_router(webhooks.webhooks_router)

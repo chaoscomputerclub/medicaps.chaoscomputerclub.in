@@ -1,0 +1,41 @@
+# systemd service unit for the CCC Judge Agent
+# Install: sudo cp ccc-judge-agent.service /etc/systemd/system/
+#          sudo systemctl daemon-reload
+#          sudo systemctl enable ccc-judge-agent
+#          sudo systemctl start ccc-judge-agent
+
+[Unit]
+Description=CCC Judge Agent — Laptop Compute Node
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ccc-agent
+Group=docker
+WorkingDirectory=/opt/ccc-judge-agent
+ExecStart=/opt/ccc-judge-agent/venv/bin/python3 agent.py
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=45
+
+# Environment — override these in /etc/ccc-judge-agent/env or EnvironmentFile
+EnvironmentFile=-/etc/ccc-judge-agent/env
+Environment=PYTHONUNBUFFERED=1
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ccc-judge-agent
+
+# Hardening (systemd isolation)
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/tmp/interleet_workspaces
+
+[Install]
+WantedBy=multi-user.target

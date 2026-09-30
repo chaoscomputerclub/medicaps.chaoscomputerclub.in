@@ -97,6 +97,19 @@ class Settings(BaseSettings):
     JUDGE_PROVIDER: str = os.getenv("JUDGE_PROVIDER", "docker")
     OUTPUT_LIMIT_BYTES: int = int(os.getenv("OUTPUT_LIMIT_BYTES", "65536"))  # 64 KB default output guard
 
+    # Worker Registry & Resource Governor
+    JUDGE_AGENT_SECRET: str = os.getenv("JUDGE_AGENT_SECRET", "")          # Shared secret for worker auth
+    WORKER_HEARTBEAT_INTERVAL_S: int = int(os.getenv("WORKER_HEARTBEAT_INTERVAL_S", "5"))
+    WORKER_HEARTBEAT_TTL_S: int = int(os.getenv("WORKER_HEARTBEAT_TTL_S", "30"))    # OFFLINE after this
+    WORKER_SUSPECT_AFTER_S: int = int(os.getenv("WORKER_SUSPECT_AFTER_S", "10"))    # SUSPECT before OFFLINE
+    WORKER_VISIBILITY_TIMEOUT_S: int = int(os.getenv("WORKER_VISIBILITY_TIMEOUT_S", "300"))
+    WORKER_MAX_CONCURRENCY: int = int(os.getenv("WORKER_MAX_CONCURRENCY", "4"))     # Default per worker
+    WORKER_CPU_SAFETY_THRESHOLD: float = float(os.getenv("WORKER_CPU_SAFETY_THRESHOLD", "0.80"))
+    WORKER_RAM_SAFETY_FLOOR_MB: int = int(os.getenv("WORKER_RAM_SAFETY_FLOOR_MB", "1024"))
+    WORKER_SCALE_UP_WAIT_S: int = int(os.getenv("WORKER_SCALE_UP_WAIT_S", "30"))   # Queue wait → scale up
+    ARENA_SUBMIT_RATE_LIMIT: int = int(os.getenv("ARENA_SUBMIT_RATE_LIMIT", "15")) # per 60s per user
+
+
     @property
     def is_dev_bypass_enabled(self) -> bool:
         """Returns True if any development restriction bypass mode is active."""

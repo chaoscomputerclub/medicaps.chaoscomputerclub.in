@@ -6,6 +6,7 @@ Delegates to app.controllers.contest_controller.ContestController
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Request, Response, status
+from app.middleware.rate_limit import rate_limit
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -253,6 +254,7 @@ async def submit_contest_arena_code(
     async_mode: Optional[bool] = Query(None, alias="async", description="Set to true for non-blocking async execution"),
     current_member: MemberProfile = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
+    _rl: None = Depends(rate_limit("arena:submit", max_calls=15, window_seconds=60)),
 ):
     """Submit solution in live contest arena against full judge test suite & update live scoreboard."""
     is_async = async_mode is True or request.headers.get("X-Execution-Mode", "").lower() == "async"
