@@ -373,3 +373,47 @@ async def list_nodes(
             nodes.append(decoded)
 
     return {"total_nodes": len(nodes), "nodes": nodes}
+
+
+class DispatchTestRequest(BaseModel):
+    language: str = "python"
+    code: str = "print(40 + 2)\n"
+    stdin: str = ""
+    expected_output: str = "42"
+    time_limit_seconds: float = 5.0
+
+
+@router.post("/dispatch-test")
+async def dispatch_test_job(payload: DispatchTestRequest) -> Dict[str, Any]:
+    """
+    Test harness: enqueues a test execution into ccc:queue:judge:pending and
+    awaits verified execution from an active compute node (e.g. connected laptop).
+    """
+    from app.engine.providers.distributed_provider import DistributedFabricProvider
+    from app.engine.schemas import TestCaseSchema
+
+    provider = DistributedFabricProvider()
+    tc = TestCaseSchema(id="test_1", stdin=payload.stdin, expected_output=payload.expected_output)
+    res = await provider.execute_batch(
+        language=payload.language,
+        code=payload.code,
+        testcases=[tc],
+        time_limit=payload.time_limit_seconds,
+    )
+    return {
+        "success": res.success,
+        "verdict": res.verdict.value if hasattr(res.verdict, "value") else str(res.verdict),
+        "execution_time_seconds": res.time,
+        "memory_mb": res.memory,
+        "testcases": [
+            {
+                "id": t.testcase_id,
+                "passed": t.passed,
+                "verdict": t.verdict.value if hasattr(t.verdict, "value") else str(t.verdict),
+                "stdout": t.stdout,
+                "stderr": t.stderr,
+                "wall_time_ms": t.wall_time_ms,
+            }
+            for t in res.testcase_results
+        ],
+    }
