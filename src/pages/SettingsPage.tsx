@@ -127,10 +127,12 @@ function SettingSection({
     <section
       className={cn(
         "border rounded-lg",
-        danger ? "border-red-500/20 bg-black" : "border-white/8 bg-black",
+        danger
+          ? "border-red-500/30 bg-black shadow-[0_1px_3px_rgba(0,0,0,0.8),0_0_0_1px_rgba(239,68,68,0.1)]"
+          : "border-white/10 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]",
       )}
     >
-      <div className={cn("px-6 py-4 border-b", danger ? "border-red-500/20" : "border-white/8")}>
+      <div className={cn("px-6 py-4 border-b", danger ? "border-red-500/20" : "border-white/10")}>
         <h2
           className={cn(
             "text-sm font-semibold tracking-tight",
@@ -218,6 +220,7 @@ function SaveButton({
       size="sm"
       disabled={disabled || saving}
       onClick={onClick}
+      className="h-10 text-xs font-mono font-medium rounded-md active:scale-[0.98] transition-all border-white/15 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/25"
     >
       {saving ? <WanderingEyes size="inline" className="h-3 mr-1.5" /> : null}
       {saving ? "Saving…" : "Save"}
@@ -469,11 +472,11 @@ export function SettingsPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       {/* Page Title Header */}
-      <div className="flex items-center justify-between mb-6 pb-5 border-b border-white/8">
+      <div className="flex items-center justify-between mb-6 pb-5 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-sans text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
-              Configuration
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
+              (01 // Configuration)
             </span>
           </div>
           <h1 className="text-xl font-semibold text-white tracking-tight">Settings</h1>
@@ -481,7 +484,7 @@ export function SettingsPage() {
             Manage your competitive identity, security, and account preferences.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="hidden sm:flex">
+        <Button asChild variant="outline" size="sm" className="hidden sm:flex border-white/15 bg-white/[0.02] hover:bg-white/[0.05]">
           <Link to="/profile">
             View profile
             <ExternalLink size={11} className="opacity-60" />
@@ -564,7 +567,7 @@ export function SettingsPage() {
                         "rounded-lg border border-dashed px-5 py-6 text-center cursor-pointer transition-colors bg-black",
                         isDragging
                           ? "border-lime-400 bg-lime-400/5"
-                          : "border-white/10 hover:border-white/25 hover:bg-zinc-950",
+                          : "border-white/10 hover:border-white/25 hover:bg-white/[0.02]",
                       )}
                     >
                       {isUploadingAvatar ? (
@@ -625,7 +628,7 @@ export function SettingsPage() {
                         e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })
                       }
                       placeholder="Full Name"
-                      className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                      className="h-10 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                     />
                     <SaveButton
                       onClick={() => saveField("full_name", { full_name: fullName.trim() })}
@@ -649,7 +652,7 @@ export function SettingsPage() {
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
                       placeholder="Competitive programmer, building expertise in algorithms…"
-                      className="text-xs font-sans resize-none bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                      className="text-base md:text-xs font-sans resize-none bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                     />
                     <div className="flex items-center justify-between font-sans">
                       <span className="text-[11px] text-zinc-500 tabular-nums">
@@ -678,7 +681,7 @@ export function SettingsPage() {
                   >
                     <SelectTrigger
                       id="s-dept"
-                      className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                      className="h-10 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
                     >
                       <SelectValue placeholder="Select Department…" />
                     </SelectTrigger>
@@ -706,7 +709,7 @@ export function SettingsPage() {
                   >
                     <SelectTrigger
                       id="s-batch"
-                      className="h-9 text-xs font-sans bg-black border-white/10 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                      className="h-10 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
                     >
                       <SelectValue placeholder="Select Graduation Batch…" />
                     </SelectTrigger>
@@ -749,7 +752,7 @@ export function SettingsPage() {
                           saveField("github", { github_username: github.trim() })
                         }
                         placeholder="octocat"
-                        className="h-9 pl-8 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                        className="h-10 pl-8 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                       />
                     </div>
                     <SaveButton
@@ -793,7 +796,7 @@ export function SettingsPage() {
                           saveField("linkedin", { linkedin_url: linkedin.trim() })
                         }
                         placeholder="https://linkedin.com/in/username"
-                        className="h-9 pl-8 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-0"
+                        className="h-10 pl-8 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                       />
                     </div>
                     <SaveButton
@@ -863,7 +866,7 @@ export function SettingsPage() {
                             setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
                           }
                           className={cn(
-                            "h-9 pl-7 text-xs font-sans bg-black border-white/10 text-white rounded-md focus-visible:ring-0",
+                            "h-10 pl-7 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:ring-0",
                             isHandleChanged &&
                               handleStatus === "available" &&
                               "border-emerald-500/60 focus-visible:border-emerald-500",
@@ -887,6 +890,7 @@ export function SettingsPage() {
                           fieldStatus["handle"] === "saving"
                         }
                         onClick={saveHandle}
+                        className="h-10 text-xs font-mono font-medium rounded-md active:scale-[0.98] transition-all border-white/15 bg-white/[0.02] hover:bg-white/[0.05]"
                       >
                         {fieldStatus["handle"] === "saving" ? (
                           <WanderingEyes size="inline" className="h-3 mr-1" />

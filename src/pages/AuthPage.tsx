@@ -68,13 +68,13 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
 // Shared input style (recessed dark)
 // ─────────────────────────────────────────────
 const INPUT_BASE =
-  "w-full h-11 rounded-xl border border-white/[0.08] bg-[#121214] px-3.5 text-[14px] text-white placeholder:text-zinc-600 " +
-  "focus:outline-none focus:border-[#CCFF00] focus:ring-0 transition-colors duration-150";
+  "w-full h-11 rounded-md border border-white/12 bg-black px-3.5 text-base md:text-sm text-white placeholder:text-zinc-600 " +
+  "focus:outline-none focus:border-[#CCFF00] focus-visible:ring-1 focus-visible:ring-[#CCFF00]/50 transition-colors duration-150 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]";
 
 // ─────────────────────────────────────────────
 // Shared label style
 // ─────────────────────────────────────────────
-const LABEL = "block text-[13px] font-normal text-zinc-300 mb-2";
+const LABEL = "block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-2";
 
 // ─────────────────────────────────────────────
 // Domain guard
@@ -381,7 +381,7 @@ export function AuthPage() {
               variant="default"
               size="lg"
               disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full mt-4 h-11 text-[14px] rounded-xl"
+              className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all shadow-[0_2px_8px_rgba(204,255,0,0.15)]"
             >
               {pending ? (
                 <span className="inline-flex items-center gap-2">
@@ -411,10 +411,10 @@ export function AuthPage() {
           {/* OR hairline divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.08]" />
+              <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-[#191919] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
+              <span className="bg-[#0c0c0e] px-3 text-[11px] font-mono uppercase tracking-wider text-zinc-500 select-none">
                 or
               </span>
             </div>
@@ -432,7 +432,7 @@ export function AuthPage() {
                 window.location.href = getGoogleLoginURL(returnDest);
               }}
               disabled={pending}
-              className="w-full h-11 text-[14px] text-zinc-200 hover:text-white [&_span]:hover:text-white border-white/[0.08] hover:bg-white/[0.04] hover:border-white/20 gap-2.5 font-normal rounded-xl transition-colors duration-150"
+              className="w-full h-11 text-sm text-zinc-200 hover:text-white [&_span]:hover:text-white border-white/12 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 gap-2.5 font-normal rounded-md transition-colors duration-150 active:scale-[0.98]"
             >
               <GoogleIcon className="size-4 shrink-0" />
               <span>Continue with Google</span>
@@ -470,8 +470,8 @@ export function AuthPage() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-white/[0.10] bg-[#0c0c0e] text-lg sm:text-xl font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] transition-all duration-150"
-                    activeClassName="!border-[#CCFF00]"
+                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-md border border-white/15 bg-black text-lg sm:text-xl font-mono font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)] transition-all duration-150"
+                    activeClassName="!border-[#CCFF00] ring-1 ring-[#CCFF00]/50"
                   />
                 ))}
               </InputOTPGroup>
@@ -496,7 +496,7 @@ export function AuthPage() {
             <p className="text-[13px] text-zinc-400">Didn't receive a code?</p>
             {countdown > 0 ? (
               <p className="text-[13px] text-zinc-500 tabular-nums">
-                You can request a new one in {countdown}
+                You can request a new one in {countdown}&nbsp;s
               </p>
             ) : (
               <Button
@@ -600,7 +600,7 @@ export function AuthPage() {
               handleStatus === "taken" ||
               handleStatus === "checking"
             }
-            className="w-full mt-4 h-11 text-[14px] rounded-xl"
+            className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all shadow-[0_2px_8px_rgba(204,255,0,0.15)]"
           >
             {pending ? (
               <span className="inline-flex items-center gap-2">

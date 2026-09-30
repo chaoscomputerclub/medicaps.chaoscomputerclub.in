@@ -91,10 +91,10 @@ export function AuthLayout({
 
         {!subtitle && <div className="mb-7" />}
 
-        {/* Obsidian card — Sleek Rectangle Geometry with Smooth Dynamic Height Morph (No Overflow Clipping) */}
+        {/* Obsidian card — Sleek Geometry with Smooth Dynamic Height Morph (No Overflow Clipping) */}
         <div
           className={cn(
-            "w-full rounded-[24px] border border-white/[0.08] border-t-white/[0.15] bg-gradient-to-b from-[#1a1a1d] to-[#141416] p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.03)] sm:p-9",
+            "w-full rounded-xl border border-white/[0.12] bg-[#0c0c0e] p-7 sm:p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.05)]",
             cardMaxWidth,
           )}
         >

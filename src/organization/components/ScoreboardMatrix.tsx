@@ -31,9 +31,9 @@ export function ScoreboardMatrix({
   const safeProblems = problems || [];
 
   return (
-    <div className="w-full min-w-0 overflow-x-auto border border-white/10 bg-black rounded-none">
+    <div className="w-full min-w-0 overflow-x-auto border border-white/8 bg-black rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
       <table className="w-full min-w-[620px] text-left font-mono text-xs border-collapse">
-        <thead className="bg-zinc-950 text-slate-400 text-[10px] uppercase tracking-wider border-b border-white/10">
+        <thead className="bg-black text-zinc-400 text-[10px] uppercase tracking-wider font-semibold border-b border-white/8">
           <tr>
             <th className="p-3 w-12 text-center">#</th>
             <th className="p-3">Contestant</th>
@@ -56,11 +56,11 @@ export function ScoreboardMatrix({
             <tr
               key={row.handle}
               className={cn(
-                "hover:bg-zinc-900/50 transition-colors duration-100",
-                row.is_you ? "bg-lime-400/5 border-l-2 border-l-lime-400" : ""
+                "hover:bg-white/[0.03] transition-colors duration-150",
+                row.is_you ? "bg-lime-400/[0.05] border-l-2 border-l-lime-400" : ""
               )}
             >
-              <td className="p-3 text-center font-bold text-slate-300 tabular-nums">
+              <td className="p-3 text-center font-bold text-zinc-300 tabular-nums">
                 {row.rank}
               </td>
               <td className="p-3">
@@ -82,18 +82,18 @@ export function ScoreboardMatrix({
                     <strong className="text-white font-semibold flex items-center gap-1.5 group-hover/cadet:text-lime-400 transition-colors">
                       {row.handle}
                       {row.is_you && (
-                        <span className="text-[9px] px-1 py-0.2 bg-lime-400 text-black font-bold uppercase">
+                        <span className="text-[9px] px-1 py-0.2 bg-lime-400 text-black font-bold uppercase rounded-xs">
                           YOU
                         </span>
                       )}
                     </strong>
-                    <span className="text-[11px] text-slate-400 font-sans">{row.full_name}</span>
+                    <span className="text-[11px] text-zinc-400 font-sans">{row.full_name}</span>
                   </Link>
                 </CadetProfileHoverCard>
               </td>
               {!compact && (
                 <td className="p-3">
-                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono bg-zinc-900 border border-white/10 text-slate-300">
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono bg-black border border-white/10 text-zinc-300 rounded">
                     {row.department} · {row.batch.slice(2)}
                   </span>
                 </td>

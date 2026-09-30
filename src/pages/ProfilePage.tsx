@@ -406,7 +406,7 @@ export function ProfilePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Profile Header Card */}
-      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-lg border border-white/8 bg-black p-6 sm:p-7">
+      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-lg border border-white/10 bg-black p-6 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
         <div className="flex items-start gap-5">
           {/* Avatar Container */}
           <div className="relative group shrink-0">
@@ -457,8 +457,8 @@ export function ProfilePage() {
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Cadet Dossier
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
+                (01 // Cadet Dossier)
               </span>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -578,7 +578,7 @@ export function ProfilePage() {
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono text-zinc-400 hover:text-white bg-black border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-md transition-colors"
                 >
                   <Github size={11} />
                   <span>{m.github_username}</span>
@@ -593,7 +593,7 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono text-zinc-400 hover:text-white bg-zinc-950 border border-white/8 rounded"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono text-zinc-400 hover:text-white bg-black border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-md transition-colors"
                 >
                   <FaLinkedinIn size={11} />
                   <span>LinkedIn</span>
@@ -643,7 +643,7 @@ export function ProfilePage() {
 
       {/* Trajectory & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+        <div className="lg:col-span-2 rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
           <SectionHeader
             kicker="01 // Rating History"
             index="TRAJECTORY"
@@ -661,7 +661,7 @@ export function ProfilePage() {
       </section>
 
       {/* Contest Battle Logs */}
-      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+      <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
         <SectionHeader kicker="02 // Record" index="CONTESTS" title="Attended Tournaments" />
         <div className="divide-y divide-white/6 font-mono text-xs">
           {battles.length === 0 ? (
@@ -670,7 +670,7 @@ export function ProfilePage() {
             battles.map((b: any) => (
               <article
                 key={b.certificate_id}
-                className="py-3 flex items-center justify-between flex-wrap gap-3"
+                className="py-3 px-2 rounded-md hover:bg-white/[0.02] transition-colors flex items-center justify-between flex-wrap gap-3"
               >
                 <time className="text-zinc-500">
                   {new Date(b.date).toLocaleDateString("en-IN", {
@@ -723,7 +723,7 @@ export function ProfilePage() {
       </section>
 
       {/* Achievements Ledger */}
-      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-4">
+      <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
         <SectionHeader kicker="04 // Milestones" index="HONORS" title="Achievement Ledger" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
           {achievements.length === 0 ? (
@@ -736,7 +736,7 @@ export function ProfilePage() {
                 key={a.code || a.id || a.name || a.title}
                 className={`p-3.5 rounded-lg border ${
                   a.earned !== false
-                    ? "border-lime-400/30 bg-black"
+                    ? "border-lime-400/30 bg-black shadow-[0_0_12px_rgba(204,255,0,0.04)]"
                     : "border-white/6 bg-black opacity-40"
                 }`}
               >
@@ -759,7 +759,7 @@ export function ProfilePage() {
       </section>
 
       {/* Trust Footer */}
-      <footer className="flex items-center gap-2.5 p-4 rounded-lg border border-white/8 bg-black text-zinc-500 font-mono text-xs">
+      <footer className="flex items-center gap-2.5 p-4 rounded-lg border border-white/10 bg-black text-zinc-500 font-mono text-xs">
         <Zap className="size-3.5 text-lime-400 shrink-0" />
         <p>
           Ratings and achievements derive exclusively from physically proctored campus tournaments.
@@ -772,7 +772,7 @@ export function ProfilePage() {
           <AlertDialogBackdrop className="fixed inset-0 z-50 bg-black/80" />
           <AlertDialogPopup
             from="top"
-            className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg shadow-2xl"
+            className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]"
           >
             <AlertDialogHeader className="space-y-2 text-left">
               <AlertDialogTitle className="text-base font-semibold text-white">

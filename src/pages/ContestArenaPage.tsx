@@ -840,7 +840,7 @@ export function ContestArenaPage() {
     if (isSubmitted) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-lg border border-lime-500/30 bg-zinc-950 p-8 text-center shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-lg space-y-6 rounded-lg border border-lime-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(204,255,0,0.15)] relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-lime-500 via-emerald-400 to-lime-500" />
             <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-lime-500/30 bg-lime-500/10 text-lime-400">
               <CheckCircle2 className="size-7" />
@@ -915,7 +915,7 @@ export function ContestArenaPage() {
     if (isUnauthenticated) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-white/10 bg-zinc-950 p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-white/12 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)]">
             <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400">
               <Lock className="size-7" />
             </div>
@@ -955,7 +955,7 @@ export function ContestArenaPage() {
     if (isUpcoming) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-amber-500/30 bg-zinc-950 p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-amber-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(245,158,11,0.1)]">
             <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <Clock className="size-7" />
             </div>
@@ -995,7 +995,7 @@ export function ContestArenaPage() {
     if (isNotFound) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-red-500/30 bg-zinc-950 p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-red-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(239,68,68,0.1)]">
             <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
               <AlertTriangle className="size-7" />
             </div>
@@ -1027,7 +1027,7 @@ export function ContestArenaPage() {
     if (isProctorGate) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-lg border border-amber-500/30 bg-zinc-950 p-8 text-center shadow-2xl">
+          <div className="w-full max-w-lg space-y-6 rounded-lg border border-amber-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(245,158,11,0.1)]">
             <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <ShieldCheck className="size-7" />
             </div>
@@ -1066,7 +1066,7 @@ export function ContestArenaPage() {
     // Generic fallback error
     return (
       <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-        <div className="w-full max-w-md space-y-6 rounded-lg border border-white/10 bg-zinc-950 p-8 text-center shadow-2xl">
+        <div className="w-full max-w-md space-y-6 rounded-lg border border-white/12 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)]">
           <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-white/10 bg-zinc-900 text-zinc-400">
             <AlertCircle className="size-7" />
           </div>
@@ -2132,7 +2132,7 @@ export function ContestArenaPage() {
 
       {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) in Strix AI Theme */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="border border-white/10 bg-zinc-950 text-white p-6 max-w-lg rounded-lg shadow-2xl">
+        <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-lg rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
           <DialogHeader className="space-y-1.5 text-left">
             <DialogTitle className="text-base font-semibold text-white tracking-tight flex items-center gap-2">
               <Settings className="size-4 text-lime-400" />
@@ -2343,7 +2343,7 @@ export function ContestArenaPage() {
 
       {/* Contest Over Modal using official shadcn Dialog */}
       <Dialog open={isContestOver}>
-        <DialogContent className="max-w-md rounded-lg border border-lime-400/40 bg-zinc-950 p-8 text-center space-y-6 shadow-2xl [&>button]:hidden">
+        <DialogContent className="max-w-md rounded-lg border border-lime-400/40 bg-black p-8 text-center space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(204,255,0,0.15)] [&>button]:hidden">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 mx-auto text-lime-400">
               <Trophy className="size-7" />
@@ -2497,8 +2497,8 @@ export function ContestArenaPage() {
                   }}
                   className={`w-full text-left p-3 rounded-md border transition-all cursor-pointer flex items-center justify-between gap-3 group relative overflow-hidden ${
                     isActive
-                      ? "bg-zinc-950 border-lime-400/60 shadow-[0_0_24px_rgba(204,255,0,0.12)] ring-1 ring-lime-400/30"
-                      : "bg-black hover:bg-zinc-950 border-white/8 hover:border-white/16 text-zinc-300 hover:text-white"
+                      ? "bg-black border-lime-400/60 shadow-[0_0_24px_rgba(204,255,0,0.12)] ring-1 ring-lime-400/30"
+                      : "bg-black hover:bg-white/[0.03] border-white/10 hover:border-white/20 text-zinc-300 hover:text-white"
                   }`}
                 >
                   {/* Left accent bar for active challenge */}
@@ -2637,7 +2637,7 @@ export function ContestArenaPage() {
 
       {/* Exit Confirmation Dialog (HackerRank Flow) */}
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <DialogContent className="border border-white/10 bg-zinc-950 text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-2xl">
+        <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
           <DialogHeader className="space-y-3 text-left">
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">

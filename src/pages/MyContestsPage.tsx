@@ -126,16 +126,16 @@ export function MyContestsPage() {
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="overflow-hidden rounded-lg border border-white/8 bg-black">
+      <section className="overflow-hidden rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
         <div className="flex items-center justify-between border-b border-white/8 p-4 sm:p-5">
           <SectionHeader
-            kicker="Contest History"
+            kicker="01 // Ledger"
             title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild className="active:scale-[0.98]">
             <Link to="/contests">
               <span>Browse Contests</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Link>
           </Button>
         </div>
@@ -146,12 +146,12 @@ export function MyContestsPage() {
             <h3 className="text-sm font-semibold text-white">
               No contests found in this view
             </h3>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
+            <p className="text-xs text-zinc-400 max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
               {filter === "registered"
                 ? "You have not registered for any upcoming tournament rounds yet."
                 : "Participate in campus contests to establish your university ranking."}
             </p>
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="active:scale-[0.98]">
               <Link to="/contests">Explore Contests</Link>
             </Button>
           </div>
@@ -166,7 +166,7 @@ export function MyContestsPage() {
               return (
                 <article
                   key={c.contest_slug}
-                  className="flex flex-col justify-between gap-4 p-5 transition-colors hover:bg-zinc-950 lg:flex-row lg:items-center content-auto-card"
+                  className="flex flex-col justify-between gap-4 p-5 transition-colors duration-150 hover:bg-white/[0.02] lg:flex-row lg:items-center content-auto-card"
                 >
                   {/* Left: Details */}
                   <div className="flex items-start gap-3.5">
@@ -180,15 +180,15 @@ export function MyContestsPage() {
                           <Radio size={18} className="animate-pulse" />
                         </div>
                       ) : isUpcoming ? (
-                        <div className="size-9 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center text-zinc-400">
+                        <div className="size-9 rounded-md bg-black border border-white/10 flex items-center justify-center text-zinc-400">
                           <Clock3 size={18} />
                         </div>
                       ) : isPending ? (
-                        <div className="size-9 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center text-zinc-400">
+                        <div className="size-9 rounded-md bg-black border border-white/10 flex items-center justify-center text-zinc-400">
                           <Clock3 size={18} />
                         </div>
                       ) : (
-                        <div className="size-9 rounded-md bg-zinc-950 border border-white/8 flex items-center justify-center text-zinc-600">
+                        <div className="size-9 rounded-md bg-black border border-white/8 flex items-center justify-center text-zinc-600">
                           <MinusCircle size={18} />
                         </div>
                       )}
@@ -196,7 +196,7 @@ export function MyContestsPage() {
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-white/8">
+                        <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-black text-zinc-400 border border-white/10">
                           {c.season}
                         </span>
                         {isQualified && (

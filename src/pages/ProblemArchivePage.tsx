@@ -89,7 +89,7 @@ export function ProblemArchivePage() {
                     setSearchQuery(val);
                   });
                 }}
-                className="h-8 pl-8 pr-2.5 text-xs bg-zinc-950 border-white/10 font-mono rounded focus-visible:ring-1 focus-visible:ring-lime-400"
+                className="h-9 pl-8 pr-2.5 text-base md:text-xs bg-black border-white/10 font-mono rounded-md focus-visible:ring-1 focus-visible:ring-lime-400"
               />
             </div>
           }
@@ -111,7 +111,7 @@ export function ProblemArchivePage() {
               return (
                 <article
                   key={`${p.contestSlug}-${p.pIndex}-${p.id || ""}`}
-                  className="flex items-center justify-between p-4 rounded-lg border border-white/8 bg-black hover:border-white/20 transition-colors group content-auto-card"
+                  className="flex items-center justify-between p-4 rounded-lg border border-white/8 bg-black hover:border-white/18 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] transition-all duration-150 group content-auto-card"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <span className="font-mono text-base font-semibold text-lime-400 w-7 text-center shrink-0">
@@ -130,17 +130,17 @@ export function ProblemArchivePage() {
                         </Link>
                       </h2>
                       <p className="font-mono text-[11px] text-zinc-500">
-                        {p.topic} · <span className="tabular-nums text-zinc-400">{p.solved_count ?? 0}</span> solves
+                        {p.topic} · <span className="tabular-nums text-zinc-400">{p.solved_count ?? 0}</span>&nbsp;solves
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 pl-3">
                     <strong className="font-mono text-xs tabular-nums text-zinc-400 font-semibold">
-                      {p.points ?? 0} pts
+                      {p.points ?? 0}&nbsp;pts
                     </strong>
                     <Link
                       to={`/problems/${p.contestSlug}--${p.pSlug}`}
-                      className="size-8 rounded-md bg-zinc-950 border border-white/8 hover:bg-lime-400 hover:text-black text-zinc-400 transition-colors flex items-center justify-center"
+                      className="size-8 rounded-md bg-black border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 text-zinc-400 transition-colors flex items-center justify-center active:scale-[0.96]"
                     >
                       <ArrowRight className="size-3.5" />
                     </Link>

@@ -442,7 +442,7 @@ export function ContestsHubPage() {
           {/* ─── UPCOMING CONTEST HERO CARDS (LEETCODE STYLE - LARGER SIZE) ───────────── */}
           <div className="w-full pt-4 max-w-5xl mx-auto">
             {upcomingContests.length === 0 ? (
-              <div className="rounded-lg border border-white/10 bg-zinc-950/80 backdrop-blur-xl p-10 text-center space-y-3 group hover:border-white/20 transition-all duration-200">
+              <div className="rounded-lg border border-white/8 bg-black p-10 text-center space-y-3 group hover:border-white/18 shadow-[0_1px_2px_rgba(0,0,0,0.4)] transition-colors duration-150">
                 <Trophy className="size-10 text-zinc-600 mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-lime-400" />
                 <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
                 <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
@@ -496,13 +496,13 @@ export function ContestsHubPage() {
                       key={contest.slug}
                       data-testid="hero-contest-card"
                       onClick={() => navigate(isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`)}
-                      className="group relative flex flex-col justify-between rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-lime-400/40 hover:shadow-[0_0_30px_rgba(203,255,0,0.08)] cursor-pointer"
+                      className="group relative flex flex-col justify-between rounded-lg border border-white/8 bg-black overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.04)] transition-all duration-200 hover:border-lime-400/40 hover:shadow-[0_4px_30px_rgba(204,255,0,0.08)] cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
-                      <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-gradient-to-br from-zinc-900/90 via-black to-zinc-950 overflow-hidden border-b border-white/8">
+                      <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-black overflow-hidden border-b border-white/8">
                         {/* Mesh grid backdrop */}
                         <div
-                          className="absolute inset-0 opacity-20 pointer-events-none"
+                          className="absolute inset-0 opacity-15 pointer-events-none"
                           style={{
                             backgroundImage:
                               "radial-gradient(circle at 1px 1px, #CBFF00 1px, transparent 0)",
@@ -564,7 +564,7 @@ export function ContestsHubPage() {
                       </div>
 
                       {/* Card Lower Info & Action Bar - Spacious & Click-Friendly */}
-                      <div className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-black/60 border-t border-white/6">
+                      <div className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-black border-t border-white/8">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 font-mono text-xs sm:text-sm text-zinc-400 truncate">
                             <Calendar className="size-4 text-zinc-500 shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:text-lime-400" />
@@ -663,7 +663,7 @@ export function ContestsHubPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
           {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
-          <div className="lg:col-span-5 rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
+          <div className="lg:col-span-5 rounded-lg border border-white/8 bg-black p-6 sm:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] space-y-6">
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
               <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
@@ -911,7 +911,7 @@ export function ContestsHubPage() {
           </div>
 
           {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
-          <div className="lg:col-span-7 rounded-lg border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-6 sm:p-7 shadow-2xl space-y-6">
+          <div className="lg:col-span-7 rounded-lg border border-white/8 bg-black p-6 sm:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] space-y-6">
             {/* Header: Animated Tabs & Search */}
             <Tabs
               value={activeTab}
@@ -1166,7 +1166,7 @@ export function ContestsHubPage() {
         </div>
 
         {/* ─── ABOUT THE CHAMPIONSHIP TROPHY ─────────────── */}
-        <div className="group rounded-lg border border-white/8 bg-zinc-950/60 backdrop-blur-md p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/15 transition-all duration-200">
+        <div className="group rounded-lg border border-white/8 bg-black p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/18 shadow-[0_1px_2px_rgba(0,0,0,0.4)] transition-colors duration-150">
           <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold text-lime-400 uppercase tracking-widest">
             <Trophy className="size-4 sm:size-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
             <span>About the Medi-Caps Chapter Trophy</span>

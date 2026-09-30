@@ -258,15 +258,15 @@ export function ContestLobbyPage() {
         </div>
       ) : notYetOpen ? (
         /* Locked Waiting Room */
-        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8 font-mono">
+        <div className="space-y-6 rounded-lg border border-white/10 bg-black p-6 sm:p-8 font-mono shadow-[0_1px_3px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500">
-                Contest · Scheduled
+              <span className="text-[10px] uppercase tracking-widest text-[#CCFF00]">
+                (01 // Scheduled)
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-zinc-900 border border-white/10 text-zinc-400">
+              <div className="p-2 rounded-md bg-white/[0.03] border border-white/12 text-zinc-400">
                 <Clock className="size-5" />
               </div>
               <h1 className="text-xl font-semibold text-white tracking-tight">
@@ -279,7 +279,7 @@ export function ContestLobbyPage() {
             </div>
 
             {/* Live Countdown in Waiting Room */}
-            <div className="rounded-md border border-white/8 bg-zinc-950 p-4 text-center space-y-2">
+            <div className="rounded-md border border-white/10 bg-black p-4 text-center space-y-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
               <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
                 Arena Unlocks In
               </span>
@@ -300,7 +300,7 @@ export function ContestLobbyPage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-md border border-white/8 bg-zinc-950 text-xs space-y-2.5">
+            <div className="p-4 rounded-md border border-white/10 bg-black text-xs space-y-2.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Starts at:</span>
                 <span className="text-lime-400 font-semibold">{formatWhen(resolvedContest.starts_at)}</span>
@@ -354,12 +354,12 @@ export function ContestLobbyPage() {
         </div>
       ) : (
         /* Ready to Attempt / Assessment Lobby */
-        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
+        <div className="space-y-6 rounded-lg border border-white/10 bg-black p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
           {/* Header */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                Live Contest Arena Lobby
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
+                (01 // Live Arena Lobby)
               </span>
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-white">{resolvedContest.title}</h1>
@@ -369,7 +369,7 @@ export function ContestLobbyPage() {
           </div>
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-3 divide-x divide-white/8 rounded-md border border-white/8 bg-black">
+          <div className="grid grid-cols-3 divide-x divide-white/10 rounded-md border border-white/10 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             {[
               {
                 label: "Time Limit",
@@ -390,7 +390,7 @@ export function ContestLobbyPage() {
           </div>
 
           {/* Regulations Card */}
-          <div className="space-y-3 rounded-md border border-white/8 bg-zinc-950 p-4 font-mono text-xs">
+          <div className="space-y-3 rounded-md border border-white/10 bg-black p-4 font-mono text-xs shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between border-b border-white/6 pb-2.5">
               <span className="text-[11px] font-semibold text-white flex items-center gap-2">
                 <Shield className="size-3.5 text-lime-400" />

@@ -148,10 +148,10 @@ export function LeaderboardPage() {
             Unified standings across Medi-Caps University computing departments.
           </p>
         </div>
-        <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-zinc-950 px-5 py-3.5 min-w-[160px] shrink-0">
+        <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-black p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
           <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
           <strong className="font-mono text-lg font-bold text-white mt-0.5">2025–2026</strong>
-          <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount} ranked cadets</small>
+          <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount}&nbsp;ranked cadets</small>
           <div className="flex items-center gap-1.5 mt-1.5 font-mono text-[9px] uppercase tracking-wider text-emerald-400">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -163,7 +163,7 @@ export function LeaderboardPage() {
       </header>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-lg border border-white/8 bg-zinc-950">
+      <div className="overflow-hidden rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

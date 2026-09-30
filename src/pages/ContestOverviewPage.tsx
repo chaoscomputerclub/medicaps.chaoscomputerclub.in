@@ -672,7 +672,7 @@ export function ContestOverviewPage() {
           </div>
 
           {/* 🚨 Contest Violations & Prohibited Actions */}
-          <div className="rounded-lg border border-red-500/20 bg-zinc-950/70 p-6 space-y-4">
+          <div className="rounded-lg border border-red-500/20 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between border-b border-white/8 pb-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="size-4 text-red-400" />
@@ -739,7 +739,7 @@ export function ContestOverviewPage() {
         {/* Right Column: Zero-Tolerance Penalties, Fair Play Whistleblowing & Waiting Lobby */}
         <div className="lg:col-span-5 space-y-6">
           {/* ⚖️ Enforcement & Penalties */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             <div className="flex items-center gap-2 border-b border-white/8 pb-3">
               <Scale className="size-4 text-lime-400" />
               <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
@@ -755,7 +755,7 @@ export function ContestOverviewPage() {
             </p>
 
             <div className="space-y-3 pt-1">
-              <div className="rounded-md border border-white/8 bg-zinc-950 p-3.5 space-y-1.5">
+              <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
                 <div className="flex items-center gap-2">
                   <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 uppercase">
                     First Violation
@@ -768,7 +768,7 @@ export function ContestOverviewPage() {
                 </p>
               </div>
 
-              <div className="rounded-md border border-red-500/20 bg-red-950/20 p-3.5 space-y-1.5">
+              <div className="rounded-md border border-red-500/20 bg-red-950/20 p-3.5 space-y-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
                 <div className="flex items-center gap-2">
                   <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 uppercase">
                     Second Violation
@@ -784,7 +784,7 @@ export function ContestOverviewPage() {
           </div>
 
           {/* 🛡️ Community Whistleblowing & Fair Play */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
+          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             <div className="flex items-center gap-2 border-b border-white/8 pb-3">
               <Flag className="size-4 text-lime-400" />
               <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
@@ -811,7 +811,7 @@ export function ContestOverviewPage() {
 
           {/* 🔒 Waiting Room / Arena Gate Status (when upcoming) */}
           {isUpcoming && (
-            <div className="rounded-lg border border-white/8 bg-zinc-950/80 p-6 space-y-4">
+            <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
               <div className="flex items-center justify-between border-b border-white/8 pb-3">
                 <div className="flex items-center gap-2">
                   <Lock className="size-4 text-lime-400" />

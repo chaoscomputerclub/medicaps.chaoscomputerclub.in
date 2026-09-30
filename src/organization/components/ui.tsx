@@ -23,11 +23,11 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "rounded-lg border border-white/8 bg-black p-6 flex flex-col md:flex-row md:items-end justify-between gap-6 shadow-none",
+        "rounded-lg border border-white/8 bg-black p-5 sm:p-6 md:p-7 flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]",
         className
       )}
     >
-      <div className="space-y-1.5 max-w-2xl">
+      <div className="space-y-1.5 max-w-2xl min-w-0">
         <div className="flex items-center gap-2.5 flex-wrap">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
             {formattedKicker}
@@ -114,23 +114,25 @@ export function Metric({
   label,
   value,
   detail,
+  className,
 }: {
   label: string;
   value: string | number;
   detail?: string;
+  className?: string;
 }) {
   return (
-    <div className="p-4 rounded-lg border border-white/8 bg-black">
-      <span className="block text-[10px] font-mono font-medium text-zinc-500 uppercase tracking-wider">{label}</span>
-      <strong className="block text-xl font-mono font-bold text-white mt-1 tabular-nums">{value}</strong>
-      {detail && <small className="block text-[10px] font-mono text-zinc-500 mt-1">{detail}</small>}
+    <div className={cn("p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]", className)}>
+      <span className="block text-[10px] font-mono font-medium text-zinc-400 uppercase tracking-wider truncate">{label}</span>
+      <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">{value}</strong>
+      {detail && <small className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">{detail}</small>}
     </div>
   );
 }
 
-export function TierBadge({ children }: { children: ReactNode }) {
+export function TierBadge({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <Badge variant="default" className="rounded font-mono text-xs font-medium uppercase tracking-wider bg-lime-400/10 border-lime-400/30 text-lime-400">
+    <Badge variant="default" className={cn("rounded font-mono text-xs font-medium uppercase tracking-wider bg-lime-400/10 border-lime-400/30 text-lime-400", className)}>
       {children}
     </Badge>
   );
@@ -144,12 +146,25 @@ export function MonoTag({ children, className }: { children: ReactNode; classNam
   );
 }
 
-export function EmptyState({ title, body }: { title: string; body: string }) {
+export function EmptyState({
+  title,
+  body,
+  action,
+  className,
+}: {
+  title: string;
+  body: string;
+  action?: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center border border-white/8 rounded-lg bg-black my-6">
-      <span className="text-2xl text-zinc-600 font-mono mb-2">∅</span>
-      <h3 className="text-sm font-semibold text-white">{title}</h3>
-      <p className="text-xs text-zinc-500 max-w-md mt-1">{body}</p>
+    <div className={cn("flex flex-col items-center justify-center p-10 sm:p-12 text-center border border-white/8 rounded-lg bg-black my-6 shadow-[0_1px_2px_rgba(0,0,0,0.4)]", className)}>
+      <div className="size-10 rounded-md border border-white/10 bg-white/[0.02] flex items-center justify-center mb-3">
+        <span className="text-xl text-zinc-500 font-mono select-none">∅</span>
+      </div>
+      <h3 className="text-sm font-semibold text-white tracking-tight">{title}</h3>
+      <p className="text-xs text-zinc-400 max-w-md mt-1.5 leading-relaxed">{body}</p>
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
