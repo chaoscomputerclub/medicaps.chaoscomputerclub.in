@@ -241,11 +241,11 @@ async def claim_job(
             detail="Node heartbeat expired or not registered",
         )
 
-    pending_key = "ccc:queue:judge:pending"
-    processing_key = "ccc:queue:judge:processing"
-
     # Atomically pop from high-priority end of pending and push into processing
-    job_id = await redis.rpoplpush(pending_key, processing_key)
+    # Dedicated fabric execution queue first, with legacy fallback
+    job_id = await redis.rpoplpush("ccc:queue:fabric:pending", "ccc:queue:fabric:processing")
+    if not job_id:
+        job_id = await redis.rpoplpush("ccc:queue:judge:pending", "ccc:queue:judge:processing")
     if not job_id:
         return {"job": None}
 
@@ -285,10 +285,9 @@ async def submit_result(
     Updates submission state, releases queues, and publishes SSE events.
     """
     redis = get_redis()
-    processing_key = "ccc:queue:judge:processing"
-    
-    # 1. Remove from in-flight processing list
-    await redis.lrem(processing_key, 1, payload.job_id)
+    # 1. Remove from in-flight processing lists
+    await redis.lrem("ccc:queue:fabric:processing", 1, payload.job_id)
+    await redis.lrem("ccc:queue:judge:processing", 1, payload.job_id)
     await redis.delete(f"ccc:job:{payload.job_id}:leased_at")
     await redis.delete(f"ccc:job:{payload.job_id}:node_id")
 

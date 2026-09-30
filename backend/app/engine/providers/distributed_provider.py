@@ -109,9 +109,9 @@ class DistributedFabricProvider(JudgeProvider):
             },
         }
 
-        # 1. Enqueue job into distributed queue
+        # 1. Enqueue job into distributed fabric queue
         await redis.set(f"ccc:job:{job_id}", json.dumps(job_payload), ex=86400)
-        await redis.rpush("ccc:queue:judge:pending", job_id)
+        await redis.rpush("ccc:queue:fabric:pending", job_id)
 
         logger.info(
             "⚡ [Fabric] Job %s enqueued to distributed queue (Active Nodes: %s, Lang: %s, Testcases: %d)",
@@ -134,8 +134,8 @@ class DistributedFabricProvider(JudgeProvider):
 
         # Timeout reached: reclaim job from queue and fall back
         logger.warning("⚠️ [Fabric] Remote execution timed out for job %s. Falling back to local Docker engine.", job_id)
-        await redis.lrem("ccc:queue:judge:pending", 1, job_id)
-        await redis.lrem("ccc:queue:judge:processing", 1, job_id)
+        await redis.lrem("ccc:queue:fabric:pending", 1, job_id)
+        await redis.lrem("ccc:queue:fabric:processing", 1, job_id)
 
         return await self._fallback.execute_batch(
             language=language,

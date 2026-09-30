@@ -142,12 +142,19 @@ func main() {
 			}
 
 			// Atomic slot claim over outbound REST
-			claimCtx, claimCancel := context.WithTimeout(ctx, 4*time.Second)
+			claimCtx, claimCancel := context.WithTimeout(ctx, 10*time.Second)
 			job, err := cpClient.ClaimJob(claimCtx, caps.NodeID, cfg.ClaimTimeout.Seconds())
 			claimCancel()
 
-			if err != nil || job == nil {
-				// No job currently queued or transient claim error: release slot & wait briefly
+			if err != nil {
+				gov.ReleaseSlot()
+				log.Printf("⚠️  [Claim] Error polling queue: %v", err)
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			if job == nil {
+				// No job currently queued: release slot & wait briefly
 				gov.ReleaseSlot()
 				time.Sleep(1 * time.Second)
 				continue

@@ -33,7 +33,7 @@ func NewManager(controlPlaneURL string) *Manager {
 		controlPlaneURL: controlPlaneURL,
 		state:           StateDisconnected,
 		client: &http.Client{
-			Timeout: 4 * time.Second,
+			Timeout: 10 * time.Second,
 		},
 		stopCh: make(chan struct{}),
 	}
@@ -44,6 +44,7 @@ func (m *Manager) Start(ctx context.Context, onConnected func(), onDisconnected 
 	go func() {
 		backoff := 1 * time.Second
 		maxBackoff := 60 * time.Second
+		consecutiveFailures := 0
 
 		for {
 			select {
@@ -56,14 +57,18 @@ func (m *Manager) Start(ctx context.Context, onConnected func(), onDisconnected 
 				m.mu.Lock()
 				prevState := m.state
 				if alive {
-					if latency > 1500*time.Millisecond {
+					consecutiveFailures = 0
+					if latency > 2500*time.Millisecond {
 						m.state = StateDegraded
 					} else {
 						m.state = StateConnected
 					}
 					backoff = 1 * time.Second // Reset on healthy connection
 				} else {
-					m.state = StateDisconnected
+					consecutiveFailures++
+					if consecutiveFailures >= 2 {
+						m.state = StateDisconnected
+					}
 				}
 				currState := m.state
 				m.mu.Unlock()
