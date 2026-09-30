@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import { Routes, Route, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { getPublicPortalData, getMemberProfileData, getUniversityLeaderboardData, getStudentProfileData } from "@/organization/data/portal.functions";
 import { contestApi } from "@/features/contest/api";
@@ -57,11 +57,52 @@ const CONTEST_MUTATION_EVENTS = [
   "member_profile_updated",
 ];
 
+const CONTEST_LIST_REFRESH_EVENTS = [
+  "contest_created",
+  "contest_updated",
+  "contest_deleted",
+  "contest_status_changed",
+  "contest_concluded",
+  "contest_finished",
+];
+
+const PARTICIPATION_REFRESH_EVENTS = [
+  "contest_registered",
+  "contest_unregistered",
+  "contest_concluded",
+  "contest_finished",
+];
+
+const CONTEST_DETAIL_REFRESH_EVENTS = [
+  "contest_updated",
+  "contest_status_changed",
+  "contest_concluded",
+  "contest_finished",
+  "contest_timer_reset",
+  "assessment_finished",
+];
+
 function ContestRealtimeSynchronizer() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const currentContestSlug = useAppSelector((state) => state.contest.currentContest?.slug);
   const currentMember = useAppSelector((state) => state.auth.member);
+
+  const debounceTimers = useRef<{
+    contests?: ReturnType<typeof setTimeout>;
+    participations?: ReturnType<typeof setTimeout>;
+    detail?: ReturnType<typeof setTimeout>;
+    user?: ReturnType<typeof setTimeout>;
+  }>({});
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimers.current.contests) clearTimeout(debounceTimers.current.contests);
+      if (debounceTimers.current.participations) clearTimeout(debounceTimers.current.participations);
+      if (debounceTimers.current.detail) clearTimeout(debounceTimers.current.detail);
+      if (debounceTimers.current.user) clearTimeout(debounceTimers.current.user);
+    };
+  }, []);
 
   useRealtimeEvents(
     null,
@@ -73,74 +114,109 @@ function ContestRealtimeSynchronizer() {
       // 1. Immediately apply real-time mutation to synchronous Redux state
       dispatch(applyRealtimeEvent({ event, currentMember }));
 
-      // 2. Refresh global contests list and user participation history
-      void dispatch(fetchContestsThunk(true));
-      if (currentMember) {
-        void dispatch(fetchMyParticipationsThunk(true));
-        if (
-          event.event === "contest_concluded" ||
-          event.event === "contest_finished" ||
-          event.event === "contest_status_changed" ||
-          event.event === "assessment_finished" ||
-          event.event === "leaderboard_updated" ||
-          event.event === "ratings_updated" ||
-          event.event === "member_profile_updated"
-        ) {
-          invalidateSwrCache("leaderboard:*");
-          invalidateSwrCache("student:profile:*");
-          invalidateSwrCache("member:profile:*");
-          void dispatch(fetchCurrentUserThunk());
+      // 2. Refresh global contests list if contest lifecycle changed (debounced 500ms)
+      if (CONTEST_LIST_REFRESH_EVENTS.includes(event.event)) {
+        if (debounceTimers.current.contests) clearTimeout(debounceTimers.current.contests);
+        debounceTimers.current.contests = setTimeout(() => {
+          void dispatch(fetchContestsThunk(true));
+        }, 500);
+      }
 
-          if (event.event === "member_profile_updated" && event.data) {
-            const isTargetMe =
-              (event.data.member_id && currentMember?.id === event.data.member_id) ||
-              (event.data.handle && currentMember?.handle?.toLowerCase() === event.data.handle.toLowerCase());
-            const isFollowerMe =
-              (event.data.follower_id && currentMember?.id === event.data.follower_id) ||
-              (event.data.follower_handle && currentMember?.handle?.toLowerCase() === event.data.follower_handle.toLowerCase());
+      // 3. Refresh user participation history if registration or conclusion changed (debounced 500ms)
+      if (currentMember && PARTICIPATION_REFRESH_EVENTS.includes(event.event)) {
+        if (debounceTimers.current.participations) clearTimeout(debounceTimers.current.participations);
+        debounceTimers.current.participations = setTimeout(() => {
+          void dispatch(fetchMyParticipationsThunk(true));
+        }, 500);
+      }
 
-            if (isTargetMe && typeof event.data.followers_count === "number") {
-              dispatch(
-                syncSocialCounts({
-                  followersCount: event.data.followers_count,
-                  followingCount: event.data.following_count,
-                })
-              );
-            } else if (event.data.handle || event.data.member_id) {
-              const targetKey = event.data.handle || event.data.member_id;
-              dispatch(
-                syncCadetSocialCounts({
-                  handleOrId: targetKey,
-                  followersCount: event.data.followers_count,
-                  followingCount: event.data.following_count,
-                })
-              );
-            }
+      // 4. Invalidate profile / leaderboard caches and refresh current user if relevant
+      if (
+        event.event === "contest_concluded" ||
+        event.event === "contest_finished" ||
+        event.event === "contest_status_changed" ||
+        event.event === "assessment_finished" ||
+        event.event === "leaderboard_updated" ||
+        event.event === "ratings_updated" ||
+        event.event === "member_profile_updated"
+      ) {
+        invalidateSwrCache("leaderboard:*");
+        invalidateSwrCache("student:profile:*");
+        invalidateSwrCache("member:profile:*");
+        if (currentMember) {
+          if (debounceTimers.current.user) clearTimeout(debounceTimers.current.user);
+          debounceTimers.current.user = setTimeout(() => {
+            void dispatch(fetchCurrentUserThunk());
+          }, 600);
+        }
 
-            if (isFollowerMe && typeof event.data.my_following_count === "number") {
-              dispatch(
-                syncSocialCounts({
-                  followingCount: event.data.my_following_count,
-                })
-              );
-            }
+        if (event.event === "member_profile_updated" && event.data) {
+          const isTargetMe =
+            (event.data.member_id && currentMember?.id === event.data.member_id) ||
+            (event.data.handle && currentMember?.handle?.toLowerCase() === event.data.handle.toLowerCase());
+          const isFollowerMe =
+            (event.data.follower_id && currentMember?.id === event.data.follower_id) ||
+            (event.data.follower_handle && currentMember?.handle?.toLowerCase() === event.data.follower_handle.toLowerCase());
+
+          if (isTargetMe && typeof event.data.followers_count === "number") {
+            dispatch(
+              syncSocialCounts({
+                followersCount: event.data.followers_count,
+                followingCount: event.data.following_count,
+              })
+            );
+          } else if (event.data.handle || event.data.member_id) {
+            const targetKey = event.data.handle || event.data.member_id;
+            dispatch(
+              syncCadetSocialCounts({
+                handleOrId: targetKey,
+                followersCount: event.data.followers_count,
+                followingCount: event.data.following_count,
+              })
+            );
+          }
+
+          if (isFollowerMe && typeof event.data.my_following_count === "number") {
+            dispatch(
+              syncSocialCounts({
+                followingCount: event.data.my_following_count,
+              })
+            );
           }
         }
       }
 
-      // 3. Handle route or detail sync if user is currently viewing the affected contest
+      // 5. Handle route or detail sync if user is currently viewing the affected contest
       if (!contestSlug || contestSlug !== currentContestSlug) return;
       if (event.event === "contest_deleted") {
         dispatch(removeContestFromState(contestSlug));
         navigate("/contests", { replace: true });
         return;
       }
-      void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
-      if (
-        event.event === "pass_checked_in" ||
-        event.event === "top30_qualified" ||
-        event.event === "contest_status_changed"
-      ) {
+
+      if (CONTEST_DETAIL_REFRESH_EVENTS.includes(event.event)) {
+        if (debounceTimers.current.detail) clearTimeout(debounceTimers.current.detail);
+        debounceTimers.current.detail = setTimeout(() => {
+          void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+        }, 400);
+      }
+
+      // Targeted pass refresh: only fetch pass when relevant to the current user
+      if (event.event === "pass_checked_in") {
+        const isTargetMe =
+          (event.data?.member_id && currentMember?.id === event.data.member_id) ||
+          (event.data?.handle && currentMember?.handle?.toLowerCase() === event.data.handle.toLowerCase());
+        if (isTargetMe) {
+          void dispatch(fetchCampusPassThunk(contestSlug));
+        }
+      } else if (event.event === "top30_qualified") {
+        const isMeQualified = Array.isArray(event.data?.qualifiers)
+          ? event.data.qualifiers.some((q: any) => q.handle?.toLowerCase() === currentMember?.handle?.toLowerCase())
+          : false;
+        if (isMeQualified) {
+          void dispatch(fetchCampusPassThunk(contestSlug));
+        }
+      } else if (event.event === "contest_status_changed") {
         void dispatch(fetchCampusPassThunk(contestSlug));
       }
     },

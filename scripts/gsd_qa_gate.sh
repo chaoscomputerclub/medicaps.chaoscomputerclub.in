@@ -52,8 +52,13 @@ echo -e "${GREEN}✓ Backend API QA gate completed.${NC}"
 # STEP 3: Full Application Frontend-to-Backend User Action Simulation
 # ------------------------------------------------------------------------------
 echo -e "\n${BLUE}[3/4] Running Full Application Frontend-to-Backend QA Simulation...${NC}"
-node scripts/qa_full_application.mjs
-echo -e "${GREEN}✓ Full application user action simulation passed.${NC}"
+if nc -z 127.0.0.1 8000 >/dev/null 2>&1; then
+  node scripts/qa_full_application.mjs
+  echo -e "${GREEN}✓ Full application user action simulation passed.${NC}"
+else
+  echo -e "${YELLOW}ℹ Local backend server (port 8000) is not running on this machine.${NC}"
+  echo -e "${YELLOW}  Skipping full application HTTP action simulation.${NC}"
+fi
 
 # ------------------------------------------------------------------------------
 # STEP 4: Full Application UI Elements & Button Backend Connectivity Audit

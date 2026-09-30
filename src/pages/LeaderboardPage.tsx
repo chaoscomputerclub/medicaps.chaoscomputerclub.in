@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useTransition } from "react";
+import { useState, useMemo, useEffect, useTransition, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Minus, Trophy, UserPlus } from "lucide-react";
@@ -54,6 +54,23 @@ export function LeaderboardPage() {
   const currentMemberId = currentMember?.id;
   const followingIds = useAppSelector((s) => s.social.followingIds);
 
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleRefresh = useCallback(() => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => {
+      invalidateSwrCache("leaderboard:*");
+      void dispatch(fetchCurrentUserThunk());
+      void revalidate();
+    }, 500);
+  }, [dispatch, revalidate]);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
+
   useRealtimeEvents(
     null,
     (event) => {
@@ -68,19 +85,12 @@ export function LeaderboardPage() {
         event.event === "top30_qualified" ||
         event.event === "member_profile_updated"
       ) {
-        invalidateSwrCache("leaderboard:*");
-        void dispatch(fetchCurrentUserThunk());
-        void revalidate();
+        handleRefresh();
       }
     }
   );
 
   useEffect(() => {
-    const handleRefresh = () => {
-      invalidateSwrCache("leaderboard:*");
-      void dispatch(fetchCurrentUserThunk());
-      void revalidate();
-    };
     window.addEventListener("contest:concluded", handleRefresh);
     window.addEventListener("contest:cache_invalidated", handleRefresh);
     window.addEventListener("leaderboard:invalidate", handleRefresh);
@@ -89,7 +99,7 @@ export function LeaderboardPage() {
       window.removeEventListener("contest:cache_invalidated", handleRefresh);
       window.removeEventListener("leaderboard:invalidate", handleRefresh);
     };
-  }, [dispatch, revalidate]);
+  }, [handleRefresh]);
 
   const data = rawData || [];
 

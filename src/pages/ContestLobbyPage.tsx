@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -43,12 +43,21 @@ export function ContestLobbyPage() {
   );
 
   const [ack, setAck] = useState(false);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refreshDetail = useCallback(() => {
-    if (contestSlug) {
+    if (!contestSlug) return;
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => {
       void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
-    }
+    }, 400);
   }, [contestSlug, dispatch]);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (contestSlug) {
@@ -70,8 +79,7 @@ export function ContestLobbyPage() {
         event.event === "contest_finished" ||
         event.event === "contest_updated" ||
         event.event === "top30_qualified" ||
-        event.event === "assessment_finished" ||
-        event.event === "submission_evaluated"
+        event.event === "assessment_finished"
       ) {
         refreshDetail();
       }
@@ -85,10 +93,8 @@ export function ContestLobbyPage() {
       refreshDetail();
     };
     window.addEventListener("contest:concluded", handleConcluded);
-    window.addEventListener("contest:cache_invalidated", handleConcluded);
     return () => {
       window.removeEventListener("contest:concluded", handleConcluded);
-      window.removeEventListener("contest:cache_invalidated", handleConcluded);
     };
   }, [refreshDetail]);
 

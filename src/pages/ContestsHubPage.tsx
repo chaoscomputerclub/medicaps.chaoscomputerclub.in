@@ -177,22 +177,33 @@ export function ContestsHubPage() {
 
   const itemsPerPage = 8;
 
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const refreshHubData = useCallback(
     (force = false) => {
-      if (force) {
-        invalidateSwrCache("contests:*");
-        invalidateSwrCache("contest:*");
-        invalidateSwrCache("passes:*");
-        invalidateSwrCache("system:contests:*");
-      }
-      void dispatch(fetchContestsThunk(force));
-      void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
-      if (member) {
-        void dispatch(fetchMyParticipationsThunk(force));
-      }
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        if (force) {
+          invalidateSwrCache("contests:*");
+          invalidateSwrCache("contest:*");
+          invalidateSwrCache("passes:*");
+          invalidateSwrCache("system:contests:*");
+        }
+        void dispatch(fetchContestsThunk(force));
+        void getUniversityLeaderboardData().then((res) => setLeaders(res || [])).catch(() => {});
+        if (member) {
+          void dispatch(fetchMyParticipationsThunk(force));
+        }
+      }, force ? 400 : 0);
     },
     [dispatch, member]
   );
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
 
   // Real-time synchronization across clients, assessment finishes, and contest status updates
   useRealtimeEvents(
@@ -207,10 +218,7 @@ export function ContestsHubPage() {
         event.event === "contest_deleted" ||
         event.event === "contest_registered" ||
         event.event === "contest_unregistered" ||
-        event.event === "pass_checked_in" ||
-        event.event === "assessment_finished" ||
-        event.event === "submission_evaluated" ||
-        event.event === "top30_qualified"
+        event.event === "assessment_finished"
       ) {
         refreshHubData(true);
       }

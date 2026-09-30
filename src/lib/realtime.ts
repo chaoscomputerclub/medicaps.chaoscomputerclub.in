@@ -50,15 +50,36 @@ const CONTEST_CACHE_PATTERNS = [
   "system:contests:*",
 ];
 
-export function invalidateContestCaches(): void {
-  for (const pattern of CONTEST_CACHE_PATTERNS) {
-    invalidateSwrCache(pattern);
+let cacheInvalidateTimer: ReturnType<typeof setTimeout> | null = null;
+
+export function invalidateContestCaches(immediate = false): void {
+  const execute = () => {
+    for (const pattern of CONTEST_CACHE_PATTERNS) {
+      invalidateSwrCache(pattern);
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("contest:cache_invalidated"));
+      window.dispatchEvent(new CustomEvent("assessment:status_changed"));
+      window.dispatchEvent(new CustomEvent("contest:status_changed"));
+    }
+  };
+
+  if (immediate) {
+    if (cacheInvalidateTimer) {
+      clearTimeout(cacheInvalidateTimer);
+      cacheInvalidateTimer = null;
+    }
+    execute();
+    return;
   }
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("contest:cache_invalidated"));
-    window.dispatchEvent(new CustomEvent("assessment:status_changed"));
-    window.dispatchEvent(new CustomEvent("contest:status_changed"));
+
+  if (cacheInvalidateTimer) {
+    clearTimeout(cacheInvalidateTimer);
   }
+  cacheInvalidateTimer = setTimeout(() => {
+    cacheInvalidateTimer = null;
+    execute();
+  }, 350);
 }
 
 interface InternalSubscriber {

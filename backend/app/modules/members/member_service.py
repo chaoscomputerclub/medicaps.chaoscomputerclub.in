@@ -338,18 +338,26 @@ class MemberService:
 
         # Solved problems telemetry
         solves_res = await db.execute(
-            select(func.count(ContestSubmission.id)).where(
+            select(func.count(func.distinct(ContestSubmission.problem_id))).where(
                 ContestSubmission.member_id == current_member.id,
-                ContestSubmission.verdict == "accepted",
+                func.upper(ContestSubmission.verdict).in_(["ACCEPTED", "AC"]),
             )
         )
         accepted_solves = solves_res.scalar() or 0
+
+        acc_subs_res = await db.execute(
+            select(func.count(ContestSubmission.id)).where(
+                ContestSubmission.member_id == current_member.id,
+                func.upper(ContestSubmission.verdict).in_(["ACCEPTED", "AC"]),
+            )
+        )
+        acc_subs_count = acc_subs_res.scalar() or 0
 
         total_submissions_res = await db.execute(
             select(func.count(ContestSubmission.id)).where(ContestSubmission.member_id == current_member.id)
         )
         total_subs = total_submissions_res.scalar() or 0
-        accuracy_pct = round((accepted_solves / total_subs) * 100, 1) if total_subs > 0 else 0.0
+        accuracy_pct = round((acc_subs_count / total_subs) * 100, 1) if total_subs > 0 else 0.0
 
         percentile = round((1.0 - (univ_rank / max(1, all_members_count))) * 100, 1)
         percentile = max(0.0, min(99.9, percentile))
@@ -570,7 +578,11 @@ class MemberService:
 
         all_submissions = list(assess_subs) + list(contest_subs)
         total_submissions = len(all_submissions)
-        accepted_subs = [s for s in all_submissions if getattr(s, "verdict", "") in ("AC", "accepted") or getattr(s, "status", "") == "accepted"]
+        accepted_subs = [
+            s for s in all_submissions
+            if str(getattr(s, "verdict", "") or "").upper() in ("AC", "ACCEPTED")
+            or str(getattr(s, "status", "") or "").lower() == "accepted"
+        ]
         total_solved = len(set(getattr(s, "problem_id", "") for s in accepted_subs))
 
         easy_count = max(1, int(total_solved * 0.45)) if total_solved > 0 else 0

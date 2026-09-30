@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft,
@@ -29,16 +29,30 @@ export function ContestQualifiedPage() {
     (state) => state.contest
   );
 
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const refreshData = useCallback((force = false) => {
     if (!contestSlug) return;
     if (force) {
-      invalidateSwrCache("contests:*");
-      invalidateSwrCache(`contest:*:${contestSlug}*`);
-      invalidateSwrCache("passes:*");
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        invalidateSwrCache("contests:*");
+        invalidateSwrCache(`contest:*:${contestSlug}*`);
+        invalidateSwrCache("passes:*");
+        void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: true }));
+        void dispatch(fetchCampusPassThunk(contestSlug));
+      }, 400);
+      return;
     }
-    void dispatch(fetchContestDetailThunk({ slug: contestSlug, force }));
+    void dispatch(fetchContestDetailThunk({ slug: contestSlug, force: false }));
     void dispatch(fetchCampusPassThunk(contestSlug));
   }, [contestSlug, dispatch]);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     refreshData(false);
@@ -101,14 +115,12 @@ export function ContestQualifiedPage() {
     window.addEventListener("storage", handleStorage);
     window.addEventListener("assessment:status_changed" as any, handleSync);
     window.addEventListener("contest:concluded" as any, handleSync);
-    window.addEventListener("contest:cache_invalidated" as any, handleSync);
 
     return () => {
       window.removeEventListener("focus", handleSync);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("assessment:status_changed" as any, handleSync);
       window.removeEventListener("contest:concluded" as any, handleSync);
-      window.removeEventListener("contest:cache_invalidated" as any, handleSync);
     };
   }, [contestSlug, refreshData]);
 

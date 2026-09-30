@@ -1,6 +1,6 @@
 import { DashboardSkeleton } from "@/organization/components/skeletons";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { ArrowRight, MapPin, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingChart } from "@/organization/components/RatingChart";
@@ -54,6 +54,23 @@ export function DashboardPage() {
     dispatch(fetchContestsThunk(false));
   }, [dispatch]);
 
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleRefresh = useCallback(() => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => {
+      revalidateProfile();
+      revalidatePublic();
+      dispatch(fetchContestsThunk(true));
+    }, 500);
+  }, [dispatch, revalidateProfile, revalidatePublic]);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
+
   useRealtimeEvents(
     null,
     (event) => {
@@ -66,18 +83,14 @@ export function DashboardPage() {
         event.event === "top30_qualified" ||
         event.event === "assessment_finished"
       ) {
-        revalidateProfile();
-        revalidatePublic();
-        dispatch(fetchContestsThunk(true));
+        handleRefresh();
       }
     }
   );
 
   useEffect(() => {
     const handleConcluded = () => {
-      revalidateProfile();
-      revalidatePublic();
-      dispatch(fetchContestsThunk(true));
+      handleRefresh();
     };
     window.addEventListener("contest:concluded", handleConcluded);
     window.addEventListener("contest:cache_invalidated", handleConcluded);
@@ -87,7 +100,7 @@ export function DashboardPage() {
       window.removeEventListener("contest:cache_invalidated", handleConcluded);
       window.removeEventListener("contest:status_changed", handleConcluded);
     };
-  }, [dispatch, revalidateProfile, revalidatePublic]);
+  }, [handleRefresh]);
 
   const publicData = publicDataRaw || { contests: [], announcements: [], standings: [], problems: [] };
 

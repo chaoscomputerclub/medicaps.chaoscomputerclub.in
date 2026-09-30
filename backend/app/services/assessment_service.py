@@ -372,14 +372,25 @@ class AssessmentService:
             .order_by(desc(AssessmentSession.total_score), AssessmentSession.total_penalty_seconds)
         )
         sessions = s_result.scalars().all()
+        if not sessions:
+            return {
+                "success": True,
+                "contest_slug": contest_slug,
+                "total_candidates": 0,
+                "qualified_count": 0,
+                "qualifiers": [],
+            }
 
         issued_passes = []
         target_contest_id = contest.id if contest else assessment.id
         contest_prefix = contest.slug[:8].upper() if contest else "CCC-26"
+        has_changes = False
 
         for idx, s in enumerate(sessions, start=1):
             is_qualifier = idx <= FINALIST_SEATS
-            s.is_top_30_qualified = is_qualifier
+            if s.is_top_30_qualified != is_qualifier:
+                s.is_top_30_qualified = is_qualifier
+                has_changes = True
             seat_num = f"LAB-04-PC{idx:02d}" if is_qualifier else "N/A"
 
             # Update ContestRegistration if exists
@@ -391,11 +402,19 @@ class AssessmentService:
                 reg_res = await db.execute(reg_stmt)
                 reg = reg_res.scalars().first()
                 if reg:
-                    reg.assessment_taken = True
-                    reg.assessment_score = s.total_score
-                    reg.assessment_rank = idx
-                    reg.is_top_30_qualified = is_qualifier
-                    reg.seat_assigned = seat_num if is_qualifier else None
+                    if (
+                        not reg.assessment_taken
+                        or reg.assessment_score != s.total_score
+                        or reg.assessment_rank != idx
+                        or reg.is_top_30_qualified != is_qualifier
+                        or reg.seat_assigned != (seat_num if is_qualifier else None)
+                    ):
+                        reg.assessment_taken = True
+                        reg.assessment_score = s.total_score
+                        reg.assessment_rank = idx
+                        reg.is_top_30_qualified = is_qualifier
+                        reg.seat_assigned = seat_num if is_qualifier else None
+                        has_changes = True
 
             if is_qualifier:
                 pass_code = f"CCC-{contest_prefix}-{s.handle[:4].upper()}-{idx:02d}"
@@ -419,13 +438,21 @@ class AssessmentService:
                         check_in_status="issued",
                     )
                     db.add(c_pass)
+                    has_changes = True
                 else:
-                    c_pass.seat_number = seat_num
-                    c_pass.qr_data = qr_payload
-                    c_pass.pass_code = pass_code
+                    if (
+                        c_pass.seat_number != seat_num
+                        or c_pass.qr_data != qr_payload
+                        or c_pass.pass_code != pass_code
+                    ):
+                        c_pass.seat_number = seat_num
+                        c_pass.qr_data = qr_payload
+                        c_pass.pass_code = pass_code
+                        has_changes = True
 
-                if contest and reg:
+                if contest and reg and reg.campus_pass_code != pass_code:
                     reg.campus_pass_code = pass_code
+                    has_changes = True
 
                 issued_passes.append({
                     "rank": idx,
@@ -436,23 +463,24 @@ class AssessmentService:
                     "pass_code": pass_code,
                 })
 
-        await db.commit()
-        await invalidate_ranking(contest_slug)
+        if has_changes:
+            await db.commit()
+            await invalidate_ranking(contest_slug)
 
-        # Broadcast Top 30 qualification real-time event
-        try:
-            await broadcast_event(
-                event_type="top30_qualified",
-                data={
-                    "contest_slug": contest_slug,
-                    "total_candidates": len(sessions),
-                    "qualified_count": len(issued_passes),
-                    "qualifiers": issued_passes,
-                },
-                contest_slug=contest_slug,
-            )
-        except Exception as broadcast_err:
-            logger.debug("Failed to broadcast top30_qualified: %s", broadcast_err)
+            # Broadcast Top 30 qualification real-time event only on actual changes
+            try:
+                await broadcast_event(
+                    event_type="top30_qualified",
+                    data={
+                        "contest_slug": contest_slug,
+                        "total_candidates": len(sessions),
+                        "qualified_count": len(issued_passes),
+                        "qualifiers": issued_passes,
+                    },
+                    contest_slug=contest_slug,
+                )
+            except Exception as broadcast_err:
+                logger.debug("Failed to broadcast top30_qualified: %s", broadcast_err)
 
         return {
             "success": True,
