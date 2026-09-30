@@ -193,7 +193,7 @@ class DistributedFabricProvider(JudgeProvider):
                     stdout=r.get("stdout", ""),
                     expected_output=r.get("expected_output", ""),
                     stderr=r.get("stderr", ""),
-                    compile_output=r.get("compile_output", ""),
+                    compile_output=r.get("compile_output") or "",
                     wall_time_ms=float(r.get("wall_time_ms", 0.0)),
                     runtime_ms=float(r.get("wall_time_ms", 0.0)),
                 )
@@ -212,6 +212,6 @@ class DistributedFabricProvider(JudgeProvider):
             total_testcases=total_tcs,
             time=float(res_dict.get("runtime_ms", 0.0)) / 1000.0,
             memory=float(res_dict.get("memory_mb", 0.0)),
-            compile_output=res_dict.get("compile_output", ""),
+            compile_output=res_dict.get("compile_output") or "",
             error=res_dict.get("error"),
         )
