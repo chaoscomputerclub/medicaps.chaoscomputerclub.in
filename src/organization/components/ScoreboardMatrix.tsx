@@ -20,7 +20,9 @@ export function ScoreboardMatrix({
     return <ScoreboardMatrixSkeleton compact={compact} />;
   }
 
-  if (!entries || entries.length === 0) {
+  const safeEntries = Array.isArray(entries) ? entries : [];
+
+  if (safeEntries.length === 0) {
     return (
       <div className="text-center py-10 text-zinc-400 font-mono text-xs border border-dashed border-white/10">
         No standings recorded yet.
@@ -52,7 +54,7 @@ export function ScoreboardMatrix({
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
-          {entries.map((row) => (
+          {safeEntries.map((row) => (
             <tr
               key={row.handle}
               className={cn(

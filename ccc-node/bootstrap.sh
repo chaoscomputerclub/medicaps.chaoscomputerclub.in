@@ -18,6 +18,12 @@ if [[ -f "${CONFIG_FILE}" ]]; then
     source "${CONFIG_FILE}"
     set +a
     echo "✓ Loaded configuration from config/node.env"
+elif [[ -f "${SCRIPT_DIR}/config/node.env.example" ]]; then
+    echo "⚠️ config/node.env not found; copying template from config/node.env.example"
+    cp "${SCRIPT_DIR}/config/node.env.example" "${CONFIG_FILE}"
+    set -a
+    source "${CONFIG_FILE}"
+    set +a
 else
     echo "⚠️ config/node.env not found; using defaults."
 fi

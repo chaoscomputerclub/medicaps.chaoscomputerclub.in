@@ -40,6 +40,19 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
     avatar_url: null,
   };
 
+  // Base API catch-all for any unhandled endpoint in CI to guarantee zero 502 Bad Gateway responses
+  await page.route('**/api/**', async (route) => {
+    const req = route.request();
+    if (req.resourceType() === 'document' || req.isNavigationRequest()) {
+      return route.continue();
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({}),
+    });
+  });
+
   await page.route('**/auth/me', async (route) => {
     await route.fulfill({
       status: 200,
@@ -228,7 +241,11 @@ export async function mockContestsApi(page: Page): Promise<void> {
       });
     }
     if (url.includes('/contests/my/')) {
-      return route.continue();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      });
     }
     if (url.endsWith('/contests') || url.includes('/contests?')) {
       return route.fulfill({
