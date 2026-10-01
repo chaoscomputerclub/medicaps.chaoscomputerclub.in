@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # 1. Authoritative Durable State
+  postgres:
+    image: postgres:16-alpine
+    container_name: ccc-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ccc_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_chaos_pass}
+      POSTGRES_DB: ccc_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ccc_admin -d ccc_platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 2. Redis Event & Lease Broker
+  redis:
+    image: redis:7-alpine
+    container_name: ccc-redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 3. Cloud Control Plane & Global Fabric Router (FastAPI)
+  control-plane:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: ccc-control-plane
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ccc_admin:${DB_PASSWORD:-secure_chaos_pass}@postgres:5432/ccc_platform
+      REDIS_URL: redis://redis:6379/0
+      PORT: 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  # 4. Global Edge Nginx Proxy
+  edge-proxy:
+    image: nginx:alpine
+    container_name: ccc-edge-proxy
+    restart: always
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../dist:/var/www/medicaps/dist:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - control-plane
+
+volumes:
+  postgres_data:
+  redis_data:

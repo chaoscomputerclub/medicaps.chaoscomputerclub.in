@@ -196,6 +196,20 @@ def test_deterministic_output_evaluator():
     ok, msg, val = OutputEvaluator.compare("[1, 2, 4]\n", [1, 2, 3], DataType.INTEGER_ARRAY)
     assert ok is False
 
+    # String match: unquoted stdout vs JSON-quoted expected output (e.g. Reverse String)
+    ok, msg, val = OutputEvaluator.compare("olleh\n", "\"olleh\"", DataType.STRING)
+    assert ok is True
+    assert val == "olleh"
+
+    ok, msg, val = OutputEvaluator.compare("\"olleh\"\n", "olleh", DataType.STRING)
+    assert ok is True
+
+    ok, msg, val = OutputEvaluator.compare("olleh\n", "olleh", DataType.STRING)
+    assert ok is True
+
+    ok, msg, val = OutputEvaluator.compare("wrong\n", "\"olleh\"", DataType.STRING)
+    assert ok is False
+
     # Float tolerance
     cfg = EvaluationConfig(match_type=MatchType.FLOAT_TOLERANCE, float_tolerance=1e-4)
     ok, msg, val = OutputEvaluator.compare("3.14159\n", 3.14158, DataType.DOUBLE, cfg)

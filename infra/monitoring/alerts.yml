@@ -1,0 +1,29 @@
+groups:
+  - name: fabric_alerts
+    rules:
+      - alert: FabricZeroCapacity
+        expr: fabric_active_healthy_nodes == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "No healthy compute or application nodes available in fabric"
+          description: "All registered nodes are offline or suspect. Traffic cannot be serviced."
+
+      - alert: NodeUnderMemoryPressure
+        expr: node_memory_usage_pct > 85
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Fabric node memory pressure > 85%"
+          description: "Resource governor is throttling judge job claims on node {{ $labels.node_id }}."
+
+      - alert: HighJudgeQueueDepth
+        expr: redis_queue_depth{queue="judge.pending"} > 50
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "Judge pending queue depth exceeds 50 submissions"
+          description: "Evaluation lag detected across distributed fabric."

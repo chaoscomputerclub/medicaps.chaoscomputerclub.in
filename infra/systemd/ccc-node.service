@@ -1,0 +1,31 @@
+[Unit]
+Description=Chaos Computer Club Node Fabric Agent
+Documentation=https://github.com/chaoscomputerclub/medicaps.chaoscomputerclub.in
+After=network-online.target docker.service
+Wants=network-online.target docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/ccc-node
+EnvironmentFile=-/opt/ccc-node/config/node.env
+ExecStartPre=/opt/ccc-node/scripts/prepare-tmpfs.sh
+ExecStart=/opt/ccc-node/bin/node-agent
+Restart=always
+RestartSec=5s
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# Resource Governance & Safety Sandbox
+Nice=-5
+LimitNOFILE=65536
+LimitNPROC=32768
+TasksMax=infinity
+
+# Security Hardening
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=false
+
+[Install]
+WantedBy=multi-user.target

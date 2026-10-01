@@ -146,7 +146,7 @@ class OutputEvaluator:
         except Exception:
             pass
 
-        if isinstance(expected_val, str) and not is_str_type:
+        if isinstance(expected_val, str):
             exp_ok, exp_parsed, _ = cls.parse_raw_output(expected_val, return_type)
             if exp_ok:
                 norm_expected = exp_parsed
@@ -168,6 +168,10 @@ class OutputEvaluator:
             if isinstance(actual_val, str) and isinstance(norm_expected, str):
                 act_s = actual_val.strip()
                 exp_s = norm_expected.strip()
+                if (act_s.startswith(('"', "'")) and act_s.endswith(('"', "'")) and len(act_s) >= 2):
+                    act_s = act_s[1:-1]
+                if (exp_s.startswith(('"', "'")) and exp_s.endswith(('"', "'")) and len(exp_s) >= 2):
+                    exp_s = exp_s[1:-1]
                 if cfg.ignore_case:
                     act_s = act_s.lower()
                     exp_s = exp_s.lower()
@@ -195,10 +199,13 @@ class OutputEvaluator:
                 else:
                     passed = actual_val == norm_expected
             elif isinstance(actual_val, str) and isinstance(norm_expected, str):
-                if cfg.ignore_whitespace:
-                    passed = actual_val.strip() == norm_expected.strip()
-                else:
-                    passed = actual_val == norm_expected
+                act_s = actual_val.strip() if cfg.ignore_whitespace else actual_val
+                exp_s = norm_expected.strip() if cfg.ignore_whitespace else norm_expected
+                if (act_s.startswith(('"', "'")) and act_s.endswith(('"', "'")) and len(act_s) >= 2):
+                    act_s = act_s[1:-1]
+                if (exp_s.startswith(('"', "'")) and exp_s.endswith(('"', "'")) and len(exp_s) >= 2):
+                    exp_s = exp_s[1:-1]
+                passed = act_s == exp_s
             elif isinstance(actual_val, bool) and isinstance(norm_expected, bool):
                 passed = actual_val == norm_expected
             else:

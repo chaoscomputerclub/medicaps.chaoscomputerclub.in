@@ -4,13 +4,46 @@ routers/jobs.py — Asynchronous Job Status & Queue Telemetry Router
 """
 
 from typing import Any, Dict, Optional
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, status
+from pydantic import BaseModel, Field
 
 from app.middleware.auth import get_current_member_optional, require_admin_or_core
 from app.models.db_models import MemberProfile
 from app.controllers.job_controller import JobController
 
 router = APIRouter(tags=["Async Jobs & Telemetry"])
+
+
+class CreateJobRequest(BaseModel):
+    queue_name: str = Field(default="judge.pending", description="Target execution queue")
+    job_type: str = Field(default="code_execution", description="Job workload classification")
+    payload: Dict[str, Any] = Field(default_factory=dict, description="Job execution payload")
+    priority: int = Field(default=2, description="Job priority (0=EMERGENCY, 1=HIGH, 2=NORMAL, 3=LOW)")
+    idempotency_key: Optional[str] = Field(default=None, description="Optional unique idempotency token")
+
+
+@router.post(
+    "/jobs",
+    summary="Enqueue a new asynchronous background execution job",
+    response_model=Dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_job(
+    req: CreateJobRequest,
+    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
+):
+    """
+    Direct asynchronous job enqueue endpoint for code evaluation, sandbox runs, or background compute.
+    Returns the queued job contract and check_status_url.
+    """
+    return await JobController.create_job(
+        queue_name=req.queue_name,
+        job_type=req.job_type,
+        payload=req.payload,
+        priority=req.priority,
+        idempotency_key=req.idempotency_key,
+        current_member=current_member,
+    )
 
 
 @router.get(

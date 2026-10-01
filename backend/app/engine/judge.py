@@ -125,6 +125,15 @@ class JudgeEngine:
         if mode == ComparisonMode.EXACT:
             return False  # Already checked exact equality above
 
+        act_s = actual.strip()
+        exp_s = expected.strip()
+
+        # String quote normalization: e.g. "olleh" vs olleh, 'olleh' vs olleh
+        act_unq = act_s[1:-1] if (act_s.startswith(('"', "'")) and act_s.endswith(('"', "'")) and len(act_s) >= 2) else act_s
+        exp_unq = exp_s[1:-1] if (exp_s.startswith(('"', "'")) and exp_s.endswith(('"', "'")) and len(exp_s) >= 2) else exp_s
+        if act_unq == exp_unq:
+            return True
+
         if mode == ComparisonMode.TRIMMED:
             act_lines = [l.rstrip() for l in actual.replace("\r\n", "\n").splitlines()]
             exp_lines = [l.rstrip() for l in expected.replace("\r\n", "\n").splitlines()]

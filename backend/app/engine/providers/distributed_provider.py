@@ -89,10 +89,17 @@ class DistributedFabricProvider(JudgeProvider):
             tc_id = getattr(tc, "id", f"tc_{i+1}")
             stdin_val = getattr(tc, "stdin", "")
             exp_val = getattr(tc, "expected_output", "")
+            clean_exp = str(exp_val)
+            s_trimmed = clean_exp.strip()
+            if s_trimmed.startswith('"') and s_trimmed.endswith('"') and len(s_trimmed) >= 2:
+                try:
+                    clean_exp = json.loads(s_trimmed)
+                except Exception:
+                    clean_exp = s_trimmed[1:-1]
             serialized_tcs.append({
                 "id": str(tc_id),
                 "stdin": str(stdin_val),
-                "expected_output": str(exp_val),
+                "expected_output": clean_exp,
             })
 
         job_payload = {
@@ -118,8 +125,9 @@ class DistributedFabricProvider(JudgeProvider):
             job_id, ", ".join(online_nodes), lang_str, len(serialized_tcs)
         )
 
-        # 2. Await remote node execution with timeout
-        wait_timeout = max(10.0, float(time_limit * len(testcases)) + 8.0)
+        # 2. Await remote node execution with timeout (accounting for queue depth under bursts)
+        q_depth = await redis.llen("ccc:queue:fabric:pending")
+        wait_timeout = max(35.0, float(time_limit * len(testcases)) + float(q_depth * 1.5) + 15.0)
         start_wait = time.time()
 
         while time.time() - start_wait < wait_timeout:
@@ -128,6 +136,13 @@ class DistributedFabricProvider(JudgeProvider):
                 job_data = json.loads(raw_job)
                 if job_data.get("status") == "COMPLETED" and "result" in job_data:
                     res_dict = job_data["result"]
+                    raw_tc_list = res_dict.get("testcase_results", [])
+                    if len(raw_tc_list) < len(testcases):
+                        logger.warning(
+                            "⚠️ [Fabric] Remote node %s returned partial testcases (%d/%d) for job %s. Falling back to local engine.",
+                            job_data.get("claimed_by_node"), len(raw_tc_list), len(testcases), job_id
+                        )
+                        break
                     logger.info("✓ [Fabric] Job %s executed remotely on compute node %s", job_id, job_data.get("claimed_by_node"))
                     return self._format_execution_result(res_dict, testcases, job_id)
             await asyncio.sleep(0.15)

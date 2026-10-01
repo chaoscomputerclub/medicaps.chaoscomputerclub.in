@@ -91,8 +91,15 @@ class NodeRegisterRequest(BaseModel):
     container: ContainerCapability
     network: NetworkCapability
     max_concurrency: int = Field(default=4, ge=1, le=64)
+    api_capacity: int = Field(default=4, ge=1, le=64)
+    sse_capacity: int = Field(default=1000, ge=10, le=50000)
+    judge_capacity: int = Field(default=4, ge=1, le=64)
+    capabilities: Dict[str, bool] = Field(
+        default_factory=lambda: {"frontend": True, "api": True, "sse": True, "judge": True}
+    )
     languages: List[str] = Field(default=["python", "javascript", "cpp", "java"])
-    agent_version: str = Field(default="2.0.0")
+    agent_version: str = Field(default="2.1.0")
+    protocol_version: str = Field(default="2.0")
 
 
 class NodeHeartbeatRequest(BaseModel):
@@ -101,6 +108,9 @@ class NodeHeartbeatRequest(BaseModel):
     available_memory_mb: int = Field(default=1024, ge=0)
     running_jobs: int = Field(default=0, ge=0)
     available_slots: int = Field(default=4, ge=0)
+    api_active: int = Field(default=0, ge=0)
+    sse_active: int = Field(default=0, ge=0)
+    judge_active: int = Field(default=0, ge=0)
     network_status: str = Field(default="healthy")
     docker_status: str = Field(default="healthy")
 
@@ -114,7 +124,7 @@ class NodeResultRequest(BaseModel):
     verdict: str
     runtime_ms: float = 0.0
     memory_mb: float = 0.0
-    testcase_results: List[Dict[str, Any]] = Field(default_factory=list)
+    testcase_results: Optional[List[Dict[str, Any]]] = None
     compile_output: Optional[str] = None
     error: Optional[str] = None
 
@@ -143,9 +153,14 @@ async def register_node(
         "cpu_model": payload.cpu.model,
         "memory_mb": payload.memory.total_mb,
         "max_concurrency": payload.max_concurrency,
+        "api_capacity": payload.api_capacity,
+        "sse_capacity": payload.sse_capacity,
+        "judge_capacity": payload.judge_capacity,
+        "capabilities": json.dumps(payload.capabilities),
         "languages": json.dumps(payload.languages),
         "docker_version": payload.container.version,
         "agent_version": payload.agent_version,
+        "protocol_version": payload.protocol_version,
         "status": "ready",
         "registered_at": time.time(),
         "last_heartbeat": time.time(),
@@ -170,8 +185,8 @@ async def register_node(
     )
 
     logger.info(
-        "🛸 [Fabric] Node registered: %s (%s, %d threads, %d MB RAM, max_concurrency=%d)",
-        node_id, payload.hostname, payload.cpu.logical_cores, payload.memory.total_mb, payload.max_concurrency
+        "🛸 [Fabric] Node registered: %s (%s, %d threads, %d MB RAM, judge_cap=%d, api_cap=%d, sse_cap=%d)",
+        node_id, payload.hostname, payload.cpu.logical_cores, payload.memory.total_mb, payload.judge_capacity, payload.api_capacity, payload.sse_capacity
     )
 
     return {
@@ -180,7 +195,10 @@ async def register_node(
         "heartbeat_interval_s": settings.WORKER_HEARTBEAT_INTERVAL_S,
         "heartbeat_ttl_s": settings.WORKER_HEARTBEAT_TTL_S,
         "assigned_concurrency": payload.max_concurrency,
-        "queue_name": "judge",
+        "api_capacity": payload.api_capacity,
+        "sse_capacity": payload.sse_capacity,
+        "judge_capacity": payload.judge_capacity,
+        "queue_name": "fabric",
     }
 
 
@@ -212,6 +230,9 @@ async def node_heartbeat(
             "available_memory_mb": str(payload.available_memory_mb),
             "running_jobs": str(payload.running_jobs),
             "available_slots": str(payload.available_slots),
+            "api_active": str(payload.api_active),
+            "sse_active": str(payload.sse_active),
+            "judge_active": str(payload.judge_active),
             "last_heartbeat": str(now),
             "status": "ready" if payload.docker_status == "healthy" else "degraded",
         },
@@ -241,11 +262,11 @@ async def claim_job(
             detail="Node heartbeat expired or not registered",
         )
 
-    # Atomically pop from high-priority end of pending and push into processing
-    # Dedicated fabric execution queue first, with legacy fallback
-    job_id = await redis.rpoplpush("ccc:queue:fabric:pending", "ccc:queue:fabric:processing")
+    processing_queue = "ccc:queue:fabric:processing"
+    job_id = await redis.rpoplpush("ccc:queue:fabric:pending", processing_queue)
     if not job_id:
-        job_id = await redis.rpoplpush("ccc:queue:judge:pending", "ccc:queue:judge:processing")
+        processing_queue = "ccc:queue:judge:processing"
+        job_id = await redis.rpoplpush("ccc:queue:judge:pending", processing_queue)
     if not job_id:
         return {"job": None}
 
@@ -254,7 +275,7 @@ async def claim_job(
 
     raw_job = await redis.get(f"ccc:job:{job_id}")
     if not raw_job:
-        await redis.lrem(processing_key, 1, job_id)
+        await redis.lrem(processing_queue, 1, job_id)
         return {"job": None}
 
     job_dict = json.loads(raw_job)
@@ -296,7 +317,10 @@ async def submit_result(
     if raw_job:
         job_dict = json.loads(raw_job)
         job_dict["status"] = "COMPLETED"
-        job_dict["result"] = payload.model_dump()
+        res_data = payload.model_dump()
+        if res_data.get("testcase_results") is None:
+            res_data["testcase_results"] = []
+        job_dict["result"] = res_data
         job_dict["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         await redis.set(f"ccc:job:{payload.job_id}", json.dumps(job_dict), ex=86400)
 
@@ -334,6 +358,89 @@ async def drain_node(
     await redis.hset(f"ccc:node:{node_id}:info", "status", "draining")
     logger.info("Node %s entered DRAINING mode", node_id)
     return {"status": "draining", "node_id": node_id}
+
+
+@router.post("/{node_id}/ready")
+async def mark_node_ready(
+    node_id: str,
+    _: None = Depends(_require_node_auth),
+) -> Dict[str, Any]:
+    """Transitions a node back into READY status to accept work."""
+    redis = get_redis()
+    await redis.hset(f"ccc:node:{node_id}:info", "status", "ready")
+    logger.info("Node %s transitioned to READY", node_id)
+    return {"status": "ready", "node_id": node_id}
+
+
+@router.get("/{node_id}")
+async def get_node(
+    node_id: str,
+    _: Any = Depends(require_admin_or_core),
+) -> Dict[str, Any]:
+    """Retrieve detailed telemetry and configuration for a specific node."""
+    redis = get_redis()
+    info = await redis.hgetall(f"ccc:node:{node_id}:info")
+    if not info:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Node '{node_id}' not found",
+        )
+    decoded = {
+        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+        for k, v in info.items()
+    }
+    decoded["is_online"] = bool(await redis.exists(f"ccc:node:{node_id}:heartbeat"))
+    return decoded
+
+
+@router.get("/{node_id}/health")
+async def get_node_health(
+    node_id: str,
+) -> Dict[str, Any]:
+    """Liveness probe for a specific node."""
+    redis = get_redis()
+    is_online = bool(await redis.exists(f"ccc:node:{node_id}:heartbeat"))
+    status_val = await redis.hget(f"ccc:node:{node_id}:info", "status")
+    status_str = status_val.decode() if isinstance(status_val, bytes) else str(status_val or "unknown")
+    
+    return {
+        "node_id": node_id,
+        "is_online": is_online,
+        "status": status_str if is_online else "offline",
+    }
+
+
+@router.get("/{node_id}/capacity")
+async def get_node_capacity(
+    node_id: str,
+) -> Dict[str, Any]:
+    """Hardware capacity and saturation report for a specific node."""
+    redis = get_redis()
+    info = await redis.hgetall(f"ccc:node:{node_id}:info")
+    if not info:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Node '{node_id}' not found",
+        )
+    decoded = {
+        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+        for k, v in info.items()
+    }
+    
+    return {
+        "node_id": node_id,
+        "cpu_cores": int(decoded.get("cpu_cores", 1)),
+        "cpu_threads": int(decoded.get("cpu_threads", 1)),
+        "memory_total_mb": int(decoded.get("memory_mb", 1024)),
+        "memory_available_mb": float(decoded.get("available_memory_mb", 512)),
+        "api_capacity": int(decoded.get("api_capacity", 4)),
+        "api_active": int(decoded.get("api_active", 0)),
+        "sse_capacity": int(decoded.get("sse_capacity", 1000)),
+        "sse_active": int(decoded.get("sse_active", 0)),
+        "judge_capacity": int(decoded.get("max_concurrency", 4)),
+        "running_jobs": int(decoded.get("running_jobs", 0)),
+        "is_online": bool(await redis.exists(f"ccc:node:{node_id}:heartbeat")),
+    }
 
 
 @router.post("/{node_id}/unregister")

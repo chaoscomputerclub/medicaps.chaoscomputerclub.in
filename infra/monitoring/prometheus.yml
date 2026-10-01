@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  # 1. Cloud Control Plane & Global Fabric Router
+  - job_name: "fabric-control-plane"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["127.0.0.1:8000"]
+
+  # 2. Fabric Health & Dynamic Capacity Probe
+  - job_name: "fabric-health-telemetry"
+    metrics_path: "/api/v1/fabric/health"
+    static_configs:
+      - targets: ["127.0.0.1:8000"]
+
+  # 3. Redis Engine Telemetry
+  - job_name: "redis-queues"
+    static_configs:
+      - targets: ["127.0.0.1:9121"]
+
+  # 4. Distributed Go Node Agents
+  - job_name: "fabric-nodes"
+    static_configs:
+      - targets: ["127.0.0.1:8080"]

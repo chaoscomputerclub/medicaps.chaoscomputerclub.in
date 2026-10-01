@@ -1,0 +1,19 @@
+[Unit]
+Description=Chaos Computer Club Medi-Caps Chapter — Portable Compute Node Daemon
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/ccc-node
+EnvironmentFile=/opt/ccc-node/config/node.env
+ExecStart=/opt/ccc-node/bin/node-agent-linux-amd64
+Restart=always
+RestartSec=5s
+LimitNOFILE=65536
+KillMode=process
+TimeoutStopSec=25s
+
+[Install]
+WantedBy=multi-user.target

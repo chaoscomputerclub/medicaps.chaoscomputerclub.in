@@ -83,5 +83,7 @@ backend/backups/
 
 # Node agent compiled binaries & identity
 judge-agent/bin/
+node-agent/bin/
+ccc-node/bin/
 .node_identity
 **/.node_identity

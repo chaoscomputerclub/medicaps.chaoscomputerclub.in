@@ -23,7 +23,7 @@ from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
 from app.core.queue import queue_manager
-from app.routers import admin, admin_contests, admin_problems, admin_qa, assessment, auth, contests, events, feed, jobs, leaderboard, metrics, passes, scoreboards, social, storage, verify, webhooks, workers
+from app.routers import admin, admin_contests, admin_problems, admin_qa, assessment, auth, contests, events, fabric, feed, jobs, leaderboard, metrics, nodes, passes, scoreboards, social, storage, verify, webhooks, workers
 from app.api.v1.router import api_router_v1
 from app.core.resource_governor import get_resource_governor
 
@@ -204,6 +204,8 @@ app.include_router(events.router, prefix=settings.API_PREFIX)
 app.include_router(webhooks.router, prefix=settings.API_PREFIX)
 app.include_router(jobs.router, prefix=settings.API_PREFIX)
 app.include_router(workers.router, prefix=settings.API_PREFIX)
+app.include_router(nodes.router, prefix=settings.API_PREFIX)
+app.include_router(fabric.router, prefix=settings.API_PREFIX)
 app.include_router(metrics.router, prefix=settings.API_PREFIX)
 app.include_router(metrics.router)  # Standard Prometheus root path GET /metrics
 

@@ -1,0 +1,181 @@
+syntax = "proto3";
+
+package fabric.v1;
+
+option go_package = "chaoscomputerclub.in/node-agent/internal/pb;pb";
+
+// ==============================================================================
+// Global Fabric Control Plane & Compute Node Protocol (gRPC / HTTP/2 + TLS)
+// High-performance typed protocol for distributed nodes and cloud control plane
+// ==============================================================================
+
+service FabricControlPlane {
+  // 1. Unary Operations for node lifecycle, heartbeat, and job dispatch
+  rpc RegisterNode (RegisterNodeRequest) returns (RegisterNodeResponse);
+  rpc SendHeartbeat (HeartbeatRequest) returns (HeartbeatResponse);
+  rpc DrainNode (DrainNodeRequest) returns (DrainNodeResponse);
+  rpc MarkReady (ReadyNodeRequest) returns (ReadyNodeResponse);
+  rpc ClaimJob (ClaimJobRequest) returns (ClaimJobResponse);
+  rpc SubmitResult (SubmitResultRequest) returns (SubmitResultResponse);
+
+  // 2. Persistent Bidirectional Fabric Stream
+  // Multiplexes heartbeats, real-time job dispatch, capacity updates, and cancellations
+  rpc ConnectFabric (stream NodeTelemetry) returns (stream FabricCommand);
+}
+
+message HardwareSpecs {
+  int32 cpu_cores = 1;
+  int32 cpu_threads = 2;
+  string cpu_model = 3;
+  int64 total_memory_mb = 4;
+  int64 available_memory_mb = 5;
+  string os = 6;
+  string arch = 7;
+  string docker_version = 8;
+  bool docker_healthy = 9;
+  repeated string supported_languages = 10;
+}
+
+message DynamicCapacity {
+  int32 judge_slots = 1;
+  int32 api_workers = 2;
+  int32 sse_connections = 3;
+  int64 reserved_memory_mb = 4;
+}
+
+message RegisterNodeRequest {
+  string node_id = 1;
+  string hostname = 2;
+  string enrollment_token = 3;
+  string agent_version = 4;
+  HardwareSpecs hardware = 5;
+  DynamicCapacity capacity = 6;
+}
+
+message RegisterNodeResponse {
+  string node_id = 1;
+  string status = 2; // "ready", "draining", etc.
+  int32 heartbeat_interval_seconds = 3;
+  string assigned_queue = 4;
+  int32 max_concurrency = 5;
+  string message = 6;
+}
+
+message HeartbeatRequest {
+  string node_id = 1;
+  float cpu_usage_pct = 2;
+  float memory_usage_pct = 3;
+  int64 available_memory_mb = 4;
+  int32 active_jobs = 5;
+  int32 active_api_workers = 6;
+  int32 active_sse_conns = 7;
+  float latency_ms = 8;
+  bool docker_healthy = 9;
+}
+
+message HeartbeatResponse {
+  bool acknowledged = 1;
+  string status = 2;
+  bool should_drain = 3;
+  int64 timestamp = 4;
+}
+
+message DrainNodeRequest {
+  string node_id = 1;
+  string reason = 2;
+}
+
+message DrainNodeResponse {
+  bool acknowledged = 1;
+  string status = 2;
+}
+
+message ReadyNodeRequest {
+  string node_id = 1;
+}
+
+message ReadyNodeResponse {
+  bool acknowledged = 1;
+  string status = 2;
+}
+
+message ClaimJobRequest {
+  string node_id = 1;
+  float timeout_seconds = 2;
+  repeated string supported_languages = 3;
+}
+
+message TestCase {
+  string id = 1;
+  string stdin = 2;
+  string expected_output = 3;
+  bool hidden = 4;
+  float weight = 5;
+}
+
+message JobSpec {
+  string job_id = 1;
+  string queue_name = 2;
+  string job_type = 3;
+  string language = 4;
+  string code = 5;
+  float time_limit_ms = 6;
+  int64 memory_limit_mb = 7;
+  repeated TestCase testcases = 8;
+  string lease_id = 9;
+  int32 attempt = 10;
+  string submission_id = 11;
+  string contest_slug = 12;
+}
+
+message ClaimJobResponse {
+  bool has_job = 1;
+  JobSpec job = 2;
+}
+
+message TestCaseResult {
+  string id = 1;
+  bool passed = 2;
+  string verdict = 3;
+  float execution_time_ms = 4;
+  int64 memory_kb = 5;
+  string stdout = 6;
+  string stderr = 7;
+}
+
+message SubmitResultRequest {
+  string node_id = 1;
+  string job_id = 2;
+  string verdict = 3;
+  float runtime_ms = 4;
+  int64 memory_kb = 5;
+  int32 exit_code = 6;
+  string error_message = 7;
+  string compiler_output = 8;
+  int32 passed_testcases = 9;
+  int32 total_testcases = 10;
+  repeated TestCaseResult testcase_results = 11;
+}
+
+message SubmitResultResponse {
+  bool recorded = 1;
+  string status = 2;
+}
+
+message NodeTelemetry {
+  string node_id = 1;
+  int64 timestamp = 2;
+  HeartbeatRequest heartbeat = 3;
+}
+
+message FabricCommand {
+  enum CommandType {
+    NOOP = 0;
+    DISPATCH_JOB = 1;
+    DRAIN = 2;
+    RECONFIGURE = 3;
+  }
+  CommandType type = 1;
+  JobSpec job = 2;
+  string message = 3;
+}

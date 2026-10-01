@@ -3,6 +3,7 @@ Chaos Computer Club — Medi-Caps Chapter
 modules/contests/contest_execution_service.py — Arena Code Sandbox Execution & Submission Service
 """
 
+import json
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -14,10 +15,10 @@ from sqlalchemy import select, func, update, text
 from app.core.cache import delete_cache_pattern
 from app.core.config import settings
 from app.core.contest_lifecycle import assert_submissions_open
-from app.engine.enums import ComparisonMode
+from app.engine.enums import ComparisonMode, Verdict
 from app.engine.languages import Language, LanguageRegistry, LanguageContaminationError, UnsupportedLanguageError
 from app.engine.providers.factory import get_judge_provider
-from app.engine.schemas import TestCaseSchema
+from app.engine.schemas import TestCaseSchema, TestCaseResult
 from app.models.db_models import (
     ContestProblem,
     ContestSubmission,
@@ -249,7 +250,9 @@ class ContestExecutionService:
                 function_signature=fn_sig,
             )
 
-        LanguageRegistry.validate_source(lang_enum, exec_code)
+        # Extract all needed primitives before releasing DB connection and potential session expiration
+        target_problem_id = str(problem.id)
+        target_problem_index = problem.problem_index
 
         # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to sandbox execution.
         try:
@@ -296,13 +299,21 @@ class ContestExecutionService:
             if tr.passed:
                 passed_count += 1
 
+            clean_exp_val = str(exp_val)
+            if (clean_exp_val.startswith(('"', "'")) and clean_exp_val.endswith(('"', "'")) and len(clean_exp_val) >= 2):
+                if not clean_exp_val.startswith(("[", "{")):
+                    try:
+                        clean_exp_val = json.loads(clean_exp_val) if clean_exp_val.startswith('"') else clean_exp_val[1:-1]
+                    except Exception:
+                        clean_exp_val = clean_exp_val[1:-1]
+
             testcase_results.append({
                 "testcase_id": tr.testcase_id,
                 "name": tr.name,
                 "passed": tr.passed,
                 "verdict": tr.verdict,
                 "stdout": tr.stdout,
-                "expected_output": str(exp_val),
+                "expected_output": str(clean_exp_val),
                 "stdin": (tcs[i].stdin if i < len(tcs) else ""),
                 "stderr": tr.stderr,
                 "compile_output": tr.compile_output,
@@ -314,7 +325,7 @@ class ContestExecutionService:
 
         logger.info(
             "Arena Code Run Completed: problem_id=%s, lang=%s, fn=%s, params=%d, passed=%d/%d, verdict=%s",
-            problem.id,
+            target_problem_id,
             lang_enum.value,
             fn_sig.name if fn_sig else "none",
             len(fn_sig.parameters) if fn_sig else 0,
@@ -448,12 +459,21 @@ class ContestExecutionService:
                 stdin_payload = str(inp)
 
             exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
+            clean_exp_out = exp_out
+            if isinstance(clean_exp_out, str):
+                s_trimmed = clean_exp_out.strip()
+                if s_trimmed.startswith('"') and s_trimmed.endswith('"') and len(s_trimmed) >= 2:
+                    try:
+                        clean_exp_out = json.loads(s_trimmed)
+                    except Exception:
+                        clean_exp_out = s_trimmed[1:-1]
+
             all_tcs.append(
                 TestCaseSchema(
                     id=f"tc_{i+1}",
                     name=f"Test {i+1}",
                     stdin=stdin_payload,
-                    expected_output=str(exp_out),
+                    expected_output=str(clean_exp_out),
                     hidden=(i >= len(samples)),
                     weight=float(s.get("weight", 1.0) or 1.0),
                 )
@@ -473,6 +493,18 @@ class ContestExecutionService:
             )
 
         LanguageRegistry.validate_source(lang_enum, exec_code)
+
+        # Extract all needed primitives before releasing DB connection and potential session expiration
+        target_problem_id = str(problem.id)
+        target_problem_points = int(getattr(problem, "points", 0) or 0)
+        target_problem_index = problem.problem_index
+        target_contest_id = str(contest.id)
+        target_contest_starts_at = contest.starts_at
+        target_member_id = str(current_member.id)
+        target_member_handle = current_member.handle or f"cadet_{target_member_id[:6]}"
+        target_member_full_name = current_member.full_name or "Cadet"
+        target_member_department = current_member.department or "CSE"
+        target_member_batch = current_member.batch or "2023-27"
 
         # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to isolated sandbox execution.
         # Zero database connections are held during sandbox execution, compilation, or container runtime.
@@ -517,19 +549,35 @@ class ContestExecutionService:
             if tr.passed:
                 passed_count += 1
 
+        # Defensive pad if provider returned fewer testcase results than requested
+        if len(exec_result.testcase_results) < len(all_tcs):
+            for missing_idx in range(len(exec_result.testcase_results), len(all_tcs)):
+                missing_tc = all_tcs[missing_idx]
+                exec_result.testcase_results.append(
+                    TestCaseResult(
+                        testcase_id=missing_tc.id,
+                        name=missing_tc.name,
+                        hidden=missing_tc.hidden,
+                        passed=False,
+                        verdict=Verdict.WRONG_ANSWER,
+                        expected_output=missing_tc.expected_output,
+                        stderr="Execution result missing from runner",
+                    )
+                )
+
         is_accepted = (passed_count == len(all_tcs)) and len(all_tcs) > 0
         verdict_str = "ACCEPTED" if is_accepted else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
         total_tc = max(1, len(all_tcs))
-        points_awarded = problem.points if is_accepted else int(problem.points * (passed_count / total_tc))
+        points_awarded = target_problem_points if is_accepted else int(target_problem_points * (passed_count / total_tc))
 
         exec_result.passed_testcases = passed_count
         exec_result.total_testcases = len(all_tcs)
 
         sub = ContestSubmission(
-            contest_id=contest.id,
-            problem_id=problem.id,
-            member_id=current_member.id,
-            handle=current_member.handle or f"cadet_{current_member.id[:6]}",
+            contest_id=target_contest_id,
+            problem_id=target_problem_id,
+            member_id=target_member_id,
+            handle=target_member_handle,
             language=lang_enum.value,
             code=payload.code,
             verdict=verdict_str,
@@ -544,9 +592,9 @@ class ContestExecutionService:
 
         # Check if cadet previously solved this problem to prevent duplicate scoring
         prev_ac_stmt = select(func.count(ContestSubmission.id)).where(
-            ContestSubmission.contest_id == contest.id,
-            ContestSubmission.problem_id == problem.id,
-            ContestSubmission.member_id == current_member.id,
+            ContestSubmission.contest_id == target_contest_id,
+            ContestSubmission.problem_id == target_problem_id,
+            ContestSubmission.member_id == target_member_id,
             ContestSubmission.verdict == "ACCEPTED",
         )
         prev_ac_count = (await db.scalar(prev_ac_stmt)) or 0
@@ -555,34 +603,34 @@ class ContestExecutionService:
         if is_first_solve_by_user:
             await db.execute(
                 update(ContestProblem)
-                .where(ContestProblem.id == problem.id)
+                .where(ContestProblem.id == target_problem_id)
                 .values(solved_count=ContestProblem.solved_count + 1)
             )
 
         # Acquire advisory transaction lock on contest scoreboard to serialize updates and eliminate deadlocks
-        await db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:cid))"), {"cid": f"scoreboard:{contest.id}"})
+        await db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:cid))"), {"cid": f"scoreboard:{target_contest_id}"})
 
-        contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
+        contest_start = target_contest_starts_at.replace(tzinfo=timezone.utc) if (target_contest_starts_at and target_contest_starts_at.tzinfo is None) else target_contest_starts_at
         solve_elapsed_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
 
-        sb_entry = await ContestRepository.get_scoreboard_entry(db, contest.id, current_member.id, for_update=True)
+        sb_entry = await ContestRepository.get_scoreboard_entry(db, target_contest_id, target_member_id, for_update=True)
         if not sb_entry:
             failed_attempts = 0 if is_accepted else 1
             prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
             sb_entry = ScoreboardEntry(
-                contest_id=contest.id,
-                member_id=current_member.id,
+                contest_id=target_contest_id,
+                member_id=target_member_id,
                 rank=999,
-                handle=current_member.handle or f"cadet_{current_member.id[:6]}",
-                full_name=current_member.full_name or "Cadet",
-                department=current_member.department or "CSE",
-                batch=current_member.batch or "2023-27",
+                handle=target_member_handle,
+                full_name=target_member_full_name,
+                department=target_member_department,
+                batch=target_member_batch,
                 division="open",
                 score=points_awarded if is_accepted else 0,
                 solved=1 if is_accepted else 0,
                 penalty_seconds=prob_penalty,
                 telemetry=[{
-                    "problem_index": problem.problem_index,
+                    "problem_index": target_problem_index,
                     "status": "solved" if is_accepted else "failed",
                     "attempts": 1,
                     "failed_attempts": 0 if is_accepted else 1,
@@ -595,7 +643,7 @@ class ContestExecutionService:
         else:
             telemetry_list = list(sb_entry.telemetry or [])
             prob_item = next(
-                (item for item in telemetry_list if item.get("problem_index") == problem.problem_index),
+                (item for item in telemetry_list if item.get("problem_index") == target_problem_index),
                 None,
             )
 
@@ -618,7 +666,7 @@ class ContestExecutionService:
                 failed_attempts = 0 if is_accepted else 1
                 prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
                 telemetry_list.append({
-                    "problem_index": problem.problem_index,
+                    "problem_index": target_problem_index,
                     "status": "solved" if is_accepted else "failed",
                     "attempts": 1,
                     "failed_attempts": failed_attempts,
@@ -639,14 +687,14 @@ class ContestExecutionService:
             sb_entry.telemetry = telemetry_list
 
         await db.flush()
-        await ContestRepository.re_rank_scoreboard(db, contest.id)
+        await ContestRepository.re_rank_scoreboard(db, target_contest_id)
         await db.commit()
 
         # Granular Cache Invalidation — strictly scope to this contest and its scoreboard/status
         await delete_cache_pattern(f"cache:scoreboard:{slug}*")
         await delete_cache_pattern(f"cache:contest:detail:{slug}*")
         await delete_cache_pattern(f"cache:contest:problems:{slug}*")
-        await delete_cache_pattern(f"cache:reg_status:{contest.id}*")
+        await delete_cache_pattern(f"cache:reg_status:{target_contest_id}*")
         await delete_cache_pattern(f"cache:reg_status:{slug}*")
 
         try:
@@ -654,9 +702,9 @@ class ContestExecutionService:
                 event_type="submission_evaluated",
                 data={
                     "contest_slug": slug,
-                    "problem_index": problem.problem_index,
-                    "problem_id": problem.id,
-                    "handle": current_member.handle,
+                    "problem_index": target_problem_index,
+                    "problem_id": target_problem_id,
+                    "handle": target_member_handle,
                     "verdict": verdict_str,
                     "is_accepted": is_accepted,
                     "points_awarded": points_awarded,
@@ -680,7 +728,7 @@ class ContestExecutionService:
                 "verdict": tr.verdict,
                 "is_hidden": is_hidden,
                 "stdout": "" if is_hidden else tr.stdout,
-                "expected_output": "[Hidden]" if is_hidden else tr.expected_output,
+                "expected_output": "[Hidden]" if is_hidden else (tc.expected_output if tc else tr.expected_output),
                 "input": "[Hidden]" if is_hidden else (tc.stdin if tc else ""),
                 "stderr": "" if is_hidden else tr.stderr,
                 "compile_output": tr.compile_output,
@@ -690,7 +738,7 @@ class ContestExecutionService:
         logger.info(
             "Arena Code Submission Evaluated: submission_id=%s, problem_id=%s, lang=%s, fn=%s, params=%d, passed=%d/%d, verdict=%s, points=%d",
             sub.id,
-            problem.id,
+            target_problem_id,
             lang_enum.value,
             fn_sig.name if fn_sig else "none",
             len(fn_sig.parameters) if fn_sig else 0,

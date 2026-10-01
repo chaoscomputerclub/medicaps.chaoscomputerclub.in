@@ -1,0 +1,37 @@
+# ==============================================================================
+# Multi-Language Secure Sandbox Container (codebox-engine)
+# Hardened for hostile student code execution
+# ==============================================================================
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install compilers and runtimes: Python 3.12, Node.js 20, GCC/G++ 13, OpenJDK 21
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    python3 \
+    python3-minimal \
+    nodejs \
+    openjdk-21-jre-headless \
+    openjdk-21-jdk-headless \
+    libseccomp2 \
+    time \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create unprivileged sandbox user and locked workspace directory
+RUN groupadd -g 2000 sandbox && \
+    useradd -u 2000 -g sandbox -m -s /bin/bash sandbox && \
+    mkdir -p /sandbox && \
+    chown -R sandbox:sandbox /sandbox && \
+    chmod 750 /sandbox
+
+# Restrict sensitive system directories from unprivileged tampering
+RUN chmod 700 /root
+
+WORKDIR /sandbox
+USER sandbox:sandbox
+
+CMD ["/bin/bash"]

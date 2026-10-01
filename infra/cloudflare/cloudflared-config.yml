@@ -1,0 +1,30 @@
+# ==============================================================================
+# Cloudflare Tunnel Configuration (cloudflared)
+# Medi-Caps Chapter — Global Ingress
+# ==============================================================================
+
+tunnel: medicaps-production-fabric
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  # 1. Main Student Portal & Web Application
+  - hostname: medicaps.chaoscomputerclub.in
+    service: https://localhost:443
+    originRequest:
+      originServerName: medicaps.chaoscomputerclub.in
+      noTLSVerify: false
+      http2Origin: true
+      connectTimeout: 10s
+
+  # 2. Production API & WebSocket/SSE Gateway
+  - hostname: medicaps-api.chaoscomputerclub.in
+    service: https://localhost:443
+    originRequest:
+      originServerName: medicaps-api.chaoscomputerclub.in
+      noTLSVerify: false
+      http2Origin: true
+      connectTimeout: 10s
+      keepAliveTimeout: 300s
+
+  # Fallback 404
+  - service: http_status:404

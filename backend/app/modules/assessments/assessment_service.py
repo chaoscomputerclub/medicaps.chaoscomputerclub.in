@@ -83,6 +83,9 @@ class AssessmentExecutionService:
         )
         LanguageRegistry.validate_source(lang_enum, exec_code)
 
+        problem_time_limit = float(getattr(problem, "time_limit", 2.0) or 2.0)
+        problem_memory_limit = int(getattr(problem, "memory_limit", 256) or 256)
+
         # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to sandbox execution.
         try:
             await db.rollback()
@@ -94,8 +97,8 @@ class AssessmentExecutionService:
             language=lang_enum,
             code=exec_code,
             testcases=tcs,
-            time_limit=problem.time_limit,
-            memory_limit_mb=problem.memory_limit,
+            time_limit=problem_time_limit,
+            memory_limit_mb=problem_memory_limit,
             comparison_mode=ComparisonMode.TRIMMED,
         )
 
@@ -183,6 +186,16 @@ class AssessmentExecutionService:
         )
         LanguageRegistry.validate_source(lang_enum, exec_code)
 
+        target_problem_id = str(problem.id)
+        target_problem_points = float(getattr(problem, "points", 100) or 100)
+        problem_time_limit = float(getattr(problem, "time_limit", 2.0) or 2.0)
+        problem_memory_limit = int(getattr(problem, "memory_limit", 256) or 256)
+        target_session_id = str(session.id)
+        session_started_at = session.started_at
+        target_member_id = str(current_member.id)
+        target_member_handle = current_member.handle
+        target_member_full_name = current_member.full_name
+
         # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to isolated sandbox execution.
         # Zero database connections are held during sandbox execution, compilation, or container runtime.
         try:
@@ -195,17 +208,17 @@ class AssessmentExecutionService:
             language=lang_enum,
             code=exec_code,
             testcases=all_tcs,
-            time_limit=problem.time_limit,
-            memory_limit_mb=problem.memory_limit,
+            time_limit=problem_time_limit,
+            memory_limit_mb=problem_memory_limit,
         )
 
-        points_earned = round((exec_result.score / 100.0) * problem.points, 2)
+        points_earned = round((exec_result.score / 100.0) * target_problem_points, 2)
         verdict_val = exec_result.verdict.value if hasattr(exec_result.verdict, "value") else str(exec_result.verdict)
 
         submission = AssessmentSubmission(
-            session_id=session.id,
-            problem_id=problem.id,
-            member_id=current_member.id,
+            session_id=target_session_id,
+            problem_id=target_problem_id,
+            member_id=target_member_id,
             language=lang_enum.value,
             code=code,
             verdict=verdict_val,
@@ -229,15 +242,22 @@ class AssessmentExecutionService:
         )
         db.add(submission)
 
-        existing_subs = await AssessmentRepository.get_all_session_submissions(db, session.id)
+        existing_subs = await AssessmentRepository.get_all_session_submissions(db, target_session_id)
         best_per_prob = {}
         for s in list(existing_subs) + [submission]:
             if s.problem_id not in best_per_prob or s.score > best_per_prob[s.problem_id]:
                 best_per_prob[s.problem_id] = s.score
 
-        session.total_score = round(sum(best_per_prob.values()), 2)
-        started_at = session.started_at.replace(tzinfo=timezone.utc) if session.started_at.tzinfo is None else session.started_at
-        session.total_penalty_seconds = int((now_utc() - started_at).total_seconds())
+        # Re-fetch active session to ensure it is attached to the current active transaction
+        live_session = await db.get(AssessmentSession, target_session_id)
+        if live_session:
+            live_session.total_score = round(sum(best_per_prob.values()), 2)
+            started_at = (live_session.started_at or session_started_at)
+            started_at = started_at.replace(tzinfo=timezone.utc) if (started_at and started_at.tzinfo is None) else started_at
+            live_session.total_penalty_seconds = int((now_utc() - started_at).total_seconds()) if started_at else 0
+            session_total_score = live_session.total_score
+        else:
+            session_total_score = round(sum(best_per_prob.values()), 2)
 
         await db.commit()
         await invalidate_ranking(contest_slug)
@@ -247,13 +267,13 @@ class AssessmentExecutionService:
                 event_type="submission_evaluated",
                 data={
                     "contest_slug": contest_slug,
-                    "problem_id": problem.id,
-                    "member_id": current_member.id,
-                    "handle": current_member.handle,
-                    "full_name": current_member.full_name,
+                    "problem_id": target_problem_id,
+                    "member_id": target_member_id,
+                    "handle": target_member_handle,
+                    "full_name": target_member_full_name,
                     "score": points_earned,
                     "verdict": exec_result.verdict.value,
-                    "total_score": session.total_score,
+                    "total_score": session_total_score,
                 },
                 contest_slug=contest_slug,
             )
@@ -263,7 +283,7 @@ class AssessmentExecutionService:
         return {
             "verdict": exec_result.verdict,
             "score": points_earned,
-            "max_points": problem.points,
+            "max_points": target_problem_points,
             "passed_testcases": exec_result.passed_testcases,
             "total_testcases": exec_result.total_testcases,
             "runtime_ms": round(exec_result.time * 1000.0, 2),

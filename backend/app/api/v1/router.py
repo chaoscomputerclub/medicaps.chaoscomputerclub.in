@@ -23,6 +23,7 @@ from app.routers import (
     workers,
     metrics,
     nodes,
+    fabric,
 )
 
 api_router_v1 = APIRouter()
@@ -42,6 +43,7 @@ for domain_router in (
     workers.router,
     metrics.router,
     nodes.router,
+    fabric.router,
 ):
     api_router_v1.include_router(domain_router)
 

@@ -19,6 +19,51 @@ class JobController:
     """Manages asynchronous job status queries, BOLA authorization, and DLQ operations."""
 
     @staticmethod
+    async def create_job(
+        queue_name: str,
+        job_type: str,
+        payload: Dict[str, Any],
+        priority: int = 2,
+        idempotency_key: Optional[str] = None,
+        current_member: Optional[MemberProfile] = None,
+    ) -> Dict[str, Any]:
+        from app.core.queue.contracts import JobPriority
+        # Bind member ID to payload for authorization tracking if user logged in
+        if current_member and "member_id" not in payload:
+            payload["member_id"] = current_member.id
+
+        pri_enum = JobPriority.NORMAL
+        if isinstance(priority, str):
+            try:
+                pri_enum = JobPriority(priority.lower())
+            except Exception:
+                pri_enum = JobPriority.NORMAL
+        elif isinstance(priority, int):
+            if priority <= 1:
+                pri_enum = JobPriority.HIGH
+            elif priority == 2:
+                pri_enum = JobPriority.NORMAL
+            else:
+                pri_enum = JobPriority.LOW
+
+        job = await RedisQueueEngine.enqueue(
+            queue_name=queue_name,
+            job_type=job_type,
+            payload=payload,
+            priority=pri_enum,
+            idempotency_key=idempotency_key,
+        )
+
+        return {
+            "job_id": job.id,
+            "queue_name": job.queue_name,
+            "job_type": job.job_type,
+            "status": job.status.value if hasattr(job.status, "value") else str(job.status),
+            "created_at": job.created_at,
+            "check_status_url": f"/api/jobs/{job.id}",
+        }
+
+    @staticmethod
     async def get_job_status(
         job_id: str,
         current_member: Optional[MemberProfile] = None,
