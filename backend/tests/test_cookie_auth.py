@@ -164,3 +164,27 @@ async def test_redis_refresh_token_logout_revocation():
     payload = await verify_and_revoke_refresh_token(refresh_token)
     assert payload is None
 
+
+@pytest.mark.asyncio
+async def test_create_member_with_duplicate_rating_kwargs():
+    """Verify create_member safely handles rating and peak_rating kwargs without TypeError."""
+    from unittest.mock import AsyncMock
+    from app.modules.auth.auth_repository import AuthRepository
+
+    mock_db = AsyncMock()
+    mock_db.add = lambda x: None
+    mock_db.commit = AsyncMock()
+    mock_db.refresh = AsyncMock()
+
+    member = await AuthRepository.create_member(
+        db=mock_db,
+        email="test_student@medicaps.ac.in",
+        rating=1200,
+        peak_rating=1200,
+        is_onboarded=False,
+        is_core_member=False,
+    )
+    assert member.email == "test_student@medicaps.ac.in"
+    assert member.rating == 1200
+    assert member.peak_rating == 1200
+

@@ -53,13 +53,20 @@ class AuthRepository:
     ) -> MemberProfile:
         """Create and persist a new member profile."""
         clean_email = email.lower().strip()
+        rating = extra_fields.pop("rating", 1200)
+        peak_rating = extra_fields.pop("peak_rating", 1200)
+        is_onboarded = extra_fields.pop("is_onboarded", is_onboarded)
+        extra_fields.pop("email", None)
+        extra_fields.pop("full_name", None)
+        extra_fields.pop("avatar_url", None)
+
         member = MemberProfile(
             email=clean_email,
             full_name=full_name or clean_email.split("@")[0],
             avatar_url=avatar_url,
             is_onboarded=is_onboarded,
-            rating=1200,
-            peak_rating=1200,
+            rating=rating,
+            peak_rating=peak_rating,
             **extra_fields,
         )
         db.add(member)
