@@ -96,6 +96,62 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
     });
   });
 
+  await page.route('**/leaderboard/distribution', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        total: 1,
+        buckets: [{ min: 1200, max: 1399, count: 1 }],
+      }),
+    });
+  });
+
+  await page.route(/\/leaderboard(\?.*)?$/, async (route) => {
+    const req = route.request();
+    if (req.resourceType() === 'document' || req.isNavigationRequest()) {
+      return route.continue();
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          id: member.id,
+          avatar_url: null,
+          rank: 1,
+          university_rank: 1,
+          previous_rank: null,
+          handle: member.handle,
+          full_name: member.full_name,
+          prn: member.prn,
+          department: member.department,
+          batch: member.batch,
+          rating: member.rating,
+          peak_rating: member.peak_rating,
+          attendance_rate: 0.8,
+          attendance_count: 8,
+          attendance_total: 10,
+          tier: 'expert',
+          ratings: [1200, 1350, 1540],
+          recent_deltas: [150, 190],
+        },
+      ]),
+    });
+  });
+
+  await page.route('**/events/stream**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/event-stream',
+      headers: {
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+      },
+      body: ': connected\n\n',
+    });
+  });
+
   await mockContestsApi(page);
 
   await page.addInitScript(
