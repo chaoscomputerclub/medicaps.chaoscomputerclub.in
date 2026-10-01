@@ -116,11 +116,13 @@ class NodeHeartbeatRequest(BaseModel):
 
 
 class NodeClaimRequest(BaseModel):
-    timeout_seconds: float = Field(default=2.0, ge=0.5, le=30.0)
+    timeout_seconds: float = Field(default=2.0, ge=0.0, le=30.0)
 
 
 class NodeResultRequest(BaseModel):
     job_id: str
+    attempt: Optional[int] = None
+    lease_id: Optional[str] = None
     verdict: str
     runtime_ms: float = 0.0
     memory_mb: float = 0.0
@@ -248,9 +250,9 @@ async def claim_job(
     _: None = Depends(_require_node_auth),
 ) -> Dict[str, Any]:
     """
-    Outbound REST job claim endpoint.
+    Outbound REST job claim endpoint with blocking pop / long-polling support.
     Allows remote USB nodes behind NAT/firewalls to atomically dequeue
-    a job over standard HTTPS without opening public Redis/TCP ports.
+    a job over standard HTTPS with near-0ms dispatch latency.
     """
     redis = get_redis()
     
@@ -263,10 +265,25 @@ async def claim_job(
         )
 
     processing_queue = "ccc:queue:fabric:processing"
+    
+    # Step 1: Immediate non-blocking check on primary queue
     job_id = await redis.rpoplpush("ccc:queue:fabric:pending", processing_queue)
     if not job_id:
+        # Step 2: Immediate non-blocking check on secondary queue
         processing_queue = "ccc:queue:judge:processing"
         job_id = await redis.rpoplpush("ccc:queue:judge:pending", processing_queue)
+
+    # Step 3: If still empty and caller requested a wait timeout > 0, block on Redis
+    timeout_s = max(0.0, min(float(payload.timeout_seconds), 15.0))
+    if not job_id and timeout_s > 0:
+        processing_queue = "ccc:queue:fabric:processing"
+        int_timeout = max(1, int(timeout_s))
+        try:
+            job_id = await redis.brpoplpush("ccc:queue:fabric:pending", processing_queue, timeout=int_timeout)
+        except Exception as exc:
+            logger.debug("brpoplpush wait completed without job: %s", exc)
+            job_id = None
+
     if not job_id:
         return {"job": None}
 
@@ -280,18 +297,25 @@ async def claim_job(
 
     job_dict = json.loads(raw_job)
 
-    # Attach distributed lease (300s) to this node
+    # Attach distributed lease (300s) and attempt tracking to this node
     now = time.time()
+    attempt = int(job_dict.get("attempt", 0)) + 1
+    lease_id = f"lease_{job_id}_{attempt}_{node_id}"
+
     await redis.set(f"ccc:job:{job_id}:leased_at", str(now), ex=300)
     await redis.set(f"ccc:job:{job_id}:node_id", node_id, ex=300)
+    await redis.set(f"ccc:job:{job_id}:lease_id", lease_id, ex=300)
+    await redis.set(f"ccc:job:{job_id}:attempt", str(attempt), ex=300)
 
     # Update job state in Redis
     job_dict["status"] = "PROCESSING"
     job_dict["claimed_by_node"] = node_id
+    job_dict["attempt"] = attempt
+    job_dict["lease_id"] = lease_id
     job_dict["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))
     await redis.set(f"ccc:job:{job_id}", json.dumps(job_dict), ex=86400)
 
-    logger.info("⚡ [Fabric] Job %s claimed by node %s", job_id, node_id)
+    logger.info("⚡ [Fabric] Job %s (attempt %d, lease %s) claimed by node %s", job_id, attempt, lease_id, node_id)
     return {"job": job_dict}
 
 
@@ -303,16 +327,42 @@ async def submit_result(
 ) -> Dict[str, Any]:
     """
     Receives verified execution results from a remote compute node.
-    Updates submission state, releases queues, and publishes SSE events.
+    Enforces fencing & stale attempt protection, releases queues, and publishes SSE/PubSub events.
     """
     redis = get_redis()
-    # 1. Remove from in-flight processing lists
+
+    # 1. Fencing and stale-attempt validation: check if lease is still owned by this node & attempt
+    active_lease = await redis.get(f"ccc:job:{payload.job_id}:lease_id")
+    active_node = await redis.get(f"ccc:job:{payload.job_id}:node_id")
+
+    if active_lease and payload.lease_id and active_lease != payload.lease_id:
+        logger.warning(
+            "⚠️ [Fabric] Rejecting stale result for job %s from node %s (lease mismatch: expected %s, got %s)",
+            payload.job_id, node_id, active_lease, payload.lease_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Stale result rejected. Active lease is held by another attempt ({active_lease}).",
+        )
+
+    if active_node and active_node != node_id:
+        logger.warning(
+            "⚠️ [Fabric] Rejecting result for job %s from node %s (lease held by node %s)",
+            payload.job_id, node_id, active_node
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Node {node_id} does not hold active lease for job {payload.job_id}.",
+        )
+
+    # 2. Remove from in-flight processing lists & clear lease keys
     await redis.lrem("ccc:queue:fabric:processing", 1, payload.job_id)
     await redis.lrem("ccc:queue:judge:processing", 1, payload.job_id)
     await redis.delete(f"ccc:job:{payload.job_id}:leased_at")
     await redis.delete(f"ccc:job:{payload.job_id}:node_id")
+    await redis.delete(f"ccc:job:{payload.job_id}:lease_id")
 
-    # 2. Update job record
+    # 3. Update authoritative job record in Redis
     raw_job = await redis.get(f"ccc:job:{payload.job_id}")
     if raw_job:
         job_dict = json.loads(raw_job)
@@ -343,6 +393,16 @@ async def submit_result(
                 "timestamp": time.time(),
             }
             await redis.publish(channel, json.dumps(event_payload))
+
+        # Publish dedicated job completion channel for 0ms event-driven wakeup
+        completion_event = {
+            "status": "COMPLETED",
+            "job_id": payload.job_id,
+            "verdict": payload.verdict,
+            "runtime_ms": payload.runtime_ms,
+            "timestamp": time.time(),
+        }
+        await redis.publish(f"ccc:job:{payload.job_id}:done", json.dumps(completion_event))
 
     logger.info("✓ [Fabric] Job %s completed by node %s with verdict: %s", payload.job_id, node_id, payload.verdict)
     return {"status": "recorded", "job_id": payload.job_id}

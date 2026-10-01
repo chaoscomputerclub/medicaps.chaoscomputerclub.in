@@ -125,30 +125,62 @@ class DistributedFabricProvider(JudgeProvider):
             job_id, ", ".join(online_nodes), lang_str, len(serialized_tcs)
         )
 
-        # 2. Await remote node execution with timeout (accounting for queue depth under bursts)
+        # 2. Await remote node execution via Redis Pub/Sub event with Authoritative Fallback
         q_depth = await redis.llen("ccc:queue:fabric:pending")
         wait_timeout = max(35.0, float(time_limit * len(testcases)) + float(q_depth * 1.5) + 15.0)
         start_wait = time.time()
+        channel_name = f"ccc:job:{job_id}:done"
 
-        while time.time() - start_wait < wait_timeout:
-            raw_job = await redis.get(f"ccc:job:{job_id}")
-            if raw_job:
-                job_data = json.loads(raw_job)
-                if job_data.get("status") == "COMPLETED" and "result" in job_data:
-                    res_dict = job_data["result"]
-                    raw_tc_list = res_dict.get("testcase_results", [])
-                    if len(raw_tc_list) < len(testcases):
-                        logger.warning(
-                            "⚠️ [Fabric] Remote node %s returned partial testcases (%d/%d) for job %s. Falling back to local engine.",
-                            job_data.get("claimed_by_node"), len(raw_tc_list), len(testcases), job_id
-                        )
+        pubsub = redis.pubsub()
+        await pubsub.subscribe(channel_name)
+
+        completed_result: Optional[ExecutionResult] = None
+
+        try:
+            while time.time() - start_wait < wait_timeout:
+                # 1. Authoritative check: verify if job is marked COMPLETED in Redis
+                raw_job = await redis.get(f"ccc:job:{job_id}")
+                if raw_job:
+                    job_data = json.loads(raw_job)
+                    if job_data.get("status") == "COMPLETED" and "result" in job_data:
+                        res_dict = job_data["result"]
+                        raw_tc_list = res_dict.get("testcase_results", [])
+                        if len(raw_tc_list) < len(testcases):
+                            logger.warning(
+                                "⚠️ [Fabric] Remote node %s returned partial testcases (%d/%d) for job %s. Falling back to local engine.",
+                                job_data.get("claimed_by_node"), len(raw_tc_list), len(testcases), job_id
+                            )
+                            break
+                        logger.info("✓ [Fabric] Job %s executed remotely on compute node %s (0ms event wakeup)", job_id, job_data.get("claimed_by_node"))
+                        completed_result = self._format_execution_result(res_dict, testcases, job_id)
                         break
-                    logger.info("✓ [Fabric] Job %s executed remotely on compute node %s", job_id, job_data.get("claimed_by_node"))
-                    return self._format_execution_result(res_dict, testcases, job_id)
-            await asyncio.sleep(0.15)
+
+                # 2. Event-driven wakeup: wait on pubsub message up to remaining timeout (capped at 1.0s slices for liveness)
+                remaining = wait_timeout - (time.time() - start_wait)
+                if remaining <= 0:
+                    break
+                slice_timeout = min(1.0, remaining)
+                try:
+                    msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=slice_timeout)
+                    if msg and msg.get("type") == "message":
+                        # Event received! Loop back to perform authoritative read from Redis state immediately
+                        continue
+                except Exception as p_err:
+                    logger.debug("Pubsub get_message notice: %s", p_err)
+                    await asyncio.sleep(0.05)
+
+        finally:
+            try:
+                await pubsub.unsubscribe(channel_name)
+                await pubsub.aclose()
+            except Exception:
+                pass
+
+        if completed_result:
+            return completed_result
 
         # Timeout reached: reclaim job from queue and fall back
-        logger.warning("⚠️ [Fabric] Remote execution timed out for job %s. Falling back to local Docker engine.", job_id)
+        logger.warning("⚠️ [Fabric] Remote execution timed out for job %s. Falling back to local engine.", job_id)
         await redis.lrem("ccc:queue:fabric:pending", 1, job_id)
         await redis.lrem("ccc:queue:fabric:processing", 1, job_id)
 

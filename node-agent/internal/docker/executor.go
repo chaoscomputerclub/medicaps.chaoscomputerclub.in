@@ -89,7 +89,7 @@ func NewExecutor(dockerBin, workspaceBase string) *Executor {
 	}
 }
 
-// Execute processes a claimed job inside isolated Docker containers on RAM tmpfs.
+// Execute processes a claimed job inside ONE isolated Docker sandbox container on RAM tmpfs.
 func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) registration.ResultRequest {
 	jobID := job.JobID
 	payload := job.Payload
@@ -103,6 +103,8 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		errStr := fmt.Sprintf("Unsupported execution language: %s", langStr)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			Attempt:         job.Attempt,
+			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
 			Error:           &errStr,
 			TestcaseResults: []map[string]interface{}{},
@@ -115,6 +117,8 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		errStr := fmt.Sprintf("Failed to initialize RAM workspace: %v", err)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			Attempt:         job.Attempt,
+			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
 			Error:           &errStr,
 			TestcaseResults: []map[string]interface{}{},
@@ -130,35 +134,77 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		errStr := fmt.Sprintf("Failed to write source code: %v", err)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			Attempt:         job.Attempt,
+			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
 			Error:           &errStr,
 			TestcaseResults: []map[string]interface{}{},
 		}
 	}
 
-	// 3. Compile Once (for compiled languages: C, C++, Java, Go)
+	// 3. Spawn exactly ONE isolated Docker sandbox container for this entire submission
+	cleanID := strings.ReplaceAll(jobID, "-", "")
+	if len(cleanID) > 16 {
+		cleanID = cleanID[:16]
+	}
+	containerName := fmt.Sprintf("ccc-sub-%s", cleanID)
+
+	spawnArgs := []string{
+		"run", "-d",
+		"--name", containerName,
+		"--network", "none",
+		"--cpus", "2.0",
+		"--memory", "512m",
+		"--memory-swap", "512m",
+		"--pids-limit", "64",
+		"--security-opt", "no-new-privileges",
+		"--cap-drop", "ALL",
+		"-v", fmt.Sprintf("%s:/workspace:rw", wsPath),
+		"-w", "/workspace",
+		"--tmpfs", "/tmp:size=128m,noexec,nosuid",
+		spec.Image,
+		"sleep", "120",
+	}
+
+	spawnCtx, spawnCancel := context.WithTimeout(ctx, 15*time.Second)
+	spawnCmd := exec.CommandContext(spawnCtx, e.dockerBin, spawnArgs...)
+	spawnOut, spawnErr := spawnCmd.CombinedOutput()
+	spawnCancel()
+
+	if spawnErr != nil {
+		errStr := fmt.Sprintf("Failed to spawn isolated sandbox container: %v (output: %s)", spawnErr, string(spawnOut))
+		log.Printf("❌ [Job %s] Sandbox spawn error: %s", jobID, errStr)
+		return registration.ResultRequest{
+			JobID:           jobID,
+			Attempt:         job.Attempt,
+			LeaseID:         job.LeaseID,
+			Verdict:         "SYSTEM_ERROR",
+			Error:           &errStr,
+			TestcaseResults: []map[string]interface{}{},
+		}
+	}
+
+	// Guaranteed sandbox cleanup: remove container upon submission completion
+	defer func() {
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cleanupCancel()
+		_ = exec.CommandContext(cleanupCtx, e.dockerBin, "rm", "-f", containerName).Run()
+	}()
+
+	// 4. Compile Once inside the running container (for compiled languages: C, C++, Java, Go)
 	if spec.NeedsCompile {
 		compCtx, compCancel := context.WithTimeout(ctx, 15*time.Second)
 		defer compCancel()
 
-		compArgs := []string{
-			"run", "--rm",
-			"--network", "none",
-			"--cpus", "2.0",
-			"--memory", "1024m",
-			"--memory-swap", "1024m",
-			"-v", fmt.Sprintf("%s:/workspace:rw", wsPath),
-			"-w", "/workspace",
-			spec.Image,
-		}
-		compArgs = append(compArgs, spec.CompileCmd...)
-
+		compArgs := append([]string{"exec", "-w", "/workspace", containerName}, spec.CompileCmd...)
 		cmd := exec.CommandContext(compCtx, e.dockerBin, compArgs...)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			compOut := string(out)
 			return registration.ResultRequest{
 				JobID:           jobID,
+				Attempt:         job.Attempt,
+				LeaseID:         job.LeaseID,
 				Verdict:         "COMPILATION_ERROR",
 				CompileOutput:   &compOut,
 				TestcaseResults: []map[string]interface{}{},
@@ -166,7 +212,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		}
 	}
 
-	// 4. Parse testcases
+	// 5. Parse testcases
 	rawTCs, _ := payload["testcases"].([]interface{})
 	if len(rawTCs) == 0 {
 		rawTCs = []interface{}{
@@ -178,15 +224,14 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 	if tl, ok := payload["time_limit_ms"].(float64); ok && tl > 0 {
 		timeLimitMS = tl
 	}
-	// Container watchdog timeout: generous headroom (+12s) to account for Docker startup overhead under heavy concurrent saturation
-	watchdogTimeout := time.Duration(timeLimitMS)*time.Millisecond + 12*time.Second
+	tcTimeout := time.Duration(timeLimitMS)*time.Millisecond + 2*time.Second
 
 	tcResults := make([]map[string]interface{}, 0)
 	passedCount := 0
 	finalVerdict := "ACCEPTED"
 	var maxRuntimeMS float64 = 0.0
 
-	// 5. Execute each testcase sequentially with early termination
+	// 6. Execute each testcase sequentially via `docker exec -i` in the warm sandbox with early termination
 	for i, raw := range rawTCs {
 		tcMap, _ := raw.(map[string]interface{})
 		tcID, _ := tcMap["id"].(string)
@@ -195,39 +240,21 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		}
 		stdin, _ := tcMap["stdin"].(string)
 		expected, _ := tcMap["expected_output"].(string)
+		hidden, _ := tcMap["hidden"].(bool)
 
-		tcCtx, tcCancel := context.WithTimeout(ctx, watchdogTimeout)
+		tcCtx, tcCancel := context.WithTimeout(ctx, tcTimeout)
 		start := time.Now()
 
-		runArgs := []string{
-			"run", "--rm", "-i",
-			"--stop-timeout", "2",
-			"--network", "none",
-			"--cpus", "1.0",
-			"--memory", "512m",
-			"--memory-swap", "512m",
-			"--pids-limit", "64",
-			"--security-opt", "no-new-privileges",
-			"--cap-drop", "ALL",
-			"-v", fmt.Sprintf("%s:/workspace:rw", wsPath),
-			"-w", "/workspace",
-			"--tmpfs", "/tmp:size=128m,noexec,nosuid",
-			spec.Image,
-		}
-		runArgs = append(runArgs, spec.RunCmd...)
-
-		cmd := exec.CommandContext(tcCtx, e.dockerBin, runArgs...)
+		execArgs := append([]string{"exec", "-i", "-w", "/workspace", containerName}, spec.RunCmd...)
+		cmd := exec.CommandContext(tcCtx, e.dockerBin, execArgs...)
 		cmd.Stdin = strings.NewReader(stdin)
 		var stdoutBuf, stderrBuf bytes.Buffer
 		cmd.Stdout = &stdoutBuf
 		cmd.Stderr = &stderrBuf
 
-		log.Printf("[DockerExec tc=%s] Starting container: %s %v", tcID, e.dockerBin, runArgs)
 		err := cmd.Run()
 		elapsed := time.Since(start)
 		tcCancel()
-
-		log.Printf("[DockerExec tc=%s] Container finished in %v, err: %v, stdout: %q, stderr: %q", tcID, elapsed, err, stdoutBuf.String(), stderrBuf.String())
 
 		elapsedMS := float64(elapsed.Milliseconds())
 		if elapsedMS > maxRuntimeMS {
@@ -244,8 +271,6 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		} else {
 			actualOut := strings.TrimRight(stdoutBuf.String(), "\r\n \t")
 			expectedOut := strings.TrimRight(expected, "\r\n \t")
-			// Delegate to the judge package — 6-layer pipeline with JSON semantic
-			// deep-equality and float-epsilon tolerance.
 			if judge.CompareOutputs(actualOut, expectedOut) {
 				passed = true
 				verdict = "ACCEPTED"
@@ -268,10 +293,18 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 			"wall_time_ms":    elapsedMS,
 			"expected_output": expected,
 		})
+
+		// Early termination: on definitive non-ACCEPTED verdict on hidden or subsequent testcases, terminate early
+		if verdict != "ACCEPTED" && (hidden || i >= 2) {
+			log.Printf("⚡ [Job %s] Early termination triggered on %s (verdict=%s)", jobID, tcID, verdict)
+			break
+		}
 	}
 
 	return registration.ResultRequest{
 		JobID:           jobID,
+		Attempt:         job.Attempt,
+		LeaseID:         job.LeaseID,
 		Verdict:         finalVerdict,
 		RuntimeMS:       maxRuntimeMS,
 		MemoryMB:        28.5,

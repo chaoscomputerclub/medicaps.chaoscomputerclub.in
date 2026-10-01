@@ -283,6 +283,16 @@ class FabricControlPlaneService(fabric_pb2_grpc.FabricControlPlaneServicer):
                 }
                 await redis.publish(channel, json.dumps(event_payload))
 
+            # Publish dedicated completion channel for 0ms event-driven wakeup
+            done_payload = {
+                "status": "COMPLETED",
+                "job_id": request.job_id,
+                "verdict": request.verdict,
+                "runtime_ms": request.runtime_ms,
+                "timestamp": time.time(),
+            }
+            await redis.publish(f"ccc:job:{request.job_id}:done", json.dumps(done_payload))
+
         logger.info("✓ [gRPC] Result for job %s received: %s (%.1f ms)", request.job_id, request.verdict, request.runtime_ms)
         return fabric_pb2.SubmitResultResponse(recorded=True, status="recorded")
 

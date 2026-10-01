@@ -44,12 +44,16 @@ type TelemetrySnapshot struct {
 type JobPayload struct {
 	JobID   string                 `json:"id"`
 	JobType string                 `json:"job_type"`
+	Attempt int                    `json:"attempt"`
+	LeaseID string                 `json:"lease_id"`
 	Payload map[string]interface{} `json:"payload"`
 }
 
 // ResultRequest represents execution results returned to control plane.
 type ResultRequest struct {
 	JobID           string                   `json:"job_id"`
+	Attempt         int                      `json:"attempt"`
+	LeaseID         string                   `json:"lease_id"`
 	Verdict         string                   `json:"verdict"`
 	RuntimeMS       float64                  `json:"runtime_ms"`
 	MemoryMB        float64                  `json:"memory_mb"`

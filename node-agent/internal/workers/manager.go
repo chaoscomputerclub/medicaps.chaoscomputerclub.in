@@ -106,23 +106,27 @@ func (m *Manager) StartJudgeWorkers(ctx context.Context) {
 
 			// Backpressure check before polling
 			if !m.gov.TryAcquireSlot() {
-				time.Sleep(300 * time.Millisecond)
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
 
-			claimCtx, claimCancel := context.WithTimeout(ctx, 8*time.Second)
-			job, err := m.client.ClaimJob(claimCtx, m.nodeID, 2.0)
+			// Bounded long-polling claim (3.0s wait inside Redis on server)
+			claimCtx, claimCancel := context.WithTimeout(ctx, 10*time.Second)
+			job, err := m.client.ClaimJob(claimCtx, m.nodeID, 3.0)
 			claimCancel()
 
 			if err != nil {
 				m.gov.ReleaseSlot()
-				time.Sleep(1 * time.Second)
+				// Transient network or connection error: brief backoff
+				time.Sleep(200 * time.Millisecond)
 				continue
 			}
 
 			if job == nil {
 				m.gov.ReleaseSlot()
-				time.Sleep(1 * time.Second)
+				// Long-poll timeout cleanly expired on server without a job.
+				// Yield briefly (10ms) to avoid CPU churn while immediately remaining receptive to new jobs.
+				time.Sleep(10 * time.Millisecond)
 				continue
 			}
 
