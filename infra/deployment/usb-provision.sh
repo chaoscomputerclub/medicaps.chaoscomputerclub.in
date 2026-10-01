@@ -22,7 +22,12 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o "${TARGET_DIR
 # 2. Copy scripts and configuration templates
 echo "--> Installing runtime scripts and configs..."
 cp -r "${SOURCE_DIR}/ccc-node/scripts"/* "${TARGET_DIR}/ccc-node/scripts/"
-cp "${SOURCE_DIR}/ccc-node/config/node.env" "${TARGET_DIR}/ccc-node/config/"
+cp "${SOURCE_DIR}/ccc-node/config/node.env.example" "${TARGET_DIR}/ccc-node/config/"
+if [[ -f "${SOURCE_DIR}/ccc-node/config/node.env" ]]; then
+    cp "${SOURCE_DIR}/ccc-node/config/node.env" "${TARGET_DIR}/ccc-node/config/"
+else
+    cp "${SOURCE_DIR}/ccc-node/config/node.env.example" "${TARGET_DIR}/ccc-node/config/node.env"
+fi
 cp "${SOURCE_DIR}/ccc-node/systemd/ccc-node.service" "${TARGET_DIR}/ccc-node/systemd/"
 cp "${SOURCE_DIR}/ccc-node/bootstrap.sh" "${TARGET_DIR}/ccc-node/"
 cp "${SOURCE_DIR}/ccc-node/stop.sh" "${TARGET_DIR}/ccc-node/"

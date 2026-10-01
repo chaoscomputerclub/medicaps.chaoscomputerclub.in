@@ -23,7 +23,7 @@ async def test_grpc_node_registration_and_heartbeat():
             reg_req = fabric_pb2.RegisterNodeRequest(
                 node_id="node_grpc_test_01",
                 hostname="test-laptop",
-                enrollment_token="ccc_judge_agent_secret_prod_2026",
+                enrollment_token="test_mock_enrollment_token",
                 hardware=fabric_pb2.HardwareSpecs(
                     cpu_cores=8,
                     cpu_threads=16,
