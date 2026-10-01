@@ -260,21 +260,10 @@ class ContestExecutionService:
         except Exception:
             pass
 
-        # Objective E & Section 13/14: Separate interactive RUN from heavy SUBMIT.
-        # Interactive "Run Code" executes only sample/custom testcases and requires instant sub-second feedback.
-        # Fast-path to cloud-local engine (Codebox / Docker Sandbox) when healthy,
-        # avoiding unnecessary multi-hop distributed fabric dispatch across the internet to remote laptops.
+        # Route interactive Run Code through the authoritative judge provider.
+        # When compute nodes are online, jobs execute on the distributed node fabric.
         provider = get_judge_provider()
-        run_provider = provider
-        if hasattr(provider, "_fallback") and provider._fallback:
-            try:
-                if await provider._fallback.healthy():
-                    run_provider = provider._fallback
-                    logger.info("⚡ [Arena Run] Fast-pathing sample run directly to cloud engine (%s)", run_provider.name)
-            except Exception as e_health:
-                logger.debug("Cloud engine health check notice for arena run: %s", e_health)
-
-        exec_result = await run_provider.execute_batch(
+        exec_result = await provider.execute_batch(
             language=lang_enum,
             code=exec_code,
             testcases=tcs,

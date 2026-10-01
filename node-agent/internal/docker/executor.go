@@ -52,10 +52,10 @@ var languageSpecs = map[string]LanguageSpec{
 		NeedsCompile:   true,
 	},
 	"java": {
-		Image:          "openjdk:17-slim",
-		SourceFileName: "Solution.java",
-		CompileCmd:     []string{"javac", "Solution.java"},
-		RunCmd:         []string{"java", "Solution"},
+		Image:          "eclipse-temurin:17-jdk-alpine",
+		SourceFileName: "Main.java",
+		CompileCmd:     []string{"javac", "Main.java"},
+		RunCmd:         []string{"java", "Main"},
 		NeedsCompile:   true,
 	},
 	"go": {

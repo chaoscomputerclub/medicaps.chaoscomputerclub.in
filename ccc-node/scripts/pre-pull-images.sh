@@ -8,7 +8,7 @@ IMAGES=(
     "python:3.11-slim"
     "node:20-alpine"
     "gcc:13"
-    "openjdk:17-slim"
+    "eclipse-temurin:17-jdk-alpine"
     "golang:1.22-alpine"
 )
 

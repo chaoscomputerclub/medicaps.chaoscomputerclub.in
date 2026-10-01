@@ -196,39 +196,48 @@ async def test_authoritative_redis_recovery_when_event_dropped():
 
 
 @pytest.mark.asyncio
-async def test_interactive_run_fast_paths_to_cloud_engine():
-    """Verifies that run_arena_code fast-paths sample runs to fallback engine when healthy, skipping distributed fabric."""
+async def test_compilation_error_authoritative_acceptance_without_cloud_fallback():
+    """Verifies that when node reports a COMPILATION_ERROR, DistributedFabricProvider accepts it directly without falling back to cloud."""
+    mock_redis = AsyncMock()
+    mock_redis.smembers.return_value = [b"node_worker_1"]
+    mock_redis.exists.return_value = True
+    mock_redis.llen.return_value = 0
+
+    mock_pubsub = AsyncMock()
+    mock_pubsub.get_message.return_value = {"type": "message", "channel": "ccc:job:job_ce_1:done", "data": "COMPLETED"}
+    mock_redis.pubsub = MagicMock(return_value=mock_pubsub)
+
+    ce_job = {
+        "id": "job_ce_1",
+        "status": "COMPLETED",
+        "claimed_by_node": "node_worker_1",
+        "result": {
+            "verdict": "COMPILATION_ERROR",
+            "runtime_ms": 0.0,
+            "memory_mb": 0.0,
+            "compile_output": "Main.java:5: error: cannot find symbol",
+            "testcase_results": [],
+        },
+    }
+    mock_redis.get.return_value = json.dumps(ce_job)
+
     mock_fallback = AsyncMock()
-    mock_fallback.name = "codebox"
-    mock_fallback.healthy = AsyncMock(return_value=True)
-    mock_fallback.execute_batch = AsyncMock(return_value=ExecutionResult(
-        success=True,
-        submission_id="run_1",
-        status=ExecutionStatus.COMPLETED,
-        verdict=Verdict.ACCEPTED,
-        testcase_results=[],
-        passed_testcases=1,
-        total_testcases=1,
-    ))
+    provider = DistributedFabricProvider(fallback_provider=mock_fallback)
+    testcases = [
+        TestCaseSchema(id="tc_1", stdin="1", expected_output="1"),
+        TestCaseSchema(id="tc_2", stdin="2", expected_output="2"),
+    ]
 
-    fabric_provider = DistributedFabricProvider(fallback_provider=mock_fallback)
-    # Fabric provider execute_batch should NOT be called if fast-path works!
-    fabric_provider.execute_batch = AsyncMock()
+    with patch("app.engine.providers.distributed_provider.get_redis", return_value=mock_redis), \
+         patch("app.engine.providers.distributed_provider.uuid4", return_value="job_ce_1"):
+        res = await provider.execute_batch(
+            language="java",
+            code="class Solution {}",
+            testcases=testcases,
+            time_limit=2.0,
+        )
 
-    # Simulate fast-path logic
-    provider = fabric_provider
-    run_provider = provider
-    if hasattr(provider, "_fallback") and provider._fallback:
-        if await provider._fallback.healthy():
-            run_provider = provider._fallback
-
-    assert run_provider == mock_fallback
-    res = await run_provider.execute_batch(
-        language="python",
-        code="print(1)",
-        testcases=[],
-    )
-    assert res.success is True
-    # Fast path verified: fallback executed directly, fabric queue bypassed
-    fabric_provider.execute_batch.assert_not_called()
-    mock_fallback.execute_batch.assert_called_once()
+        assert res.verdict == Verdict.COMPILATION_ERROR
+        assert "cannot find symbol" in res.compile_output
+        # Fallback should NOT be invoked because the node's result is authoritative!
+        mock_fallback.execute_batch.assert_not_called()

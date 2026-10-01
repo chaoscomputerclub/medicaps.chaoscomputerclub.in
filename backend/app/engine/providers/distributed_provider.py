@@ -145,6 +145,18 @@ class DistributedFabricProvider(JudgeProvider):
                     if job_data.get("status") == "COMPLETED" and "result" in job_data:
                         res_dict = job_data["result"]
                         raw_tc_list = res_dict.get("testcase_results", [])
+                        node_verdict = res_dict.get("verdict", "")
+
+                        # If the node reported a definitive compilation error or internal failure,
+                        # testcase_results is expected to be empty. Accept it directly as the authoritative verdict.
+                        if node_verdict in ("COMPILATION_ERROR", "INTERNAL_ERROR") or bool(res_dict.get("compile_output")):
+                            logger.info(
+                                "✓ [Fabric] Job %s reported definitive verdict '%s' from node %s",
+                                job_id, node_verdict, job_data.get("claimed_by_node")
+                            )
+                            completed_result = self._format_execution_result(res_dict, testcases, job_id)
+                            break
+
                         if len(raw_tc_list) < len(testcases):
                             logger.warning(
                                 "⚠️ [Fabric] Remote node %s returned partial testcases (%d/%d) for job %s. Falling back to local engine.",
