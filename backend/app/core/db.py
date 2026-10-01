@@ -55,13 +55,6 @@ AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
-    # CRITICAL: prevent SQLAlchemy from expiring ORM objects after rollback.
-    # Without this, await db.rollback() (used to release the connection pool
-    # before long-running sandbox execution) expires every loaded ORM object.
-    # Accessing any attribute on an expired object fires a lazy-load, which is
-    # a synchronous IO operation that cannot run inside an async greenlet —
-    # causing: "greenlet_spawn has not been called; can't call await_only() here".
-    expire_on_rollback=False,
     autoflush=False,
 )
 
