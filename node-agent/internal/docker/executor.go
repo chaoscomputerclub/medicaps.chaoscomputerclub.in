@@ -3,7 +3,6 @@ package docker
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -12,44 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"chaoscomputerclub.in/node-agent/internal/judge"
 	"chaoscomputerclub.in/node-agent/internal/registration"
 )
-
-// semanticOutputsEqual compares two output strings using a layered strategy:
-//  1. Exact byte equality
-//  2. JSON-unquoted string equality (handles "olleh" vs olleh)
-//  3. JSON semantic equality (handles [1, 3, 12] vs [1,3,12], true vs True)
-//  4. Whitespace-normalized token equality
-func semanticOutputsEqual(actual, expected string) bool {
-	// Layer 1: exact match
-	if actual == expected {
-		return true
-	}
-	// Layer 2: strip surrounding JSON quotes (string return types)
-	act := strings.Trim(actual, "\"")
-	exp := strings.Trim(expected, "\"")
-	if act == exp {
-		return true
-	}
-	// Layer 3: JSON semantic comparison (arrays, objects, booleans, numbers)
-	var actJSON, expJSON interface{}
-	if json.Unmarshal([]byte(actual), &actJSON) == nil && json.Unmarshal([]byte(expected), &expJSON) == nil {
-		actNorm, errA := json.Marshal(actJSON)
-		expNorm, errE := json.Marshal(expJSON)
-		if errA == nil && errE == nil && string(actNorm) == string(expNorm) {
-			return true
-		}
-	}
-	// Layer 4: whitespace-token equality (e.g. multi-line output with extra spaces)
-	actTokens := strings.Fields(actual)
-	expTokens := strings.Fields(expected)
-	if len(actTokens) > 0 && len(expTokens) > 0 {
-		if strings.Join(actTokens, " ") == strings.Join(expTokens, " ") {
-			return true
-		}
-	}
-	return false
-}
 
 // LanguageSpec configures compilation and execution parameters for a programming language.
 type LanguageSpec struct {
@@ -280,7 +244,9 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		} else {
 			actualOut := strings.TrimRight(stdoutBuf.String(), "\r\n \t")
 			expectedOut := strings.TrimRight(expected, "\r\n \t")
-			if semanticOutputsEqual(actualOut, expectedOut) {
+			// Delegate to the judge package — 6-layer pipeline with JSON semantic
+			// deep-equality and float-epsilon tolerance.
+			if judge.CompareOutputs(actualOut, expectedOut) {
 				passed = true
 				verdict = "ACCEPTED"
 				passedCount++
