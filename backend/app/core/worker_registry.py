@@ -252,6 +252,9 @@ class WorkerRegistry:
         return workers
 
     @classmethod
+    async def list_active(cls) -> List[WorkerInfo]:
+        """Alias for get_all_active_workers for autoscaler compatibility."""
+        return await cls.get_all_active_workers()
     async def get_all_workers(cls) -> List[WorkerInfo]:
         r = get_redis()
         worker_ids = await r.smembers(ALL_SET_KEY)

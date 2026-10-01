@@ -591,6 +591,12 @@ class RedisQueueEngine:
         }
 
     @classmethod
+    async def queue_depth(cls, queue_name: str) -> int:
+        """Returns the pending queue depth for the given queue."""
+        redis = get_redis()
+        return await redis.llen(cls._pending_key(queue_name))
+
+    @classmethod
     async def get_all_metrics(cls) -> Dict[str, Any]:
         """Aggregate metrics across all production queues."""
         results = {}
