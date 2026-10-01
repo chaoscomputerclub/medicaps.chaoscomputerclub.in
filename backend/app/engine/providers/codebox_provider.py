@@ -113,13 +113,18 @@ class CodeboxProvider(JudgeProvider):
                 diagnostics=[f"Codebox does not support language: {request.language}"],
             )
 
+        # Codebox Joi validation schema caps maxMemoryLimit to 512000 KB and maxCpuTimeLimit to 15.0s.
+        # Clamp inputs defensively to prevent HTTP 422 Unprocessable Entity errors on higher problem specs.
+        safe_mem_kb = min(int(request.memory_limit_mb * 1024), 512000)
+        safe_cpu_sec = min(max(0.5, float(request.time_limit_seconds)), 15.0)
+
         payload = {
             "language_id": lang_id,
             "source_code": request.source_code,
             "stdin": request.stdin or "",
             "expected_output": request.expected_output or "",
-            "cpu_time_limit": max(0.5, float(request.time_limit_seconds)),
-            "memory_limit": int(request.memory_limit_mb * 1024),
+            "cpu_time_limit": safe_cpu_sec,
+            "memory_limit": safe_mem_kb,
         }
 
         try:
@@ -149,8 +154,16 @@ class CodeboxProvider(JudgeProvider):
                         return ProviderRunResult(verdict="time_limit_exceeded", timed_out=True)
 
         except Exception as exc:
-            logger.warning("Codebox run failed (%s)", exc)
-            return ProviderRunResult(verdict="internal_error", diagnostics=[str(exc)])
+            err_msg = str(exc)
+            if isinstance(exc, httpx.HTTPStatusError):
+                try:
+                    err_json = exc.response.json()
+                    err_msg = err_json.get("message") or err_json.get("error") or str(exc)
+                except Exception:
+                    if exc.response.text:
+                        err_msg = exc.response.text[:200]
+            logger.warning("Codebox run failed (%s)", err_msg)
+            return ProviderRunResult(verdict="internal_error", diagnostics=[err_msg])
 
         status_id = int((data.get("status") or {}).get("id", 0))
         verdict = STATUS_VERDICTS.get(status_id, Verdict.RUNTIME_ERROR).value.lower()
@@ -201,13 +214,18 @@ class CodeboxProvider(JudgeProvider):
         comparison_mode: ComparisonMode,
     ) -> TestCaseResult:
         """Execute one testcase concurrently against Codebox with fallback polling."""
+        # Codebox Joi validation schema caps maxMemoryLimit to 512000 KB and maxCpuTimeLimit to 15.0s.
+        # Clamp inputs defensively to prevent HTTP 422 Unprocessable Entity errors on higher problem specs.
+        safe_mem_kb = min(int(memory_limit_mb * 1024), 512000)
+        safe_cpu_sec = min(max(0.5, float(time_limit)), 15.0)
+
         payload = {
             "language_id": lang_id,
             "source_code": code,
             "stdin": tc.stdin or "",
             "expected_output": tc.expected_output or "",
-            "cpu_time_limit": max(0.5, float(time_limit)),
-            "memory_limit": int(memory_limit_mb * 1024),
+            "cpu_time_limit": safe_cpu_sec,
+            "memory_limit": safe_mem_kb,
         }
 
         data: Dict[str, Any] = {}
@@ -232,7 +250,15 @@ class CodeboxProvider(JudgeProvider):
                     if status_id >= 3:
                         break
         except Exception as exc:
-            logger.warning("Codebox testcase execution error: %s", exc)
+            err_msg = str(exc)
+            if isinstance(exc, httpx.HTTPStatusError):
+                try:
+                    err_json = exc.response.json()
+                    err_msg = err_json.get("message") or err_json.get("error") or str(exc)
+                except Exception:
+                    if exc.response.text:
+                        err_msg = exc.response.text[:200]
+            logger.warning("Codebox testcase execution error: %s", err_msg)
             return TestCaseResult(
                 testcase_id=tc.id,
                 name=tc.name,
@@ -240,7 +266,7 @@ class CodeboxProvider(JudgeProvider):
                 category=getattr(tc.category, "value", None) if tc.category else None,
                 stdout="",
                 expected_output="" if tc.hidden else (tc.expected_output or ""),
-                stderr=str(exc),
+                stderr=err_msg,
                 compile_output="",
                 wall_time_ms=0.0,
                 runtime_ms=0.0,
