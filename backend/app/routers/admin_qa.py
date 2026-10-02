@@ -7,6 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from app.core.config import settings
 from app.middleware.auth import require_admin_or_core
 from app.models.db_models import MemberProfile
 from app.services.qa_test_service import QAAuditReport
@@ -23,7 +24,7 @@ class TournamentSimulationRequest(BaseModel):
     cadet_count: int = 110
     contest_count: int = 50
     primary_handle: str = "santusht"
-    primary_email: str = "santusht.en23@medicaps.ac.in"
+    primary_email: Optional[str] = None
     primary_name: str = "Santusht Kotai"
     primary_prn: str = "EN23CS301927"
 
@@ -94,7 +95,7 @@ async def simulate_tournament(
         cadet_count=req.cadet_count,
         contest_count=req.contest_count,
         primary_handle=req.primary_handle,
-        primary_email=req.primary_email,
+        primary_email=req.primary_email or settings.ADMIN_PRIMARY_EMAIL,
         primary_name=req.primary_name,
         primary_prn=req.primary_prn,
     )

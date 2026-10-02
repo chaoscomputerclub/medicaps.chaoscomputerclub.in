@@ -81,12 +81,12 @@ class ProductionQAService:
     @classmethod
     async def get_or_create_qa_member(cls, db: AsyncSession) -> MemberProfile:
         """Fetch or create dedicated QA Bot member for authenticated test runs."""
-        stmt = select(MemberProfile).where(MemberProfile.email == "qa.organizer@medicaps.ac.in")
+        stmt = select(MemberProfile).where(MemberProfile.email == settings.QA_ORGANIZER_EMAIL)
         res = await db.execute(stmt)
         member = res.scalars().first()
         if not member:
             member = MemberProfile(
-                email="qa.organizer@medicaps.ac.in",
+                email=settings.QA_ORGANIZER_EMAIL,
                 handle="qa_organizer",
                 full_name="QA Automated Test Runner",
                 prn="0801CS211000",
@@ -195,7 +195,7 @@ class ProductionQAService:
             target_res = await db.execute(select(MemberProfile).where(MemberProfile.handle == "qa_target"))
             if not target_res.scalars().first():
                 target_user = MemberProfile(
-                    email="qa.target@medicaps.ac.in",
+                    email=settings.QA_TARGET_EMAIL,
                     handle="qa_target",
                     full_name="QA Target Student",
                     department="IT",

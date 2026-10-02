@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Tuple
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models.db_models import (
     Announcement,
     Assessment,
@@ -131,7 +132,7 @@ class TournamentQAService:
         cadet_count: int = 110,
         contest_count: int = 50,
         primary_handle: str = "santusht",
-        primary_email: str = "santusht.en23@medicaps.ac.in",
+        primary_email: Optional[str] = None,
         primary_name: str = "Santusht Kotai",
         primary_prn: str = "EN23CS301927",
     ) -> Dict:
@@ -143,6 +144,7 @@ class TournamentQAService:
           5,500 AssessmentSession, 1,500 CampusPass, 1,500 ScoreboardEntry,
           and complete RatingHistory rows.
         """
+        effective_email = primary_email or settings.ADMIN_PRIMARY_EMAIL
         logger.info(
             "⚡ [TOURNAMENT SIM] Starting 50-contest, 110-cadet simulation for primary user: %s",
             primary_handle,
@@ -156,10 +158,10 @@ class TournamentQAService:
         # Find or create primary cadet (safely handle any legacy duplicate records)
         prim_stmt = select(MemberProfile).where(
             (MemberProfile.handle == primary_handle)
-            | (MemberProfile.email == primary_email)
+            | (MemberProfile.email == effective_email)
             | (MemberProfile.prn == primary_prn)
             | (MemberProfile.handle == "en23cs301927")
-            | (MemberProfile.email == "en23cs301927@medicaps.ac.in")
+            | (MemberProfile.email == settings.ADMIN_PRIMARY_EMAIL)
         )
         prim_res = await db.execute(prim_stmt)
         existing_matches = prim_res.scalars().all()

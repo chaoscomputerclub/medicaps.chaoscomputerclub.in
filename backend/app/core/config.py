@@ -45,6 +45,32 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
 
+    # Core Team & Chief Proctor Access Control (ENV Driven)
+    CORE_TEAM_EMAILS: str = os.getenv(
+        "CORE_TEAM_EMAILS",
+None    )
+    CORE_TEAM_HANDLES: str = os.getenv(
+        "CORE_TEAM_HANDLES", None    )
+    ADMIN_PRIMARY_EMAIL: str = os.getenv("ADMIN_PRIMARY_EMAIL", "en23cs301927@medicaps.ac.in")
+    QA_ORGANIZER_EMAIL: str = os.getenv("QA_ORGANIZER_EMAIL", "qa.organizer@medicaps.ac.in")
+    QA_TARGET_EMAIL: str = os.getenv("QA_TARGET_EMAIL", "qa.target@medicaps.ac.in")
+
+    @cached_property
+    def core_team_emails_set(self) -> set:
+        return {
+            e.strip().lower()
+            for e in self.CORE_TEAM_EMAILS.split(",")
+            if e.strip()
+        }
+
+    @cached_property
+    def core_team_handles_set(self) -> set:
+        return {
+            h.strip().lower()
+            for h in self.CORE_TEAM_HANDLES.split(",")
+            if h.strip()
+        }
+
     # Cookie Security Settings
     COOKIE_DOMAIN: Optional[str] = os.getenv("COOKIE_DOMAIN", None)
     COOKIE_SECURE: Optional[bool] = None if os.getenv("COOKIE_SECURE") is None else os.getenv("COOKIE_SECURE", "false").lower() in ("true", "1", "yes")

@@ -20,6 +20,7 @@ from app.models.db_models import (
     OfflineContest,
     now_utc,
 )
+from app.core.config import settings
 from app.modules.contests.contest_repository import ContestRepository
 from app.services.assessment_service import AssessmentService
 from app.services.event_broadcaster import broadcast_event
@@ -163,7 +164,7 @@ class AdminContestService:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
         demo_cadets = [
-            {"handle": "santusht", "full_name": "Santusht Kotai", "prn": "EN23CS301927", "email": "en23cs301927@medicaps.ac.in", "dept": "CSE", "score": 98.5},
+            {"handle": "santusht", "full_name": "Santusht Kotai", "prn": "EN23CS301927", "email": settings.ADMIN_PRIMARY_EMAIL, "dept": "CSE", "score": 98.5},
             {"handle": "aarav_sharma", "full_name": "Aarav Sharma", "prn": "EN23CS301042", "email": "aarav.sharma@medicaps.ac.in", "dept": "CSE", "score": 94.0},
             {"handle": "priya_patel", "full_name": "Priya Patel", "prn": "EN23IT301118", "email": "priya.patel@medicaps.ac.in", "dept": "IT", "score": 91.5},
             {"handle": "rohan_verma", "full_name": "Rohan Verma", "prn": "EN23CS301205", "email": "rohan.verma@medicaps.ac.in", "dept": "Cyber Security", "score": 88.0},

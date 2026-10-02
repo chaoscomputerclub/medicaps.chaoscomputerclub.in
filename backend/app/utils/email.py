@@ -208,7 +208,7 @@ async def send_otp_email(to_email: str, otp: str) -> bool:
     if (
         to_email.startswith("qa.")
         or "test" in to_email
-        or to_email == "qa.organizer@medicaps.ac.in"
+        or to_email == settings.QA_ORGANIZER_EMAIL
         or getattr(settings, "ENVIRONMENT", "production") in ("test", "testing", "qa")
     ):
         logger.info("🛡️ [QA/TEST GUARD] Suppressing external SMTP dispatch for %s. Mock OTP: %s", to_email, otp)

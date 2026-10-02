@@ -25,6 +25,7 @@ class MaintenanceWorker(BaseQueueWorker):
         payload = job.payload
 
         if job_type == "SIMULATE_TOURNAMENT":
+            from app.core.config import settings
             from app.services.tournament_qa_service import TournamentQAService
             logger.info("⚙️ [MaintenanceWorker] Running tournament simulation via worker...")
             result = await TournamentQAService.simulate_50_contests(
@@ -32,7 +33,7 @@ class MaintenanceWorker(BaseQueueWorker):
                 cadet_count=payload.get("cadet_count", 110),
                 contest_count=payload.get("contest_count", 50),
                 primary_handle=payload.get("primary_handle", "santusht"),
-                primary_email=payload.get("primary_email", "santusht.en23@medicaps.ac.in"),
+                primary_email=payload.get("primary_email", settings.ADMIN_PRIMARY_EMAIL),
                 primary_name=payload.get("primary_name", "Santusht Kotai"),
                 primary_prn=payload.get("primary_prn", "EN23CS301927"),
             )
