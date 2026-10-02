@@ -34,6 +34,7 @@ from .proof import TrustProof
 from .campus_pass import CampusPass
 from .announcement import Announcement
 from .version import ResourceVersion
+from .judge_job import JudgeJob, JudgeJobAttempt
 from app.core.queue.outbox import OutboxEvent
 
 __all__ = [
@@ -61,5 +62,7 @@ __all__ = [
     "Announcement",
     "ResourceVersion",
     "OutboxEvent",
+    "JudgeJob",
+    "JudgeJobAttempt",
 ]
 

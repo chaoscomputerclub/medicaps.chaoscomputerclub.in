@@ -26,6 +26,9 @@ type RegisterResponse struct {
 // JobPayload represents the work item to execute.
 type JobPayload struct {
 	JobID       string                 `json:"id"`
+	AttemptID   string                 `json:"attempt_id"`
+	Attempt     int                    `json:"attempt"`
+	LeaseID     string                 `json:"lease_id"`
 	Status      string                 `json:"status"`
 	QueueName   string                 `json:"queue_name"`
 	Payload     map[string]interface{} `json:"payload"`
@@ -41,6 +44,9 @@ type ClaimResponse struct {
 // ResultRequest holds execution verdict and testcase breakdown.
 type ResultRequest struct {
 	JobID           string                   `json:"job_id"`
+	AttemptID       string                   `json:"attempt_id,omitempty"`
+	Attempt         int                      `json:"attempt,omitempty"`
+	LeaseID         string                   `json:"lease_id,omitempty"`
 	Verdict         string                   `json:"verdict"`
 	RuntimeMS       float64                  `json:"runtime_ms"`
 	MemoryMB        float64                  `json:"memory_mb"`

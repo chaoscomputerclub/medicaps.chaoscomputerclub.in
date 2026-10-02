@@ -93,3 +93,10 @@ node-agent/bin/
 ccc-node/bin/
 .node_identity
 **/.node_identity
+
+# Load testing transient artifacts & tokens
+tests/load/data/*.json
+tests/load/reports/
+tests/load/.pytest_cache/
+tests/load/__pycache__/
+

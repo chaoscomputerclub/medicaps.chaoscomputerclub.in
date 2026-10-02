@@ -81,21 +81,21 @@ async def assert_submissions_open(slug: str) -> None:
 
     if state == ContestLifecycleState.DRAINING:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422),
             detail="Contest time has expired and the queue is DRAINING. In-flight submissions are completing; new submissions are closed.",
         )
     elif state == ContestLifecycleState.FINALIZING:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422),
             detail="Contest is currently FINALIZING rankings and rating deltas. Submissions are closed.",
         )
     elif state == ContestLifecycleState.COMPLETE:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422),
             detail="Contest is COMPLETE. Submissions are locked.",
         )
     elif state == ContestLifecycleState.PRE_CONTEST:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422),
             detail="Contest is in PRE_CONTEST warmup phase. Submissions will open when the contest officially starts.",
         )

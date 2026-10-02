@@ -27,6 +27,7 @@ from .problem import Problem, ProblemVersion, ProblemTestCase
 from .proof import TrustProof
 from .campus_pass import CampusPass
 from .announcement import Announcement
+from .judge_job import JudgeJob, JudgeJobAttempt
 
 __all__ = [
     # Base
@@ -57,5 +58,8 @@ __all__ = [
     "TrustProof",
     "CampusPass",
     "Announcement",
+    # Distributed Judge Jobs & Attempts
+    "JudgeJob",
+    "JudgeJobAttempt",
 ]
 

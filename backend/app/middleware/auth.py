@@ -139,25 +139,17 @@ async def get_current_member_optional(
 
 
 async def require_admin_or_core(
-    request: Request,
     member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ) -> Optional[MemberProfile]:
     """
     Guards organizer/admin endpoints.
     Permits execution if:
     - User is authenticated with `is_core_member` set to True
-    - Or authorized proctor key is supplied via X-Proctor-Key or X-Admin-Key header
-    - Or development bypass / dev mode is active
+    - Development bypass is honored only outside production.
     """
     from app.core.config import settings
 
-    if settings.is_dev_bypass_enabled:
-        return member
-
-    # Check for proctor security key header
-    proctor_key = request.headers.get("X-Proctor-Key") or request.headers.get("X-Admin-Key")
-    valid_keys = {"CHAOS-PROCTOR-2026", "MEDICAPS-PROCTOR", "CCC-ADMIN-GATE", "1337", "admin"}
-    if proctor_key and proctor_key.strip() in valid_keys:
+    if settings.is_dev_bypass_enabled and not settings.is_production:
         return member
 
     if not member:
@@ -170,4 +162,3 @@ async def require_admin_or_core(
         )
 
     return member
-

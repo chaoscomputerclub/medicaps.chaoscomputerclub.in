@@ -354,11 +354,103 @@ async def outbox_relay_loop(session_factory: async_sessionmaker, interval: int =
             logger.debug("outbox relay loop notice: %s", exc)
 
 
+# ─── Task 6: Fabric Queue Orphan Reaper ───────────────────────────────────────
+
+async def _reap_fabric_orphans(session_factory: async_sessionmaker) -> None:
+    """
+    Periodic sweep of ccc:queue:fabric:processing:
+    Detects jobs claimed by nodes whose leases expired, heartbeats died,
+    or workers disappeared, and reconciles them safely with PostgreSQL.
+    """
+    from app.core.redis import get_redis
+    from app.models.judge_job import JudgeJob
+    from app.engine.attempt_manager import AttemptManager
+    from app.core.queue.outbox import record_outbox_event
+
+    try:
+        redis = get_redis()
+    except Exception:
+        return
+
+    try:
+        processing_job_ids = await redis.lrange("ccc:queue:fabric:processing", 0, -1)
+    except Exception as exc:
+        logger.debug("Failed to read fabric processing queue: %s", exc)
+        return
+
+    if not processing_job_ids:
+        return
+
+    now_ts = datetime.now(timezone.utc).timestamp()
+
+    for raw_id in processing_job_ids:
+        job_id = raw_id.decode("utf-8") if isinstance(raw_id, bytes) else str(raw_id)
+        lease_exists = bool(await redis.exists(f"ccc:job:{job_id}:lease_id"))
+        leased_at = await redis.get(f"ccc:job:{job_id}:leased_at")
+        node_id = await redis.get(f"ccc:job:{job_id}:node_id")
+
+        node_alive = True
+        if node_id:
+            node_id_str = node_id.decode() if isinstance(node_id, bytes) else str(node_id)
+            node_alive = bool(await redis.exists(f"ccc:node:{node_id_str}:heartbeat"))
+
+        lease_expired = False
+        if not lease_exists or not node_alive:
+            lease_expired = True
+        elif leased_at:
+            try:
+                leased_time = float(leased_at)
+                if now_ts - leased_time > 60.0:
+                    lease_expired = True
+            except ValueError:
+                lease_expired = True
+
+        if lease_expired:
+            logger.warning("🧹 [FabricReaper] Job %s has expired lease or dead node. Reconciling.", job_id)
+            await redis.lrem("ccc:queue:fabric:processing", 1, job_id)
+
+            async with session_factory() as db:
+                try:
+                    job = await db.get(JudgeJob, job_id)
+                    if not job:
+                        continue
+                    if job.state == "PROCESSING":
+                        if job.active_attempt_id:
+                            await AttemptManager.expire_attempt(db, job.id, job.active_attempt_id, reason="NODE_LEASE_EXPIRED")
+                        job.state = "QUEUED"
+                        job.active_attempt_id = None
+                        await record_outbox_event(
+                            db=db,
+                            queue_name="fabric",
+                            event_type="EXECUTION_REQUEUE",
+                            payload={"job_id": job.id, "attempt_number": job.attempt_number + 1},
+                            aggregate_id=job.id,
+                            priority="high",
+                        )
+                        await db.commit()
+                        logger.info("✓ [FabricReaper] Requeued orphaned fabric job %s", job_id)
+                except Exception as db_exc:
+                    await db.rollback()
+                    logger.error("Error reconciling orphaned fabric job %s: %s", job_id, db_exc)
+
+
+async def fabric_reaper_loop(session_factory: async_sessionmaker, interval: int = 30) -> None:
+    logger.info("fabric queue orphan reaper loop started (interval=%ds)", interval)
+    while True:
+        await asyncio.sleep(interval)
+        try:
+            async with distributed_lock("scheduler:fabric_reaper", ttl_seconds=25) as acquired:
+                if acquired:
+                    await _reap_fabric_orphans(session_factory)
+        except Exception as exc:
+            logger.debug("fabric reaper loop notice: %s", exc)
+
+
 # ─── Entry Point ─────────────────────────────────────────────────────────────
 
 def start_background_tasks(session_factory: async_sessionmaker) -> list[asyncio.Task]:
     """
-    Spawn all five production background tasks with distributed locking protection.
+    Spawn all production background tasks with distributed locking protection.
     Returns task handles for clean cancellation in the lifespan shutdown hook.
     """
     loop = asyncio.get_running_loop()
@@ -382,6 +474,10 @@ def start_background_tasks(session_factory: async_sessionmaker) -> list[asyncio.
         loop.create_task(
             outbox_relay_loop(session_factory, interval=5),
             name="ccc.outbox_relay_sweeper",
+        ),
+        loop.create_task(
+            fabric_reaper_loop(session_factory, interval=30),
+            name="ccc.fabric_queue_reaper",
         ),
     ]
     logger.info(

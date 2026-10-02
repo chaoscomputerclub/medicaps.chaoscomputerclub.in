@@ -9,16 +9,22 @@ and execution result reporting for portable USB compute nodes.
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import time
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
 from app.core.config import settings
+from app.core.db import AsyncSessionLocal
 from app.core.redis import get_redis
+from app.engine.attempt_manager import AttemptManager, FinalizeResult
+from app.models.judge_job import JudgeJob, JudgeJobAttempt
 from app.core.worker_registry import WorkerRegistry, WorkerStatus
 from app.middleware.auth import require_admin_or_core
 
@@ -121,6 +127,7 @@ class NodeClaimRequest(BaseModel):
 
 class NodeResultRequest(BaseModel):
     job_id: str
+    attempt_id: Optional[str] = None
     attempt: Optional[int] = None
     lease_id: Optional[str] = None
     verdict: str
@@ -264,16 +271,52 @@ async def claim_job(
             detail="Node heartbeat expired or not registered",
         )
 
+    # Check node status and available slots
+    node_info = await redis.hgetall(f"ccc:node:{node_id}:info")
+    node_langs = set()
+    if isinstance(node_info, dict):
+        raw_status = node_info.get(b"status") or node_info.get("status") or b""
+        node_status = raw_status.decode() if isinstance(raw_status, bytes) else (raw_status if isinstance(raw_status, str) else "")
+        if node_status == "draining":
+            return {"job": None}
+
+        raw_avail = node_info.get(b"available_slots") or node_info.get("available_slots")
+        if raw_avail is not None and isinstance(raw_avail, (str, bytes, int)):
+            try:
+                avail_int = int(raw_avail.decode() if isinstance(raw_avail, bytes) else raw_avail)
+                if avail_int <= 0:
+                    return {"job": None}
+            except (ValueError, TypeError):
+                pass
+
+        # Extract advertised supported languages
+        raw_langs = node_info.get(b"languages") or node_info.get("languages")
+        if raw_langs and isinstance(raw_langs, (str, bytes)):
+            try:
+                parsed_langs = json.loads(raw_langs.decode() if isinstance(raw_langs, bytes) else raw_langs)
+                node_langs = set(str(l).lower() for l in parsed_langs)
+            except Exception:
+                pass
+
     processing_queue = "ccc:queue:fabric:processing"
-    
-    # Step 1: Immediate non-blocking check on primary queue
-    job_id = await redis.rpoplpush("ccc:queue:fabric:pending", processing_queue)
+    job_id = None
+
+    # Step 1: Check language-partitioned queues for languages this node supports
+    if node_langs:
+        for lang in node_langs:
+            job_id = await redis.rpoplpush(f"ccc:queue:fabric:pending:{lang}", processing_queue)
+            if job_id:
+                break
+
+    # Step 2: Immediate non-blocking check on primary queue if not yet claimed
     if not job_id:
-        # Step 2: Immediate non-blocking check on secondary queue
+        job_id = await redis.rpoplpush("ccc:queue:fabric:pending", processing_queue)
+    if not job_id:
+        # Step 3: Immediate non-blocking check on secondary queue
         processing_queue = "ccc:queue:judge:processing"
         job_id = await redis.rpoplpush("ccc:queue:judge:pending", processing_queue)
 
-    # Step 3: If still empty and caller requested a wait timeout > 0, block on Redis
+    # Step 4: If still empty and caller requested a wait timeout > 0, block on Redis
     timeout_s = max(0.0, min(float(payload.timeout_seconds), 15.0))
     if not job_id and timeout_s > 0:
         processing_queue = "ccc:queue:fabric:processing"
@@ -296,11 +339,51 @@ async def claim_job(
         return {"job": None}
 
     job_dict = json.loads(raw_job)
+    job_lang = str(job_dict.get("payload", {}).get("language", "")).lower()
 
-    # Attach distributed lease (300s) and attempt tracking to this node
+    # Capability verification: ensure this node can execute the job's language
+    if node_langs and job_lang and job_lang not in node_langs:
+        logger.info("Capability mismatch: job %s (lang=%s) not supported by node %s. Requeuing.", job_id, job_lang, node_id)
+        await redis.lrem(processing_queue, 1, job_id)
+        await redis.rpush(f"ccc:queue:fabric:pending:{job_lang}", job_id)
+        return {"job": None}
+
+    # Bounded slots: decrement available slots and track running jobs
+    await redis.hincrby(f"ccc:node:{node_id}:info", "available_slots", -1)
+    await redis.hincrby(f"ccc:node:{node_id}:info", "running_jobs", 1)
+
+    # Bind the Redis lease to the active PostgreSQL attempt before returning work.
     now = time.time()
     attempt = int(job_dict.get("attempt", 0)) + 1
     lease_id = f"lease_{job_id}_{attempt}_{node_id}"
+
+    attempt_id = job_dict.get("attempt_id")
+    if attempt_id:
+        async with AsyncSessionLocal() as session:
+            job_res = await session.execute(
+                select(JudgeJob).where(JudgeJob.id == job_id).with_for_update()
+            )
+            db_job = job_res.scalars().first()
+            attempt_res = await session.execute(
+                select(JudgeJobAttempt).where(JudgeJobAttempt.id == attempt_id).with_for_update()
+            )
+            db_attempt = attempt_res.scalars().first()
+            if (
+                not db_job
+                or not db_attempt
+                or db_job.active_attempt_id != attempt_id
+                or db_job.state != "PROCESSING"
+                or db_attempt.job_id != job_id
+                or db_attempt.state != "STARTED"
+            ):
+                await redis.lrem(processing_queue, 1, job_id)
+                return {"job": None}
+            attempt = db_attempt.attempt_number
+            lease_id = f"lease_{job_id}_{attempt}_{node_id}"
+            db_attempt.node_id = node_id
+            db_attempt.lease_id = lease_id
+            db_attempt.heartbeat_at = datetime.now(timezone.utc)
+            await session.commit()
 
     await redis.set(f"ccc:job:{job_id}:leased_at", str(now), ex=300)
     await redis.set(f"ccc:job:{job_id}:node_id", node_id, ex=300)
@@ -311,6 +394,7 @@ async def claim_job(
     job_dict["status"] = "PROCESSING"
     job_dict["claimed_by_node"] = node_id
     job_dict["attempt"] = attempt
+    job_dict["attempt_id"] = attempt_id
     job_dict["lease_id"] = lease_id
     job_dict["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))
     await redis.set(f"ccc:job:{job_id}", json.dumps(job_dict), ex=86400)
@@ -331,11 +415,13 @@ async def submit_result(
     """
     redis = get_redis()
 
-    # 1. Fencing and stale-attempt validation: check if lease is still owned by this node & attempt
+    raw_job = await redis.get(f"ccc:job:{payload.job_id}")
+
+    # The DB CAS is authoritative for centrally tracked submissions. The Redis
+    # lease remains an additional owner check and supports the dispatch-test path.
     active_lease = await redis.get(f"ccc:job:{payload.job_id}:lease_id")
     active_node = await redis.get(f"ccc:job:{payload.job_id}:node_id")
-
-    if active_lease and payload.lease_id and active_lease != payload.lease_id:
+    if not active_lease or not payload.lease_id or active_lease != payload.lease_id:
         logger.warning(
             "⚠️ [Fabric] Rejecting stale result for job %s from node %s (lease mismatch: expected %s, got %s)",
             payload.job_id, node_id, active_lease, payload.lease_id
@@ -345,25 +431,99 @@ async def submit_result(
             detail=f"Stale result rejected. Active lease is held by another attempt ({active_lease}).",
         )
 
-    if active_node and active_node != node_id:
+    if not raw_job:
+        raise HTTPException(status_code=404, detail="Execution job was not found.")
+    job_dict = json.loads(raw_job)
+
+    if not active_node or active_node != node_id:
         logger.warning(
             "⚠️ [Fabric] Rejecting result for job %s from node %s (lease held by node %s)",
             payload.job_id, node_id, active_node
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Node {node_id} does not hold active lease for job {payload.job_id}.",
+            detail=f"Node {node_id} does not hold the active lease for job {payload.job_id}.",
         )
+
+    res_data = payload.model_dump()
+    result_hash = hashlib.sha256(
+        json.dumps(res_data, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    attempt_id = job_dict.get("attempt_id")
+    if attempt_id:
+        async with AsyncSessionLocal() as session:
+            job_res = await session.execute(
+                select(JudgeJob).where(JudgeJob.id == payload.job_id).with_for_update()
+            )
+            db_job = job_res.scalars().first()
+            attempt_res = await session.execute(
+                select(JudgeJobAttempt).where(JudgeJobAttempt.id == attempt_id).with_for_update()
+            )
+            db_attempt = attempt_res.scalars().first()
+            if not db_job or not db_attempt or db_attempt.job_id != payload.job_id:
+                raise HTTPException(status_code=409, detail="Execution attempt is no longer valid.")
+
+            if db_job.state in {"COMPLETED", "FAILED"} and db_attempt.state == db_job.state:
+                if db_attempt.result_hash != result_hash:
+                    raise HTTPException(status_code=409, detail="Conflicting duplicate result rejected.")
+            else:
+                if (
+                    payload.attempt_id != attempt_id
+                    or db_job.active_attempt_id != attempt_id
+                    or db_job.state != "PROCESSING"
+                    or db_attempt.state != "STARTED"
+                    or db_attempt.node_id != node_id
+                    or db_attempt.lease_id != payload.lease_id
+                ):
+                    raise HTTPException(status_code=409, detail="Stale execution attempt rejected.")
+
+                final_state = "FAILED" if payload.verdict == "SYSTEM_ERROR" else "COMPLETED"
+                finalize_status, _ = await AttemptManager.finalize_attempt(
+                    session,
+                    job_id=payload.job_id,
+                    attempt_id=attempt_id,
+                    final_state=final_state,
+                    failure_code="NODE_SYSTEM_ERROR" if final_state == "FAILED" else None,
+                    execution_time_ms=payload.runtime_ms,
+                    result_hash=result_hash,
+                    result_payload=res_data,
+                )
+                if finalize_status != FinalizeResult.SUCCESS:
+                    raise HTTPException(status_code=409, detail="Stale execution attempt rejected.")
+
+                # Record transactional outbox event
+                contest_slug = job_dict.get("payload", {}).get("contest_slug") if raw_job else None
+                from app.core.queue.outbox import record_outbox_event
+                await record_outbox_event(
+                    db=session,
+                    queue_name="realtime",
+                    event_type="submission_completed",
+                    payload={
+                        "contest_slug": contest_slug,
+                        "submission_id": payload.job_id,
+                        "verdict": payload.verdict,
+                        "runtime_ms": payload.runtime_ms,
+                    },
+                    aggregate_id=payload.job_id,
+                    priority="high",
+                )
+            await session.commit()
+    elif payload.attempt_id:
+        raise HTTPException(status_code=409, detail="Execution attempt metadata mismatch.")
+
+    # Restore node capacity slot
+    await redis.hincrby(f"ccc:node:{node_id}:info", "available_slots", 1)
+    await redis.hincrby(f"ccc:node:{node_id}:info", "running_jobs", -1)
 
     # 2. Remove from in-flight processing lists & clear lease keys
     await redis.lrem("ccc:queue:fabric:processing", 1, payload.job_id)
     await redis.lrem("ccc:queue:judge:processing", 1, payload.job_id)
     await redis.delete(f"ccc:job:{payload.job_id}:leased_at")
-    await redis.delete(f"ccc:job:{payload.job_id}:node_id")
-    await redis.delete(f"ccc:job:{payload.job_id}:lease_id")
+    if not attempt_id:
+        await redis.delete(f"ccc:job:{payload.job_id}:node_id")
+        await redis.delete(f"ccc:job:{payload.job_id}:lease_id")
 
     # 3. Update authoritative job record in Redis
-    raw_job = await redis.get(f"ccc:job:{payload.job_id}")
     if raw_job:
         job_dict = json.loads(raw_job)
         job_dict["status"] = "COMPLETED"
@@ -383,16 +543,18 @@ async def submit_result(
         # Broadcast SSE completion event
         contest_slug = job_dict.get("payload", {}).get("contest_slug")
         if contest_slug:
-            channel = f"ccc:contest:{contest_slug}"
-            event_payload = {
-                "event": "submission_completed",
-                "job_id": payload.job_id,
-                "submission_id": job_dict.get("payload", {}).get("submission_id"),
-                "verdict": payload.verdict,
-                "runtime_ms": payload.runtime_ms,
-                "timestamp": time.time(),
-            }
-            await redis.publish(channel, json.dumps(event_payload))
+            from app.services.event_broadcaster import broadcast_event
+
+            await broadcast_event(
+                "submission_completed",
+                {
+                    "job_id": payload.job_id,
+                    "submission_id": job_dict.get("payload", {}).get("submission_id"),
+                    "verdict": payload.verdict,
+                    "runtime_ms": payload.runtime_ms,
+                },
+                contest_slug=contest_slug,
+            )
 
         # Publish dedicated job completion channel for 0ms event-driven wakeup
         completion_event = {

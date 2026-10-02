@@ -123,5 +123,19 @@ async def prometheus_metrics() -> Response:
     except Exception as exc:
         logger.debug("Error collecting autoscale metrics: %s", exc)
 
+    # ─── 6. Execution Observability Telemetry ────────────────────────────────────
+    try:
+        from app.engine.observability import ExecutionObservability
+        from app.engine.circuit_breaker import CodeboxCircuitBreaker
+        obs = ExecutionObservability.get_instance()
+        for metric_name, val in obs.metrics.items():
+            out.append(_format_metric(f"ccc_{metric_name}", f"Execution metric: {metric_name}", "gauge", [f"ccc_{metric_name} {val}"]))
+        cb = CodeboxCircuitBreaker.get_instance()
+        cb_state = await cb.get_state()
+        state_num = 0 if cb_state.value == "CLOSED" else (1 if cb_state.value == "HALF_OPEN" else 2)
+        out.append(_format_metric("ccc_circuit_breaker_state", "Circuit breaker state (0=CLOSED, 1=HALF_OPEN, 2=OPEN)", "gauge", [f"ccc_circuit_breaker_state {state_num}"]))
+    except Exception as exc:
+        logger.debug("Error collecting execution observability metrics: %s", exc)
+
     content = "".join(filter(None, out))
     return PlainTextResponse(content=content, media_type="text/plain; version=0.0.4; charset=utf-8")

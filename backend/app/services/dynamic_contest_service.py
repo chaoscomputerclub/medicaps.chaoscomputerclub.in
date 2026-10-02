@@ -1326,7 +1326,9 @@ class DynamicContestService:
         if cleaned_status not in valid_statuses:
             raise HTTPException(status_code=400, detail=f"Invalid status '{target_status}'. Must be one of: {valid_statuses}")
 
-        c_res = await db.execute(select(OfflineContest).where(OfflineContest.slug == contest_slug))
+        c_res = await db.execute(
+            select(OfflineContest).where(OfflineContest.slug == contest_slug).with_for_update()
+        )
         contest = c_res.scalars().first()
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
@@ -1373,10 +1375,7 @@ class DynamicContestService:
 
         rating_summary = None
         if cleaned_status == "finished":
-            try:
-                rating_summary = await DynamicContestService._apply_final_ratings(contest, db)
-            except Exception as e:
-                logger.warning("Rating application notice: %s", e)
+            rating_summary = await DynamicContestService._apply_final_ratings(contest, db)
 
         await db.commit()
 
@@ -1390,6 +1389,7 @@ class DynamicContestService:
         )
 
         if cleaned_status == "finished":
+            await DynamicContestService._publish_rating_events(contest.slug, rating_summary)
             concluded_event_data = DynamicContestService._contest_event_data(contest, "concluded")
             concluded_event_data.update({
                 "old_status": old_status,
@@ -1437,6 +1437,29 @@ class DynamicContestService:
         from app.services.rating_service import calculate_rating_deltas
         from datetime import timezone
         from sqlalchemy import text
+
+        locked_result = await db.execute(
+            select(OfflineContest).where(OfflineContest.id == contest.id).with_for_update()
+        )
+        locked_contest = locked_result.scalars().first()
+        if locked_contest is None:
+            raise HTTPException(status_code=404, detail="Contest not found during rating finalization.")
+        contest = locked_contest
+
+        if contest.ratings_finalized_at is not None:
+            return {"rated_count": 0, "already_finalized": True, "message": "Contest ratings were already finalized."}
+
+        prior_history_count = await db.scalar(
+            select(func.count(RatingHistory.id)).where(
+                (RatingHistory.contest_id == contest.id) | (RatingHistory.contest_id == contest.slug)
+            )
+        ) or 0
+        if prior_history_count:
+            # Older deployments had no finalization marker. Existing history is
+            # evidence that replaying the Elo mutation would double-apply it.
+            contest.ratings_finalized_at = now_utc()
+            return {"rated_count": prior_history_count, "already_finalized": True, "legacy_history": True,
+                    "message": "Existing rating history detected; rating mutations were not replayed."}
 
         ends_at = contest.ends_at
         if ends_at and ends_at.tzinfo is None:
@@ -1546,6 +1569,7 @@ class DynamicContestService:
         entries = sb_res.scalars().all()
 
         if not entries:
+            contest.ratings_finalized_at = now_utc()
             return {"rated_count": 0, "message": "No scoreboard entries to rate."}
 
         for new_rank, entry in enumerate(entries, start=1):
@@ -1605,28 +1629,39 @@ class DynamicContestService:
             ))
             rated += 1
 
-
-
-        try:
-            from app.services.event_broadcaster import broadcast_event
-            await broadcast_event(
-                event_type="leaderboard_updated",
-                data={
-                    "contest_slug": contest.slug,
-                    "rated_count": rated,
-                    "action": "ratings_applied",
-                },
-                contest_slug=None,
-            )
-            await broadcast_event(
-                event_type="ratings_updated",
-                data={"contest_slug": contest.slug, "rated_count": rated},
-                contest_slug=None,
-            )
-        except Exception as exc:
-            logger.debug("Failed to broadcast leaderboard update SSE: %s", exc)
-
+        contest.ratings_finalized_at = now_utc()
+        from app.core.queue.outbox import record_outbox_event
+        await record_outbox_event(
+            db=db,
+            queue_name="realtime",
+            event_type="ratings_updated",
+            payload={"contest_slug": contest_slug, "rated_count": rated},
+            aggregate_id=contest.id,
+            priority="high",
+        )
+        await record_outbox_event(
+            db=db,
+            queue_name="realtime",
+            event_type="leaderboard_updated",
+            payload={"contest_slug": contest_slug, "rated_count": rated, "action": "ratings_applied"},
+            aggregate_id=contest.id,
+            priority="high",
+        )
         return {"rated_count": rated, "message": f"Ratings applied for {rated} participant(s)."}
+
+    @staticmethod
+    async def _publish_rating_events(contest_slug: str, rating_summary: Optional[Dict[str, Any]]) -> None:
+        from app.services.event_broadcaster import broadcast_event
+
+        data = {
+            "contest_slug": contest_slug,
+            "rated_count": (rating_summary or {}).get("rated_count", 0),
+        }
+        try:
+            await broadcast_event("leaderboard_updated", {**data, "action": "ratings_applied"})
+            await broadcast_event("ratings_updated", data)
+        except Exception as exc:
+            logger.warning("Failed to broadcast committed rating updates for %s: %s", contest_slug, exc)
 
     @staticmethod
     async def delete_contest(

@@ -17,13 +17,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 from app.core.config import settings
-from app.core.origins import validate_frontend_origin
+from app.core.origins import get_allowed_production_origins, validate_frontend_origin
 from app.core.db import AsyncSessionLocal, init_db
 from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
 from app.core.queue import queue_manager
-from app.routers import admin, admin_contests, admin_problems, admin_qa, assessment, auth, contests, events, fabric, feed, jobs, leaderboard, metrics, nodes, passes, scoreboards, social, storage, verify, webhooks, workers
+from app.routers import admin, admin_contests, admin_loadtest, admin_problems, admin_qa, assessment, auth, contests, events, fabric, feed, jobs, leaderboard, metrics, nodes, passes, scoreboards, social, storage, verify, webhooks, workers
 from app.api.v1.router import api_router_v1
 from app.core.resource_governor import get_resource_governor
 
@@ -80,9 +80,16 @@ async def lifespan(app: FastAPI):
     autoscaler.start()
     print("✓ Dynamic Autoscaler started (interval=10s)")
 
+    # ── Judge Reconciliation Worker (stuck processing audit & lease recovery) ─
+    from app.core.reconciliation import ReconciliationWorker
+    reconciliation_worker = ReconciliationWorker.get_instance()
+    await reconciliation_worker.start()
+    print("✓ Judge Reconciliation Worker started (interval=15s)")
+
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
+    await reconciliation_worker.stop()
     await autoscaler.stop()
     await governor.stop()
     await queue_manager.stop_all(drain_timeout=15.0)
@@ -112,10 +119,20 @@ app.add_middleware(CloudflareSecurityMiddleware)
 # Live Contest Eligibility Middleware (Enforces Top 30 restriction on live finals)
 app.add_middleware(ContestEligibilityMiddleware)
 
+allowed_origins = set(settings.cors_origins_list or [])
+if settings.is_production:
+    allowed_origins.update(get_allowed_production_origins())
+else:
+    allowed_origins.update({
+        "http://localhost:8081",
+        "http://localhost:8082",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:8082",
+    })
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list or [],
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|.*\.sharexpress\.in|.*\.chaoscomputerclub\.in|.*\.shaxpress\.in)(:\d+)?",
+    allow_origins=sorted(allowed_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -218,6 +235,7 @@ app.include_router(admin_contests.router, prefix=settings.API_PREFIX)
 app.include_router(admin_problems.router, prefix=settings.API_PREFIX)
 app.include_router(admin_problems.router)  # Direct /admin/problems mount
 app.include_router(admin_qa.router, prefix=settings.API_PREFIX)
+app.include_router(admin_loadtest.router, prefix=settings.API_PREFIX)
 
 
 # Versioned surface — preferred for all new clients (/api/v1/).

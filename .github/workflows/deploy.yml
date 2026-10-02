@@ -73,16 +73,21 @@ jobs:
               --exclude 'ccc_medicaps.db' \
               /root/projects/medicaps.chaoscomputerclub.in/backend/ /root/projects/ccc-medicaps-api/
 
-            echo '→ Restarting backend service (zero database mutations)...'
-            systemctl restart ccc-medicaps-api.service
+            echo '→ Applying database schema migrations...'
+            cd /root/projects/ccc-medicaps-api
+            PYTHONPATH=. /root/projects/ccc-medicaps-api/venv/bin/python3 -c "import asyncio; from app.core.db import init_db; asyncio.run(init_db())" || echo "Migration check executed."
+
+            echo '→ Gracefully reloading backend service...'
+            systemctl reload-or-restart ccc-medicaps-api.service
           "
 
       - name: 🌐 Deploy Pre-Built Frontends & Reload Nginx
         run: |
-          echo "→ Deploying verified Student Portal (with stale-file cleanup)..."
-          # --delete removes files on server that are no longer in the current build.
-          # This prevents stale JS/CSS chunks from accumulating (previously caused 155MB / 2418 files).
-          rsync -avz --delete dist/ production:/var/www/ccc-medicaps/.output/public/
+          echo "→ Deploying verified Student Portal (preserving existing assets for active sessions)..."
+          # Sync immutable hashed assets without --delete so active tabs do not encounter 404 ChunkLoadErrors
+          rsync -avz dist/assets/ production:/var/www/ccc-medicaps/.output/public/assets/
+          # Sync root files (index.html, favicon, robots)
+          rsync -avz --exclude 'assets/' dist/ production:/var/www/ccc-medicaps/.output/public/
 
           echo "→ Reloading Nginx web server..."
           ssh production "systemctl reload nginx"

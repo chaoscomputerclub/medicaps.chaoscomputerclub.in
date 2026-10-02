@@ -181,9 +181,9 @@ async def delete_account(
 async def logout(
     request: Request,
     response: Response,
-    current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ):
-    return await AuthController.logout(request, response, current_member)
+    return await AuthController.logout(request, response, current_member=None)
+
 
 
 @router.get("/jwt-public-key", summary="Get RSA 256 public key for asymmetric token verification")

@@ -29,13 +29,14 @@ interface CacheRecord<T> {
 class SwrMemoryStore {
   private cache = new Map<string, CacheRecord<any>>();
   private inFlight = new Map<string, Promise<any>>();
+  private generations = new Map<string, number>();
   private subscribers = new Map<string, Set<(data: any) => void>>();
 
   constructor() {
     // Hydrate from sessionStorage if available
     if (typeof window !== "undefined" && window.sessionStorage) {
       try {
-        const persisted = window.sessionStorage.getItem("__ccc_swr_cache__");
+        const persisted = window.sessionStorage.getItem(this.storageKey());
         if (persisted) {
           const parsed = JSON.parse(persisted);
           const now = Date.now();
@@ -59,11 +60,25 @@ class SwrMemoryStore {
         for (const [key, record] of this.cache.entries()) {
           obj[key] = record;
         }
-        window.sessionStorage.setItem("__ccc_swr_cache__", JSON.stringify(obj));
+        window.sessionStorage.setItem(this.storageKey(), JSON.stringify(obj));
       } catch {
         // Storage quota full or unavailable
       }
     }
+  }
+
+  private storageKey(): string {
+    try {
+      const member = JSON.parse(localStorage.getItem("ccc_medicaps_member") || "null");
+      const identity = member?.id || member?.email || "anonymous";
+      return `__ccc_swr_cache_${encodeURIComponent(String(identity))}__`;
+    } catch {
+      return "__ccc_swr_cache_anonymous__";
+    }
+  }
+
+  public generation(key: string): number {
+    return this.generations.get(key) ?? 0;
   }
 
   public get<T>(key: string): CacheRecord<T> | undefined {
@@ -99,29 +114,30 @@ class SwrMemoryStore {
     this.inFlight.set(key, promise);
   }
 
-  public clearInFlight(key: string): void {
-    this.inFlight.delete(key);
+  public clearInFlight(key: string, promise?: Promise<any>): void {
+    if (!promise || this.inFlight.get(key) === promise) this.inFlight.delete(key);
   }
 
   public invalidate(patternOrKey: string): void {
-    if (patternOrKey.includes("*")) {
-      const regex = new RegExp("^" + patternOrKey.replace(/\*/g, ".*") + "$");
-      for (const key of this.cache.keys()) {
-        if (regex.test(key)) {
-          this.cache.delete(key);
-        }
+    const matches = patternOrKey.includes("*")
+      ? (key: string) => new RegExp("^" + patternOrKey.replace(/\*/g, ".*") + "$").test(key)
+      : (key: string) => key === patternOrKey;
+    const keys = new Set([...this.cache.keys(), ...this.inFlight.keys()]);
+    for (const key of keys) {
+      if (matches(key)) {
+        this.cache.delete(key);
+        this.generations.set(key, this.generation(key) + 1);
       }
-    } else {
-      this.cache.delete(patternOrKey);
     }
     this.saveToSession();
   }
 
   public clear(): void {
+    for (const key of this.inFlight.keys()) this.generations.set(key, this.generation(key) + 1);
     this.cache.clear();
-    this.inFlight.clear();
+    for (const [key, promise] of this.inFlight) this.clearInFlight(key, promise);
     if (typeof window !== "undefined" && window.sessionStorage) {
-      window.sessionStorage.removeItem("__ccc_swr_cache__");
+      window.sessionStorage.removeItem(this.storageKey());
     }
   }
 
@@ -143,6 +159,10 @@ class SwrMemoryStore {
 }
 
 export const globalSwrStore = new SwrMemoryStore();
+
+if (typeof window !== "undefined") {
+  window.addEventListener("ccc:auth-changed", () => globalSwrStore.clear());
+}
 
 /**
  * Perform a Stale-While-Revalidate fetch:
@@ -187,15 +207,17 @@ export async function swrFetch<T>(
   }
 
   // 3. Dispatch new network request
-  const fetchPromise = (async () => {
+  const generation = globalSwrStore.generation(key);
+  let fetchPromise!: Promise<T>;
+  fetchPromise = (async () => {
     try {
       const freshData = await fetcher();
-      if (freshData !== undefined && freshData !== null) {
+      if (freshData !== undefined && freshData !== null && globalSwrStore.generation(key) === generation) {
         globalSwrStore.set(key, freshData, persistSession);
       }
       return freshData;
     } finally {
-      globalSwrStore.clearInFlight(key);
+      globalSwrStore.clearInFlight(key, fetchPromise);
     }
   })();
 
@@ -210,16 +232,18 @@ function triggerBackgroundRevalidate<T>(
 ) {
   if (globalSwrStore.getInFlight(key)) return;
 
-  const bgPromise = (async () => {
+  const generation = globalSwrStore.generation(key);
+  let bgPromise!: Promise<void>;
+  bgPromise = (async () => {
     try {
       const freshData = await fetcher();
-      if (freshData !== undefined && freshData !== null) {
+      if (freshData !== undefined && freshData !== null && globalSwrStore.generation(key) === generation) {
         globalSwrStore.set(key, freshData, persistSession);
       }
     } catch (e) {
       // Silent background catch
     } finally {
-      globalSwrStore.clearInFlight(key);
+      globalSwrStore.clearInFlight(key, bgPromise);
     }
   })();
 

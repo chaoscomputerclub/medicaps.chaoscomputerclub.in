@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     JWT_PUBLIC_KEY: str = os.getenv("JWT_PUBLIC_KEY", "")
     JWT_PRIVATE_KEY_PATH: Optional[str] = os.getenv("JWT_PRIVATE_KEY_PATH", None)
     JWT_PUBLIC_KEY_PATH: Optional[str] = os.getenv("JWT_PUBLIC_KEY_PATH", None)
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "43200"))  # 30 days long-lived persistent access
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
 
     # Cookie Security Settings
@@ -161,6 +161,10 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+# Access tokens are deliberately short-lived; the refresh token is the long-lived credential.
+if settings.is_production and settings.ACCESS_TOKEN_EXPIRE_MINUTES > 15:
+    settings.ACCESS_TOKEN_EXPIRE_MINUTES = 15
+
 # Enforce Phase 7: DATABASE_URL Safety — Zero implicit fallback in production
 if settings.is_production:
     raw_db_env = os.getenv("DATABASE_URL", "").strip()
@@ -195,5 +199,4 @@ if not settings.JWT_PUBLIC_KEY:
             settings.JWT_PUBLIC_KEY = pub_path.read_text().strip()
     elif (BASE_DIR / "keys" / "jwt_public_key.pem").exists():
         settings.JWT_PUBLIC_KEY = (BASE_DIR / "keys" / "jwt_public_key.pem").read_text().strip()
-
 

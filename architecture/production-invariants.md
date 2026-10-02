@@ -174,3 +174,83 @@ Compute nodes are designed for zero-configuration, plug-and-play operation:
    Machine-to-machine traffic (Go agents, judge workers, CI/CD, admin tools) addresses `https://medicaps-api.chaoscomputerclub.in` with bearer token or HMAC cryptographic authentication.
 4. **Strict Isolation of Data Engines**:
    PostgreSQL 16 and Redis 7 listen only on `127.0.0.1` and are never reachable outside the VPS localhost boundary.
+
+---
+
+### 7. Execution Safety & Fencing Invariant
+
+> **EXECUTION SAFETY INVARIANT**
+> 
+> "No execution provider or node may finalize a submission unless its `attempt_id` matches the currently authoritative `active_attempt_id` for that job.
+> 
+> Node crash or network delay must never cause:
+> - duplicate authoritative results
+> - stale result overwrites
+> - unbounded fallback fan-out
+> - uncontrolled Codebox saturation
+> - loss of PostgreSQL submission state
+> - scoreboard corruption."
+
+Key Mechanisms:
+1. **Durable Attempt Models**: Every execution is recorded in PostgreSQL (`judge_jobs` and `judge_job_attempts`) with a strictly managed `active_attempt_id`.
+2. **Atomic Result Fencing**: Results are committed conditionally:
+   ```sql
+   UPDATE judge_jobs
+   SET state = 'COMPLETED', active_attempt_id = NULL
+   WHERE id = :job_id AND active_attempt_id = :attempt_id;
+   ```
+   If 0 rows update, the result is rejected as `STALE_ATTEMPT` or `DUPLICATE_RESULT`.
+3. **Event-Driven Bounded Admission**: Codebox fallback avoids polling spin-loops, using non-blocking Lua permit checks and deterministic grant key signaling (`BLPOP`) with bounded capacity.
+4. **Sliding-Window Circuit Breakers**: Codebox circuit breaker tracks infrastructure failures within a sliding 60-second time window (ignoring user code errors like WA/TLE/MLE) and transitions `CLOSED -> OPEN -> HALF-OPEN -> CLOSED`.
+5. **Reconciliation Engine**: Background worker detects orphaned jobs, verifies lease timestamps, records `EXECUTION_REQUEUE` in the Transactional Outbox within PostgreSQL, and expires dead attempts without dual-write races.
+
+---
+
+### 8. Transactional Outbox Architecture
+
+To prevent Redis/PostgreSQL dual-write divergence:
+1. Every domain mutation (verdict finalization, contest lifecycle transition, rating update, execution requeue) commits business state and inserts an `outbox_events` record within the **SAME PostgreSQL transaction**.
+2. PostgreSQL transaction commits.
+3. The background **Outbox Relay** polls pending outbox events with row-level advisory locking (`FOR UPDATE SKIP LOCKED`), dispatches them idempotently to Redis (pub/sub, SSE, or fabric queue), and marks them `DELIVERED`.
+4. If Redis is temporarily down, PostgreSQL state remains fully intact, and events are delivered immediately upon Redis recovery with zero event loss.
+
+---
+
+### 9. Capability-Aware Node Scheduling & Slot Governance
+
+Nodes advertise hardware capabilities on registration (`POST /api/v1/nodes/register`):
+- `languages`: e.g. `["python", "cpp", "java", "javascript"]`
+- `architecture`: e.g. `x86_64` / `arm64`
+- `available_slots`: centralized integer bound based on CPU logical cores and RAM
+- `draining`: boolean drain flag
+
+Scheduler Guarantees:
+- Jobs requiring specific language runtimes are partitioned into language-specific queues (`ccc:queue:fabric:pending:{lang}`).
+- In `POST /api/v1/nodes/claim`, nodes atomically pop only from queues matching their advertised language set.
+- Nodes with `available_slots <= 0` or status `draining` are rejected from claiming new work.
+- Atomic slot decrement occurs upon claim, and slot restoration occurs upon result finalization.
+
+---
+
+### 10. Canonical Contest State Machine & Scoreboard Atomicity
+
+Contests transition through five deterministic states:
+```
+UPCOMING  ──►  LIVE  ──►  DRAINING  ──►  FINALIZING  ──►  COMPLETED
+```
+- **LIVE**: Submissions accepted and judged.
+- **DRAINING**: Contest duration has expired; `assert_submissions_open()` strictly blocks new submissions with HTTP 422, while existing in-flight jobs are permitted to complete.
+- **FINALIZING**: Scoreboard recalculation and anti-cheat audit.
+- **COMPLETED**: Final ratings computed and committed atomically alongside outbox events (`ratings_updated`, `leaderboard_updated`). Rating finalization is strictly idempotent and prevented from running twice.
+
+---
+
+### 11. Production Observability & Metrics
+
+Prometheus exposition via `/metrics`:
+- `ccc_judge_attempts_total{provider, status}`: Execution attempts by provider and outcome.
+- `ccc_judge_stale_results_total`: Count of rejected stale attempts.
+- `ccc_circuit_breaker_state{provider}`: Current state (0 = CLOSED, 1 = HALF_OPEN, 2 = OPEN).
+- `ccc_outbox_events_total{event_type, status}`: Outbox delivery and relay telemetry.
+- `ccc_node_active_count`, `ccc_node_available_slots`: Distributed fabric cluster capacity.
+

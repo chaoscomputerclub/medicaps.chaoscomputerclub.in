@@ -20,8 +20,13 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+import enum
 from app.core.config import settings
+from app.engine.admission_controller import CodeboxAdmissionController, AdmissionPool
+from app.engine.circuit_breaker import CodeboxCircuitBreaker, CircuitState
+from app.engine.deadlines import ExecutionDeadlineTracker
 from app.engine.enums import ComparisonMode, ExecutionStatus, Language, Verdict
+from app.engine.errors import ErrorCode, JudgeExecutionException
 from app.engine.judge import JudgeEngine
 from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
 from app.lib.chunking import gather_with_concurrency
@@ -29,6 +34,14 @@ from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
 
 
 logger = logging.getLogger("ccc.judge.codebox")
+
+
+class ReadinessState(str, enum.Enum):
+    HEALTHY = "HEALTHY"
+    READY = "READY"
+    DEGRADED = "DEGRADED"
+    SATURATED = "SATURATED"
+    UNAVAILABLE = "UNAVAILABLE"
 
 # CodeBox / Judge0 Language ID Mapping
 CODEBOX_LANGUAGE_IDS: Dict[str, int] = {
@@ -66,6 +79,7 @@ class CodeboxProvider(JudgeProvider):
     """
     Client for Hitesh Choudhary's Codebox execution engine.
     Drop-in Judge0 API compliant with Firecracker microVM & Docker isolation.
+    Hardened with admission control, circuit breakers, and queue-aware deadlines.
     """
 
     name = "codebox"
@@ -76,6 +90,8 @@ class CodeboxProvider(JudgeProvider):
         self.poll_interval = float(os.getenv("CODEBOX_POLL_SECONDS", "0.3"))
         self.max_polls = int(os.getenv("CODEBOX_MAX_POLLS", "30"))
         self.timeout = float(os.getenv("CODEBOX_TIMEOUT", "15.0"))
+        self._circuit_breaker = CodeboxCircuitBreaker.get_instance()
+        self._admission_controller = CodeboxAdmissionController.get_instance()
 
     def _headers(self) -> Dict[str, str]:
         headers = {"Content-Type": "application/json"}
@@ -84,18 +100,63 @@ class CodeboxProvider(JudgeProvider):
             headers["X-RapidAPI-Key"] = self.auth_token
         return headers
 
-    async def healthy(self) -> bool:
-        """Probe Codebox health endpoint without needing auth."""
+    async def check_readiness(self) -> dict:
+        """
+        Deep execution readiness probe.
+        Distinguishes: HEALTHY, READY, DEGRADED, SATURATED, UNAVAILABLE.
+        Accounts for: HTTP API health, Circuit Breaker state, Admission pool saturation.
+        """
+        cb_state = await self._circuit_breaker.get_state()
+        if cb_state == CircuitState.OPEN:
+            return {
+                "status": ReadinessState.UNAVAILABLE.value,
+                "reason": "Circuit breaker is OPEN due to repeated infrastructure faults.",
+                "accepting_submissions": False,
+                "circuit_state": cb_state.value,
+            }
+
+        pool_status = await self._admission_controller.get_pool_status()
+        is_saturated = all(p["saturated"] for p in pool_status.values())
+        if is_saturated:
+            return {
+                "status": ReadinessState.SATURATED.value,
+                "reason": "All execution capacity pools and queues are currently saturated.",
+                "accepting_submissions": False,
+                "circuit_state": cb_state.value,
+                "pool_status": pool_status,
+            }
+
+        # Check HTTP /ready or /health
         try:
-            async with httpx.AsyncClient(timeout=4.0) as client:
+            async with httpx.AsyncClient(timeout=3.0) as client:
                 resp = await client.get(f"{self.base_url}/health")
                 if resp.status_code == 200:
-                    return True
-                # Fallback to /about
-                about_resp = await client.get(f"{self.base_url}/about", headers=self._headers())
-                return about_resp.status_code < 400
-        except Exception:
-            return False
+                    status_enum = ReadinessState.DEGRADED if cb_state == CircuitState.HALF_OPEN else ReadinessState.READY
+                    return {
+                        "status": status_enum.value,
+                        "reason": "Codebox service responsive and accepting executions.",
+                        "accepting_submissions": True,
+                        "circuit_state": cb_state.value,
+                        "pool_status": pool_status,
+                    }
+                return {
+                    "status": ReadinessState.UNAVAILABLE.value,
+                    "reason": f"Codebox returned HTTP {resp.status_code}",
+                    "accepting_submissions": False,
+                    "circuit_state": cb_state.value,
+                }
+        except Exception as exc:
+            return {
+                "status": ReadinessState.UNAVAILABLE.value,
+                "reason": f"Codebox unreachable: {exc}",
+                "accepting_submissions": False,
+                "circuit_state": cb_state.value,
+            }
+
+    async def healthy(self) -> bool:
+        """Health check backed by deep readiness state and circuit breaker."""
+        readiness = await self.check_readiness()
+        return readiness["status"] in (ReadinessState.HEALTHY.value, ReadinessState.READY.value, ReadinessState.DEGRADED.value)
 
     def _resolve_lang_id(self, language: str | Language) -> Optional[int]:
         if isinstance(language, Language):
@@ -348,24 +409,50 @@ class CodeboxProvider(JudgeProvider):
         time_limit: float = 5.0,
         memory_limit_mb: int = 256,
         comparison_mode: ComparisonMode = ComparisonMode.TRIMMED,
+        admission_pool: str = AdmissionPool.FALLBACK,
+        deadline_tracker: Optional[ExecutionDeadlineTracker] = None,
     ) -> ExecutionResult:
         """
         Execute full suite of testcases concurrently against Codebox engine.
-        Seamlessly falls back to local execution if Codebox server is unreachable.
+        Protected by distributed admission control, circuit breaker, and dominant deadlines.
         """
         lang_id = self._resolve_lang_id(language)
         submission_id = str(uuid4())
 
-        # Probe health or fallback
+        # 1. Circuit breaker gate
+        if not await self._circuit_breaker.can_execute():
+            if settings.ALLOW_UNSANDBOXED_EXECUTION:
+                logger.warning("🛑 [Codebox] Circuit breaker is OPEN. Falling back to local execution (ALLOW_UNSANDBOXED_EXECUTION=True).")
+                from app.engine.executors.factory import get_executor
+                lang_enum = language if isinstance(language, Language) else Language(language)
+                return await get_executor(lang_enum).execute_batch(
+                    code=code,
+                    testcases=testcases,
+                    time_limit=time_limit,
+                    memory_limit_mb=memory_limit_mb,
+                    comparison_mode=comparison_mode,
+                )
+            logger.warning("🛑 [Codebox] Circuit breaker is OPEN. Fast-failing Codebox request.")
+            return ExecutionResult(
+                success=False,
+                submission_id=submission_id,
+                status=ExecutionStatus.FAILED,
+                verdict=Verdict.SYSTEM_ERROR,
+                error=f"[{ErrorCode.CODEBOX_UNAVAILABLE.value}] CRITICAL INFRASTRUCTURE FAILURE: Codebox execution engine circuit is currently OPEN due to repeated faults.",
+                total_testcases=len(testcases),
+            )
+
+        # 2. Check health/readiness
         if not await self.healthy():
             if not settings.ALLOW_UNSANDBOXED_EXECUTION:
+                await self._circuit_breaker.record_failure(is_infrastructure=True, reason="Health probe failed")
                 logger.error("Codebox engine is unreachable and ALLOW_UNSANDBOXED_EXECUTION is False. Failing closed with SYSTEM_ERROR.")
                 return ExecutionResult(
                     success=False,
                     submission_id=submission_id,
                     status=ExecutionStatus.FAILED,
                     verdict=Verdict.SYSTEM_ERROR,
-                    error="CRITICAL INFRASTRUCTURE FAILURE: Codebox execution engine is unreachable. Unsandboxed host execution is prohibited by security policy.",
+                    error=f"[{ErrorCode.CODEBOX_UNAVAILABLE.value}] CRITICAL INFRASTRUCTURE FAILURE: Codebox execution engine is unreachable.",
                     total_testcases=len(testcases),
                 )
             logger.warning("Codebox engine unreachable at %s; falling back to local sandbox (ALLOW_UNSANDBOXED_EXECUTION=True).", self.base_url)
@@ -389,24 +476,70 @@ class CodeboxProvider(JudgeProvider):
                 total_testcases=len(testcases),
             )
 
-        limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
-        async with httpx.AsyncClient(timeout=self.timeout, limits=limits) as client:
-            tasks = [
-                self._execute_single_tc(
-                    client=client,
-                    lang_id=lang_id,
-                    code=code,
-                    tc=tc,
-                    time_limit=time_limit,
-                    memory_limit_mb=memory_limit_mb,
-                    comparison_mode=comparison_mode,
+        # 3. Calculate dynamic stage budget from dominant deadline
+        timeout_budget = self.timeout
+        if deadline_tracker is not None:
+            try:
+                timeout_budget = deadline_tracker.stage_budget(self.timeout)
+            except Exception as d_err:
+                return ExecutionResult(
+                    success=False,
+                    submission_id=submission_id,
+                    status=ExecutionStatus.FAILED,
+                    verdict=Verdict.SYSTEM_ERROR,
+                    error=f"[{ErrorCode.EXECUTION_DEADLINE_EXCEEDED.value}] {d_err}",
+                    total_testcases=len(testcases),
                 )
-                for tc in testcases
-            ]
-            results: list[TestCaseResult] = await gather_with_concurrency(8, *tasks)
+
+        # 4. Acquire permit from bounded admission pool
+        try:
+            async with self._admission_controller.acquire_permit(pool=admission_pool, wait_timeout_s=min(5.0, timeout_budget)):
+                limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
+                async with httpx.AsyncClient(timeout=timeout_budget, limits=limits) as client:
+                    tasks = [
+                        self._execute_single_tc(
+                            client=client,
+                            lang_id=lang_id,
+                            code=code,
+                            tc=tc,
+                            time_limit=time_limit,
+                            memory_limit_mb=memory_limit_mb,
+                            comparison_mode=comparison_mode,
+                        )
+                        for tc in testcases
+                    ]
+                    # Concurrency bounded to 4 to match container worker slot limits
+                    results: list[TestCaseResult] = await gather_with_concurrency(4, *tasks)
+        except JudgeExecutionException as j_exc:
+            return ExecutionResult(
+                success=False,
+                submission_id=submission_id,
+                status=ExecutionStatus.FAILED,
+                verdict=Verdict.SYSTEM_ERROR,
+                error=f"[{j_exc.error_code.value}] {j_exc.safe_message}",
+                total_testcases=len(testcases),
+            )
+        except Exception as exc:
+            err_str = str(exc)
+            is_infra = any(k in err_str.lower() for k in ("connect", "timeout", "503", "refused"))
+            await self._circuit_breaker.record_failure(is_infrastructure=is_infra, reason=err_str)
+            return ExecutionResult(
+                success=False,
+                submission_id=submission_id,
+                status=ExecutionStatus.FAILED,
+                verdict=Verdict.SYSTEM_ERROR,
+                error=f"[{ErrorCode.INFRASTRUCTURE_FAILURE.value}] Execution failed: {err_str[:200]}",
+                total_testcases=len(testcases),
+            )
+
+        # 5. Evaluate infrastructure success vs failure
+        infra_failures = [r for r in results if r.verdict == Verdict.INTERNAL_ERROR and ("503" in r.stderr or "connect" in r.stderr.lower())]
+        if infra_failures:
+            await self._circuit_breaker.record_failure(is_infrastructure=True, reason=infra_failures[0].stderr)
+        else:
+            await self._circuit_breaker.record_success()
 
         passed_count = sum(1 for r in results if r.passed)
-
         total_count = len(results)
         max_time = max((r.wall_time_ms for r in results), default=0.0)
         max_mem = max((r.peak_memory_mb for r in results), default=0.0)

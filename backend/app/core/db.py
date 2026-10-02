@@ -76,6 +76,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 
+# Alias for compatibility with routers expecting get_async_db
+get_async_db = get_db
+
+
 async def ensure_database_integrity():
     """
     Validates and guarantees foreign key constraints, indexes, and data integrity
@@ -209,6 +213,9 @@ async def ensure_database_integrity():
                     ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
                 """))
                 await session.execute(text("""
+                    ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS ratings_finalized_at TIMESTAMPTZ;
+                """))
+                await session.execute(text("""
                     ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
                 """))
             except Exception:
@@ -312,6 +319,88 @@ async def ensure_database_integrity():
                 ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS sandbox_config JSON DEFAULT '{}'::json;
             """))
 
+            # 7. Schema Evolution: Distributed Judge Jobs & Execution Attempts with Strict Result Fencing
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS judge_jobs (
+                    id VARCHAR(36) PRIMARY KEY,
+                    submission_id VARCHAR(36),
+                    contest_id VARCHAR(36),
+                    problem_id VARCHAR(36),
+                    member_id VARCHAR(36),
+                    state VARCHAR(20) NOT NULL DEFAULT 'QUEUED',
+                    provider VARCHAR(30),
+                    attempt_number INTEGER NOT NULL DEFAULT 0,
+                    active_attempt_id VARCHAR(36),
+                    deadline_at TIMESTAMPTZ,
+                    failure_code VARCHAR(50),
+                    execution_decision JSON,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    queued_at TIMESTAMPTZ,
+                    started_at TIMESTAMPTZ,
+                    completed_at TIMESTAMPTZ
+                );
+            """))
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS judge_job_attempts (
+                    id VARCHAR(36) PRIMARY KEY,
+                    job_id VARCHAR(36) NOT NULL REFERENCES judge_jobs(id) ON DELETE CASCADE,
+                    attempt_number INTEGER NOT NULL,
+                    provider VARCHAR(30) NOT NULL,
+                    node_id VARCHAR(50),
+                    lease_id VARCHAR(100),
+                    state VARCHAR(20) NOT NULL DEFAULT 'STARTED',
+                    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    heartbeat_at TIMESTAMPTZ,
+                    completed_at TIMESTAMPTZ,
+                    queue_time_ms DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+                    compile_time_ms DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+                    execution_time_ms DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+                    total_time_ms DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+                    result_hash VARCHAR(64),
+                    error_code VARCHAR(50),
+                    error_message TEXT,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+            """))
+            await session.execute(text("""
+                ALTER TABLE judge_jobs ADD COLUMN IF NOT EXISTS result_payload JSON;
+            """))
+            for idx_stmt in [
+                "CREATE INDEX IF NOT EXISTS ix_judge_jobs_submission_id ON judge_jobs(submission_id)",
+                "CREATE INDEX IF NOT EXISTS ix_judge_jobs_state ON judge_jobs(state)",
+                "CREATE INDEX IF NOT EXISTS ix_judge_jobs_active_attempt_id ON judge_jobs(active_attempt_id)",
+                "CREATE INDEX IF NOT EXISTS ix_judge_jobs_state_deadline ON judge_jobs(state, deadline_at)",
+                "CREATE INDEX IF NOT EXISTS ix_judge_job_attempts_job_id ON judge_job_attempts(job_id)",
+                "CREATE INDEX IF NOT EXISTS ix_judge_job_attempts_lease_id ON judge_job_attempts(lease_id)",
+            ]:
+                await session.execute(text(idx_stmt))
+
+            # 8. Schema Evolution: Transactional Outbox Table
+            await session.execute(text("""
+                CREATE TABLE IF NOT EXISTS outbox_events (
+                    id VARCHAR(36) PRIMARY KEY,
+                    queue_name VARCHAR(40) NOT NULL DEFAULT 'realtime',
+                    event_type VARCHAR(80) NOT NULL,
+                    aggregate_id VARCHAR(100),
+                    payload JSON NOT NULL,
+                    priority VARCHAR(20) NOT NULL DEFAULT 'normal',
+                    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+                    retry_count INTEGER NOT NULL DEFAULT 0,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    published_at TIMESTAMPTZ,
+                    error_message TEXT
+                )
+            """))
+            for outbox_ddl in [
+                "ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS queue_name VARCHAR(40) NOT NULL DEFAULT 'realtime'",
+                "ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS priority VARCHAR(20) NOT NULL DEFAULT 'normal'",
+                "ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ",
+                "ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS error_message TEXT",
+                "CREATE INDEX IF NOT EXISTS ix_outbox_events_status ON outbox_events(status)",
+                "CREATE INDEX IF NOT EXISTS ix_outbox_events_created_at ON outbox_events(created_at)",
+                "CREATE INDEX IF NOT EXISTS ix_outbox_events_queue_status ON outbox_events(queue_name, status)",
+            ]:
+                await session.execute(text(outbox_ddl))
 
             await session.commit()
         except Exception as e:

@@ -173,6 +173,9 @@ func main() {
 
 				log.Printf("📥 [Job %s] Claimed. Starting isolated Docker execution...", j.JobID)
 				res := dockerExec.Execute(ctx, j)
+				res.AttemptID = j.AttemptID
+				res.Attempt = j.Attempt
+				res.LeaseID = j.LeaseID
 				log.Printf("📤 [Job %s] Completed with verdict: %s (Runtime: %.1fms)", j.JobID, res.Verdict, res.RuntimeMS)
 
 				submitCtx, submitCancel := context.WithTimeout(ctx, 10*time.Second)
@@ -216,6 +219,6 @@ func main() {
 	_ = cpClient.Unregister(unregCtx, caps.NodeID)
 	unregCancel()
 
-	log.Printf("👋 Node %s safely stopped. Machine left in clean state.", caps.NodeID)
+	log.Printf("Node %s safely stopped. Machine left in clean state.", caps.NodeID)
 	fmt.Println("Clean exit.")
 }

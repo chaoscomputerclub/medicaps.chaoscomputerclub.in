@@ -109,15 +109,45 @@ async def relay_outbox_events(db: AsyncSession, batch_size: int = 50) -> int:
 
     for event in events:
         try:
-            prio = JobPriority.HIGH if event.priority == "high" else JobPriority.NORMAL
-            await RedisQueueEngine.enqueue(
-                queue_name=event.queue_name,
-                job_type=event.event_type,
-                payload=event.payload,
-                priority=prio,
-                idempotency_key=f"outbox:{event.id}",
-                correlation_id=f"outbox-{event.id[:8]}",
-            )
+            if event.event_type == "EXECUTION_REQUEUE" or event.queue_name == "fabric":
+                import json
+                from app.core.redis import get_redis
+                job_id = event.payload.get("job_id") if isinstance(event.payload, dict) else str(event.payload)
+                if job_id:
+                    redis = get_redis()
+                    raw_job = await redis.get(f"ccc:job:{job_id}")
+                    lang = None
+                    if raw_job:
+                        try:
+                            jd = json.loads(raw_job)
+                            jd["status"] = "QUEUED"
+                            jd["attempt"] = event.payload.get("attempt_number", int(jd.get("attempt", 0)) + 1)
+                            await redis.set(f"ccc:job:{job_id}", json.dumps(jd), ex=86400)
+                            lang = jd.get("payload", {}).get("language")
+                        except Exception:
+                            pass
+                    if lang:
+                        await redis.lpush(f"ccc:queue:fabric:pending:{str(lang).lower()}", job_id)
+                    await redis.lpush("ccc:queue:fabric:pending", job_id)
+                    logger.info("🔁 [Outbox] Relayed EXECUTION_REQUEUE for job %s into Redis queue", job_id)
+            elif event.queue_name in {"realtime", "events", "sse"}:
+                from app.services.event_broadcaster import broadcast_event
+                contest_slug = event.payload.get("contest_slug") if isinstance(event.payload, dict) else None
+                await broadcast_event(
+                    event_type=event.event_type,
+                    data=event.payload if isinstance(event.payload, dict) else {"raw": event.payload},
+                    contest_slug=contest_slug,
+                )
+            else:
+                prio = JobPriority.HIGH if event.priority == "high" else JobPriority.NORMAL
+                await RedisQueueEngine.enqueue(
+                    queue_name=event.queue_name,
+                    job_type=event.event_type,
+                    payload=event.payload,
+                    priority=prio,
+                    idempotency_key=f"outbox:{event.id}",
+                    correlation_id=f"outbox-{event.id[:8]}",
+                )
             event.status = "published"
             event.published_at = now
             relayed_count += 1
@@ -130,6 +160,6 @@ async def relay_outbox_events(db: AsyncSession, batch_size: int = 50) -> int:
 
     await db.commit()
     if relayed_count > 0:
-        logger.info("✓ Relayed %d outbox event(s) to Redis queue.", relayed_count)
+        logger.info("✓ Relayed %d outbox event(s) to Redis queue / pubsub.", relayed_count)
 
     return relayed_count

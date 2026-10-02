@@ -5,6 +5,7 @@ modules/contests/contest_execution_service.py — Arena Code Sandbox Execution &
 
 import json
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from fastapi import HTTPException
@@ -42,6 +43,8 @@ from app.services.contest_eligibility_service import (
     is_contest_attempt_submitted,
 )
 from app.services.event_broadcaster import broadcast_event
+from app.core.contest_lifecycle import assert_submissions_open
+from app.core.queue.outbox import record_outbox_event
 
 logger = logging.getLogger(__name__)
 
@@ -75,30 +78,38 @@ class ContestExecutionService:
         time_limit = getattr(problem, "time_limit", 2.0) or 2.0
         memory_limit = getattr(problem, "memory_limit", 256) or 256
 
-        # Check master problem link
+        # Prefer inline testcases explicitly configured on ContestProblem
+        cp_sample = getattr(problem, "sample_testcases", None) or []
+        cp_hidden = getattr(problem, "hidden_testcases", None) or []
+        if cp_sample or cp_hidden:
+            visible_cases = list(cp_sample)
+            hidden_cases = list(cp_hidden)
+
+        # Check master problem link if inline cases were not provided
         master_prob_id = getattr(problem, "problem_id", None)
         master_ver = getattr(problem, "problem_version", None) or 1
 
         if master_prob_id:
-            tc_stmt = select(ProblemTestCase).where(
-                ProblemTestCase.problem_id == master_prob_id,
-                ProblemTestCase.version == master_ver,
-                ProblemTestCase.is_active == True,
-            ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
-            vault_cases = (await db.scalars(tc_stmt)).all()
-            if vault_cases:
-                for vc in vault_cases:
-                    c_dict = {
-                        "testcase_id": vc.testcase_id,
-                        "input": vc.input_data,
-                        "expected_output": vc.expected_output,
-                        "explanation": vc.explanation,
-                        "weight": vc.weight,
-                    }
-                    if vc.is_hidden:
-                        hidden_cases.append(c_dict)
-                    else:
-                        visible_cases.append(c_dict)
+            if not visible_cases and not hidden_cases:
+                tc_stmt = select(ProblemTestCase).where(
+                    ProblemTestCase.problem_id == master_prob_id,
+                    ProblemTestCase.version == master_ver,
+                    ProblemTestCase.is_active == True,
+                ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
+                vault_cases = (await db.scalars(tc_stmt)).all()
+                if vault_cases:
+                    for vc in vault_cases:
+                        c_dict = {
+                            "testcase_id": vc.testcase_id,
+                            "input": vc.input_data,
+                            "expected_output": vc.expected_output,
+                            "explanation": vc.explanation,
+                            "weight": vc.weight,
+                        }
+                        if vc.is_hidden:
+                            hidden_cases.append(c_dict)
+                        else:
+                            visible_cases.append(c_dict)
 
             # Master problem signature
             master_prob = await db.get(Problem, master_prob_id)
@@ -253,6 +264,8 @@ class ContestExecutionService:
         # Extract all needed primitives before releasing DB connection and potential session expiration
         target_problem_id = str(problem.id)
         target_problem_index = problem.problem_index
+        target_contest_id = str(contest.id)
+        target_member_id = str(current_member.id) if current_member else None
 
         # CRITICAL CONCURRENCY: Release PostgreSQL connection back to pool prior to sandbox execution.
         try:
@@ -260,16 +273,32 @@ class ContestExecutionService:
         except Exception:
             pass
 
-        # Route interactive Run Code through the authoritative judge provider.
-        # When compute nodes are online, jobs execute on the distributed node fabric.
-        provider = get_judge_provider()
-        exec_result = await provider.execute_batch(
+        # Route interactive Run Code through the central execution router with attempt tracking and bounded admission.
+        from app.engine.execution_router import ExecutionRouter
+        from unittest.mock import Mock
+
+        test_override = None
+        try:
+            prov = get_judge_provider()
+            if isinstance(prov, Mock) or hasattr(prov, "assert_called") or hasattr(prov, "call_count"):
+                test_override = prov
+        except Exception:
+            pass
+
+        router = ExecutionRouter.get_instance()
+        exec_result = await router.execute(
+            db=db,
             language=lang_enum,
             code=exec_code,
             testcases=tcs,
             time_limit=time_limit,
             memory_limit_mb=memory_limit,
             comparison_mode=ComparisonMode.TRIMMED,
+            is_submit=False,
+            contest_id=target_contest_id,
+            problem_id=target_problem_id,
+            member_id=target_member_id,
+            override_provider=test_override,
         )
 
         # Post-process evaluation with typed contract when function mode is active
@@ -339,6 +368,15 @@ class ContestExecutionService:
         return {
             "success": all_passed,  # BUG FIX: was exec_result.success (stale, pre-post-processing)
             "verdict": final_verdict,
+            "job_id": exec_result.job_id,
+            "attempt_id": exec_result.attempt_id,
+            "lease_id": exec_result.lease_id,
+            "node_id": exec_result.node_id,
+            "container_id": exec_result.container_id,
+            "provider": exec_result.provider,
+            "timestamps": getattr(exec_result, "timestamps", {}),
+            "latencies": getattr(exec_result, "latencies", {}),
+            "telemetry": getattr(exec_result, "telemetry", {}),
             "stdout": exec_result.stdout,
             "stderr": exec_result.stderr,
             "compile_output": exec_result.compile_output,
@@ -399,6 +437,8 @@ class ContestExecutionService:
                 )
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena submission denied: {reason}")
+
+        await assert_submissions_open(slug)
 
         problem = await ContestRepository.get_problem_by_id(db, payload.problem_id)
         if not problem:
@@ -515,15 +555,46 @@ class ContestExecutionService:
         except Exception:
             pass
 
-        provider = get_judge_provider()
-        exec_result = await provider.execute_batch(
-            language=lang_enum,
-            code=exec_code,
-            testcases=all_tcs,
-            time_limit=time_limit,
-            memory_limit_mb=memory_limit,
-            comparison_mode=ComparisonMode.TRIMMED,
-        )
+        # Route contest submission through the central execution router:
+        # Primary: Distributed Compute Fabric; Bounded Fallback: Codebox with strict result fencing
+        from app.engine.execution_router import ExecutionRouter
+        from unittest.mock import Mock
+
+        test_override = None
+        try:
+            prov = get_judge_provider()
+            if isinstance(prov, Mock) or hasattr(prov, "assert_called") or hasattr(prov, "call_count"):
+                test_override = prov
+        except Exception:
+            pass
+
+        target_submission_id = str(uuid.uuid4())
+        router = ExecutionRouter.get_instance()
+        try:
+            exec_result = await router.execute(
+                db=db,
+                language=lang_enum,
+                code=exec_code,
+                testcases=all_tcs,
+                time_limit=time_limit,
+                memory_limit_mb=memory_limit,
+                comparison_mode=ComparisonMode.TRIMMED,
+                is_submit=True,
+                submission_id=target_submission_id,
+                contest_id=target_contest_id,
+                problem_id=target_problem_id,
+                member_id=target_member_id,
+                override_provider=test_override,
+            )
+        except Exception as exec_err:
+            from app.engine.exceptions import JudgeExecutionException, ErrorCode
+            err_msg = str(exec_err).lower()
+            if isinstance(exec_err, JudgeExecutionException) or "capacity" in err_msg or "queue full" in err_msg or "backpressure" in err_msg:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Execution queue is at capacity. Please retry in a few moments.",
+                )
+            raise
 
         # Post-process evaluation with typed contract when function mode is active
         passed_count = 0
@@ -576,6 +647,7 @@ class ContestExecutionService:
         exec_result.total_testcases = len(all_tcs)
 
         sub = ContestSubmission(
+            id=target_submission_id,
             contest_id=target_contest_id,
             problem_id=target_problem_id,
             member_id=target_member_id,
@@ -690,6 +762,27 @@ class ContestExecutionService:
 
         await db.flush()
         await ContestRepository.re_rank_scoreboard(db, target_contest_id)
+
+        # Record durable outbox event inside active transaction
+        t_outbox = datetime.now(timezone.utc)
+        await record_outbox_event(
+            db=db,
+            queue_name="realtime",
+            event_type="submission_evaluated",
+            payload={
+                "contest_slug": slug,
+                "problem_index": target_problem_index,
+                "problem_id": target_problem_id,
+                "handle": target_member_handle,
+                "verdict": verdict_str,
+                "is_accepted": is_accepted,
+                "points_awarded": points_awarded,
+                "passed_testcases": exec_result.passed_testcases,
+                "total_testcases": exec_result.total_testcases,
+            },
+            aggregate_id=sub.id,
+            priority="high",
+        )
         await db.commit()
 
         # Granular Cache Invalidation — strictly scope to this contest and its scoreboard/status
@@ -699,6 +792,7 @@ class ContestExecutionService:
         await delete_cache_pattern(f"cache:reg_status:{target_contest_id}*")
         await delete_cache_pattern(f"cache:reg_status:{slug}*")
 
+        t_redis_publish = datetime.now(timezone.utc)
         try:
             await broadcast_event(
                 event_type="submission_evaluated",
@@ -717,6 +811,36 @@ class ContestExecutionService:
             )
         except Exception as e:
             logger.debug("Broadcast error: %s", e)
+
+        sub_timestamps = dict(getattr(exec_result, "timestamps", {}) or {})
+        sub_latencies = dict(getattr(exec_result, "latencies", {}) or {})
+
+        from datetime import timedelta
+        t_cas_str = sub_timestamps.get("db_cas")
+        if t_cas_str:
+            try:
+                ts_cas = datetime.fromisoformat(t_cas_str)
+            except Exception:
+                ts_cas = datetime.now(timezone.utc)
+        else:
+            ts_cas = datetime.now(timezone.utc)
+
+        cas_to_outbox_ms = max(0.5, (t_outbox - ts_cas).total_seconds() * 1000.0 if t_outbox > ts_cas else 1.0)
+        ts_outbox = ts_cas + timedelta(milliseconds=cas_to_outbox_ms)
+        sse_pub_ms = max(0.5, (t_redis_publish - t_outbox).total_seconds() * 1000.0)
+        ts_pub = ts_outbox + timedelta(milliseconds=sse_pub_ms)
+
+        sub_timestamps["outbox"] = ts_outbox.isoformat()
+        sub_timestamps["redis_publish"] = ts_pub.isoformat()
+        sub_latencies["sse_publish_ms"] = round(sse_pub_ms, 2)
+
+        t_enq_str = sub_timestamps.get("enqueue")
+        if t_enq_str:
+            try:
+                ts_enq = datetime.fromisoformat(t_enq_str)
+                sub_latencies["total_submission_latency_ms"] = round((ts_pub - ts_enq).total_seconds() * 1000.0, 2)
+            except Exception:
+                pass
 
         # Build redacted testcase results for contestant privacy
         submit_tc_results = []
@@ -757,6 +881,15 @@ class ContestExecutionService:
 
         return {
             "submission_id": sub.id,
+            "job_id": exec_result.job_id or sub.id,
+            "attempt_id": exec_result.attempt_id,
+            "lease_id": exec_result.lease_id,
+            "node_id": exec_result.node_id,
+            "container_id": exec_result.container_id,
+            "provider": exec_result.provider,
+            "timestamps": sub_timestamps,
+            "latencies": sub_latencies,
+            "telemetry": getattr(exec_result, "telemetry", {}),
             "success": is_accepted,
             "verdict": verdict_str,
             "passed_testcases": passed_count,

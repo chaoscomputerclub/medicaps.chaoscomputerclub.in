@@ -114,25 +114,24 @@ if __name__ == '__main__':
             else:
                 args = [raw]
 
-    target_cls = globals().get('{class_name}')
-    if not target_cls:
-        # Fallback to Solution if class_name was not found
-        target_cls = globals().get('Solution')
-    if not target_cls:
-        sys.stderr.write("Judge Error: class {class_name} not found in contestant submission.\\n")
-        sys.exit(1)
+    target_method = None
+    target_cls = globals().get('{class_name}') or globals().get('Solution')
+    if target_cls:
+        try:
+            sol = target_cls()
+            if hasattr(sol, "{fn_name}"):
+                target_method = getattr(sol, "{fn_name}")
+        except Exception:
+            pass
 
-    try:
-        sol = target_cls()
-    except Exception as e:
-        sys.stderr.write(f"Judge Error: Could not instantiate class {class_name}: {{e}}\\n")
-        sys.exit(1)
+    if not target_method:
+        candidate_fn = globals().get('{fn_name}')
+        if callable(candidate_fn):
+            target_method = candidate_fn
 
-    if not hasattr(sol, "{fn_name}"):
-        sys.stderr.write("Judge Error: method '{fn_name}' not found on class {class_name}.\\n")
+    if not target_method:
+        sys.stderr.write("Judge Error: method '{fn_name}' or class {class_name} not found in submission.\\n")
         sys.exit(1)
-
-    target_method = getattr(sol, "{fn_name}")
 
     try:
         result = target_method(*args)

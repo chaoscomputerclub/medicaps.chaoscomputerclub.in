@@ -605,10 +605,10 @@ export function AuthPage() {
             {pending ? (
               <span className="inline-flex items-center gap-2">
                 <WanderingEyes size="sm" />
-                <span>Entering CCC Arena…</span>
+                <span>Continuing…</span>
               </span>
             ) : (
-              "Enter CCC Arena"
+              "Continue"
             )}
           </Button>
         </form>

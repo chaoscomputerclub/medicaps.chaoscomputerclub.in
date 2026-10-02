@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +14,31 @@ import (
 	"chaoscomputerclub.in/judge-agent/pkg/client"
 	"chaoscomputerclub.in/judge-agent/pkg/judge"
 )
+
+const maxCapturedOutputBytes = 2 * 1024 * 1024
+
+type limitedBuffer struct {
+	buffer bytes.Buffer
+	limit  int
+}
+
+func (b *limitedBuffer) Write(p []byte) (int, error) {
+	remaining := b.limit - b.buffer.Len()
+	if remaining > 0 {
+		if len(p) > remaining {
+			_, _ = b.buffer.Write(p[:remaining])
+		} else {
+			_, _ = b.buffer.Write(p)
+		}
+	}
+	return len(p), nil
+}
+
+func (b *limitedBuffer) String() string {
+	return b.buffer.String()
+}
+
+var _ io.Writer = (*limitedBuffer)(nil)
 
 // LanguageSpec configures compilation and execution parameters for a programming language.
 type LanguageSpec struct {
@@ -131,6 +157,10 @@ func (e *DockerExecutor) Execute(ctx context.Context, job *client.JobPayload) cl
 			"--network", "none",
 			"--cpus", "2.0",
 			"--memory", "1024m",
+			"--memory-swap", "1024m",
+			"--pids-limit", "64",
+			"--security-opt", "no-new-privileges",
+			"--cap-drop", "ALL",
 			"-v", fmt.Sprintf("%s:/workspace:rw", wsPath),
 			"-w", "/workspace",
 			spec.Image,
@@ -138,8 +168,14 @@ func (e *DockerExecutor) Execute(ctx context.Context, job *client.JobPayload) cl
 		compArgs = append(compArgs, spec.CompileCmd...)
 
 		cmd := exec.CommandContext(compCtx, e.dockerBin, compArgs...)
-		out, err := cmd.CombinedOutput()
+		var compileStdout, compileStderr limitedBuffer
+		compileStdout.limit = maxCapturedOutputBytes
+		compileStderr.limit = maxCapturedOutputBytes
+		cmd.Stdout = &compileStdout
+		cmd.Stderr = &compileStderr
+		err := cmd.Run()
 		if err != nil {
+			out := compileStdout.String() + compileStderr.String()
 			return client.ResultRequest{
 				JobID:         jobID,
 				Verdict:       "COMPILATION_ERROR",
@@ -189,7 +225,7 @@ func (e *DockerExecutor) Execute(ctx context.Context, job *client.JobPayload) cl
 			"--pids-limit", "64",
 			"--security-opt", "no-new-privileges",
 			"--cap-drop", "ALL",
-			"-v", fmt.Sprintf("%s:/workspace:rw", wsPath),
+			"-v", fmt.Sprintf("%s:/workspace:ro", wsPath),
 			"-w", "/workspace",
 			"--tmpfs", "/tmp:size=128m,noexec,nosuid",
 			spec.Image,
@@ -198,7 +234,9 @@ func (e *DockerExecutor) Execute(ctx context.Context, job *client.JobPayload) cl
 
 		cmd := exec.CommandContext(tcCtx, e.dockerBin, runArgs...)
 		cmd.Stdin = strings.NewReader(stdin)
-		var stdoutBuf, stderrBuf bytes.Buffer
+		var stdoutBuf, stderrBuf limitedBuffer
+		stdoutBuf.limit = maxCapturedOutputBytes
+		stderrBuf.limit = maxCapturedOutputBytes
 		cmd.Stdout = &stdoutBuf
 		cmd.Stderr = &stderrBuf
 

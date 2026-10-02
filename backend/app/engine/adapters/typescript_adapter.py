@@ -111,4 +111,4 @@ class TypeScriptAdapter(BaseLanguageAdapter):
     }}
 }})();
 """
-        return user_code + "\n" + driver
+        return "// @ts-nocheck\n" + user_code + "\n" + driver

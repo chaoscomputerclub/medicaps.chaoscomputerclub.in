@@ -45,13 +45,6 @@ _LOCALHOST_REGEX = re.compile(
     re.IGNORECASE,
 )
 
-# Regex matching trusted production domain hierarchies
-_TRUSTED_DOMAIN_REGEX = re.compile(
-    r"^https://([a-zA-Z0-9-]+\.)*(chaoscomputerclub\.in|sharexpress\.in|shaxpress\.in)(:\d+)?$",
-    re.IGNORECASE,
-)
-
-
 def get_allowed_production_origins() -> Set[str]:
     """Returns the set of explicitly allowed production frontend origins."""
     origins = set(_DEFAULT_PRODUCTION_ORIGINS)
@@ -102,10 +95,6 @@ def validate_frontend_origin(candidate: Optional[str]) -> Optional[str]:
     # 2. Production allowlist
     allowed_prod = get_allowed_production_origins()
     if normalized in allowed_prod:
-        return normalized
-
-    # 3. Domain pattern match (for trusted university / chapter subdomains over HTTPS)
-    if scheme == "https" and _TRUSTED_DOMAIN_REGEX.match(normalized):
         return normalized
 
     logger.warning("Rejected untrusted frontend origin: %s", candidate)

@@ -73,9 +73,21 @@ async def _fan_out(raw_message: str, contest_slug: Optional[str] = None) -> None
     If a slow client's queue is completely full, we do NOT silently drop.
     We remove the oldest message and inject a resync warning so the client knows it fell behind.
     """
-    target_channels = ["global"]
+    try:
+        event_type = json.loads(raw_message).get("event")
+    except (TypeError, ValueError, AttributeError):
+        event_type = None
+
+    # Submission verdicts are private to the contest stream. Broadcasting them
+    # globally makes every connected browser invalidate and refetch its caches.
+    contest_scoped_events = {"submission_evaluated", "submission_completed"}
+    target_channels = [] if event_type in contest_scoped_events else ["global"]
     if contest_slug:
         target_channels.append(f"contest:{contest_slug}")
+
+    if not target_channels:
+        logger.warning("Dropping contest-scoped event without contest slug: %s", event_type)
+        return
 
     async with _lock:
         for channel in target_channels:

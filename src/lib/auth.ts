@@ -45,6 +45,18 @@ export class ApiError extends Error {
 const TOKEN_KEY = "ccc_medicaps_token";
 const MEMBER_KEY = "ccc_medicaps_member";
 
+function clearPersistedSwrCaches(): void {
+  try {
+    window.dispatchEvent(new Event("ccc:auth-changed"));
+    for (let i = sessionStorage.length - 1; i >= 0; i -= 1) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith("__ccc_swr_cache_")) sessionStorage.removeItem(key);
+    }
+  } catch {
+    // Ignore storage issues.
+  }
+}
+
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
@@ -71,11 +83,7 @@ export function setToken(token: string, member?: Member | null): void {
   if (member) {
     localStorage.setItem(MEMBER_KEY, JSON.stringify(member));
   }
-  try {
-    sessionStorage.removeItem("__ccc_swr_cache__");
-  } catch {
-    // Ignore storage issues
-  }
+  clearPersistedSwrCaches();
 }
 
 export function setStoredMember(member: Member | null): void {
@@ -85,17 +93,14 @@ export function setStoredMember(member: Member | null): void {
   } else {
     localStorage.removeItem(MEMBER_KEY);
   }
+  clearPersistedSwrCaches();
 }
 
 export function clearToken(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(MEMBER_KEY);
-  try {
-    sessionStorage.removeItem("__ccc_swr_cache__");
-  } catch {
-    // Ignore storage issues
-  }
+  clearPersistedSwrCaches();
 }
 
 /**

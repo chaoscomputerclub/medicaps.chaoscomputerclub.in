@@ -6,6 +6,7 @@ app.routers — Thin HTTP API routing layer delegating to app.controllers.
 from app.routers import (
     admin,
     admin_contests,
+    admin_loadtest,
     admin_qa,
     assessment,
     auth,
@@ -24,6 +25,7 @@ from app.routers import (
 __all__ = [
     "admin",
     "admin_contests",
+    "admin_loadtest",
     "admin_qa",
     "assessment",
     "auth",

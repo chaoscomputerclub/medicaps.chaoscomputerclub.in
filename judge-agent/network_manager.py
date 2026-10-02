@@ -73,7 +73,7 @@ class NetworkManager:
         while True:
             reachable = await self.check_reachability()
             if reachable:
-                logger.info("✅ Connection established with control plane: %s", self.target_url)
+                logger.info("Connection established with control plane: %s", self.target_url)
                 return
 
             self.state = ConnectionState.RECONNECTING

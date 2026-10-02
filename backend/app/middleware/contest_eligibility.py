@@ -13,7 +13,6 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from sqlalchemy import select
 
-from app.core.config import settings
 from app.core.db import AsyncSessionLocal
 from app.core.security import decode_access_token
 from app.models.db_models import OfflineContest, MemberProfile
@@ -34,11 +33,6 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-
-        # Proctors, Teachers and Core Admins bypass student arena restrictions
-        proctor_key = request.headers.get("X-Proctor-Key")
-        if proctor_key and (proctor_key == getattr(settings, "PROCTOR_KEY", "1337") or proctor_key == "1337"):
-            return await call_next(request)
 
         # Public/Administrative assessment endpoints
         if path.endswith("/qualify-top30") or path.endswith("/leaderboard"):
@@ -117,6 +111,9 @@ class ContestEligibilityMiddleware(BaseHTTPMiddleware):
                         member_id = payload.get("sub")
                         m_res = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
                         member = m_res.scalars().first()
+
+                        if member and getattr(member, "is_core_member", False):
+                            return await call_next(request)
 
                         from app.core.security import is_privileged_test_member
                         if is_privileged_test_member(member):

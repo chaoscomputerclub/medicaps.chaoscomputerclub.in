@@ -210,8 +210,9 @@ async def reset_contest_timer(
     slug: str,
     seconds: int = Query(10, description="Countdown duration in seconds"),
     db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
 ):
-    """Reset contest and assessment starts_at to N seconds in the future for demo countdown."""
+    """Admin-only reset of contest and assessment countdown."""
     return await ContestController.reset_contest_timer(slug=slug, seconds=seconds, db=db)
 
 

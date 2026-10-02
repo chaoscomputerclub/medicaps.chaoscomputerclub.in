@@ -94,6 +94,8 @@ class GlobalSseMultiplexer {
   private static instance: GlobalSseMultiplexer;
 
   private eventSource: EventSource | null = null;
+  private contestEventSources = new Map<string, EventSource>();
+  private contestReconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private subscribers: Map<string, InternalSubscriber> = new Map();
   private status: ConnectionStatus = "disconnected";
   private statusListeners: Set<(status: ConnectionStatus) => void> = new Set();
@@ -166,6 +168,7 @@ class GlobalSseMultiplexer {
     };
 
     this.subscribers.set(id, sub);
+    if (sub.enabled && sub.contestSlug) this.connectContest(sub.contestSlug);
 
     // Cancel any pending disconnect grace timer since a subscriber is active
     if (this.disconnectGraceTimer) {
@@ -185,7 +188,11 @@ class GlobalSseMultiplexer {
   }
 
   private unsubscribe(id: string) {
+    const removed = this.subscribers.get(id);
     this.subscribers.delete(id);
+    if (removed?.contestSlug && !Array.from(this.subscribers.values()).some((s) => s.enabled && s.contestSlug === removed.contestSlug)) {
+      this.disconnectContest(removed.contestSlug);
+    }
 
     const hasActiveSubscribers = Array.from(this.subscribers.values()).some((s) => s.enabled);
     if (!hasActiveSubscribers) {
@@ -256,6 +263,7 @@ class GlobalSseMultiplexer {
         "pass_checked_in",
         "top30_qualified",
         "submission_evaluated",
+        "submission_completed",
         "assessment_finished",
         "ratings_updated",
         "member_profile_updated",
@@ -285,6 +293,36 @@ class GlobalSseMultiplexer {
       console.warn("[SSE Multiplexer] Connection initialization error:", err);
       this.scheduleReconnect();
     }
+  }
+
+  private connectContest(slug: string) {
+    if (typeof window === "undefined" || this.contestEventSources.has(slug)) return;
+    const source = new EventSource(`${getApiBase()}/events/contest/${encodeURIComponent(slug)}/stream`);
+    this.contestEventSources.set(slug, source);
+    const onMessage = (event: MessageEvent) => this.handleRawMessage(event.data, `contest:${slug}`);
+    source.onmessage = onMessage;
+    for (const eventName of ["submission_evaluated", "submission_completed"]) {
+      source.addEventListener(eventName, onMessage as EventListener);
+    }
+    source.onerror = () => {
+      if (this.contestEventSources.get(slug) !== source) return;
+      source.close();
+      this.contestEventSources.delete(slug);
+      if (!Array.from(this.subscribers.values()).some((s) => s.enabled && s.contestSlug === slug)) return;
+      const timer = setTimeout(() => {
+        this.contestReconnectTimers.delete(slug);
+        this.connectContest(slug);
+      }, this.BASE_RECONNECT_DELAY_MS);
+      this.contestReconnectTimers.set(slug, timer);
+    };
+  }
+
+  private disconnectContest(slug: string) {
+    this.contestEventSources.get(slug)?.close();
+    this.contestEventSources.delete(slug);
+    const timer = this.contestReconnectTimers.get(slug);
+    if (timer) clearTimeout(timer);
+    this.contestReconnectTimers.delete(slug);
   }
 
   private scheduleReconnect() {
@@ -333,6 +371,9 @@ class GlobalSseMultiplexer {
       this.eventSource.close();
       this.eventSource = null;
     }
+    for (const slug of new Set([...this.contestEventSources.keys(), ...this.contestReconnectTimers.keys()])) {
+      this.disconnectContest(slug);
+    }
     this.setStatus("disconnected");
   }
 
@@ -342,7 +383,7 @@ class GlobalSseMultiplexer {
     this.disconnect();
   }
 
-  private handleRawMessage(rawData: string) {
+  private handleRawMessage(rawData: string, sourceChannel = "global") {
     if (!rawData) return;
     const trimmed = rawData.trim();
     if (trimmed === ": ping" || trimmed === ": connected" || trimmed.startsWith(": connected to")) {
@@ -355,6 +396,7 @@ class GlobalSseMultiplexer {
 
     try {
       const parsed: RealtimeEvent = JSON.parse(rawData);
+      if (sourceChannel.startsWith("contest:") && !["submission_evaluated", "submission_completed"].includes(parsed.event)) return;
 
       // 1. Process Global Platform Cache & Lifecycle Invalidation (Executed ONCE per event)
       if (
@@ -370,7 +412,6 @@ class GlobalSseMultiplexer {
         parsed.event === "contest_registered" ||
         parsed.event === "contest_unregistered" ||
         parsed.event === "top30_qualified" ||
-        parsed.event === "submission_evaluated" ||
         parsed.event === "assessment_finished" ||
         parsed.event === "leaderboard_updated" ||
         parsed.event === "leaderboard.updated" ||
@@ -406,6 +447,9 @@ class GlobalSseMultiplexer {
       // 2. Dispatch to Subscribed Components with Selective Filtering
       this.subscribers.forEach((sub) => {
         if (!sub.enabled) return;
+
+        if (sourceChannel.startsWith("contest:") && sub.contestSlug !== sourceChannel.slice("contest:".length)) return;
+        if (sourceChannel === "global" && parsed.event === "submission_evaluated") return;
 
         // Contest filter: if subscriber specified a contestSlug, only dispatch matching contest events
         if (sub.contestSlug && parsed.contest_slug && parsed.contest_slug !== sub.contestSlug) {

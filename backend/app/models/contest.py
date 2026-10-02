@@ -49,6 +49,7 @@ class OfflineContest(Base):
     edition = Column(Integer, nullable=True)  # e.g. 42, 18
     banner_url = Column(String(500), nullable=True)
     version = Column(Integer, default=1, nullable=False)
+    ratings_finalized_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
     # Relationships
@@ -194,4 +195,3 @@ class ContestRegistration(Base):
     # Relationships
     contest = relationship("OfflineContest", back_populates="registrations")
     member = relationship("MemberProfile", back_populates="contest_registrations")
-

@@ -100,6 +100,12 @@ class ScoringResult(BaseModel):
 class ExecutionResult(BaseModel):
     success: bool
     submission_id: str = Field(default_factory=lambda: str(uuid4()))
+    job_id: Optional[str] = None
+    attempt_id: Optional[str] = None
+    lease_id: Optional[str] = None
+    node_id: Optional[str] = None
+    container_id: Optional[str] = None
+    provider: Optional[str] = None
     status: ExecutionStatus = ExecutionStatus.COMPLETED
     verdict: Verdict = Verdict.SYSTEM_ERROR
     stdout: str = ""
@@ -115,5 +121,8 @@ class ExecutionResult(BaseModel):
     compile_time_ms: float = 0.0
     execution_time_ms: float = 0.0
     total_time_ms: float = 0.0
+    timestamps: dict[str, Optional[str]] = Field(default_factory=dict)
+    latencies: dict[str, float] = Field(default_factory=dict)
+    telemetry: dict[str, Any] = Field(default_factory=dict)
     error: Optional[str] = None
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

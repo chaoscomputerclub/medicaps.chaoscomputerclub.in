@@ -63,6 +63,8 @@ class ContestLifecycleWorker(BaseQueueWorker):
             rating_summary = await DynamicContestService._apply_final_ratings(contest, db)
             await db.commit()
 
+            await DynamicContestService._publish_rating_events(slug, rating_summary)
+
             # Invalidate all affected caches
             await DynamicContestService._invalidate_contest_caches(include_rating_caches=True)
 
