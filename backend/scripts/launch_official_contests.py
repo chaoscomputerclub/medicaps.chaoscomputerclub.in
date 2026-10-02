@@ -21,6 +21,7 @@ if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
 from sqlalchemy import select, delete
+from app.core.cache import delete_cache_pattern
 from app.core.db import AsyncSessionLocal, init_db
 from app.models.db_models import (
     OfflineContest,

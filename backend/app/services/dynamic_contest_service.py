@@ -1635,7 +1635,7 @@ class DynamicContestService:
             db=db,
             queue_name="realtime",
             event_type="ratings_updated",
-            payload={"contest_slug": contest_slug, "rated_count": rated},
+            payload={"contest_slug": contest.slug, "rated_count": rated},
             aggregate_id=contest.id,
             priority="high",
         )
@@ -1643,7 +1643,7 @@ class DynamicContestService:
             db=db,
             queue_name="realtime",
             event_type="leaderboard_updated",
-            payload={"contest_slug": contest_slug, "rated_count": rated, "action": "ratings_applied"},
+            payload={"contest_slug": contest.slug, "rated_count": rated, "action": "ratings_applied"},
             aggregate_id=contest.id,
             priority="high",
         )
