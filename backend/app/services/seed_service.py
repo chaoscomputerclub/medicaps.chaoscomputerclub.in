@@ -8,6 +8,7 @@ import logging
 from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models.db_models import (
     OfflineContest,
     ContestProblem,

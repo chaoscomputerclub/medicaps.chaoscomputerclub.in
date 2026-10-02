@@ -11,6 +11,7 @@ from fastapi import HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import delete_cache, delete_cache_pattern
+from app.core.config import settings
 from app.core.security import (
     create_access_token,
     generate_refresh_token,
