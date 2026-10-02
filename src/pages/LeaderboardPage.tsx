@@ -207,7 +207,7 @@ export function LeaderboardPage() {
                   // Optimistically bind to currentMember when SSE updates authSlice in real time
                   const displayRating = isYou && currentMember?.rating ? currentMember.rating : x.rating;
                   const displayPeak = isYou && currentMember?.peak_rating ? currentMember.peak_rating : x.peak_rating;
-                  const displayRank = isYou && currentMember?.university_rank ? currentMember.university_rank : x.university_rank;
+                  const displayRank = x.university_rank;
                   const attendanceCount = isYou && currentMember?.attendance_count !== undefined ? currentMember.attendance_count : (x.attendance_count ?? 0);
                   const attendanceTotal = isYou && currentMember?.attendance_total ? currentMember.attendance_total : (x.attendance_total && x.attendance_total > 0 ? x.attendance_total : Math.max(1, attendanceCount));
 

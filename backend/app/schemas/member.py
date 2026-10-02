@@ -46,6 +46,11 @@ class MemberProfileResponse(BaseModel):
     attendance_total: int
     is_core_member: bool
     created_at: datetime
+    university_rank: Optional[int] = None
+    percentile: Optional[float] = None
+    top_percentage: Optional[float] = None
+    standing: Optional[str] = None
+    is_ranked: Optional[bool] = False
 
 
 class RatingHistoryResponse(BaseModel):
@@ -65,8 +70,8 @@ class LeaderboardRow(BaseModel):
 
     id: str
     avatar_url: Optional[str] = None
-    rank: int
-    university_rank: int
+    rank: Optional[int] = None
+    university_rank: Optional[int] = None
     previous_rank: Optional[int] = None
     handle: str
     full_name: str
@@ -81,3 +86,11 @@ class LeaderboardRow(BaseModel):
     tier: str
     ratings: list[int] = []
     recent_deltas: list[int] = []
+    is_ranked: Optional[bool] = True
+    country: Optional[str] = "IN"
+    verified: Optional[bool] = False
+    is_core_member: Optional[bool] = False
+    percentile: Optional[float] = None
+    top_percentage: Optional[float] = None
+    standing: Optional[str] = None
+

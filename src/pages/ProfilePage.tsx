@@ -622,13 +622,11 @@ export function ProfilePage() {
         <Metric label="Rating" value={m.rating} detail={`Peak: ${m.peak_rating}`} />
         <Metric
           label="Rank"
-          value={
-            (m.attendance_count ?? 0) > 0 && m.university_rank ? `#${m.university_rank}` : "#—"
-          }
+          value={m.is_ranked && m.university_rank ? `#${m.university_rank}` : "Unranked"}
           detail={
-            (m.attendance_count ?? 0) > 0 && m.university_rank
-              ? `of ${m.active_members || distribution?.total || 1} cadets`
-              : "Unranked"
+            m.is_ranked && m.university_rank
+              ? `of ${m.active_members || 1} cadets`
+              : "Attend 1 contest to rank"
           }
         />
         <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />

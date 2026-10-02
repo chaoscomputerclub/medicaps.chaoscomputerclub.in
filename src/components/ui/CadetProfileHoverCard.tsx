@@ -253,7 +253,7 @@ export function CadetProfileHoverCard({
             <p className="font-mono text-xs text-zinc-400 mt-0.5 truncate">@{cleanHandle}</p>
             <p className="font-mono text-xs text-lime-400 tabular-nums mt-1 truncate">
               Rank&nbsp;
-              <span className="font-bold">{universityRank ? `#${universityRank}` : "—"}</span>
+              <span className="font-bold">{universityRank ? `#${universityRank}` : "Unranked"}</span>
               &nbsp;·&nbsp;
               <span className="text-zinc-400">{tier}</span>
             </p>

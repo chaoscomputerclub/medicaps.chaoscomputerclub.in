@@ -265,7 +265,7 @@ class MemberService:
         campus_pass = await MemberRepository.get_active_campus_pass(db, current_member.id)
         followers_count, following_count = await MemberRepository.get_social_counts(db, current_member.id)
         attended, total_contests = await MemberRepository.get_attendance_and_contest_counts(db, current_member.id)
-        univ_rank, dept_rank, all_members_count = await MemberRepository.compute_ranks(db, current_member)
+        rank_res = await MemberRepository.compute_ranks(db, current_member)
 
         pass_data = None
         if campus_pass:
@@ -359,19 +359,22 @@ class MemberService:
         total_subs = total_submissions_res.scalar() or 0
         accuracy_pct = round((acc_subs_count / total_subs) * 100, 1) if total_subs > 0 else 0.0
 
-        percentile = round((1.0 - (univ_rank / max(1, all_members_count))) * 100, 1)
-        percentile = max(0.0, min(99.9, percentile))
-
         from app.services.rating_service import get_rating_tier
         tier = get_rating_tier(current_member.rating or 1200)
 
         member_dto = to_member_public(current_member).model_dump()
         member_dto["attendance_count"] = attended
         member_dto["attendance_total"] = total_contests
-        member_dto["university_rank"] = univ_rank
-        member_dto["department_rank"] = dept_rank
-        member_dto["active_members"] = all_members_count
-        member_dto["percentile"] = percentile
+        member_dto["university_rank"] = rank_res.university_rank
+        member_dto["department_rank"] = rank_res.department_rank
+        member_dto["active_members"] = rank_res.active_ranked_count
+        member_dto["percentile"] = rank_res.percentile
+        member_dto["top_percentage"] = rank_res.top_percentage
+        member_dto["standing"] = rank_res.standing
+        member_dto["standing_percent"] = rank_res.top_percentage
+        member_dto["is_ranked"] = rank_res.is_ranked
+        member_dto["season"] = rank_res.season
+        member_dto["scope"] = rank_res.scope
         member_dto["followers_count"] = followers_count
         member_dto["following_count"] = following_count
         member_dto["tier"] = tier
@@ -415,7 +418,7 @@ class MemberService:
                     "contest": "Initial Baseline",
                     "contest_slug": "",
                     "date": base_date.isoformat(),
-                    "rank": 1,
+                    "rank": None,
                     "old_rating": 1200,
                     "new_rating": first_item.get("old_rating", 1200),
                     "delta": 0,
@@ -426,7 +429,7 @@ class MemberService:
                 "contest": "Initial Baseline",
                 "contest_slug": "",
                 "date": init_date,
-                "rank": 1,
+                "rank": None,
                 "old_rating": 1200,
                 "new_rating": current_member.rating or 1200,
                 "delta": 0,
@@ -486,7 +489,7 @@ class MemberService:
 
         followers_count, following_count = await MemberRepository.get_social_counts(db, student.id)
         attended, total_contests = await MemberRepository.get_attendance_and_contest_counts(db, student.id)
-        univ_rank, dept_rank, all_members_count = await MemberRepository.compute_ranks(db, student)
+        rank_res = await MemberRepository.compute_ranks(db, student)
 
         is_following = False
         if current_member and current_member.id != student.id:
@@ -547,7 +550,7 @@ class MemberService:
                     "contest": "Initial Baseline",
                     "contest_slug": "",
                     "date": base_date.isoformat(),
-                    "rank": 1,
+                    "rank": None,
                     "old_rating": 1200,
                     "new_rating": first_b.get("old_rating", 1200),
                     "delta": 0,
@@ -559,7 +562,7 @@ class MemberService:
                 "contest": "Initial Baseline",
                 "contest_slug": "",
                 "date": init_date,
-                "rank": 1,
+                "rank": None,
                 "old_rating": 1200,
                 "new_rating": student.rating or 1200,
                 "delta": 0,
@@ -640,8 +643,6 @@ class MemberService:
                     enrollment_val = match.group(1) if match else prefix
         masked_prn = f"{enrollment_val[:4]}•••{enrollment_val[-3:]}" if enrollment_val and len(enrollment_val) > 7 else (enrollment_val or "—")
 
-        percentile = round((1.0 - (univ_rank / max(1, all_members_count or 1))) * 100, 1) if (attended > 0 and univ_rank) else None
-
         student_dto = {
             "id": student.id,
             "handle": student.handle or f"cadet_{student.id[:6]}",
@@ -655,14 +656,21 @@ class MemberService:
             "rating": student.rating,
             "peak_rating": student.peak_rating or student.rating,
             "peak_contest": (battles[0].get("contest_title") or battles[0].get("title") or battles[0].get("contest")) if battles else None,
-            "university_rank": univ_rank if attended > 0 else None,
-            "percentile": percentile,
-            "active_members": all_members_count,
+            "university_rank": rank_res.university_rank,
+            "department_rank": rank_res.department_rank,
+            "percentile": rank_res.percentile,
+            "top_percentage": rank_res.top_percentage,
+            "standing": rank_res.standing,
+            "standing_percent": rank_res.top_percentage,
+            "active_members": rank_res.active_ranked_count,
             "attendance_count": attended,
             "attendance_total": total_contests,
             "attendance_rate": round((attended / total_contests * 100), 1) if total_contests > 0 else 0.0,
             "is_onboarded": student.is_onboarded,
             "is_core_member": student.is_core_member,
+            "is_ranked": rank_res.is_ranked,
+            "season": rank_res.season,
+            "scope": rank_res.scope,
             "tier": tier,
             "podiums": podiums,
             "streak": f"{len(battles)}w",
@@ -684,11 +692,14 @@ class MemberService:
                 "attendance_rate": f"{round((attended / max(1, total_contests)) * 100)}%",
                 "streak": f"{len(battles)}w",
                 "podiums": podiums,
-                "best_rank": min([b.get("rank") or 999 for b in battles], default=univ_rank),
+                "best_rank": min([b.get("rank") or 999 for b in battles], default=rank_res.university_rank),
                 "accepted_solves": solves_count,
                 "followers_count": followers_count,
                 "following_count": following_count,
-                "percentile": percentile,
+                "percentile": rank_res.percentile,
+                "top_percentage": rank_res.top_percentage,
+                "standing": rank_res.standing,
+                "standing_percent": rank_res.top_percentage,
                 "is_following": is_following,
                 "is_you": bool(current_member and str(current_member.id) == str(student.id)),
             },

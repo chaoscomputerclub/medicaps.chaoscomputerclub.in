@@ -26,18 +26,10 @@ class LeaderboardRepository:
         limit: int = 50,
         offset: int = 0,
     ) -> Tuple[Sequence[MemberProfile], int]:
-        stmt = select(MemberProfile).where(
-            MemberProfile.is_onboarded.is_(True),
-            MemberProfile.handle.isnot(None),
-            ~MemberProfile.email.like("qa.%"),
-            ~MemberProfile.handle.like("qa_%"),
-        )
-        count_stmt = select(func.count(MemberProfile.id)).where(
-            MemberProfile.is_onboarded.is_(True),
-            MemberProfile.handle.isnot(None),
-            ~MemberProfile.email.like("qa.%"),
-            ~MemberProfile.handle.like("qa_%"),
-        )
+        from app.services.ranking_service import RankingService
+        base_filters = RankingService.get_base_ranked_filter()
+        stmt = select(MemberProfile).where(*base_filters)
+        count_stmt = select(func.count(MemberProfile.id)).where(*base_filters)
 
         if department:
             stmt = stmt.where(MemberProfile.department == department)
@@ -66,7 +58,12 @@ class LeaderboardRepository:
         total_count = await db.scalar(count_stmt) or 0
 
         stmt = (
-            stmt.order_by(MemberProfile.rating.desc(), MemberProfile.peak_rating.desc(), MemberProfile.id.asc())
+            stmt.order_by(
+                MemberProfile.rating.desc(),
+                MemberProfile.peak_rating.desc(),
+                MemberProfile.attendance_count.desc(),
+                MemberProfile.id.asc(),
+            )
             .limit(limit)
             .offset(offset)
         )
@@ -120,18 +117,17 @@ class LeaderboardRepository:
 
     @staticmethod
     async def get_all_active_ratings(db: AsyncSession) -> List[int]:
+        from app.services.ranking_service import RankingService
         result = await db.execute(
             select(MemberProfile.rating).where(
-                MemberProfile.is_onboarded.is_(True),
-                MemberProfile.handle.isnot(None),
-                ~MemberProfile.email.like("qa.%"),
-                ~MemberProfile.handle.like("qa_%"),
+                *RankingService.get_base_ranked_filter()
             )
         )
         return [r for (r,) in result.all() if r is not None]
 
     @staticmethod
     async def get_department_aggregates(db: AsyncSession) -> Sequence[Any]:
+        from app.services.ranking_service import RankingService
         stmt = (
             select(
                 MemberProfile.department,
@@ -139,12 +135,7 @@ class LeaderboardRepository:
                 func.avg(MemberProfile.rating).label("avg_rating"),
                 func.max(MemberProfile.rating).label("top_rating"),
             )
-            .where(
-                MemberProfile.is_onboarded.is_(True),
-                MemberProfile.handle.isnot(None),
-                ~MemberProfile.email.like("qa.%"),
-                ~MemberProfile.handle.like("qa_%"),
-            )
+            .where(*RankingService.get_base_ranked_filter())
             .group_by(MemberProfile.department)
         )
         result = await db.execute(stmt)

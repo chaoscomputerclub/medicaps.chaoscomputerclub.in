@@ -25,7 +25,7 @@ export function ScoreboardMatrix({
   if (safeEntries.length === 0) {
     return (
       <div className="text-center py-10 text-zinc-400 font-mono text-xs border border-dashed border-white/10">
-        No standings recorded yet.
+        No active tournament scoreboard on file.
       </div>
     );
   }

@@ -27,24 +27,24 @@ export function RatingDistributionCard({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const attendanceCount = member?.attendance_count ?? 0;
-  const hasAttended = attendanceCount > 0;
+  const isRanked = Boolean(member?.is_ranked && member?.university_rank);
 
-  let percentileDisplay = "—";
-  let rankDisplay = "—";
+  let percentileDisplay = "Unranked";
+  let rankDisplay = "Unranked";
 
-  if (hasAttended && member?.university_rank) {
-    const cohortTotal = Math.max(distribution?.total || (member as any)?.active_members || 1, 1);
-    const rank = Math.max(1, member.university_rank || 1);
-    if (rank === 1) {
-      percentileDisplay = "Top 1%";
-    } else {
-      const pct = (rank / cohortTotal) * 100;
-      percentileDisplay = pct <= 1 ? "Top 1%" : `Top ${pct.toFixed(1)}%`;
-    }
+  if (isRanked && member?.university_rank) {
     rankDisplay = `#${member.university_rank}`;
-  } else if (hasAttended && member?.percentile) {
-    const pct = 100 - member.percentile;
-    percentileDisplay = pct <= 1 ? "Top 1%" : `Top ${pct.toFixed(1)}%`;
+    // Strictly consume authoritative canonical standing from backend RankingService
+    if (member?.standing) {
+      percentileDisplay = member.standing;
+    } else if (member?.top_percentage !== undefined && member.top_percentage !== null) {
+      percentileDisplay = member.top_percentage <= 1 ? "Top 1%" : `Top ${member.top_percentage}%`;
+    } else {
+      percentileDisplay = "Ranked";
+    }
+  } else {
+    rankDisplay = "Unranked";
+    percentileDisplay = "Unranked";
   }
 
   const buckets = distribution?.buckets ?? [];
@@ -54,11 +54,11 @@ export function RatingDistributionCard({
 
   const memberRating = userRating ?? member?.rating ?? 1200;
   let activeBucketIndex = -1;
-  if (!isEmpty) {
+  if (!isEmpty && isRanked) {
     activeBucketIndex = buckets.findIndex(
       (b) => memberRating >= b.min && memberRating < b.max
     );
-    if (activeBucketIndex === -1) {
+    if (activeBucketIndex === -1 && memberRating >= 2400) {
       activeBucketIndex = buckets.length - 1;
     }
   }
@@ -77,7 +77,7 @@ export function RatingDistributionCard({
       {/* Top Percentile Display */}
       <div>
         <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block">
-          {hasAttended ? "Cohort Standing" : "Standing"}
+          {isRanked ? "Cohort Standing" : "Standing"}
         </span>
         <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mt-1 font-sans">
           {percentileDisplay}

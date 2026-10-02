@@ -71,44 +71,18 @@ class MemberRepository:
         total_contests = await db.scalar(
             select(func.count(OfflineContest.id)).where(OfflineContest.status.in_(["finished", "live"]))
         ) or 1
-        attended = await db.scalar(
+        sb_attended = await db.scalar(
             select(func.count(ScoreboardEntry.id)).where(ScoreboardEntry.member_id == member_id)
         ) or 0
+        member = await db.get(MemberProfile, member_id)
+        profile_att = getattr(member, "attendance_count", 0) or 0
+        attended = max(sb_attended, profile_att)
         return attended, total_contests
 
     @staticmethod
-    async def compute_ranks(db: AsyncSession, member: MemberProfile) -> Tuple[int, int, int]:
-        rank_filter = [
-            MemberProfile.is_onboarded.is_(True),
-            MemberProfile.handle.isnot(None),
-            ~MemberProfile.email.like("qa.%"),
-            ~MemberProfile.handle.like("qa_%"),
-        ]
-        all_members_count = await db.scalar(select(func.count(MemberProfile.id)).where(*rank_filter)) or 1
-
-        univ_rank = 1
-        dept_rank = 1
-        rating = member.rating or 1200
-
-        higher_univ = await db.scalar(
-            select(func.count(MemberProfile.id)).where(
-                *rank_filter,
-                MemberProfile.rating > rating,
-            )
-        )
-        univ_rank = (higher_univ or 0) + 1
-
-        if member.department:
-            higher_dept = await db.scalar(
-                select(func.count(MemberProfile.id)).where(
-                    *rank_filter,
-                    MemberProfile.department == member.department,
-                    MemberProfile.rating > rating,
-                )
-            )
-            dept_rank = (higher_dept or 0) + 1
-
-        return univ_rank, dept_rank, all_members_count
+    async def compute_ranks(db: AsyncSession, member: MemberProfile):
+        from app.services.ranking_service import RankingService
+        return await RankingService.get_member_ranks(db, member)
 
     @staticmethod
     async def get_rating_history(db: AsyncSession, member_id: str) -> List[RatingHistory]:

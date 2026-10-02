@@ -178,9 +178,11 @@ export function DashboardPage() {
         <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
           <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Campus Standings</span>
           <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
-            #{member?.university_rank || 1}
+            {member?.is_ranked && member?.university_rank ? `#${member.university_rank}` : "Unranked"}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">Medi-Caps University</span>
+          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">
+            {member?.is_ranked && member?.standing ? `${member.standing} · Medi-Caps` : "Attend 1 contest to rank"}
+          </span>
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
@@ -194,9 +196,11 @@ export function DashboardPage() {
         <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
           <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Contests Logged</span>
           <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
-            {history.length || (member as any)?.contests_count || 0}
+            {member?.attendance_count ?? 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">Verified Tournaments</span>
+          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">
+            {(member?.attendance_count ?? 0) === 1 ? "1 Verified Tournament" : `${member?.attendance_count ?? 0} Verified Tournaments`}
+          </span>
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
@@ -285,16 +289,21 @@ export function DashboardPage() {
         </div>
       </section>
 
-      {/* Campus Scoreboard Radar */}
+      {/* Live Tournament Scoreboard Radar */}
       <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
         <SectionHeader
-          kicker="02 // Standings Radar"
+          kicker="02 // Tournament Radar"
           index="LIVE"
-          title="Campus Scoreboard"
+          title="Tournament Scoreboard"
           action={
-            <Link to="/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
-              Full Standings →
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link to="/contests" className="text-xs font-mono font-medium text-zinc-400 hover:text-white transition-colors">
+                All Contests →
+              </Link>
+              <Link to="/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+                Campus Leaderboard →
+              </Link>
+            </div>
           }
         />
         <div className="w-full min-w-0 overflow-hidden">

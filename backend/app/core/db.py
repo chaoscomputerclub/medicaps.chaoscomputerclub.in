@@ -148,6 +148,66 @@ async def ensure_database_integrity():
                 except Exception as sess_err:
                     print(f"Notice on assessment_sessions unique constraint: {sess_err}")
 
+            # 3b. Unique constraint on contest_problems (contest_id, problem_index)
+            cp_uq_res = await session.execute(text("""
+                SELECT 1 FROM information_schema.table_constraints 
+                WHERE constraint_name = 'uq_contest_problem_index'
+            """))
+            if not cp_uq_res.scalar():
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE contest_problems 
+                        ADD CONSTRAINT uq_contest_problem_index 
+                        UNIQUE (contest_id, problem_index);
+                    """))
+                except Exception as cp_err:
+                    print(f"Notice on contest_problems unique constraint: {cp_err}")
+
+            # 3c. Unique constraint on rating_history (contest_id, member_id)
+            rh_uq_res = await session.execute(text("""
+                SELECT 1 FROM information_schema.table_constraints 
+                WHERE constraint_name = 'uq_rating_history_contest_member'
+            """))
+            if not rh_uq_res.scalar():
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE rating_history 
+                        ADD CONSTRAINT uq_rating_history_contest_member 
+                        UNIQUE (contest_id, member_id);
+                    """))
+                except Exception as rh_err:
+                    print(f"Notice on rating_history unique constraint: {rh_err}")
+
+            # 3d. Unique constraint on campus_passes (contest_id, member_id)
+            pass_uq_res = await session.execute(text("""
+                SELECT 1 FROM information_schema.table_constraints 
+                WHERE constraint_name = 'uq_campus_pass_contest_member'
+            """))
+            if not pass_uq_res.scalar():
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE campus_passes 
+                        ADD CONSTRAINT uq_campus_pass_contest_member 
+                        UNIQUE (contest_id, member_id);
+                    """))
+                except Exception as pass_err:
+                    print(f"Notice on campus_passes unique constraint: {pass_err}")
+
+            # 3e. Unique constraint on judge_job_attempts (job_id, attempt_number)
+            jja_uq_res = await session.execute(text("""
+                SELECT 1 FROM information_schema.table_constraints 
+                WHERE constraint_name = 'uq_judge_job_attempt'
+            """))
+            if not jja_uq_res.scalar():
+                try:
+                    await session.execute(text("""
+                        ALTER TABLE judge_job_attempts 
+                        ADD CONSTRAINT uq_judge_job_attempt 
+                        UNIQUE (job_id, attempt_number);
+                    """))
+                except Exception as jja_err:
+                    print(f"Notice on judge_job_attempts unique constraint: {jja_err}")
+
             # 4. Ensure essential query & foreign key indexes
             index_statements = [
                 "CREATE INDEX IF NOT EXISTS ix_rating_history_contest_id ON rating_history (contest_id)",

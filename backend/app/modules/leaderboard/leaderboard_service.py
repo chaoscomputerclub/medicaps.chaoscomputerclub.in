@@ -114,6 +114,12 @@ class LeaderboardService:
                 dept = m.department or "CSE"
                 batch_val = m.batch or "2024-28"
 
+                pop_size = max(1, total_count)
+                standing_pct = round((current_rank / pop_size) * 100, 1)
+                standing_str = "Top 1%" if standing_pct <= 1.0 else f"Top {standing_pct}%"
+                users_below = max(0, total_count - current_rank)
+                row_percentile = round((users_below / pop_size) * 100, 1)
+
                 rows.append(
                     LeaderboardRow(
                         id=m.id,
@@ -137,6 +143,9 @@ class LeaderboardService:
                         country="IN",
                         verified=bool(m.is_onboarded),
                         is_core_member=bool(getattr(m, "is_core_member", False)),
+                        percentile=row_percentile,
+                        top_percentage=standing_pct,
+                        standing=standing_str,
                     )
                 )
 

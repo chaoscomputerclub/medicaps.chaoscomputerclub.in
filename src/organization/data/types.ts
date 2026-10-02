@@ -122,7 +122,7 @@ export type MemberProfile = {
   rating: number;
   peak_rating: number;
   peak_contest: string | null;
-  university_rank: number;
+  university_rank?: number | null;
   active_members: number;
   attendance_count: number;
   attendance_total: number;
@@ -137,7 +137,13 @@ export type MemberProfile = {
   github_username?: string | null;
   linkedin_url?: string | null;
   avatar_url?: string | null;
-  percentile?: number;
+  percentile?: number | null;
+  top_percentage?: number | null;
+  standing?: string | null;
+  standing_percent?: number | null;
+  is_ranked?: boolean;
+  season?: string;
+  scope?: string;
 };
 export type LeaderboardEntry = MemberProfile & { previous_rank: number; ratings: number[] };
 export type Achievement = { name: string; description: string; earned: boolean; code: string };

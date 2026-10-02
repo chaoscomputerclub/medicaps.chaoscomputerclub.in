@@ -237,8 +237,14 @@ class GlobalSseMultiplexer {
       this.eventSource = new EventSource(endpoint);
 
       this.eventSource.onopen = () => {
+        const wasReconnecting = this.reconnectAttempts > 0;
         this.reconnectAttempts = 0;
         this.setStatus("connected");
+        if (wasReconnecting) {
+          // Reconnect state reconciliation: on network reconnect, invalidate local caches
+          // to pull authoritative domain state from PostgreSQL (Section 21 SSOT invariant)
+          invalidateContestCaches(true);
+        }
       };
 
       this.eventSource.onmessage = (e: MessageEvent) => {
