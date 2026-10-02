@@ -57,7 +57,7 @@ jobs:
       - name: 🚀 Sync Remote Repo & Deploy Backend
         run: |
           echo "→ Pulling latest main on server..."
-          ssh production "
+          ssh production 'bash -s' << 'EOF'
             set -e
             cd /root/projects/medicaps.chaoscomputerclub.in
             git pull origin main
@@ -79,7 +79,7 @@ jobs:
 
             echo '→ Gracefully reloading backend service...'
             systemctl reload-or-restart ccc-medicaps-api.service
-          "
+          EOF
 
       - name: 🌐 Deploy Pre-Built Frontends & Reload Nginx
         run: |

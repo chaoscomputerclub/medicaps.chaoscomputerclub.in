@@ -207,12 +207,14 @@ export function LeaderboardPage() {
                   // Optimistically bind to currentMember when SSE updates authSlice in real time
                   const displayRating = isYou && currentMember?.rating ? currentMember.rating : x.rating;
                   const displayPeak = isYou && currentMember?.peak_rating ? currentMember.peak_rating : x.peak_rating;
-                  const displayRank = x.university_rank;
+                  const displayRank = x.university_rank ?? x.rank ?? null;
                   const attendanceCount = isYou && currentMember?.attendance_count !== undefined ? currentMember.attendance_count : (x.attendance_count ?? 0);
                   const attendanceTotal = isYou && currentMember?.attendance_total ? currentMember.attendance_total : (x.attendance_total && x.attendance_total > 0 ? x.attendance_total : Math.max(1, attendanceCount));
 
                   const change =
-                    (x.previous_rank ?? displayRank) - displayRank;
+                    x.previous_rank != null && displayRank != null
+                      ? x.previous_rank - displayRank
+                      : 0;
                   const isFollowing = followingIds.includes(x.id) || followingIds.includes(x.handle);
                   const initials = x.full_name
                     ? x.full_name.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase()
@@ -229,7 +231,7 @@ export function LeaderboardPage() {
                       <TableCell className="pl-5 py-3">
                         <div className="flex items-center gap-1.5 font-mono">
                           <strong className="text-xs font-bold tabular-nums text-white w-5 text-right">
-                            {displayRank}
+                            {displayRank != null ? displayRank : "—"}
                           </strong>
                           <span
                             className={`inline-flex items-center text-[10px] tabular-nums ${

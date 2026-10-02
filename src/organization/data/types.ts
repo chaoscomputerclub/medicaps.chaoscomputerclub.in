@@ -123,6 +123,7 @@ export type MemberProfile = {
   peak_rating: number;
   peak_contest: string | null;
   university_rank?: number | null;
+  rank?: number | null;
   active_members: number;
   attendance_count: number;
   attendance_total: number;
