@@ -70,7 +70,7 @@ async def run_funnel_test():
             if not member:
                 member = MemberProfile(
                     handle=test_handle,
-                    email="funnel_test@medicaps.ac.in",
+                    email=os.getenv("TEST_CADET_EMAIL", "funnel_test@medicaps.ac.in"),
                     full_name="Aarav Sharma",
                     department="Computer Science & Engineering",
                     batch="2023-2027",

@@ -21,11 +21,15 @@ _bg_otp_tasks: Set[asyncio.Task] = set()
 
 
 def is_allowed_organization_email(email: str) -> bool:
-    """Institutional access restriction: strictly Medi-Caps University emails (@medicaps.ac.in)."""
+    """Institutional access restriction: strictly Medi-Caps University emails (@medicaps.ac.in) or Core Team."""
     if not email or "@" not in email:
         return False
-    domain = email.split("@")[1].strip().lower()
-    return domain == "medicaps.ac.in"
+    clean = email.strip().lower()
+    if clean in settings.core_team_emails_set:
+        return True
+    domain = clean.split("@")[1].strip().lower()
+    allowed = (settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in").lower()
+    return domain == allowed or domain.endswith(f".{allowed}")
 
 
 class OtpService:
@@ -42,9 +46,10 @@ class OtpService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is required.")
 
         if not is_allowed_organization_email(clean_email):
+            allowed = settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in"
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are strictly prohibited.",
+                detail=f"Access restricted: Only @{allowed} organization emails are permitted. Gmail and personal accounts are strictly prohibited.",
             )
 
         client_ip = get_client_ip(request) if request else None
@@ -126,9 +131,10 @@ class OtpService:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Session corrupted. Please restart.")
 
         if not is_allowed_organization_email(email):
+            allowed = settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in"
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access restricted: Only @medicaps.ac.in organization emails are permitted.",
+                detail=f"Access restricted: Only @{allowed} organization emails are permitted.",
             )
 
         return email

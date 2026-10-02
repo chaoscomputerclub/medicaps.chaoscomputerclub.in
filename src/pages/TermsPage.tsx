@@ -205,10 +205,10 @@ export function TermsPage() {
               <p className="mt-2 font-mono text-xs text-lime-400">
                 Email:{" "}
                 <a
-                  href="mailto:info@chaoscomputerclub.in"
+                  href={`mailto:${(import.meta.env["VITE_CONTACT_EMAIL"] as string) || "info@chaoscomputerclub.in"}`}
                   className="underline underline-offset-4 transition-colors hover:text-lime-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
                 >
-                  info@chaoscomputerclub.in
+                  {(import.meta.env["VITE_CONTACT_EMAIL"] as string) || "info@chaoscomputerclub.in"}
                 </a>
               </p>
             </div>

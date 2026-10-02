@@ -16,10 +16,14 @@ class SendOTPRequest(BaseModel):
         clean = v.strip().lower()
         if "@" not in clean:
             raise ValueError("A valid institutional email address is required.")
+        from app.core.config import settings
+        if clean in settings.core_team_emails_set:
+            return clean
         domain = clean.split("@")[-1].strip()
-        if domain != "medicaps.ac.in" and not domain.endswith(".medicaps.ac.in"):
+        allowed = (settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in").lower()
+        if domain != allowed and not domain.endswith(f".{allowed}"):
             raise ValueError(
-                "Access restricted: Only @medicaps.ac.in organization emails are permitted. Gmail and personal accounts are strictly prohibited."
+                f"Access restricted: Only @{allowed} organization emails are permitted. Gmail and personal accounts are strictly prohibited."
             )
         return clean
 

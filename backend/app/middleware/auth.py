@@ -78,11 +78,34 @@ async def get_current_member(
         result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
         member = result.scalars().first()
 
-    # Self-heal is intentionally removed.
-    # Auto-creating member records here caused duplicate ghost accounts whenever
-    # the JWT's `sub` UUID did not match an existing DB row (e.g. after a DB
-    # migration, reset, or UUID collision). Members are ONLY created via
-    # verify_otp — any token pointing at a non-existent member must re-auth.
+    # If the user is designated in ENV Core Team, auto-provision or elevate them dynamically
+    if not member and email and email.strip().lower() in settings.core_team_emails_set:
+        import uuid
+        clean_email = email.strip().lower()
+        handle_prefix = clean_email.split("@")[0].replace(".", "_")
+        member = MemberProfile(
+            id=member_id or str(uuid.uuid4()),
+            email=clean_email,
+            handle=handle_prefix,
+            full_name=handle_prefix.replace("_", " ").title(),
+            is_core_member=True,
+            is_onboarded=True,
+            rating=1200,
+            peak_rating=1200,
+        )
+        db.add(member)
+        await db.commit()
+        await db.refresh(member)
+        logger.info("Auto-provisioned Core Team member from ENV: %s", clean_email)
+
+    if member:
+        clean_email = (member.email or "").strip().lower()
+        clean_handle = (member.handle or "").strip().lower()
+        if not member.is_core_member and (clean_email in settings.core_team_emails_set or clean_handle in settings.core_team_handles_set):
+            member.is_core_member = True
+            await db.commit()
+            await db.refresh(member)
+
     if not member:
         logger.warning(
             "JWT resolved to no DB member (sub=%s, email=%s) — forcing re-auth.",
@@ -132,6 +155,32 @@ async def get_current_member_optional(
         if not member and email:
             result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
             member = result.scalars().first()
+
+        if not member and email and email.strip().lower() in settings.core_team_emails_set:
+            import uuid
+            clean_email = email.strip().lower()
+            handle_prefix = clean_email.split("@")[0].replace(".", "_")
+            member = MemberProfile(
+                id=member_id or str(uuid.uuid4()),
+                email=clean_email,
+                handle=handle_prefix,
+                full_name=handle_prefix.replace("_", " ").title(),
+                is_core_member=True,
+                is_onboarded=True,
+                rating=1200,
+                peak_rating=1200,
+            )
+            db.add(member)
+            await db.commit()
+            await db.refresh(member)
+
+        if member:
+            clean_email = (member.email or "").strip().lower()
+            clean_handle = (member.handle or "").strip().lower()
+            if not member.is_core_member and (clean_email in settings.core_team_emails_set or clean_handle in settings.core_team_handles_set):
+                member.is_core_member = True
+                await db.commit()
+                await db.refresh(member)
 
         return member
     except Exception:

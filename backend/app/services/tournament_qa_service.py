@@ -222,7 +222,7 @@ class TournamentQAService:
             last_name = INDIAN_LAST_NAMES[((i - 2) * 5) % len(INDIAN_LAST_NAMES)]
             full_name = f"{first_name} {last_name}"
             handle = f"{first_name.lower()}_{i:03d}"
-            email = f"cadet_{i:03d}@medicaps.ac.in"
+            email = f"cadet_{i:03d}@{settings.ALLOWED_EMAIL_DOMAIN or 'medicaps.ac.in'}"
 
             dept = (
                 "CSE" if i <= 45

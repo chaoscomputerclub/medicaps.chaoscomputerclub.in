@@ -111,8 +111,10 @@ async function main() {
     console.log(`\n${c.yellow}⚡ Phase 1: 50-Contest, 110-Cadet Tournament Simulation${c.reset}`);
     const simRes = await api('/admin/qa/simulate-tournament', 'POST', {
       cadet_count: 110, contest_count: 50,
-      primary_handle: 'santusht', primary_email: 'santusht.en23@medicaps.ac.in',
-      primary_name: 'Santusht Kotai', primary_prn: 'EN23CS301927',
+      primary_handle: process.env.PRIMARY_HANDLE || 'santusht',
+      primary_email: process.env.ADMIN_PRIMARY_EMAIL || 'santusht.en23@medicaps.ac.in',
+      primary_name: process.env.PRIMARY_NAME || 'Santusht Kotai',
+      primary_prn: process.env.PRIMARY_PRN || 'EN23CS301927',
     });
     const sim = simRes.data || {};
     check('P1-T01', 'Tournament simulation — HTTP 200', simRes.ok && sim.success === true,

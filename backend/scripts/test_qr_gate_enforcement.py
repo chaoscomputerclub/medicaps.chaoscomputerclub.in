@@ -73,7 +73,7 @@ async def run_tests():
             cadet = MemberProfile(
                 handle="test_cadet_qr",
                 full_name="Cadet Test QR",
-                email="cadet.qr@medicaps.ac.in",
+                email=os.getenv("TEST_CADET_EMAIL", "cadet.qr@medicaps.ac.in"),
                 is_core_member=False,
             )
             db.add(cadet)

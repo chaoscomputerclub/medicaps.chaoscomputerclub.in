@@ -71,6 +71,7 @@ class AuthService:
         member = await AuthRepository.get_by_email(db, email)
         is_new = False
 
+        is_core = email.strip().lower() in settings.core_team_emails_set
         if not member:
             is_new = True
             member = await AuthRepository.create_member(
@@ -79,10 +80,12 @@ class AuthService:
                 rating=1200,
                 peak_rating=1200,
                 is_onboarded=False,
-                is_core_member=False,
+                is_core_member=is_core,
             )
-            logger.info("New member registered via OTP: %s", email)
+            logger.info("New member registered via OTP: %s (core=%s)", email, is_core)
         else:
+            if is_core:
+                member.is_core_member = True
             member.updated_at = datetime.now(timezone.utc)
             await AuthRepository.save(db, member)
 

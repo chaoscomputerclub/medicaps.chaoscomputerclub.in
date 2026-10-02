@@ -462,18 +462,6 @@ async def ensure_database_integrity():
             ]:
                 await session.execute(text(outbox_ddl))
 
-            # Ensure core team organizers and chief proctor accounts have is_core_member = True (ENV-driven)
-            core_emails = list(settings.core_team_emails_set)
-            core_handles = list(settings.core_team_handles_set)
-            if core_emails or core_handles:
-                await session.execute(
-                    text("""
-                        UPDATE member_profiles 
-                        SET is_core_member = TRUE 
-                        WHERE email = ANY(:emails) OR LOWER(handle) = ANY(:handles);
-                    """),
-                    {"emails": core_emails, "handles": core_handles},
-                )
 
             await session.commit()
         except Exception as e:

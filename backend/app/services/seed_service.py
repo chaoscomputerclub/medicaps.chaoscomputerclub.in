@@ -75,7 +75,7 @@ async def purge_all_contest_data(db: AsyncSession) -> dict:
         await db.execute(
             delete(MemberProfile).where(
                 (MemberProfile.handle.like("cadet_funnel%"))
-                | (MemberProfile.email.like("%test%@medicaps.ac.in"))
+                | (MemberProfile.email.like(f"%test%@{settings.ALLOWED_EMAIL_DOMAIN or 'medicaps.ac.in'}"))
                 | (MemberProfile.handle.like("test_%"))
             )
         )

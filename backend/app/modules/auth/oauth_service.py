@@ -88,7 +88,7 @@ class OAuthService:
             f"&access_type=offline"
             f"&prompt=select_account"
             f"&state={state}"
-            f"&hd=medicaps.ac.in"
+            f"&hd={settings.ALLOWED_EMAIL_DOMAIN or 'medicaps.ac.in'}"
         )
         res = RedirectResponse(url=google_auth_url)
         res.set_cookie(
@@ -176,6 +176,7 @@ class OAuthService:
         is_new = False
         enrollment_candidate = email.split("@")[0].upper() if "@" in email else None
 
+        is_core = email in settings.core_team_emails_set
         if not member:
             is_new = True
             member = await AuthRepository.create_member(
@@ -186,10 +187,13 @@ class OAuthService:
                 full_name=name or None,
                 prn=enrollment_candidate,
                 is_onboarded=False,
+                is_core_member=is_core,
             )
-            logger.info("New member registered via Google OAuth: %s", email)
+            logger.info("New member registered via Google OAuth: %s (core=%s)", email, is_core)
         else:
             member.google_id = google_id
+            if is_core:
+                member.is_core_member = True
             if not member.prn and enrollment_candidate:
                 member.prn = enrollment_candidate
             if picture and not member.avatar_url:

@@ -46,15 +46,19 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
 
     # Core Team & Chief Proctor Access Control (ENV Driven)
-    CORE_TEAM_EMAILS: Optional[str] = (
-        "en23cs301927@medicaps.ac.in,santushtkotai@gmail.com,info@chaoscomputerclub.in,qa.organizer@medicaps.ac.in"
+    ALLOWED_EMAIL_DOMAIN: str = os.getenv("ALLOWED_EMAIL_DOMAIN", "medicaps.ac.in")
+    CONTACT_EMAIL: Optional[str] = os.getenv("CONTACT_EMAIL", "info@chaoscomputerclub.in")
+    CORE_TEAM_EMAILS: Optional[str] = os.getenv(
+        "CORE_TEAM_EMAILS",
+        "en23cs301927@medicaps.ac.in,santushtkotai@gmail.com,info@chaoscomputerclub.in,qa.organizer@medicaps.ac.in",
     )
-    CORE_TEAM_HANDLES: Optional[str] = (
-        "santusht,admin,core,proctor,qa_organizer"
+    CORE_TEAM_HANDLES: Optional[str] = os.getenv(
+        "CORE_TEAM_HANDLES",
+        "santusht,admin,core,proctor,qa_organizer",
     )
-    ADMIN_PRIMARY_EMAIL: Optional[str] = "en23cs301927@medicaps.ac.in"
-    QA_ORGANIZER_EMAIL: Optional[str] = "qa.organizer@medicaps.ac.in"
-    QA_TARGET_EMAIL: Optional[str] = "qa.target@medicaps.ac.in"
+    ADMIN_PRIMARY_EMAIL: Optional[str] = os.getenv("ADMIN_PRIMARY_EMAIL", "en23cs301927@medicaps.ac.in")
+    QA_ORGANIZER_EMAIL: Optional[str] = os.getenv("QA_ORGANIZER_EMAIL", "qa.organizer@medicaps.ac.in")
+    QA_TARGET_EMAIL: Optional[str] = os.getenv("QA_TARGET_EMAIL", "qa.target@medicaps.ac.in")
 
     @cached_property
     def core_team_emails_set(self) -> set:

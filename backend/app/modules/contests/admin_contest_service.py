@@ -163,17 +163,18 @@ class AdminContestService:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
+        domain = settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in"
         demo_cadets = [
             {"handle": "santusht", "full_name": "Santusht Kotai", "prn": "EN23CS301927", "email": settings.ADMIN_PRIMARY_EMAIL, "dept": "CSE", "score": 98.5},
-            {"handle": "aarav_sharma", "full_name": "Aarav Sharma", "prn": "EN23CS301042", "email": "aarav.sharma@medicaps.ac.in", "dept": "CSE", "score": 94.0},
-            {"handle": "priya_patel", "full_name": "Priya Patel", "prn": "EN23IT301118", "email": "priya.patel@medicaps.ac.in", "dept": "IT", "score": 91.5},
-            {"handle": "rohan_verma", "full_name": "Rohan Verma", "prn": "EN23CS301205", "email": "rohan.verma@medicaps.ac.in", "dept": "Cyber Security", "score": 88.0},
-            {"handle": "ananya_singh", "full_name": "Ananya Singh", "prn": "EN24AI301012", "email": "ananya.singh@medicaps.ac.in", "dept": "AIDS", "score": 86.5},
-            {"handle": "vikram_aditya", "full_name": "Vikram Aditya", "prn": "EN22CS301088", "email": "vikram.aditya@medicaps.ac.in", "dept": "CSE", "score": 82.0},
-            {"handle": "sneha_reddy", "full_name": "Sneha Reddy", "prn": "EN23IT301064", "email": "sneha.reddy@medicaps.ac.in", "dept": "IT", "score": 79.5},
-            {"handle": "dev_malhotra", "full_name": "Dev Malhotra", "prn": "EN24CS301310", "email": "dev.malhotra@medicaps.ac.in", "dept": "CSE", "score": 76.0},
-            {"handle": "ishita_gupta", "full_name": "Ishita Gupta", "prn": "EN23CS301150", "email": "ishita.gupta@medicaps.ac.in", "dept": "Cyber Security", "score": 73.0},
-            {"handle": "kabir_joshi", "full_name": "Kabir Joshi", "prn": "EN24IT301099", "email": "kabir.joshi@medicaps.ac.in", "dept": "IT", "score": 69.5},
+            {"handle": "aarav_sharma", "full_name": "Aarav Sharma", "prn": "EN23CS301042", "email": f"aarav.sharma@{domain}", "dept": "CSE", "score": 94.0},
+            {"handle": "priya_patel", "full_name": "Priya Patel", "prn": "EN23IT301118", "email": f"priya.patel@{domain}", "dept": "IT", "score": 91.5},
+            {"handle": "rohan_verma", "full_name": "Rohan Verma", "prn": "EN23CS301205", "email": f"rohan.verma@{domain}", "dept": "Cyber Security", "score": 88.0},
+            {"handle": "ananya_singh", "full_name": "Ananya Singh", "prn": "EN24AI301012", "email": f"ananya.singh@{domain}", "dept": "AIDS", "score": 86.5},
+            {"handle": "vikram_aditya", "full_name": "Vikram Aditya", "prn": "EN22CS301088", "email": f"vikram.aditya@{domain}", "dept": "CSE", "score": 82.0},
+            {"handle": "sneha_reddy", "full_name": "Sneha Reddy", "prn": "EN23IT301064", "email": f"sneha.reddy@{domain}", "dept": "IT", "score": 79.5},
+            {"handle": "dev_malhotra", "full_name": "Dev Malhotra", "prn": "EN24CS301310", "email": f"dev.malhotra@{domain}", "dept": "CSE", "score": 76.0},
+            {"handle": "ishita_gupta", "full_name": "Ishita Gupta", "prn": "EN23CS301150", "email": f"ishita.gupta@{domain}", "dept": "Cyber Security", "score": 73.0},
+            {"handle": "kabir_joshi", "full_name": "Kabir Joshi", "prn": "EN24IT301099", "email": f"kabir.joshi@{domain}", "dept": "IT", "score": 69.5},
         ]
 
         added = 0
@@ -301,7 +302,7 @@ class AdminContestService:
             last_name = LAST_NAMES[((i - 1) * 3) % len(LAST_NAMES)]
             full_name = f"{first_name} {last_name}"
             handle = f"cadet_{i:03d}"
-            email = f"cadet_{i:03d}@medicaps.ac.in"
+            email = f"cadet_{i:03d}@{settings.ALLOWED_EMAIL_DOMAIN or 'medicaps.ac.in'}"
 
             if i <= 10:
                 score = round(99.5 - (i - 1) * 0.75, 1)
