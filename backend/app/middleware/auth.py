@@ -138,6 +138,22 @@ async def get_current_member_optional(
         return None
 
 
+CORE_TEAM_EMAILS = {
+    "en23cs301927@medicaps.ac.in",
+    "santushtkotai@gmail.com",
+    "info@chaoscomputerclub.in",
+    "qa.organizer@medicaps.ac.in",
+}
+
+CORE_TEAM_HANDLES = {
+    "santusht",
+    "admin",
+    "core",
+    "proctor",
+    "qa_organizer",
+}
+
+
 async def require_admin_or_core(
     member: Optional[MemberProfile] = Depends(get_current_member_optional),
 ) -> Optional[MemberProfile]:
@@ -145,6 +161,7 @@ async def require_admin_or_core(
     Guards organizer/admin endpoints.
     Permits execution if:
     - User is authenticated with `is_core_member` set to True
+    - User matches designated Core Team / Chief Proctor roster (auto-elevated)
     - Development bypass is honored only outside production.
     """
     from app.core.config import settings
@@ -154,6 +171,14 @@ async def require_admin_or_core(
 
     if not member:
         raise _UNAUTHORIZED
+
+    email_clean = (member.email or "").strip().lower()
+    handle_clean = (member.handle or "").strip().lower()
+
+    if email_clean in CORE_TEAM_EMAILS or handle_clean in CORE_TEAM_HANDLES:
+        if not getattr(member, "is_core_member", False):
+            member.is_core_member = True
+        return member
 
     if not getattr(member, "is_core_member", False):
         raise HTTPException(
