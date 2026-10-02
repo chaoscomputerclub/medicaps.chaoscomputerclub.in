@@ -10,11 +10,12 @@ import {
   StatusDot,
   formatContestDate,
 } from "@/organization/components/ui";
-import { fetchFullProfileData, type FullProfilePayload } from "@/organization/data/queries";
-import { getPublicPortalData } from "@/organization/data/portal.functions";
+import { type FullProfilePayload } from "@/organization/data/queries";
+import { getPublicPortalData, getMemberProfileData } from "@/organization/data/portal.functions";
 import { ContestActivityFeed } from "@/features/contest/feed";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData, globalSwrStore } from "@/lib/cache/swrCache";
+import { markNavigationMount, markNavigationContentReady } from "@/lib/navigationTelemetry";
 import { useRealtimeEvents } from "@/lib/realtime";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestsThunk } from "@/store/slices/contestSlice";
@@ -35,8 +36,8 @@ export function DashboardPage() {
   const authed = isAuthenticated();
   const { data: profile, loading: profileLoading, revalidate: revalidateProfile } = useSwrData<FullProfilePayload | null>(
     authed ? "member:profile:full" : null,
-    () => fetchFullProfileData(),
-    { ttl: 5 * 60 * 1000, enabled: authed }
+    () => getMemberProfileData(false) as Promise<FullProfilePayload>,
+    { ttl: 5 * 60 * 1000, staleTime: 30 * 1000, enabled: authed }
   );
 
   const { data: publicDataRaw, loading: publicLoading, revalidate: revalidatePublic } = useSwrData<{
@@ -45,10 +46,15 @@ export function DashboardPage() {
     standings: any[];
     problems: any[];
   }>(
-    "public:portal:data",
-    () => getPublicPortalData(),
-    { ttl: 5 * 60 * 1000 }
+    "portal:public_data",
+    () => getPublicPortalData(false),
+    { ttl: 5 * 60 * 1000, staleTime: 30 * 1000 }
   );
+
+  useEffect(() => {
+    markNavigationMount("/", profile ? "hit" : "miss");
+    markNavigationContentReady("/");
+  }, []);
 
   useEffect(() => {
     dispatch(fetchContestsThunk(false));

@@ -2,6 +2,7 @@ import { SocialDrawer } from "./SocialDrawer";
 import { fetchMyFollowingIdsThunk, fetchMySocialStatsThunk } from "@/store/slices/socialSlice";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { prefetchRoute } from "@/AppRoutes";
+import { markNavigationClick } from "@/lib/navigationTelemetry";
 import {
   LayoutDashboard,
   Trophy,
@@ -296,6 +297,7 @@ export function PortalShell() {
                 onFocus={() => prefetchRoute(item.to)}
                 onTouchStart={() => prefetchRoute(item.to)}
                 onClick={() => {
+                  markNavigationClick(item.to);
                   if (open) dispatch(setSidebarOpen(false));
                 }}
                 className={`relative z-10 flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-sans select-none group min-h-[38px] active:scale-[0.98] transition-colors duration-150 ${
@@ -323,6 +325,7 @@ export function PortalShell() {
             onMouseEnter={() => prefetchRoute("/profile")}
             onFocus={() => prefetchRoute("/profile")}
             onTouchStart={() => prefetchRoute("/profile")}
+            onClick={() => markNavigationClick("/profile")}
             className="flex items-center gap-2.5 min-w-0 flex-1 p-1.5 rounded-md hover:bg-white/[0.04] transition-colors"
             title="View Profile"
           >
@@ -360,9 +363,7 @@ export function PortalShell() {
 
       {/* Main Viewport */}
       <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 sm:p-6 md:p-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] relative min-w-0 max-w-full overflow-x-hidden">
-        <Suspense fallback={<PortalRouteSkeleton />}>
-          <Outlet />
-        </Suspense>
+        <Outlet />
       </main>
 
       <SocialDrawer />

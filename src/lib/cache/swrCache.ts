@@ -322,8 +322,13 @@ export function useSwrData<T>(
     if (currentCached && Date.now() - currentCached.timestamp < ttl) {
       setData(currentCached.data);
       setLoading(false);
+      // Stale-While-Revalidate: If stale, revalidate asynchronously in background without blocking UI
+      const isStale = Date.now() - currentCached.timestamp >= staleTime;
+      if (isStale || forceRefresh) {
+        void executeFetch(forceRefresh);
+      }
     } else {
-      executeFetch(forceRefresh);
+      void executeFetch(forceRefresh);
     }
 
     // Subscribe to external mutations or background syncs

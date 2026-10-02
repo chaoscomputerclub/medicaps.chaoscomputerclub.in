@@ -78,124 +78,17 @@ export const defaultCampusPass: CampusPass = {
   status: "expired",
 };
 
-// In-memory memoization caches
-let fullProfilePromise: Promise<FullProfilePayload> | null = null;
-let fullProfileCache: { data: FullProfilePayload; timestamp: number } | null = null;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 let publicRecordsPromise: Promise<any> | null = null;
 let publicRecordsCache: { data: any; timestamp: number } | null = null;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Canonical Member Profile Query — delegates directly to the unified SWR store
+ * under the authoritative "member:profile:full" cache key.
+ */
 export async function fetchFullProfileData(force = false): Promise<FullProfilePayload> {
-  if (typeof window !== "undefined") {
-    if (force) {
-      fullProfileCache = null;
-      fullProfilePromise = null;
-    }
-
-    // 1. Check in-memory memoized cache
-    if (!force && fullProfileCache && Date.now() - fullProfileCache.timestamp < CACHE_TTL) {
-      return fullProfileCache.data;
-    }
-
-    // 2. Reuse in-flight promise to eliminate duplicate parallel fetches
-    if (!force && fullProfilePromise) {
-      return fullProfilePromise;
-    }
-
-    const token = getToken();
-    if (!token) {
-      return {
-        member: defaultMemberProfile,
-        ratingHistory: [],
-        recentBattles: [],
-        campusPass: defaultCampusPass,
-        proofs: [],
-        achievements: [],
-      };
-    }
-
-    const apiBase = getApiBase();
-    fullProfilePromise = (async () => {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
-      try {
-        const res = await fetch(`${apiBase}/auth/profile/full`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        if (res.ok) {
-          const data = await res.json();
-          const payload: FullProfilePayload = {
-            member: { ...defaultMemberProfile, ...(data.member || {}) },
-            ratingHistory: Array.isArray(data.ratingHistory) ? data.ratingHistory : [],
-            recentBattles: Array.isArray(data.recentBattles) ? data.recentBattles : [],
-            campusPass: data.campusPass || defaultCampusPass,
-            proofs: Array.isArray(data.proofs) ? data.proofs : [],
-            achievements: Array.isArray(data.achievements) ? data.achievements : [],
-          };
-          fullProfileCache = { data: payload, timestamp: Date.now() };
-          return payload;
-        }
-        if (res.status === 401) {
-          const refreshed = await silentRefreshToken();
-          if (refreshed) {
-            const retryToken = getToken();
-            const retryRes = await fetch(`${apiBase}/auth/me`, {
-              headers: {
-                Authorization: `Bearer ${retryToken}`,
-                "Content-Type": "application/json",
-              },
-              credentials: "include",
-            });
-            if (retryRes.ok) {
-              const retryData = await retryRes.json();
-              const payload: FullProfilePayload = {
-                member: { ...defaultMemberProfile, ...(retryData.member || {}) },
-                ratingHistory: Array.isArray(retryData.ratingHistory) ? retryData.ratingHistory : [],
-                recentBattles: Array.isArray(retryData.recentBattles) ? retryData.recentBattles : [],
-                campusPass: retryData.campusPass || defaultCampusPass,
-                proofs: Array.isArray(retryData.proofs) ? retryData.proofs : [],
-                achievements: Array.isArray(retryData.achievements) ? retryData.achievements : [],
-              };
-              fullProfileCache = { data: payload, timestamp: Date.now() };
-              return payload;
-            }
-          }
-        }
-      } catch {
-        // Fallback on network failure without destroying session
-      } finally {
-        fullProfilePromise = null;
-      }
-
-      return {
-        member: defaultMemberProfile,
-        ratingHistory: [],
-        recentBattles: [],
-        campusPass: defaultCampusPass,
-        proofs: [],
-        achievements: [],
-      };
-    })();
-
-    return fullProfilePromise;
-  }
-
-  // During SSR, return safe defaults without throwing
-  return {
-    member: defaultMemberProfile,
-    ratingHistory: [],
-    recentBattles: [],
-    campusPass: defaultCampusPass,
-    proofs: [],
-    achievements: [],
-  };
+  const data = await getMemberProfileData(force);
+  return data as unknown as FullProfilePayload;
 }
 
 /**
@@ -415,8 +308,6 @@ export const portalQueries = {
 };
 
 export function invalidateFullProfileCache(): void {
-  fullProfileCache = null;
-  fullProfilePromise = null;
   invalidateSwrCache("member:profile:*");
   invalidateSwrCache("student:profile:*");
   invalidateSwrCache("leaderboard:*");

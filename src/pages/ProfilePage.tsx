@@ -47,6 +47,7 @@ import {
 import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
+import { markNavigationMount, markNavigationContentReady } from "@/lib/navigationTelemetry";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -90,8 +91,8 @@ export function ProfilePage() {
     mutate: mutateOwnProfile,
   } = useSwrData(
     isViewingSelf && isAuthenticated() ? "member:profile:full" : null,
-    () => getMemberProfileData(true),
-    { ttl: 2 * 60 * 1000, enabled: isViewingSelf && isAuthenticated() },
+    () => getMemberProfileData(false),
+    { ttl: 5 * 60 * 1000, staleTime: 30 * 1000, enabled: isViewingSelf && isAuthenticated() },
   );
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -237,7 +238,15 @@ export function ProfilePage() {
     currentMember?.following_count,
   ]);
 
-  if (isLoading || (!m && (ownLoading || studentLoading))) {
+  useEffect(() => {
+    markNavigationMount(
+      window.location.pathname,
+      ownProfileData || studentProfileData ? "hit" : (m ? "stale" : "miss")
+    );
+    markNavigationContentReady(window.location.pathname);
+  }, [ownProfileData, studentProfileData, m]);
+
+  if (!m && (isLoading || ownLoading || studentLoading)) {
     return <ProfileSkeleton />;
   }
 
@@ -645,7 +654,7 @@ export function ProfilePage() {
             index="TRAJECTORY"
             title="Competitive Trajectory"
           />
-          <RatingChart data={history} />
+          <RatingChart data={history} loading={isLoading && history.length === 0} />
         </div>
         <div>
           <RatingDistributionCard
