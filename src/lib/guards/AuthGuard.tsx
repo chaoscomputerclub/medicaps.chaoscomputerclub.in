@@ -62,7 +62,7 @@ export function AuthGuard() {
 
   if (authStatus === "checking") {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center select-none">
         <GlobalLoader text="Loading" size="large" />
       </div>
     );
@@ -119,7 +119,7 @@ export function GuestGuard() {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center select-none">
         <GlobalLoader text="Loading" size="large" />
       </div>
     );

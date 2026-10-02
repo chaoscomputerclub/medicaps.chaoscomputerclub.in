@@ -15,47 +15,46 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+const SIZE_CONFIGS: Record<
+  NonNullable<WanderingEyesProps["size"]>,
+  { eye: string; gap: string; heightClass: string }
+> = {
+  inline: { eye: "10px", gap: "2px", heightClass: "h-3" },
+  sm: { eye: "13px", gap: "2.5px", heightClass: "h-4" },
+  default: { eye: "20px", gap: "3.5px", heightClass: "h-6" },
+  md: { eye: "20px", gap: "3.5px", heightClass: "h-6" },
+  modal: { eye: "32px", gap: "6px", heightClass: "h-8" },
+  large: { eye: "52px", gap: "9px", heightClass: "h-[52px]" },
+  lg: { eye: "52px", gap: "9px", heightClass: "h-[52px]" },
+  xl: { eye: "52px", gap: "9px", heightClass: "h-[52px]" },
+};
+
 function WanderingEyes({
   className,
   style,
   eyeScale,
-  gapScale = 0.09,
+  gapScale,
   pupilScale = 0.32,
   blinkScale = 0.375,
   travelScale = 0.3125,
   size = "default",
   ...props
 }: WanderingEyesProps) {
-  // Calibrated size presets per Section 8 of loading state architecture
-  const resolvedEyeScale =
-    eyeScale ??
-    (size === "inline" || size === "sm"
-      ? 0.35
-      : size === "xl"
-        ? 0.68
-        : size === "modal" || size === "large" || size === "lg"
-          ? 0.65
-          : 0.62);
+  // Calibrated size presets matching pre-hydration shell and tactical density
+  const config = SIZE_CONFIGS[size] ?? SIZE_CONFIGS.default;
 
-  const defaultHeightClass =
-    size === "inline" || size === "sm"
-      ? "h-4"
-      : size === "xl"
-        ? "h-14"
-        : size === "modal" || size === "large" || size === "lg"
-          ? "h-12"
-          : "h-[1.25em]";
+  const resolvedEye = eyeScale ? `${(eyeScale * 52).toFixed(1)}px` : config.eye;
+  const resolvedGap = gapScale !== undefined ? `${(gapScale * 100).toFixed(1)}px` : config.gap;
 
-  const safeEyeScale = clamp(resolvedEyeScale, 0.28, 0.7);
-  const safeGapScale = clamp(gapScale, 0.04, 0.3);
   const safePupilScale = clamp(pupilScale, 0.12, 0.45);
   const safeBlinkScale = clamp(blinkScale, 0.15, 1);
   const safeTravelScale = clamp(travelScale, 0.08, 0.5);
 
   const eyesStyle = {
+    height: style?.height ?? config.eye,
     ...style,
-    "--loading-ui-wandering-eyes-eye": `${(safeEyeScale * 100).toFixed(2)}cqmin`,
-    "--loading-ui-wandering-eyes-gap": `${(safeGapScale * 100).toFixed(2)}cqmin`,
+    "--loading-ui-wandering-eyes-eye": resolvedEye,
+    "--loading-ui-wandering-eyes-gap": resolvedGap,
     "--loading-ui-wandering-eyes-pupil-scale": `${safePupilScale}`,
     "--loading-ui-wandering-eyes-blink": `${safeBlinkScale}`,
     "--loading-ui-wandering-eyes-travel-scale": `${safeTravelScale}`,
@@ -130,8 +129,8 @@ function WanderingEyes({
       <span
         role="status"
         className={cn(
-          "@container-[size] [container-type:size] relative inline-flex aspect-9/4 items-center justify-center align-middle shrink-0 [--eye-color:color-mix(in_srgb,currentColor_16%,transparent)] [--pupil-color:currentColor]",
-          defaultHeightClass,
+          "relative inline-flex aspect-9/4 items-center justify-center align-middle shrink-0 [--eye-color:color-mix(in_srgb,currentColor_16%,transparent)] [--pupil-color:currentColor]",
+          config.heightClass,
           className,
         )}
         style={eyesStyle}
@@ -139,7 +138,8 @@ function WanderingEyes({
       >
         <span
           aria-hidden="true"
-          className="inline-flex items-center justify-center gap-(--loading-ui-wandering-eyes-gap)"
+          className="inline-flex items-center justify-center"
+          style={{ gap: "var(--loading-ui-wandering-eyes-gap)" }}
         >
           {Array.from({ length: 2 }, (_, index) => (
             <span
@@ -148,9 +148,9 @@ function WanderingEyes({
               style={{
                 width: "var(--loading-ui-wandering-eyes-eye)",
                 height: "var(--loading-ui-wandering-eyes-eye)",
-                backgroundColor: "var(--eye-color)",
+                backgroundColor: "var(--eye-color, rgba(255,255,255,0.16))",
                 backgroundImage:
-                  "radial-gradient(circle calc(var(--loading-ui-wandering-eyes-eye) * var(--loading-ui-wandering-eyes-pupil-scale)), var(--pupil-color) 100%, transparent 0)",
+                  "radial-gradient(circle calc(var(--loading-ui-wandering-eyes-eye) * var(--loading-ui-wandering-eyes-pupil-scale)), var(--pupil-color, #ffffff) 100%, transparent 0)",
                 backgroundRepeat: "no-repeat",
                 animation:
                   "loading-ui-wandering-eyes-move var(--duration, 10s) infinite, loading-ui-wandering-eyes-blink var(--duration, 10s) infinite",
@@ -171,10 +171,10 @@ export function GlobalLoader({
   ...props
 }: WanderingEyesProps & { text?: string }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-4", className)}>
+    <div className={cn("flex flex-col items-center justify-center select-none", className)}>
       <WanderingEyes size={size} className="text-white" {...props} />
       {text && (
-        <TextShimmer className="text-xs font-mono tracking-widest text-white uppercase">
+        <TextShimmer className="mt-5 text-[11px] font-mono tracking-[0.25em] text-white uppercase">
           {text}
         </TextShimmer>
       )}
