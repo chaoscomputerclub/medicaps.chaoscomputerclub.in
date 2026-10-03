@@ -102,6 +102,11 @@ class DistributedFabricProvider(JudgeProvider):
                 "expected_output": clean_exp,
             })
 
+        from app.engine.languages import LanguageRegistry
+        import hashlib
+        config = LanguageRegistry.get_config(lang_str)
+        source_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
+
         job_payload = {
             "id": job_id,
             "status": "QUEUED",
@@ -109,20 +114,30 @@ class DistributedFabricProvider(JudgeProvider):
             "created_at": datetime.now(timezone.utc).isoformat(),
             "payload": {
                 "language": lang_str,
+                "language_id": config.language_id,
+                "execution_mode": config.family.value,
+                "compile_required": config.requires_compile,
+                "compile_timeout": 10.0,
+                "execution_timeout": float(time_limit),
+                "source_hash": source_hash,
+                "toolchain_hash": config.compiler_version or "default",
                 "code": code,
                 "time_limit_ms": float(time_limit * 1000.0),
                 "memory_limit_mb": int(memory_limit_mb),
+                "cpu_limit": 1.0,
+                "testcase_count": len(serialized_tcs),
                 "testcases": serialized_tcs,
             },
         }
 
-        # 1. Enqueue job into distributed fabric queue
+        # 1. Enqueue job into distributed fabric queue and language-partitioned queue
         await redis.set(f"ccc:job:{job_id}", json.dumps(job_payload), ex=86400)
+        await redis.rpush(f"ccc:queue:fabric:pending:{lang_str}", job_id)
         await redis.rpush("ccc:queue:fabric:pending", job_id)
 
         logger.info(
-            "⚡ [Fabric] Job %s enqueued to distributed queue (Active Nodes: %s, Lang: %s, Testcases: %d)",
-            job_id, ", ".join(online_nodes), lang_str, len(serialized_tcs)
+            "⚡ [Fabric] Job %s (mode=%s, compile=%s) enqueued to distributed queue (Active Nodes: %s, Lang: %s, Testcases: %d)",
+            job_id, config.family.value, config.requires_compile, ", ".join(online_nodes), lang_str, len(serialized_tcs)
         )
 
         # 2. Await remote node execution via Redis Pub/Sub event with Authoritative Fallback

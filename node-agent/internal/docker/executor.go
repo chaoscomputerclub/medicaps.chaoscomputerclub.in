@@ -65,6 +65,13 @@ var languageSpecs = map[string]LanguageSpec{
 		RunCmd:         []string{"./solution"},
 		NeedsCompile:   true,
 	},
+	"rust": {
+		Image:          "rust:alpine",
+		SourceFileName: "solution.rs",
+		CompileCmd:     []string{"rustc", "-O", "-o", "solution", "solution.rs"},
+		RunCmd:         []string{"./solution"},
+		NeedsCompile:   true,
+	},
 }
 
 // Executor manages sandboxed execution in isolated ephemeral containers.

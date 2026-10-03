@@ -41,7 +41,20 @@ class ExecutionObservability:
             "codebox_fallback_rejected": 0,
             "distributed_execution_total": 0,
             "fallback_execution_total": 0,
+            # Prometheus language-aware execution metrics
+            "ccc_compile_total": 0,
+            "ccc_compile_duration_seconds": 0.0,
+            "ccc_compile_failures_total": 0,
+            "ccc_compile_cache_hits_total": 0,
+            "ccc_compile_cache_misses_total": 0,
+            "ccc_execution_total": 0,
+            "ccc_execution_duration_seconds": 0.0,
+            "ccc_testcase_duration_seconds": 0.0,
+            "ccc_judge_system_errors_total": 0,
+            "ccc_judge_timeouts_total": 0,
+            "ccc_judge_memory_errors_total": 0,
         }
+        self.labeled_metrics: Dict[str, float] = {}
 
     @classmethod
     def get_instance(cls) -> "ExecutionObservability":
@@ -64,6 +77,45 @@ class ExecutionObservability:
             await redis.incrby(f"ccc:metrics:{name}", increment)
         except Exception:
             pass
+
+    def record_compilation(self, language: str, duration_seconds: float, success: bool, cached: bool) -> None:
+        """Record bounded Prometheus compile telemetry."""
+        lang = str(language).lower()
+        self.record_counter("ccc_compile_total", 1.0)
+        self.record_counter("ccc_compile_duration_seconds", duration_seconds)
+        if cached:
+            self.record_counter("ccc_compile_cache_hits_total", 1.0)
+        else:
+            self.record_counter("ccc_compile_cache_misses_total", 1.0)
+        if not success:
+            self.record_counter("ccc_compile_failures_total", 1.0)
+
+        # Labeled metric keys
+        k_tot = f"ccc_compile_total{{language=\"{lang}\"}}"
+        k_dur = f"ccc_compile_duration_seconds{{language=\"{lang}\"}}"
+        self.labeled_metrics[k_tot] = self.labeled_metrics.get(k_tot, 0.0) + 1.0
+        self.labeled_metrics[k_dur] = self.labeled_metrics.get(k_dur, 0.0) + duration_seconds
+
+    def record_testcase_execution(self, language: str, execution_mode: str, duration_seconds: float, verdict: str) -> None:
+        """Record bounded Prometheus testcase execution telemetry."""
+        lang = str(language).lower()
+        mode = str(execution_mode).lower()
+        v_class = str(verdict).upper()
+        self.record_counter("ccc_execution_total", 1.0)
+        self.record_counter("ccc_execution_duration_seconds", duration_seconds)
+        self.record_counter("ccc_testcase_duration_seconds", duration_seconds)
+
+        if v_class == "TIME_LIMIT_EXCEEDED":
+            self.record_counter("ccc_judge_timeouts_total", 1.0)
+        elif v_class == "MEMORY_LIMIT_EXCEEDED":
+            self.record_counter("ccc_judge_memory_errors_total", 1.0)
+        elif v_class == "SYSTEM_ERROR":
+            self.record_counter("ccc_judge_system_errors_total", 1.0)
+
+        k_tot = f"ccc_execution_total{{language=\"{lang}\",execution_mode=\"{mode}\",result_class=\"{v_class}\"}}"
+        k_dur = f"ccc_execution_duration_seconds{{language=\"{lang}\",execution_mode=\"{mode}\"}}"
+        self.labeled_metrics[k_tot] = self.labeled_metrics.get(k_tot, 0.0) + 1.0
+        self.labeled_metrics[k_dur] = self.labeled_metrics.get(k_dur, 0.0) + duration_seconds
 
     @staticmethod
     def create_decision_record(

@@ -97,6 +97,24 @@ class ExecutionDeadlineTracker:
         usable_remaining = max(0.1, remaining - 0.2)
         return min(configured_stage_timeout_s, usable_remaining)
 
+    def compile_budget(self, configured_compile_timeout_s: float) -> float:
+        """
+        Calculates maximum allowed timeout for compilation stage.
+        Bounded strictly by configured compile timeout AND remaining dominant submission deadline.
+        Compilation budget NEVER consumes the testcase execution budget.
+        """
+        self.check_deadline(stage="compile")
+        return self.stage_budget(configured_compile_timeout_s)
+
+    def testcase_budget(self, configured_testcase_timeout_s: float) -> float:
+        """
+        Calculates maximum allowed timeout for an individual testcase.
+        Bounded strictly by configured testcase timeout AND remaining dominant submission deadline.
+        Testcase execution NEVER inherits an exhausted compile timeout.
+        """
+        self.check_deadline(stage="testcase")
+        return self.stage_budget(configured_testcase_timeout_s)
+
     def total_elapsed_ms(self) -> float:
         """Total elapsed milliseconds from the start of this tracker."""
         return (time.monotonic() - self.start_monotonic) * 1000.0

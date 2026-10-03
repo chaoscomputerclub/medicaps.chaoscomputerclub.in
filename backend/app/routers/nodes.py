@@ -160,6 +160,7 @@ async def register_node(
         "cpu_cores": payload.cpu.physical_cores,
         "cpu_threads": payload.cpu.logical_cores,
         "cpu_model": payload.cpu.model,
+        "architecture": payload.cpu.architecture,
         "memory_mb": payload.memory.total_mb,
         "max_concurrency": payload.max_concurrency,
         "api_capacity": payload.api_capacity,
@@ -339,13 +340,24 @@ async def claim_job(
         return {"job": None}
 
     job_dict = json.loads(raw_job)
-    job_lang = str(job_dict.get("payload", {}).get("language", "")).lower()
+    payload_data = job_dict.get("payload", {})
+    job_lang = str(payload_data.get("language", "")).lower()
 
     # Capability verification: ensure this node can execute the job's language
     if node_langs and job_lang and job_lang not in node_langs:
         logger.info("Capability mismatch: job %s (lang=%s) not supported by node %s. Requeuing.", job_id, job_lang, node_id)
         await redis.lrem(processing_queue, 1, job_id)
         await redis.rpush(f"ccc:queue:fabric:pending:{job_lang}", job_id)
+        return {"job": None}
+
+    # Architecture verification: ensure node architecture matches if job requires specific architecture
+    req_arch = payload_data.get("required_architecture")
+    raw_node_arch = node_info.get(b"architecture") or node_info.get("architecture")
+    node_arch = (raw_node_arch.decode() if isinstance(raw_node_arch, bytes) else str(raw_node_arch or "")).lower()
+    if req_arch and node_arch and req_arch.lower() not in node_arch:
+        logger.info("Architecture mismatch: job %s (req_arch=%s) incompatible with node %s (arch=%s). Requeuing.", job_id, req_arch, node_id, node_arch)
+        await redis.lrem(processing_queue, 1, job_id)
+        await redis.rpush("ccc:queue:fabric:pending", job_id)
         return {"job": None}
 
     # Bounded slots: decrement available slots and track running jobs
@@ -745,3 +757,29 @@ async def dispatch_test_job(payload: DispatchTestRequest) -> Dict[str, Any]:
             for t in res.testcase_results
         ],
     }
+
+
+class NodeSelfTestPayload(BaseModel):
+    tested_languages: Dict[str, bool]
+    passed: bool
+    details: Optional[str] = None
+
+
+@router.post("/{node_id}/self-test")
+async def node_self_test(
+    node_id: str,
+    payload: NodeSelfTestPayload,
+    _: None = Depends(_require_node_auth),
+) -> Dict[str, Any]:
+    """Record node self-test results and update node ready state."""
+    redis = get_redis()
+    await redis.hset(
+        f"ccc:node:{node_id}:info",
+        mapping={
+            "self_test_passed": "true" if payload.passed else "false",
+            "self_test_results": json.dumps(payload.tested_languages),
+            "status": "ready" if payload.passed else "degraded",
+        },
+    )
+    logger.info("Node %s self-test reported: passed=%s (details: %s)", node_id, payload.passed, payload.details)
+    return {"status": "recorded", "node_id": node_id, "ready": payload.passed}
