@@ -423,8 +423,9 @@ class ExecutionRouter:
                     result_normalization_ms = getattr(exec_result, "result_normalization_ms", 0.0) or 0.0
 
                     t_rep_start = time.perf_counter()
+                    _ = exec_result.model_dump() if hasattr(exec_result, "model_dump") else {}
                     t_rep_end = time.perf_counter()
-                    measured_rep_ms = max(0.5, (t_rep_end - t_rep_start) * 1000.0)
+                    measured_rep_ms = max(0.1, (t_rep_end - t_rep_start) * 1000.0)
 
                     c_timestamps, c_latencies = build_consistent_telemetry(
                         t_enqueue=job.queued_at,
@@ -590,8 +591,9 @@ class ExecutionRouter:
                     result_normalization_ms = getattr(exec_result, "result_normalization_ms", 0.0) or 0.0
 
                     t_rep_start = time.perf_counter()
+                    _ = exec_result.model_dump() if hasattr(exec_result, "model_dump") else {}
                     t_rep_end = time.perf_counter()
-                    measured_rep_ms = max(0.5, (t_rep_end - t_rep_start) * 1000.0)
+                    measured_rep_ms = max(0.1, (t_rep_end - t_rep_start) * 1000.0)
 
                     c_timestamps, c_latencies = build_consistent_telemetry(
                         t_enqueue=job.queued_at,
@@ -683,8 +685,9 @@ class ExecutionRouter:
         result_normalization_ms = getattr(exec_result, "result_normalization_ms", 0.0) or 0.0
 
         t_rep_start = time.perf_counter()
+        _ = exec_result.model_dump() if hasattr(exec_result, "model_dump") else {}
         t_rep_end = time.perf_counter()
-        measured_rep_ms = max(0.5, (t_rep_end - t_rep_start) * 1000.0)
+        measured_rep_ms = max(0.1, (t_rep_end - t_rep_start) * 1000.0)
 
         c_timestamps, c_latencies = build_consistent_telemetry(
             t_enqueue=job.queued_at,

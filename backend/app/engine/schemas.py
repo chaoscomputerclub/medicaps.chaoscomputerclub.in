@@ -87,6 +87,7 @@ class TestCaseResult(BaseModel):
     peak_memory_mb: float = 0.0
     exit_code: int = 0
     weight: float = 1.0
+    wall_time_fallback: bool = False
 
 
 class ScoringResult(BaseModel):

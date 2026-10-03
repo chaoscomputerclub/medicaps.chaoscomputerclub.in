@@ -187,12 +187,16 @@ class InterpretedExecutionStrategy(ExecutionStrategy):
         artifact: ExecutionArtifact,
         stdin_data: str,
         limits: ExecutionLimits,
+        run_dir: Optional[Path] = None,
     ) -> TestcaseExecutionResult:
         """
         Execute single testcase in a clean, fresh interpreter process (MODE A).
+        Isolates execution inside per-testcase run_dir when provided.
         """
         source_file = workspace / "source" / self.config.filename
         cmd = [self.config.runtime, *self.config.runtime_arguments, str(source_file)]
+        effective_cwd = run_dir if run_dir is not None else (workspace / "source")
+        effective_cwd.mkdir(parents=True, exist_ok=True)
         start_time = time.monotonic()
         timed_out = False
         oom_killed = False
@@ -202,7 +206,7 @@ class InterpretedExecutionStrategy(ExecutionStrategy):
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
-                cwd=str(workspace / "source"),
+                cwd=str(effective_cwd),
                 env=_clean_env(workspace),
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,

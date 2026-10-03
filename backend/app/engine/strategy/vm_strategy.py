@@ -238,11 +238,15 @@ class VMExecutionStrategy(ExecutionStrategy):
         artifact: ExecutionArtifact,
         stdin_data: str,
         limits: ExecutionLimits,
+        run_dir: Optional[Path] = None,
     ) -> TestcaseExecutionResult:
         """
         Execute single testcase in a clean JVM process (MODE A).
+        Isolates execution inside per-testcase run_dir when provided.
         """
         build_dir = workspace / "build"
+        effective_cwd = run_dir if run_dir is not None else build_dir
+        effective_cwd.mkdir(parents=True, exist_ok=True)
         cmd = [self.config.runtime, *self.config.runtime_arguments, "-cp", str(build_dir), "Main"]
         start_time = time.monotonic()
         timed_out = False
@@ -253,7 +257,7 @@ class VMExecutionStrategy(ExecutionStrategy):
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
-                cwd=str(build_dir),
+                cwd=str(effective_cwd),
                 env=_clean_env(workspace),
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,

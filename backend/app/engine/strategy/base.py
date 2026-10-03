@@ -166,6 +166,7 @@ class ExecutionStrategy(ABC):
         artifact: ExecutionArtifact,
         stdin_data: str,
         limits: ExecutionLimits,
+        run_dir: Optional[Path] = None,
     ) -> TestcaseExecutionResult:
         """Execute single testcase against the prepared/compiled artifact."""
         pass

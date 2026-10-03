@@ -58,6 +58,42 @@ class LanguageAwareExecutionEngine:
         self.obs = ExecutionObservability.get_instance()
 
 
+    @staticmethod
+    def resolve_testcase_concurrency(
+        family: LanguageFamily,
+        testcase_count: int,
+        memory_limit_mb: int = 256,
+    ) -> int:
+        """
+        Derives capacity-aware, bounded testcase execution concurrency:
+        - Respects settings.MAX_TESTCASE_CONCURRENCY (default 4)
+        - Respects available system CPU cores
+        - Considers language execution characteristics:
+            - VM (Java): JVM heap and metaspace footprint bounded to <= 2
+            - COMPILED (C, C++, Rust, Go): binary already compiled, bounded to <= 4
+            - INTERPRETED (Python, Node): fresh process bounded to <= 4
+        - Heavy memory limits (> 512MB) scale down concurrency to prevent OOM
+        - Never exceeds testcase count
+        """
+        if testcase_count <= 1:
+            return 1
+
+        configured = getattr(settings, "MAX_TESTCASE_CONCURRENCY", 4)
+        import os
+        cpu_cores = os.cpu_count() or 2
+
+        if family == LanguageFamily.VM:
+            lang_bound = 2
+        elif family == LanguageFamily.COMPILED:
+            lang_bound = 4
+        else:
+            lang_bound = 4
+
+        if memory_limit_mb > 512:
+            lang_bound = min(lang_bound, 2)
+
+        return max(1, min(configured, cpu_cores, lang_bound, testcase_count))
+
     async def execute(
         self,
         language: str | Language,
@@ -256,102 +292,130 @@ class LanguageAwareExecutionEngine:
             if not artifact:
                 raise RuntimeError("Failed to resolve valid ExecutionArtifact for execution stage.")
 
-            # 7. Testcase Execution Stage: execute testcases sequentially (MODE A: process per testcase)
-            testcase_results: list[TestCaseResult] = []
-            total_exec_time_ms = 0.0
-            max_runtime_ms = 0.0
-            max_memory_mb = 0.0
-            passed_count = 0
-            dominant_verdict = Verdict.ACCEPTED
+            # 7. Testcase Execution Stage: capacity-aware bounded execution concurrency
+            concurrency = self.resolve_testcase_concurrency(
+                family=config.family,
+                testcase_count=len(testcases),
+                memory_limit_mb=int(e_limits.memory_bytes / (1024 * 1024)),
+            )
+            semaphore = asyncio.Semaphore(concurrency)
+            early_stop_event = asyncio.Event()
 
-            for idx, tc in enumerate(testcases):
-                # Check dominant job deadline
-                if tracker.is_expired():
-                    dominant_verdict = Verdict.TIME_LIMIT_EXCEEDED
-                    tc_res = TestCaseResult(
-                        testcase_id=tc.id,
-                        name=tc.name,
-                        hidden=tc.hidden,
-                        passed=False,
-                        verdict=Verdict.TIME_LIMIT_EXCEEDED,
-                        stderr="Execution budget exceeded dominant job deadline.",
-                        compile_output=comp_res.stdout,
-                        wall_time_ms=0.0,
-                        peak_memory_mb=0.0,
-                        weight=tc.weight,
+            t_exec_start = time.monotonic()
+
+            async def _run_single_tc(idx: int, tc: TestCaseSchema) -> tuple[int, TestCaseResult, float, float]:
+                async with semaphore:
+                    if early_stop_event.is_set() or tracker.is_expired():
+                        verdict = Verdict.TIME_LIMIT_EXCEEDED if tracker.is_expired() else Verdict.INTERNAL_ERROR
+                        msg = "Execution budget exceeded dominant job deadline." if tracker.is_expired() else "Execution aborted: earlier failure triggered early-stop."
+                        tc_res = TestCaseResult(
+                            testcase_id=tc.id,
+                            name=tc.name,
+                            hidden=tc.hidden,
+                            passed=False,
+                            verdict=verdict,
+                            stderr=msg,
+                            compile_output=comp_res.stdout,
+                            wall_time_ms=0.0,
+                            peak_memory_mb=0.0,
+                            weight=tc.weight,
+                        )
+                        return idx, tc_res, 0.0, 0.0
+
+                    tc_time_limit = tc.time_limit or e_limits.timeout
+                    tc_mem_limit = tc.memory_limit or int(e_limits.memory_bytes / (1024 * 1024))
+
+                    try:
+                        bounded_tc_timeout = tracker.testcase_budget(tc_time_limit)
+                    except Exception as b_err:
+                        tc_res = TestCaseResult(
+                            testcase_id=tc.id,
+                            name=tc.name,
+                            hidden=tc.hidden,
+                            passed=False,
+                            verdict=Verdict.TIME_LIMIT_EXCEEDED,
+                            stderr=str(b_err),
+                            compile_output=comp_res.stdout,
+                            wall_time_ms=0.0,
+                            peak_memory_mb=0.0,
+                            weight=tc.weight,
+                        )
+                        return idx, tc_res, 0.0, 0.0
+
+                    tc_exec_limits = ExecutionLimits(
+                        timeout=bounded_tc_timeout,
+                        cpu=e_limits.cpu,
+                        memory_bytes=tc_mem_limit * 1024 * 1024,
+                        process_count=e_limits.process_count,
+                        output_limit_bytes=e_limits.output_limit_bytes,
                     )
-                    testcase_results.append(tc_res)
-                    break
 
-                tc_time_limit = tc.time_limit or e_limits.timeout
-                tc_mem_limit = tc.memory_limit or int(e_limits.memory_bytes / (1024 * 1024))
+                    # Distinct isolated working directory per testcase
+                    tc_run_dir = workspace / "runs" / f"tc_{idx}"
+                    tc_run_dir.mkdir(parents=True, exist_ok=True)
 
-                # Calculate bounded timeout for this testcase
-                bounded_tc_timeout = tracker.testcase_budget(tc_time_limit)
-                tc_exec_limits = ExecutionLimits(
-                    timeout=bounded_tc_timeout,
-                    cpu=e_limits.cpu,
-                    memory_bytes=tc_mem_limit * 1024 * 1024,
-                    process_count=e_limits.process_count,
-                    output_limit_bytes=e_limits.output_limit_bytes,
-                )
+                    raw_stdin = tc.stdin if getattr(tc, "stdin", None) is not None else getattr(tc, "input", "")
+                    exec_res: TestcaseExecutionResult = await strategy.execute(
+                        workspace=workspace,
+                        artifact=artifact,
+                        stdin_data=raw_stdin or "",
+                        limits=tc_exec_limits,
+                        run_dir=tc_run_dir,
+                    )
 
-                # Execute in clean process
-                exec_start = time.monotonic()
-                raw_stdin = tc.stdin if getattr(tc, "stdin", None) is not None else getattr(tc, "input", "")
-                exec_res: TestcaseExecutionResult = await strategy.execute(
-                    workspace=workspace,
-                    artifact=artifact,
-                    stdin_data=raw_stdin or "",
-                    limits=tc_exec_limits,
-                )
-                exec_wall_ms = exec_res.wall_time_ms
-                total_exec_time_ms += exec_wall_ms
-                if exec_wall_ms > max_runtime_ms:
-                    max_runtime_ms = exec_wall_ms
+                    exec_wall_ms = exec_res.wall_time_ms
+                    peak_mb = round(exec_res.peak_memory_bytes / (1024.0 * 1024.0), 2)
 
-                peak_mb = round(exec_res.peak_memory_bytes / (1024.0 * 1024.0), 2)
-                if peak_mb > max_memory_mb:
-                    max_memory_mb = peak_mb
+                    sandbox_res = SandboxResult(
+                        stdout=exec_res.stdout,
+                        stderr=exec_res.stderr,
+                        exit_code=exec_res.exit_code,
+                        wall_time_ms=round(exec_wall_ms, 2),
+                        peak_memory_mb=peak_mb,
+                        timed_out=exec_res.timed_out,
+                        oom_killed=exec_res.oom_killed,
+                        output_limit_exceeded=exec_res.output_limit_exceeded,
+                        system_error=exec_res.system_error,
+                    )
 
-                # Convert to SandboxResult for unified scoring
-                sandbox_res = SandboxResult(
-                    stdout=exec_res.stdout,
-                    stderr=exec_res.stderr,
-                    exit_code=exec_res.exit_code,
-                    wall_time_ms=round(exec_wall_ms, 2),
-                    peak_memory_mb=peak_mb,
-                    timed_out=exec_res.timed_out,
-                    oom_killed=exec_res.oom_killed,
-                    output_limit_exceeded=exec_res.output_limit_exceeded,
-                    system_error=exec_res.system_error,
-                )
+                    tc_eval = JudgeEngine.evaluate(
+                        sandbox_result=sandbox_res,
+                        testcase=tc,
+                        compile_output=comp_res.stdout,
+                        compile_failed=False,
+                        comparison_mode=comparison_mode,
+                    )
 
-                tc_eval = JudgeEngine.evaluate(
-                    sandbox_result=sandbox_res,
-                    testcase=tc,
-                    compile_output=comp_res.stdout,
-                    compile_failed=False,
-                    comparison_mode=comparison_mode,
-                )
+                    self.obs.record_testcase_execution(
+                        language=config.language_id,
+                        execution_mode="process_per_testcase",
+                        duration_seconds=exec_wall_ms / 1000.0,
+                        verdict=tc_eval.verdict.value,
+                    )
 
-                testcase_results.append(tc_eval)
-                if tc_eval.passed:
-                    passed_count += 1
-                elif dominant_verdict == Verdict.ACCEPTED:
-                    dominant_verdict = tc_eval.verdict
+                    # Early termination trigger on fatal non-ACCEPTED verdict
+                    if not tc_eval.passed and (tc.hidden or idx >= 2):
+                        logger.debug("⚡ Early termination triggered on testcase %s (verdict=%s)", tc.id, tc_eval.verdict)
+                        early_stop_event.set()
 
-                self.obs.record_testcase_execution(
-                    language=config.language_id,
-                    execution_mode="process_per_testcase",
-                    duration_seconds=exec_wall_ms / 1000.0,
-                    verdict=tc_eval.verdict.value,
-                )
+                    return idx, tc_eval, exec_wall_ms, peak_mb
 
-                # Early termination on non-ACCEPTED verdict for hidden testcases
-                if not tc_eval.passed and (tc.hidden or idx >= 2):
-                    logger.debug("⚡ Early termination on testcase %s (verdict=%s)", tc.id, tc_eval.verdict)
-                    break
+            tasks = [_run_single_tc(idx, tc) for idx, tc in enumerate(testcases)]
+            run_outcomes = await asyncio.gather(*tasks)
+
+            # Sort strictly back into original testcase order
+            run_outcomes_sorted = sorted(run_outcomes, key=lambda x: x[0])
+            testcase_results = [item[1] for item in run_outcomes_sorted]
+
+            # Timing & verdict calculations
+            total_exec_time_ms = sum(item[2] for item in run_outcomes_sorted)
+            max_runtime_ms = max((item[2] for item in run_outcomes_sorted), default=0.0)
+            max_memory_mb = max((item[3] for item in run_outcomes_sorted), default=0.0)
+            stage_wall_ms = (time.monotonic() - t_exec_start) * 1000.0
+
+            passed_count = sum(1 for tr in testcase_results if tr.passed)
+            first_fail = next((tr for tr in testcase_results if not tr.passed), None)
+            dominant_verdict = first_fail.verdict if first_fail else Verdict.ACCEPTED
 
             # 8. Final Verdict Aggregation
             total_time_ms = (time.monotonic() - t_start) * 1000.0
@@ -378,10 +442,10 @@ class LanguageAwareExecutionEngine:
                 total_testcases=len(testcases),
                 score=round(score, 2),
                 compile_time_ms=round(compile_ms, 2),
-                execution_time_ms=round(total_exec_time_ms, 2),
+                execution_time_ms=round(stage_wall_ms, 2),
                 total_time_ms=round(total_time_ms, 2),
                 execution_cpu_ms=round(total_exec_time_ms, 2),
-                execution_wall_ms=round(total_exec_time_ms, 2),
+                execution_wall_ms=round(stage_wall_ms, 2),
                 provider_turnaround_ms=round(total_time_ms, 2),
 
                 latencies={
@@ -391,6 +455,8 @@ class LanguageAwareExecutionEngine:
                     "compile_ms": round(compile_ms, 2),
                     "artifact_cache_lookup_ms": round(cache_lookup_ms, 2),
                     "execution_ms": round(total_exec_time_ms, 2),
+                    "execution_wall_ms": round(stage_wall_ms, 2),
+                    "execution_concurrency": concurrency,
                     "total_ms": round(total_time_ms, 2),
                 },
                 telemetry={

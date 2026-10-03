@@ -273,12 +273,16 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
         artifact: ExecutionArtifact,
         stdin_data: str,
         limits: ExecutionLimits,
+        run_dir: Optional[Path] = None,
     ) -> TestcaseExecutionResult:
         """
         Execute single testcase in a clean process (MODE A) while reusing the compiled artifact.
+        Isolates execution inside per-testcase run_dir when provided.
         """
         build_binary = workspace / "build" / (self.config.binary_filename or "solution")
         exec_cmd = [str(build_binary)] if build_binary.exists() else (list(artifact.entry_command) or [str(artifact.path)])
+        effective_cwd = run_dir if run_dir is not None else (workspace / "build")
+        effective_cwd.mkdir(parents=True, exist_ok=True)
         start_time = time.monotonic()
         timed_out = False
         oom_killed = False
@@ -288,7 +292,7 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
         try:
             proc = await asyncio.create_subprocess_exec(
                 *exec_cmd,
-                cwd=str(workspace / "build"),
+                cwd=str(effective_cwd),
                 env=_clean_env(workspace),
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,

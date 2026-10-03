@@ -401,9 +401,10 @@ class CodeboxProvider(JudgeProvider):
         )
 
         # --- Stage 3: Normalise results (mirrors _execute_single_tc logic) ---
+        t_norm_start = time.perf_counter()
+        batch_turnaround_ms = (t_norm_start - t_submit_start) * 1000.0
         tc_results: list[TestCaseResult] = []
         for i, (tc, data) in enumerate(zip(testcases, results_data)):
-            tc_wall_ms = (time.perf_counter() - t_submit_start) * 1000.0
             if data is None:
                 # Timed out waiting for this TC
                 tc_results.append(TestCaseResult(
@@ -415,7 +416,7 @@ class CodeboxProvider(JudgeProvider):
                     expected_output="" if tc.hidden else (tc.expected_output or ""),
                     stderr="Batch polling timed out before this testcase completed.",
                     compile_output="",
-                    wall_time_ms=round(tc_wall_ms, 2),
+                    wall_time_ms=round(batch_turnaround_ms, 2),
                     runtime_ms=0.0,
                     cpu_time_ms=0.0,
                     peak_memory_mb=0.0,
@@ -423,8 +424,22 @@ class CodeboxProvider(JudgeProvider):
                     weight=tc.weight,
                     passed=False,
                     verdict=Verdict.INTERNAL_ERROR,
+                    wall_time_fallback=True,
                 ))
                 continue
+
+            # Preserves actual Codebox wall_time when reported, avoiding batch turnaround contamination
+            raw_wall = data.get("wall_time")
+            is_fallback_wall = False
+            if raw_wall is not None:
+                try:
+                    tc_wall_ms = float(raw_wall) * 1000.0
+                except (ValueError, TypeError):
+                    tc_wall_ms = batch_turnaround_ms
+                    is_fallback_wall = True
+            else:
+                tc_wall_ms = batch_turnaround_ms
+                is_fallback_wall = True
 
             status_id = int((data.get("status") or {}).get("id", 0))
             raw_verdict = STATUS_VERDICTS.get(status_id, Verdict.RUNTIME_ERROR)
@@ -486,8 +501,22 @@ class CodeboxProvider(JudgeProvider):
                 weight=tc.weight,
                 passed=passed,
                 verdict=final_verdict,
+                wall_time_fallback=is_fallback_wall,
             ))
 
+        t_norm_end = time.perf_counter()
+        norm_ms = (t_norm_end - t_norm_start) * 1000.0
+        self._last_batch_norm_ms = norm_ms
+        self._last_batch_meta = {
+            "provider_submit_start": t_submit_start,
+            "provider_submit_end": t_submit_done,
+            "provider_submit_ms": round(submit_ms, 2),
+            "provider_poll_start": t_poll_start,
+            "provider_poll_end": t_poll_start + (poll_wall_ms / 1000.0),
+            "provider_poll_count": poll_count,
+            "provider_turnaround_ms": round(batch_turnaround_ms, 2),
+            "batch_result_normalization_ms": round(norm_ms, 2),
+        }
         return tc_results
 
     async def _execute_single_tc(
@@ -582,7 +611,19 @@ class CodeboxProvider(JudgeProvider):
                 verdict=Verdict.INTERNAL_ERROR,
             )
 
-        tc_wall_ms = (time.perf_counter() - t0) * 1000.0
+        tc_turnaround_ms = (time.perf_counter() - t0) * 1000.0
+        raw_wall = data.get("wall_time")
+        is_fallback_wall = False
+        if raw_wall is not None:
+            try:
+                tc_wall_ms = float(raw_wall) * 1000.0
+            except (ValueError, TypeError):
+                tc_wall_ms = tc_turnaround_ms
+                is_fallback_wall = True
+        else:
+            tc_wall_ms = tc_turnaround_ms
+            is_fallback_wall = True
+
         status_id = int((data.get("status") or {}).get("id", 0))
         raw_verdict = STATUS_VERDICTS.get(status_id, Verdict.RUNTIME_ERROR)
         stdout = data.get("stdout") or ""
@@ -638,7 +679,7 @@ class CodeboxProvider(JudgeProvider):
             expected_output=tc.expected_output or "",
             stderr=stderr,
             compile_output=compile_out,
-            wall_time_ms=round(tc_wall_ms, 2),  # Actual measured HTTP/polling turnaround
+            wall_time_ms=round(tc_wall_ms, 2),  # Actual measured testcase execution wall-clock time
             runtime_ms=round(cpu_time_ms, 2),   # CPU / sandbox process runtime
             cpu_time_ms=round(cpu_time_ms, 2),  # Explicit sandbox CPU runtime
             peak_memory_mb=mem_mb,
@@ -646,6 +687,7 @@ class CodeboxProvider(JudgeProvider):
             weight=tc.weight,
             passed=passed,
             verdict=final_verdict,
+            wall_time_fallback=is_fallback_wall,
         )
 
 
@@ -930,7 +972,10 @@ class CodeboxProvider(JudgeProvider):
 
         score = (passed_count / max(1, total_count)) * 100.0
 
-        return ExecutionResult(
+        batch_meta = getattr(self, "_last_batch_meta", None)
+        norm_ms = float(batch_meta.get("batch_result_normalization_ms", 0.0)) if batch_meta else 0.0
+
+        exec_res = ExecutionResult(
             success=passed_count == total_count,
             submission_id=submission_id,
             status=ExecutionStatus.COMPLETED,
@@ -951,6 +996,13 @@ class CodeboxProvider(JudgeProvider):
             execution_cpu_ms=round(total_cpu_time_ms, 2),
             execution_wall_ms=round(batch_wall_ms, 2),
             provider_turnaround_ms=round(batch_wall_ms, 2),
+            result_normalization_ms=round(norm_ms, 2),
             completed_at=datetime.now(timezone.utc),
         )
+        if batch_meta:
+            exec_res.telemetry.update(batch_meta)
+            for k in ("provider_submit_ms", "provider_turnaround_ms", "batch_result_normalization_ms"):
+                if k in batch_meta:
+                    exec_res.latencies[k] = batch_meta[k]
+        return exec_res
 
