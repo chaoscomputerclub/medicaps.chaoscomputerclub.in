@@ -21,12 +21,19 @@ logger = logging.getLogger("ccc.judge.local")
 class LocalSandboxProvider(JudgeProvider):
     name = "local"
 
+    async def healthy(self) -> bool:
+        """
+        Local host execution is only supported and healthy when ALLOW_UNSANDBOXED_EXECUTION
+        is explicitly permitted by security configuration.
+        """
+        return bool(settings.ALLOW_UNSANDBOXED_EXECUTION)
+
     @property
     def capabilities(self) -> ProviderCapabilities:
         return ProviderCapabilities(
             languages=["python", "javascript", "cpp", "c", "java", "rust", "go", "typescript"],
             compile_support=True,
-            sandbox_support=True,
+            sandbox_support=bool(settings.ALLOW_UNSANDBOXED_EXECUTION),
             network_policy="disabled",
             concurrency=8,
             max_testcase_count=100,

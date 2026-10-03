@@ -20,6 +20,7 @@ from app.engine.execution_router import ExecutionRouter, build_consistent_teleme
 from app.engine.pipeline import LanguageAwareExecutionEngine
 from app.engine.providers.codebox_provider import CodeboxProvider
 from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
+from app.core.config import settings
 from app.models.judge_job import JudgeJob, JudgeJobAttempt
 
 
@@ -454,3 +455,92 @@ def test_exact_13_testcase_incident_regression():
     # 4. CAS and total latency accurately recorded
     assert latencies["cas_finalize_ms"] == 6.36
     assert latencies["total_submission_latency_ms"] == 22963.33
+
+
+@pytest.mark.asyncio
+async def test_router_routes_to_codebox_when_unsandboxed_execution_forbidden():
+    """
+    In production environments, ALLOW_UNSANDBOXED_EXECUTION is False for security.
+    Verify that ExecutionRouter does not select 'local' unsandboxed execution,
+    but cleanly selects Codebox compatibility provider when no distributed nodes are registered.
+    """
+    router = ExecutionRouter.get_instance()
+    mock_db = AsyncMock()
+    mock_db.commit = AsyncMock()
+    mock_db.rollback = AsyncMock()
+    mock_db.flush = AsyncMock()
+
+    tcs = [TestCaseSchema(id="tc_sec", stdin="4\n", expected_output="8")]
+
+    mock_codebox_res = ExecutionResult(
+        success=True,
+        status=ExecutionStatus.COMPLETED,
+        verdict=Verdict.ACCEPTED,
+        time=0.05,
+        testcase_results=[TestCaseResult(testcase_id="tc_sec", passed=True, verdict=Verdict.ACCEPTED)],
+    )
+
+    with patch.object(settings, "ALLOW_UNSANDBOXED_EXECUTION", False), \
+         patch.object(router, "_get_active_distributed_nodes", AsyncMock(return_value=[])), \
+         patch.object(router._codebox_provider, "execute_batch", AsyncMock(return_value=mock_codebox_res)):
+        
+        res = await router.execute(
+            db=mock_db,
+            language=Language.PYTHON,
+            code="n = int(input())\nprint(n * 2)",
+            testcases=tcs,
+            is_submit=True,
+        )
+
+    # Must route to 'codebox' sandbox, NOT 'local' (which is prohibited without sandbox)
+    assert res.provider == "codebox"
+    assert res.verdict == Verdict.ACCEPTED
+    assert res.success is True
+
+
+@pytest.mark.asyncio
+async def test_router_falls_back_to_codebox_when_local_engine_fails_system_error():
+    """
+    If Attempt 1 on 'local' engine fails with SYSTEM_ERROR (e.g. host runtime issue),
+    verify that ExecutionRouter creates Attempt 2 and falls back to Codebox.
+    """
+    router = ExecutionRouter.get_instance()
+    mock_db = AsyncMock()
+    mock_db.commit = AsyncMock()
+    mock_db.rollback = AsyncMock()
+    mock_db.flush = AsyncMock()
+
+    tcs = [TestCaseSchema(id="tc_fb", stdin="1\n", expected_output="2")]
+
+    mock_local_failure = ExecutionResult(
+        success=False,
+        status=ExecutionStatus.FAILED,
+        verdict=Verdict.SYSTEM_ERROR,
+        error="Host process runner crashed unexpectedly",
+    )
+
+    mock_codebox_success = ExecutionResult(
+        success=True,
+        status=ExecutionStatus.COMPLETED,
+        verdict=Verdict.ACCEPTED,
+        time=0.1,
+        testcase_results=[TestCaseResult(testcase_id="tc_fb", passed=True, verdict=Verdict.ACCEPTED)],
+    )
+
+    with patch.object(router, "_get_active_distributed_nodes", AsyncMock(return_value=[])), \
+         patch.object(router._local_provider, "execute_batch", AsyncMock(return_value=mock_local_failure)), \
+         patch.object(router._codebox_provider, "execute_batch", AsyncMock(return_value=mock_codebox_success)):
+
+        res = await router.execute(
+            db=mock_db,
+            language=Language.PYTHON,
+            code="print(2)",
+            testcases=tcs,
+            is_submit=True,
+        )
+
+    # Attempt 2 must have succeeded on codebox
+    assert res.provider == "codebox"
+    assert res.verdict == Verdict.ACCEPTED
+    assert res.success is True
+

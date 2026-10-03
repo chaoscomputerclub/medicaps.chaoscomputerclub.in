@@ -210,12 +210,14 @@ class ExecutionRouter:
 
         # Phase 7 & 8: Determine provider capability and preference.
         # Prefer the local LanguageAwareExecutionEngine when distributed nodes are not registered,
-        # avoiding slow HTTP+BullMQ+polling overhead on supported languages.
+        # but ONLY if local host execution is permitted and healthy on this environment.
+        local_healthy = await self._local_provider.healthy()
         prefer_local = (
             getattr(settings, "PREFER_LOCAL_JUDGE_ENGINE", True)
             and not has_active_nodes
+            and local_healthy
             and self._local_provider.capabilities.supports_language(language)
-            and (settings.ALLOW_UNSANDBOXED_EXECUTION or getattr(settings, "ENABLE_LOCAL_SANDBOX", True))
+            and settings.ALLOW_UNSANDBOXED_EXECUTION
         )
 
         # 3. Determine initial provider via policy
@@ -507,6 +509,120 @@ class ExecutionRouter:
                 lease_id=attempt_1.lease_id,
                 node_id="local-language-engine",
             )
+            # If local engine suffered a sandbox/infrastructure failure, evaluate fallback to Codebox
+            if exec_result.verdict == Verdict.SYSTEM_ERROR and tracker.remaining_seconds() > 5.0:
+                logger.warning("⚠️ [ExecutionRouter] Local Attempt 1 failed (%s); evaluating fallback to Codebox", exec_result.error)
+                fallback_decision = await self.fallback_mgr.evaluate_fallback(
+                    deadline_tracker=tracker,
+                    attempt_number=1,
+                    primary_failure_code=ErrorCode.INFRASTRUCTURE_FAILURE.value,
+                )
+                if fallback_decision.allowed:
+                    fallback_used = True
+                    executed_provider = "codebox"
+                    self.obs.record_counter("codebox_fallback_requests")
+
+                    # Mark Attempt 1 as EXPIRED in DB
+                    await AttemptManager.expire_attempt(db, job.id, attempt_1.id, reason=ErrorCode.INFRASTRUCTURE_FAILURE.value)
+                    await db.commit()
+
+                    # Create Attempt #2 for Codebox Fallback
+                    attempt_2 = await AttemptManager.create_attempt(
+                        db=db,
+                        job_id=job.id,
+                        provider=executed_provider,
+                    )
+                    await db.commit()
+                    self.obs.record_counter("judge_attempts_total")
+                    self.obs.record_counter("judge_jobs_retried_total")
+                    self.obs.record_counter("fallback_execution_total")
+
+                    logger.info("🔁 [ExecutionRouter] Job %s created Fallback Attempt %d on %s", job.id, attempt_2.attempt_number, executed_provider)
+
+                    exec_result = await self._codebox_provider.execute_batch(
+                        language=language,
+                        code=code,
+                        testcases=testcases,
+                        time_limit=time_limit,
+                        memory_limit_mb=memory_limit_mb,
+                        comparison_mode=comparison_mode,
+                        admission_pool=fallback_decision.admission_pool,
+                        deadline_tracker=tracker,
+                    )
+
+                    # Authoritative finalization of Attempt #2
+                    final_state = "COMPLETED" if exec_result.verdict != Verdict.SYSTEM_ERROR else "FAILED"
+                    decision_rec = ExecutionObservability.create_decision_record(
+                        job_id=job.id,
+                        attempt_id=attempt_2.id,
+                        provider_selected=initial_provider,
+                        provider_attempted=executed_provider,
+                        fallback_used=True,
+                        node_id="codebox-fallback",
+                        queue_wait_ms=tracker.queue_wait_ms,
+                        execution_ms=exec_result.time * 1000.0,
+                        failure_code=None if exec_result.verdict != Verdict.SYSTEM_ERROR else ErrorCode.CODEBOX_WORKER_FAILURE.value,
+                    )
+                    t_cas_start = time.perf_counter()
+                    fin_status, _ = await AttemptManager.finalize_attempt(
+                        db=db,
+                        job_id=job.id,
+                        attempt_id=attempt_2.id,
+                        final_state=final_state,
+                        failure_code=None if exec_result.verdict != Verdict.SYSTEM_ERROR else ErrorCode.CODEBOX_WORKER_FAILURE.value,
+                        execution_decision=decision_rec,
+                        queue_time_ms=tracker.queue_wait_ms,
+                        execution_time_ms=exec_result.time * 1000.0,
+                        total_time_ms=tracker.total_elapsed_ms(),
+                    )
+                    t_cas_end = time.perf_counter()
+                    await db.commit()
+
+                    if fin_status == FinalizeResult.STALE_ATTEMPT:
+                        self.obs.record_counter("judge_stale_results_total")
+
+                    cas_ms = (t_cas_end - t_cas_start) * 1000.0
+                    compile_dur_ms = getattr(exec_result, "compile_time_ms", 0.0) or tracker.compile_ms
+                    exec_dur_ms = getattr(exec_result, "execution_time_ms", 0.0) or (exec_result.time * 1000.0)
+                    execution_cpu_ms = getattr(exec_result, "execution_cpu_ms", None) or (exec_result.time * 1000.0)
+                    execution_wall_ms = getattr(exec_result, "execution_wall_ms", None) or exec_dur_ms
+                    provider_turnaround_ms = getattr(exec_result, "provider_turnaround_ms", None) or execution_wall_ms
+                    result_normalization_ms = getattr(exec_result, "result_normalization_ms", 0.0) or 0.0
+
+                    t_rep_start = time.perf_counter()
+                    t_rep_end = time.perf_counter()
+                    measured_rep_ms = max(0.5, (t_rep_end - t_rep_start) * 1000.0)
+
+                    c_timestamps, c_latencies = build_consistent_telemetry(
+                        t_enqueue=job.queued_at,
+                        total_elapsed_ms=tracker.total_elapsed_ms(),
+                        queue_wait_ms=tracker.queue_wait_ms,
+                        compile_dur_ms=compile_dur_ms,
+                        exec_dur_ms=exec_dur_ms,
+                        cas_ms=cas_ms,
+                        execution_cpu_ms=execution_cpu_ms,
+                        execution_wall_ms=execution_wall_ms,
+                        provider_turnaround_ms=provider_turnaround_ms,
+                        result_normalization_ms=result_normalization_ms,
+                        result_report_ms=measured_rep_ms,
+                    )
+
+                    exec_result.job_id = job.id
+                    exec_result.attempt_id = attempt_2.id
+                    exec_result.lease_id = attempt_2.lease_id
+                    exec_result.node_id = "codebox-fallback"
+                    exec_result.container_id = f"sandbox-{job.id[:8]}-2"
+                    exec_result.provider = executed_provider
+                    exec_result.compile_time_ms = compile_dur_ms
+                    exec_result.execution_time_ms = exec_dur_ms
+                    exec_result.execution_cpu_ms = execution_cpu_ms
+                    exec_result.execution_wall_ms = execution_wall_ms
+                    exec_result.provider_turnaround_ms = provider_turnaround_ms
+                    exec_result.result_normalization_ms = result_normalization_ms
+                    exec_result.timestamps = c_timestamps
+                    exec_result.latencies = c_latencies
+                    exec_result.telemetry = decision_rec
+                    return exec_result
         else:
             # Initial provider is Codebox (e.g. Run Code or fallback compatibility)
             logger.info("⚡ [ExecutionRouter] Job %s routing to Codebox (pool: %s)", job.id, AdmissionPool.RUN_CODE if not is_submit else AdmissionPool.FALLBACK)
