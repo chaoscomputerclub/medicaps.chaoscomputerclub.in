@@ -31,10 +31,35 @@ class ProviderRunResult:
     diagnostics: List[str] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class ProviderCapabilities:
+    """Explicit capability contract defining supported languages, sandboxing, and limits."""
+    languages: List[str] = field(default_factory=list)
+    compile_support: bool = True
+    sandbox_support: bool = True
+    network_policy: str = "disabled"
+    architecture: str = "x86_64"
+    resource_limits: dict[str, Any] = field(default_factory=lambda: {"max_time_s": 15.0, "max_memory_mb": 1024})
+    concurrency: int = 4
+    max_testcase_count: int = 100
+    max_execution_duration_s: float = 60.0
+
+    def supports_language(self, language: str | Any) -> bool:
+        lang_str = getattr(language, "value", str(language)).lower()
+        if not self.languages:
+            return True
+        return lang_str in [l.lower() for l in self.languages]
+
+
 class JudgeProvider(abc.ABC):
     """Runs code executions against test cases."""
 
     name: str = "abstract"
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        return ProviderCapabilities()
+
 
     @abc.abstractmethod
     async def run(self, request: ProviderRunRequest) -> ProviderRunResult:

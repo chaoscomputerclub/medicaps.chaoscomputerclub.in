@@ -77,7 +77,8 @@ async def test_execution_router_attaches_phase_0_telemetry():
     assert res.lease_id is not None
     assert res.node_id is not None
     assert res.container_id is not None
-    assert res.provider in ("codebox", "distributed", "docker")
+    assert res.provider in ("codebox", "distributed", "docker", "local")
+
 
     # Timestamps
     required_timestamps = [

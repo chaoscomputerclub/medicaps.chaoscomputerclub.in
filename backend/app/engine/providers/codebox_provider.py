@@ -9,7 +9,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import time
 from datetime import datetime, timezone
+
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
@@ -30,7 +32,7 @@ from app.engine.errors import ErrorCode, JudgeExecutionException
 from app.engine.judge import JudgeEngine
 from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
 from app.lib.chunking import gather_with_concurrency
-from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
+from .base import JudgeProvider, ProviderCapabilities, ProviderRunRequest, ProviderRunResult
 
 
 logger = logging.getLogger("ccc.judge.codebox")
@@ -83,6 +85,18 @@ class CodeboxProvider(JudgeProvider):
     """
 
     name = "codebox"
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        return ProviderCapabilities(
+            languages=list(CODEBOX_LANGUAGE_IDS.keys()),
+            compile_support=True,
+            sandbox_support=True,
+            network_policy="disabled",
+            concurrency=4,
+            max_testcase_count=50,
+            max_execution_duration_s=15.0,
+        )
 
     def __init__(self) -> None:
         self.base_url = os.getenv("CODEBOX_URL", "http://127.0.0.1:3000").rstrip("/")
@@ -289,6 +303,7 @@ class CodeboxProvider(JudgeProvider):
             "memory_limit": safe_mem_kb,
         }
 
+        t0 = time.perf_counter()
         data: Dict[str, Any] = {}
         try:
             url = f"{self.base_url}/submissions?base64_encoded=false&wait=true"
@@ -311,6 +326,7 @@ class CodeboxProvider(JudgeProvider):
                     if status_id >= 3:
                         break
         except Exception as exc:
+            tc_wall_ms = (time.perf_counter() - t0) * 1000.0
             err_msg = str(exc)
             if isinstance(exc, httpx.HTTPStatusError):
                 try:
@@ -329,8 +345,9 @@ class CodeboxProvider(JudgeProvider):
                 expected_output="" if tc.hidden else (tc.expected_output or ""),
                 stderr=err_msg,
                 compile_output="",
-                wall_time_ms=0.0,
+                wall_time_ms=round(tc_wall_ms, 2),
                 runtime_ms=0.0,
+                cpu_time_ms=0.0,
                 peak_memory_mb=0.0,
                 exit_code=1,
                 weight=tc.weight,
@@ -338,14 +355,16 @@ class CodeboxProvider(JudgeProvider):
                 verdict=Verdict.INTERNAL_ERROR,
             )
 
+        tc_wall_ms = (time.perf_counter() - t0) * 1000.0
         status_id = int((data.get("status") or {}).get("id", 0))
         raw_verdict = STATUS_VERDICTS.get(status_id, Verdict.RUNTIME_ERROR)
         stdout = data.get("stdout") or ""
         stderr = data.get("stderr") or ""
         compile_out = data.get("compile_output") or ""
         status_desc = (data.get("status") or {}).get("description") or ""
-        time_sec = float(data.get("time") or 0.0)
-        time_ms = time_sec * 1000
+        # data["time"] represents isolate/process CPU runtime in seconds, NOT turnaround wall-clock time
+        cpu_time_sec = float(data.get("time") or 0.0)
+        cpu_time_ms = cpu_time_sec * 1000.0
         mem_kb = float(data.get("memory") or 0.0)
         mem_mb = mem_kb / 1024.0
 
@@ -392,14 +411,16 @@ class CodeboxProvider(JudgeProvider):
             expected_output=tc.expected_output or "",
             stderr=stderr,
             compile_output=compile_out,
-            wall_time_ms=time_ms,
-            runtime_ms=time_ms,
+            wall_time_ms=round(tc_wall_ms, 2),  # Actual measured HTTP/polling turnaround
+            runtime_ms=round(cpu_time_ms, 2),   # CPU / sandbox process runtime
+            cpu_time_ms=round(cpu_time_ms, 2),  # Explicit sandbox CPU runtime
             peak_memory_mb=mem_mb,
             exit_code=int(data.get("exit_code") or 0),
             weight=tc.weight,
             passed=passed,
             verdict=final_verdict,
         )
+
 
     async def execute_batch(
         self,
@@ -419,8 +440,34 @@ class CodeboxProvider(JudgeProvider):
         lang_id = self._resolve_lang_id(language)
         submission_id = str(uuid4())
 
+        # 0. Dominant deadline gate (Phase 11: Fail fast if submission budget expired)
+        timeout_budget = self.timeout
+
+        if deadline_tracker is not None:
+            if deadline_tracker.is_expired():
+                return ExecutionResult(
+                    success=False,
+                    submission_id=submission_id,
+                    status=ExecutionStatus.FAILED,
+                    verdict=Verdict.SYSTEM_ERROR,
+                    error=f"[{ErrorCode.EXECUTION_DEADLINE_EXCEEDED.value}] Execution deadline exceeded before provider invocation.",
+                    total_testcases=len(testcases),
+                )
+            try:
+                timeout_budget = deadline_tracker.stage_budget(self.timeout)
+            except Exception as d_err:
+                return ExecutionResult(
+                    success=False,
+                    submission_id=submission_id,
+                    status=ExecutionStatus.FAILED,
+                    verdict=Verdict.SYSTEM_ERROR,
+                    error=f"[{ErrorCode.EXECUTION_DEADLINE_EXCEEDED.value}] {d_err}",
+                    total_testcases=len(testcases),
+                )
+
         # 1. Circuit breaker gate
         if not await self._circuit_breaker.can_execute():
+
             if settings.ALLOW_UNSANDBOXED_EXECUTION:
                 logger.warning("🛑 [Codebox] Circuit breaker is OPEN. Falling back to local execution (ALLOW_UNSANDBOXED_EXECUTION=True).")
                 from app.engine.executors.factory import get_executor
@@ -492,6 +539,7 @@ class CodeboxProvider(JudgeProvider):
                 )
 
         # 4. Acquire permit from bounded admission pool
+        batch_start = time.perf_counter()
         try:
             async with self._admission_controller.acquire_permit(pool=admission_pool, wait_timeout_s=min(5.0, timeout_budget)):
                 limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
@@ -511,6 +559,7 @@ class CodeboxProvider(JudgeProvider):
                     # Concurrency bounded to 4 to match container worker slot limits
                     results: list[TestCaseResult] = await gather_with_concurrency(4, *tasks)
         except JudgeExecutionException as j_exc:
+            batch_wall_ms = (time.perf_counter() - batch_start) * 1000.0
             return ExecutionResult(
                 success=False,
                 submission_id=submission_id,
@@ -518,8 +567,12 @@ class CodeboxProvider(JudgeProvider):
                 verdict=Verdict.SYSTEM_ERROR,
                 error=f"[{j_exc.error_code.value}] {j_exc.safe_message}",
                 total_testcases=len(testcases),
+                execution_wall_ms=round(batch_wall_ms, 2),
+                provider_turnaround_ms=round(batch_wall_ms, 2),
+                total_time_ms=round(batch_wall_ms, 2),
             )
         except Exception as exc:
+            batch_wall_ms = (time.perf_counter() - batch_start) * 1000.0
             err_str = str(exc)
             is_infra = any(k in err_str.lower() for k in ("connect", "timeout", "503", "refused"))
             await self._circuit_breaker.record_failure(is_infrastructure=is_infra, reason=err_str)
@@ -530,7 +583,12 @@ class CodeboxProvider(JudgeProvider):
                 verdict=Verdict.SYSTEM_ERROR,
                 error=f"[{ErrorCode.INFRASTRUCTURE_FAILURE.value}] Execution failed: {err_str[:200]}",
                 total_testcases=len(testcases),
+                execution_wall_ms=round(batch_wall_ms, 2),
+                provider_turnaround_ms=round(batch_wall_ms, 2),
+                total_time_ms=round(batch_wall_ms, 2),
             )
+
+        batch_wall_ms = (time.perf_counter() - batch_start) * 1000.0
 
         # 5. Evaluate infrastructure success vs failure
         infra_failures = [r for r in results if r.verdict == Verdict.INTERNAL_ERROR and ("503" in r.stderr or "connect" in r.stderr.lower())]
@@ -541,7 +599,8 @@ class CodeboxProvider(JudgeProvider):
 
         passed_count = sum(1 for r in results if r.passed)
         total_count = len(results)
-        max_time = max((r.wall_time_ms for r in results), default=0.0)
+        total_cpu_time_ms = sum((r.runtime_ms or 0.0) for r in results)
+        max_cpu_time = max(((r.runtime_ms or 0.0) for r in results), default=0.0)
         max_mem = max((r.peak_memory_mb for r in results), default=0.0)
 
         # Primary compile output if any
@@ -582,11 +641,18 @@ class CodeboxProvider(JudgeProvider):
             stderr=first_stderr,
             compile_output=compile_out,
             memory=max_mem,
-            time=max_time / 1000.0,
+            time=round(max_cpu_time / 1000.0, 3),  # Max single testcase CPU runtime in seconds
             exit_code=0 if top_verdict == Verdict.ACCEPTED else 1,
             testcase_results=results,
             passed_testcases=passed_count,
             total_testcases=total_count,
             score=score,
+            compile_time_ms=0.0,
+            execution_time_ms=round(batch_wall_ms, 2),
+            total_time_ms=round(batch_wall_ms, 2),
+            execution_cpu_ms=round(total_cpu_time_ms, 2),
+            execution_wall_ms=round(batch_wall_ms, 2),
+            provider_turnaround_ms=round(batch_wall_ms, 2),
             completed_at=datetime.now(timezone.utc),
         )
+

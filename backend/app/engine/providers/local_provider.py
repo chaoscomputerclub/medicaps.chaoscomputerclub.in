@@ -10,13 +10,28 @@ from app.engine.executors.factory import get_executor
 from app.engine.languages import LanguageRegistry
 from app.engine.schemas import ExecutionResult, TestCaseSchema
 
-from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
+from typing import Optional
+
+from .base import JudgeProvider, ProviderCapabilities, ProviderRunRequest, ProviderRunResult
+from app.engine.deadlines import ExecutionDeadlineTracker
 
 logger = logging.getLogger("ccc.judge.local")
 
 
 class LocalSandboxProvider(JudgeProvider):
     name = "local"
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        return ProviderCapabilities(
+            languages=["python", "javascript", "cpp", "c", "java", "rust", "go", "typescript"],
+            compile_support=True,
+            sandbox_support=True,
+            network_policy="disabled",
+            concurrency=8,
+            max_testcase_count=100,
+            max_execution_duration_s=60.0,
+        )
 
     async def run(self, request: ProviderRunRequest) -> ProviderRunResult:
         if not settings.ALLOW_UNSANDBOXED_EXECUTION:
@@ -72,6 +87,12 @@ class LocalSandboxProvider(JudgeProvider):
         time_limit: float = 5.0,
         memory_limit_mb: int = 256,
         comparison_mode: ComparisonMode = ComparisonMode.TRIMMED,
+        deadline_tracker: Optional[ExecutionDeadlineTracker] = None,
+        submission_id: Optional[str] = None,
+        job_id: Optional[str] = None,
+        attempt_id: Optional[str] = None,
+        lease_id: Optional[str] = None,
+        node_id: Optional[str] = None,
     ) -> ExecutionResult:
         if not settings.ALLOW_UNSANDBOXED_EXECUTION:
             return ExecutionResult(
@@ -81,12 +102,31 @@ class LocalSandboxProvider(JudgeProvider):
                 error="CRITICAL SECURITY VIOLATION: Unsandboxed local execution is prohibited by security policy. Docker sandbox required.",
                 total_testcases=len(testcases),
             )
-        lang = LanguageRegistry.normalize(language)
-        executor = get_executor(lang)
-        return await executor.execute_batch(
-            code=code,
-            testcases=testcases,
-            time_limit=time_limit,
-            memory_limit_mb=memory_limit_mb,
-            comparison_mode=comparison_mode,
-        )
+
+        try:
+            from app.engine.pipeline import LanguageAwareExecutionEngine
+            engine = LanguageAwareExecutionEngine.get_instance()
+            return await engine.execute(
+                language=language,
+                code=code,
+                testcases=testcases,
+                deadline_tracker=deadline_tracker,
+                comparison_mode=comparison_mode,
+                submission_id=submission_id,
+                job_id=job_id,
+                attempt_id=attempt_id,
+                lease_id=lease_id,
+                node_id=node_id,
+            )
+        except Exception as exc:
+            logger.warning("LanguageAwareExecutionEngine failed, falling back to legacy executor: %s", exc)
+            lang = LanguageRegistry.normalize(language)
+            executor = get_executor(lang)
+            return await executor.execute_batch(
+                code=code,
+                testcases=testcases,
+                time_limit=time_limit,
+                memory_limit_mb=memory_limit_mb,
+                comparison_mode=comparison_mode,
+            )
+

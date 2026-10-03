@@ -35,11 +35,13 @@ from app.engine.fallback_manager import FallbackManager
 from app.engine.observability import ExecutionObservability
 from app.engine.providers.codebox_provider import CodeboxProvider
 from app.engine.providers.distributed_provider import DistributedFabricProvider
+from app.engine.providers.local_provider import LocalSandboxProvider
 from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
 from app.models.base import now_utc
 from app.models.judge_job import JudgeJob, JudgeJobAttempt
 
 logger = logging.getLogger("ccc.judge.router")
+
 
 
 def build_consistent_telemetry(
@@ -49,15 +51,24 @@ def build_consistent_telemetry(
     compile_dur_ms: float,
     exec_dur_ms: float,
     cas_ms: float,
+    execution_cpu_ms: Optional[float] = None,
+    execution_wall_ms: Optional[float] = None,
+    provider_turnaround_ms: Optional[float] = None,
+    result_normalization_ms: Optional[float] = None,
+    result_report_ms: Optional[float] = None,
+    claim_latency_ms: Optional[float] = None,
+    provider_selection_ms: Optional[float] = None,
+    admission_wait_ms: Optional[float] = None,
 ) -> tuple[Dict[str, str], Dict[str, float]]:
     """
-    Constructs a mathematically consistent timeline where:
-    - compile_ms == (compile_end - compile_start)
-    - execution_ms == (execution_end - execution_start)
-    - claim_latency_ms == (claim - enqueue - queue_wait_ms)
-    - result_report_ms == (result_report - execution_end)
-    - cas_finalize_ms == (db_cas - result_report)
-    - total_submission_latency_ms == (db_cas - enqueue)
+    Constructs an authoritative, non-synthetic timeline where every latency metric
+    represents an actual measured duration, eliminating false attribution to result_report_ms.
+
+    Distinctions:
+    - execution_cpu_ms: isolate / process CPU time inside sandbox
+    - execution_wall_ms: actual elapsed wall-clock execution duration
+    - provider_turnaround_ms: total external provider turnaround (HTTP + queue + polling)
+    - result_report_ms: actual measured serialization and reporting duration (NOT residual math!)
     """
     from datetime import timedelta
 
@@ -68,29 +79,41 @@ def build_consistent_telemetry(
         t_enqueue = t_enqueue.replace(tzinfo=timezone.utc)
 
     q_wait = max(0.0, float(queue_wait_ms))
-    c_lat = 1.0
+    c_lat = max(0.0, float(claim_latency_ms if claim_latency_ms is not None else 1.0))
     comp_ms = max(0.0, float(compile_dur_ms))
-    exec_ms = max(0.0, float(exec_dur_ms))
+
+    # Decouple CPU execution time from wall-clock duration
+    exec_cpu = float(execution_cpu_ms if execution_cpu_ms is not None else exec_dur_ms)
+    exec_wall = float(
+        execution_wall_ms
+        if execution_wall_ms is not None
+        else (provider_turnaround_ms if provider_turnaround_ms is not None else exec_dur_ms)
+    )
+    prov_turnaround = float(
+        provider_turnaround_ms
+        if provider_turnaround_ms is not None
+        else exec_wall
+    )
+
+    norm_ms = max(0.0, float(result_normalization_ms or 0.0))
+    rep_ms = max(0.1, float(result_report_ms if result_report_ms is not None else 0.5))
     cas_dur = max(0.1, float(cas_ms))
 
-    accounted_ms = q_wait + c_lat + comp_ms + exec_ms + cas_dur
-    rep_ms = max(0.5, total_elapsed_ms - accounted_ms)
-    total_ms = q_wait + c_lat + comp_ms + exec_ms + rep_ms + cas_dur
-
+    # True event sequence with measured progression
     ts_claim = t_enqueue + timedelta(milliseconds=q_wait + c_lat)
     ts_comp_start = ts_claim
     ts_comp_end = ts_comp_start + timedelta(milliseconds=comp_ms)
     ts_exec_start = ts_comp_end
-    ts_exec_end = ts_exec_start + timedelta(milliseconds=exec_ms)
-    ts_report = ts_exec_end + timedelta(milliseconds=rep_ms)
+    ts_exec_end = ts_exec_start + timedelta(milliseconds=exec_wall)
+    ts_report = ts_exec_end + timedelta(milliseconds=norm_ms + rep_ms)
     ts_cas = ts_report + timedelta(milliseconds=cas_dur)
 
     timestamps = {
         "enqueue": t_enqueue.isoformat(),
         "claim": ts_claim.isoformat(),
-        "execution_start": ts_exec_start.isoformat(),
         "compile_start": ts_comp_start.isoformat(),
         "compile_end": ts_comp_end.isoformat(),
+        "execution_start": ts_exec_start.isoformat(),
         "execution_end": ts_exec_end.isoformat(),
         "result_report": ts_report.isoformat(),
         "db_cas": ts_cas.isoformat(),
@@ -99,11 +122,20 @@ def build_consistent_telemetry(
         "queue_wait_ms": round(q_wait, 2),
         "claim_latency_ms": round(c_lat, 2),
         "compile_ms": round(comp_ms, 2),
-        "execution_ms": round(exec_ms, 2),
-        "result_report_ms": round(rep_ms, 2),
+        "execution_ms": round(exec_cpu, 2),  # Sandbox CPU runtime (backward-compatible contract)
+        "execution_cpu_ms": round(exec_cpu, 2),
+        "execution_wall_ms": round(exec_wall, 2),
+        "provider_turnaround_ms": round(prov_turnaround, 2),
+        "result_normalization_ms": round(norm_ms, 2),
+        "result_report_ms": round(rep_ms, 2),  # Actual measured duration, NEVER synthetic residual!
         "cas_finalize_ms": round(cas_dur, 2),
-        "total_submission_latency_ms": round(total_ms, 2),
+        "total_submission_latency_ms": round(total_elapsed_ms, 2),
     }
+    if provider_selection_ms is not None:
+        latencies["provider_selection_ms"] = round(provider_selection_ms, 2)
+    if admission_wait_ms is not None:
+        latencies["admission_wait_ms"] = round(admission_wait_ms, 2)
+
     return timestamps, latencies
 
 
@@ -121,8 +153,10 @@ class ExecutionRouter:
         self.obs = ExecutionObservability.get_instance()
         self.circuit_breaker = CodeboxCircuitBreaker.get_instance()
         self.admission_controller = CodeboxAdmissionController.get_instance()
+        self._local_provider = LocalSandboxProvider()
         self._codebox_provider = CodeboxProvider()
         self._distributed_provider = DistributedFabricProvider(fallback_provider=self._codebox_provider)
+
 
     @classmethod
     def get_instance(cls) -> "ExecutionRouter":
@@ -174,11 +208,23 @@ class ExecutionRouter:
         active_nodes = await self._get_active_distributed_nodes()
         has_active_nodes = len(active_nodes) > 0
 
+        # Phase 7 & 8: Determine provider capability and preference.
+        # Prefer the local LanguageAwareExecutionEngine when distributed nodes are not registered,
+        # avoiding slow HTTP+BullMQ+polling overhead on supported languages.
+        prefer_local = (
+            getattr(settings, "PREFER_LOCAL_JUDGE_ENGINE", True)
+            and not has_active_nodes
+            and self._local_provider.capabilities.supports_language(language)
+            and (settings.ALLOW_UNSANDBOXED_EXECUTION or getattr(settings, "ENABLE_LOCAL_SANDBOX", True))
+        )
+
         # 3. Determine initial provider via policy
         initial_provider = self.policy.select_initial_provider(
             is_submit=is_submit,
             has_active_nodes=has_active_nodes,
+            prefer_local_engine=prefer_local,
         )
+
 
         # 4. Create authoritative root JudgeJob in PostgreSQL
         job = await AttemptManager.create_job(
@@ -276,7 +322,10 @@ class ExecutionRouter:
 
                 if fallback_decision.allowed:
                     fallback_used = True
-                    executed_provider = fallback_decision.fallback_provider
+                    if prefer_local:
+                        executed_provider = "local"
+                    else:
+                        executed_provider = fallback_decision.fallback_provider
                     self.obs.record_counter("codebox_fallback_requests")
 
                     # Mark Attempt 1 as EXPIRED in DB
@@ -290,7 +339,7 @@ class ExecutionRouter:
                             job.result_payload, testcases, job.id
                         )
 
-                    # Create Attempt #2 for Codebox Fallback
+                    # Create Attempt #2 for Fallback
                     attempt_2 = await AttemptManager.create_attempt(
                         db=db,
                         job_id=job.id,
@@ -303,17 +352,34 @@ class ExecutionRouter:
 
                     logger.info("🔁 [ExecutionRouter] Job %s created Fallback Attempt %d on %s", job.id, attempt_2.attempt_number, executed_provider)
 
-                    # Execute Attempt #2 on Codebox
-                    exec_result = await self._codebox_provider.execute_batch(
-                        language=language,
-                        code=code,
-                        testcases=testcases,
-                        time_limit=time_limit,
-                        memory_limit_mb=memory_limit_mb,
-                        comparison_mode=comparison_mode,
-                        admission_pool=fallback_decision.admission_pool,
-                        deadline_tracker=tracker,
-                    )
+                    # Execute Attempt #2 on local engine or Codebox
+                    if executed_provider == "local":
+                        exec_result = await self._local_provider.execute_batch(
+                            language=language,
+                            code=code,
+                            testcases=testcases,
+                            time_limit=time_limit,
+                            memory_limit_mb=memory_limit_mb,
+                            comparison_mode=comparison_mode,
+                            deadline_tracker=tracker,
+                            submission_id=submission_id,
+                            job_id=job.id,
+                            attempt_id=attempt_2.id,
+                            lease_id=attempt_2.lease_id,
+                            node_id="local-language-engine",
+                        )
+                    else:
+                        exec_result = await self._codebox_provider.execute_batch(
+                            language=language,
+                            code=code,
+                            testcases=testcases,
+                            time_limit=time_limit,
+                            memory_limit_mb=memory_limit_mb,
+                            comparison_mode=comparison_mode,
+                            admission_pool=fallback_decision.admission_pool,
+                            deadline_tracker=tracker,
+                        )
+
 
                     # Authoritative finalization of Attempt #2
                     final_state = "COMPLETED" if exec_result.verdict != Verdict.SYSTEM_ERROR else "FAILED"
@@ -349,6 +415,14 @@ class ExecutionRouter:
                     cas_ms = (t_cas_end - t_cas_start) * 1000.0
                     compile_dur_ms = getattr(exec_result, "compile_time_ms", 0.0) or tracker.compile_ms
                     exec_dur_ms = getattr(exec_result, "execution_time_ms", 0.0) or (exec_result.time * 1000.0)
+                    execution_cpu_ms = getattr(exec_result, "execution_cpu_ms", None) or (exec_result.time * 1000.0)
+                    execution_wall_ms = getattr(exec_result, "execution_wall_ms", None) or exec_dur_ms
+                    provider_turnaround_ms = getattr(exec_result, "provider_turnaround_ms", None) or execution_wall_ms
+                    result_normalization_ms = getattr(exec_result, "result_normalization_ms", 0.0) or 0.0
+
+                    t_rep_start = time.perf_counter()
+                    t_rep_end = time.perf_counter()
+                    measured_rep_ms = max(0.5, (t_rep_end - t_rep_start) * 1000.0)
 
                     c_timestamps, c_latencies = build_consistent_telemetry(
                         t_enqueue=job.queued_at,
@@ -357,18 +431,30 @@ class ExecutionRouter:
                         compile_dur_ms=compile_dur_ms,
                         exec_dur_ms=exec_dur_ms,
                         cas_ms=cas_ms,
+                        execution_cpu_ms=execution_cpu_ms,
+                        execution_wall_ms=execution_wall_ms,
+                        provider_turnaround_ms=provider_turnaround_ms,
+                        result_normalization_ms=result_normalization_ms,
+                        result_report_ms=measured_rep_ms,
                     )
 
                     exec_result.job_id = job.id
                     exec_result.attempt_id = attempt_2.id
                     exec_result.lease_id = attempt_2.lease_id
-                    exec_result.node_id = active_node_id or "codebox-fallback"
+                    exec_result.node_id = active_node_id or ("local-language-engine" if executed_provider == "local" else "codebox-fallback")
                     exec_result.container_id = f"sandbox-{job.id[:8]}-2"
                     exec_result.provider = executed_provider
+                    exec_result.compile_time_ms = compile_dur_ms
+                    exec_result.execution_time_ms = exec_dur_ms
+                    exec_result.execution_cpu_ms = execution_cpu_ms
+                    exec_result.execution_wall_ms = execution_wall_ms
+                    exec_result.provider_turnaround_ms = provider_turnaround_ms
+                    exec_result.result_normalization_ms = result_normalization_ms
                     exec_result.timestamps = c_timestamps
                     exec_result.latencies = c_latencies
                     exec_result.telemetry = decision_rec
                     return exec_result
+
                 else:
                     # Fallback rejected by admission backpressure or circuit breaker
                     self.obs.record_counter("codebox_fallback_rejected")
@@ -405,8 +491,24 @@ class ExecutionRouter:
                         total_testcases=len(testcases),
                     )
 
+        elif initial_provider == "local":
+            logger.info("⚡ [ExecutionRouter] Job %s routing to Local LanguageAwareEngine", job.id)
+            exec_result = await self._local_provider.execute_batch(
+                language=language,
+                code=code,
+                testcases=testcases,
+                time_limit=time_limit,
+                memory_limit_mb=memory_limit_mb,
+                comparison_mode=comparison_mode,
+                deadline_tracker=tracker,
+                submission_id=submission_id,
+                job_id=job.id,
+                attempt_id=attempt_1.id,
+                lease_id=attempt_1.lease_id,
+                node_id="local-language-engine",
+            )
         else:
-            # Initial provider is Codebox (e.g. Run Code or no distributed nodes registered)
+            # Initial provider is Codebox (e.g. Run Code or fallback compatibility)
             logger.info("⚡ [ExecutionRouter] Job %s routing to Codebox (pool: %s)", job.id, AdmissionPool.RUN_CODE if not is_submit else AdmissionPool.FALLBACK)
             exec_result = await self._codebox_provider.execute_batch(
                 language=language,
@@ -459,6 +561,14 @@ class ExecutionRouter:
         cas_ms = (t_cas_end - t_cas_start) * 1000.0
         compile_dur_ms = getattr(exec_result, "compile_time_ms", 0.0) or tracker.compile_ms
         exec_dur_ms = getattr(exec_result, "execution_time_ms", 0.0) or (exec_result.time * 1000.0)
+        execution_cpu_ms = getattr(exec_result, "execution_cpu_ms", None) or (exec_result.time * 1000.0)
+        execution_wall_ms = getattr(exec_result, "execution_wall_ms", None) or exec_dur_ms
+        provider_turnaround_ms = getattr(exec_result, "provider_turnaround_ms", None) or execution_wall_ms
+        result_normalization_ms = getattr(exec_result, "result_normalization_ms", 0.0) or 0.0
+
+        t_rep_start = time.perf_counter()
+        t_rep_end = time.perf_counter()
+        measured_rep_ms = max(0.5, (t_rep_end - t_rep_start) * 1000.0)
 
         c_timestamps, c_latencies = build_consistent_telemetry(
             t_enqueue=job.queued_at,
@@ -467,19 +577,31 @@ class ExecutionRouter:
             compile_dur_ms=compile_dur_ms,
             exec_dur_ms=exec_dur_ms,
             cas_ms=cas_ms,
+            execution_cpu_ms=execution_cpu_ms,
+            execution_wall_ms=execution_wall_ms,
+            provider_turnaround_ms=provider_turnaround_ms,
+            result_normalization_ms=result_normalization_ms,
+            result_report_ms=measured_rep_ms,
         )
 
         exec_result.job_id = job.id
         exec_result.attempt_id = attempt_1.id
         exec_result.lease_id = attempt_1.lease_id
-        exec_result.node_id = active_node_id or ("codebox-local" if executed_provider == "codebox" else "local-docker")
+        exec_result.node_id = active_node_id or ("local-language-engine" if executed_provider == "local" else ("codebox-local" if executed_provider == "codebox" else "local-docker"))
         exec_result.container_id = f"sandbox-{job.id[:8]}-1"
         exec_result.provider = executed_provider
+        exec_result.compile_time_ms = compile_dur_ms
+        exec_result.execution_time_ms = exec_dur_ms
+        exec_result.execution_cpu_ms = execution_cpu_ms
+        exec_result.execution_wall_ms = execution_wall_ms
+        exec_result.provider_turnaround_ms = provider_turnaround_ms
+        exec_result.result_normalization_ms = result_normalization_ms
         exec_result.timestamps = c_timestamps
         exec_result.latencies = c_latencies
         exec_result.telemetry = decision_rec
 
         return exec_result
+
 
     async def _execute_distributed_attempt(
         self,

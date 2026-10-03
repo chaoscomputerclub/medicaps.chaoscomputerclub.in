@@ -81,8 +81,9 @@ class TestCaseResult(BaseModel):
     expected_output: str = ""
     stderr: str = ""
     compile_output: str = ""
-    wall_time_ms: float = 0.0
-    runtime_ms: float = 0.0
+    wall_time_ms: float = 0.0  # Measured wall-clock duration of testcase execution
+    runtime_ms: float = 0.0    # CPU / sandbox process runtime in milliseconds
+    cpu_time_ms: Optional[float] = None  # Explicit sandbox CPU runtime in milliseconds
     peak_memory_mb: float = 0.0
     exit_code: int = 0
     weight: float = 1.0
@@ -112,17 +113,22 @@ class ExecutionResult(BaseModel):
     stderr: str = ""
     compile_output: str = ""
     memory: float = 0.0
-    time: float = 0.0
+    time: float = 0.0  # CPU execution time in seconds (for problem time limit evaluation)
     exit_code: int = 0
     testcase_results: list[TestCaseResult] = Field(default_factory=list)
     passed_testcases: int = 0
     total_testcases: int = 0
     score: float = 0.0
-    compile_time_ms: float = 0.0
-    execution_time_ms: float = 0.0
-    total_time_ms: float = 0.0
+    compile_time_ms: float = 0.0  # Time spent compiling code
+    execution_time_ms: float = 0.0  # Wall-clock duration of testcase execution stage
+    total_time_ms: float = 0.0  # Total provider execution lifecycle wall time
+    execution_cpu_ms: Optional[float] = None  # Aggregate CPU/process runtime inside sandbox
+    execution_wall_ms: Optional[float] = None  # Actual elapsed wall-clock execution time
+    provider_turnaround_ms: Optional[float] = None  # Full wall-clock turnaround of execution provider
+    result_normalization_ms: Optional[float] = None  # Time spent parsing/evaluating results
     timestamps: dict[str, Optional[str]] = Field(default_factory=dict)
     latencies: dict[str, float] = Field(default_factory=dict)
     telemetry: dict[str, Any] = Field(default_factory=dict)
     error: Optional[str] = None
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+

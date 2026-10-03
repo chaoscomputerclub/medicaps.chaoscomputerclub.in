@@ -45,9 +45,18 @@ class LanguageAwareExecutionEngine:
     Enforces 'Compile ONCE per submission attempt' across all testcases.
     """
 
+    _instance: Optional["LanguageAwareExecutionEngine"] = None
+
+    @classmethod
+    def get_instance(cls, cache: Optional[CompilationCache] = None) -> "LanguageAwareExecutionEngine":
+        if cls._instance is None:
+            cls._instance = cls(cache=cache)
+        return cls._instance
+
     def __init__(self, cache: Optional[CompilationCache] = None) -> None:
         self.cache = cache or CompilationCache(enabled=True)
         self.obs = ExecutionObservability.get_instance()
+
 
     async def execute(
         self,
@@ -371,6 +380,10 @@ class LanguageAwareExecutionEngine:
                 compile_time_ms=round(compile_ms, 2),
                 execution_time_ms=round(total_exec_time_ms, 2),
                 total_time_ms=round(total_time_ms, 2),
+                execution_cpu_ms=round(total_exec_time_ms, 2),
+                execution_wall_ms=round(total_exec_time_ms, 2),
+                provider_turnaround_ms=round(total_time_ms, 2),
+
                 latencies={
                     "sandbox_create_ms": round(sandbox_create_ms, 2),
                     "source_write_ms": round(source_write_ms, 2),

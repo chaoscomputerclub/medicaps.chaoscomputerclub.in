@@ -69,12 +69,18 @@ class ExecutionPolicy:
     def select_initial_provider(
         is_submit: bool,
         has_active_nodes: bool,
+        prefer_local_engine: bool = False,
     ) -> str:
         """
         Contest submissions use the distributed fabric whenever active nodes exist.
-        Interactive 'Run Code' may use Codebox for fast cloud execution.
+        If no active nodes exist and prefer_local_engine is True, prefer local engine.
+        Interactive 'Run Code' or compatibility fallback paths use Codebox.
         """
+        if has_active_nodes:
+            return "distributed"
+        if prefer_local_engine:
+            return "local"
         if is_submit:
-            return "distributed" if has_active_nodes else "codebox"
-        # Run code preference
-        return "codebox" if not has_active_nodes else "distributed"
+            return "codebox"
+        return "codebox"
+

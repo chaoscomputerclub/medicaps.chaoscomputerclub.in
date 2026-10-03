@@ -5,8 +5,10 @@ modules/contests/contest_execution_service.py — Arena Code Sandbox Execution &
 
 import json
 import logging
+import time
 import uuid
 from datetime import datetime, timezone
+
 from typing import Any, Dict, List, Optional, Tuple
 from fastapi import HTTPException, status
 from pydantic import BaseModel
@@ -682,6 +684,7 @@ class ContestExecutionService:
             )
 
         # Acquire advisory transaction lock on contest scoreboard to serialize updates and eliminate deadlocks
+        t_sb_start = time.perf_counter()
         await db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:cid))"), {"cid": f"scoreboard:{target_contest_id}"})
 
         contest_start = target_contest_starts_at.replace(tzinfo=timezone.utc) if (target_contest_starts_at and target_contest_starts_at.tzinfo is None) else target_contest_starts_at
@@ -762,8 +765,10 @@ class ContestExecutionService:
 
         await db.flush()
         await ContestRepository.re_rank_scoreboard(db, target_contest_id)
+        scoreboard_ms = max(0.1, (time.perf_counter() - t_sb_start) * 1000.0)
 
         # Record durable outbox event inside active transaction
+        t_outbox_start = time.perf_counter()
         t_outbox = datetime.now(timezone.utc)
         await record_outbox_event(
             db=db,
@@ -784,8 +789,10 @@ class ContestExecutionService:
             priority="high",
         )
         await db.commit()
+        outbox_ms = max(0.1, (time.perf_counter() - t_outbox_start) * 1000.0)
 
         # Granular Cache Invalidation — strictly scope to this contest and its scoreboard/status
+        t_pub_start = time.perf_counter()
         await delete_cache_pattern(f"cache:scoreboard:{slug}*")
         await delete_cache_pattern(f"cache:contest:detail:{slug}*")
         await delete_cache_pattern(f"cache:contest:problems:{slug}*")
@@ -811,6 +818,7 @@ class ContestExecutionService:
             )
         except Exception as e:
             logger.debug("Broadcast error: %s", e)
+        redis_publish_ms = max(0.1, (time.perf_counter() - t_pub_start) * 1000.0)
 
         sub_timestamps = dict(getattr(exec_result, "timestamps", {}) or {})
         sub_latencies = dict(getattr(exec_result, "latencies", {}) or {})
@@ -832,6 +840,9 @@ class ContestExecutionService:
 
         sub_timestamps["outbox"] = ts_outbox.isoformat()
         sub_timestamps["redis_publish"] = ts_pub.isoformat()
+        sub_latencies["scoreboard_ms"] = round(scoreboard_ms, 2)
+        sub_latencies["outbox_ms"] = round(outbox_ms, 2)
+        sub_latencies["redis_publish_ms"] = round(redis_publish_ms, 2)
         sub_latencies["sse_publish_ms"] = round(sse_pub_ms, 2)
 
         t_enq_str = sub_timestamps.get("enqueue")
@@ -841,6 +852,7 @@ class ContestExecutionService:
                 sub_latencies["total_submission_latency_ms"] = round((ts_pub - ts_enq).total_seconds() * 1000.0, 2)
             except Exception:
                 pass
+
 
         # Build redacted testcase results for contestant privacy
         submit_tc_results = []

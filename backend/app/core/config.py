@@ -127,8 +127,10 @@ class Settings(BaseSettings):
     # In production, untrusted code MUST run in isolated Docker sandboxes.
     # Unsandboxed host execution is strictly disabled by default (fail-closed).
     ALLOW_UNSANDBOXED_EXECUTION: bool = os.getenv("ALLOW_UNSANDBOXED_EXECUTION", "false").lower() in ("true", "1", "yes")
+    PREFER_LOCAL_JUDGE_ENGINE: bool = os.getenv("PREFER_LOCAL_JUDGE_ENGINE", "true").lower() in ("true", "1", "yes")
     JUDGE_PROVIDER: str = os.getenv("JUDGE_PROVIDER", "docker")
     OUTPUT_LIMIT_BYTES: int = int(os.getenv("OUTPUT_LIMIT_BYTES", "65536"))  # 64 KB default output guard
+
 
     # Worker Registry & Resource Governor
     JUDGE_AGENT_SECRET: str = os.getenv("JUDGE_AGENT_SECRET", "")          # Shared secret for worker auth
