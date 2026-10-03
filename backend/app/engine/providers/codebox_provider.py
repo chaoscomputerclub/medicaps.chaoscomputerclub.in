@@ -104,6 +104,11 @@ class CodeboxProvider(JudgeProvider):
         self.poll_interval = float(os.getenv("CODEBOX_POLL_SECONDS", "0.3"))
         self.max_polls = int(os.getenv("CODEBOX_MAX_POLLS", "30"))
         self.timeout = float(os.getenv("CODEBOX_TIMEOUT", "15.0"))
+        # Batch API: submit all TCs in one request, eliminating the ceil(N/concurrency) latency multiplier.
+        # Set CODEBOX_USE_BATCH_API=false to force per-TC fallback (e.g. if Codebox lacks /submissions/batch).
+        self.use_batch_api: bool = os.getenv("CODEBOX_USE_BATCH_API", "true").lower() not in ("false", "0", "no")
+        # Initial poll interval for exponential-backoff polling (catches sub-second completions fast).
+        self.poll_initial_s: float = float(os.getenv("CODEBOX_POLL_INITIAL_SECONDS", "0.05"))
         self._circuit_breaker = CodeboxCircuitBreaker.get_instance()
         self._admission_controller = CodeboxAdmissionController.get_instance()
 
@@ -278,6 +283,206 @@ class CodeboxProvider(JudgeProvider):
             verdict=verdict,
         )
 
+    async def _execute_batch_api(
+        self,
+        client: httpx.AsyncClient,
+        lang_id: int,
+        code: str,
+        testcases: list[TestCaseSchema],
+        time_limit: float,
+        memory_limit_mb: int,
+        comparison_mode: ComparisonMode,
+    ) -> list[TestCaseResult]:
+        """
+        Submit all testcases in ONE batch request to the Judge0-compatible /submissions/batch endpoint.
+
+        This eliminates the ceil(N/concurrency) × per_TC_latency wall-time multiplier that arises when
+        each testcase is submitted as a separate HTTP request with individual polling loops.
+        Instead, Codebox handles all N submissions internally with its own worker pool, and we poll
+        a single /submissions/batch endpoint until all are complete.
+
+        Expected improvement for N=13, concurrency=4:
+          Before: ceil(13/4) * ~7s = ~23s
+          After:  max(TC wall times) ≈ ~7s  (3× speedup)
+
+        Raises:
+            httpx.HTTPStatusError: if /submissions/batch returns 404, caller falls back to per-TC.
+        """
+        safe_mem_kb = min(int(memory_limit_mb * 1024), 512000)
+        safe_cpu_sec = min(max(0.5, float(time_limit)), 15.0)
+
+        submissions = [
+            {
+                "language_id": lang_id,
+                "source_code": code,
+                "stdin": tc.stdin or "",
+                "expected_output": tc.expected_output or "",
+                "cpu_time_limit": safe_cpu_sec,
+                "memory_limit": safe_mem_kb,
+            }
+            for tc in testcases
+        ]
+
+        # --- Stage 1: Batch Submit ---
+        t_submit_start = time.perf_counter()
+        resp = await client.post(
+            f"{self.base_url}/submissions/batch?base64_encoded=false",
+            json={"submissions": submissions},
+            headers=self._headers(),
+        )
+        resp.raise_for_status()  # 404 → caller falls back to per-TC
+        t_submit_done = time.perf_counter()
+        submit_ms = (t_submit_done - t_submit_start) * 1000.0
+
+        batch_resp = resp.json()
+        tokens: list[str] = [
+            item["token"] for item in (batch_resp if isinstance(batch_resp, list) else batch_resp.get("submissions", []))
+        ]
+        if not tokens:
+            raise ValueError(f"Codebox batch API returned no tokens: {batch_resp!r}")
+
+        logger.debug(
+            "[Codebox|batch] %d TCs submitted in %.0fms → tokens: %s",
+            len(testcases),
+            submit_ms,
+            tokens,
+        )
+
+        # --- Stage 2: Poll Until All Complete (exponential backoff) ---
+        tokens_csv = ",".join(tokens)
+        max_total_wait_s = self.max_polls * self.poll_interval  # honour existing deadline budget
+        poll_interval = self.poll_initial_s  # start fast (default 50ms)
+        t_poll_start = time.perf_counter()
+        results_data: list[Optional[Dict[str, Any]]] = [None] * len(tokens)
+        pending_indices = list(range(len(tokens)))
+        poll_count = 0
+
+        while pending_indices and (time.perf_counter() - t_poll_start) < max_total_wait_s:
+            await asyncio.sleep(poll_interval)
+            poll_interval = min(poll_interval * 1.5, self.poll_interval)  # exponential backoff up to max
+            poll_count += 1
+
+            poll_resp = await client.get(
+                f"{self.base_url}/submissions/batch?tokens={tokens_csv}&base64_encoded=false",
+                headers=self._headers(),
+            )
+            poll_resp.raise_for_status()
+            poll_payload = poll_resp.json()
+            batch_results = poll_payload if isinstance(poll_payload, list) else poll_payload.get("submissions", [])
+
+            still_pending: list[int] = []
+            for idx in pending_indices:
+                if idx >= len(batch_results):
+                    still_pending.append(idx)
+                    continue
+                d = batch_results[idx]
+                status_id = int((d.get("status") or {}).get("id", 0))
+                if status_id >= 3:
+                    results_data[idx] = d
+                else:
+                    still_pending.append(idx)
+            pending_indices = still_pending
+
+        poll_wall_ms = (time.perf_counter() - t_poll_start) * 1000.0
+        logger.debug(
+            "[Codebox|batch] poll complete: %d/%d resolved in %.0fms (%d polls, final_interval=%.0fms)",
+            len(tokens) - len(pending_indices),
+            len(tokens),
+            poll_wall_ms,
+            poll_count,
+            poll_interval * 1000,
+        )
+
+        # --- Stage 3: Normalise results (mirrors _execute_single_tc logic) ---
+        tc_results: list[TestCaseResult] = []
+        for i, (tc, data) in enumerate(zip(testcases, results_data)):
+            tc_wall_ms = (time.perf_counter() - t_submit_start) * 1000.0
+            if data is None:
+                # Timed out waiting for this TC
+                tc_results.append(TestCaseResult(
+                    testcase_id=tc.id,
+                    name=tc.name,
+                    hidden=bool(tc.hidden),
+                    category=getattr(tc.category, "value", None) if tc.category else None,
+                    stdout="",
+                    expected_output="" if tc.hidden else (tc.expected_output or ""),
+                    stderr="Batch polling timed out before this testcase completed.",
+                    compile_output="",
+                    wall_time_ms=round(tc_wall_ms, 2),
+                    runtime_ms=0.0,
+                    cpu_time_ms=0.0,
+                    peak_memory_mb=0.0,
+                    exit_code=1,
+                    weight=tc.weight,
+                    passed=False,
+                    verdict=Verdict.INTERNAL_ERROR,
+                ))
+                continue
+
+            status_id = int((data.get("status") or {}).get("id", 0))
+            raw_verdict = STATUS_VERDICTS.get(status_id, Verdict.RUNTIME_ERROR)
+            stdout = data.get("stdout") or ""
+            stderr = data.get("stderr") or ""
+            compile_out = data.get("compile_output") or ""
+            status_desc = (data.get("status") or {}).get("description") or ""
+            cpu_time_sec = float(data.get("time") or 0.0)
+            cpu_time_ms = cpu_time_sec * 1000.0
+            mem_kb = float(data.get("memory") or 0.0)
+            mem_mb = mem_kb / 1024.0
+
+            passed = False
+            final_verdict = raw_verdict
+
+            if status_id == 6:
+                final_verdict = Verdict.COMPILATION_ERROR
+                if not compile_out:
+                    compile_out = stderr or status_desc or "Compilation error"
+                if not stderr:
+                    stderr = compile_out
+            elif status_id == 5:
+                final_verdict = Verdict.TIME_LIMIT_EXCEEDED
+                if not stderr:
+                    stderr = "Time Limit Exceeded"
+            elif status_id in {7, 8, 9, 10, 11, 12}:
+                final_verdict = Verdict.RUNTIME_ERROR
+                if not stderr:
+                    stderr = compile_out or status_desc or "Runtime error"
+            elif status_id == 3 or raw_verdict == Verdict.ACCEPTED:
+                passed = JudgeEngine.compare(
+                    actual=stdout,
+                    expected=tc.expected_output or "",
+                    mode=tc.comparison_mode or comparison_mode,
+                )
+                final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
+            elif status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
+                passed = JudgeEngine.compare(
+                    actual=stdout,
+                    expected=tc.expected_output or "",
+                    mode=tc.comparison_mode or comparison_mode,
+                )
+                final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
+
+            tc_results.append(TestCaseResult(
+                testcase_id=tc.id,
+                name=tc.name,
+                hidden=bool(tc.hidden),
+                category=getattr(tc.category, "value", None) if tc.category else None,
+                stdout=stdout,
+                expected_output=tc.expected_output or "",
+                stderr=stderr,
+                compile_output=compile_out,
+                wall_time_ms=round(tc_wall_ms, 2),
+                runtime_ms=round(cpu_time_ms, 2),
+                cpu_time_ms=round(cpu_time_ms, 2),
+                peak_memory_mb=mem_mb,
+                exit_code=int(data.get("exit_code") or 0),
+                weight=tc.weight,
+                passed=passed,
+                verdict=final_verdict,
+            ))
+
+        return tc_results
+
     async def _execute_single_tc(
         self,
         client: httpx.AsyncClient,
@@ -307,15 +512,26 @@ class CodeboxProvider(JudgeProvider):
         data: Dict[str, Any] = {}
         try:
             url = f"{self.base_url}/submissions?base64_encoded=false&wait=true"
+            t_submit = time.perf_counter()
             resp = await client.post(url, json=payload, headers=self._headers())
             resp.raise_for_status()
             data = resp.json()
+            t_submit_done = time.perf_counter()
 
             token = data.get("token")
             status_id = int((data.get("status") or {}).get("id", 0))
             if status_id < 3 and token:
-                for _ in range(self.max_polls):
-                    await asyncio.sleep(self.poll_interval)
+                # wait=true was not honored — fall into exponential-backoff polling
+                logger.debug(
+                    "[Codebox|tc] wait=true returned status_id=%d (pending) for token=%s; polling (submit_ms=%.0f)",
+                    status_id,
+                    token,
+                    (t_submit_done - t_submit) * 1000,
+                )
+                poll_interval = self.poll_initial_s
+                for poll_num in range(self.max_polls):
+                    await asyncio.sleep(poll_interval)
+                    poll_interval = min(poll_interval * 1.5, self.poll_interval)  # exponential backoff
                     poll_resp = await client.get(
                         f"{self.base_url}/submissions/{token}?base64_encoded=false",
                         headers=self._headers(),
@@ -324,6 +540,10 @@ class CodeboxProvider(JudgeProvider):
                     data = poll_resp.json()
                     status_id = int((data.get("status") or {}).get("id", 0))
                     if status_id >= 3:
+                        logger.debug(
+                            "[Codebox|tc] token=%s resolved status_id=%d after %d polls (%.0fms elapsed)",
+                            token, status_id, poll_num + 1, (time.perf_counter() - t0) * 1000,
+                        )
                         break
         except Exception as exc:
             tc_wall_ms = (time.perf_counter() - t0) * 1000.0
@@ -544,20 +764,77 @@ class CodeboxProvider(JudgeProvider):
             async with self._admission_controller.acquire_permit(pool=admission_pool, wait_timeout_s=min(5.0, timeout_budget)):
                 limits = httpx.Limits(max_keepalive_connections=20, max_connections=50)
                 async with httpx.AsyncClient(timeout=timeout_budget, limits=limits) as client:
-                    tasks = [
-                        self._execute_single_tc(
-                            client=client,
-                            lang_id=lang_id,
-                            code=code,
-                            tc=tc,
-                            time_limit=time_limit,
-                            memory_limit_mb=memory_limit_mb,
-                            comparison_mode=comparison_mode,
-                        )
-                        for tc in testcases
-                    ]
-                    # Concurrency bounded to 4 to match container worker slot limits
-                    results: list[TestCaseResult] = await gather_with_concurrency(4, *tasks)
+                    # --- Batch API path (preferred): submit all TCs in one request ---
+                    # Eliminates ceil(N/concurrency) × per_TC_latency multiplier.
+                    # Falls back to per-TC concurrent if batch endpoint returns 404.
+                    if self.use_batch_api:
+                        try:
+                            t_batch = time.perf_counter()
+                            logger.debug(
+                                "[Codebox] Attempting batch API for %d testcases (CODEBOX_USE_BATCH_API=true)",
+                                len(testcases),
+                            )
+                            results: list[TestCaseResult] = await self._execute_batch_api(
+                                client=client,
+                                lang_id=lang_id,
+                                code=code,
+                                testcases=testcases,
+                                time_limit=time_limit,
+                                memory_limit_mb=memory_limit_mb,
+                                comparison_mode=comparison_mode,
+                            )
+                            logger.info(
+                                "[Codebox] batch API resolved %d/%d TCs in %.0fms",
+                                sum(1 for r in results if r.verdict != Verdict.INTERNAL_ERROR),
+                                len(testcases),
+                                (time.perf_counter() - t_batch) * 1000,
+                            )
+                        except (httpx.HTTPStatusError, ValueError) as batch_err:
+                            # ValueError: batch response malformed (no tokens) = batch not supported.
+                            # HTTPStatusError 404: endpoint does not exist.
+                            # Both signal "fall back to per-TC"; any other HTTPStatusError re-raises.
+                            is_not_supported = isinstance(batch_err, ValueError) or (
+                                isinstance(batch_err, httpx.HTTPStatusError)
+                                and batch_err.response.status_code == 404
+                            )
+                            if is_not_supported:
+                                logger.warning(
+                                    "[Codebox] batch API not supported (%s) — "
+                                    "disabling for this instance and falling back to per-TC concurrent.",
+                                    type(batch_err).__name__,
+                                )
+                                self.use_batch_api = False  # disable for lifetime of this instance
+                                tasks = [
+                                    self._execute_single_tc(
+                                        client=client,
+                                        lang_id=lang_id,
+                                        code=code,
+                                        tc=tc,
+                                        time_limit=time_limit,
+                                        memory_limit_mb=memory_limit_mb,
+                                        comparison_mode=comparison_mode,
+                                    )
+                                    for tc in testcases
+                                ]
+                                results = await gather_with_concurrency(4, *tasks)
+                            else:
+                                raise
+                    else:
+                        # Per-TC concurrent path (fallback or explicitly disabled)
+                        tasks = [
+                            self._execute_single_tc(
+                                client=client,
+                                lang_id=lang_id,
+                                code=code,
+                                tc=tc,
+                                time_limit=time_limit,
+                                memory_limit_mb=memory_limit_mb,
+                                comparison_mode=comparison_mode,
+                            )
+                            for tc in testcases
+                        ]
+                        # Concurrency bounded to 4 to match container worker slot limits
+                        results = await gather_with_concurrency(4, *tasks)
         except JudgeExecutionException as j_exc:
             batch_wall_ms = (time.perf_counter() - batch_start) * 1000.0
             return ExecutionResult(

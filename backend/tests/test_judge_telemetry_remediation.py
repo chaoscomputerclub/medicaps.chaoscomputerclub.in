@@ -115,8 +115,9 @@ async def test_codebox_wall_clock_is_measured():
 
 @pytest.mark.asyncio
 async def test_provider_turnaround_is_separate_from_execution_time():
-    """Verify CodeboxProvider.execute_batch populates provider_turnaround_ms separately."""
+    """Verify CodeboxProvider.execute_batch (per-TC path) populates provider_turnaround_ms separately."""
     provider = CodeboxProvider()
+    provider.use_batch_api = False  # force per-TC path so the blanket POST mock still works
 
     mock_resp = MagicMock()
     mock_resp.status_code = 200
@@ -147,6 +148,58 @@ async def test_provider_turnaround_is_separate_from_execution_time():
     # 3 testcases * 50ms CPU time = 150ms total CPU
     assert res.execution_cpu_ms == pytest.approx(150.0, rel=1e-2)
     assert res.time == pytest.approx(0.050, rel=1e-2)  # Max single testcase CPU time in seconds
+
+
+@pytest.mark.asyncio
+async def test_provider_turnaround_via_batch_api():
+    """
+    Verify CodeboxProvider.execute_batch uses /submissions/batch when available.
+    POST returns a list of tokens; GET returns all completed results on first poll.
+    The batch path collapses wall time from ceil(N/4)*TC_time to single-TC-time.
+    """
+    provider = CodeboxProvider()
+    provider.use_batch_api = True
+
+    batch_submit_resp = MagicMock()
+    batch_submit_resp.status_code = 200
+    batch_submit_resp.raise_for_status = MagicMock()
+    batch_submit_resp.json.return_value = [
+        {"token": f"tok_{i}"} for i in range(3)
+    ]
+
+    tc_result_data = {
+        "status": {"id": 3, "description": "Accepted"},
+        "stdout": "ans",
+        "time": "0.050",
+        "memory": 1024,
+        "exit_code": 0,
+    }
+
+    batch_poll_resp = MagicMock()
+    batch_poll_resp.status_code = 200
+    batch_poll_resp.raise_for_status = MagicMock()
+    batch_poll_resp.json.return_value = [tc_result_data] * 3
+
+    tcs = [
+        TestCaseSchema(id=f"tc_{i}", stdin="", expected_output="ans")
+        for i in range(3)
+    ]
+
+    with patch.object(provider, "healthy", AsyncMock(return_value=True)), \
+         patch("httpx.AsyncClient.post", AsyncMock(return_value=batch_submit_resp)), \
+         patch("httpx.AsyncClient.get", AsyncMock(return_value=batch_poll_resp)):
+        res = await provider.execute_batch(
+            language="python",
+            code="print('ans')",
+            testcases=tcs,
+        )
+
+    assert res.provider_turnaround_ms is not None
+    assert res.execution_cpu_ms is not None
+    assert res.execution_wall_ms is not None
+    assert res.execution_cpu_ms == pytest.approx(150.0, rel=1e-2)
+    assert res.time == pytest.approx(0.050, rel=1e-2)
+    assert res.passed_testcases == 3
 
 
 # ─────────────────────────────────────────────────────────────────────────────
