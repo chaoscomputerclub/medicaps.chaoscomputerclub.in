@@ -42,16 +42,18 @@ type TelemetrySnapshot struct {
 
 // JobPayload represents a claimed execution job from the queue.
 type JobPayload struct {
-	JobID   string                 `json:"id"`
-	JobType string                 `json:"job_type"`
-	Attempt int                    `json:"attempt"`
-	LeaseID string                 `json:"lease_id"`
-	Payload map[string]interface{} `json:"payload"`
+	JobID     string                 `json:"id"`
+	AttemptID string                 `json:"attempt_id,omitempty"`
+	JobType   string                 `json:"job_type"`
+	Attempt   int                    `json:"attempt"`
+	LeaseID   string                 `json:"lease_id"`
+	Payload   map[string]interface{} `json:"payload"`
 }
 
 // ResultRequest represents execution results returned to control plane.
 type ResultRequest struct {
 	JobID           string                   `json:"job_id"`
+	AttemptID       string                   `json:"attempt_id,omitempty"`
 	Attempt         int                      `json:"attempt"`
 	LeaseID         string                   `json:"lease_id"`
 	Verdict         string                   `json:"verdict"`

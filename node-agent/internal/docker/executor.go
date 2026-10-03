@@ -3,17 +3,39 @@ package docker
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"chaoscomputerclub.in/node-agent/internal/judge"
 	"chaoscomputerclub.in/node-agent/internal/registration"
 )
+
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	return err
+}
 
 // LanguageSpec configures compilation and execution parameters for a programming language.
 type LanguageSpec struct {
@@ -28,48 +50,48 @@ var languageSpecs = map[string]LanguageSpec{
 	"python": {
 		Image:          "python:3.11-slim",
 		SourceFileName: "solution.py",
-		RunCmd:         []string{"python3", "solution.py"},
+		RunCmd:         []string{"python3", "/workspace/solution.py"},
 		NeedsCompile:   false,
 	},
 	"javascript": {
 		Image:          "node:20-alpine",
 		SourceFileName: "solution.js",
-		RunCmd:         []string{"node", "solution.js"},
+		RunCmd:         []string{"node", "/workspace/solution.js"},
 		NeedsCompile:   false,
 	},
 	"cpp": {
 		Image:          "gcc:13",
 		SourceFileName: "solution.cpp",
-		CompileCmd:     []string{"g++", "-O3", "-std=c++20", "solution.cpp", "-o", "solution"},
-		RunCmd:         []string{"./solution"},
+		CompileCmd:     []string{"g++", "-O3", "-std=c++20", "/workspace/solution.cpp", "-o", "/workspace/solution"},
+		RunCmd:         []string{"/workspace/solution"},
 		NeedsCompile:   true,
 	},
 	"c": {
 		Image:          "gcc:13",
 		SourceFileName: "solution.c",
-		CompileCmd:     []string{"gcc", "-O3", "solution.c", "-o", "solution"},
-		RunCmd:         []string{"./solution"},
+		CompileCmd:     []string{"gcc", "-O3", "/workspace/solution.c", "-o", "/workspace/solution"},
+		RunCmd:         []string{"/workspace/solution"},
 		NeedsCompile:   true,
 	},
 	"java": {
 		Image:          "eclipse-temurin:17-jdk-alpine",
 		SourceFileName: "Main.java",
-		CompileCmd:     []string{"javac", "Main.java"},
-		RunCmd:         []string{"java", "Main"},
+		CompileCmd:     []string{"javac", "-d", "/workspace", "/workspace/Main.java"},
+		RunCmd:         []string{"java", "-cp", "/workspace", "Main"},
 		NeedsCompile:   true,
 	},
 	"go": {
 		Image:          "golang:1.22-alpine",
 		SourceFileName: "main.go",
-		CompileCmd:     []string{"go", "build", "-o", "solution", "main.go"},
-		RunCmd:         []string{"./solution"},
+		CompileCmd:     []string{"go", "build", "-o", "/workspace/solution", "/workspace/main.go"},
+		RunCmd:         []string{"/workspace/solution"},
 		NeedsCompile:   true,
 	},
 	"rust": {
 		Image:          "rust:alpine",
 		SourceFileName: "solution.rs",
-		CompileCmd:     []string{"rustc", "-O", "-o", "solution", "solution.rs"},
-		RunCmd:         []string{"./solution"},
+		CompileCmd:     []string{"rustc", "-O", "-o", "/workspace/solution", "/workspace/solution.rs"},
+		RunCmd:         []string{"/workspace/solution"},
 		NeedsCompile:   true,
 	},
 }
@@ -110,6 +132,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		errStr := fmt.Sprintf("Unsupported execution language: %s", langStr)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			AttemptID:       job.AttemptID,
 			Attempt:         job.Attempt,
 			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
@@ -124,6 +147,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		errStr := fmt.Sprintf("Failed to initialize RAM workspace: %v", err)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			AttemptID:       job.AttemptID,
 			Attempt:         job.Attempt,
 			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
@@ -141,6 +165,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		errStr := fmt.Sprintf("Failed to write source code: %v", err)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			AttemptID:       job.AttemptID,
 			Attempt:         job.Attempt,
 			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
@@ -183,6 +208,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		log.Printf("❌ [Job %s] Sandbox spawn error: %s", jobID, errStr)
 		return registration.ResultRequest{
 			JobID:           jobID,
+			AttemptID:       job.AttemptID,
 			Attempt:         job.Attempt,
 			LeaseID:         job.LeaseID,
 			Verdict:         "SYSTEM_ERROR",
@@ -198,23 +224,56 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		_ = exec.CommandContext(cleanupCtx, e.dockerBin, "rm", "-f", containerName).Run()
 	}()
 
-	// 4. Compile Once inside the running container (for compiled languages: C, C++, Java, Go)
+	// 4. Compile Once inside the running container (with content-addressed caching)
 	if spec.NeedsCompile {
-		compCtx, compCancel := context.WithTimeout(ctx, 15*time.Second)
-		defer compCancel()
+		cacheDir := filepath.Join(e.workspaceBase, "compilation_cache", langStr)
+		_ = os.MkdirAll(cacheDir, 0755)
 
-		compArgs := append([]string{"exec", "-w", "/workspace", containerName}, spec.CompileCmd...)
-		cmd := exec.CommandContext(compCtx, e.dockerBin, compArgs...)
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			compOut := string(out)
-			return registration.ResultRequest{
-				JobID:           jobID,
-				Attempt:         job.Attempt,
-				LeaseID:         job.LeaseID,
-				Verdict:         "COMPILATION_ERROR",
-				CompileOutput:   &compOut,
-				TestcaseResults: []map[string]interface{}{},
+		artifactName := "solution"
+		if langStr == "java" {
+			artifactName = "Main.class"
+		}
+		dstPath := filepath.Join(wsPath, artifactName)
+
+		keyRaw := fmt.Sprintf("%s|%s|%s", spec.Image, strings.Join(spec.CompileCmd, " "), code)
+		cacheHash := fmt.Sprintf("%x", sha256.Sum256([]byte(keyRaw)))
+		cachedArtifact := filepath.Join(cacheDir, cacheHash)
+
+		cached := false
+		if info, err := os.Stat(cachedArtifact); err == nil && info.Size() > 0 {
+			if copyErr := copyFile(cachedArtifact, dstPath); copyErr == nil {
+				_ = os.Chmod(dstPath, 0777)
+				cached = true
+				log.Printf("⚡ [Job %s] Compilation cache hit (%s)", jobID, cacheHash[:12])
+			}
+		}
+
+		if !cached {
+			compCtx, compCancel := context.WithTimeout(ctx, 15*time.Second)
+			defer compCancel()
+
+			compArgs := append([]string{"exec", "-w", "/workspace", containerName}, spec.CompileCmd...)
+			cmd := exec.CommandContext(compCtx, e.dockerBin, compArgs...)
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				compOut := string(out)
+				return registration.ResultRequest{
+					JobID:           jobID,
+					AttemptID:       job.AttemptID,
+					Attempt:         job.Attempt,
+					LeaseID:         job.LeaseID,
+					Verdict:         "COMPILATION_ERROR",
+					CompileOutput:   &compOut,
+					TestcaseResults: []map[string]interface{}{},
+				}
+			}
+
+			// Store artifact in cache atomically
+			if info, err := os.Stat(dstPath); err == nil && info.Size() > 0 {
+				tmpCached := fmt.Sprintf("%s.tmp.%d", cachedArtifact, time.Now().UnixNano())
+				if copyErr := copyFile(dstPath, tmpCached); copyErr == nil {
+					_ = os.Rename(tmpCached, cachedArtifact)
+				}
 			}
 		}
 	}
@@ -233,83 +292,166 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 	}
 	tcTimeout := time.Duration(timeLimitMS)*time.Millisecond + 2*time.Second
 
-	tcResults := make([]map[string]interface{}, 0)
-	passedCount := 0
-	finalVerdict := "ACCEPTED"
-	var maxRuntimeMS float64 = 0.0
+	// 6. Capacity-aware bounded testcase execution
+	concurrency := runtime.NumCPU()
+	if concurrency > 4 {
+		concurrency = 4
+	}
+	if langStr == "java" && concurrency > 2 {
+		concurrency = 2
+	}
+	if concurrency < 1 {
+		concurrency = 1
+	}
+	if len(rawTCs) == 1 {
+		concurrency = 1
+	}
 
-	// 6. Execute each testcase sequentially via `docker exec -i` in the warm sandbox with early termination
-	for i, raw := range rawTCs {
-		tcMap, _ := raw.(map[string]interface{})
-		tcID, _ := tcMap["id"].(string)
-		if tcID == "" {
-			tcID = fmt.Sprintf("tc_%d", i+1)
-		}
-		stdin, _ := tcMap["stdin"].(string)
-		expected, _ := tcMap["expected_output"].(string)
-		hidden, _ := tcMap["hidden"].(bool)
+	type tcOutcome struct {
+		index   int
+		result  map[string]interface{}
+		runtime float64
+		passed  bool
+		verdict string
+	}
 
-		tcCtx, tcCancel := context.WithTimeout(ctx, tcTimeout)
-		start := time.Now()
+	outcomes := make([]tcOutcome, 0, len(rawTCs))
+	var outcomesMu sync.Mutex
 
-		execArgs := append([]string{"exec", "-i", "-w", "/workspace", containerName}, spec.RunCmd...)
-		cmd := exec.CommandContext(tcCtx, e.dockerBin, execArgs...)
-		cmd.Stdin = strings.NewReader(stdin)
-		var stdoutBuf, stderrBuf bytes.Buffer
-		cmd.Stdout = &stdoutBuf
-		cmd.Stderr = &stderrBuf
+	sem := make(chan struct{}, concurrency)
+	var wg sync.WaitGroup
+	var earlyStopMu sync.Mutex
+	earlyStopped := false
 
-		err := cmd.Run()
-		elapsed := time.Since(start)
-		tcCancel()
-
-		elapsedMS := float64(elapsed.Milliseconds())
-		if elapsedMS > maxRuntimeMS {
-			maxRuntimeMS = elapsedMS
-		}
-
-		verdict := "ACCEPTED"
-		passed := false
-
-		if tcCtx.Err() == context.DeadlineExceeded {
-			verdict = "TIME_LIMIT_EXCEEDED"
-		} else if err != nil {
-			verdict = "RUNTIME_ERROR"
-		} else {
-			actualOut := strings.TrimRight(stdoutBuf.String(), "\r\n \t")
-			expectedOut := strings.TrimRight(expected, "\r\n \t")
-			if judge.CompareOutputs(actualOut, expectedOut) {
-				passed = true
-				verdict = "ACCEPTED"
-				passedCount++
-			} else {
-				verdict = "WRONG_ANSWER"
-			}
-		}
-
-		if verdict != "ACCEPTED" && finalVerdict == "ACCEPTED" {
-			finalVerdict = verdict
-		}
-
-		tcResults = append(tcResults, map[string]interface{}{
-			"testcase_id":     tcID,
-			"passed":          passed,
-			"verdict":         verdict,
-			"stdout":          stdoutBuf.String(),
-			"stderr":          stderrBuf.String(),
-			"wall_time_ms":    elapsedMS,
-			"expected_output": expected,
-		})
-
-		// Early termination: on definitive non-ACCEPTED verdict on hidden or subsequent testcases, terminate early
-		if verdict != "ACCEPTED" && (hidden || i >= 2) {
-			log.Printf("⚡ [Job %s] Early termination triggered on %s (verdict=%s)", jobID, tcID, verdict)
+	for idx, raw := range rawTCs {
+		earlyStopMu.Lock()
+		if earlyStopped {
+			earlyStopMu.Unlock()
 			break
+		}
+		earlyStopMu.Unlock()
+
+		sem <- struct{}{}
+		wg.Add(1)
+
+		go func(i int, tcRaw interface{}) {
+			defer func() {
+				<-sem
+				wg.Done()
+			}()
+
+			earlyStopMu.Lock()
+			if earlyStopped {
+				earlyStopMu.Unlock()
+				return
+			}
+			earlyStopMu.Unlock()
+
+			tcMap, _ := tcRaw.(map[string]interface{})
+			tcID, _ := tcMap["id"].(string)
+			if tcID == "" {
+				tcID = fmt.Sprintf("tc_%d", i+1)
+			}
+			stdin, _ := tcMap["stdin"].(string)
+			expected, _ := tcMap["expected_output"].(string)
+			hidden, _ := tcMap["hidden"].(bool)
+
+			// Create isolated per-testcase execution directory
+			tcRunDir := filepath.Join(wsPath, "runs", fmt.Sprintf("tc_%d", i))
+			_ = os.MkdirAll(tcRunDir, 0777)
+
+			tcCtx, tcCancel := context.WithTimeout(ctx, tcTimeout)
+			defer tcCancel()
+
+			start := time.Now()
+			execArgs := append([]string{"exec", "-i", "-w", fmt.Sprintf("/workspace/runs/tc_%d", i), containerName}, spec.RunCmd...)
+			cmd := exec.CommandContext(tcCtx, e.dockerBin, execArgs...)
+			cmd.Stdin = strings.NewReader(stdin)
+			var stdoutBuf, stderrBuf bytes.Buffer
+			cmd.Stdout = &stdoutBuf
+			cmd.Stderr = &stderrBuf
+
+			err := cmd.Run()
+			elapsed := time.Since(start)
+			elapsedMS := float64(elapsed.Milliseconds())
+
+			verdict := "ACCEPTED"
+			passed := false
+
+			if tcCtx.Err() == context.DeadlineExceeded {
+				verdict = "TIME_LIMIT_EXCEEDED"
+			} else if err != nil {
+				verdict = "RUNTIME_ERROR"
+			} else {
+				actualOut := strings.TrimRight(stdoutBuf.String(), "\r\n \t")
+				expectedOut := strings.TrimRight(expected, "\r\n \t")
+				if judge.CompareOutputs(actualOut, expectedOut) {
+					passed = true
+					verdict = "ACCEPTED"
+				} else {
+					verdict = "WRONG_ANSWER"
+				}
+			}
+
+			// Early termination trigger on non-ACCEPTED verdict
+			if verdict != "ACCEPTED" && (hidden || i >= 2) {
+				earlyStopMu.Lock()
+				if !earlyStopped {
+					earlyStopped = true
+					log.Printf("⚡ [Job %s] Early termination triggered on %s (verdict=%s)", jobID, tcID, verdict)
+				}
+				earlyStopMu.Unlock()
+			}
+
+			outcome := tcOutcome{
+				index:   i,
+				runtime: elapsedMS,
+				passed:  passed,
+				verdict: verdict,
+				result: map[string]interface{}{
+					"testcase_id":     tcID,
+					"passed":          passed,
+					"verdict":         verdict,
+					"stdout":          stdoutBuf.String(),
+					"stderr":          stderrBuf.String(),
+					"wall_time_ms":    elapsedMS,
+					"expected_output": expected,
+				},
+			}
+
+			outcomesMu.Lock()
+			outcomes = append(outcomes, outcome)
+			outcomesMu.Unlock()
+		}(idx, raw)
+	}
+
+	wg.Wait()
+
+	// Sort results back into strict testcase sequence
+	sort.Slice(outcomes, func(i, j int) bool {
+		return outcomes[i].index < outcomes[j].index
+	})
+
+	tcResults := make([]map[string]interface{}, len(outcomes))
+	passedCount := 0
+	var maxRuntimeMS float64 = 0.0
+	finalVerdict := "ACCEPTED"
+
+	for i, o := range outcomes {
+		tcResults[i] = o.result
+		if o.runtime > maxRuntimeMS {
+			maxRuntimeMS = o.runtime
+		}
+		if o.passed {
+			passedCount++
+		} else if finalVerdict == "ACCEPTED" {
+			finalVerdict = o.verdict
 		}
 	}
 
 	return registration.ResultRequest{
 		JobID:           jobID,
+		AttemptID:       job.AttemptID,
 		Attempt:         job.Attempt,
 		LeaseID:         job.LeaseID,
 		Verdict:         finalVerdict,

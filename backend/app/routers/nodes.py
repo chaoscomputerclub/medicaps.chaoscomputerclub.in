@@ -480,7 +480,7 @@ async def submit_result(
                     raise HTTPException(status_code=409, detail="Conflicting duplicate result rejected.")
             else:
                 if (
-                    payload.attempt_id != attempt_id
+                    (payload.attempt_id is not None and payload.attempt_id != attempt_id)
                     or db_job.active_attempt_id != attempt_id
                     or db_job.state != "PROCESSING"
                     or db_attempt.state != "STARTED"

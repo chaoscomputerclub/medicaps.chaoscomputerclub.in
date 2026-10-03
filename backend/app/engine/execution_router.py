@@ -804,7 +804,7 @@ class ExecutionRouter:
                             break
 
                         raw_tc_list = res_dict.get("testcase_results", [])
-                        if len(raw_tc_list) < len(testcases):
+                        if len(raw_tc_list) < len(testcases) and node_verdict == "ACCEPTED":
                             failure_code = ErrorCode.NODE_RESULT_TIMEOUT.value
                             break
 

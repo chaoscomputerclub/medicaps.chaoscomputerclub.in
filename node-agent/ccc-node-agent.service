@@ -1,0 +1,29 @@
+[Unit]
+Description=Chaos Computer Club — Production Compute Fabric Node Agent
+After=network-online.target docker.service ccc-medicaps-api.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/ccc-node-agent
+EnvironmentFile=-/opt/ccc-node-agent/node.env
+ExecStart=/opt/ccc-node-agent/bin/node-agent-linux-amd64
+Restart=always
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ccc-node-agent
+
+[Install]
+WantedBy=multi-user.target
