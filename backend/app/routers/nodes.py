@@ -132,6 +132,7 @@ class NodeResultRequest(BaseModel):
     lease_id: Optional[str] = None
     verdict: str
     runtime_ms: float = 0.0
+    compile_time_ms: float = 0.0
     memory_mb: float = 0.0
     testcase_results: Optional[List[Dict[str, Any]]] = None
     compile_output: Optional[str] = None

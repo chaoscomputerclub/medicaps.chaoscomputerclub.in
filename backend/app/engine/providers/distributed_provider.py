@@ -276,6 +276,10 @@ class DistributedFabricProvider(JudgeProvider):
         total_tcs = len(tc_results) if tc_results else len(testcases)
         all_passed = (passed_count == total_tcs) and total_tcs > 0
 
+        total_tc_cpu = sum(r.runtime_ms for r in tc_results)
+        max_tc_wall = float(res_dict.get("runtime_ms", 0.0))
+        compile_ms = float(res_dict.get("compile_time_ms", 0.0))
+
         return ExecutionResult(
             success=all_passed,
             submission_id=job_id,
@@ -284,7 +288,12 @@ class DistributedFabricProvider(JudgeProvider):
             testcase_results=tc_results,
             passed_testcases=passed_count,
             total_testcases=total_tcs,
-            time=float(res_dict.get("runtime_ms", 0.0)) / 1000.0,
+            time=max_tc_wall / 1000.0,
+            compile_time_ms=compile_ms,
+            execution_time_ms=total_tc_cpu,
+            execution_cpu_ms=total_tc_cpu,
+            execution_wall_ms=max_tc_wall,
+            provider_turnaround_ms=compile_ms + max_tc_wall,
             memory=float(res_dict.get("memory_mb", 0.0)),
             compile_output=res_dict.get("compile_output") or "",
             error=res_dict.get("error"),

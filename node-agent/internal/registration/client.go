@@ -58,6 +58,7 @@ type ResultRequest struct {
 	LeaseID         string                   `json:"lease_id"`
 	Verdict         string                   `json:"verdict"`
 	RuntimeMS       float64                  `json:"runtime_ms"`
+	CompileTimeMS   float64                  `json:"compile_time_ms"`
 	MemoryMB        float64                  `json:"memory_mb"`
 	TestcaseResults []map[string]interface{} `json:"testcase_results"`
 	CompileOutput   *string                  `json:"compile_output"`

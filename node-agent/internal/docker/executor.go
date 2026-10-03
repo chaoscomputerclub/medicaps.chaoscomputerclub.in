@@ -225,6 +225,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 	}()
 
 	// 4. Compile Once inside the running container (with content-addressed caching)
+	var compileDurationMS float64 = 0.0
 	if spec.NeedsCompile {
 		cacheDir := filepath.Join(e.workspaceBase, "compilation_cache", langStr)
 		_ = os.MkdirAll(cacheDir, 0755)
@@ -249,12 +250,14 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		}
 
 		if !cached {
+			compStart := time.Now()
 			compCtx, compCancel := context.WithTimeout(ctx, 15*time.Second)
 			defer compCancel()
 
 			compArgs := append([]string{"exec", "-w", "/workspace", containerName}, spec.CompileCmd...)
 			cmd := exec.CommandContext(compCtx, e.dockerBin, compArgs...)
 			out, err := cmd.CombinedOutput()
+			compileDurationMS = float64(time.Since(compStart).Milliseconds())
 			if err != nil {
 				compOut := string(out)
 				return registration.ResultRequest{
@@ -263,6 +266,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 					Attempt:         job.Attempt,
 					LeaseID:         job.LeaseID,
 					Verdict:         "COMPILATION_ERROR",
+					CompileTimeMS:   compileDurationMS,
 					CompileOutput:   &compOut,
 					TestcaseResults: []map[string]interface{}{},
 				}
@@ -458,6 +462,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		LeaseID:         job.LeaseID,
 		Verdict:         finalVerdict,
 		RuntimeMS:       maxRuntimeMS,
+		CompileTimeMS:   compileDurationMS,
 		MemoryMB:        28.5,
 		TestcaseResults: tcResults,
 	}

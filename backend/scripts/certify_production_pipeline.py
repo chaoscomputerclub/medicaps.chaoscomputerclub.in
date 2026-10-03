@@ -98,15 +98,27 @@ async def run_single_submission(router, lang_cfg, mode_label):
         )
     t_wall_ms = (time.perf_counter() - t_start) * 1000.0
 
+    comp_ms = res.compile_time_ms or 0.0
+    cpu_ms = res.execution_cpu_ms or 0.0
+    wall_ms = res.execution_wall_ms or 0.0
+    turn_ms = res.provider_turnaround_ms or 0.0
+
     print(f"  ✓ Verdict:                {res.verdict.value} ({res.passed_testcases}/{res.total_testcases} passed)")
     print(f"  ✓ Provider Used:          {res.provider}")
     print(f"  ✓ Executing Node:         {res.node_id}")
     print(f"  ✓ Container Sandbox:      {res.container_id}")
-    print(f"  ✓ Single Compile Time:    {res.compile_time_ms:.2f} ms")
-    print(f"  ✓ Execution CPU Time:     {res.execution_cpu_ms:.2f} ms")
-    print(f"  ✓ Execution Wall Time:    {res.execution_wall_ms:.2f} ms")
-    print(f"  ✓ Provider Turnaround:    {res.provider_turnaround_ms:.2f} ms")
+    print(f"  ✓ Single Compile Time:    {comp_ms:.2f} ms")
+    print(f"  ✓ Execution CPU Time:     {cpu_ms:.2f} ms")
+    print(f"  ✓ Execution Wall Time:    {wall_ms:.2f} ms")
+    print(f"  ✓ Provider Turnaround:    {turn_ms:.2f} ms")
     print(f"  ✓ Measured End-to-End:    {t_wall_ms:.2f} ms")
+    if res.error:
+        print(f"  ❌ Error detail:          {res.error}")
+    if res.compile_output:
+        print(f"  ❌ Compile output:        {res.compile_output}")
+    if res.testcase_results:
+        for tc in res.testcase_results[:3]:
+            print(f"     TC {tc.testcase_id}: verdict={tc.verdict.value} passed={tc.passed} out={repr(tc.stdout)} exp={repr(tc.expected_output)}")
 
     if res.latencies:
         print(f"  ✓ Pipeline Latencies:     {json.dumps(res.latencies, indent=4)}")
