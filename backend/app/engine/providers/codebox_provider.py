@@ -103,7 +103,9 @@ class CodeboxProvider(JudgeProvider):
         self.auth_token = os.getenv("CODEBOX_TOKEN", "dev-token")
         self.poll_interval = float(os.getenv("CODEBOX_POLL_SECONDS", "0.3"))
         self.max_polls = int(os.getenv("CODEBOX_MAX_POLLS", "30"))
-        self.timeout = float(os.getenv("CODEBOX_TIMEOUT", "15.0"))
+        # 60s default: a batch of 13 TCs through Codebox's internal worker pool can take 20-30s.
+        # The old 15s default was insufficient and caused premature batch-poll timeouts.
+        self.timeout = float(os.getenv("CODEBOX_TIMEOUT", "60.0"))
         # Batch API: submit all TCs in one request, eliminating the ceil(N/concurrency) latency multiplier.
         # Set CODEBOX_USE_BATCH_API=false to force per-TC fallback (e.g. if Codebox lacks /submissions/batch).
         self.use_batch_api: bool = os.getenv("CODEBOX_USE_BATCH_API", "true").lower() not in ("false", "0", "no")
@@ -292,6 +294,7 @@ class CodeboxProvider(JudgeProvider):
         time_limit: float,
         memory_limit_mb: int,
         comparison_mode: ComparisonMode,
+        poll_budget_s: float = 0.0,
     ) -> list[TestCaseResult]:
         """
         Submit all testcases in ONE batch request to the Judge0-compatible /submissions/batch endpoint.
@@ -350,7 +353,11 @@ class CodeboxProvider(JudgeProvider):
 
         # --- Stage 2: Poll Until All Complete (exponential backoff) ---
         tokens_csv = ",".join(tokens)
-        max_total_wait_s = self.max_polls * self.poll_interval  # honour existing deadline budget
+        # Use the passed poll_budget_s (= httpx timeout_budget) as the authoritative deadline.
+        # Fallback: max_polls * poll_interval for backwards compat if called without poll_budget_s.
+        # CRITICAL FIX: the old code used 30 * 0.3 = 9.0s which caused all TCs to time out on
+        # batches of 13 where Codebox needs 10-25s to process through its internal worker pool.
+        max_total_wait_s = poll_budget_s if poll_budget_s > 0 else self.max_polls * self.poll_interval
         poll_interval = self.poll_initial_s  # start fast (default 50ms)
         t_poll_start = time.perf_counter()
         results_data: list[Optional[Dict[str, Any]]] = [None] * len(tokens)
@@ -771,8 +778,9 @@ class CodeboxProvider(JudgeProvider):
                         try:
                             t_batch = time.perf_counter()
                             logger.debug(
-                                "[Codebox] Attempting batch API for %d testcases (CODEBOX_USE_BATCH_API=true)",
+                                "[Codebox] Attempting batch API for %d testcases (CODEBOX_USE_BATCH_API=true, poll_budget=%.1fs)",
                                 len(testcases),
+                                timeout_budget,
                             )
                             results: list[TestCaseResult] = await self._execute_batch_api(
                                 client=client,
@@ -782,10 +790,12 @@ class CodeboxProvider(JudgeProvider):
                                 time_limit=time_limit,
                                 memory_limit_mb=memory_limit_mb,
                                 comparison_mode=comparison_mode,
+                                poll_budget_s=timeout_budget,  # FIX: pass real budget, not max_polls*poll_interval
                             )
+                            resolved = sum(1 for r in results if r.verdict != Verdict.INTERNAL_ERROR)
                             logger.info(
                                 "[Codebox] batch API resolved %d/%d TCs in %.0fms",
-                                sum(1 for r in results if r.verdict != Verdict.INTERNAL_ERROR),
+                                resolved,
                                 len(testcases),
                                 (time.perf_counter() - t_batch) * 1000,
                             )
@@ -868,7 +878,18 @@ class CodeboxProvider(JudgeProvider):
         batch_wall_ms = (time.perf_counter() - batch_start) * 1000.0
 
         # 5. Evaluate infrastructure success vs failure
-        infra_failures = [r for r in results if r.verdict == Verdict.INTERNAL_ERROR and ("503" in r.stderr or "connect" in r.stderr.lower())]
+        # CRITICAL FIX: also count batch poll timeouts (data=None → "Batch polling timed out") as
+        # infrastructure failures. The old filter only matched "503/connect" so batch-timeout results
+        # were incorrectly counted as successes, masking the timeout issue from the circuit breaker.
+        infra_failures = [
+            r for r in results
+            if r.verdict == Verdict.INTERNAL_ERROR and (
+                "503" in r.stderr
+                or "connect" in r.stderr.lower()
+                or "timed out" in r.stderr.lower()
+                or "timeout" in r.stderr.lower()
+            )
+        ]
         if infra_failures:
             await self._circuit_breaker.record_failure(is_infrastructure=True, reason=infra_failures[0].stderr)
         else:
