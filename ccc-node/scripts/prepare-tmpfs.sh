@@ -13,7 +13,7 @@ mkdir -p "${WS_PATH}"
 if [[ "$(uname -s)" == "Linux" ]]; then
     if ! mountpoint -q "${WS_PATH}"; then
         if [[ $EUID -eq 0 ]]; then
-            mount -t tmpfs -o size=2048M,noexec,nosuid tmpfs "${WS_PATH}"
+            mount -t tmpfs -o size=2048M,exec,nosuid tmpfs "${WS_PATH}"
             echo "✓ Mounted 2048 MB tmpfs in RAM"
         else
             echo "ℹ️ Running unprivileged; relying on host /tmp RAM backing"

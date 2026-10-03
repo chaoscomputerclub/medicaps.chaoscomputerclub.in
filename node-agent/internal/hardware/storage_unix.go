@@ -31,7 +31,7 @@ func EnsureRAMWorkspace(path string) error {
 	}
 	if runtime.GOOS == "linux" {
 		// Attempt tmpfs mount if root/sudo is permitted; else rely on /tmp
-		_ = exec.Command("mount", "-t", "tmpfs", "-o", "size=2048M,noexec,nosuid", "tmpfs", path).Run()
+		_ = exec.Command("mount", "-t", "tmpfs", "-o", "size=2048M,exec,nosuid", "tmpfs", path).Run()
 	}
 	_ = os.Chmod(path, 0777)
 	return nil

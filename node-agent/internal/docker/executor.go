@@ -270,8 +270,10 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 
 			// Store artifact in cache atomically
 			if info, err := os.Stat(dstPath); err == nil && info.Size() > 0 {
+				_ = os.Chmod(dstPath, 0777)
 				tmpCached := fmt.Sprintf("%s.tmp.%d", cachedArtifact, time.Now().UnixNano())
 				if copyErr := copyFile(dstPath, tmpCached); copyErr == nil {
+					_ = os.Chmod(tmpCached, 0777)
 					_ = os.Rename(tmpCached, cachedArtifact)
 				}
 			}
