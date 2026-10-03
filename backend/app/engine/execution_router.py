@@ -784,6 +784,7 @@ class ExecutionRouter:
         completed_result: Optional[ExecutionResult] = None
         claimed_node_id: Optional[str] = None
         failure_code: Optional[str] = None
+        claimed_recorded = False
 
         try:
             while time.time() - start_wait < remaining_timeout:
@@ -792,12 +793,17 @@ class ExecutionRouter:
                 if raw_job:
                     job_data = json.loads(raw_job)
                     claimed_node_id = job_data.get("claimed_by_node")
+                    if not claimed_recorded and (claimed_node_id or job_data.get("status") in ("PROCESSING", "COMPLETED")):
+                        tracker.record_stage("queue", max(0.1, (time.time() - start_wait) * 1000.0))
+                        claimed_recorded = True
+
                     if job_data.get("status") == "COMPLETED" and "result" in job_data:
                         res_dict = job_data["result"]
                         node_verdict = res_dict.get("verdict", "")
 
-                        # Record queue latency
-                        tracker.record_stage("queue", (time.time() - start_wait) * 1000.0)
+                        if not claimed_recorded:
+                            tracker.record_stage("queue", max(0.1, (time.time() - start_wait) * 1000.0))
+                            claimed_recorded = True
 
                         if node_verdict in ("COMPILATION_ERROR", "INTERNAL_ERROR") or bool(res_dict.get("compile_output")):
                             completed_result = self._distributed_provider._format_execution_result(res_dict, testcases, job_id)
