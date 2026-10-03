@@ -105,7 +105,7 @@ func (m *Manager) StartJudgeWorkers(ctx context.Context) {
 			}
 
 			// Backpressure check before polling
-			if !m.gov.TryAcquireSlot() {
+			if !m.gov.CanAcquireSlot() {
 				time.Sleep(100 * time.Millisecond)
 				continue
 			}
@@ -116,21 +116,24 @@ func (m *Manager) StartJudgeWorkers(ctx context.Context) {
 			claimCancel()
 
 			if err != nil {
-				m.gov.ReleaseSlot()
 				// Transient network or connection error: brief backoff
 				time.Sleep(200 * time.Millisecond)
 				continue
 			}
 
 			if job == nil {
-				m.gov.ReleaseSlot()
 				// Long-poll timeout cleanly expired on server without a job.
 				// Yield briefly (10ms) to avoid CPU churn while immediately remaining receptive to new jobs.
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
 
-			// Job claimed: spawn execution goroutine
+			// Job claimed: acquire governor slot & spawn execution goroutine
+			if !m.gov.TryAcquireSlot() {
+				// If backpressure hit while polling, drop claim briefly
+				continue
+			}
+
 			m.claimSem <- struct{}{}
 			m.wg.Add(1)
 

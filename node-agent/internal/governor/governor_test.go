@@ -33,6 +33,9 @@ func TestResourceGovernorSlots(t *testing.T) {
 
 	// Release 1 slot
 	gov.ReleaseSlot()
+	if !gov.CanAcquireSlot() {
+		t.Fatal("Expected CanAcquireSlot to return true when a slot is released")
+	}
 	snap2 := gov.Snapshot()
 	if snap2.RunningJobs != 2 {
 		t.Errorf("Expected 2 running jobs, got %d", snap2.RunningJobs)

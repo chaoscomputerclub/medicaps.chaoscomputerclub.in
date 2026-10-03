@@ -74,6 +74,16 @@ func (g *ResourceGovernor) Stop() {
 	}
 }
 
+func (g *ResourceGovernor) CanAcquireSlot() bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if g.inBackpressure {
+		return false
+	}
+	return g.activeSlots < g.maxConcurrency
+}
+
 func (g *ResourceGovernor) TryAcquireSlot() bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
