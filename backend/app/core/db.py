@@ -18,7 +18,7 @@ db_url = settings.DATABASE_URL.strip()
 if "sqlite" in db_url.lower():
     raise RuntimeError(
         "\n" + "=" * 80 + "\n"
-        "❌ SQLITE HAS BEEN REMOVED — POSTGRESQL 16+ REQUIRED\n"
+        "SQLITE HAS BEEN REMOVED — POSTGRESQL 16+ REQUIRED\n"
         "Chaos Computer Club Medi-Caps Chapter backend strictly uses PostgreSQL 16+.\n\n"
         "Please configure a valid PostgreSQL async URI in backend/.env:\n"
         "  DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps\n\n"

@@ -489,7 +489,13 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 
 			envelope, userStdout := judge.ParseRunnerEnvelope(stdoutBuf.String())
 			if envelope != nil {
-				if envelope.Status == "RUNTIME_ERROR" || envelope.Status == "FUNCTION_NOT_FOUND" {
+				if envelope.Status == "FUNCTION_NOT_FOUND" {
+					verdict = "FUNCTION_NOT_FOUND"
+					passed = false
+					if envelope.Error != "" {
+						stderrBuf.WriteString("\n" + envelope.Error)
+					}
+				} else if envelope.Status == "RUNTIME_ERROR" {
 					verdict = "RUNTIME_ERROR"
 					passed = false
 					if envelope.Error != "" {
@@ -531,8 +537,19 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 			}
 
 			displayStdout := stdoutBuf.String()
-			if envelope != nil {
+			if envelope != nil && envelope.Status == "SUCCESS" {
+				displayStdout = judge.FormatCanonicalValue(envelope.ReturnValue)
+			} else if envelope != nil {
 				displayStdout = userStdout
+			}
+
+			displayStderr := stderrBuf.String()
+			if envelope != nil && userStdout != "" {
+				if displayStderr != "" {
+					displayStderr = "Stdout:\n" + userStdout + "\nStderr:\n" + displayStderr
+				} else {
+					displayStderr = "Stdout:\n" + userStdout
+				}
 			}
 
 			outcome := tcOutcome{
@@ -545,7 +562,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 					"passed":          passed,
 					"verdict":         verdict,
 					"stdout":          displayStdout,
-					"stderr":          stderrBuf.String(),
+					"stderr":          displayStderr,
 					"wall_time_ms":    elapsedMS,
 					"expected_output": expected,
 				},

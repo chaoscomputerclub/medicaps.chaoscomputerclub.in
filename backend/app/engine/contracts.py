@@ -229,15 +229,15 @@ def parse_type_descriptor(type_input: Union[str, DataType, TypeDescriptor]) -> T
         )
 
     # Primitives & Scalars
-    if s in ("int", "integer", "long", "long long"):
+    if s in ("int", "integer", "long", "long long", "number", "size_t", "usize", "isize", "u32", "u64", "i32", "i64", "int32", "int64"):
         return TypeDescriptor(raw_type="int", kind=TypeKind.PRIMITIVE, base="int", dimensions=0)
-    elif s in ("float", "double"):
+    elif s in ("float", "double", "f32", "f64"):
         return TypeDescriptor(raw_type="float", kind=TypeKind.PRIMITIVE, base="float", dimensions=0)
     elif s in ("boolean", "bool"):
         return TypeDescriptor(raw_type="boolean", kind=TypeKind.PRIMITIVE, base="boolean", dimensions=0)
-    elif s in ("string", "str", "char*"):
+    elif s in ("string", "str", "char*", "char", "&str", "string_view"):
         return TypeDescriptor(raw_type="string", kind=TypeKind.PRIMITIVE, base="string", dimensions=0)
-    elif s in ("object", "map", "dict"):
+    elif s in ("object", "map", "dict", "any", "unknown", "auto"):
         return TypeDescriptor(raw_type="object", kind=TypeKind.OBJECT, base="object", dimensions=0)
     elif s in ("void", "none"):
         return TypeDescriptor(raw_type="void", kind=TypeKind.VOID, base="void", dimensions=0)

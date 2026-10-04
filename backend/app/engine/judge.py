@@ -68,9 +68,34 @@ class JudgeEngine:
         # Check if runner result envelope is present in stdout
         envelope, user_stdout = JudgeEngine.parse_runner_envelope(sandbox_result.stdout)
 
-        display_stdout = user_stdout if envelope is not None else sandbox_result.stdout
+        if envelope is not None and envelope.get("status") == "SUCCESS":
+            ret_val = envelope.get("return_value")
+            if isinstance(ret_val, bool):
+                display_stdout = "true" if ret_val else "false"
+            elif ret_val is None:
+                display_stdout = "null"
+            elif isinstance(ret_val, (list, dict)):
+                display_stdout = json.dumps(ret_val, ensure_ascii=False)
+            elif isinstance(ret_val, (int, float)):
+                display_stdout = str(ret_val)
+            elif isinstance(ret_val, str):
+                display_stdout = ret_val
+            else:
+                display_stdout = str(ret_val)
+        elif envelope is not None:
+            display_stdout = user_stdout
+        else:
+            display_stdout = sandbox_result.stdout
+
         if not testcase.hidden and not display_stdout.strip() and sandbox_result.exit_code != 0:
             display_stdout = "(no output produced)"
+
+        display_stderr = sandbox_result.stderr
+        if envelope is not None and user_stdout:
+            if display_stderr:
+                display_stderr = f"Stdout:\n{user_stdout}\nStderr:\n{display_stderr}"
+            else:
+                display_stderr = f"Stdout:\n{user_stdout}"
 
         result = TestCaseResult(
             testcase_id=testcase.id,
@@ -79,7 +104,7 @@ class JudgeEngine:
             category=testcase.category.value if testcase.category else None,
             stdout="" if testcase.hidden else display_stdout,
             expected_output="" if testcase.hidden else testcase.expected_output,
-            stderr="" if testcase.hidden else sandbox_result.stderr,
+            stderr="" if testcase.hidden else display_stderr,
             compile_output=compile_output,
             wall_time_ms=sandbox_result.wall_time_ms,
             runtime_ms=sandbox_result.wall_time_ms,
@@ -129,7 +154,7 @@ class JudgeEngine:
                     result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
                 return result
             elif status == "FUNCTION_NOT_FOUND":
-                result.verdict = Verdict.RUNTIME_ERROR
+                result.verdict = Verdict.FUNCTION_NOT_FOUND
                 result.passed = False
                 err_msg = envelope.get("error") or "Function not found in submission"
                 result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)

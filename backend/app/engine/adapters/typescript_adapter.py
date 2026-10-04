@@ -171,7 +171,7 @@ class TypeScriptAdapter(BaseLanguageAdapter):
                                 args = paramNames.map(p => parsed[p] !== undefined ? parsed[p] : Object.values(parsed)[0]);
                             }}
                         }} else if (Array.isArray(parsed)) {{
-                            if (paramNames.length === 1) {{
+                            if (paramNames.length === 1 && parsed.length !== 1) {{
                                 args = [parsed];
                             }} else if (parsed.length === paramNames.length) {{
                                 args = parsed;
@@ -228,10 +228,8 @@ class TypeScriptAdapter(BaseLanguageAdapter):
         const result = targetFn(...args);
         if (typeof result === 'boolean') {{
             process.stdout.write((result ? 'true' : 'false') + '\\n');
-        }} else if (result === null) {{
+        }} else if (result === null || result === undefined) {{
             process.stdout.write('null\\n');
-        }} else if (result === undefined) {{
-            process.stdout.write('undefined\\n');
         }} else if (typeof result === 'object') {{
             process.stdout.write(JSON.stringify(result) + '\\n');
         }} else {{
@@ -240,7 +238,7 @@ class TypeScriptAdapter(BaseLanguageAdapter):
 
         let canonicalVal = result;
         if (result === undefined) {{
-            canonicalVal = "undefined";
+            canonicalVal = null;
         }}
         process.stdout.write("\\n<<<CCC_RUNNER_RESULT>>>\\n" + JSON.stringify({{
             status: "SUCCESS",

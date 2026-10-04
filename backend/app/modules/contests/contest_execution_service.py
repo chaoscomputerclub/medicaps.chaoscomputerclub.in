@@ -117,8 +117,10 @@ class ContestExecutionService:
             # Master problem signature
             master_prob = await db.get(Problem, master_prob_id)
             if master_prob:
-                raw_sig = getattr(problem, "function_signature", None) or master_prob.function_signature
-                if raw_sig:
+                raw_sig = getattr(problem, "function_signature", None)
+                if not raw_sig or (isinstance(raw_sig, dict) and not raw_sig.get("name") and not raw_sig.get("parameters")):
+                    raw_sig = master_prob.function_signature
+                if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("parameters")):
                     try:
                         fn_sig = FunctionSignature(**raw_sig)
                     except Exception:
@@ -231,7 +233,7 @@ class ContestExecutionService:
         from app.engine.build_plan import SourcePlanBuilder
         from app.engine.enums import SubmissionMode
 
-        is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT") and fn_sig is not None
+        is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT")
         submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
         adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
 
@@ -552,7 +554,7 @@ class ContestExecutionService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
-        is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT") and fn_sig is not None
+        is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT")
         submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
         adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
         all_raw = samples + hidden

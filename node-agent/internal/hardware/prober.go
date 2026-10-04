@@ -112,7 +112,7 @@ func Discover(controlPlaneURL, workspaceBase, agentVersion, customNodeID string)
 		APICapacity:     apiWorkers,
 		SSECapacity:     sseCapacity,
 		JudgeCapacity:   judgeSlots,
-		Languages:       []string{"python", "javascript", "cpp", "java", "go", "c"},
+		Languages:       []string{"python", "javascript", "typescript", "cpp", "c", "java", "go", "rust"},
 		AgentVersion:    agentVersion,
 		ProtocolVersion: "2.0",
 	}

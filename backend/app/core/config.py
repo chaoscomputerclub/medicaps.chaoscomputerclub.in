@@ -16,7 +16,7 @@ load_dotenv(BASE_DIR / ".env", override=True)
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
-    VERSION: str = os.getenv("VERSION", "1.0.1")
+    VERSION: str = os.getenv("VERSION", "1.0.2")
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
 
