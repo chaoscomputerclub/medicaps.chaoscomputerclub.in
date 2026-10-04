@@ -469,14 +469,35 @@ class CodeboxProvider(JudgeProvider):
                 final_verdict = Verdict.RUNTIME_ERROR
                 if not stderr:
                     stderr = compile_out or status_desc or "Runtime error"
-            elif status_id == 3 or raw_verdict == Verdict.ACCEPTED:
-                passed = JudgeEngine.compare(
-                    actual=stdout,
-                    expected=tc.expected_output or "",
-                    mode=tc.comparison_mode or comparison_mode,
-                )
-                final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
-            elif status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
+            env, user_out = JudgeEngine.parse_runner_envelope(stdout)
+            display_out = user_out if env is not None else stdout
+            if env is not None:
+                if env.get("status") in ("RUNTIME_ERROR", "FUNCTION_NOT_FOUND"):
+                    final_verdict = Verdict.RUNTIME_ERROR
+                    if env.get("error"):
+                        stderr = (stderr + "\n" if stderr else "") + str(env["error"])
+                elif env.get("status") == "SUCCESS":
+                    ret_val = env.get("return_value")
+                    if isinstance(ret_val, bool):
+                        actual_cmp_str = "true" if ret_val else "false"
+                    elif ret_val is None:
+                        actual_cmp_str = "null"
+                    elif isinstance(ret_val, (list, dict)):
+                        actual_cmp_str = json.dumps(ret_val, ensure_ascii=False)
+                    elif isinstance(ret_val, (int, float)):
+                        actual_cmp_str = str(ret_val)
+                    elif isinstance(ret_val, str):
+                        actual_cmp_str = ret_val
+                    else:
+                        actual_cmp_str = str(ret_val)
+
+                    passed = JudgeEngine.compare(
+                        actual=actual_cmp_str,
+                        expected=tc.expected_output or "",
+                        mode=tc.comparison_mode or comparison_mode,
+                    )
+                    final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
+            elif status_id == 3 or raw_verdict == Verdict.ACCEPTED or status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
                 passed = JudgeEngine.compare(
                     actual=stdout,
                     expected=tc.expected_output or "",
@@ -489,7 +510,7 @@ class CodeboxProvider(JudgeProvider):
                 name=tc.name,
                 hidden=bool(tc.hidden),
                 category=getattr(tc.category, "value", None) if tc.category else None,
-                stdout=stdout,
+                stdout=display_out,
                 expected_output=tc.expected_output or "",
                 stderr=stderr,
                 compile_output=compile_out,
@@ -654,15 +675,35 @@ class CodeboxProvider(JudgeProvider):
             final_verdict = Verdict.RUNTIME_ERROR
             if not stderr:
                 stderr = compile_out or status_desc or "Runtime error"
-        elif status_id == 3 or raw_verdict == Verdict.ACCEPTED:
-            # Check comparison with configured mode
-            passed = JudgeEngine.compare(
-                actual=stdout,
-                expected=tc.expected_output or "",
-                mode=tc.comparison_mode or comparison_mode,
-            )
-            final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
-        elif status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
+        env, user_out = JudgeEngine.parse_runner_envelope(stdout)
+        display_out = user_out if env is not None else stdout
+        if env is not None:
+            if env.get("status") in ("RUNTIME_ERROR", "FUNCTION_NOT_FOUND"):
+                final_verdict = Verdict.RUNTIME_ERROR
+                if env.get("error"):
+                    stderr = (stderr + "\n" if stderr else "") + str(env["error"])
+            elif env.get("status") == "SUCCESS":
+                ret_val = env.get("return_value")
+                if isinstance(ret_val, bool):
+                    actual_cmp_str = "true" if ret_val else "false"
+                elif ret_val is None:
+                    actual_cmp_str = "null"
+                elif isinstance(ret_val, (list, dict)):
+                    actual_cmp_str = json.dumps(ret_val, ensure_ascii=False)
+                elif isinstance(ret_val, (int, float)):
+                    actual_cmp_str = str(ret_val)
+                elif isinstance(ret_val, str):
+                    actual_cmp_str = ret_val
+                else:
+                    actual_cmp_str = str(ret_val)
+
+                passed = JudgeEngine.compare(
+                    actual=actual_cmp_str,
+                    expected=tc.expected_output or "",
+                    mode=tc.comparison_mode or comparison_mode,
+                )
+                final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
+        elif status_id == 3 or raw_verdict == Verdict.ACCEPTED or status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
             passed = JudgeEngine.compare(
                 actual=stdout,
                 expected=tc.expected_output or "",
@@ -675,7 +716,7 @@ class CodeboxProvider(JudgeProvider):
             name=tc.name,
             hidden=bool(tc.hidden),
             category=getattr(tc.category, "value", None) if tc.category else None,
-            stdout=stdout,
+            stdout=display_out,
             expected_output=tc.expected_output or "",
             stderr=stderr,
             compile_output=compile_out,

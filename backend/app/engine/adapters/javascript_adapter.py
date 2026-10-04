@@ -240,6 +240,10 @@ class JavaScriptAdapter(BaseLanguageAdapter):
 
     if (!targetFn) {{
         process.stderr.write("FUNCTION_NOT_FOUND: Method '{fn_name}' or class {class_name} not found.\\n");
+        process.stdout.write("\\n<<<CCC_RUNNER_RESULT>>>\\n" + JSON.stringify({{
+            status: "FUNCTION_NOT_FOUND",
+            error: "Method '{fn_name}' or class {class_name} not found."
+        }}) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
         process.exit(1);
     }}
 
@@ -256,8 +260,21 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         }} else {{
             process.stdout.write(String(result) + '\\n');
         }}
+
+        let canonicalVal = result;
+        if (result === undefined) {{
+            canonicalVal = "undefined";
+        }}
+        process.stdout.write("\\n<<<CCC_RUNNER_RESULT>>>\\n" + JSON.stringify({{
+            status: "SUCCESS",
+            return_value: canonicalVal
+        }}) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
     }} catch (err) {{
         process.stderr.write(`Runtime Exception in '{fn_name}': ${{err.stack || err}}\\n`);
+        process.stdout.write("\\n<<<CCC_RUNNER_RESULT>>>\\n" + JSON.stringify({{
+            status: "RUNTIME_ERROR",
+            error: String(err && err.message ? err.message : err)
+        }}) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
         process.exit(1);
     }}
 }})();

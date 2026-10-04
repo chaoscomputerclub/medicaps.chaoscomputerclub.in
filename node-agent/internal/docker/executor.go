@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"archive/tar"
 	"bytes"
 	"context"
 	"crypto/sha256"
@@ -34,6 +35,78 @@ func copyFile(src, dst string) error {
 
 	_, err = io.Copy(out, in)
 	return err
+}
+
+func archiveClasses(wsPath, destTar string) error {
+	matches, err := filepath.Glob(filepath.Join(wsPath, "*.class"))
+	if err != nil || len(matches) == 0 {
+		return fmt.Errorf("no class files found to archive in %s", wsPath)
+	}
+	tarFile, err := os.Create(destTar)
+	if err != nil {
+		return err
+	}
+	defer tarFile.Close()
+
+	tw := tar.NewWriter(tarFile)
+	defer tw.Close()
+
+	for _, match := range matches {
+		info, err := os.Stat(match)
+		if err != nil {
+			continue
+		}
+		hdr, err := tar.FileInfoHeader(info, "")
+		if err != nil {
+			continue
+		}
+		hdr.Name = filepath.Base(match)
+		if err := tw.WriteHeader(hdr); err != nil {
+			return err
+		}
+		data, err := os.ReadFile(match)
+		if err != nil {
+			return err
+		}
+		if _, err := tw.Write(data); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func extractClasses(srcTar, wsPath string) error {
+	tarFile, err := os.Open(srcTar)
+	if err != nil {
+		return err
+	}
+	defer tarFile.Close()
+
+	tr := tar.NewReader(tarFile)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		cleanName := filepath.Clean(hdr.Name)
+		if strings.Contains(cleanName, "..") {
+			continue
+		}
+		dest := filepath.Join(wsPath, cleanName)
+		out, err := os.OpenFile(dest, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(out, tr); err != nil {
+			out.Close()
+			return err
+		}
+		out.Close()
+	}
+	return nil
 }
 
 // LanguageSpec configures compilation and execution parameters for a programming language.
@@ -91,6 +164,20 @@ var languageSpecs = map[string]LanguageSpec{
 		SourceFileName: "solution.rs",
 		CompileCmd:     []string{"rustc", "-O", "-o", "/workspace/solution", "/workspace/solution.rs"},
 		RunCmd:         []string{"/workspace/solution"},
+		NeedsCompile:   true,
+	},
+	"typescript": {
+		Image:          "interleet-typescript:latest",
+		SourceFileName: "solution.ts",
+		CompileCmd:     []string{"sh", "-c", "tsc --skipLibCheck --target ES2020 --module commonjs /workspace/solution.ts 2>&1"},
+		RunCmd:         []string{"node", "/workspace/solution.js"},
+		NeedsCompile:   true,
+	},
+	"ts": {
+		Image:          "interleet-typescript:latest",
+		SourceFileName: "solution.ts",
+		CompileCmd:     []string{"sh", "-c", "tsc --skipLibCheck --target ES2020 --module commonjs /workspace/solution.ts 2>&1"},
+		RunCmd:         []string{"node", "/workspace/solution.js"},
 		NeedsCompile:   true,
 	},
 }
@@ -230,8 +317,8 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		_ = os.MkdirAll(cacheDir, 0755)
 
 		artifactName := "solution"
-		if langStr == "java" {
-			artifactName = "Main.class"
+		if langStr == "typescript" || langStr == "ts" {
+			artifactName = "solution.js"
 		}
 		dstPath := filepath.Join(wsPath, artifactName)
 
@@ -240,11 +327,20 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 		cachedArtifact := filepath.Join(cacheDir, cacheHash)
 
 		cached := false
-		if info, err := os.Stat(cachedArtifact); err == nil && info.Size() > 0 {
-			if copyErr := copyFile(cachedArtifact, dstPath); copyErr == nil {
-				_ = os.Chmod(dstPath, 0777)
-				cached = true
-				log.Printf("⚡ [Job %s] Compilation cache hit (%s)", jobID, cacheHash[:12])
+		if langStr == "java" {
+			if info, err := os.Stat(cachedArtifact); err == nil && info.Size() > 0 {
+				if extractErr := extractClasses(cachedArtifact, wsPath); extractErr == nil {
+					cached = true
+					log.Printf("⚡ [Job %s] Compilation cache hit for Java classes (%s)", jobID, cacheHash[:12])
+				}
+			}
+		} else {
+			if info, err := os.Stat(cachedArtifact); err == nil && info.Size() > 0 {
+				if copyErr := copyFile(cachedArtifact, dstPath); copyErr == nil {
+					_ = os.Chmod(dstPath, 0777)
+					cached = true
+					log.Printf("⚡ [Job %s] Compilation cache hit (%s)", jobID, cacheHash[:12])
+				}
 			}
 		}
 
@@ -272,12 +368,20 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 			}
 
 			// Store artifact in cache atomically
-			if info, err := os.Stat(dstPath); err == nil && info.Size() > 0 {
-				_ = os.Chmod(dstPath, 0777)
-				tmpCached := fmt.Sprintf("%s.tmp.%d", cachedArtifact, time.Now().UnixNano())
-				if copyErr := copyFile(dstPath, tmpCached); copyErr == nil {
+			if langStr == "java" {
+				tmpCached := fmt.Sprintf("%s.tmp.%d.tar", cachedArtifact, time.Now().UnixNano())
+				if arcErr := archiveClasses(wsPath, tmpCached); arcErr == nil {
 					_ = os.Chmod(tmpCached, 0777)
 					_ = os.Rename(tmpCached, cachedArtifact)
+				}
+			} else {
+				if info, err := os.Stat(dstPath); err == nil && info.Size() > 0 {
+					_ = os.Chmod(dstPath, 0777)
+					tmpCached := fmt.Sprintf("%s.tmp.%d", cachedArtifact, time.Now().UnixNano())
+					if copyErr := copyFile(dstPath, tmpCached); copyErr == nil {
+						_ = os.Chmod(tmpCached, 0777)
+						_ = os.Rename(tmpCached, cachedArtifact)
+					}
 				}
 			}
 		}
@@ -383,7 +487,25 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 			verdict := "ACCEPTED"
 			passed := false
 
-			if tcCtx.Err() == context.DeadlineExceeded {
+			envelope, userStdout := judge.ParseRunnerEnvelope(stdoutBuf.String())
+			if envelope != nil {
+				if envelope.Status == "RUNTIME_ERROR" || envelope.Status == "FUNCTION_NOT_FOUND" {
+					verdict = "RUNTIME_ERROR"
+					passed = false
+					if envelope.Error != "" {
+						stderrBuf.WriteString("\n" + envelope.Error)
+					}
+				} else if envelope.Status == "SUCCESS" {
+					actualOut := judge.FormatCanonicalValue(envelope.ReturnValue)
+					expectedOut := strings.TrimRight(expected, "\r\n \t")
+					if judge.CompareOutputs(actualOut, expectedOut) {
+						passed = true
+						verdict = "ACCEPTED"
+					} else {
+						verdict = "WRONG_ANSWER"
+					}
+				}
+			} else if tcCtx.Err() == context.DeadlineExceeded {
 				verdict = "TIME_LIMIT_EXCEEDED"
 			} else if err != nil {
 				verdict = "RUNTIME_ERROR"
@@ -408,6 +530,11 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 				earlyStopMu.Unlock()
 			}
 
+			displayStdout := stdoutBuf.String()
+			if envelope != nil {
+				displayStdout = userStdout
+			}
+
 			outcome := tcOutcome{
 				index:   i,
 				runtime: elapsedMS,
@@ -417,7 +544,7 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 					"testcase_id":     tcID,
 					"passed":          passed,
 					"verdict":         verdict,
-					"stdout":          stdoutBuf.String(),
+					"stdout":          displayStdout,
 					"stderr":          stderrBuf.String(),
 					"wall_time_ms":    elapsedMS,
 					"expected_output": expected,

@@ -87,11 +87,148 @@ class JavaAdapter(BaseLanguageAdapter):
             decl_lines.append(self._build_param_extraction(p.type, pname, idx, p.name))
 
         args_str = ", ".join(call_args)
-        invoke_str = f"            var result = sol.{fn_name}({args_str});\n"
-        invoke_str += "            _printResult(result);\n"
+        invoke_str = f"""
+        {class_name} sol = null;
+        try {{
+            sol = new {class_name}();
+        }} catch (Throwable t) {{
+            String msg = "Could not instantiate {class_name}: " + t.toString();
+            System.err.println(msg);
+            System.out.print("\\n<<<CCC_RUNNER_RESULT>>>\\n" + _toJsonEnvelope("RUNTIME_ERROR", null, msg) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
+            System.exit(1);
+        }}
+
+        try {{
+            var result = sol.{fn_name}({args_str});
+            _printResult(result);
+            System.out.print("\\n<<<CCC_RUNNER_RESULT>>>\\n" + _toJsonEnvelope("SUCCESS", result, null) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
+        }} catch (Throwable t) {{
+            String msg = t.getMessage() != null ? t.getMessage() : t.toString();
+            System.err.println("Runtime Exception in '{fn_name}': " + msg);
+            System.out.print("\\n<<<CCC_RUNNER_RESULT>>>\\n" + _toJsonEnvelope("RUNTIME_ERROR", null, msg) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
+            System.exit(1);
+        }}
+"""
 
         driver = r"""
 public class Main {
+    static String _escapeJson(String s) {
+        if (s == null) return "null";
+        StringBuilder sb = new StringBuilder("\"");
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '"') sb.append("\\\"");
+            else if (c == '\\') sb.append("\\\\");
+            else if (c == '\b') sb.append("\\b");
+            else if (c == '\f') sb.append("\\f");
+            else if (c == '\n') sb.append("\\n");
+            else if (c == '\r') sb.append("\\r");
+            else if (c == '\t') sb.append("\\t");
+            else if (c < 32) sb.append(String.format("\\u%04x", (int) c));
+            else sb.append(c);
+        }
+        sb.append("\"");
+        return sb.toString();
+    }
+
+    static String _toJsonValue(Object res) {
+        if (res == null) return "null";
+        if (res instanceof Boolean) return res.toString();
+        if (res instanceof Number) return res.toString();
+        if (res instanceof String) return _escapeJson((String) res);
+        if (res instanceof Character) return _escapeJson(res.toString());
+        if (res instanceof int[]) {
+            int[] arr = (int[]) res;
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < arr.length; i++) {
+                if (i > 0) sb.append(",");
+                sb.append(arr[i]);
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (res instanceof long[]) {
+            long[] arr = (long[]) res;
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < arr.length; i++) {
+                if (i > 0) sb.append(",");
+                sb.append(arr[i]);
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (res instanceof double[]) {
+            double[] arr = (double[]) res;
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < arr.length; i++) {
+                if (i > 0) sb.append(",");
+                sb.append(arr[i]);
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (res instanceof boolean[]) {
+            boolean[] arr = (boolean[]) res;
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < arr.length; i++) {
+                if (i > 0) sb.append(",");
+                sb.append(arr[i]);
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (res instanceof Object[]) {
+            Object[] arr = (Object[]) res;
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < arr.length; i++) {
+                if (i > 0) sb.append(",");
+                sb.append(_toJsonValue(arr[i]));
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (res instanceof java.util.Collection<?>) {
+            java.util.Collection<?> col = (java.util.Collection<?>) res;
+            StringBuilder sb = new StringBuilder("[");
+            int i = 0;
+            for (Object item : col) {
+                if (i++ > 0) sb.append(",");
+                sb.append(_toJsonValue(item));
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (res instanceof java.util.Map<?, ?>) {
+            java.util.Map<?, ?> map = (java.util.Map<?, ?>) res;
+            StringBuilder sb = new StringBuilder("{");
+            int i = 0;
+            for (java.util.Map.Entry<?, ?> entry : map.entrySet()) {
+                if (i++ > 0) sb.append(",");
+                sb.append(_escapeJson(String.valueOf(entry.getKey())));
+                sb.append(":");
+                sb.append(_toJsonValue(entry.getValue()));
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        return _escapeJson(res.toString());
+    }
+
+    static String _toJsonEnvelope(String status, Object returnVal, String error) {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append("\"status\":").append(_escapeJson(status));
+        if ("SUCCESS".equals(status)) {
+            sb.append(",\"return_value\":").append(_toJsonValue(returnVal));
+        } else {
+            sb.append(",\"return_value\":null");
+        }
+        if (error != null) {
+            sb.append(",\"error\":").append(_escapeJson(error));
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
     static void _printResult(Object res) {
         if (res == null) {
             System.out.println("null");
@@ -292,10 +429,31 @@ public class Main {
         List<String> chunks = _extractChunks(fullInput);
 
 """
-        body = "\n".join(decl_lines) + f"\n\n        {class_name} sol = new {class_name}();\n{invoke_str}    }}\n}}\n"
-        sanitized_code = re.sub(rf"\bpublic\s+class\s+{re.escape(class_name)}\b", f"class {class_name}", user_code)
+        body = "\n".join(decl_lines) + f"\n{invoke_str}    }}\n}}\n"
+
+        # Remove package declarations (Main is in default package)
+        clean_code = re.sub(r'^\s*package\s+[^;]+;', '', user_code, flags=re.MULTILINE)
+
+        # Hoist user imports to the top
+        user_imports = []
+        user_body_lines = []
+        for line in clean_code.splitlines():
+            s = line.strip()
+            if s.startswith("import ") and s.endswith(";"):
+                user_imports.append(line)
+            else:
+                user_body_lines.append(line)
+
+        sanitized_code = "\n".join(user_body_lines)
+        # Prevent class visibility collisions: demote all public classes to package-private in single-file compilation
+        sanitized_code = re.sub(r'\bpublic\s+class\b', 'class', sanitized_code)
+
+        imports_block = "\n".join(user_imports)
+        if imports_block:
+            imports_block += "\n\n"
+
         header = "// CCC Trusted Judge Execution Driver (Java)\nimport java.util.*;\nimport java.io.*;\n\n"
-        return f"{header}{sanitized_code}\n\n{driver}{body}"
+        return f"{header}{imports_block}{sanitized_code}\n\n{driver}{body}"
 
     def _build_param_extraction(self, type_input: Any, pname: str, idx: int, orig_name: str) -> str:
         find_expr = f'_findParam(fullInput, "{orig_name}", {idx}, chunks)'

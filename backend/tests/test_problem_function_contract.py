@@ -130,7 +130,7 @@ def test_trusted_wrapper_generation():
     wrapper = get_adapter("python").generate_wrapper(sig, user_code)
 
     assert user_code in wrapper
-    assert "json.loads(raw)" in wrapper
+    assert "json.loads" in wrapper
     assert "getattr(sol, \"networkRoute\")" in wrapper
     assert "print(result)" in wrapper
 

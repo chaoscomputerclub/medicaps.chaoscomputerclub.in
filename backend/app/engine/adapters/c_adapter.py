@@ -129,17 +129,32 @@ class CAdapter(BaseLanguageAdapter):
         parse_block = "\n".join(parse_lines)
         args_str = ", ".join(call_args)
 
-        # Output printer
+        # Output printer & envelope
         if ret_type == "int":
-            print_call = f'    printf("%d\\n", result);'
+            print_call = (
+                '    printf("%d\\n", result);\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
+            )
         elif ret_type == "long long":
-            print_call = f'    printf("%lld\\n", result);'
+            print_call = (
+                '    printf("%lld\\n", result);\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%lld}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
+            )
         elif ret_type in ("double", "float"):
-            print_call = f'    printf("%.6f\\n", result);'
+            print_call = (
+                '    printf("%.6f\\n", result);\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%f}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
+            )
         elif ret_type == "bool":
-            print_call = f'    printf("%s\\n", result ? "true" : "false");'
+            print_call = (
+                '    printf("%s\\n", result ? "true" : "false");\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%s}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? "true" : "false");'
+            )
         elif ret_type == "char*":
-            print_call = f'    printf("%s\\n", result ? result : "");'
+            print_call = (
+                '    printf("%s\\n", result ? result : "");\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":\\"%s\\"}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? result : "");'
+            )
         elif ret_td.kind == TypeKind.ARRAY:
             print_call = (
                 '    printf("[");\n'
@@ -147,10 +162,19 @@ class CAdapter(BaseLanguageAdapter):
                 '        if (_i > 0) printf(", ");\n'
                 '        printf("%d", result[_i]);\n'
                 '    }\n'
-                '    printf("]\\n");'
+                '    printf("]\\n");\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":[");\n'
+                '    for (int _i = 0; _i < _returnSize; _i++) {\n'
+                '        if (_i > 0) printf(", ");\n'
+                '        printf("%d", result[_i]);\n'
+                '    }\n'
+                '    printf("]}\\n<<<CCC_RUNNER_RESULT>>>\\n");'
             )
         else:
-            print_call = f'    printf("%d\\n", (int)result);'
+            print_call = (
+                '    printf("%d\\n", (int)result);\n'
+                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", (int)result);'
+            )
 
         driver = f"""
 
@@ -379,4 +403,5 @@ int main(void) {{
     return 0;
 }}
 """
-        return user_code + "\n" + driver
+        header = "// CCC Trusted Judge Execution Driver (C)\n#include <stdio.h>\n#include <stdlib.h>\n#include <stdbool.h>\n#include <string.h>\n#include <ctype.h>\n\n"
+        return header + user_code + "\n" + driver

@@ -134,6 +134,8 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
             cmd = [compiler, *self.config.compile_flags, "-o", bin_path_str, src_path_str]
         elif lang_id == "go":
             cmd = [compiler, "build", "-o", bin_path_str, src_path_str]
+        elif lang_id in ("typescript", "ts"):
+            cmd = [compiler, *self.config.compile_flags, "--outDir", str(workspace / "build"), src_path_str]
         else:
             cmd = [compiler, *self.config.compile_flags, src_path_str, "-o", bin_path_str]
 
@@ -206,8 +208,11 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
                 pass
 
             actual_size = build_binary.stat().st_size
+            is_ts = self.config.language_id in ("typescript", "ts")
+            entry_cmd = (self.config.runtime, *self.config.runtime_arguments, str(build_binary)) if is_ts else (str(build_binary),)
+
             artifact = ExecutionArtifact(
-                artifact_type=ArtifactType.NATIVE_BINARY,
+                artifact_type=ArtifactType.RUNTIME_SOURCE if is_ts else ArtifactType.NATIVE_BINARY,
                 path=build_binary,
                 language_id=self.config.language_id,
                 compiler_version=self.config.compiler_version,
@@ -219,8 +224,8 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
                     compile_flags=self.config.compile_flags,
                 ).source_hash,
                 size_bytes=actual_size,
-                is_executable=True,
-                entry_command=(str(build_binary),),
+                is_executable=not is_ts,
+                entry_command=entry_cmd,
             )
 
             comp_res = CompilationResult(
@@ -249,9 +254,9 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
                     key=cache_key,
                     compiled_file=build_binary,
                     compilation_result=comp_res,
-                    artifact_type=ArtifactType.NATIVE_BINARY,
-                    is_executable=True,
-                    entry_command=[str(build_binary)],
+                    artifact_type=ArtifactType.RUNTIME_SOURCE if is_ts else ArtifactType.NATIVE_BINARY,
+                    is_executable=not is_ts,
+                    entry_command=list(entry_cmd),
                 )
 
             return comp_res
@@ -280,7 +285,10 @@ class NativeCompiledExecutionStrategy(ExecutionStrategy):
         Isolates execution inside per-testcase run_dir when provided.
         """
         build_binary = workspace / "build" / (self.config.binary_filename or "solution")
-        exec_cmd = [str(build_binary)] if build_binary.exists() else (list(artifact.entry_command) or [str(artifact.path)])
+        if self.config.language_id in ("typescript", "ts") or (self.config.binary_filename and self.config.binary_filename.endswith(".js")):
+            exec_cmd = [self.config.runtime, *self.config.runtime_arguments, str(build_binary)]
+        else:
+            exec_cmd = [str(build_binary)] if build_binary.exists() else (list(artifact.entry_command) or [str(artifact.path)])
         effective_cwd = run_dir if run_dir is not None else (workspace / "build")
         effective_cwd.mkdir(parents=True, exist_ok=True)
         start_time = time.monotonic()

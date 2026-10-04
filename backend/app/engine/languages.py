@@ -170,6 +170,9 @@ def detect_toolchain_version(binary: Optional[str]) -> Optional[str]:
 
 
 # Resolve host compilers with deterministic fallbacks
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_LOCAL_TSC = str(_PROJECT_ROOT / "node_modules" / ".bin" / "tsc")
+_HOST_TSC = shutil.which("tsc") or (_LOCAL_TSC if os.path.exists(_LOCAL_TSC) else "tsc")
 _HOST_GXX = shutil.which("g++") or shutil.which("clang++") or "g++"
 _HOST_GCC = shutil.which("gcc") or shutil.which("clang") or "gcc"
 _HOST_NODE = shutil.which("node") or "node"
@@ -394,9 +397,9 @@ LANGUAGE_CONFIGS: Dict[Language, LanguageConfig] = {
         source_extension=".ts",
         filename="solution.ts",
         binary_filename="solution.js",
-        compiler="tsc",
-        compiler_version=detect_toolchain_version("tsc"),
-        compile_command=["tsc", "--skipLibCheck", "--target", "ES2020", "--module", "commonjs", "solution.ts"],
+        compiler=_HOST_TSC,
+        compiler_version=detect_toolchain_version(_HOST_TSC),
+        compile_command=[_HOST_TSC, "--skipLibCheck", "--target", "ES2020", "--module", "commonjs", "solution.ts"],
         run_command=[_HOST_NODE, "solution.js"],
         compile_flags=["--skipLibCheck", "--target", "ES2020", "--module", "commonjs"],
         runtime=_HOST_NODE,
@@ -496,6 +499,8 @@ class LanguageRegistry:
         from app.engine.adapters.java_adapter import JavaAdapter
         from app.engine.adapters.javascript_adapter import JavaScriptAdapter
         from app.engine.adapters.typescript_adapter import TypeScriptAdapter
+        from app.engine.adapters.go_adapter import GoAdapter
+        from app.engine.adapters.rust_adapter import RustAdapter
 
         adapters: Dict[Language, BaseLanguageAdapter] = {
             Language.PYTHON: PythonAdapter(),
@@ -504,6 +509,8 @@ class LanguageRegistry:
             Language.JAVA: JavaAdapter(),
             Language.JAVASCRIPT: JavaScriptAdapter(),
             Language.TYPESCRIPT: TypeScriptAdapter(),
+            Language.GO: GoAdapter(),
+            Language.RUST: RustAdapter(),
         }
 
         adapter = adapters.get(lang)

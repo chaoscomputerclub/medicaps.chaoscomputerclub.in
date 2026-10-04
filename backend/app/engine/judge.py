@@ -32,7 +32,28 @@ FLOAT_EPSILON = 1e-6
 
 
 class JudgeEngine:
-    """Evaluates sandbox execution output against expected outputs."""
+    @staticmethod
+    def parse_runner_envelope(raw_stdout: str) -> tuple[Optional[dict], str]:
+        """
+        Extracts internal runner result envelope from stdout if present.
+        Returns: (envelope_dict_or_None, user_stdout_without_envelope)
+        """
+        if not raw_stdout:
+            return None, ""
+        marker = "<<<CCC_RUNNER_RESULT>>>"
+        if marker not in raw_stdout:
+            return None, raw_stdout
+
+        parts = raw_stdout.split(marker)
+        if len(parts) >= 3:
+            envelope_str = parts[1].strip()
+            user_stdout = (parts[0] + "".join(parts[2:])).strip()
+            try:
+                envelope = json.loads(envelope_str)
+                return envelope, user_stdout
+            except Exception:
+                pass
+        return None, raw_stdout
 
     @staticmethod
     def evaluate(
@@ -44,7 +65,10 @@ class JudgeEngine:
     ) -> TestCaseResult:
         effective_mode = testcase.comparison_mode or comparison_mode
 
-        display_stdout = sandbox_result.stdout
+        # Check if runner result envelope is present in stdout
+        envelope, user_stdout = JudgeEngine.parse_runner_envelope(sandbox_result.stdout)
+
+        display_stdout = user_stdout if envelope is not None else sandbox_result.stdout
         if not testcase.hidden and not display_stdout.strip() and sandbox_result.exit_code != 0:
             display_stdout = "(no output produced)"
 
@@ -94,13 +118,53 @@ class JudgeEngine:
             result.passed = False
             return result
 
-        # 6. Check Runtime Error
+        # 6. Check Runner Envelope Status if present
+        if envelope is not None:
+            status = envelope.get("status", "")
+            if status == "RUNTIME_ERROR":
+                result.verdict = Verdict.RUNTIME_ERROR
+                result.passed = False
+                err_msg = envelope.get("error") or ""
+                if err_msg:
+                    result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
+                return result
+            elif status == "FUNCTION_NOT_FOUND":
+                result.verdict = Verdict.RUNTIME_ERROR
+                result.passed = False
+                err_msg = envelope.get("error") or "Function not found in submission"
+                result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
+                return result
+            elif status == "SUCCESS":
+                ret_val = envelope.get("return_value")
+                if isinstance(ret_val, bool):
+                    actual_cmp_str = "true" if ret_val else "false"
+                elif ret_val is None:
+                    actual_cmp_str = "null"
+                elif isinstance(ret_val, (list, dict)):
+                    actual_cmp_str = json.dumps(ret_val, ensure_ascii=False)
+                elif isinstance(ret_val, (int, float)):
+                    actual_cmp_str = str(ret_val)
+                elif isinstance(ret_val, str):
+                    actual_cmp_str = ret_val
+                else:
+                    actual_cmp_str = str(ret_val)
+
+                passed = JudgeEngine.compare(
+                    actual=actual_cmp_str,
+                    expected=testcase.expected_output,
+                    mode=effective_mode,
+                )
+                result.passed = passed
+                result.verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
+                return result
+
+        # 7. Check Runtime Error (when envelope is not present or exited non-zero)
         if sandbox_result.exit_code != 0:
             result.verdict = Verdict.RUNTIME_ERROR
             result.passed = False
             return result
 
-        # 7. Output comparison
+        # 8. Output comparison (for FULL_PROGRAM mode or legacy stdout submissions)
         passed = JudgeEngine.compare(
             actual=sandbox_result.stdout,
             expected=testcase.expected_output,

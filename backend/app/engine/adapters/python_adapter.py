@@ -223,6 +223,8 @@ if __name__ == '__main__':
 
     if not target_method:
         sys.stderr.write("Judge Error: method '{fn_name}' or class {class_name} not found in submission.\\n")
+        sys.stdout.write(f"\\n<<<CCC_RUNNER_RESULT>>>\\n" + json.dumps({{"status": "FUNCTION_NOT_FOUND", "error": "Method '{fn_name}' or class {class_name} not found in submission."}}) + "\\n<<<CCC_RUNNER_RESULT>>>\\n")
+        sys.stdout.flush()
         sys.exit(1)
 
     try:
@@ -235,8 +237,14 @@ if __name__ == '__main__':
             print("null")
         else:
             print(result)
+
+        canonical_val = result if isinstance(result, (bool, int, float, str, list, dict)) or result is None else str(result)
+        sys.stdout.write(f"\\n<<<CCC_RUNNER_RESULT>>>\\n" + json.dumps({{"status": "SUCCESS", "return_value": canonical_val}}, ensure_ascii=False) + "\\n<<<CCC_RUNNER_RESULT>>>\\n")
+        sys.stdout.flush()
     except Exception as e:
         sys.stderr.write(f"Runtime Exception in '{fn_name}': {{e}}\\n")
+        sys.stdout.write(f"\\n<<<CCC_RUNNER_RESULT>>>\\n" + json.dumps({{"status": "RUNTIME_ERROR", "error": str(e)}}) + "\\n<<<CCC_RUNNER_RESULT>>>\\n")
+        sys.stdout.flush()
         sys.exit(1)
 """
         return user_code + "\n" + driver

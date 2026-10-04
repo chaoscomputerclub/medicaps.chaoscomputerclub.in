@@ -131,11 +131,53 @@ class CppAdapter(BaseLanguageAdapter):
 
         args_str = ", ".join(call_args)
         if ret_type == "void":
-            invoke_str = f"    _sol.{fn_name}({args_str});\n"
             if call_args:
-                invoke_str += f"    _ccc_print({call_args[0]});\n"
+                invoke_str = f"""
+    try {{
+        _sol.{fn_name}({args_str});
+        _ccc_print({call_args[0]});
+        _ccc_emit_envelope({call_args[0]});
+    }} catch (const std::exception& e) {{
+        std::cerr << "Runtime Exception in '{fn_name}': " << e.what() << "\\n";
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"RUNTIME_ERROR\\",\\"error\\":\\"" << e.what() << "\\"}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+        return 1;
+    }} catch (...) {{
+        std::cerr << "Unknown Runtime Exception in '{fn_name}'\\n";
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"RUNTIME_ERROR\\",\\"error\\":\\"Unknown exception\\"}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+        return 1;
+    }}
+"""
+            else:
+                invoke_str = f"""
+    try {{
+        _sol.{fn_name}({args_str});
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":null}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+    }} catch (const std::exception& e) {{
+        std::cerr << "Runtime Exception in '{fn_name}': " << e.what() << "\\n";
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"RUNTIME_ERROR\\",\\"error\\":\\"" << e.what() << "\\"}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+        return 1;
+    }} catch (...) {{
+        std::cerr << "Unknown Runtime Exception in '{fn_name}'\\n";
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"RUNTIME_ERROR\\",\\"error\\":\\"Unknown exception\\"}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+        return 1;
+    }}
+"""
         else:
-            invoke_str = f"    _ccc_print(_sol.{fn_name}({args_str}));\n"
+            invoke_str = f"""
+    try {{
+        auto _res = _sol.{fn_name}({args_str});
+        _ccc_print(_res);
+        _ccc_emit_envelope(_res);
+    }} catch (const std::exception& e) {{
+        std::cerr << "Runtime Exception in '{fn_name}': " << e.what() << "\\n";
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"RUNTIME_ERROR\\",\\"error\\":\\"" << e.what() << "\\"}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+        return 1;
+    }} catch (...) {{
+        std::cerr << "Unknown Runtime Exception in '{fn_name}'\\n";
+        std::cout << "\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"RUNTIME_ERROR\\",\\"error\\":\\"Unknown exception\\"}}\\n<<<CCC_RUNNER_RESULT>>>\\n";
+        return 1;
+    }}
+"""
 
         driver = r"""
 // ==========================================
@@ -158,6 +200,43 @@ template<typename T> inline void _ccc_print(const vector<vector<T>>& vec2d) {
         cout << "]";
     }
     cout << "]\n";
+}
+
+inline void _ccc_emit_envelope(bool v) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":" << (v ? "true" : "false") << "}\n<<<CCC_RUNNER_RESULT>>>\n";
+}
+inline void _ccc_emit_envelope(int v) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":" << v << "}\n<<<CCC_RUNNER_RESULT>>>\n";
+}
+inline void _ccc_emit_envelope(long long v) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":" << v << "}\n<<<CCC_RUNNER_RESULT>>>\n";
+}
+inline void _ccc_emit_envelope(double v) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":" << v << "}\n<<<CCC_RUNNER_RESULT>>>\n";
+}
+inline void _ccc_emit_envelope(const string& v) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":\"" << v << "\"}\n<<<CCC_RUNNER_RESULT>>>\n";
+}
+template<typename T> inline void _ccc_emit_envelope(const vector<T>& vec) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":[";
+    for (size_t i = 0; i < vec.size(); i++) {
+        if (i > 0) cout << ", ";
+        cout << vec[i];
+    }
+    cout << "]}\n<<<CCC_RUNNER_RESULT>>>\n";
+}
+template<typename T> inline void _ccc_emit_envelope(const vector<vector<T>>& vec2d) {
+    cout << "\n<<<CCC_RUNNER_RESULT>>>\n{\"status\":\"SUCCESS\",\"return_value\":[";
+    for (size_t i = 0; i < vec2d.size(); i++) {
+        if (i > 0) cout << ", ";
+        cout << "[";
+        for (size_t j = 0; j < vec2d[i].size(); j++) {
+            if (j > 0) cout << ", ";
+            cout << vec2d[i][j];
+        }
+        cout << "]";
+    }
+    cout << "]}\n<<<CCC_RUNNER_RESULT>>>\n";
 }
 
 inline vector<string> _ccc_extract_chunks(const string& input) {
