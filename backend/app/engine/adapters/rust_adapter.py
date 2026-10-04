@@ -141,7 +141,7 @@ fn main() {
     }} else {{
         println!("{{:?}}", result);
     }}
-    println!("\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":{serialized}}}\\n<<<CCC_RUNNER_RESULT>>>");
+    println!("\\n<<<CCC_RUNNER_RESULT>>>\\n{{{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":{{}}}}}}\\n<<<CCC_RUNNER_RESULT>>>", serialized);
 }}
 """
         return struct_def + user_code + "\n" + driver + exec_lines + invoke_block
