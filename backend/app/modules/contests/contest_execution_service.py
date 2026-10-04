@@ -34,6 +34,7 @@ from app.models.db_models import (
     now_utc,
 )
 from app.engine.contracts import FunctionSignature, EvaluationConfig, DataType
+from app.engine.build_plan import SourcePlanBuilder, SubmissionMode
 from app.engine.binder import InputBinder, InputBindingError
 from app.engine.adapters import OutputEvaluator
 from app.engine.harness import prepare_solution_code
@@ -154,7 +155,15 @@ class ContestExecutionService:
                 except Exception:
                     pass
 
-        return fn_sig, eval_cfg, visible_cases, hidden_cases, time_limit, memory_limit
+        exec_mode = getattr(problem, "execution_mode", None)
+        if not exec_mode and master_prob_id:
+            master_prob = await db.get(Problem, master_prob_id)
+            if master_prob:
+                exec_mode = getattr(master_prob, "execution_mode", None)
+        if not exec_mode:
+            exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
+
+        return fn_sig, eval_cfg, visible_cases, hidden_cases, time_limit, memory_limit, exec_mode
 
     @staticmethod
     async def run_arena_code(
@@ -197,7 +206,7 @@ class ContestExecutionService:
                     )
             if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
-                    current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
+                    current_member, contest, db
                 )
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena execution denied: {reason}")
@@ -206,16 +215,29 @@ class ContestExecutionService:
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
 
-        fn_sig, eval_cfg, sample_list, _, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
+        # BUG-C1 Fix: Reject problem IDs belonging to other contests
+        if str(problem.contest_id) != str(contest.id):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Problem '{payload.problem_id}' does not belong to contest '{slug}'.",
+            )
+
+        fn_sig, eval_cfg, sample_list, _, time_limit, memory_limit, exec_mode = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
         try:
             lang_enum = LanguageRegistry.normalize(payload.language)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
-        adapter = LanguageRegistry.get_adapter(lang_enum) if fn_sig else None
+
+        from app.engine.build_plan import SourcePlanBuilder
+        from app.engine.enums import SubmissionMode
+
+        is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT") and fn_sig is not None
+        submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
+        adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
 
         tc_binding_errors: dict[int, str] = {}
         if payload.custom_stdin is not None:
-            if adapter and fn_sig:
+            if is_fn_mode and adapter and fn_sig:
                 try:
                     custom_payload = adapter.serialize_input(fn_sig, payload.custom_stdin)
                 except InputBindingError as e:
@@ -230,7 +252,7 @@ class ContestExecutionService:
             raw_cases = sample_list if sample_list else []
             for i, s in enumerate(raw_cases):
                 inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
-                if adapter and fn_sig:
+                if is_fn_mode and adapter and fn_sig:
                     try:
                         stdin_payload = adapter.serialize_input(fn_sig, inp)
                     except InputBindingError as e:
@@ -252,16 +274,15 @@ class ContestExecutionService:
                 tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
                 raw_cases = [{"input": "", "expected_output": ""}]
 
-        if adapter and fn_sig:
-            exec_code = adapter.generate_wrapper(fn_sig, payload.code)
-        else:
-            exec_code = prepare_solution_code(
-                code=payload.code,
-                language=lang_enum,
-                problem_index=problem.problem_index,
-                starter_codes=getattr(problem, "starter_codes", None) or {},
-                function_signature=fn_sig,
-            )
+        build_plan = SourcePlanBuilder.build_plan(
+            language=lang_enum,
+            user_source=payload.code,
+            submission_mode=submission_mode,
+            function_signature=fn_sig if is_fn_mode else None,
+            starter_codes=getattr(problem, "starter_codes", None) or {},
+            method_name=fn_sig.name if (is_fn_mode and fn_sig) else None,
+        )
+        exec_code = build_plan.generated_source
 
         # Extract all needed primitives before releasing DB connection and potential session expiration
         target_problem_id = str(problem.id)
@@ -314,20 +335,21 @@ class ContestExecutionService:
                 tr.passed = False
                 tr.verdict = "INPUT_FORMAT_ERROR"
                 tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
-            elif tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
-                if fn_sig:
+            elif str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",):
+                if is_fn_mode and fn_sig:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
                     if not passed:
                         # Fallback: if OutputEvaluator fails (e.g., mismatched declared type),
                         # use JudgeEngine semantic comparison (handles [0, 1] vs [0,1] etc.)
                         passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
-                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
                 else:
-                    # No function signature: use semantic comparison, not plain string equality
                     passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
-                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
+            else:
+                tr.passed = False
 
             if tr.passed:
                 passed_count += 1
@@ -353,8 +375,45 @@ class ContestExecutionService:
                 "wall_time_ms": tr.wall_time_ms,
             })
 
+        # Defensive pad if provider returned fewer testcase results than requested
+        if len(testcase_results) < len(tcs):
+            for missing_idx in range(len(testcase_results), len(tcs)):
+                missing_tc = tcs[missing_idx]
+                if exec_result.verdict == Verdict.COMPILATION_ERROR:
+                    tc_v = Verdict.NOT_EXECUTED.value
+                    tc_err = ""
+                elif exec_result.verdict == Verdict.SYSTEM_ERROR:
+                    tc_v = Verdict.SYSTEM_ERROR.value
+                    tc_err = "Infrastructure failure"
+                else:
+                    tc_v = Verdict.NOT_EXECUTED.value
+                    tc_err = ""
+                testcase_results.append({
+                    "testcase_id": missing_tc.id,
+                    "name": missing_tc.name,
+                    "passed": False,
+                    "verdict": tc_v,
+                    "stdout": "",
+                    "expected_output": str(missing_tc.expected_output),
+                    "stdin": missing_tc.stdin,
+                    "stderr": tc_err,
+                    "compile_output": exec_result.compile_output or "",
+                    "wall_time_ms": 0.0,
+                })
+
         all_passed = (passed_count == len(testcase_results)) and len(testcase_results) > 0
-        final_verdict = "ACCEPTED" if all_passed else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
+        if all_passed:
+            final_verdict = "ACCEPTED"
+        elif str(getattr(exec_result.verdict, "value", exec_result.verdict)).upper() == "COMPILATION_ERROR":
+            final_verdict = "COMPILATION_ERROR"
+        elif str(getattr(exec_result.verdict, "value", exec_result.verdict)).upper() in (
+            "SYSTEM_ERROR", "EXECUTION_RESULT_MISSING", "SANDBOX_ERROR", "EXECUTOR_UNAVAILABLE"
+        ):
+            final_verdict = "SYSTEM_ERROR"
+        elif not exec_result.success:
+            final_verdict = str(getattr(exec_result.verdict, "value", exec_result.verdict))
+        else:
+            final_verdict = "WRONG_ANSWER"
 
         logger.info(
             "Arena Code Run Completed: problem_id=%s, lang=%s, fn=%s, params=%d, passed=%d/%d, verdict=%s",
@@ -400,6 +459,9 @@ class ContestExecutionService:
         current_member: MemberProfile,
         db: AsyncSession,
     ) -> Dict[str, Any]:
+        # BUG-B1 & BUG-B2 Ingress: Capture server receipt timestamp immediately upon entry
+        received_at = now_utc()
+
         contest = await ContestRepository.get_by_slug(db, slug)
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
@@ -416,24 +478,20 @@ class ContestExecutionService:
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
             await assert_submissions_open(slug)
-            if contest.status in ("finished", "archived", "ended"):
+            if getattr(contest, "status", None) in ("finished", "archived", "ended"):
                 raise HTTPException(
                     status_code=403,
-                    detail="Contest has ended. Submissions are locked.",
+                    detail="Contest has ended. Submissions are closed.",
                 )
-            if contest.status == "upcoming":
-                raise HTTPException(
-                    status_code=403,
-                    detail="Contest has not started yet. Submissions unlock at start time.",
-                )
-            if contest.ends_at:
+            if getattr(contest, "ends_at", None):
                 contest_ends = contest.ends_at.replace(tzinfo=timezone.utc) if contest.ends_at.tzinfo is None else contest.ends_at
-                if now_utc() >= contest_ends:
+                if received_at >= contest_ends:
                     raise HTTPException(
                         status_code=403,
                         detail="Contest time limit has expired. Submissions are locked.",
                     )
-            if contest.status == "live":
+
+            if getattr(contest, "status", None) == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
                     current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
                 )
@@ -445,6 +503,13 @@ class ContestExecutionService:
         problem = await ContestRepository.get_problem_by_id(db, payload.problem_id)
         if not problem:
             raise HTTPException(status_code=404, detail="Contest problem not found.")
+
+        # BUG-C1 Fix: Reject problem IDs belonging to other contests
+        if str(problem.contest_id) != str(contest.id):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Problem '{payload.problem_id}' does not belong to contest '{slug}'.",
+            )
 
         # Server-side atomic idempotency & debounce guard (prevents concurrent duplicate races)
         import hashlib
@@ -481,19 +546,22 @@ class ContestExecutionService:
                     detail="Duplicate submission detected. Please wait a moment before submitting again."
                 )
 
-        fn_sig, eval_cfg, samples, hidden, time_limit, memory_limit = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
+        fn_sig, eval_cfg, samples, hidden, time_limit, memory_limit, exec_mode = await ContestExecutionService._resolve_problem_execution_contract(problem, db)
         try:
             lang_enum = LanguageRegistry.normalize(payload.language)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
-        adapter = LanguageRegistry.get_adapter(lang_enum) if fn_sig else None
+
+        is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT") and fn_sig is not None
+        submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
+        adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
         all_raw = samples + hidden
 
         all_tcs: list[TestCaseSchema] = []
         tc_binding_errors: dict[int, str] = {}
         for i, s in enumerate(all_raw):
             inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
-            if adapter and fn_sig:
+            if is_fn_mode and adapter and fn_sig:
                 try:
                     stdin_payload = adapter.serialize_input(fn_sig, inp)
                 except InputBindingError as e:
@@ -525,16 +593,15 @@ class ContestExecutionService:
         if not all_tcs:
             all_tcs = [TestCaseSchema(id="tc_1", name="Test 1", stdin="", expected_output="")]
 
-        if adapter and fn_sig:
-            exec_code = adapter.generate_wrapper(fn_sig, payload.code)
-        else:
-            exec_code = prepare_solution_code(
-                code=payload.code,
-                language=lang_enum,
-                problem_index=problem.problem_index,
-                starter_codes=getattr(problem, "starter_codes", None) or {},
-                function_signature=fn_sig,
-            )
+        build_plan = SourcePlanBuilder.build_plan(
+            language=lang_enum,
+            user_source=payload.code,
+            submission_mode=submission_mode,
+            function_signature=fn_sig if is_fn_mode else None,
+            starter_codes=getattr(problem, "starter_codes", None) or {},
+            method_name=fn_sig.name if (is_fn_mode and fn_sig) else None,
+        )
+        exec_code = build_plan.generated_source
 
         LanguageRegistry.validate_source(lang_enum, exec_code)
 
@@ -608,18 +675,20 @@ class ContestExecutionService:
                 tr.passed = False
                 tr.verdict = "INPUT_FORMAT_ERROR"
                 tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
-            elif tr.verdict not in ("TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "COMPILATION_ERROR", "RUNTIME_ERROR"):
-                if fn_sig:
+            elif str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",):
+                if is_fn_mode and fn_sig:
                     passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
                     if not passed:
                         # Fallback: semantic comparison if OutputEvaluator fails type parsing
                         passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
-                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
                 else:
                     passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
                     tr.passed = passed
-                    tr.verdict = "ACCEPTED" if passed else "WRONG_ANSWER"
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
+            else:
+                tr.passed = False
 
             if tr.passed:
                 passed_count += 1
@@ -628,22 +697,52 @@ class ContestExecutionService:
         if len(exec_result.testcase_results) < len(all_tcs):
             for missing_idx in range(len(exec_result.testcase_results), len(all_tcs)):
                 missing_tc = all_tcs[missing_idx]
+                if exec_result.verdict == Verdict.COMPILATION_ERROR:
+                    tc_v = Verdict.NOT_EXECUTED
+                    tc_err = ""
+                elif exec_result.verdict == Verdict.SYSTEM_ERROR:
+                    tc_v = Verdict.SYSTEM_ERROR
+                    tc_err = "Infrastructure failure"
+                else:
+                    tc_v = Verdict.NOT_EXECUTED
+                    tc_err = ""
                 exec_result.testcase_results.append(
                     TestCaseResult(
                         testcase_id=missing_tc.id,
                         name=missing_tc.name,
                         hidden=missing_tc.hidden,
                         passed=False,
-                        verdict=Verdict.WRONG_ANSWER,
+                        verdict=tc_v,
                         expected_output=missing_tc.expected_output,
-                        stderr="Execution result missing from runner",
+                        stderr=tc_err,
                     )
                 )
 
         is_accepted = (passed_count == len(all_tcs)) and len(all_tcs) > 0
-        verdict_str = "ACCEPTED" if is_accepted else (exec_result.verdict if not exec_result.success else "WRONG_ANSWER")
-        total_tc = max(1, len(all_tcs))
-        points_awarded = target_problem_points if is_accepted else int(target_problem_points * (passed_count / total_tc))
+        if is_accepted:
+            verdict_str = "ACCEPTED"
+        elif str(getattr(exec_result.verdict, "value", exec_result.verdict)).upper() == "COMPILATION_ERROR":
+            verdict_str = "COMPILATION_ERROR"
+        elif str(getattr(exec_result.verdict, "value", exec_result.verdict)).upper() in (
+            "SYSTEM_ERROR", "EXECUTION_RESULT_MISSING", "SANDBOX_ERROR", "EXECUTOR_UNAVAILABLE"
+        ):
+            verdict_str = "SYSTEM_ERROR"
+        elif not exec_result.success:
+            verdict_str = str(getattr(exec_result.verdict, "value", exec_result.verdict))
+        else:
+            verdict_str = "WRONG_ANSWER"
+        # BUG-B4 Fix: Standard CP all-or-nothing problem points invariant
+        points_awarded = target_problem_points if is_accepted else 0
+
+        # BUG-B3 Fix: Only user-code runtime/logical failures count as penalized attempts.
+        # System/infrastructure errors and compilation errors do NOT penalize the student.
+        is_user_failure = verdict_str in (
+            "WRONG_ANSWER",
+            "TIME_LIMIT_EXCEEDED",
+            "MEMORY_LIMIT_EXCEEDED",
+            "OUTPUT_LIMIT_EXCEEDED",
+            "RUNTIME_ERROR",
+        )
 
         exec_result.passed_testcases = passed_count
         exec_result.total_testcases = len(all_tcs)
@@ -665,106 +764,133 @@ class ContestExecutionService:
             submitted_at=now_utc(),
         )
         db.add(sub)
+        await db.flush()
 
-        # Check if cadet previously solved this problem to prevent duplicate scoring
-        prev_ac_stmt = select(func.count(ContestSubmission.id)).where(
-            ContestSubmission.contest_id == target_contest_id,
-            ContestSubmission.problem_id == target_problem_id,
-            ContestSubmission.member_id == target_member_id,
-            ContestSubmission.verdict == "ACCEPTED",
-        )
-        prev_ac_count = (await db.scalar(prev_ac_stmt)) or 0
-        is_first_solve_by_user = (prev_ac_count == 0) and is_accepted
-
-        if is_first_solve_by_user:
-            await db.execute(
-                update(ContestProblem)
-                .where(ContestProblem.id == target_problem_id)
-                .values(solved_count=ContestProblem.solved_count + 1)
-            )
-
-        # Acquire advisory transaction lock on contest scoreboard to serialize updates and eliminate deadlocks
+        # BUG-B1 & BUG-B5 Fix: Acquire advisory transaction lock BEFORE checking solved count or mutating scoreboard
         t_sb_start = time.perf_counter()
         await db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:cid))"), {"cid": f"scoreboard:{target_contest_id}"})
 
-        contest_start = target_contest_starts_at.replace(tzinfo=timezone.utc) if (target_contest_starts_at and target_contest_starts_at.tzinfo is None) else target_contest_starts_at
-        solve_elapsed_secs = max(0, int((now_utc() - contest_start).total_seconds())) if contest_start else 0
+        # Re-check contest finalization state under advisory lock (BUG-B1 Fix)
+        c_check = await db.execute(
+            select(OfflineContest.ratings_finalized_at)
+            .where(OfflineContest.id == target_contest_id)
+        )
+        finalized_val = None
+        try:
+            if hasattr(c_check, "scalar_one_or_none"):
+                val = c_check.scalar_one_or_none()
+                if not hasattr(val, "__await__"):
+                    finalized_val = val
+            elif hasattr(c_check, "scalar"):
+                val = c_check.scalar()
+                if not hasattr(val, "__await__"):
+                    finalized_val = val
+        except Exception:
+            finalized_val = None
+        is_already_finalized = finalized_val is not None
 
-        sb_entry = await ContestRepository.get_scoreboard_entry(db, target_contest_id, target_member_id, for_update=True)
-        if not sb_entry:
-            failed_attempts = 0 if is_accepted else 1
-            prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
-            sb_entry = ScoreboardEntry(
-                contest_id=target_contest_id,
-                member_id=target_member_id,
-                rank=999,
-                handle=target_member_handle,
-                full_name=target_member_full_name,
-                department=target_member_department,
-                batch=target_member_batch,
-                division="open",
-                score=points_awarded if is_accepted else 0,
-                solved=1 if is_accepted else 0,
-                penalty_seconds=prob_penalty,
-                telemetry=[{
-                    "problem_index": target_problem_index,
-                    "status": "solved" if is_accepted else "failed",
-                    "attempts": 1,
-                    "failed_attempts": 0 if is_accepted else 1,
-                    "solve_time_seconds": solve_elapsed_secs if is_accepted else 0,
-                    "penalty_seconds": prob_penalty,
-                    "is_first_ac": False,
-                }],
+        if not is_already_finalized:
+            # Atomic first-solve count increment under scoreboard lock (BUG-B5 Fix)
+            prev_ac_stmt = select(func.count(ContestSubmission.id)).where(
+                ContestSubmission.contest_id == target_contest_id,
+                ContestSubmission.problem_id == target_problem_id,
+                ContestSubmission.member_id == target_member_id,
+                ContestSubmission.verdict == "ACCEPTED",
             )
-            db.add(sb_entry)
-        else:
-            telemetry_list = list(sb_entry.telemetry or [])
-            prob_item = next(
-                (item for item in telemetry_list if item.get("problem_index") == target_problem_index),
-                None,
-            )
+            prev_ac_count = (await db.scalar(prev_ac_stmt)) or 0
+            is_first_solve_by_user = (prev_ac_count == 1) and is_accepted
 
-            if prob_item:
-                prob_item["attempts"] = prob_item.get("attempts", 0) + 1
-                if is_accepted:
-                    if prob_item.get("status") != "solved":
-                        prob_item["status"] = "solved"
-                        failed_attempts = prob_item.get("attempts", 1) - 1
-                        prob_item["failed_attempts"] = failed_attempts
-                        prob_item["solve_time_seconds"] = solve_elapsed_secs
-                        prob_item["penalty_seconds"] = solve_elapsed_secs + (failed_attempts * 20 * 60)
+            if is_first_solve_by_user:
+                await db.execute(
+                    update(ContestProblem)
+                    .where(ContestProblem.id == target_problem_id)
+                    .values(solved_count=ContestProblem.solved_count + 1)
+                )
+
+            # BUG-B2 Fix: Penalty elapsed seconds uses authoritative received_at (judge latency independent)
+            contest_start = target_contest_starts_at.replace(tzinfo=timezone.utc) if (target_contest_starts_at and target_contest_starts_at.tzinfo is None) else target_contest_starts_at
+            solve_elapsed_secs = max(0, int((received_at - contest_start).total_seconds())) if contest_start else 0
+
+            sb_entry = await ContestRepository.get_scoreboard_entry(db, target_contest_id, target_member_id, for_update=True)
+            if not sb_entry:
+                failed_attempts = 0 if is_accepted else (1 if is_user_failure else 0)
+                prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
+                sb_entry = ScoreboardEntry(
+                    contest_id=target_contest_id,
+                    member_id=target_member_id,
+                    rank=999,
+                    handle=target_member_handle,
+                    full_name=target_member_full_name,
+                    department=target_member_department,
+                    batch=target_member_batch,
+                    division="open",
+                    score=points_awarded if is_accepted else 0,
+                    solved=1 if is_accepted else 0,
+                    penalty_seconds=prob_penalty,
+                    telemetry=[{
+                        "problem_index": target_problem_index,
+                        "status": "solved" if is_accepted else ("failed" if is_user_failure else "error"),
+                        "attempts": 1,
+                        "failed_attempts": failed_attempts,
+                        "solve_time_seconds": solve_elapsed_secs if is_accepted else 0,
+                        "penalty_seconds": prob_penalty,
+                        "is_first_ac": False,
+                    }],
+                )
+                db.add(sb_entry)
+            else:
+                telemetry_list = list(sb_entry.telemetry or [])
+                prob_item = next(
+                    (item for item in telemetry_list if item.get("problem_index") == target_problem_index),
+                    None,
+                )
+
+                if prob_item:
+                    prob_item["attempts"] = prob_item.get("attempts", 0) + 1
+                    if is_accepted:
+                        if prob_item.get("status") != "solved":
+                            prob_item["status"] = "solved"
+                            failed_attempts = prob_item.get("failed_attempts", 0)
+                            prob_item["solve_time_seconds"] = solve_elapsed_secs
+                            prob_item["penalty_seconds"] = solve_elapsed_secs + (failed_attempts * 20 * 60)
+                            sb_entry.score += points_awarded
+                            sb_entry.solved += 1
+                    elif is_user_failure:
+                        if prob_item.get("status") != "solved":
+                            prob_item["status"] = "failed"
+                            prob_item["failed_attempts"] = prob_item.get("failed_attempts", 0) + 1
+                else:
+                    failed_attempts = 0 if is_accepted else (1 if is_user_failure else 0)
+                    prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
+                    telemetry_list.append({
+                        "problem_index": target_problem_index,
+                        "status": "solved" if is_accepted else ("failed" if is_user_failure else "error"),
+                        "attempts": 1,
+                        "failed_attempts": failed_attempts,
+                        "solve_time_seconds": solve_elapsed_secs if is_accepted else 0,
+                        "penalty_seconds": prob_penalty,
+                        "is_first_ac": False,
+                    })
+                    if is_accepted:
                         sb_entry.score += points_awarded
                         sb_entry.solved += 1
-                else:
-                    if prob_item.get("status") != "solved":
-                        prob_item["status"] = "failed"
-                        prob_item["failed_attempts"] = prob_item.get("attempts", 1)
-            else:
-                failed_attempts = 0 if is_accepted else 1
-                prob_penalty = (solve_elapsed_secs + (failed_attempts * 20 * 60)) if is_accepted else 0
-                telemetry_list.append({
-                    "problem_index": target_problem_index,
-                    "status": "solved" if is_accepted else "failed",
-                    "attempts": 1,
-                    "failed_attempts": failed_attempts,
-                    "solve_time_seconds": solve_elapsed_secs if is_accepted else 0,
-                    "penalty_seconds": prob_penalty,
-                    "is_first_ac": False,
-                })
-                if is_accepted:
-                    sb_entry.score += points_awarded
-                    sb_entry.solved += 1
 
-            # Total penalty is the deterministic sum across all solved problems
-            sb_entry.penalty_seconds = sum(
-                item.get("penalty_seconds", 0)
-                for item in telemetry_list
-                if item.get("status") == "solved"
+                # Total penalty is the deterministic sum across all solved problems
+                sb_entry.penalty_seconds = sum(
+                    item.get("penalty_seconds", 0)
+                    for item in telemetry_list
+                    if item.get("status") == "solved"
+                )
+                sb_entry.telemetry = telemetry_list
+
+            await db.flush()
+            await ContestRepository.re_rank_scoreboard(db, target_contest_id)
+        else:
+            logger.warning(
+                "Contest '%s' was already finalized. Submission '%s' saved as practice record without mutating scoreboard.",
+                target_contest_id, target_submission_id,
             )
-            sb_entry.telemetry = telemetry_list
 
-        await db.flush()
-        await ContestRepository.re_rank_scoreboard(db, target_contest_id)
         scoreboard_ms = max(0.1, (time.perf_counter() - t_sb_start) * 1000.0)
 
         # Record durable outbox event inside active transaction

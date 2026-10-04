@@ -126,52 +126,24 @@ def prepare_solution_code(
     method_name: Optional[str] = None,
     starter_codes: Optional[Dict[str, str]] = None,
     function_signature: Optional[Any] = None,
+    submission_mode: Optional[Any] = None,
 ) -> str:
     """
-    Inspects candidate solution code. If it's a function or class Solution,
-    wraps/appends the appropriate execution driver harness.
-
-    function_signature: structured FunctionSignature or dict. When present, delegates to LanguageAdapter.
-    method_name: explicitly supplied function name.
-    starter_codes: admin-defined starter code dict; function name extracted when method_name not supplied.
+    Canonical source code preparer. Delegates directly to SourcePlanBuilder.
+    Enforces mode-aware wrapping:
+      - FULL_PROGRAM: Never wraps user source into Solution class or generated main.
+      - FUNCTION: Resolves function contract and wraps using canonical language adapter.
     """
-    lang_enum = LanguageRegistry.normalize(language)
-    lang = lang_enum.value
-
-    if function_signature:
-        from app.engine.contracts import FunctionSignature
-        try:
-            sig = function_signature if isinstance(function_signature, FunctionSignature) else FunctionSignature(**function_signature)
-            adapter = LanguageRegistry.get_adapter(lang_enum)
-            wrapped = adapter.generate_wrapper(sig, code)
-            LanguageRegistry.validate_source(lang_enum, wrapped)
-            return wrapped
-        except Exception as e:
-            logger.error("Failed to generate wrapper via adapter for %s: %s", lang, e)
-            raise
-
-    # Resolve the expected function name dynamically
-    fn_name = method_name
-    if not fn_name and starter_codes:
-        fn_name = extract_function_name(starter_codes, lang)
-
-    if lang_enum == Language.PYTHON:
-        prepared = _prepare_python_solution(code, fn_name=fn_name)
-    elif lang_enum == Language.JAVASCRIPT:
-        prepared = _prepare_javascript_solution(code, is_ts=False, fn_name=fn_name)
-    elif lang_enum == Language.TYPESCRIPT:
-        prepared = _prepare_javascript_solution(code, is_ts=True, fn_name=fn_name)
-    elif lang_enum == Language.CPP:
-        prepared = _prepare_cpp_solution(code, fn_name=fn_name, starter_codes=starter_codes)
-    elif lang_enum == Language.C:
-        prepared = _prepare_c_solution(code, fn_name=fn_name, starter_codes=starter_codes)
-    elif lang_enum == Language.JAVA:
-        prepared = _prepare_java_solution(code, fn_name=fn_name, starter_codes=starter_codes)
-    else:
-        prepared = code
-
-    LanguageRegistry.validate_source(lang_enum, prepared)
-    return prepared
+    from app.engine.build_plan import SourcePlanBuilder
+    plan = SourcePlanBuilder.build_plan(
+        language=language,
+        user_source=code,
+        submission_mode=submission_mode,
+        function_signature=function_signature,
+        starter_codes=starter_codes,
+        method_name=method_name,
+    )
+    return plan.generated_source
 
 
 # ---------------------------------------------------------------------------

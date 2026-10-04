@@ -232,14 +232,53 @@ class DistributedFabricProvider(JudgeProvider):
         return active
 
     def _format_execution_result(
-        self, res_dict: dict, testcases: list[Any], job_id: str
+        self, res_dict: Optional[dict], testcases: list[Any], job_id: str
     ) -> ExecutionResult:
         """Converts node JSON result into typed ExecutionResult schema."""
+        if not res_dict or not isinstance(res_dict, dict):
+            return ExecutionResult(
+                success=False,
+                submission_id=job_id,
+                status=ExecutionStatus.FAILED,
+                verdict=Verdict.SYSTEM_ERROR,
+                failure_code="EXECUTION_RESULT_MISSING",
+                error="Execution result missing from runner",
+                testcase_results=[],
+                passed_testcases=0,
+                total_testcases=len(testcases),
+            )
+
         raw_verdict = res_dict.get("verdict", "SYSTEM_ERROR")
         try:
             enum_verdict = Verdict(raw_verdict)
         except Exception:
             enum_verdict = Verdict.SYSTEM_ERROR
+
+        # Handle Compilation Error explicitly
+        if enum_verdict == Verdict.COMPILATION_ERROR:
+            comp_out = res_dict.get("compile_output") or res_dict.get("error") or ""
+            not_exec_tcs = [
+                TestCaseResult(
+                    testcase_id=str(getattr(tc, "id", f"tc_{i+1}")),
+                    name=getattr(tc, "name", None),
+                    hidden=getattr(tc, "hidden", False),
+                    passed=False,
+                    verdict=Verdict.NOT_EXECUTED,
+                    compile_output=comp_out,
+                )
+                for i, tc in enumerate(testcases)
+            ]
+            return ExecutionResult(
+                success=False,
+                submission_id=job_id,
+                status=ExecutionStatus.COMPLETED,
+                verdict=Verdict.COMPILATION_ERROR,
+                compile_output=comp_out,
+                testcase_results=not_exec_tcs,
+                passed_testcases=0,
+                total_testcases=len(testcases),
+                compile_time_ms=float(res_dict.get("compile_time_ms", 0.0)),
+            )
 
         tc_results = []
         passed_count = 0

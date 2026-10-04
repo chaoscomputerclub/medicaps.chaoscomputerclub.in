@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 from uuid import uuid4
 from pydantic import BaseModel, Field
-from app.engine.enums import ComparisonMode, ExecutionStatus, Language, TestCaseCategory, Verdict
+from app.engine.enums import ComparisonMode, ExecutionStatus, Language, TestCaseCategory, TestCaseState, Verdict
 
 
 class InlineTestCase(BaseModel):
@@ -76,6 +76,7 @@ class TestCaseResult(BaseModel):
     hidden: bool = False
     passed: bool = False
     verdict: Verdict = Verdict.SYSTEM_ERROR
+    state: TestCaseState = TestCaseState.EXECUTED
     category: Optional[str] = None
     stdout: str = ""
     expected_output: str = ""
@@ -110,6 +111,7 @@ class ExecutionResult(BaseModel):
     provider: Optional[str] = None
     status: ExecutionStatus = ExecutionStatus.COMPLETED
     verdict: Verdict = Verdict.SYSTEM_ERROR
+    failure_code: Optional[str] = None
     stdout: str = ""
     stderr: str = ""
     compile_output: str = ""
@@ -130,6 +132,7 @@ class ExecutionResult(BaseModel):
     timestamps: dict[str, Optional[str]] = Field(default_factory=dict)
     latencies: dict[str, float] = Field(default_factory=dict)
     telemetry: dict[str, Any] = Field(default_factory=dict)
+    build_plan: Optional[dict[str, Any]] = None
     error: Optional[str] = None
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

@@ -1,6 +1,6 @@
 """
 Chaos Computer Club — JavaScript Language Execution Adapter
-Generates Solution class templates and trusted Node.js runner drivers.
+Generates Solution class templates and deterministic trusted Node.js runner drivers.
 """
 
 from __future__ import annotations
@@ -59,15 +59,6 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         )
 
     def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:
-        has_script_main = (
-            "process.stdin" in user_code
-            or "require('readline')" in user_code
-            or 'require("readline")' in user_code
-            or "fs.readFileSync" in user_code
-        )
-        if has_script_main:
-            return user_code
-
         class_name = signature.class_name or "Solution"
         fn_name = signature.name or signature.function_name or "solution"
         param_names = [p.name for p in signature.parameters]
@@ -86,15 +77,31 @@ class JavaScriptAdapter(BaseLanguageAdapter):
     if (raw) {{
         try {{
             const parsed = JSON.parse(raw);
-            if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) && paramNames.length > 0) {{
-                args = paramNames.map(p => parsed[p]);
+            if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
+                if (paramNames.length > 0 && paramNames.every(p => p in parsed)) {{
+                    args = paramNames.map(p => parsed[p]);
+                }} else if (paramNames.length === 1 && Object.keys(parsed).length === 1) {{
+                    args = [Object.values(parsed)[0]];
+                }} else if (paramNames.length > 0 && Object.keys(parsed).length === paramNames.length) {{
+                    args = Object.values(parsed);
+                }} else if (paramNames.length > 0) {{
+                    args = paramNames.map(p => parsed[p] !== undefined ? parsed[p] : Object.values(parsed)[0]);
+                }} else {{
+                    args = Object.values(parsed);
+                }}
             }} else if (Array.isArray(parsed)) {{
-                args = parsed;
+                if (paramNames.length === 1) {{
+                    args = [parsed];
+                }} else if (parsed.length === paramNames.length) {{
+                    args = parsed;
+                }} else {{
+                    args = [parsed];
+                }}
             }} else {{
                 args = [parsed];
             }}
         }} catch(e) {{
-            // Line based fallback
+            // Line-based fallback
             const lines = raw.split('\\n').map(l => l.trim()).filter(Boolean);
             if (lines.length === paramNames.length && paramNames.length > 1) {{
                 args = lines.map(l => {{
@@ -125,32 +132,44 @@ class JavaScriptAdapter(BaseLanguageAdapter):
             const inst = new targetClass();
             if (typeof inst['{fn_name}'] === 'function') {{
                 targetFn = inst['{fn_name}'].bind(inst);
+            }} else if (typeof targetClass['{fn_name}'] === 'function') {{
+                targetFn = targetClass['{fn_name}'].bind(targetClass);
+            }}
+        }} catch(e) {{
+            if (typeof targetClass['{fn_name}'] === 'function') {{
+                targetFn = targetClass['{fn_name}'].bind(targetClass);
+            }}
+        }}
+    }}
+
+    if (!targetFn) {{
+        try {{
+            if (typeof {fn_name} === 'function') {{
+                targetFn = {fn_name};
             }}
         }} catch(e) {{}}
     }}
 
-    if (!targetFn && typeof {fn_name} === 'function') {{
-        targetFn = {fn_name};
-    }}
-
     if (!targetFn) {{
-        console.error("Judge Error: Method '{fn_name}' or class {class_name} not found.");
+        process.stderr.write("FUNCTION_NOT_FOUND: Method '{fn_name}' or class {class_name} not found.\\n");
         process.exit(1);
     }}
 
     try {{
         const result = targetFn.apply(null, args);
         if (typeof result === 'boolean') {{
-            console.log(result ? 'true' : 'false');
-        }} else if (result !== undefined && result !== null && typeof result === 'object') {{
-            console.log(JSON.stringify(result));
+            process.stdout.write((result ? 'true' : 'false') + '\\n');
+        }} else if (result === null) {{
+            process.stdout.write('null\\n');
         }} else if (result === undefined) {{
-            console.log('null');
+            process.stdout.write('undefined\\n');
+        }} else if (typeof result === 'object') {{
+            process.stdout.write(JSON.stringify(result) + '\\n');
         }} else {{
-            console.log(result);
+            process.stdout.write(String(result) + '\\n');
         }}
     }} catch (err) {{
-        console.error(`Runtime Exception in '{fn_name}': ${{err.stack || err}}`);
+        process.stderr.write(`Runtime Exception in '{fn_name}': ${{err.stack || err}}\\n`);
         process.exit(1);
     }}
 }})();

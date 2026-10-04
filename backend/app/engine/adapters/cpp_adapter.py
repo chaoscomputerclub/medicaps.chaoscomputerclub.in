@@ -72,10 +72,36 @@ class CppAdapter(BaseLanguageAdapter):
             "};\n"
         )
 
-    def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:
-        if "int main(" in user_code or "int main (" in user_code:
-            return user_code
+    @staticmethod
+    def _partition_cpp_source(user_code: str, class_name: str) -> tuple[str, str]:
+        """
+        Partitions user code into (global_directives, class_body).
+        Global directives (includes, defines, using namespace, pragmas) MUST be placed at file scope,
+        NEVER inside class Solution.
+        """
+        if f"class {class_name}" in user_code or "class Solution" in user_code or f"struct {class_name}" in user_code:
+            return "", user_code
 
+        global_lines = []
+        body_lines = []
+
+        for line in user_code.splitlines(keepends=True):
+            s = line.strip()
+            if (
+                s.startswith("#")
+                or s.startswith("using namespace ")
+                or (s.startswith("using ") and s.endswith(";") and "::" in s)
+            ):
+                global_lines.append(line)
+            else:
+                body_lines.append(line)
+
+        global_part = "".join(global_lines)
+        body_part = "".join(body_lines)
+        wrapped_class = f"class {class_name} {{\npublic:\n{body_part}\n}};\n"
+        return global_part, wrapped_class
+
+    def generate_wrapper(self, signature: FunctionSignature, user_code: str) -> str:
         class_name = signature.class_name or "Solution"
         fn_name = signature.name or signature.function_name or "solution"
         ret_type = self._map_type(signature.return_type, is_param=False)
@@ -92,9 +118,7 @@ class CppAdapter(BaseLanguageAdapter):
         ]
         header_block = "\n".join(headers) + "\n\n"
 
-        wrapped_code = user_code
-        if f"class {class_name}" not in user_code and "class Solution" not in user_code:
-            wrapped_code = f"class {class_name} {{\npublic:\n{user_code}\n}};\n"
+        global_part, wrapped_code = self._partition_cpp_source(user_code, class_name)
 
         # Build parameter parsers
         decl_lines = []
@@ -376,7 +400,7 @@ int main() {
     vector<string> _chunks = _ccc_extract_chunks(_full_input);
 """
         body = "\n".join(decl_lines) + f"\n\n    {class_name} _sol;\n{invoke_str}    return 0;\n}}\n"
-        return header_block + wrapped_code + "\n" + driver + body
+        return header_block + global_part + ("\n\n" if global_part else "") + wrapped_code + "\n" + driver + body
 
     def _build_param_extraction(self, type_input: Any, ptype: str, pname: str, idx: int, orig_name: str) -> str:
         chunk_expr = f'_ccc_find_param(_full_input, "{orig_name}", {idx}, _chunks)'

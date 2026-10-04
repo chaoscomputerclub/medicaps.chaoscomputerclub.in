@@ -61,23 +61,50 @@ class TypeScriptAdapter(BaseLanguageAdapter):
         param_names_repr = json.dumps(param_names)
 
         driver = f"""
-
 // CCC Trusted Judge Execution Driver (TypeScript/Node.js)
 (function _ccc_run() {{
     const fs = require('fs');
     try {{
         const raw = fs.readFileSync(0, 'utf-8').trim();
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
         const paramNames = {param_names_repr};
 
         let args = [];
-        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) && paramNames.length > 0) {{
-            args = paramNames.map(p => parsed[p]);
-        }} else if (Array.isArray(parsed)) {{
-            args = parsed;
-        }} else {{
-            args = [parsed];
+        if (raw) {{
+            try {{
+                const parsed = JSON.parse(raw);
+                if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
+                    if (paramNames.length > 0 && paramNames.every(p => p in parsed)) {{
+                        args = paramNames.map(p => parsed[p]);
+                    }} else if (paramNames.length === 1 && Object.keys(parsed).length === 1) {{
+                        args = [Object.values(parsed)[0]];
+                    }} else if (paramNames.length > 0 && Object.keys(parsed).length === paramNames.length) {{
+                        args = Object.values(parsed);
+                    }} else if (paramNames.length > 0) {{
+                        args = paramNames.map(p => parsed[p] !== undefined ? parsed[p] : Object.values(parsed)[0]);
+                    }} else {{
+                        args = Object.values(parsed);
+                    }}
+                }} else if (Array.isArray(parsed)) {{
+                    if (paramNames.length === 1) {{
+                        args = [parsed];
+                    }} else if (parsed.length === paramNames.length) {{
+                        args = parsed;
+                    }} else {{
+                        args = [parsed];
+                    }}
+                }} else {{
+                    args = [parsed];
+                }}
+            }} catch(e) {{
+                const lines = raw.split('\\n').map(l => l.trim()).filter(Boolean);
+                if (lines.length === paramNames.length && paramNames.length > 1) {{
+                    args = lines.map(l => {{
+                        try {{ return JSON.parse(l); }} catch(err) {{ return l; }}
+                    }});
+                }} else {{
+                    args = [raw];
+                }}
+            }}
         }}
 
         let targetFn = null;
@@ -87,26 +114,36 @@ class TypeScriptAdapter(BaseLanguageAdapter):
                 const sol = new targetCls();
                 if (typeof sol['{fn_name}'] === 'function') {{
                     targetFn = sol['{fn_name}'].bind(sol);
+                }} else if (typeof targetCls['{fn_name}'] === 'function') {{
+                    targetFn = targetCls['{fn_name}'].bind(targetCls);
                 }}
-            }} catch(e) {{}}
+            }} catch(e) {{
+                if (typeof targetCls['{fn_name}'] === 'function') {{
+                    targetFn = targetCls['{fn_name}'].bind(targetCls);
+                }}
+            }}
         }}
         if (!targetFn && typeof {fn_name} === 'function') {{
             targetFn = {fn_name};
         }}
         if (!targetFn) {{
-            console.error('Error: Method "{fn_name}" or class {class_name} not found');
+            process.stderr.write("FUNCTION_NOT_FOUND: Method '{fn_name}' or class {class_name} not found.\\n");
             process.exit(1);
         }}
         const result = targetFn(...args);
-        if (result === undefined || result === null) {{
-            console.log('null');
-        }} else if (typeof result === 'boolean') {{
-            console.log(result ? 'true' : 'false');
+        if (typeof result === 'boolean') {{
+            process.stdout.write((result ? 'true' : 'false') + '\\n');
+        }} else if (result === null) {{
+            process.stdout.write('null\\n');
+        }} else if (result === undefined) {{
+            process.stdout.write('undefined\\n');
+        }} else if (typeof result === 'object') {{
+            process.stdout.write(JSON.stringify(result) + '\\n');
         }} else {{
-            console.log(JSON.stringify(result));
+            process.stdout.write(String(result) + '\\n');
         }}
     }} catch (err) {{
-        console.error('Runtime error in driver execution:', err);
+        process.stderr.write(`Runtime error in driver execution: ${{err.stack || err}}\\n`);
         process.exit(1);
     }}
 }})();

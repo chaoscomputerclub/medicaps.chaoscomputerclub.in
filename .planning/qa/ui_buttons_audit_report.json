@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-30T17:50:16.272Z",
-  "totalElements": 338,
-  "functionalCount": 338,
+  "timestamp": "2026-10-04T07:33:54.638Z",
+  "totalElements": 339,
+  "functionalCount": 339,
   "connectivityRate": "100.0%",
   "breakdown": {
     "backendMutations": 28,
     "backendQueries": 9,
-    "routingNavigation": 214,
+    "routingNavigation": 215,
     "clientUiState": 61,
     "conditionalLocked": 20,
     "uiPrimitiveWrappers": 6,
@@ -358,7 +358,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 211,
+      "line": 212,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "\"/\"",
@@ -367,7 +367,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 218,
+      "line": 219,
       "tag": "<button>",
       "label": "{open ? <X size={20} /> : <Menu size=...",
       "handler": "{() => dispatch(toggleSidebar())}",
@@ -376,7 +376,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 230,
+      "line": 231,
       "tag": "<div>",
       "label": "div",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -385,7 +385,7 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 243,
+      "line": 244,
       "tag": "<Link>",
       "label": "[to=/]",
       "handler": "{() => dispatch(setSidebarOpen(false))}",
@@ -394,25 +394,25 @@
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 289,
+      "line": 290,
       "tag": "<Link>",
       "label": "[to={item.to}]",
-      "handler": "{() => {\n                  if (open) dispatch(setSidebarOpen(false));\n          ",
+      "handler": "{() => {\n                  markNavigationClick(item.to);\n                  if (o",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 321,
+      "line": 323,
       "tag": "<Link>",
       "label": "[to=/profile]",
-      "handler": "\"/profile\"",
+      "handler": "{() => markNavigationClick(\"/profile\")}",
       "category": "LIVE_BACKEND_QUERY",
       "description": "Triggers live backend SWR query / data reload"
     },
     {
       "file": "src/organization/components/PortalShell.tsx",
-      "line": 349,
+      "line": 352,
       "tag": "<button>",
       "label": "button",
       "handler": "{handleLogout}",
@@ -439,7 +439,7 @@
     },
     {
       "file": "src/organization/components/ScoreboardMatrix.tsx",
-      "line": 78,
+      "line": 80,
       "tag": "<Link>",
       "label": "[to={/profile/${row.handle}}]",
       "handler": "{`/profile/${row.handle}`}",
@@ -2527,7 +2527,7 @@
     },
     {
       "file": "src/pages/DashboardPage.tsx",
-      "line": 237,
+      "line": 247,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2536,7 +2536,7 @@
     },
     {
       "file": "src/pages/DashboardPage.tsx",
-      "line": 238,
+      "line": 248,
       "tag": "<Link>",
       "label": "[to={/contests/${live.slug}}]",
       "handler": "{`/contests/${live.slug}`}",
@@ -2545,7 +2545,7 @@
     },
     {
       "file": "src/pages/DashboardPage.tsx",
-      "line": 261,
+      "line": 271,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2554,7 +2554,7 @@
     },
     {
       "file": "src/pages/DashboardPage.tsx",
-      "line": 262,
+      "line": 272,
       "tag": "<Link>",
       "label": "[to={/contests/${next.slug}}]",
       "handler": "{`/contests/${next.slug}`}",
@@ -2563,7 +2563,7 @@
     },
     {
       "file": "src/pages/DashboardPage.tsx",
-      "line": 278,
+      "line": 288,
       "tag": "<Link>",
       "label": "Profile Dossier →",
       "handler": "\"/profile\"",
@@ -2572,16 +2572,25 @@
     },
     {
       "file": "src/pages/DashboardPage.tsx",
-      "line": 295,
+      "line": 306,
       "tag": "<Link>",
-      "label": "Full Standings →",
+      "label": "All Contests →",
+      "handler": "\"/contests\"",
+      "category": "ROUTING_NAVIGATION",
+      "description": "Routes client across platform views via React Router"
+    },
+    {
+      "file": "src/pages/DashboardPage.tsx",
+      "line": 309,
+      "tag": "<Link>",
+      "label": "Campus Leaderboard →",
       "handler": "\"/leaderboard\"",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 266,
+      "line": 268,
       "tag": "<Link>",
       "label": "[to={/profile/${x.handle}}]",
       "handler": "{`/profile/${x.handle}`}",
@@ -2590,7 +2599,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 345,
+      "line": 347,
       "tag": "<button>",
       "label": "{size}",
       "handler": "{() => handlePageSizeChange(size)}",
@@ -2599,7 +2608,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 363,
+      "line": 365,
       "tag": "<Button>",
       "label": "Button",
       "handler": "{handlePrevPage}",
@@ -2608,7 +2617,7 @@
     },
     {
       "file": "src/pages/LeaderboardPage.tsx",
-      "line": 377,
+      "line": 379,
       "tag": "<Button>",
       "label": "= totalPages - 1}\n                ari...",
       "handler": "{handleNextPage}",
@@ -2761,7 +2770,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 254,
+      "line": 263,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2770,7 +2779,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 255,
+      "line": 264,
       "tag": "<Link>",
       "label": "{isViewingSelf ? Sign In to Access P...",
       "handler": "{isViewingSelf ? \"/auth\" : \"/leaderboard\"}",
@@ -2779,7 +2788,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 426,
+      "line": 435,
       "tag": "<button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2788,7 +2797,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 469,
+      "line": 478,
       "tag": "<Button>",
       "label": "{isUploadingAvatar ? (               ...",
       "handler": "{() => !isUploadingAvatar && avatarInputRef.current?.click()}",
@@ -2797,7 +2806,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 485,
+      "line": 494,
       "tag": "<Button>",
       "label": "setShowRemoveAvatarModal(true)}\n     ...",
       "handler": "{() => setShowRemoveAvatarModal(true)}",
@@ -2806,7 +2815,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 496,
+      "line": 505,
       "tag": "<Button>",
       "label": "Button",
       "handler": "asChild",
@@ -2815,7 +2824,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 497,
+      "line": 506,
       "tag": "<Link>",
       "label": "[to=/settings]",
       "handler": "\"/settings\"",
@@ -2824,7 +2833,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 505,
+      "line": 514,
       "tag": "<Button>",
       "label": "{isFollowing ? (                     ...",
       "handler": "{handleFollowToggle}",
@@ -2833,7 +2842,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 532,
+      "line": 541,
       "tag": "<Button>",
       "label": "{copied ? <Check size={11} className=...",
       "handler": "{handleCopyLink}",
@@ -2842,7 +2851,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 575,
+      "line": 584,
       "tag": "<a>",
       "label": "[href={https://github.com/${m.github...",
       "handler": "{`https://github.com/${m.github_username}`}",
@@ -2851,7 +2860,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 586,
+      "line": 595,
       "tag": "<a>",
       "label": "[href={\n                    m.linkedi...",
       "handler": "{\n                    m.linkedin_url.startsWith(\"http\")\n                      ? ",
@@ -2860,7 +2869,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 682,
+      "line": 689,
       "tag": "<Link>",
       "label": "{b.contest}",
       "handler": "{`/contests/${b.contest_slug || b.slug}/results`}",
@@ -2869,7 +2878,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 781,
+      "line": 788,
       "tag": "<AlertDialogCancel>",
       "label": "Cancel",
       "handler": "{() => setShowRemoveAvatarModal(false)}",
@@ -2878,7 +2887,7 @@
     },
     {
       "file": "src/pages/ProfilePage.tsx",
-      "line": 787,
+      "line": 794,
       "tag": "<AlertDialogAction>",
       "label": "Remove Photo",
       "handler": "{handleAvatarRemove}",
@@ -3042,8 +3051,8 @@
       "file": "src/pages/TermsPage.tsx",
       "line": 207,
       "tag": "<a>",
-      "label": "info@chaoscomputerclub.in",
-      "handler": "\"mailto:info@chaoscomputerclub.in\"",
+      "label": "{(import.meta.env[VITE_CONTACT_EMAIL...",
+      "handler": "{`mailto:${(import.meta.env[\"VITE_CONTACT_EMAIL\"] as string) || \"info@chaoscompu",
       "category": "ROUTING_NAVIGATION",
       "description": "Routes client across platform views via React Router"
     },

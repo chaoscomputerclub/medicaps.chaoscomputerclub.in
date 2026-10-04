@@ -4,12 +4,12 @@ import { globalSwrStore } from "@/lib/cache/swrCache";
 import type {
   ContestSummary,
   RegistrationStatus,
-  CampusPass,
   ContestProblemPreview,
   ContestArenaData,
   ArenaRunResult,
   ArenaSubmitResult,
   ParticipationRecord,
+  CampusPass,
 } from "@/features/contest/types";
 import type { RealtimeEvent } from "@/lib/realtime";
 import { sanitizeCodeSnippet } from "@/lib/utils";

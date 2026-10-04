@@ -485,12 +485,26 @@ class ExecutionRouter:
                     )
                     await db.commit()
 
+                    sys_tcs = [
+                        TestCaseResult(
+                            testcase_id=str(getattr(tc, "id", f"tc_{i+1}")),
+                            name=getattr(tc, "name", None),
+                            hidden=getattr(tc, "hidden", False),
+                            passed=False,
+                            verdict=Verdict.SYSTEM_ERROR,
+                            stderr=f"[{rej_code.value}] {fallback_decision.reason}",
+                        )
+                        for i, tc in enumerate(testcases)
+                    ]
                     return ExecutionResult(
                         success=False,
                         submission_id=job.id,
                         status=ExecutionStatus.FAILED,
                         verdict=Verdict.SYSTEM_ERROR,
+                        failure_code=rej_code.value,
                         error=f"[{rej_code.value}] {fallback_decision.reason}",
+                        testcase_results=sys_tcs,
+                        passed_testcases=0,
                         total_testcases=len(testcases),
                     )
 

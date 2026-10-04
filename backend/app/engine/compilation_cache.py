@@ -185,6 +185,13 @@ class CompilationCache:
                 dest_path = target_dest
 
             art_type = ArtifactType(meta.get("artifact_type", ArtifactType.NATIVE_BINARY.value))
+            if art_type == ArtifactType.CLASS_FILES and target_dest:
+                classes_dir = entry_dir / "classes"
+                if classes_dir.exists():
+                    target_dest.parent.mkdir(parents=True, exist_ok=True)
+                    for cf in classes_dir.glob("*.class"):
+                        shutil.copy2(cf, target_dest.parent / cf.name)
+
             if art_type == ArtifactType.CLASS_FILES:
                 entry_cmd = ("java", "-Xmx256m", "-Xms32m", "-cp", str(dest_path.parent), "Main")
             elif meta.get("is_executable", True):
@@ -258,6 +265,12 @@ class CompilationCache:
                 shutil.copy2(compiled_file, tmp_artifact)
                 if is_executable:
                     os.chmod(tmp_artifact, 0o755)
+
+                if artifact_type == ArtifactType.CLASS_FILES and compiled_file.is_file():
+                    classes_dir = entry_dir / "classes"
+                    classes_dir.mkdir(parents=True, exist_ok=True)
+                    for cf in compiled_file.parent.glob("*.class"):
+                        shutil.copy2(cf, classes_dir / cf.name)
                 
                 size_bytes = tmp_artifact.stat().st_size
                 now_str = datetime.now(timezone.utc).isoformat()

@@ -392,6 +392,7 @@ async def test_atomic_solved_count_and_advisory_locking_in_submit():
 
     mock_problem = MagicMock()
     mock_problem.id = "p-1"
+    mock_problem.contest_id = "c-1"
     mock_problem.points = 100
     mock_problem.problem_index = "A"
     mock_problem.solved_count = 0

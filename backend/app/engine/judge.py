@@ -134,6 +134,12 @@ class JudgeEngine:
         if act_unq == exp_unq:
             return True
 
+        # Boolean normalization: e.g. true vs True, false vs False
+        act_lower = act_unq.lower()
+        exp_lower = exp_unq.lower()
+        if act_lower in ("true", "false") and exp_lower in ("true", "false"):
+            return act_lower == exp_lower
+
         if mode == ComparisonMode.TRIMMED:
             act_lines = [l.rstrip() for l in actual.replace("\r\n", "\n").splitlines()]
             exp_lines = [l.rstrip() for l in expected.replace("\r\n", "\n").splitlines()]

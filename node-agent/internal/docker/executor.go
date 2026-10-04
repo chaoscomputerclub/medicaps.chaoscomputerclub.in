@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -433,25 +432,45 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 
 	wg.Wait()
 
-	// Sort results back into strict testcase sequence
-	sort.Slice(outcomes, func(i, j int) bool {
-		return outcomes[i].index < outcomes[j].index
-	})
+	// Map executed outcomes by index
+	outcomeMap := make(map[int]tcOutcome, len(outcomes))
+	for _, o := range outcomes {
+		outcomeMap[o.index] = o
+	}
 
-	tcResults := make([]map[string]interface{}, len(outcomes))
+	tcResults := make([]map[string]interface{}, len(rawTCs))
 	passedCount := 0
 	var maxRuntimeMS float64 = 0.0
 	finalVerdict := "ACCEPTED"
 
-	for i, o := range outcomes {
-		tcResults[i] = o.result
-		if o.runtime > maxRuntimeMS {
-			maxRuntimeMS = o.runtime
-		}
-		if o.passed {
-			passedCount++
-		} else if finalVerdict == "ACCEPTED" {
-			finalVerdict = o.verdict
+	for i, raw := range rawTCs {
+		if o, ok := outcomeMap[i]; ok {
+			tcResults[i] = o.result
+			if o.runtime > maxRuntimeMS {
+				maxRuntimeMS = o.runtime
+			}
+			if o.passed {
+				passedCount++
+			} else if finalVerdict == "ACCEPTED" {
+				finalVerdict = o.verdict
+			}
+		} else {
+			// Unexecuted testcase due to early stop
+			tcMap, _ := raw.(map[string]interface{})
+			tcID, _ := tcMap["id"].(string)
+			if tcID == "" {
+				tcID = fmt.Sprintf("tc_%d", i+1)
+			}
+			expected, _ := tcMap["expected_output"].(string)
+			tcResults[i] = map[string]interface{}{
+				"testcase_id":     tcID,
+				"passed":          false,
+				"verdict":         "NOT_EXECUTED",
+				"stdout":          "",
+				"stderr":          "",
+				"wall_time_ms":    0.0,
+				"expected_output": expected,
+			}
 		}
 	}
 
