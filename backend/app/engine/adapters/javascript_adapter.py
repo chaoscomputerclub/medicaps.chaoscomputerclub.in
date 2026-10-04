@@ -70,46 +70,134 @@ class JavaScriptAdapter(BaseLanguageAdapter):
 // ==========================================
 (function() {{
     const fs = require('fs');
-    const raw = fs.readFileSync(0, 'utf-8').trim();
+    // IMPORTANT: Do NOT trim raw here — user input may be a meaningful
+    // whitespace-only string (e.g. s = " " for palindrome check).
+    const raw = fs.readFileSync(0, 'utf-8');
     const paramNames = {param_names_repr};
 
+    function _parseVal(s) {{
+        try {{ return JSON.parse(s); }} catch(e) {{ return s; }}
+    }}
+
+    // Parse LeetCode-style "paramName = value" per-line format.
+    // Handles multi-line bracket-enclosed values.
+    // e.g.:
+    //   s = "A man, a plan, a canal: Panama"
+    //   nums = [2,7,11,15]
+    //   target = 9
+    function _parseParamAssign(input, paramNames) {{
+        const lines = input.split('\\n');
+        const results = new Array(paramNames.length);
+        let filledCount = 0;
+        let currentParamIdx = -1;
+        let curValue = '';
+        let depth = 0;
+
+        const flushCurrent = function() {{
+            if (currentParamIdx >= 0 && curValue !== '') {{
+                results[currentParamIdx] = _parseVal(curValue.trim());
+                filledCount++;
+                currentParamIdx = -1;
+                curValue = '';
+                depth = 0;
+            }}
+        }};
+
+        for (let i = 0; i < lines.length; i++) {{
+            const line = lines[i];
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+
+            if (depth === 0) {{
+                let matched = false;
+                for (let pi = 0; pi < paramNames.length; pi++) {{
+                    const pn = paramNames[pi];
+                    const re = new RegExp('^' + pn.replace(/[.*+?^${{}}()|[\\]\\\\]/g, '\\\\$&') + '\\\\s*=\\\\s*');
+                    const m = re.exec(trimmed);
+                    if (m) {{
+                        flushCurrent();
+                        currentParamIdx = pi;
+                        curValue = trimmed.slice(m[0].length);
+                        matched = true;
+                        break;
+                    }}
+                }}
+                if (!matched && currentParamIdx >= 0) {{
+                    curValue += '\\n' + line;
+                }}
+            }} else {{
+                curValue += '\\n' + line;
+            }}
+
+            for (let j = 0; j < trimmed.length; j++) {{
+                const c = trimmed[j];
+                if (c === '[' || c === '{{') depth++;
+                else if (c === ']' || c === '}}') depth = Math.max(0, depth - 1);
+            }}
+        }}
+        flushCurrent();
+
+        if (filledCount === paramNames.length && results.every(r => r !== undefined)) {{
+            return results;
+        }}
+        return null;
+    }}
+
     let args = [];
-    if (raw) {{
-        try {{
-            const parsed = JSON.parse(raw);
-            if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
-                if (paramNames.length > 0 && paramNames.every(p => p in parsed)) {{
-                    args = paramNames.map(p => parsed[p]);
-                }} else if (paramNames.length === 1 && Object.keys(parsed).length === 1) {{
-                    args = [Object.values(parsed)[0]];
-                }} else if (paramNames.length > 0 && Object.keys(parsed).length === paramNames.length) {{
-                    args = Object.values(parsed);
-                }} else if (paramNames.length > 0) {{
-                    args = paramNames.map(p => parsed[p] !== undefined ? parsed[p] : Object.values(parsed)[0]);
-                }} else {{
-                    args = Object.values(parsed);
-                }}
-            }} else if (Array.isArray(parsed)) {{
-                if (paramNames.length === 1) {{
-                    args = [parsed];
-                }} else if (parsed.length === paramNames.length) {{
-                    args = parsed;
-                }} else {{
-                    args = [parsed];
-                }}
+    const rawTrimmed = raw.trim();
+
+    if (rawTrimmed === '' && raw !== '') {{
+        // Input was only whitespace (e.g. " ") — pass it as-is
+        args = [raw];
+    }} else if (rawTrimmed !== '') {{
+        // 1. Try param=value line-format first (LeetCode standard)
+        if (paramNames.length > 0) {{
+            const assigned = _parseParamAssign(rawTrimmed, paramNames);
+            if (assigned !== null) {{
+                args = assigned;
             }} else {{
-                args = [parsed];
+                // 2. Try JSON parse
+                try {{
+                    const parsed = JSON.parse(rawTrimmed);
+                    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
+                        if (paramNames.length > 0 && paramNames.every(p => p in parsed)) {{
+                            args = paramNames.map(p => parsed[p]);
+                        }} else if (paramNames.length === 1 && Object.keys(parsed).length === 1) {{
+                            args = [Object.values(parsed)[0]];
+                        }} else if (paramNames.length > 0 && Object.keys(parsed).length === paramNames.length) {{
+                            args = Object.values(parsed);
+                        }} else if (paramNames.length > 0) {{
+                            args = paramNames.map(p => parsed[p] !== undefined ? parsed[p] : Object.values(parsed)[0]);
+                        }} else {{
+                            args = Object.values(parsed);
+                        }}
+                    }} else if (Array.isArray(parsed)) {{
+                        if (paramNames.length === 1) {{
+                            args = [parsed];
+                        }} else if (parsed.length === paramNames.length) {{
+                            args = parsed;
+                        }} else {{
+                            args = [parsed];
+                        }}
+                    }} else {{
+                        args = [parsed];
+                    }}
+                }} catch(e) {{
+                    // 3. Multi-line fallback
+                    const lines = rawTrimmed.split('\\n').filter(l => l.trim());
+                    if (lines.length === paramNames.length && paramNames.length > 1) {{
+                        try {{
+                            args = lines.map(l => JSON.parse(l.trim()));
+                        }} catch(e2) {{
+                            args = [rawTrimmed];
+                        }}
+                    }} else {{
+                        args = [rawTrimmed];
+                    }}
+                }}
             }}
-        }} catch(e) {{
-            // Line-based fallback
-            const lines = raw.split('\\n').map(l => l.trim()).filter(Boolean);
-            if (lines.length === paramNames.length && paramNames.length > 1) {{
-                args = lines.map(l => {{
-                    try {{ return JSON.parse(l); }} catch(err) {{ return l; }}
-                }});
-            }} else {{
-                args = [raw];
-            }}
+        }} else {{
+            args = [rawTrimmed];
         }}
     }}
 
