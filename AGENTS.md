@@ -28,6 +28,15 @@
   - Agents and developers do **NOT** have to run slow local SSH deploys or wait on `./scripts/gsd_sync.sh`. Simply push commits to `main` when instructed, and GitHub handles the deployment asynchronously in the cloud.
   - Push only when instructed by the user or when features are tested and verified locally.
 
+### 1.1 Mandatory Version Increment Protocol
+- **Strict Requirement to Increment Version**: Whenever making backend changes, API contract changes, core engine updates, or pushing a production release, developers and agents **MUST ALWAYS** increment the semantic version number (e.g. `1.0.0` → `1.0.1` → `1.0.2` for patches, or `1.1.0` for feature sets).
+- **Files to Update**:
+  1. `backend/app/core/config.py` (`VERSION: str = os.getenv("VERSION", "<new_version>")`)
+  2. `backend/.env`, `backend/.env.production`, & `backend/.env.example` (`VERSION=<new_version>`)
+  3. `package.json` (`"version": "<new_version>"`)
+- **Operational Purpose**: The live health probe `/api/health` returns `"version": settings.VERSION`. Incrementing the version allows instant, unambiguous verification via `curl https://medicaps.chaoscomputerclub.in/api/health` that the newly deployed build is active and running, preventing stale cache or un-restarted daemon confusion.
+- **Pre-Push Check**: Never deploy or push commits touching backend services, execution engines, or APIs without bumping this version.
+
 ## 2. Core Engineering Principles
 - **Bias for Action**: Directly investigate root causes and fix them completely.
 - **Production Standard**: Zero placeholders, zero TODOs in user paths, resilient error handling.

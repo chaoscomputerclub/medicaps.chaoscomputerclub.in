@@ -20,3 +20,8 @@
       npm run build
       pm2 restart <app>
       ```
+
+4. **Mandatory Version Increment on Deployment**:
+   - **Always Bump the Version Number**: Before committing and deploying changes, increment the version number in `backend/app/core/config.py`, `backend/.env`, `backend/.env.production`, and `package.json` (e.g. `1.0.0` -> `1.0.1`).
+   - **Health Verification**: After pulling and restarting on the production server, verify the deployment by querying `/api/health` (e.g. `curl -s http://127.0.0.1:8002/api/health` or `curl -s https://medicaps.chaoscomputerclub.in/api/health`) and checking that the reported `"version"` matches the bumped version.
+
