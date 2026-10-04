@@ -298,12 +298,22 @@ inline bool _ccc_to_bool(const string& raw) {
 }
 
 inline string _ccc_to_string(const string& raw) {
-    size_t q1 = raw.find('"');
+    // Handle JSON-quoted string: "value"
+    size_t q1 = raw.find('\"');
     if (q1 != string::npos) {
-        size_t q2 = raw.find('"', q1 + 1);
-        if (q2 != string::npos) return raw.substr(q1 + 1, q2 - q1 - 1);
+        size_t q2 = q1 + 1;
+        while (q2 < raw.size() && raw[q2] != '\"') {
+            if (raw[q2] == '\\' && q2 + 1 < raw.size()) q2++;
+            q2++;
+        }
+        if (q2 < raw.size()) return raw.substr(q1 + 1, q2 - q1 - 1);
     }
-    return raw;
+    // Bare string (from param = value without quotes) — return as-is trimmed
+    string s = raw;
+    while (!s.empty() && isspace((unsigned char)s.back())) s.pop_back();
+    size_t start = 0;
+    while (start < s.size() && isspace((unsigned char)s[start])) start++;
+    return s.substr(start);
 }
 
 inline vector<string> _ccc_to_vector_string(const string& raw, const string& full_input) {
@@ -392,6 +402,30 @@ inline vector<vector<int>> _ccc_to_vector_vector_int(const string& raw, const st
     return res;
 }
 
+inline vector<double> _ccc_to_vector_double(const string& raw, const string& full_input) {
+    const string& src = (raw.find('[') != string::npos) ? raw : full_input;
+    vector<double> res;
+    string num;
+    bool inside = false;
+    for (char c : src) {
+        if (c == '[') inside = true;
+        else if (c == ']') {
+            if (!num.empty()) { try { res.push_back(stod(num)); } catch(...) {} num.clear(); }
+            inside = false;
+        } else if (inside && (isdigit((unsigned char)c) || c == '-' || c == '.')) {
+            num += c;
+        } else if (inside && (c == ',' || isspace((unsigned char)c))) {
+            if (!num.empty()) { try { res.push_back(stod(num)); } catch(...) {} num.clear(); }
+        }
+    }
+    if (res.empty() && !raw.empty()) {
+        stringstream ss(raw);
+        double v;
+        while (ss >> v) res.push_back(v);
+    }
+    return res;
+}
+
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
@@ -411,13 +445,19 @@ int main() {
                     return f"    vector<vector<int>> {pname} = _ccc_to_vector_vector_int({chunk_expr}, _full_input);"
                 if td.base == "string":
                     return f"    vector<string> {pname} = _ccc_to_vector_string({chunk_expr}, _full_input);"
+                if td.base in ("float", "double"):
+                    return f"    vector<double> {pname} = _ccc_to_vector_double({chunk_expr}, _full_input);"
+                if td.base in ("long", "long long"):
+                    return f"    vector<long long> {pname} = _ccc_to_vector_long({chunk_expr}, _full_input);"
                 return f"    vector<int> {pname} = _ccc_to_vector_int({chunk_expr}, _full_input);"
             if td.base == "string":
                 return f"    string {pname} = _ccc_to_string({chunk_expr});"
             if td.base == "boolean":
                 return f"    bool {pname} = _ccc_to_bool({chunk_expr});"
-            if td.base == "float":
+            if td.base in ("float", "double"):
                 return f"    double {pname} = _ccc_to_double({chunk_expr});"
+            if td.base in ("long", "long long"):
+                return f"    long long {pname} = _ccc_to_long_long({chunk_expr});"
             return f"    int {pname} = _ccc_to_int({chunk_expr});"
         except Exception:
             return f"    int {pname} = _ccc_to_int({chunk_expr});"

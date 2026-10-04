@@ -161,18 +161,50 @@ class CAdapter(BaseLanguageAdapter):
 #include <string.h>
 #include <ctype.h>
 
+// Skip whitespace, commas, colons
 static void _ccc_skip_ws(const char** p) {{
     while (**p && (isspace((unsigned char)**p) || **p == ',' || **p == ':')) (*p)++;
 }}
 
+// Find a value by JSON key ("key": ...) or LeetCode assignment (key = ...)
+// Returns pointer to start of value, or NULL if not found.
 static const char* _ccc_find_key(const char* src, const char* key) {{
-    char pat[64];
+    // Strategy 1: JSON format: "key": value
+    char pat[128];
     snprintf(pat, sizeof(pat), "\\"%s\\"", key);
     const char* found = strstr(src, pat);
-    if (!found) return NULL;
-    found += strlen(pat);
-    while (*found && (*found == ':' || isspace((unsigned char)*found))) found++;
-    return found;
+    if (found) {{
+        found += strlen(pat);
+        while (*found && (*found == ':' || isspace((unsigned char)*found))) found++;
+        return found;
+    }}
+    // Strategy 2: LeetCode assignment format: key = value  (key on its own line)
+    // Search for newline-delimited "key = " or "key= "
+    char assign_pat[128];
+    snprintf(assign_pat, sizeof(assign_pat), "%s ", key);
+    const char* p = src;
+    while (*p) {{
+        // Check at start of line
+        if (p == src || *(p-1) == '\\n') {{
+            // Skip leading whitespace on line
+            const char* lp = p;
+            while (*lp == ' ' || *lp == '\\t') lp++;
+            size_t klen = strlen(key);
+            if (strncmp(lp, key, klen) == 0) {{
+                const char* after_key = lp + klen;
+                // Skip optional whitespace before '='
+                while (*after_key == ' ' || *after_key == '\\t') after_key++;
+                if (*after_key == '=') {{
+                    after_key++;
+                    // Skip whitespace after '='
+                    while (*after_key == ' ' || *after_key == '\\t') after_key++;
+                    return after_key;
+                }}
+            }}
+        }}
+        p++;
+    }}
+    return NULL;
 }}
 
 static int _ccc_read_int(const char** p, const char* key) {{
@@ -199,17 +231,35 @@ static bool _ccc_read_bool(const char** p, const char* key) {{
     return (strncmp(k, "true", 4) == 0 || *k == '1');
 }}
 
+// Read a string value — handles both JSON format ("value") and bare value
 static char* _ccc_read_str(const char** p, const char* key) {{
     const char* k = _ccc_find_key(*p, key);
     if (!k) return strdup("");
-    const char* start = strchr(k, '"');
-    if (!start) return strdup("");
-    start++;
-    const char* end = strchr(start, '"');
-    if (!end) return strdup("");
-    int len = (int)(end - start);
+    // Skip leading whitespace
+    while (*k && isspace((unsigned char)*k)) k++;
+    if (*k == '"') {{
+        // JSON string with quotes
+        const char* start = k + 1;
+        // Find closing quote, handling escape sequences
+        const char* end = start;
+        while (*end && *end != '"') {{
+            if (*end == '\\\\' && *(end+1)) end++;
+            end++;
+        }}
+        int len = (int)(end - start);
+        char* buf = (char*)malloc(len + 1);
+        strncpy(buf, start, len);
+        buf[len] = '\\0';
+        return buf;
+    }}
+    // Bare string value (no quotes) — read until newline or end
+    const char* end = k;
+    while (*end && *end != '\\n' && *end != '\\r') end++;
+    // Trim trailing whitespace
+    while (end > k && isspace((unsigned char)*(end-1))) end--;
+    int len = (int)(end - k);
     char* buf = (char*)malloc(len + 1);
-    strncpy(buf, start, len);
+    strncpy(buf, k, len);
     buf[len] = '\\0';
     return buf;
 }}

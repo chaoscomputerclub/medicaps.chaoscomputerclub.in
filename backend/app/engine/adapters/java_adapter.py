@@ -144,6 +144,7 @@ public class Main {
     }
 
     static String _findParam(String src, String name, int fallbackIdx, List<String> chunks) {
+        // Strategy 1: JSON format: {"name": value}
         String pat = "\"" + name + "\"";
         int p = src.indexOf(pat);
         if (p != -1) {
@@ -178,6 +179,18 @@ public class Main {
                 }
             }
         }
+        // Strategy 2: LeetCode assignment format: name = value (line-based)
+        String[] lines = src.split("\n");
+        for (String line : lines) {
+            String trimmed = line.trim();
+            // Match "name = ..." or "name= ..."
+            if (trimmed.matches("^" + java.util.regex.Pattern.quote(name) + "\\s*=.*")) {
+                int eq = trimmed.indexOf('=');
+                if (eq != -1) {
+                    return trimmed.substring(eq + 1).trim();
+                }
+            }
+        }
         if (fallbackIdx < chunks.size()) return chunks.get(fallbackIdx);
         return "";
     }
@@ -206,11 +219,30 @@ public class Main {
     }
 
     static String _toString(String s) {
-        int q1 = s.indexOf('"');
-        if (q1 != -1) {
-            int q2 = s.indexOf('"', q1 + 1);
-            if (q2 != -1) return s.substring(q1 + 1, q2);
+        s = s.trim();
+        // Handle JSON-quoted string: "value"
+        if (s.startsWith("\"")) {
+            // Find closing quote, handling escape sequences
+            int i = 1;
+            StringBuilder sb = new StringBuilder();
+            while (i < s.length() && s.charAt(i) != '"') {
+                if (s.charAt(i) == '\\' && i + 1 < s.length()) {
+                    i++;
+                    char esc = s.charAt(i);
+                    switch (esc) {
+                        case 'n': sb.append('\n'); break;
+                        case 't': sb.append('\t'); break;
+                        case 'r': sb.append('\r'); break;
+                        default: sb.append(esc); break;
+                    }
+                } else {
+                    sb.append(s.charAt(i));
+                }
+                i++;
+            }
+            return sb.toString();
         }
+        // Bare string (from param = value without quotes) - return as-is
         return s;
     }
 
@@ -272,13 +304,18 @@ public class Main {
             if td.kind == TypeKind.ARRAY:
                 if td.dimensions == 2:
                     return f"        int[][] {pname} = _toInt2DArray({find_expr});"
+                if td.base == "string":
+                    # Return String[] using a helper approach
+                    return f"        String[] {pname} = {find_expr}.replaceAll(\"[\\\\\\\\[\\\\\\\\]]\", \"\").split(\",\\\\s*\");"
                 return f"        int[] {pname} = _toIntArray({find_expr});"
             if td.base == "string":
                 return f"        String {pname} = _toString({find_expr});"
             if td.base == "boolean":
                 return f"        boolean {pname} = _toBool({find_expr});"
-            if td.base == "float":
+            if td.base in ("float", "double"):
                 return f"        double {pname} = _toDouble({find_expr});"
+            if td.base in ("long",):
+                return f"        long {pname} = _toLong({find_expr});"
             return f"        int {pname} = _toInt({find_expr});"
         except Exception:
             return f"        int {pname} = _toInt({find_expr});"

@@ -87,32 +87,124 @@ class PythonAdapter(BaseLanguageAdapter):
 if __name__ == '__main__':
     import sys
     import json
+    import re
 
-    raw = sys.stdin.read().strip()
+    # IMPORTANT: Do NOT strip raw here — user input may be a meaningful
+    # whitespace-only string (e.g. s = " " for palindrome check).
+    raw = sys.stdin.read()
+    param_names = {param_names_repr}
     args = []
 
-    if raw:
+    def _ccc_parse_val(s):
+        s = s.strip()
         try:
-            parsed = json.loads(raw)
-            param_names = {param_names_repr}
-            if isinstance(parsed, dict) and param_names:
-                args = [parsed.get(p) for p in param_names]
-            elif isinstance(parsed, list):
-                args = parsed
-            else:
-                args = [parsed]
+            return json.loads(s)
         except Exception:
-            lines = [l.strip() for l in raw.splitlines() if l.strip()]
-            param_names = {param_names_repr}
-            if len(lines) == len(param_names) and len(param_names) > 1:
-                args = []
-                for l in lines:
-                    try:
-                        args.append(json.loads(l))
-                    except Exception:
-                        args.append(l)
+            pass
+        return s
+
+    def _ccc_parse_param_assign(raw, param_names):
+        \"\"\"
+        Parse LeetCode-style 'paramName = value' per-line format.
+        Handles multi-line bracket values.
+        e.g.:
+            s = "A man, a plan, a canal: Panama"
+            nums = [2,7,11,15]
+            target = 9
+        \"\"\"
+        lines = raw.split('\\n')
+        results = [None] * len(param_names)
+        filled = [False] * len(param_names)
+        current_idx = -1
+        cur_value = ''
+        depth = 0
+
+        def flush():
+            nonlocal current_idx, cur_value, depth
+            if current_idx >= 0 and cur_value != '':
+                results[current_idx] = _ccc_parse_val(cur_value.strip())
+                filled[current_idx] = True
+                current_idx = -1
+                cur_value = ''
+                depth = 0
+
+        for line in lines:
+            trimmed = line.strip()
+            if not trimmed:
+                continue
+
+            if depth == 0:
+                matched = False
+                for pi, pn in enumerate(param_names):
+                    # Match "paramName = ..." or "paramName= ..."
+                    pat = re.compile(r'^' + re.escape(pn) + r'\\s*=\\s*(.*)', re.DOTALL)
+                    m = pat.match(trimmed)
+                    if m:
+                        flush()
+                        current_idx = pi
+                        cur_value = m.group(1)
+                        matched = True
+                        break
+                if not matched and current_idx >= 0:
+                    cur_value += '\\n' + line
             else:
-                args = [raw]
+                cur_value += '\\n' + line
+
+            for ch in trimmed:
+                if ch in '[{{':
+                    depth += 1
+                elif ch in ']}}'.replace('{{', '').replace('}}', ''):
+                    depth = max(0, depth - 1)
+
+        flush()
+
+        if all(filled):
+            return results
+        return None
+
+    raw_trimmed = raw.strip()
+
+    if raw_trimmed == '' and raw != '':
+        # Input was only whitespace (e.g. " ") — pass as-is as a single arg
+        args = [raw]
+    elif raw_trimmed:
+        # 1. Try param=value line format first (LeetCode standard)
+        if param_names:
+            assigned = _ccc_parse_param_assign(raw_trimmed, param_names)
+            if assigned is not None:
+                args = assigned
+            else:
+                # 2. Try JSON parse
+                try:
+                    parsed = json.loads(raw_trimmed)
+                    if isinstance(parsed, dict) and param_names:
+                        if all(p in parsed for p in param_names):
+                            args = [parsed[p] for p in param_names]
+                        else:
+                            args = list(parsed.values())
+                    elif isinstance(parsed, list):
+                        if len(param_names) == 1 and len(parsed) != 1:
+                            args = [parsed]
+                        elif len(parsed) == len(param_names):
+                            args = parsed
+                        else:
+                            args = [parsed]
+                    else:
+                        args = [parsed]
+                except Exception:
+                    # 3. Multi-line fallback: one JSON value per line
+                    lines = [l.strip() for l in raw_trimmed.splitlines() if l.strip()]
+                    if len(lines) == len(param_names) and len(param_names) > 1:
+                        args = []
+                        for l in lines:
+                            try:
+                                args.append(json.loads(l))
+                            except Exception:
+                                args.append(l)
+                    else:
+                        args = [raw_trimmed]
+        else:
+            args = [raw_trimmed]
 
     target_method = None
     target_cls = globals().get('{class_name}') or globals().get('Solution')
