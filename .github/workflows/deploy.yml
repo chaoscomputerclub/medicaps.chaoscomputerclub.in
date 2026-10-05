@@ -78,8 +78,14 @@ jobs:
             cd /root/projects/ccc-medicaps-api
             PYTHONPATH=. /root/projects/ccc-medicaps-api/venv/bin/python3 -c "import asyncio; from app.core.db import init_db; asyncio.run(init_db())" || echo "Migration check executed."
 
-            echo '→ Gracefully reloading backend service...'
-            systemctl reload-or-restart ccc-medicaps-api.service
+            echo '→ Syncing environment version...'
+            NEW_VER=$(grep '^VERSION=' /root/projects/medicaps.chaoscomputerclub.in/backend/.env.production | cut -d= -f2)
+            if [ -n "$NEW_VER" ] && [ -f /root/projects/ccc-medicaps-api/.env ]; then
+              sed -i "s/^VERSION=.*/VERSION=$NEW_VER/" /root/projects/ccc-medicaps-api/.env
+            fi
+
+            echo '→ Restarting backend service...'
+            systemctl restart ccc-medicaps-api.service
 
             echo '→ Deploying & reloading CCC Node-Agent...'
             cd /root/projects/medicaps.chaoscomputerclub.in/node-agent
