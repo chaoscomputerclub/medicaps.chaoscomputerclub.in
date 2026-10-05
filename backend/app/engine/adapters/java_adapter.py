@@ -100,7 +100,6 @@ class JavaAdapter(BaseLanguageAdapter):
 
         try {{
             var result = sol.{fn_name}({args_str});
-            _printResult(result);
             System.out.print("\\n<<<CCC_RUNNER_RESULT>>>\\n" + _toJsonEnvelope("SUCCESS", result, null) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
         }} catch (Throwable t) {{
             String msg = t.getMessage() != null ? t.getMessage() : t.toString();

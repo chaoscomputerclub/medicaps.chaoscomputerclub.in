@@ -256,8 +256,7 @@ export const assessmentSlice = createSlice({
               current.includes("def solve(") ||
               current.includes("int solve(") ||
               current.includes("var solve =") ||
-              current.includes("function solve(") ||
-              (lang === "python" && !current.includes("class Solution")));
+              current.includes("function solve("));
           if ((!current || isLegacy) && starters[lang]) {
             state.codeMap[key] = starters[lang];
           }

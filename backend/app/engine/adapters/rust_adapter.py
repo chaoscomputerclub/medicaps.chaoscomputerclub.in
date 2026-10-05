@@ -134,13 +134,7 @@ fn main() {
         Solution::{fn_name}({args_str})
     }};
 
-    let is_bool = format!("{{:?}}", &result) == "true" || format!("{{:?}}", &result) == "false";
     let serialized = format!("{{:?}}", &result);
-    if is_bool {{
-        println!("{{}}", serialized);
-    }} else {{
-        println!("{{:?}}", result);
-    }}
     println!("\\n<<<CCC_RUNNER_RESULT>>>\\n{{{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":{{}}}}}}\\n<<<CCC_RUNNER_RESULT>>>", serialized);
 }}
 """

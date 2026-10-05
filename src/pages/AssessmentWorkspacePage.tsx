@@ -199,8 +199,7 @@ export function AssessmentWorkspacePage() {
     codeInMap &&
     (codeInMap.includes("def main():") ||
       codeInMap.includes("sys.stdin.read()") ||
-      codeInMap.includes("TODO: Calculate valid mirror pairs") ||
-      (selectedLanguage === "python" && !codeInMap.includes("class Solution")));
+      codeInMap.includes("TODO: Calculate valid mirror pairs"));
   const currentCode = activeProblem
     ? !isCodeInMapLegacy && codeInMap
       ? codeInMap

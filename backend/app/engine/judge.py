@@ -91,11 +91,6 @@ class JudgeEngine:
             display_stdout = "(no output produced)"
 
         display_stderr = sandbox_result.stderr
-        if envelope is not None and user_stdout:
-            if display_stderr:
-                display_stderr = f"Stdout:\n{user_stdout}\nStderr:\n{display_stderr}"
-            else:
-                display_stderr = f"Stdout:\n{user_stdout}"
 
         result = TestCaseResult(
             testcase_id=testcase.id,

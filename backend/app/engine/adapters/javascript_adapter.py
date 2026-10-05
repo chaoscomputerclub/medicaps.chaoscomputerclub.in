@@ -249,16 +249,6 @@ class JavaScriptAdapter(BaseLanguageAdapter):
 
     try {{
         const result = targetFn.apply(null, args);
-        if (typeof result === 'boolean') {{
-            process.stdout.write((result ? 'true' : 'false') + '\\n');
-        }} else if (result === null || result === undefined) {{
-            process.stdout.write('null\\n');
-        }} else if (typeof result === 'object') {{
-            process.stdout.write(JSON.stringify(result) + '\\n');
-        }} else {{
-            process.stdout.write(String(result) + '\\n');
-        }}
-
         let canonicalVal = result;
         if (result === undefined) {{
             canonicalVal = null;

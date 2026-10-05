@@ -166,7 +166,6 @@ class CppAdapter(BaseLanguageAdapter):
             invoke_str = f"""
     try {{
         auto _res = _sol.{fn_name}({args_str});
-        _ccc_print(_res);
         _ccc_emit_envelope(_res);
     }} catch (const std::exception& e) {{
         std::cerr << "Runtime Exception in '{fn_name}': " << e.what() << "\\n";

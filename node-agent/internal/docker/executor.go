@@ -544,13 +544,6 @@ func (e *Executor) Execute(ctx context.Context, job *registration.JobPayload) re
 			}
 
 			displayStderr := stderrBuf.String()
-			if envelope != nil && userStdout != "" {
-				if displayStderr != "" {
-					displayStderr = "Stdout:\n" + userStdout + "\nStderr:\n" + displayStderr
-				} else {
-					displayStderr = "Stdout:\n" + userStdout
-				}
-			}
 
 			outcome := tcOutcome{
 				index:   i,

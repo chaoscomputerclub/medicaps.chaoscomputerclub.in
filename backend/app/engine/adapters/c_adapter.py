@@ -132,37 +132,26 @@ class CAdapter(BaseLanguageAdapter):
         # Output printer & envelope
         if ret_type == "int":
             print_call = (
-                '    printf("%d\\n", result);\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
             )
         elif ret_type == "long long":
             print_call = (
-                '    printf("%lld\\n", result);\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%lld}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
             )
         elif ret_type in ("double", "float"):
             print_call = (
-                '    printf("%.6f\\n", result);\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%f}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
             )
         elif ret_type == "bool":
             print_call = (
-                '    printf("%s\\n", result ? "true" : "false");\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%s}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? "true" : "false");'
             )
         elif ret_type == "char*":
             print_call = (
-                '    printf("%s\\n", result ? result : "");\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":\\"%s\\"}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? result : "");'
             )
         elif ret_td.kind == TypeKind.ARRAY:
             print_call = (
-                '    printf("[");\n'
-                '    for (int _i = 0; _i < _returnSize; _i++) {\n'
-                '        if (_i > 0) printf(", ");\n'
-                '        printf("%d", result[_i]);\n'
-                '    }\n'
-                '    printf("]\\n");\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":[");\n'
                 '    for (int _i = 0; _i < _returnSize; _i++) {\n'
                 '        if (_i > 0) printf(", ");\n'
@@ -172,7 +161,6 @@ class CAdapter(BaseLanguageAdapter):
             )
         else:
             print_call = (
-                '    printf("%d\\n", (int)result);\n'
                 '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", (int)result);'
             )
 

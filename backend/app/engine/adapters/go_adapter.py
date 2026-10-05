@@ -195,15 +195,6 @@ func main() {{
 	result := {fn_name}({args_str})
 	resBytes, _ := json.Marshal(result)
 	resStr := string(resBytes)
-	if _, ok := any(result).(bool); ok {{
-		if any(result).(bool) {{
-			fmt.Println("true")
-		}} else {{
-			fmt.Println("false")
-		}}
-	}} else {{
-		fmt.Println(resStr)
-	}}
 	fmt.Printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%s}}\\n<<<CCC_RUNNER_RESULT>>>\\n", resStr)
 }}
 """

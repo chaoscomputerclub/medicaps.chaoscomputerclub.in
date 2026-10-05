@@ -6,6 +6,7 @@ Generates typed Solution class starter templates and trusted driver harnesses.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Dict, List, Optional
 from app.engine.adapters.base import BaseLanguageAdapter
 from app.engine.contracts import DataType, FunctionSignature, parse_type_descriptor, TypeKind
@@ -76,6 +77,7 @@ class PythonAdapter(BaseLanguageAdapter):
 
         class_name = signature.class_name or "Solution"
         fn_name = signature.name or signature.function_name or "solution"
+        snake_fn_name = re.sub(r'(?<!^)(?=[A-Z])', '_', fn_name).lower()
         param_names = [p.name for p in signature.parameters]
         param_names_repr = json.dumps(param_names)
 
@@ -208,18 +210,23 @@ if __name__ == '__main__':
 
     target_method = None
     target_cls = globals().get('{class_name}') or globals().get('Solution')
+    candidate_names = ["{fn_name}", "{snake_fn_name}", "{fn_name}".lower()]
     if target_cls:
         try:
             sol = target_cls()
-            if hasattr(sol, "{fn_name}"):
-                target_method = getattr(sol, "{fn_name}")
+            for cand in candidate_names:
+                if hasattr(sol, cand):
+                    target_method = getattr(sol, cand)
+                    break
         except Exception:
             pass
 
     if not target_method:
-        candidate_fn = globals().get('{fn_name}')
-        if callable(candidate_fn):
-            target_method = candidate_fn
+        for cand in candidate_names:
+            candidate_fn = globals().get(cand)
+            if callable(candidate_fn):
+                target_method = candidate_fn
+                break
 
     if not target_method:
         sys.stderr.write("Judge Error: method '{fn_name}' or class {class_name} not found in submission.\\n")
@@ -229,15 +236,6 @@ if __name__ == '__main__':
 
     try:
         result = target_method(*args)
-        if isinstance(result, bool):
-            print("true" if result else "false")
-        elif isinstance(result, (list, tuple, dict)):
-            print(json.dumps(result, ensure_ascii=False))
-        elif result is None:
-            print("null")
-        else:
-            print(result)
-
         canonical_val = result if isinstance(result, (bool, int, float, str, list, dict)) or result is None else str(result)
         sys.stdout.write(f"\\n<<<CCC_RUNNER_RESULT>>>\\n" + json.dumps({{"status": "SUCCESS", "return_value": canonical_val}}, ensure_ascii=False) + "\\n<<<CCC_RUNNER_RESULT>>>\\n")
         sys.stdout.flush()

@@ -567,8 +567,7 @@ export function ContestArenaPage() {
         code.includes("def solve(") ||
         code.includes("int solve(") ||
         code.includes("var solve =") ||
-        code.includes("function solve(") ||
-        (selectedLanguage === "python" && !code.includes("class Solution"));
+        code.includes("function solve(");
       if (!isLegacy) {
         return code;
       }
@@ -598,8 +597,7 @@ export function ContestArenaPage() {
             sanitizedSaved.includes("def solve(") ||
             sanitizedSaved.includes("int solve(") ||
             sanitizedSaved.includes("var solve =") ||
-            sanitizedSaved.includes("function solve(") ||
-            (selectedLanguage === "python" && !sanitizedSaved.includes("class Solution"));
+            sanitizedSaved.includes("function solve(");
           if (isLegacy) {
             localStorage.removeItem(problemStorageKey);
           } else {
