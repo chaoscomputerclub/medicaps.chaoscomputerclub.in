@@ -79,7 +79,7 @@ jobs:
             PYTHONPATH=. /root/projects/ccc-medicaps-api/venv/bin/python3 -c "import asyncio; from app.core.db import init_db; asyncio.run(init_db())" || echo "Migration check executed."
 
             echo '→ Syncing environment version...'
-            NEW_VER=$(grep '^VERSION=' /root/projects/medicaps.chaoscomputerclub.in/backend/.env.production | cut -d= -f2)
+            NEW_VER=$(grep '^VERSION=' /root/projects/medicaps.chaoscomputerclub.in/backend/.env.example | cut -d= -f2)
             if [ -n "$NEW_VER" ] && [ -f /root/projects/ccc-medicaps-api/.env ]; then
               sed -i "s/^VERSION=.*/VERSION=$NEW_VER/" /root/projects/ccc-medicaps-api/.env
             fi
