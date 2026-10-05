@@ -75,7 +75,8 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "
   set -e
   echo '→ Pulling repository in ${REMOTE_REPO}...'
   cd ${REMOTE_REPO}
-  git pull origin main
+  git fetch origin main
+  git reset --hard origin/main
 "
 
 echo -e "${GREEN}✓ Remote repository updated to latest main commit.${NC}"

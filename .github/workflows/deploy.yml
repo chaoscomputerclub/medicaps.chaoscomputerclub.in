@@ -60,7 +60,8 @@ jobs:
           ssh production 'bash -s' << 'EOF'
             set -e
             cd /root/projects/medicaps.chaoscomputerclub.in
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             echo '→ Updating backend application files...'
             rsync -av --delete \
