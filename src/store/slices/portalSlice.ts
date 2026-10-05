@@ -1,4 +1,14 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { getStoredMember } from "@/lib/auth";
+
+function getMemberBookmarkKey(): string {
+  try {
+    const mem = getStoredMember();
+    return mem?.id ? `ccc_bookmarked_problems_${mem.id}` : "ccc_bookmarked_problems";
+  } catch {
+    return "ccc_bookmarked_problems";
+  }
+}
 
 export interface PortalState {
   activeContestSlug: string | null;
@@ -15,7 +25,7 @@ export interface PortalState {
 const initialBookmarks: string[] = (() => {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("ccc_bookmarked_problems");
+    const raw = localStorage.getItem(getMemberBookmarkKey());
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -64,7 +74,7 @@ export const portalSlice = createSlice({
         state.bookmarkedProblems.push(slug);
       }
       if (typeof window !== "undefined") {
-        localStorage.setItem("ccc_bookmarked_problems", JSON.stringify(state.bookmarkedProblems));
+        localStorage.setItem(getMemberBookmarkKey(), JSON.stringify(state.bookmarkedProblems));
       }
     },
     setLeaderboardSearch(state, action: PayloadAction<string>) {

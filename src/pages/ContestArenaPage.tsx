@@ -908,7 +908,9 @@ export function ContestArenaPage() {
     const isProctorGate =
       errLower.includes("physical gate") ||
       errLower.includes("proctor scan") ||
-      errLower.includes("campus pass");
+      errLower.includes("campus pass") ||
+      errLower.includes("restricted") ||
+      errLower.includes("registration");
 
     if (isUnauthenticated) {
       return (
@@ -1032,14 +1034,14 @@ export function ContestArenaPage() {
 
             <div className="space-y-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
-                Proctor Verification Required
+                Contest Access Restricted
               </span>
               <h1 className="text-xl font-semibold tracking-tight text-white">
-                On-Premise Check-in Required
+                Contest Registration Required
               </h1>
               <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                 {error ||
-                  "Physical gate check-in required. Your campus pass must be scanned by a lab proctor before entering the live arena."}
+                  "Active contest registration required. Please register for the contest to access problem statements and submit solutions."}
               </p>
             </div>
 

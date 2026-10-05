@@ -1333,6 +1333,30 @@ class DynamicContestService:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{contest_slug}' not found.")
 
+        # Strict Contest State Machine enforcement
+        ALLOWED_TRANSITIONS = {
+            "draft": {"upcoming", "draft"},
+            "upcoming": {"live", "draft", "upcoming"},
+            "live": {"finished", "live"},
+            "finished": {"finished"},
+        }
+        current_st = (contest.status or "upcoming").lower()
+        if cleaned_status not in ALLOWED_TRANSITIONS.get(current_st, set()):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Illegal contest status transition from '{current_st}' to '{cleaned_status}'. Finalized/finished contests cannot be reopened.",
+            )
+
+        if cleaned_status == current_st:
+            return {
+                "success": True,
+                "contest_slug": contest.slug,
+                "title": contest.title,
+                "previous_status": current_st,
+                "current_status": cleaned_status,
+                "message": f"Contest is already in status '{cleaned_status}'.",
+            }
+
         old_status = contest.status
         contest.status = cleaned_status
 
@@ -1389,7 +1413,7 @@ class DynamicContestService:
         )
 
         if cleaned_status == "finished":
-            await DynamicContestService._publish_rating_events(contest.slug, rating_summary)
+            # Rating updates are recorded and published strictly via transactional outbox (ONE publish path)
             concluded_event_data = DynamicContestService._contest_event_data(contest, "concluded")
             concluded_event_data.update({
                 "old_status": old_status,
@@ -1468,12 +1492,18 @@ class DynamicContestService:
         contest_start = contest.starts_at.replace(tzinfo=timezone.utc) if (contest.starts_at and contest.starts_at.tzinfo is None) else contest.starts_at
         penalty_secs = max(0, int((finalized_at - contest_start).total_seconds())) if contest_start else 0
 
-        # 1. Sync all participants who took part or submitted into ScoreboardEntry
+        # 1. Sync all participants who actually participated (submitted code or completed/submitted assessment session)
+        # Invariant: Registration alone (status == 'confirmed') does NOT constitute participation.
         reg_stmt = select(ContestRegistration).where(
             ContestRegistration.contest_id == contest.id,
-            (ContestRegistration.status.in_(["submitted", "completed", "confirmed"])) | (ContestRegistration.assessment_taken == True)
+            (ContestRegistration.status.in_(["submitted", "completed"])) | (ContestRegistration.assessment_taken == True)
         )
         reg_rows = (await db.execute(reg_stmt)).scalars().all()
+
+        sub_stmt = select(ContestSubmission.member_id).where(
+            ContestSubmission.contest_id == contest.id
+        ).distinct()
+        sub_member_ids = set((await db.execute(sub_stmt)).scalars().all())
 
         sess_stmt = select(AssessmentSession, Assessment).join(
             Assessment, AssessmentSession.assessment_id == Assessment.id
@@ -1495,6 +1525,8 @@ class DynamicContestService:
             candidate_member_ids.add(s.member_id)
         for m_id in existing_sb_by_member.keys():
             candidate_member_ids.add(m_id)
+        for sub_m_id in sub_member_ids:
+            candidate_member_ids.add(sub_m_id)
 
         candidate_members = {}
         if candidate_member_ids:

@@ -59,7 +59,7 @@ async def test_python_conformance():
         sb_res = SandboxResult(stdout=exec_res.stdout, stderr=exec_res.stderr, exit_code=exec_res.exit_code, wall_time_ms=10.0)
         res = JudgeEngine.evaluate(sb_res, tc)
         assert res.verdict == Verdict.ACCEPTED
-        assert "dbg" in res.stdout
+        assert "dbg" in ustdout
         assert "<<<CCC_RUNNER_RESULT>>>" not in res.stdout
 
     # 2. pass -> returns None / null -> WRONG_ANSWER when expected is true

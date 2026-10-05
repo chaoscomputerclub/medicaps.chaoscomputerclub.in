@@ -78,6 +78,7 @@ async def test_zero_db_connections_held_during_sandbox_execution():
 
     mock_problem = MagicMock(spec=ContestProblem)
     mock_problem.id = "p-1"
+    mock_problem.contest_id = "c-concurrency-1"
     mock_problem.problem_id = None
     mock_problem.problem_index = "A"
     mock_problem.points = 100
@@ -193,6 +194,7 @@ async def test_scoped_cache_invalidation_does_not_flush_unrelated_contests():
 
         mock_problem = MagicMock(spec=ContestProblem)
         mock_problem.id = "p-1"
+        mock_problem.contest_id = "c-target"
         mock_problem.problem_id = None
         mock_problem.problem_index = "A"
         mock_problem.points = 100

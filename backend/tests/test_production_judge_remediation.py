@@ -398,6 +398,7 @@ async def test_atomic_solved_count_and_advisory_locking_in_submit():
     mock_problem.solved_count = 0
     mock_problem.sample_testcases = [{"input": "test", "expected_output": "true"}]
     mock_problem.hidden_testcases = []
+    mock_problem.starter_codes = {}
 
     mock_db = AsyncMock()
     # Mock queries

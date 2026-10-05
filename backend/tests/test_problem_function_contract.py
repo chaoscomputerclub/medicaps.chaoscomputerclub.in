@@ -131,8 +131,8 @@ def test_trusted_wrapper_generation():
 
     assert user_code in wrapper
     assert "json.loads" in wrapper
-    assert "getattr(sol, \"networkRoute\")" in wrapper
-    assert "print(result)" in wrapper
+    assert '"networkRoute"' in wrapper
+    assert "getattr(sol, cand)" in wrapper
 
     # C++ wrapper
     cpp_user = "class Solution { public: int networkRoute(int n, vector<vector<int>>& edges) { return edges.size(); } };"

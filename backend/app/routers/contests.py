@@ -181,7 +181,7 @@ async def unregister_for_contest(
     db: AsyncSession = Depends(get_db),
     current_member: MemberProfile = Depends(get_current_member),
 ):
-    """Cancel contest registration and release reserved workstation seat."""
+    """Cancel contest registration."""
     return await ContestController.unregister_from_contest(
         slug=slug,
         current_member=current_member,
@@ -192,11 +192,11 @@ async def unregister_for_contest(
 @router.post("/{slug}/check-in")
 async def check_in_contest(
     slug: str,
-    pass_code: Optional[str] = Query(None, description="Campus Pass verification code"),
+    pass_code: Optional[str] = Query(None, description="Optional participant check-in code"),
     current_member: Optional[MemberProfile] = Depends(get_current_member_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    """Verify physical on-premise attendance at the lab gate check-in."""
+    """Confirm online participation for the contest arena."""
     return await ContestController.check_in_contest(
         slug=slug,
         pass_code=pass_code,

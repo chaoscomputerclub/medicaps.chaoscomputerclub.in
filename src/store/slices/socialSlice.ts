@@ -10,19 +10,29 @@ import { invalidateFullProfileCache } from "@/organization/data/queries";
 import type { StudentFollowItem } from "@/organization/data/types";
 import { fetchCurrentUserThunk } from "./authSlice";
 
-const SOCIAL_COUNTS_KEY = "ccc_my_social_counts";
+function getMemberSocialKey(): string | null {
+  try {
+    const mem = getStoredMember();
+    return mem?.id ? `ccc_my_social_counts_${mem.id}` : null;
+  } catch {
+    return null;
+  }
+}
 
 function getStoredSocialCounts(): { followers: number; following: number; synced: boolean } {
   if (typeof window === "undefined") return { followers: 0, following: 0, synced: false };
-  try {
-    const raw = localStorage.getItem(SOCIAL_COUNTS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed?.followers === "number" && typeof parsed?.following === "number") {
-        return { followers: parsed.followers, following: parsed.following, synced: true };
+  const key = getMemberSocialKey();
+  if (key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed?.followers === "number" && typeof parsed?.following === "number") {
+          return { followers: parsed.followers, following: parsed.following, synced: true };
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
   try {
     const mem = getStoredMember();
     if (typeof mem?.followers_count === "number" || typeof mem?.following_count === "number") {
@@ -38,8 +48,10 @@ function getStoredSocialCounts(): { followers: number; following: number; synced
 
 function persistSocialCounts(followers: number, following: number) {
   if (typeof window === "undefined") return;
+  const key = getMemberSocialKey();
+  if (!key) return;
   try {
-    localStorage.setItem(SOCIAL_COUNTS_KEY, JSON.stringify({ followers, following }));
+    localStorage.setItem(key, JSON.stringify({ followers, following }));
   } catch {}
 }
 

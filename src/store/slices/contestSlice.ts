@@ -32,6 +32,9 @@ export interface ContestState {
   isRunningCode: boolean;
   isSubmittingCode: boolean;
   error: string | null;
+  activeDetailRequestId: string | null;
+  activeDetailSlug: string | null;
+  lastEventTimestamps: Record<string, number>;
 }
 
 function getInitialContests(): ContestSummary[] {
@@ -66,6 +69,9 @@ const initialState: ContestState = {
   isRunningCode: false,
   isSubmittingCode: false,
   error: null,
+  activeDetailRequestId: null,
+  activeDetailSlug: null,
+  lastEventTimestamps: {},
 };
 
 export const fetchContestsThunk = createAsyncThunk(
@@ -242,6 +248,18 @@ export const contestSlice = createSlice({
     ) {
       const { event, currentMember } = action.payload;
       const slug = event.contest_slug ?? event.data?.contest_slug;
+
+      // Event ordering & version fencing: drop out-of-order stale SSE events
+      const eventTime = event.timestamp ? new Date(event.timestamp).getTime() : 0;
+      if (slug && eventTime > 0) {
+        const lastTime = state.lastEventTimestamps?.[slug] || 0;
+        if (eventTime < lastTime) {
+          return;
+        }
+        if (!state.lastEventTimestamps) state.lastEventTimestamps = {};
+        state.lastEventTimestamps[slug] = eventTime;
+      }
+
       const isCurrentMember = Boolean(
         currentMember &&
           ((event.data?.member_id && String(event.data.member_id) === String(currentMember.id)) ||
@@ -355,30 +373,6 @@ export const contestSlice = createSlice({
             state.pass = null;
             state.problems = [];
             state.arenaData = null;
-          }
-          break;
-        }
-        case "pass_checked_in": {
-          if (isCurrentMember) {
-            if (state.pass) {
-              state.pass.status = "checked_in";
-              state.pass.check_in_status = "checked_in";
-              if (event.data?.seat_number) {
-                state.pass.seat = event.data.seat_number;
-                state.pass.seat_number = event.data.seat_number;
-              }
-            }
-            if (state.arenaData && event.data?.seat_number) {
-              state.arenaData.assigned_seat = event.data.seat_number;
-              state.arenaData.check_in_status = "checked_in";
-            }
-          }
-          break;
-        }
-        case "top30_qualified": {
-          if (isCurrentMember && state.registration) {
-            state.registration.is_top_30_qualified = true;
-            state.registration.can_enter_live_contest = true;
           }
           break;
         }

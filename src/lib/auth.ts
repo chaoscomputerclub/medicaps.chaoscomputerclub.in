@@ -98,8 +98,17 @@ export function setStoredMember(member: Member | null): void {
 
 export function clearToken(): void {
   if (typeof window === "undefined") return;
+  try {
+    const member = getStoredMember();
+    if (member?.id) {
+      localStorage.removeItem(`ccc_my_social_counts_${member.id}`);
+      localStorage.removeItem(`ccc_bookmarked_problems_${member.id}`);
+    }
+  } catch {}
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(MEMBER_KEY);
+  localStorage.removeItem("ccc_my_social_counts");
+  localStorage.removeItem("ccc_bookmarked_problems");
   clearPersistedSwrCaches();
 }
 

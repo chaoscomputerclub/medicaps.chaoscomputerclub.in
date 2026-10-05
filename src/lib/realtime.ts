@@ -122,6 +122,11 @@ class GlobalSseMultiplexer {
       window.addEventListener("pagehide", () => {
         this.destroy();
       });
+
+      // Tear down SSE connections immediately on logout / auth switch
+      window.addEventListener("ccc:auth-changed", () => {
+        this.destroy();
+      });
     }
   }
 

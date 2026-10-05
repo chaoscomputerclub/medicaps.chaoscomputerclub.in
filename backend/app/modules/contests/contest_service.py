@@ -38,6 +38,7 @@ from app.services.contest_eligibility_service import (
     is_contest_attempt_submitted,
 )
 from app.services.event_broadcaster import broadcast_event
+from app.core.queue.outbox import record_outbox_event, relay_outbox_events
 
 logger = logging.getLogger(__name__)
 
@@ -547,9 +548,8 @@ class ContestService:
                         (assessment_rank is not None and assessment_rank <= 30)
                     )
 
-            pass_obj = await ContestRepository.get_campus_pass(db, contest.id, current_member.id)
-            check_in_status = pass_obj.check_in_status if pass_obj else "not_issued"
-            is_checked_in = check_in_status == "checked_in"
+            check_in_status = "checked_in" if is_registered else "not_issued"
+            is_checked_in = is_registered
 
             from app.services.contest_lifecycle_service import assessment_available
             assessment_window_open = False
@@ -668,7 +668,10 @@ class ContestService:
         current_member: MemberProfile,
         db: AsyncSession,
     ) -> Dict[str, Any]:
-        contest = await ContestRepository.get_by_slug(db, slug)
+        # Lock contest row with with_for_update() to prevent concurrent registration over-capacity race condition
+        stmt = select(OfflineContest).where(OfflineContest.slug == slug).with_for_update()
+        res = await db.execute(stmt)
+        contest = res.scalar_one_or_none()
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
@@ -690,14 +693,14 @@ class ContestService:
             return {
                 "status": "already_registered",
                 "registered": True,
-                "message": f"You are already registered for {contest.title}. Proceed to the assessment studio.",
+                "message": f"You are already registered for {contest.title}. Proceed to the arena.",
                 "venue": contest.venue,
                 "registered_count": contest.registered_count,
                 "capacity": contest.seat_capacity,
             }
 
         if contest.registered_count >= contest.seat_capacity:
-            raise HTTPException(status_code=400, detail="All lab workstation seats are filled for this contest.")
+            raise HTTPException(status_code=400, detail="Registration capacity reached for this online contest.")
 
         new_reg = ContestRegistration(
             contest_id=contest.id,
@@ -706,6 +709,25 @@ class ContestService:
         )
         db.add(new_reg)
         contest.registered_count += 1
+
+        # Transactional Outbox Event inside active DB transaction
+        await record_outbox_event(
+            db=db,
+            queue_name="realtime",
+            event_type="contest_registered",
+            payload={
+                "contest_slug": contest.slug,
+                "contest_title": contest.title,
+                "member_id": current_member.id,
+                "handle": current_member.handle,
+                "full_name": current_member.full_name or current_member.handle,
+                "registered_count": contest.registered_count,
+                "capacity": contest.seat_capacity,
+                "status": "confirmed",
+            },
+            aggregate_id=contest.id,
+            priority="high",
+        )
         await db.commit()
 
         await delete_cache_pattern("cache:contest*")
@@ -713,28 +735,10 @@ class ContestService:
         await delete_cache_pattern(f"cache:*:{current_member.id}:*")
         await delete_cache_pattern("cache:passes*")
 
-        try:
-            await broadcast_event(
-                event_type="contest_registered",
-                data={
-                    "contest_slug": contest.slug,
-                    "contest_title": contest.title,
-                    "member_id": current_member.id,
-                    "handle": current_member.handle,
-                    "full_name": current_member.full_name or current_member.handle,
-                    "registered_count": contest.registered_count,
-                    "capacity": contest.seat_capacity,
-                    "status": "confirmed",
-                },
-                contest_slug=contest.slug,
-            )
-        except Exception as e:
-            logger.debug("Broadcast error: %s", e)
-
         return {
             "status": "confirmed",
             "registered": True,
-            "message": f"Registration confirmed for {contest.title}. Workstation seat reserved and assessment round unlocked.",
+            "message": f"Registration confirmed for {contest.title}. Online arena unlocked.",
             "venue": contest.venue,
             "registered_count": contest.registered_count,
             "capacity": contest.seat_capacity,
@@ -746,7 +750,9 @@ class ContestService:
         current_member: MemberProfile,
         db: AsyncSession,
     ) -> Dict[str, Any]:
-        contest = await ContestRepository.get_by_slug(db, slug)
+        stmt = select(OfflineContest).where(OfflineContest.slug == slug).with_for_update()
+        res = await db.execute(stmt)
+        contest = res.scalar_one_or_none()
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
@@ -781,29 +787,30 @@ class ContestService:
         )
 
         contest.registered_count = max(0, contest.registered_count - 1)
+
+        # Transactional Outbox Event inside active DB transaction
+        await record_outbox_event(
+            db=db,
+            queue_name="realtime",
+            event_type="contest_unregistered",
+            payload={
+                "contest_slug": contest.slug,
+                "contest_title": contest.title,
+                "member_id": current_member.id,
+                "handle": current_member.handle,
+                "registered_count": contest.registered_count,
+                "capacity": contest.seat_capacity,
+                "status": "unregistered",
+            },
+            aggregate_id=contest.id,
+            priority="high",
+        )
         await db.commit()
 
         await delete_cache_pattern("cache:contest*")
         await delete_cache_pattern("cache:contests*")
         await delete_cache_pattern(f"cache:*:{current_member.id}:*")
         await delete_cache_pattern("cache:passes*")
-
-        try:
-            await broadcast_event(
-                event_type="contest_unregistered",
-                data={
-                    "contest_slug": contest.slug,
-                    "contest_title": contest.title,
-                    "member_id": current_member.id,
-                    "handle": current_member.handle,
-                    "registered_count": contest.registered_count,
-                    "capacity": contest.seat_capacity,
-                    "status": "unregistered",
-                },
-                contest_slug=contest.slug,
-            )
-        except Exception as e:
-            logger.debug("Broadcast error: %s", e)
 
         return {
             "status": "unregistered",
@@ -825,51 +832,48 @@ class ContestService:
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
 
-        effective_code = pass_code or f"CCC-PASS-{uuid.uuid4().hex[:6].upper()}"
-        assigned_seat = "UNASSIGNED"
+        effective_code = pass_code or f"CCC-ONLINE-{uuid.uuid4().hex[:6].upper()}"
+        assigned_seat = "ONLINE"
 
         if current_member:
-            pass_obj = await ContestRepository.get_campus_pass(db, contest.id, current_member.id)
-            if not pass_obj:
-                existing_passes_count = await ContestRepository.count_campus_passes(db, contest.id)
-                assigned_seat = f"LAB-04-PC{existing_passes_count + 1:02d}"
-                pass_obj = CampusPass(
+            reg = await ContestRepository.get_registration(db, contest.id, current_member.id)
+            if not reg:
+                reg = ContestRegistration(
                     contest_id=contest.id,
                     member_id=current_member.id,
-                    pass_code=effective_code,
-                    seat_number=assigned_seat,
-                    qr_data=f"ccc://medicaps/contest/{contest.slug}/cadet/{current_member.handle}",
-                    check_in_status="checked_in",
-                    issued_at=now_utc(),
+                    status="confirmed",
+                    registered_at=now_utc(),
                 )
-                db.add(pass_obj)
+                db.add(reg)
             else:
-                pass_obj.check_in_status = "checked_in"
-                assigned_seat = pass_obj.seat_number
+                reg.status = "confirmed"
+
+            await record_outbox_event(
+                db=db,
+                queue_name="contest_events",
+                event_type="contest_check_in",
+                aggregate_id=contest.id,
+                payload={
+                    "member_id": current_member.id,
+                    "handle": current_member.handle,
+                    "candidate_name": current_member.full_name or current_member.handle,
+                    "contest_slug": contest.slug,
+                    "status": "confirmed",
+                    "seat_number": "ONLINE",
+                    "checked_in_at": now_utc().isoformat(),
+                },
+            )
             await db.commit()
             await delete_cache_pattern("cache:contest*")
-
             try:
-                await broadcast_event(
-                    event_type="pass_checked_in",
-                    data={
-                        "member_id": current_member.id,
-                        "handle": current_member.handle,
-                        "candidate_name": current_member.full_name or current_member.handle,
-                        "pass_code": effective_code,
-                        "seat_number": assigned_seat,
-                        "status": "checked_in",
-                        "checked_in_at": now_utc().isoformat(),
-                    },
-                    contest_slug=contest.slug,
-                )
+                await relay_outbox_events(db, batch_size=5)
             except Exception as e:
-                logger.debug("Broadcast error: %s", e)
+                logger.debug("Outbox relay notice: %s", e)
 
         return {
             "success": True,
             "status": "checked_in",
-            "message": f"Physical presence verified. Workstation assigned: {assigned_seat}",
+            "message": "Online participation confirmed. Ready to enter arena.",
             "contest": contest.title,
             "seat": assigned_seat,
             "pass_code": effective_code,
@@ -958,16 +962,9 @@ class ContestService:
                 if not is_eligible:
                     raise HTTPException(status_code=403, detail=f"Arena access denied: {reason}")
 
-        assigned_seat = None
+        assigned_seat = "ONLINE"
         pass_code = None
-        check_in_status = "checked_in" if is_test_user else "issued"
-
-        if current_member:
-            pass_obj = await ContestRepository.get_campus_pass(db, contest.id, current_member.id)
-            if pass_obj:
-                assigned_seat = pass_obj.seat_number
-                pass_code = pass_obj.pass_code
-                check_in_status = "checked_in" if is_test_user else pass_obj.check_in_status
+        check_in_status = "checked_in"
 
         problems = sorted(contest.problems, key=lambda p: p.problem_index)
 

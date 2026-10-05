@@ -90,6 +90,7 @@ class RatingHistory(Base):
     rank = Column(Integer, nullable=False)
 
     __table_args__ = (
+        UniqueConstraint("contest_id", "member_id", name="uq_rating_history_contest_member"),
         Index("ix_rating_history_member_contested_new_rating", "member_id", "contested_at", "new_rating"),
         Index("ix_rating_history_contest_rank", "contest_id", "rank"),
     )

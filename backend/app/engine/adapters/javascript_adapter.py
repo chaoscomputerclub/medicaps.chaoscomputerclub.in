@@ -251,7 +251,8 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         const result = targetFn.apply(null, args);
         let canonicalVal = result;
         if (result === undefined) {{
-            canonicalVal = null;
+            canonicalVal = "undefined";
+            process.stdout.write('undefined\\n');
         }}
         process.stdout.write("\\n<<<CCC_RUNNER_RESULT>>>\\n" + JSON.stringify({{
             status: "SUCCESS",

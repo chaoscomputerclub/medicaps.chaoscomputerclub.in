@@ -929,23 +929,10 @@ class ContestExecutionService:
 
         t_redis_publish = datetime.now(timezone.utc)
         try:
-            await broadcast_event(
-                event_type="submission_evaluated",
-                data={
-                    "contest_slug": slug,
-                    "problem_index": target_problem_index,
-                    "problem_id": target_problem_id,
-                    "handle": target_member_handle,
-                    "verdict": verdict_str,
-                    "is_accepted": is_accepted,
-                    "points_awarded": points_awarded,
-                    "passed_testcases": exec_result.passed_testcases,
-                    "total_testcases": exec_result.total_testcases,
-                },
-                contest_slug=slug,
-            )
+            from app.core.queue.outbox import relay_outbox_events
+            await relay_outbox_events(db, batch_size=10)
         except Exception as e:
-            logger.debug("Broadcast error: %s", e)
+            logger.debug("Outbox relay dispatch notice: %s", e)
         redis_publish_ms = max(0.1, (time.perf_counter() - t_pub_start) * 1000.0)
 
         sub_timestamps = dict(getattr(exec_result, "timestamps", {}) or {})
