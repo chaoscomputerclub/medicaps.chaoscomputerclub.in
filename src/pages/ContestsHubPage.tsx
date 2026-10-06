@@ -26,7 +26,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestsThunk, registerContestThunk, unregisterContestThunk, fetchMyParticipationsThunk } from "@/store/slices/contestSlice";
+import {
+  fetchContestsThunk,
+  registerContestThunk,
+  unregisterContestThunk,
+  fetchMyParticipationsThunk,
+  selectIsContestRegistered,
+} from "@/store/slices/contestSlice";
 import { contestApi } from "@/features/contest/api";
 import { invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
 import type { ContestSummary, ParticipationRecord } from "@/features/contest/types";
@@ -156,13 +162,14 @@ function ContestCountdownBadge({
 export function ContestsHubPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const contestState = useAppSelector((state) => state.contest);
   const {
     contests: rawContests,
     isLoading,
     myParticipations,
     isLoadingParticipations,
     registeringSlugs,
-  } = useAppSelector((state) => state.contest);
+  } = contestState;
   const cachedContests = (globalSwrStore.get<any>("contests:list")?.data ?? []) as ContestSummary[];
   const contests = rawContests && rawContests.length > 0 ? rawContests : cachedContests;
   const member = useAppSelector((state) => state.auth.member);
@@ -478,10 +485,7 @@ export function ContestsHubPage() {
               >
                 {upcomingContests.map((contest, idx) => {
                   const participation = myParticipations.find((p) => p.contest_slug === contest.slug);
-                  const isRegistered = Boolean(
-                    contest.registered ||
-                      participation !== undefined
-                  );
+                  const isRegistered = selectIsContestRegistered({ contest: contestState }, contest.slug);
                   const isLive = contest.status === "live";
                   const isUserCompleted = Boolean(
                     contest.is_submitted ||

@@ -25,6 +25,7 @@ import {
   syncSocialCounts,
   syncCadetSocialCounts,
 } from "@/store/slices/socialSlice";
+import { fetchContestsThunk } from "@/store/slices/contestSlice";
 import { SocialFollowStats } from "@/organization/components/SocialFollowStats";
 import {
   uploadAvatarThunk,
@@ -64,12 +65,19 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const { handle } = useParams<{ handle?: string }>();
   const currentMember = useAppSelector((s) => s.auth.member);
+  const contests = useAppSelector((s) => s.contest.contests);
   const followingIds = useAppSelector((s) => s.social.followingIds);
   const hasFetchedFollowing = useAppSelector((s) => s.social.hasFetchedFollowing);
   const actionPendingId = useAppSelector((s) => s.social.actionPendingId);
   const myFollowersCount = useAppSelector((s) => s.social.myFollowersCount);
   const myFollowingCount = useAppSelector((s) => s.social.myFollowingCount);
   const hasSyncedMyCounts = useAppSelector((s) => s.social.hasSyncedMyCounts);
+
+  useEffect(() => {
+    if (contests.length === 0) {
+      void dispatch(fetchContestsThunk(false));
+    }
+  }, [dispatch, contests.length]);
 
   const [copied, setCopied] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
@@ -627,24 +635,54 @@ export function ProfilePage() {
       </header>
 
       {/* 4 Metric Bento Strip */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Metric label="Rating" value={m.rating} detail={`Peak: ${m.peak_rating}`} />
-        <Metric
-          label="Rank"
-          value={m.is_ranked && m.university_rank ? `#${m.university_rank}` : "Unranked"}
-          detail={
-            m.is_ranked && m.university_rank
-              ? `of ${m.active_members || 1} cadets`
-              : "Attend 1 contest to rank"
-          }
-        />
-        <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />
-        <Metric
-          label="Contests"
-          value={`${m.attendance_count}/${m.attendance_total}`}
-          detail="Official attendance"
-        />
-      </section>
+      {(() => {
+        const officialFinishedContests = contests.filter(
+          (c) => c.status === "finished" || c.status === "live",
+        ).length;
+        const rawAttendanceCount = m.attendance_count ?? 0;
+        const rawAttendanceTotal = m.attendance_total ?? 0;
+
+        // Strict attendance total resolution:
+        // 1. If officialFinishedContests > 0, attendance_total is at least officialFinishedContests or rawAttendanceTotal.
+        // 2. If battles exist, attendance_total is at least battles.length.
+        // 3. If rawAttendanceCount > 0, use rawAttendanceTotal.
+        // 4. Otherwise (no official contests held, no battles, attendance count 0), attendance_total must strictly be 0,
+        //    rendering "0/0" with detail "No official contests yet" and eliminating any phantom "0/1" state.
+        const effectiveAttendanceTotal =
+          officialFinishedContests > 0
+            ? Math.max(officialFinishedContests, rawAttendanceTotal)
+            : battles.length > 0
+              ? Math.max(battles.length, rawAttendanceTotal)
+              : rawAttendanceCount > 0
+                ? rawAttendanceTotal
+                : 0;
+        const effectiveAttendanceCount = rawAttendanceCount;
+
+        return (
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Metric label="Rating" value={m.rating} detail={`Peak: ${m.peak_rating}`} />
+            <Metric
+              label="Rank"
+              value={m.is_ranked && m.university_rank ? `#${m.university_rank}` : "Unranked"}
+              detail={
+                m.is_ranked && m.university_rank
+                  ? `of ${m.active_members || 1} cadets`
+                  : "Attend 1 contest to rank"
+              }
+            />
+            <Metric label="Podiums" value={m.podiums} detail="Verified finishes" />
+            <Metric
+              label="Contests"
+              value={`${effectiveAttendanceCount}/${effectiveAttendanceTotal}`}
+              detail={
+                effectiveAttendanceTotal === 0
+                  ? "No official contests yet"
+                  : "Official attendance"
+              }
+            />
+          </section>
+        );
+      })()}
 
       {/* Trajectory & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">

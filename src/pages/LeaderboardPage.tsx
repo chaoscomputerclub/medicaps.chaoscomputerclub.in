@@ -51,8 +51,13 @@ export function LeaderboardPage() {
   );
 
   const currentMember = useAppSelector((s) => s.auth.member);
+  const contests = useAppSelector((s) => s.contest.contests);
   const currentMemberId = currentMember?.id;
   const followingIds = useAppSelector((s) => s.social.followingIds);
+
+  const officialContestsCount = contests.filter(
+    (c) => c.status === "finished" || c.status === "live",
+  ).length;
 
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -209,7 +214,19 @@ export function LeaderboardPage() {
                   const displayPeak = isYou && currentMember?.peak_rating ? currentMember.peak_rating : x.peak_rating;
                   const displayRank = x.university_rank ?? x.rank ?? null;
                   const attendanceCount = isYou && currentMember?.attendance_count !== undefined ? currentMember.attendance_count : (x.attendance_count ?? 0);
-                  const attendanceTotal = isYou && currentMember?.attendance_total ? currentMember.attendance_total : (x.attendance_total && x.attendance_total > 0 ? x.attendance_total : Math.max(1, attendanceCount));
+                  const rawAttendanceTotal =
+                    isYou && currentMember?.attendance_total !== undefined
+                      ? currentMember.attendance_total
+                      : x.attendance_total !== undefined && x.attendance_total !== null
+                        ? x.attendance_total
+                        : attendanceCount;
+
+                  const attendanceTotal =
+                    officialContestsCount > 0
+                      ? Math.max(officialContestsCount, rawAttendanceTotal)
+                      : attendanceCount > 0
+                        ? rawAttendanceTotal
+                        : 0;
 
                   const change =
                     x.previous_rank != null && displayRank != null

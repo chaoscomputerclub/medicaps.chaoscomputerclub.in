@@ -433,7 +433,12 @@ class GlobalSseMultiplexer {
         parsed.event === "resync_required" ||
         parsed.event === "cache_sync"
       ) {
-        invalidateContestCaches();
+        const isImmediate =
+          parsed.event === "contest_registered" ||
+          parsed.event === "contest_unregistered" ||
+          parsed.event === "resync_required" ||
+          parsed.event === "cache_sync";
+        invalidateContestCaches(isImmediate);
       }
 
       if (

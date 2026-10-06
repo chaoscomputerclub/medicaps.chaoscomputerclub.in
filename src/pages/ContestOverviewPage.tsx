@@ -4,6 +4,7 @@ import {
   fetchContestDetailThunk,
   registerContestThunk,
   unregisterContestThunk,
+  selectIsContestRegistered,
 } from "@/store/slices/contestSlice";
 import { useEffect, useState, useCallback } from "react";
 import { globalSwrStore, invalidateSwrCache } from "@/lib/cache/swrCache";
@@ -85,6 +86,8 @@ export function ContestOverviewPage() {
       if (force) {
         invalidateSwrCache("contests:*");
         invalidateSwrCache(`contest:*:${contestSlug}*`);
+        invalidateSwrCache(`contest:detail:${contestSlug}*`);
+        invalidateSwrCache(`contest:reg_status:${contestSlug}*`);
         invalidateSwrCache("system:contests:*");
         invalidateSwrCache("passes:*");
       }
@@ -97,7 +100,10 @@ export function ContestOverviewPage() {
     refreshDetail(false);
   }, [refreshDetail]);
 
-  // Hydrate from SWR sessionStorage cache on reload — no skeleton flash
+  // Authoritative canonical registration projection from Redux
+  const canonicalIsRegistered = useAppSelector((state) => selectIsContestRegistered(state, contestSlug));
+
+  // Hydrate from SWR sessionStorage cache on reload — zero skeleton flash
   const cachedContest =
     !rawContest && contestSlug
       ? (globalSwrStore.get<any>(`contest:detail:${contestSlug}`)?.data ?? null)
@@ -111,9 +117,10 @@ export function ContestOverviewPage() {
   const registration = rawRegistration ?? cachedRegistration;
 
   const isRegistered =
-    registration !== null && registration !== undefined
+    canonicalIsRegistered ||
+    (registration !== null && registration !== undefined
       ? Boolean(registration.registered)
-      : Boolean(contest?.registered);
+      : Boolean(contest?.registered));
   const isLive = contest?.status === "live";
   const isFinished = contest?.status === "finished";
   const isUpcoming = contest?.status === "upcoming" || !contest?.status;

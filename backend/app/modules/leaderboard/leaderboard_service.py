@@ -90,7 +90,7 @@ class LeaderboardService:
 
                 member_tier = get_rating_tier(verified_rating)
                 attendance_count = live_attendance_by_member.get(m.id) or m.attendance_count or 0
-                attendance_total = total_finished_contests or m.attendance_total or (1 if attendance_count > 0 else 1)
+                attendance_total = total_finished_contests if total_finished_contests is not None else (m.attendance_total or 0)
                 attendance_rate = (
                     round((attendance_count / attendance_total) * 100, 1)
                     if attendance_total > 0

@@ -1,6 +1,6 @@
 {
   "name": "medicaps.chaoscomputerclub.in",
-  "version": "1.0.5",
+  "version": "1.0.8",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -24,6 +24,8 @@
     "test:nav": "playwright test tests/e2e/inter_navigation.spec.ts",
     "test:api": "node scripts/api_contract_fuzzer.mjs",
     "test:qa": "node scripts/run_unified_qa.mjs",
+    "test:regression": "python3 scripts/regression/select_tests.py --all --run",
+    "regression": "python3 scripts/regression/select_tests.py --all --run",
     "typecheck": "tsc --noEmit",
     "verify:production": "tsc --noEmit && vite build && playwright test tests/e2e/zero_lag_navigation.spec.ts tests/e2e/runtime_telemetry.spec.ts tests/e2e/inter_navigation.spec.ts",
     "audit:performance": "node scripts/audit_platform_performance.mjs"

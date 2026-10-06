@@ -14,6 +14,17 @@ import type {
 import type { RealtimeEvent } from "@/lib/realtime";
 import { sanitizeCodeSnippet } from "@/lib/utils";
 
+export interface CanonicalRegistration {
+  contest_id?: number | string | null;
+  contest_slug: string;
+  member_id?: number | string | null;
+  registered: boolean;
+  status?: string | null;
+  registered_at?: string | null;
+  updated_at: number;
+  version?: number;
+}
+
 export interface ContestState {
   contests: ContestSummary[];
   currentContest: ContestSummary | null;
@@ -35,6 +46,8 @@ export interface ContestState {
   activeDetailRequestId: string | null;
   activeDetailSlug: string | null;
   lastEventTimestamps: Record<string, number>;
+  registrationsBySlug: Record<string, CanonicalRegistration>;
+  detailRequestStartTimes: Record<string, number>;
 }
 
 function getInitialContests(): ContestSummary[] {
@@ -72,6 +85,8 @@ const initialState: ContestState = {
   activeDetailRequestId: null,
   activeDetailSlug: null,
   lastEventTimestamps: {},
+  registrationsBySlug: {},
+  detailRequestStartTimes: {},
 };
 
 export const fetchContestsThunk = createAsyncThunk(
@@ -140,14 +155,42 @@ export const fetchMyParticipationsThunk = createAsyncThunk(
   }
 );
 
+// Fence window: canonical mutations carry updated_at biased this many ms into the future,
+// so any detail fetch triggered immediately after a mutation is correctly treated as "older"
+// than the canonical and does NOT overwrite the authoritative local state.
+const MUTATION_FENCE_MS = 10_000; // 10 seconds
+
 export const registerContestThunk = createAsyncThunk(
   "contest/register",
   async (slug: string, { rejectWithValue }) => {
     try {
+      // contestApi.register() already invalidates all SWR caches and seeds contest:reg_status:{slug}
+      // synchronously. Re-fetching registrationStatus(force=true) here would race against the
+      // simultaneous refreshDetail(true) call on ContestOverviewPage and could produce stale reads.
       const result = await contestApi.register(slug);
-      const reg = await contestApi.registrationStatus(slug, true);
+      // Build a canonical registration from the mutation response directly (no extra round-trip).
+      const canonicalReg = {
+        registered: true,
+        contest_slug: slug,
+        status: (result as any).status || "confirmed",
+        registered_at: (result as any).registered_at || new Date().toISOString(),
+        contest_status: null,
+        assessment_taken: false,
+        assessment_score: null,
+        assessment_rank: null,
+        assessment_status: null,
+        is_top_30_qualified: true,
+        can_take_assessment: false,
+        can_resume_assessment: false,
+        can_enter_live_contest: false,
+        eligibility_message: null,
+        is_dev_bypass: false,
+        remaining_seconds: null,
+        anti_cheat_violations: 0,
+        max_violations: 3,
+      };
       const myParticipated = await contestApi.participated(true).catch(() => null);
-      return { result, registration: reg, myParticipated, slug };
+      return { result, registration: canonicalReg, myParticipated, slug };
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to register for contest");
     }
@@ -159,9 +202,29 @@ export const unregisterContestThunk = createAsyncThunk(
   async (slug: string, { rejectWithValue }) => {
     try {
       const result = await contestApi.unregister(slug);
-      const reg = await contestApi.registrationStatus(slug, true);
+      // Derive unregistered state from mutation response directly, same pattern as register.
+      const canonicalReg = {
+        registered: false,
+        contest_slug: slug,
+        status: "unregistered" as const,
+        registered_at: null,
+        contest_status: null,
+        assessment_taken: false,
+        assessment_score: null,
+        assessment_rank: null,
+        assessment_status: null,
+        is_top_30_qualified: false,
+        can_take_assessment: false,
+        can_resume_assessment: false,
+        can_enter_live_contest: false,
+        eligibility_message: null,
+        is_dev_bypass: false,
+        remaining_seconds: null,
+        anti_cheat_violations: 0,
+        max_violations: 3,
+      };
       const myParticipated = await contestApi.participated(true).catch(() => null);
-      return { result, registration: reg, myParticipated, slug };
+      return { result, registration: canonicalReg, myParticipated, slug };
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to unregister from contest");
     }
@@ -278,7 +341,22 @@ export const contestSlice = createSlice({
           if (state.currentContest && state.currentContest.slug === slug && typeof regCount === "number") {
             state.currentContest.registered_count = regCount;
           }
-          if (isCurrentMember) {
+          if (isCurrentMember && slug) {
+            const eventTimestamp = eventTime || Date.now();
+            if (!state.registrationsBySlug) state.registrationsBySlug = {};
+            const existing = state.registrationsBySlug[slug];
+            if (!existing || eventTimestamp >= existing.updated_at) {
+              state.registrationsBySlug[slug] = {
+                contest_id: event.data?.contest_id,
+                contest_slug: slug,
+                member_id: event.data?.member_id ?? currentMember?.id,
+                registered: true,
+                status: event.data?.status || "confirmed",
+                registered_at: event.data?.registered_at || new Date().toISOString(),
+                updated_at: eventTimestamp,
+                version: event.data?.version,
+              };
+            }
             if (targetContest) targetContest.registered = true;
             if (state.currentContest && state.currentContest.slug === slug) {
               state.currentContest.registered = true;
@@ -299,12 +377,28 @@ export const contestSlice = createSlice({
           if (state.currentContest && state.currentContest.slug === slug && typeof regCount === "number") {
             state.currentContest.registered_count = regCount;
           }
-          if (isCurrentMember) {
+          if (isCurrentMember && slug) {
+            const eventTimestamp = eventTime || Date.now();
+            if (!state.registrationsBySlug) state.registrationsBySlug = {};
+            const existing = state.registrationsBySlug[slug];
+            if (!existing || eventTimestamp >= existing.updated_at) {
+              state.registrationsBySlug[slug] = {
+                contest_id: event.data?.contest_id,
+                contest_slug: slug,
+                member_id: event.data?.member_id ?? currentMember?.id,
+                registered: false,
+                status: "unregistered",
+                registered_at: null,
+                updated_at: eventTimestamp,
+                version: event.data?.version,
+              };
+            }
             if (targetContest) targetContest.registered = false;
             if (state.currentContest && state.currentContest.slug === slug) {
               state.currentContest.registered = false;
               if (state.registration) {
                 state.registration.registered = false;
+                state.registration.status = "unregistered";
               }
             }
             state.myParticipations = state.myParticipations.filter((p) => p.contest_slug !== slug);
@@ -389,7 +483,23 @@ export const contestSlice = createSlice({
     });
     builder.addCase(fetchContestsThunk.fulfilled, (state, action: PayloadAction<ContestSummary[]>) => {
       state.isLoading = false;
-      state.contests = action.payload;
+      const list = action.payload || [];
+      if (!state.registrationsBySlug) state.registrationsBySlug = {};
+      state.contests = list.map((c) => {
+        const canonical = state.registrationsBySlug[c.slug];
+        if (canonical) {
+          return { ...c, registered: canonical.registered };
+        }
+        if (c.registered) {
+          state.registrationsBySlug[c.slug] = {
+            contest_slug: c.slug,
+            registered: true,
+            status: "confirmed",
+            updated_at: Date.now(),
+          };
+        }
+        return { ...c };
+      });
     });
     builder.addCase(fetchContestsThunk.rejected, (state, action) => {
       state.isLoading = false;
@@ -397,18 +507,51 @@ export const contestSlice = createSlice({
     });
 
     // Detail
-    builder.addCase(fetchContestDetailThunk.pending, (state) => {
-      if (!state.currentContest) {
+    builder.addCase(fetchContestDetailThunk.pending, (state, action) => {
+      const slug = typeof action.meta.arg === "string" ? action.meta.arg : action.meta.arg.slug;
+      if (!state.currentContest || state.currentContest.slug !== slug) {
         state.isLoadingDetail = true;
       }
+      state.activeDetailRequestId = action.meta.requestId;
+      state.activeDetailSlug = slug;
+      if (!state.detailRequestStartTimes) state.detailRequestStartTimes = {};
+      state.detailRequestStartTimes[slug] = Date.now();
     });
     builder.addCase(fetchContestDetailThunk.fulfilled, (state, action) => {
       state.isLoadingDetail = false;
+      const slug = typeof action.meta.arg === "string" ? action.meta.arg : action.meta.arg.slug;
       const contest = action.payload.contest ? { ...action.payload.contest } : null;
-      const registration = action.payload.registration;
-      if (registration && contest) {
-        contest.registered = registration.registered;
+      let registration = action.payload.registration ? { ...action.payload.registration } : null;
+
+      const requestStart = state.detailRequestStartTimes?.[slug] || 0;
+      const canonical = state.registrationsBySlug?.[slug];
+
+      // Timestamp fencing: If a newer local mutation or SSE event was applied after this GET started,
+      // preserve the newer authoritative state rather than being overwritten by a stale GET response!
+      if (canonical && canonical.updated_at > requestStart) {
+        if (contest) contest.registered = canonical.registered;
+        if (registration) {
+          registration.registered = canonical.registered;
+          if (canonical.status) registration.status = canonical.status;
+        }
+      } else {
+        const isReg =
+          registration !== null && registration !== undefined
+            ? Boolean(registration.registered)
+            : Boolean(contest?.registered);
+        if (!state.registrationsBySlug) state.registrationsBySlug = {};
+        state.registrationsBySlug[slug] = {
+          contest_slug: slug,
+          registered: isReg,
+          status: registration?.status || (isReg ? "confirmed" : null),
+          registered_at: registration?.registered_at || null,
+          updated_at: Date.now(),
+        };
+        if (registration && contest) {
+          contest.registered = registration.registered;
+        }
       }
+
       state.currentContest = contest;
       state.registration = registration;
       const rawProblems = action.payload.problems || [];
@@ -475,8 +618,22 @@ export const contestSlice = createSlice({
     });
     builder.addCase(registerContestThunk.fulfilled, (state, action) => {
       const slug = action.payload.slug;
+      // Future-bias the updated_at by MUTATION_FENCE_MS so that any detail fetch triggered
+      // immediately after (requestStart ≈ now) sees canonical.updated_at > requestStart and
+      // correctly preserves the mutation result rather than overwriting it.
+      const fencedNow = Date.now() + MUTATION_FENCE_MS;
       state.registeringSlugs[slug] = false;
-      state.registration = action.payload.registration;
+      state.registration = action.payload.registration as any;
+
+      if (!state.registrationsBySlug) state.registrationsBySlug = {};
+      state.registrationsBySlug[slug] = {
+        contest_slug: slug,
+        registered: true,
+        status: (action.payload.registration as any)?.status || "confirmed",
+        registered_at: (action.payload.registration as any)?.registered_at || new Date().toISOString(),
+        updated_at: fencedNow,
+      };
+
       if (state.currentContest && state.currentContest.slug === slug) {
         state.currentContest.registered = true;
         state.currentContest.registered_count =
@@ -502,9 +659,20 @@ export const contestSlice = createSlice({
     });
     builder.addCase(unregisterContestThunk.fulfilled, (state, action) => {
       const slug = action.payload.slug;
+      const fencedNow = Date.now() + MUTATION_FENCE_MS;
       state.registeringSlugs[slug] = false;
       state.registration =
-        action.payload.registration ?? (state.registration ? { ...state.registration, registered: false } : null);
+        (action.payload.registration as any) ?? (state.registration ? { ...state.registration, registered: false } : null);
+
+      if (!state.registrationsBySlug) state.registrationsBySlug = {};
+      state.registrationsBySlug[slug] = {
+        contest_slug: slug,
+        registered: false,
+        status: "unregistered",
+        registered_at: null,
+        updated_at: fencedNow,
+      };
+
       if (state.currentContest && state.currentContest.slug === slug) {
         state.currentContest.registered = false;
         state.currentContest.registered_count =
@@ -563,4 +731,38 @@ export const contestSlice = createSlice({
 
 export const { clearArenaResults, resetContestState, removeContestFromState, applyRealtimeEvent } =
   contestSlice.actions;
+
+export const selectContestRegistration = (
+  state: { contest: ContestState },
+  slug: string
+): CanonicalRegistration | null => {
+  return state.contest.registrationsBySlug?.[slug] ?? null;
+};
+
+export const selectIsContestRegistered = (
+  state: { contest: ContestState },
+  slug: string
+): boolean => {
+  if (!slug) return false;
+  const canonical = state.contest.registrationsBySlug?.[slug];
+  if (canonical !== undefined && canonical !== null) {
+    return Boolean(canonical.registered);
+  }
+  if (state.contest.currentContest?.slug === slug && state.contest.currentContest.registered !== undefined) {
+    return Boolean(state.contest.currentContest.registered);
+  }
+  const inList = state.contest.contests.find((c) => c.slug === slug);
+  if (inList && inList.registered !== undefined) {
+    return Boolean(inList.registered);
+  }
+  const inPart = state.contest.myParticipations.find((p) => p.contest_slug === slug);
+  if (inPart) {
+    return true;
+  }
+  if (state.contest.registration?.contest_slug === slug && state.contest.registration.registered !== undefined) {
+    return Boolean(state.contest.registration.registered);
+  }
+  return false;
+};
+
 export default contestSlice.reducer;

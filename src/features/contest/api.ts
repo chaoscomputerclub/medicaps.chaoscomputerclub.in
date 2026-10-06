@@ -5,7 +5,7 @@
  */
 
 import { getApiBase, getToken } from "@/lib/auth";
-import { swrFetch, invalidateSwrCache } from "@/lib/cache/swrCache";
+import { swrFetch, invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
 import type {
   AssessmentRanking,
   CampusPass,
@@ -235,31 +235,78 @@ export const contestApi = {
   },
 
   async register(slug: string) {
-    const res = await request<{ registered: boolean; message: string; registered_count: number }>(
+    const res = await request<{
+      registered: boolean;
+      message: string;
+      registered_count: number;
+      contest_id?: number | string;
+      contest_slug?: string;
+      status?: string;
+      registered_at?: string;
+    }>(
       `/contests/${encodeURIComponent(slug)}/register`,
       { method: "POST" }
     );
-    // Invalidate caches across the platform
+    // Invalidate all client-side SWR caches representing this contest and member registration.
+    // Order matters: invalidate first, then seed authoritative values so they survive the next fetch.
     invalidateSwrCache("contests:*");
     invalidateSwrCache("contest:*");
-    invalidateSwrCache(`contest:detail:${slug}`);
-    invalidateSwrCache(`contest:reg_status:${slug}`);
+    invalidateSwrCache(`contest:detail:${slug}*`);
+    invalidateSwrCache(`contest:reg_status:${slug}*`);
     invalidateSwrCache("portal:*");
     invalidateSwrCache("passes:*");
+
+    // Immediately seed the SWR cache with authoritative registration state from mutation response.
+    // This is the client-side canonical truth that satisfies the "mutation response = immediate local
+    // convergence" invariant (Section 7 of MASTER PROMPT). SSE will converge other tabs/components.
+    globalSwrStore.set(
+      `contest:reg_status:${slug}`,
+      {
+        registered: true,
+        contest_slug: slug,
+        status: res.status || "confirmed",
+        registered_at: res.registered_at || new Date().toISOString(),
+        registered_count: res.registered_count,
+        // Do NOT set is_checked_in / is_top_30_qualified here — these depend on backend
+        // assessment/QR logic and will be hydrated on the next registrationStatus fetch.
+      },
+      true // persistSession
+    );
+
     return res;
   },
 
   async unregister(slug: string) {
-    const res = await request<{ registered: boolean; message: string; registered_count: number }>(
+    const res = await request<{
+      registered: boolean;
+      message: string;
+      registered_count: number;
+      contest_id?: number | string;
+      contest_slug?: string;
+      status?: string;
+    }>(
       `/contests/${encodeURIComponent(slug)}/unregister`,
       { method: "POST" }
     );
     invalidateSwrCache("contests:*");
     invalidateSwrCache("contest:*");
-    invalidateSwrCache(`contest:detail:${slug}`);
-    invalidateSwrCache(`contest:reg_status:${slug}`);
+    invalidateSwrCache(`contest:detail:${slug}*`);
+    invalidateSwrCache(`contest:reg_status:${slug}*`);
     invalidateSwrCache("portal:*");
     invalidateSwrCache("passes:*");
+
+    globalSwrStore.set(
+      `contest:reg_status:${slug}`,
+      {
+        registered: false,
+        contest_slug: slug,
+        status: "unregistered",
+        registered_at: null,
+        registered_count: res.registered_count,
+      },
+      true // persistSession
+    );
+
     return res;
   },
 

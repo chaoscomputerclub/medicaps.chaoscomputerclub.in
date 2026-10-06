@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchContestDetailThunk } from "@/store/slices/contestSlice";
+import { fetchContestDetailThunk, selectIsContestRegistered } from "@/store/slices/contestSlice";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
 import { globalSwrStore } from "@/lib/cache/swrCache";
 import {
@@ -116,7 +116,8 @@ export function ContestLobbyPage() {
   const isLive = resolvedContest?.status === "live";
   const isFinished = resolvedContest?.status === "finished";
   const isUpcoming = resolvedContest?.status === "upcoming" || (!isLive && !isFinished);
-  const isRegistered = Boolean(resolvedRegistration?.registered || resolvedContest?.registered);
+  const canonicalIsRegistered = useAppSelector((state) => selectIsContestRegistered(state, contestSlug));
+  const isRegistered = Boolean(canonicalIsRegistered || resolvedRegistration?.registered || resolvedContest?.registered);
 
   const onCountdownExpire = useCallback(() => {
     refreshDetail();

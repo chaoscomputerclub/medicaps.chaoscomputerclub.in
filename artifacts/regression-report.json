@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-10-05T06:59:47.651101+00:00",
+  "total_historical_bugs": 246,
+  "covered_bugs": 208,
+  "gap_bugs": 38,
+  "severity_breakdown": {
+    "critical": 9,
+    "high": 118,
+    "medium": 12,
+    "low": 107
+  },
+  "test_execution": {
+    "exit_code": 0,
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 0.98,
+    "raw_summary": "40 passed in 0.72s"
+  },
+  "status": "REGRESSION SYSTEM CERTIFIED"
+}

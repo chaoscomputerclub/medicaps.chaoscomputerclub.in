@@ -11,7 +11,7 @@ from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, func
 
-from app.core.cache import delete_cache_pattern, get_cache, set_cache, single_flight
+from app.core.cache import delete_cache, delete_cache_pattern, get_cache, set_cache, single_flight
 from app.core.config import settings
 from app.lib.cache_keys import contest_list_cache_key, TTL_CONTESTS_LIST
 from app.lib.pagination import normalize_pagination, inject_pagination_headers, slice_page
@@ -693,6 +693,10 @@ class ContestService:
             return {
                 "status": "already_registered",
                 "registered": True,
+                "contest_id": contest.id,
+                "contest_slug": contest.slug,
+                "member_id": current_member.id,
+                "registered_at": existing_reg.registered_at.isoformat() if existing_reg.registered_at else now_utc().isoformat(),
                 "message": f"You are already registered for {contest.title}. Proceed to the arena.",
                 "venue": contest.venue,
                 "registered_count": contest.registered_count,
@@ -709,6 +713,7 @@ class ContestService:
         )
         db.add(new_reg)
         contest.registered_count += 1
+        reg_time = now_utc().isoformat()
 
         # Transactional Outbox Event inside active DB transaction
         await record_outbox_event(
@@ -716,11 +721,16 @@ class ContestService:
             queue_name="realtime",
             event_type="contest_registered",
             payload={
+                "event": "contest_registered",
+                "version": contest.registered_count,
+                "contest_id": contest.id,
                 "contest_slug": contest.slug,
                 "contest_title": contest.title,
                 "member_id": current_member.id,
                 "handle": current_member.handle,
                 "full_name": current_member.full_name or current_member.handle,
+                "registered": True,
+                "registered_at": reg_time,
                 "registered_count": contest.registered_count,
                 "capacity": contest.seat_capacity,
                 "status": "confirmed",
@@ -730,14 +740,32 @@ class ContestService:
         )
         await db.commit()
 
+        # Immediately relay outbox event into Redis Pub/Sub -> SSE stream with near zero latency
+        try:
+            await relay_outbox_events(db, batch_size=10)
+        except Exception as exc:
+            logger.warning("Immediate outbox relay after registration encountered: %s", exc)
+
+        # Invalidate all server caches representing this contest and member registration
+        await delete_cache(f"cache:reg_status:{contest.id}:{current_member.id}")
+        await delete_cache(f"cache:contest:detail:{contest.slug}:{current_member.id}")
+        await delete_cache_pattern(f"cache:reg_status:{contest.id}*")
+        await delete_cache_pattern(f"cache:reg_status:{contest.slug}*")
+        await delete_cache_pattern(f"cache:contest:detail:{contest.slug}*")
+        await delete_cache_pattern(f"cache:contest:{contest.slug}*")
         await delete_cache_pattern("cache:contest*")
         await delete_cache_pattern("cache:contests*")
-        await delete_cache_pattern(f"cache:*:{current_member.id}:*")
+        await delete_cache_pattern(f"cache:*:{current_member.id}*")
+        await delete_cache_pattern(f"cache:passes:{current_member.id}*")
         await delete_cache_pattern("cache:passes*")
 
         return {
             "status": "confirmed",
             "registered": True,
+            "contest_id": contest.id,
+            "contest_slug": contest.slug,
+            "member_id": current_member.id,
+            "registered_at": reg_time,
             "message": f"Registration confirmed for {contest.title}. Online arena unlocked.",
             "venue": contest.venue,
             "registered_count": contest.registered_count,
@@ -767,6 +795,10 @@ class ContestService:
             return {
                 "status": "not_registered",
                 "registered": False,
+                "contest_id": contest.id,
+                "contest_slug": contest.slug,
+                "member_id": current_member.id,
+                "registered_at": None,
                 "message": f"You are not registered for {contest.title}.",
                 "registered_count": contest.registered_count,
             }
@@ -794,10 +826,15 @@ class ContestService:
             queue_name="realtime",
             event_type="contest_unregistered",
             payload={
+                "event": "contest_unregistered",
+                "version": contest.registered_count,
+                "contest_id": contest.id,
                 "contest_slug": contest.slug,
                 "contest_title": contest.title,
                 "member_id": current_member.id,
                 "handle": current_member.handle,
+                "registered": False,
+                "registered_at": None,
                 "registered_count": contest.registered_count,
                 "capacity": contest.seat_capacity,
                 "status": "unregistered",
@@ -807,14 +844,32 @@ class ContestService:
         )
         await db.commit()
 
+        # Immediately relay outbox event into Redis Pub/Sub -> SSE stream
+        try:
+            await relay_outbox_events(db, batch_size=10)
+        except Exception as exc:
+            logger.warning("Immediate outbox relay after unregistration encountered: %s", exc)
+
+        # Invalidate all server caches representing this contest and member registration
+        await delete_cache(f"cache:reg_status:{contest.id}:{current_member.id}")
+        await delete_cache(f"cache:contest:detail:{contest.slug}:{current_member.id}")
+        await delete_cache_pattern(f"cache:reg_status:{contest.id}*")
+        await delete_cache_pattern(f"cache:reg_status:{contest.slug}*")
+        await delete_cache_pattern(f"cache:contest:detail:{contest.slug}*")
+        await delete_cache_pattern(f"cache:contest:{contest.slug}*")
         await delete_cache_pattern("cache:contest*")
         await delete_cache_pattern("cache:contests*")
-        await delete_cache_pattern(f"cache:*:{current_member.id}:*")
+        await delete_cache_pattern(f"cache:*:{current_member.id}*")
+        await delete_cache_pattern(f"cache:passes:{current_member.id}*")
         await delete_cache_pattern("cache:passes*")
 
         return {
             "status": "unregistered",
             "registered": False,
+            "contest_id": contest.id,
+            "contest_slug": contest.slug,
+            "member_id": current_member.id,
+            "registered_at": None,
             "message": f"Successfully unregistered from {contest.title}.",
             "venue": contest.venue,
             "registered_count": contest.registered_count,

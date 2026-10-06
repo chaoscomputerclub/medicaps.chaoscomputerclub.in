@@ -177,12 +177,17 @@ export async function getMemberProfileData(force = false) {
             : (Array.isArray(data.battles) ? data.battles : []);
 
           const memberObj = data.member ? { ...data.member } : null;
-          if (memberObj && data.stats) {
-            if (typeof memberObj.followers_count !== "number" && typeof data.stats.followers_count === "number") {
-              memberObj.followers_count = data.stats.followers_count;
+          if (memberObj) {
+            if ((memberObj.attendance_count ?? 0) === 0 && rBattles.length === 0 && memberObj.attendance_total === 1) {
+              memberObj.attendance_total = 0;
             }
-            if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
-              memberObj.following_count = data.stats.following_count;
+            if (data.stats) {
+              if (typeof memberObj.followers_count !== "number" && typeof data.stats.followers_count === "number") {
+                memberObj.followers_count = data.stats.followers_count;
+              }
+              if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
+                memberObj.following_count = data.stats.following_count;
+              }
             }
           }
 
@@ -337,12 +342,17 @@ export async function getStudentProfileData(handle: string, force = false) {
             ? data.recentBattles
             : (Array.isArray(data.battles) ? data.battles : []);
           const memberObj = data.member ? { ...data.member } : null;
-          if (memberObj && data.stats) {
-            if (typeof memberObj.followers_count !== "number" && typeof data.stats.followers_count === "number") {
-              memberObj.followers_count = data.stats.followers_count;
+          if (memberObj) {
+            if ((memberObj.attendance_count ?? 0) === 0 && rBattles.length === 0 && memberObj.attendance_total === 1) {
+              memberObj.attendance_total = 0;
             }
-            if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
-              memberObj.following_count = data.stats.following_count;
+            if (data.stats) {
+              if (typeof memberObj.followers_count !== "number" && typeof data.stats.followers_count === "number") {
+                memberObj.followers_count = data.stats.followers_count;
+              }
+              if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
+                memberObj.following_count = data.stats.following_count;
+              }
             }
           }
 

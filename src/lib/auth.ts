@@ -68,8 +68,13 @@ export function getStoredMember(): Member | null {
   if (!raw) return null;
   try {
     const m = JSON.parse(raw);
-    if (m && typeof m === "object" && m.full_name && /^[a-z]{2}\d{2}[a-z]{2}\d+/i.test(m.full_name)) {
-      m.full_name = null;
+    if (m && typeof m === "object") {
+      if (m.full_name && /^[a-z]{2}\d{2}[a-z]{2}\d+/i.test(m.full_name)) {
+        m.full_name = null;
+      }
+      if ((m.attendance_count ?? 0) === 0 && m.attendance_total === 1) {
+        m.attendance_total = 0;
+      }
     }
     return m;
   } catch {

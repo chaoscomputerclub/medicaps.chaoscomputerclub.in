@@ -9,7 +9,8 @@ from fastapi import HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
 
-from app.core.cache import delete_cache_pattern
+from app.core.cache import delete_cache, delete_cache_pattern
+from app.core.queue.outbox import record_outbox_event, relay_outbox_events
 from app.lib.pagination import normalize_pagination, inject_pagination_headers
 from app.models.db_models import (
     AssessmentSession,
@@ -124,30 +125,51 @@ class AdminContestService:
         )
         db.add(new_reg)
         contest.registered_count += 1
+        reg_time = now_utc().isoformat()
+
+        # Transactional Outbox Event inside active DB transaction (Single Publisher Invariant)
+        await record_outbox_event(
+            db=db,
+            queue_name="realtime",
+            event_type="contest_registered",
+            payload={
+                "event": "contest_registered",
+                "version": contest.registered_count,
+                "contest_id": contest.id,
+                "contest_slug": contest.slug,
+                "contest_title": contest.title,
+                "member_id": member.id,
+                "handle": member.handle,
+                "full_name": member.full_name or member.handle,
+                "registered": True,
+                "registered_at": reg_time,
+                "registered_count": contest.registered_count,
+                "capacity": contest.seat_capacity,
+                "status": "confirmed",
+            },
+            aggregate_id=contest.id,
+            priority="high",
+        )
         await db.commit()
 
+        # Immediately relay outbox event into Redis Pub/Sub -> SSE stream
+        try:
+            await relay_outbox_events(db, batch_size=10)
+        except Exception as exc:
+            logger.warning("Immediate outbox relay after admin registration encountered: %s", exc)
+
+        # Invalidate all server caches representing this contest and member registration
+        await delete_cache(f"cache:reg_status:{contest.id}:{member.id}")
+        await delete_cache(f"cache:contest:detail:{contest.slug}:{member.id}")
+        await delete_cache_pattern(f"cache:reg_status:{contest.id}*")
+        await delete_cache_pattern(f"cache:reg_status:{contest.slug}*")
+        await delete_cache_pattern(f"cache:contest:detail:{contest.slug}*")
+        await delete_cache_pattern(f"cache:contest:{contest.slug}*")
         await delete_cache_pattern("cache:contest*")
         await delete_cache_pattern("cache:contests*")
-        await delete_cache_pattern(f"cache:*:{member.id}:*")
+        await delete_cache_pattern(f"cache:*:{member.id}*")
+        await delete_cache_pattern(f"cache:passes:{member.id}*")
         await delete_cache_pattern("cache:passes*")
-
-        try:
-            await broadcast_event(
-                event_type="contest_registered",
-                data={
-                    "contest_slug": contest.slug,
-                    "contest_title": contest.title,
-                    "member_id": member.id,
-                    "handle": member.handle,
-                    "full_name": member.full_name or member.handle,
-                    "registered_count": contest.registered_count,
-                    "capacity": contest.seat_capacity,
-                    "status": "confirmed",
-                },
-                contest_slug=contest.slug,
-            )
-        except Exception:
-            pass
 
         return {
             "status": "confirmed",

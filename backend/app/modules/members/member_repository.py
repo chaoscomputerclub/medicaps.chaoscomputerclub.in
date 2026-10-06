@@ -68,9 +68,10 @@ class MemberRepository:
 
     @staticmethod
     async def get_attendance_and_contest_counts(db: AsyncSession, member_id: str) -> Tuple[int, int]:
-        total_contests = await db.scalar(
+        total_contests_val = await db.scalar(
             select(func.count(OfflineContest.id)).where(OfflineContest.status.in_(["finished", "live"]))
-        ) or 1
+        )
+        total_contests = total_contests_val if total_contests_val is not None else 0
         sb_attended = await db.scalar(
             select(func.count(ScoreboardEntry.id)).where(ScoreboardEntry.member_id == member_id)
         ) or 0

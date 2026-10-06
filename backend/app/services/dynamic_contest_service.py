@@ -1582,9 +1582,10 @@ class DynamicContestService:
         await db.flush()
 
         # Count total finished contests for global attendance_total
-        total_finished = await db.scalar(
+        total_finished_res = await db.scalar(
             select(func.count(OfflineContest.id)).where(OfflineContest.status == "finished")
-        ) or 1
+        )
+        total_finished = total_finished_res if total_finished_res is not None else 0
 
         # Sync attendance_total across all active members
         await db.execute(

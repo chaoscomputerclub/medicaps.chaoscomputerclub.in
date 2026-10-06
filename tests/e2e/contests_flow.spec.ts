@@ -83,4 +83,83 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
     expect(dashTitle.trim()).toBe(hubTitle.trim());
     expect(dashLink).toBe(hubLink);
   });
+
+  test('REG-STATE-001: Contest registration state converges across list, detail, and reload', async ({ page }) => {
+    let isRegisteredServer = false;
+    const contestSlug = 'weekly-contest-1';
+
+    // Intercept registration endpoints dynamically
+    await page.route(`**/contests/${contestSlug}/register`, async (route) => {
+      isRegisteredServer = true;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'confirmed',
+          registered: true,
+          contest_id: 'c-test-01',
+          contest_slug: contestSlug,
+          registered_at: new Date().toISOString(),
+          message: 'Registration confirmed for Weekly Contest 1. Online arena unlocked.',
+          registered_count: 42,
+          capacity: 100,
+        }),
+      });
+    });
+
+    await page.route(`**/contests/${contestSlug}/registration-status`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          registered: isRegisteredServer,
+          contest_slug: contestSlug,
+          status: isRegisteredServer ? 'confirmed' : null,
+          can_enter_live_contest: false,
+          can_take_assessment: false,
+          is_top_30_qualified: true,
+          is_checked_in: true,
+        }),
+      });
+    });
+
+    await authenticateCadetSession(page);
+
+    // 1. Navigate to Contests Hub
+    await page.goto('/contests', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/contests/);
+
+    // 2. Open contest card to navigate to detail
+    const contestCard = page.locator('text=/Weekly Contest/i').first();
+    await expect(contestCard).toBeVisible({ timeout: 15000 });
+    await contestCard.click();
+
+    // 3. Confirm we are on the contest detail page
+    await page.waitForURL(/\/contests\/.+/, { timeout: 10000 });
+
+    // 4. If Register button is visible, click Register
+    const registerBtn = page.locator('button').filter({ hasText: /^Register$/i }).first();
+    if (await registerBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await registerBtn.click();
+    }
+
+    // 5. Verify registered indicator appears on detail page
+    const registeredIndicator = page.locator('button, [data-testid="badge"], span').filter({ hasText: /Registered/i }).first();
+    await expect(registeredIndicator).toBeVisible({ timeout: 10000 });
+
+    // 6. Navigate back to Contests Hub
+    await page.goto('/contests', { waitUntil: 'domcontentloaded' });
+    const hubRegistered = page.locator('button, span').filter({ hasText: /Registered/i }).first();
+    await expect(hubRegistered).toBeVisible({ timeout: 10000 });
+
+    // 7. Return to contest detail
+    const contestCardAgain = page.locator('text=/Weekly Contest/i').first();
+    await contestCardAgain.click();
+    await page.waitForURL(/\/contests\/.+/, { timeout: 10000 });
+    await expect(registeredIndicator).toBeVisible({ timeout: 10000 });
+
+    // 8. Hard reload
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(registeredIndicator).toBeVisible({ timeout: 10000 });
+  });
 });
