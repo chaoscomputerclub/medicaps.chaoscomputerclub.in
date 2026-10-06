@@ -130,21 +130,26 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
     await expect(page).toHaveURL(/\/contests/);
 
     // 2. Open contest card to navigate to detail
-    const contestCard = page.locator('text=/Weekly Contest/i').first();
+    const contestCard = page.locator('[data-testid="hero-contest-card"]').first();
     await expect(contestCard).toBeVisible({ timeout: 15000 });
     await contestCard.click();
 
     // 3. Confirm we are on the contest detail page
-    await page.waitForURL(/\/contests\/.+/, { timeout: 10000 });
+    await page.waitForURL(/\/contests\/[a-zA-Z0-9_-]+/, { timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
 
-    // 4. If Register button is visible, click Register
-    const registerBtn = page.locator('button').filter({ hasText: /^Register$/i }).first();
-    if (await registerBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    // 4. If Register button is visible and not yet registered, click Register
+    const registeredIndicator = page.locator('button, [data-testid="badge"], span, div').filter({ hasText: /Registered/i }).first();
+    const isAlreadyRegistered = await registeredIndicator.isVisible().catch(() => false);
+
+    if (!isAlreadyRegistered) {
+      const registerBtn = page.locator('button').filter({ hasText: /Register/i }).first();
+      await expect(registerBtn).toBeVisible({ timeout: 10000 });
+      await expect(registerBtn).toBeEnabled({ timeout: 10000 });
       await registerBtn.click();
     }
 
     // 5. Verify registered indicator appears on detail page
-    const registeredIndicator = page.locator('button, [data-testid="badge"], span').filter({ hasText: /Registered/i }).first();
     await expect(registeredIndicator).toBeVisible({ timeout: 10000 });
 
     // 6. Navigate back to Contests Hub
@@ -153,9 +158,9 @@ test.describe('Contests Hub & User Journey E2E Flow', () => {
     await expect(hubRegistered).toBeVisible({ timeout: 10000 });
 
     // 7. Return to contest detail
-    const contestCardAgain = page.locator('text=/Weekly Contest/i').first();
+    const contestCardAgain = page.locator('[data-testid="hero-contest-card"]').first();
     await contestCardAgain.click();
-    await page.waitForURL(/\/contests\/.+/, { timeout: 10000 });
+    await page.waitForURL(/\/contests\/[a-zA-Z0-9_-]+/, { timeout: 10000 });
     await expect(registeredIndicator).toBeVisible({ timeout: 10000 });
 
     // 8. Hard reload
