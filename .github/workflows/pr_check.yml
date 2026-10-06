@@ -96,6 +96,7 @@ jobs:
           echo "| \`tests/e2e/dead_ui_and_interactions.spec.ts\` | Dead-UI & Interaction Triggers | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| \`tests/e2e/accessibility.spec.ts\` | WCAG 2.2 AA Compliance Audit | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| \`tests/e2e/runtime_telemetry.spec.ts\` | Error Boundary & 5xx Sentinel | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`tests/e2e/zero_lag_navigation.spec.ts\` | Zero-Lag Transition & Fast Sequential Navigation | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| \`tests/e2e/inter_navigation.spec.ts\` | Full Platform Inter-Page & Subpage Navigation | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
 
   # ─── JOB 3: BACKEND API QA & CONTRACT VERIFICATION ───────────────────────────
@@ -194,6 +195,16 @@ jobs:
           FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
         run: pytest backend/tests/test_cookie_auth.py backend/tests/test_cloudflare_security.py -v
 
+      - name: 🔄 Execute Contest Registration State Consistency Suite (5 Tests)
+        env:
+          PYTHONPATH: backend
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci_secret_key_testing_1234567890
+          ALGORITHM: RS256
+          FEATURE_ASSESSMENT_AND_QR_ENABLED: "false"
+        run: pytest backend/tests/test_contest_registration_consistency.py -v
+
       - name: 🛡️ Execute Historical Invariant Regression Suite (Mandatory CI Gate)
         env:
           PYTHONPATH: backend
@@ -214,4 +225,5 @@ jobs:
           echo "| Real-Time Cache Synchronization Engine | 27 Monotonic CAS, Invalidation, SWR & Concurrency Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| ChaosQueue Async Engine & DLQ | 10 Job Lifecycle, Outbox Relay & Locking Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
           echo "| Cookie Auth & Cloudflare Security | 12 HttpOnly Rotation & Turnstile Protection Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Historical Invariant Regression Suite | 39 Executable Invariant Tests (Zero Regressions Allowed) | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Contest Registration State Consistency | 5 Dual-Write, Invalidation & Outbox Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Historical Invariant Regression Suite | 40 Executable Invariant Tests (Zero Regressions Allowed) | ✅ PASS |" >> $GITHUB_STEP_SUMMARY

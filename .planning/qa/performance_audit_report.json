@@ -1,29 +1,29 @@
 {
-  "timestamp": "2026-09-26T20:23:45.336Z",
+  "timestamp": "2026-10-06T06:46:41.297Z",
   "apiBase": "https://medicaps-api.chaoscomputerclub.in/api",
-  "grade": "B",
-  "passRate": 85,
+  "grade": "F",
+  "passRate": 54,
   "summary": {
     "totalChecks": 13,
-    "passedChecks": 11,
-    "failedChecks": 2
+    "passedChecks": 7,
+    "failedChecks": 6
   },
   "modules": {
     "frontend": {
       "status": "COMPLETE",
       "fileCount": 46,
-      "totalRawBytes": 6529183,
-      "totalGzipBytes": 1740280,
-      "coreUIRawBytes": 451971,
-      "coreUIGzipBytes": 134200,
+      "totalRawBytes": 6643577,
+      "totalGzipBytes": 1773256,
+      "coreUIRawBytes": 463487,
+      "coreUIGzipBytes": 136724,
       "workerRawBytes": 0,
       "monacoRawBytes": 4373559,
       "assets": [
         {
-          "name": "vendor-monaco-DH8SJHWf.js",
+          "name": "vendor-monaco-Bg5mSXG_.js",
           "category": "monaco_editor",
           "rawBytes": 4373559,
-          "gzipBytes": 1107225
+          "gzipBytes": 1107226
         },
         {
           "name": "vendor-charts-2fYnrJmY.js",
@@ -32,22 +32,22 @@
           "gzipBytes": 102265
         },
         {
-          "name": "vendor-common-D2smggWZ.js",
+          "name": "vendor-common-DQi07QZc.js",
           "category": "js_chunk",
-          "rawBytes": 301775,
-          "gzipBytes": 96165
+          "rawBytes": 365640,
+          "gzipBytes": 117250
         },
         {
-          "name": "vendor-react-CwqhkyO8.js",
+          "name": "vendor-react-BnzYn8a6.js",
           "category": "core_ui",
           "rawBytes": 246056,
           "gzipBytes": 77608
         },
         {
-          "name": "index-BoLbzjgP.css",
+          "name": "index-CRviHcob.css",
           "category": "css",
-          "rawBytes": 167966,
-          "gzipBytes": 24794
+          "rawBytes": 184568,
+          "gzipBytes": 27231
         },
         {
           "name": "vendor-monaco-Dl25h2Qx.css",
@@ -62,28 +62,28 @@
           "gzipBytes": 69091
         },
         {
-          "name": "index-DedhQiA1.js",
+          "name": "index-C_u95JGD.js",
           "category": "core_ui",
-          "rawBytes": 115385,
-          "gzipBytes": 30241
+          "rawBytes": 129239,
+          "gzipBytes": 33367
         },
         {
-          "name": "vendor-radix-Ci3TEvzL.js",
+          "name": "vendor-radix-pIFC2T30.js",
           "category": "core_ui",
-          "rawBytes": 90530,
-          "gzipBytes": 26351
+          "rawBytes": 88192,
+          "gzipBytes": 25749
         },
         {
-          "name": "ContestArenaPage-ClYqK931.js",
+          "name": "ContestArenaPage-ejKbcRnI.js",
           "category": "route_page",
-          "rawBytes": 76970,
-          "gzipBytes": 15544
+          "rawBytes": 73339,
+          "gzipBytes": 15101
         },
         {
-          "name": "skeletons-BRK6GwQt.js",
+          "name": "skeletons-BGBdhzDC.js",
           "category": "js_chunk",
-          "rawBytes": 57928,
-          "gzipBytes": 8926
+          "rawBytes": 65838,
+          "gzipBytes": 11241
         },
         {
           "name": "inter-latin-wght-normal-Dx4kXJAl.woff2",
@@ -92,58 +92,58 @@
           "gzipBytes": 48254
         },
         {
-          "name": "ContestsHubPage-Dhsp-kdF.js",
+          "name": "ContestsHubPage-D4CB8GAE.js",
           "category": "route_page",
-          "rawBytes": 46235,
-          "gzipBytes": 11065
+          "rawBytes": 46602,
+          "gzipBytes": 11159
         },
         {
-          "name": "AssessmentWorkspacePage-BtCurCjb.js",
+          "name": "SettingsPage-DBCqRwLB.js",
           "category": "route_page",
-          "rawBytes": 29472,
-          "gzipBytes": 6937
+          "rawBytes": 27900,
+          "gzipBytes": 8086
         },
         {
-          "name": "SettingsPage-Cpp_jAoM.js",
+          "name": "ContestOverviewPage-BrPayEtJ.js",
           "category": "route_page",
-          "rawBytes": 28211,
-          "gzipBytes": 8337
+          "rawBytes": 27048,
+          "gzipBytes": 6446
         },
         {
-          "name": "ContestOverviewPage-bjSjAH2r.js",
+          "name": "AssessmentWorkspacePage-Cq2cXUBu.js",
           "category": "route_page",
-          "rawBytes": 26776,
-          "gzipBytes": 6380
+          "rawBytes": 25777,
+          "gzipBytes": 6450
         },
         {
-          "name": "ContestSummaryPage-cCFlDhM2.js",
+          "name": "ProfilePage-0nTKsaMv.js",
           "category": "route_page",
-          "rawBytes": 23997,
-          "gzipBytes": 6032
+          "rawBytes": 25424,
+          "gzipBytes": 7537
         },
         {
-          "name": "ProfilePage-B9irZ9ga.js",
+          "name": "ContestSummaryPage-_83rFKsK.js",
           "category": "route_page",
-          "rawBytes": 22219,
-          "gzipBytes": 6672
+          "rawBytes": 23942,
+          "gzipBytes": 6043
         },
         {
-          "name": "vendor-icons-D5_1xMr7.js",
+          "name": "vendor-icons-R5uXiEI3.js",
           "category": "js_chunk",
-          "rawBytes": 19010,
-          "gzipBytes": 6444
+          "rawBytes": 19192,
+          "gzipBytes": 6507
         },
         {
-          "name": "MyContestsPage-QOO6XDr5.js",
+          "name": "ContestLobbyPage-DuhCuZVy.js",
           "category": "route_page",
-          "rawBytes": 17528,
-          "gzipBytes": 5122
+          "rawBytes": 17651,
+          "gzipBytes": 4114
         },
         {
-          "name": "ContestLobbyPage-C9E2W62h.js",
+          "name": "DashboardPage-DrpkMeG3.js",
           "category": "route_page",
-          "rawBytes": 17321,
-          "gzipBytes": 3978
+          "rawBytes": 17647,
+          "gzipBytes": 4840
         },
         {
           "name": "vendor-qr-DNEe277Q.js",
@@ -152,118 +152,118 @@
           "gzipBytes": 5986
         },
         {
-          "name": "DashboardPage-n7LaukkX.js",
+          "name": "MyContestsPage-DzpHBDkN.js",
           "category": "route_page",
-          "rawBytes": 14058,
-          "gzipBytes": 4169
+          "rawBytes": 16137,
+          "gzipBytes": 4844
         },
         {
-          "name": "vendor-redux-O3x54XlQ.js",
+          "name": "vendor-redux-BgEy-SS8.js",
           "category": "js_chunk",
           "rawBytes": 12250,
-          "gzipBytes": 4947
+          "gzipBytes": 4956
         },
         {
-          "name": "LeaderboardPage-BG0Zs96t.js",
+          "name": "LeaderboardPage-BRxt52qr.js",
           "category": "route_page",
-          "rawBytes": 10487,
-          "gzipBytes": 3380
+          "rawBytes": 10857,
+          "gzipBytes": 3536
         },
         {
-          "name": "ContestOfflinePage-DZOZNMQl.js",
+          "name": "TermsPage-K8IlmCku.js",
+          "category": "route_page",
+          "rawBytes": 10635,
+          "gzipBytes": 3488
+        },
+        {
+          "name": "ContestOfflinePage-INvx_qG1.js",
           "category": "route_page",
           "rawBytes": 10283,
-          "gzipBytes": 3053
+          "gzipBytes": 3054
         },
         {
-          "name": "ContestResultsPage-BomkX7ep.js",
+          "name": "ContestResultsPage-BC8cMzZb.js",
           "category": "route_page",
-          "rawBytes": 10282,
-          "gzipBytes": 3069
+          "rawBytes": 10283,
+          "gzipBytes": 3068
         },
         {
-          "name": "TermsPage-BcMF_wl4.js",
+          "name": "ContestQualifiedPage-C_-JrywB.js",
           "category": "route_page",
-          "rawBytes": 9940,
-          "gzipBytes": 3291
+          "rawBytes": 9733,
+          "gzipBytes": 3240
         },
         {
-          "name": "ContestQualifiedPage-COpLGWEl.js",
-          "category": "route_page",
-          "rawBytes": 9655,
-          "gzipBytes": 3203
+          "name": "avatar-BvaKbqRU.js",
+          "category": "js_chunk",
+          "rawBytes": 9537,
+          "gzipBytes": 2990
         },
         {
-          "name": "ContestFinalResultsPage-CgwJF1UV.js",
+          "name": "dialog-DXTX-pgz.js",
+          "category": "js_chunk",
+          "rawBytes": 9269,
+          "gzipBytes": 2736
+        },
+        {
+          "name": "ContestFinalResultsPage-DYMznlTw.js",
           "category": "route_page",
           "rawBytes": 6572,
-          "gzipBytes": 2083
+          "gzipBytes": 2084
         },
         {
-          "name": "portal.functions-1NDUkYxa.js",
+          "name": "portal.functions-ATzyRmFV.js",
           "category": "js_chunk",
-          "rawBytes": 4893,
-          "gzipBytes": 1728
+          "rawBytes": 5735,
+          "gzipBytes": 1889
         },
         {
-          "name": "ProblemArchivePage-DyeAIvoz.js",
+          "name": "ProblemArchivePage-CLV_Jhty.js",
           "category": "route_page",
-          "rawBytes": 4508,
-          "gzipBytes": 1825
+          "rawBytes": 4655,
+          "gzipBytes": 1906
         },
         {
-          "name": "ProblemDetailPage-CoM_cm-6.js",
+          "name": "ProblemDetailPage-ClCOzWyg.js",
           "category": "route_page",
-          "rawBytes": 3643,
-          "gzipBytes": 1467
+          "rawBytes": 3653,
+          "gzipBytes": 1474
         },
         {
-          "name": "select-CkNOkm6m.js",
+          "name": "select-D2dqbeGE.js",
           "category": "js_chunk",
           "rawBytes": 3543,
-          "gzipBytes": 1304
+          "gzipBytes": 1306
         },
         {
-          "name": "alert-dialog-BvH8YKe-.js",
+          "name": "RatingChartInner-gC-MbIaj.js",
           "category": "js_chunk",
-          "rawBytes": 3498,
-          "gzipBytes": 1314
+          "rawBytes": 2899,
+          "gzipBytes": 1369
         },
         {
-          "name": "avatar-DclFA-zn.js",
-          "category": "js_chunk",
-          "rawBytes": 3255,
-          "gzipBytes": 1362
-        },
-        {
-          "name": "MonacoEditor-BNv5Dq0W.js",
+          "name": "MonacoEditor-DUkwsXVa.js",
           "category": "js_chunk",
           "rawBytes": 2592,
-          "gzipBytes": 1296
+          "gzipBytes": 1297
         },
         {
-          "name": "dialog-wjEjKjUB.js",
+          "name": "alert-dialog-DgLr7zYw.js",
           "category": "js_chunk",
-          "rawBytes": 2096,
-          "gzipBytes": 934
+          "rawBytes": 2559,
+          "gzipBytes": 978
         },
         {
-          "name": "RatingChartInner-CP5audt6.js",
-          "category": "js_chunk",
-          "rawBytes": 2006,
-          "gzipBytes": 1004
-        },
-        {
-          "name": "table-Bro3vfrq.js",
+          "name": "table-BWDxqegv.js",
           "category": "js_chunk",
           "rawBytes": 1854,
           "gzipBytes": 684
         },
         {
-          "name": "card-02WUxlW8.js",
+          "name": "card-SFIyoPwl.js",
           "category": "js_chunk",
-          "rawBytes": 1154,
-          "gzipBytes": 453
+          "rawBytes": 1241,
+          "gzipBytes": 508
         },
         {
           "name": "useCountdown-BGN4bbYT.js",
@@ -272,10 +272,10 @@
           "gzipBytes": 460
         },
         {
-          "name": "RatingChart-CRJkZy2_.js",
+          "name": "RatingChart-CoijM_H0.js",
           "category": "js_chunk",
           "rawBytes": 916,
-          "gzipBytes": 536
+          "gzipBytes": 537
         },
         {
           "name": "rolldown-runtime-hePW80VL.js",
@@ -304,13 +304,13 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 443.9,
-        "max": 1478.3,
-        "avg": 728.6,
-        "p50": 450.2,
-        "p90": 1478.3,
-        "p95": 1478.3,
-        "p99": 1478.3,
+        "min": 378.8,
+        "max": 2425.9,
+        "avg": 1077,
+        "p50": 383.9,
+        "p90": 2425.9,
+        "p95": 2425.9,
+        "p99": 2425.9,
         "targetMs": 300,
         "passed": false,
         "headers": {
@@ -325,17 +325,17 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 371.3,
-        "max": 450.8,
-        "avg": 400.2,
-        "p50": 375.4,
-        "p90": 450.8,
-        "p95": 450.8,
-        "p99": 450.8,
+        "min": 373.4,
+        "max": 425.1,
+        "avg": 392,
+        "p50": 379.1,
+        "p90": 425.1,
+        "p95": 425.1,
+        "p99": 425.1,
         "targetMs": 250,
         "passed": false,
         "headers": {
-          "cacheControl": null,
+          "cacheControl": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800, immutable",
           "xCache": null,
           "contentEncoding": "br"
         }
@@ -346,15 +346,15 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 393.2,
-        "max": 450.7,
-        "avg": 421.2,
-        "p50": 393.2,
-        "p90": 450.7,
-        "p95": 450.7,
-        "p99": 450.7,
+        "min": 454.8,
+        "max": 858,
+        "avg": 731.7,
+        "p50": 757.2,
+        "p90": 858,
+        "p95": 858,
+        "p99": 858,
         "targetMs": 350,
-        "passed": true,
+        "passed": false,
         "headers": {
           "cacheControl": "no-cache, no-store, must-revalidate",
           "xCache": "HIT",
@@ -367,15 +367,15 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 397.3,
-        "max": 450.4,
-        "avg": 427.2,
-        "p50": 412.2,
-        "p90": 450.4,
-        "p95": 450.4,
-        "p99": 450.4,
+        "min": 378.9,
+        "max": 948.4,
+        "avg": 654.2,
+        "p50": 391.8,
+        "p90": 948.4,
+        "p95": 948.4,
+        "p99": 948.4,
         "targetMs": 400,
-        "passed": true,
+        "passed": false,
         "headers": {
           "cacheControl": "public, max-age=60, stale-while-revalidate=30",
           "xCache": "HIT",
@@ -388,15 +388,15 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 384,
-        "max": 449.5,
-        "avg": 424.6,
-        "p50": 419.8,
-        "p90": 449.5,
-        "p95": 449.5,
-        "p99": 449.5,
+        "min": 450.4,
+        "max": 1311.5,
+        "avg": 1065.1,
+        "p50": 1230.5,
+        "p90": 1311.5,
+        "p95": 1311.5,
+        "p99": 1311.5,
         "targetMs": 350,
-        "passed": true,
+        "passed": false,
         "headers": {
           "cacheControl": "public, max-age=120, stale-while-revalidate=60",
           "xCache": "HIT",
@@ -406,9 +406,9 @@
     ],
     "caching": {
       "endpoint": "/leaderboard",
-      "coldLatencyMs": 404.2,
-      "warmLatencyMs": 476.1,
-      "speedupMultiplier": "0.85",
+      "coldLatencyMs": 384,
+      "warmLatencyMs": 432.3,
+      "speedupMultiplier": "0.89",
       "coldStatus": 200,
       "warmStatus": 200,
       "warmXCache": "HIT",
@@ -420,8 +420,8 @@
         "name": "Unfiltered Baseline",
         "query": "(default)",
         "status": 200,
-        "latencyMs": 410.7,
-        "totalCountHeader": "3",
+        "latencyMs": 459,
+        "totalCountHeader": "1",
         "pageSizeHeader": "50",
         "passed": true
       },
@@ -429,16 +429,16 @@
         "name": "Department Filter (CSE)",
         "query": "?department=CSE",
         "status": 200,
-        "latencyMs": 448,
-        "totalCountHeader": "2",
+        "latencyMs": 1456.8,
+        "totalCountHeader": "1",
         "pageSizeHeader": "50",
-        "passed": true
+        "passed": false
       },
       {
         "name": "Batch Filter (2024-28)",
         "query": "?batch=2024-28",
         "status": 200,
-        "latencyMs": 454,
+        "latencyMs": 479.9,
         "totalCountHeader": "0",
         "pageSizeHeader": "50",
         "passed": true
@@ -447,7 +447,7 @@
         "name": "Star Division (3_star)",
         "query": "?tier=3_star",
         "status": 200,
-        "latencyMs": 385.2,
+        "latencyMs": 449.6,
         "totalCountHeader": "0",
         "pageSizeHeader": "50",
         "passed": true
@@ -456,8 +456,8 @@
         "name": "Deep Pagination (Offset 50)",
         "query": "?offset=50&limit=50",
         "status": 200,
-        "latencyMs": 384.2,
-        "totalCountHeader": "3",
+        "latencyMs": 450.1,
+        "totalCountHeader": "1",
         "pageSizeHeader": "50",
         "passed": true
       }
@@ -465,16 +465,16 @@
     "realtimeSse": {
       "endpoint": "/events/stream",
       "connected": true,
-      "handshakeLatencyMs": 377,
+      "handshakeLatencyMs": 454,
       "firstFrame": ": connected",
       "passed": true,
       "note": "Preamble received; stream verified"
     },
     "sandbox": {
-      "provider": "codebox",
+      "provider": "distributed",
       "judgeHealthy": true,
       "redisHealthy": true,
-      "healthLatencyMs": 1060.5,
+      "healthLatencyMs": 1021.3,
       "passed": true
     }
   }
