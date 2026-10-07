@@ -22,3 +22,4 @@ routes = [
 [vars]
 FRONTEND_ORIGIN = "https://medicaps.chaoscomputerclub.in"
 ROUTER_PEERS = "https://ccc-medicaps-peer.onrender.com"
+JUDGE_PEERS = "https://ccc-judge-peer.onrender.com"
