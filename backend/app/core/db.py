@@ -38,7 +38,16 @@ if not db_url.startswith("postgresql+asyncpg://"):
         "CCC Medi-Caps backend requires 'postgresql+asyncpg://...' (PostgreSQL 16+ with asyncpg)."
     )
 
-# Optimized connection pool tuned for PostgreSQL 16
+# SSL Configuration for remote cloud databases (Supabase, Neon, AWS, Cloud SQL)
+connect_args = {}
+if "supabase" in db_url or "pooler" in db_url or not ("localhost" in db_url or "127.0.0.1" in db_url):
+    import ssl
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    connect_args["ssl"] = ctx
+
+# Optimized connection pool tuned for PostgreSQL 16/17
 engine = create_async_engine(
     db_url,
     echo=False,
@@ -48,6 +57,7 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_recycle=settings.DB_POOL_RECYCLE,
     pool_timeout=settings.DB_POOL_TIMEOUT,
+    connect_args=connect_args,
 )
 
 # Async session factory
