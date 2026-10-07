@@ -216,12 +216,17 @@ async def health_check():
     """
     from app.core.redis import ping_redis
 
-    redis_ok = await ping_redis()
+    redis_ok = False
+    try:
+        redis_ok = await ping_redis()
+    except Exception:
+        redis_ok = False
+
     db_ok = False
     try:
         from sqlalchemy import text
         async with AsyncSessionLocal() as session:
-            await session.execute(text("SELECT 1"))
+            await asyncio.wait_for(session.execute(text("SELECT 1")), timeout=1.5)
         db_ok = True
     except Exception:
         db_ok = False
@@ -233,9 +238,9 @@ async def health_check():
         from app.engine.providers.factory import get_judge_provider
         provider = get_judge_provider()
         judge_provider = provider.name
-        judge_healthy = await provider.healthy()
+        judge_healthy = await asyncio.wait_for(provider.healthy(), timeout=1.0)
         if hasattr(provider, "get_engine_status"):
-            judge_meta = await provider.get_engine_status()
+            judge_meta = await asyncio.wait_for(provider.get_engine_status(), timeout=1.0)
     except Exception:
         pass
 

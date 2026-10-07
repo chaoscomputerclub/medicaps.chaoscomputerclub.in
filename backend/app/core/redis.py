@@ -35,6 +35,8 @@ def get_redis() -> aioredis.Redis:
             _redis_client = aioredis.from_url(
                 settings.REDIS_URL,
                 decode_responses=True,
+                socket_connect_timeout=0.5,
+                socket_timeout=0.5,
             )
         else:
             _redis_client = aioredis.Redis(
@@ -43,6 +45,8 @@ def get_redis() -> aioredis.Redis:
                 password=settings.REDIS_PASSWORD or None,
                 ssl=settings.REDIS_SSL,
                 decode_responses=True,
+                socket_connect_timeout=0.5,
+                socket_timeout=0.5,
             )
         _redis_loop = current_loop
     return _redis_client
@@ -66,7 +70,7 @@ async def close_redis() -> None:
 async def ping_redis() -> bool:
     """Health-check the Redis connection. Returns True if reachable."""
     try:
-        return await get_redis().ping()
+        return await asyncio.wait_for(get_redis().ping(), timeout=0.5)
     except Exception as e:
-        logger.error("Redis health check failed: %s", e)
+        logger.debug("Redis health check notice (non-fatal): %s", e)
         return False
