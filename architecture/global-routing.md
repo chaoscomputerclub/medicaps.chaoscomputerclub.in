@@ -66,7 +66,7 @@ The Global Router maintains an in-memory and Redis-backed state machine for all 
 ```json
 {
   "node_id": "node_32dc9245c062",
-  "hostname": "santusht-legion-5",
+  "hostname": "node-worker-primary",
   "status": "READY",
   "cpu_total": 12,
   "cpu_available": 8.4,

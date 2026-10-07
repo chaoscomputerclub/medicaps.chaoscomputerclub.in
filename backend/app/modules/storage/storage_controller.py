@@ -66,3 +66,14 @@ class StorageController:
             object_name=object_name,
             current_member=current_member,
         )
+
+    @staticmethod
+    def get_cloudinary_signature(
+        folder: str,
+        current_member: MemberProfile,
+    ) -> Dict[str, Any]:
+        return StorageAppService.get_cloudinary_signature(
+            folder=folder,
+            current_member=current_member,
+        )
+

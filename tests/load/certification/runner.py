@@ -75,19 +75,25 @@ async def run_full_certification(
 
     # Reset prior contest submissions so metrics reflect this exact certified test run
     logger.info("🧹 Performing clean slate reset for contest '%s'...", readiness.contest_slug)
-    db_host = os.getenv("DB_HOST", "143.198.38.205")
-    db_user = os.getenv("DB_USER", "ccc_admin")
-    db_pass = os.getenv("DB_PASS", "ccc_medicaps_prod_db_2026")
-    db_name = os.getenv("DB_NAME", "ccc_medicaps")
-    reset_sql = (
-        f"DELETE FROM judge_job_attempts WHERE job_id IN (SELECT id FROM judge_jobs WHERE contest_id = '{contest_id}'); "
-        f"DELETE FROM judge_jobs WHERE contest_id = '{contest_id}'; "
-        f"DELETE FROM contest_submissions WHERE contest_id = '{contest_id}'; "
-        f"DELETE FROM scoreboard_entries WHERE contest_id = '{contest_id}';"
-    )
-    cmd = f"ssh -i $HOME/.ssh/shopground_era_key root@{db_host} \"PGPASSWORD={db_pass} psql -U {db_user} -d {db_name} -h 127.0.0.1 -c \\\"{reset_sql}\\\"\""
-    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    await proc.communicate()
+    try:
+        import asyncpg
+        db_url = os.getenv("DATABASE_URL")
+        if db_url and "postgresql" in db_url:
+            conn_str = db_url.replace("postgresql+asyncpg://", "postgresql://")
+            conn = await asyncpg.connect(conn_str)
+        else:
+            conn = await asyncpg.connect(
+                host=os.getenv("DB_HOST", "localhost"),
+                port=int(os.getenv("DB_PORT", "5432")),
+                user=os.getenv("DB_USER", "postgres"),
+                password=os.getenv("DB_PASS", "postgres"),
+                database=os.getenv("DB_NAME", "arena_dev"),
+            )
+        await conn.execute(reset_sql)
+        await conn.close()
+        logger.info("✓ Reset prior contest submissions successfully via direct DB connection.")
+    except Exception as exc:
+        logger.warning("Could not execute direct DB reset: %s", exc)
 
     # 2. Scenario Execution Engine
     engine = ScenarioEngine(
@@ -174,23 +180,18 @@ async def run_full_certification(
         logger.warning("Could not persist report to Redis: %s", e)
 
     try:
-        remote_save_cmd = (
-            f"ssh -i $HOME/.ssh/shopground_era_key root@{db_host} "
-            f"\"/root/projects/ccc-medicaps-api/venv/bin/python3 -c \\\""
-            f"import redis, json, datetime\n"
-            f"r = redis.Redis()\n"
-            f"raw = r.get('ccc:loadtest:{contest_id}:state')\n"
-            f"if raw:\n"
-            f"    data = json.loads(raw)\n"
-            f"    data['status'] = 'REPORT_READY'\n"
-            f"    data['completed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()\n"
-            f"    r.set('ccc:loadtest:{contest_id}:state', json.dumps(data), ex=86400)\n"
-            f"\\\"\""
-        )
-        proc_rem = await asyncio.create_subprocess_shell(remote_save_cmd)
-        await proc_rem.communicate()
+        import redis.asyncio as aioredis
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        r = aioredis.from_url(redis_url)
+        raw = await r.get(f"ccc:loadtest:{contest_id}:state")
+        if raw:
+            data = json.loads(raw)
+            data["status"] = "REPORT_READY"
+            data["completed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            await r.set(f"ccc:loadtest:{contest_id}:state", json.dumps(data), ex=86400)
+        await r.aclose()
     except Exception as e:
-        logger.warning("Remote status update error: %s", e)
+        logger.debug("Local/Cloud Redis state update notice: %s", e)
 
     logger.info("Saved certification reports to:\n  JSON: %s\n  Markdown: %s", json_path, md_path)
     print("\n" + report_bundle["markdown_report"])

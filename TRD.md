@@ -3,7 +3,7 @@
 
 **Document Version:** `3.0.0-PRODUCTION`  
 **System Classification:** `Enterprise Competitive Programming Arena & Member Intelligence Hub`  
-**Target Environment:** `DigitalOcean Production Node (143.198.38.205) / Linux Ubuntu 24.04 LTS`  
+**Target Environment:** `Distributed Cloud Architecture (Cloudflare + Vercel + Google Cloud Run + Supabase PostgreSQL)`  
 **Author:** Chaos Computer Club Core Architecture & Engineering Team  
 **Institution:** Medi-Caps University, Indore  
 
@@ -362,4 +362,4 @@ $$\text{Tier} = \begin{cases}
 All codebase changes must satisfy the project's automated verification pipeline prior to pushing:
 1. `npm run build` & `npm run build:admin` (Clean TypeScript & Vite packaging).
 2. `./scripts/gsd_qa_gate.sh` (51 in-process API contract tests, 16 frontend-to-backend user simulations, 303 UI element connectivity audits).
-3. `./scripts/gsd_sync.sh "commit message"` (Atomic commit, push to GitHub `origin/main`, auto-pull and service reload on `root@143.198.38.205`, and live endpoint validation).
+3. `./scripts/gsd_sync.sh "commit message"` (Atomic commit, push to GitHub `origin/main`, automated cloud deployment via GitHub Actions, and live health validation).

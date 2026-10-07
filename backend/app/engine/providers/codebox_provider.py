@@ -99,7 +99,10 @@ class CodeboxProvider(JudgeProvider):
         )
 
     def __init__(self) -> None:
-        self.base_url = os.getenv("CODEBOX_URL", "http://127.0.0.1:3000").rstrip("/")
+        raw_urls = os.getenv("JUDGE_URLS") or os.getenv("CODEBOX_URLS") or os.getenv("JUDGE_URL") or os.getenv("CODEBOX_URL", "http://127.0.0.1:3000")
+        self.endpoints = [u.strip().rstrip("/") for u in raw_urls.split(",") if u.strip()]
+        self._current_endpoint_idx = 0
+        self.base_url = self.endpoints[0] if self.endpoints else "http://127.0.0.1:3000"
         self.auth_token = os.getenv("CODEBOX_TOKEN", "dev-token")
         self.poll_interval = float(os.getenv("CODEBOX_POLL_SECONDS", "0.3"))
         self.max_polls = int(os.getenv("CODEBOX_MAX_POLLS", "30"))
@@ -113,6 +116,14 @@ class CodeboxProvider(JudgeProvider):
         self.poll_initial_s: float = float(os.getenv("CODEBOX_POLL_INITIAL_SECONDS", "0.05"))
         self._circuit_breaker = CodeboxCircuitBreaker.get_instance()
         self._admission_controller = CodeboxAdmissionController.get_instance()
+
+    def get_next_endpoint(self) -> str:
+        """Rotate to next available judge endpoint in pool."""
+        if not self.endpoints:
+            return "http://127.0.0.1:3000"
+        self._current_endpoint_idx = (self._current_endpoint_idx + 1) % len(self.endpoints)
+        self.base_url = self.endpoints[self._current_endpoint_idx]
+        return self.base_url
 
     def _headers(self) -> Dict[str, str]:
         headers = {"Content-Type": "application/json"}

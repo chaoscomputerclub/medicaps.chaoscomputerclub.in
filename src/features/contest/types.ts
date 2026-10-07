@@ -191,6 +191,8 @@ export type ContestArenaData = {
   check_in_status: string;
   is_proctored: boolean;
   is_faculty_proctored?: boolean;
+  is_submitted?: boolean;
+  is_review_mode?: boolean;
   problems: ContestArenaProblem[];
 };
 

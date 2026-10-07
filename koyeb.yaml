@@ -1,0 +1,37 @@
+# ==============================================================================
+# Koyeb App Specification — CCC Medi-Caps P2P Compute Peer
+# Deploys the universal container as an automated web service on Koyeb
+# ==============================================================================
+
+name: ccc-medicaps-peer
+services:
+  - name: ccc-medicaps-api
+    type: web
+    dockerfile:
+      dockerfile: Dockerfile
+    instance_type: nano
+    regions:
+      - sin
+    ports:
+      - port: 8000
+        protocol: http
+    routes:
+      - path: /
+        port: 8000
+    env:
+      - key: SERVICE_MODE
+        value: all
+      - key: ENVIRONMENT
+        value: production
+      - key: FRONTEND_URL
+        value: https://medicaps.chaoscomputerclub.in
+      - key: BACKEND_URL
+        value: https://api-medicaps.chaoscomputerclub.in/api
+      - key: PEER_PROVIDER
+        value: koyeb
+      - key: PEER_ID
+        value: peer-koyeb-01
+      - key: ALLOW_UNSANDBOXED_EXECUTION
+        value: "true"
+      - key: DEV_MODE
+        value: "false"

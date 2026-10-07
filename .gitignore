@@ -100,3 +100,6 @@ tests/load/reports/
 tests/load/.pytest_cache/
 tests/load/__pycache__/
 
+.vercel
+.env*
+supabase/.temp/

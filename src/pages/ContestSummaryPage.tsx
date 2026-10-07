@@ -48,6 +48,12 @@ import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { ContestSummarySkeleton } from "@/organization/components/skeletons";
 import { contestApi } from "@/features/contest/api";
 import type { ContestArenaProblem } from "@/features/contest/types";
+import {
+  getProblemReviewUrl,
+  getProblemSolveUrl,
+  getContestOverviewUrl,
+  isContestConcluded,
+} from "@/features/contest/navigation";
 import { slugifyProblem, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import { getToken, fetchAssessmentData } from "@/lib/auth";
 import { useRealtimeEvents } from "@/lib/realtime";
@@ -97,6 +103,9 @@ export function ContestSummaryPage() {
         registration?.assessment_status === "submitted" ||
         registration?.assessment_status === "completed")),
   );
+
+  const isConcluded = isContestConcluded(currentContest || arenaData);
+  const isReviewMode = isAlreadySubmitted || isConcluded;
 
   useEffect(() => {
     if (!member && getToken()) {
@@ -403,12 +412,12 @@ export function ContestSummaryPage() {
         <div className="flex items-center gap-3.5 min-w-0">
           <Link
             to={
-              isAlreadySubmitted
-                ? `/contests/${contestSlug}`
-                : `/contests/${contestSlug}/problems/${firstProblemSlug}`
+              isReviewMode
+                ? getContestOverviewUrl(contestSlug)
+                : getProblemSolveUrl(contestSlug, firstProblemSlug)
             }
             className="flex items-center gap-2 shrink-0 group"
-            title={isAlreadySubmitted ? "Return to Contest Overview" : "Return to Contest Arena"}
+            title={isReviewMode ? "Return to Contest Overview" : "Return to Contest Arena"}
           >
             <div className="size-7 rounded bg-lime-400/10 border border-lime-400/30 flex items-center justify-center group-hover:bg-lime-400/20 transition-colors">
               <img src="/logo.webp" alt="CCC" className="size-5 object-contain" />
@@ -431,8 +440,8 @@ export function ContestSummaryPage() {
               {contestTitle}
             </span>
             <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-zinc-900 text-[10px] font-mono text-zinc-400">
-              <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
-              LIVE ASSESSMENT
+              <span className={`size-1.5 rounded-full ${isReviewMode ? "bg-zinc-400" : "bg-lime-400 animate-pulse"}`} />
+              {isReviewMode ? "REVIEW MODE" : "LIVE ASSESSMENT"}
             </span>
           </div>
         </div>
@@ -443,16 +452,16 @@ export function ContestSummaryPage() {
           <Button asChild variant="outline" size="sm">
             <Link
               to={
-                isAlreadySubmitted
-                  ? `/contests/${contestSlug}`
-                  : `/contests/${contestSlug}/problems/${firstProblemSlug}`
+                isReviewMode
+                  ? getContestOverviewUrl(contestSlug)
+                  : getProblemSolveUrl(contestSlug, firstProblemSlug)
               }
             >
               <ArrowLeft className="size-3.5 mr-1" />
               <span className="hidden sm:inline">
-                {isAlreadySubmitted ? "Back to" : "Back to"}
+                Back to
               </span>{" "}
-              {isAlreadySubmitted ? "Overview" : "Workspace"}
+              {isReviewMode ? "Overview" : "Workspace"}
             </Link>
           </Button>
 
@@ -636,6 +645,7 @@ export function ContestSummaryPage() {
               return (
                 <div
                   key={problem.id}
+                  data-testid={`summary-problem-${problem.problem_index}`}
                   className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="flex items-start gap-3.5 min-w-0">
@@ -654,7 +664,11 @@ export function ContestSummaryPage() {
                     <div className="space-y-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <Link
-                          to={`/contests/${contestSlug}/problems/${problemSlug}`}
+                          to={
+                            isReviewMode
+                              ? getProblemReviewUrl(contestSlug, problem.title, problem.problem_index)
+                              : getProblemSolveUrl(contestSlug, problem.title, problem.problem_index)
+                          }
                           className="text-sm font-semibold text-white hover:text-lime-400 transition-colors truncate"
                         >
                           {problem.title}
@@ -704,14 +718,22 @@ export function ContestSummaryPage() {
                     )}
 
                     {/* Action Button */}
-                    <Button asChild variant="outline" size="sm">
-                      <Link to={`/contests/${contestSlug}/problems/${problemSlug}`}>
+                    <Button asChild variant="outline" size="sm" data-testid={`summary-action-${problem.problem_index}`}>
+                      <Link
+                        to={
+                          isReviewMode
+                            ? getProblemReviewUrl(contestSlug, problem.title, problem.problem_index)
+                            : getProblemSolveUrl(contestSlug, problem.title, problem.problem_index)
+                        }
+                      >
                         <span>
-                          {isSolved
-                            ? "Review Code"
-                            : isAttempted
-                              ? "Continue Solving"
-                              : "Solve Challenge"}
+                          {isReviewMode
+                            ? "Review Problem"
+                            : isSolved
+                              ? "Review Code"
+                              : isAttempted
+                                ? "Continue Solving"
+                                : "Solve Challenge"}
                         </span>
                         <ArrowRight className="size-3 ml-1" />
                       </Link>
@@ -744,7 +766,7 @@ export function ContestSummaryPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
               <Button asChild variant="outline" size="default" className="w-full sm:w-auto">
-                <Link to={`/contests/${contestSlug}`}>
+                <Link to={getContestOverviewUrl(contestSlug)}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Return to Contest Overview</span>
                 </Link>
@@ -785,9 +807,15 @@ export function ContestSummaryPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/6">
               <Button asChild variant="outline" size="default" className="w-full sm:w-auto">
-                <Link to={`/contests/${contestSlug}/problems/${firstProblemSlug}`}>
+                <Link
+                  to={
+                    isReviewMode
+                      ? getProblemReviewUrl(contestSlug, firstProblemSlug)
+                      : getProblemSolveUrl(contestSlug, firstProblemSlug)
+                  }
+                >
                   <ArrowLeft className="size-3.5 mr-1.5" />
-                  <span>Return to Coding Workspace</span>
+                  <span>{isReviewMode ? "Review Problems" : "Return to Coding Workspace"}</span>
                 </Link>
               </Button>
 

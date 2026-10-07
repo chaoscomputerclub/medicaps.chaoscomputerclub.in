@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Chaos Computer Club — Shopgroundera Server CodeBox Migration Script
-# Replaces old Interleet / Docker Judge containers with Hitesh Choudhary's CodeBox engine
+# Chaos Computer Club — Containerized CodeBox Execution Runner
+# Deploys isolated containerized CodeBox execution engine for untrusted code
 # ==============================================================================
 
 set -euo pipefail
 
 echo "============================================================"
-echo "⚡ [CCC] CodeBox Engine Migration & Deployment on Server"
+echo "⚡ [CCC] CodeBox Engine Containerized Sandbox Deployment"
 echo "============================================================"
 
 # Step 1: Stop and remove legacy Docker judge instances

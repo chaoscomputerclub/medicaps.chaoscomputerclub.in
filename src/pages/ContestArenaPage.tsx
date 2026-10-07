@@ -4,7 +4,7 @@
  * Redesigned to Strix AI Paradigm (Pure Pitch Black × Electric Lime)
  */
 
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import {
   AlertCircle,
@@ -23,6 +23,7 @@ import {
   Code2,
   Copy,
   Cpu,
+  Eye,
   FileText,
   GripHorizontal,
   GripVertical,
@@ -97,6 +98,13 @@ import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
 import type { AssessmentRanking } from "@/features/contest/types";
+import {
+  getProblemReviewUrl,
+  getProblemSolveUrl,
+  getContestOverviewUrl,
+  getContestSummaryUrl,
+  isContestConcluded,
+} from "@/features/contest/navigation";
 
 import { ProblemStatementView } from "@/components/problem/ProblemStatementView";
 import {
@@ -145,11 +153,16 @@ function getFallbackStarter(
   return starters[lang] || "";
 }
 
-export function ContestArenaPage() {
+export interface ContestArenaPageProps {
+  mode?: "live" | "review";
+}
+
+export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   const { contestSlug = "", problemSlug = "" } = useParams<{
     contestSlug: string;
     problemSlug?: string;
   }>();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const problemParam = searchParams.get("problem");
   const dispatch = useAppDispatch();
@@ -172,8 +185,14 @@ export function ContestArenaPage() {
 
   const isAlreadySubmitted = Boolean(
     !member?.is_core_member &&
-    (registration?.status === "submitted" || registration?.status === "completed")
+    (registration?.status === "submitted" ||
+      registration?.status === "completed" ||
+      arenaData?.is_submitted)
   );
+
+  const isConcluded = isContestConcluded(arenaData);
+  const isReviewRoute = mode === "review" || location.pathname.includes("/review");
+  const isReviewMode = isReviewRoute || isConcluded || isAlreadySubmitted;
 
   useEffect(() => {
     if (!member && getToken()) {
@@ -222,16 +241,18 @@ export function ContestArenaPage() {
   const resolvedIndex = activeIndex >= 0 ? activeIndex : 0;
   const activeProblem = problems[resolvedIndex] || problems[0];
 
-  // Auto-redirect to first problem's slug if URL is generic /arena or /problems
+  // Auto-redirect to first problem's slug if URL is generic /arena or /problems or /review
   useEffect(() => {
     if (problems.length > 0 && !problemSlug && contestSlug) {
       const firstProblem = problems[0];
       if (firstProblem) {
-        const firstSlug = slugifyProblem(firstProblem.title, firstProblem.problem_index);
-        navigate(`/contests/${contestSlug}/problems/${firstSlug}`, { replace: true });
+        const targetUrl = isReviewRoute
+          ? getProblemReviewUrl(contestSlug, firstProblem.title, firstProblem.problem_index)
+          : getProblemSolveUrl(contestSlug, firstProblem.title, firstProblem.problem_index);
+        navigate(targetUrl, { replace: true });
       }
     }
-  }, [problems, problemSlug, contestSlug, navigate]);
+  }, [problems, problemSlug, contestSlug, navigate, isReviewRoute]);
 
   const [selectedLanguage, setSelectedLanguage] = useState<ArenaLanguage>("python");
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
@@ -244,9 +265,11 @@ export function ContestArenaPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const memberId = member?.id || "anon";
   const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(() => {
     try {
-      const saved = localStorage.getItem(`ccc_solved_${contestSlug}`);
+      const saved = localStorage.getItem(`ccc_solved_${member?.id || "anon"}_${contestSlug}`) ||
+                    localStorage.getItem(`ccc_solved_${contestSlug}`);
       return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch {
       return new Set();
@@ -300,7 +323,8 @@ export function ContestArenaPage() {
   const [submissionHistory, setSubmissionHistory] = useState<any[]>(() => {
     if (typeof window !== "undefined" && contestSlug && activeProblem?.id) {
       try {
-        const saved = localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
+        const saved = localStorage.getItem(`ccc_submissions_${memberId}_${contestSlug}_${activeProblem.id}`) ||
+                      localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
         return saved ? JSON.parse(saved) : [];
       } catch {
         return [];
@@ -314,7 +338,8 @@ export function ContestArenaPage() {
     let cancelled = false;
 
     try {
-      const saved = localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
+      const saved = localStorage.getItem(`ccc_submissions_${memberId}_${contestSlug}_${activeProblem.id}`) ||
+                    localStorage.getItem(`ccc_submissions_${contestSlug}_${activeProblem.id}`);
       if (saved) setSubmissionHistory(JSON.parse(saved));
     } catch {
       setSubmissionHistory([]);
@@ -327,7 +352,7 @@ export function ContestArenaPage() {
         setSubmissionHistory(serverSubs);
         try {
           localStorage.setItem(
-            `ccc_submissions_${contestSlug}_${activeProblem.id}`,
+            `ccc_submissions_${memberId}_${contestSlug}_${activeProblem.id}`,
             JSON.stringify(serverSubs.slice(0, 20)),
           );
         } catch {}
@@ -337,27 +362,31 @@ export function ContestArenaPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeProblem?.id, contestSlug]);
+  }, [activeProblem?.id, contestSlug, memberId]);
 
   const handlePrevProblem = useCallback(() => {
     if (resolvedIndex > 0) {
       const prev = problems[resolvedIndex - 1];
       if (prev) {
-        const pSlug = slugifyProblem(prev.title, prev.problem_index);
-        navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+        const target = isReviewMode
+          ? getProblemReviewUrl(contestSlug, prev.title, prev.problem_index)
+          : getProblemSolveUrl(contestSlug, prev.title, prev.problem_index);
+        navigate(target);
       }
     }
-  }, [resolvedIndex, problems, contestSlug, navigate]);
+  }, [resolvedIndex, problems, contestSlug, navigate, isReviewMode]);
 
   const handleNextProblem = useCallback(() => {
     if (resolvedIndex < problems.length - 1) {
       const next = problems[resolvedIndex + 1];
       if (next) {
-        const pSlug = slugifyProblem(next.title, next.problem_index);
-        navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+        const target = isReviewMode
+          ? getProblemReviewUrl(contestSlug, next.title, next.problem_index)
+          : getProblemSolveUrl(contestSlug, next.title, next.problem_index);
+        navigate(target);
       }
     }
-  }, [resolvedIndex, problems, contestSlug, navigate]);
+  }, [resolvedIndex, problems, contestSlug, navigate, isReviewMode]);
 
   const contestOverRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -533,8 +562,9 @@ export function ContestArenaPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Contest over: lock arena and navigate to summary console for review
+  // Contest over: lock arena and navigate to summary console for review (ONLY when in live contest mode)
   useEffect(() => {
+    if (isReviewMode) return; // In review mode, NEVER kick candidate out to summary!
     if (remainingSeconds > 0 || isContestOver) return;
     setIsContestOver(true);
     let count = 5;
@@ -543,16 +573,16 @@ export function ContestArenaPage() {
       setRedirectCountdown(count);
       if (count <= 0) {
         clearInterval(tick);
-        navigate(`/contests/${contestSlug}/summary`);
+        navigate(getContestSummaryUrl(contestSlug));
       }
     }, 1000);
     contestOverRedirectRef.current = tick;
     return () => clearInterval(tick);
-  }, [remainingSeconds, isContestOver, contestSlug, navigate]);
+  }, [remainingSeconds, isContestOver, contestSlug, navigate, isReviewMode]);
 
   const problemKey = `${activeProblem?.id || "p"}_${selectedLanguage}`;
   const problemStorageKey = activeProblem
-    ? `ccc_code_v4_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
+    ? `ccc_code_v4_${memberId}_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
     : "";
 
   // Load durable code: state -> validated localStorage -> official problem starter_code
@@ -704,6 +734,10 @@ export function ContestArenaPage() {
   ]);
 
   const handleSubmitCode = useCallback(async () => {
+    if (isReviewMode) {
+      toast.error("Contest submissions are locked in Review mode.");
+      return;
+    }
     if (!activeProblem || isRunningCode || isSubmittingCode || isContestOver) return;
     setHasRunCode(true);
     setIsDrawerCollapsed(false);
@@ -737,7 +771,7 @@ export function ContestArenaPage() {
         const updated = [newRecord, ...prev];
         try {
           localStorage.setItem(
-            `ccc_submissions_${contestSlug}_${activeProblem.id}`,
+            `ccc_submissions_${memberId}_${contestSlug}_${activeProblem.id}`,
             JSON.stringify(updated.slice(0, 20)),
           );
         } catch {}
@@ -748,7 +782,7 @@ export function ContestArenaPage() {
         setSolvedProblemIds((prev) => {
           const next = new Set([...prev, activeProblem.id]);
           try {
-            localStorage.setItem(`ccc_solved_${contestSlug}`, JSON.stringify(Array.from(next)));
+            localStorage.setItem(`ccc_solved_${memberId}_${contestSlug}`, JSON.stringify(Array.from(next)));
           } catch {}
           return next;
         });
@@ -762,6 +796,7 @@ export function ContestArenaPage() {
       toast.error(String(result.payload || "Submission failed"));
     }
   }, [
+    isReviewMode,
     activeProblem,
     isRunningCode,
     isSubmittingCode,
@@ -783,7 +818,9 @@ export function ContestArenaPage() {
       // Cmd+Enter or Ctrl+Enter to submit
       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
         e.preventDefault();
-        void handleSubmitCode();
+        if (!isReviewMode) {
+          void handleSubmitCode();
+        }
       }
       // Alt+Left to prev problem
       if (e.altKey && e.key === "ArrowLeft") {
@@ -825,7 +862,7 @@ export function ContestArenaPage() {
     return <AssessmentStudioSkeleton />;
   }
 
-  if (isAlreadySubmitted || !arenaData) {
+  if (!arenaData) {
     const errLower = (error || "").toLowerCase();
     const isSubmitted =
       !member?.is_core_member &&
@@ -1113,11 +1150,17 @@ export function ContestArenaPage() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setShowExitModal(true)}
-            title="Exit to contest overview"
+            onClick={() => {
+              if (isReviewMode) {
+                navigate(getContestOverviewUrl(contestSlug));
+              } else {
+                setShowExitModal(true);
+              }
+            }}
+            title={isReviewMode ? "Return to Contest Overview" : "Exit to contest overview"}
           >
             <ChevronLeft className="size-4 mr-0.5" />
-            <span>Exit</span>
+            <span>{isReviewMode ? "Overview" : "Exit"}</span>
           </Button>
 
           <div className="h-3.5 w-px bg-white/10 shrink-0" />
@@ -1197,39 +1240,68 @@ export function ContestArenaPage() {
 
         {/* Center: Run & Submit Action Buttons */}
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isRunningCode || isSubmittingCode || isContestOver}
-            onClick={handleRunCode}
-          >
-            {isRunningCode ? (
-              <WanderingEyes size="inline" className="h-3 mr-1.5" />
-            ) : (
-              <Play className="size-3 fill-current" />
-            )}
-            <span>{isRunningCode ? "Running…" : "Run"}</span>
-            <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
-          </Button>
+          {isReviewMode ? (
+            <>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-lime-400/40 bg-lime-400/10 text-lime-400 font-mono text-xs">
+                <Eye className="size-3.5" />
+                <span className="font-semibold uppercase tracking-wider text-[10px] sm:text-[11px]">
+                  Review Mode (Read Only)
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isRunningCode}
+                onClick={handleRunCode}
+                title="Run code against sample testcases"
+              >
+                {isRunningCode ? (
+                  <WanderingEyes size="inline" className="h-3 mr-1.5" />
+                ) : (
+                  <Play className="size-3 fill-current" />
+                )}
+                <span>{isRunningCode ? "Running…" : "Run"}</span>
+                <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isRunningCode || isSubmittingCode || isContestOver}
+                onClick={handleRunCode}
+              >
+                {isRunningCode ? (
+                  <WanderingEyes size="inline" className="h-3 mr-1.5" />
+                ) : (
+                  <Play className="size-3 fill-current" />
+                )}
+                <span>{isRunningCode ? "Running…" : "Run"}</span>
+                <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
+              </Button>
 
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            disabled={isRunningCode || isSubmittingCode || isContestOver}
-            onClick={handleSubmitCode}
-          >
-            {isSubmittingCode ? (
-              <WanderingEyes size="inline" className="h-3 mr-1.5" />
-            ) : (
-              <Send className="size-3 fill-current" />
-            )}
-            <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
-            <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">
-              ⌘⏎
-            </span>
-          </Button>
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                disabled={isRunningCode || isSubmittingCode || isContestOver}
+                onClick={handleSubmitCode}
+              >
+                {isSubmittingCode ? (
+                  <WanderingEyes size="inline" className="h-3 mr-1.5" />
+                ) : (
+                  <Send className="size-3 fill-current" />
+                )}
+                <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
+                <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">
+                  ⌘⏎
+                </span>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Right: Layout, Settings, Countdown Timer, Avatar */}
@@ -1277,12 +1349,19 @@ export function ContestArenaPage() {
             <Settings className="size-3.5" />
           </Button>
 
-          {/* Timer Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold tabular-nums shrink-0">
-            <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
-            <Clock className="size-3 text-lime-400" />
-            <span>{formatTimer(remainingSeconds)}</span>
-          </div>
+          {/* Timer Badge / Status */}
+          {isReviewMode ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-400 font-mono text-xs font-semibold shrink-0">
+              <span className="size-1.5 rounded-full bg-zinc-500" />
+              <span>CONCLUDED</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold tabular-nums shrink-0">
+              <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
+              <Clock className="size-3 text-lime-400" />
+              <span>{formatTimer(remainingSeconds)}</span>
+            </div>
+          )}
 
           {/* User Profile Logo / Avatar */}
           <Link
@@ -2342,7 +2421,7 @@ export function ContestArenaPage() {
       )}
 
       {/* Contest Over Modal using official shadcn Dialog */}
-      <Dialog open={isContestOver}>
+      <Dialog open={isContestOver && !isReviewMode}>
         <DialogContent className="max-w-md rounded-lg border border-lime-400/40 bg-black p-8 text-center space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(204,255,0,0.15)] [&>button]:hidden">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 mx-auto text-lime-400">
@@ -2491,7 +2570,10 @@ export function ContestArenaPage() {
                   key={prob.id}
                   type="button"
                   onClick={() => {
-                    navigate(`/contests/${contestSlug}/problems/${pSlug}`);
+                    const target = isReviewMode
+                      ? getProblemReviewUrl(contestSlug, prob.title, prob.problem_index)
+                      : getProblemSolveUrl(contestSlug, prob.title, prob.problem_index);
+                    navigate(target);
                     dispatch(clearArenaResults());
                     setIsProblemListOpen(false);
                   }}
@@ -2636,7 +2718,7 @@ export function ContestArenaPage() {
       </aside>
 
       {/* Exit Confirmation Dialog (HackerRank Flow) */}
-      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
+      <Dialog open={showExitModal && !isReviewMode} onOpenChange={setShowExitModal}>
         <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
           <DialogHeader className="space-y-3 text-left">
             <div className="flex items-center gap-3">

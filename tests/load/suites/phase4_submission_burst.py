@@ -44,10 +44,10 @@ ROOT_DIR = Path(__file__).resolve().parents[3]
 DATA_DIR = ROOT_DIR / "tests" / "load" / "data"
 BASE_URL = os.getenv("LOAD_TEST_BASE_URL", "https://medicaps-api.chaoscomputerclub.in")
 CONTEST_SLUG = "loadtest-arena-50"
-DB_HOST = os.getenv("DB_HOST", "143.198.38.205")
-DB_USER = os.getenv("DB_USER", "ccc_admin")
-DB_PASS = os.getenv("DB_PASS", "ccc_medicaps_prod_db_2026")
-DB_NAME = os.getenv("DB_NAME", "ccc_medicaps")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASS = os.getenv("DB_PASS", "postgres")
+DB_NAME = os.getenv("DB_NAME", "arena_dev")
 
 
 def load_identities() -> List[Dict[str, Any]]:
@@ -130,27 +130,37 @@ async def submit_single(
 async def reset_contest_submissions(contest_slug: str):
     """Clean slate reset of submissions and jobs for loadtest arena."""
     logger.info("🧹 Resetting prior submissions and judge jobs for %s...", contest_slug)
-    cmd = (
-        f"ssh -i $HOME/.ssh/shopground_era_key root@{DB_HOST} "
-        f"\"PGPASSWORD={DB_PASS} psql -U {DB_USER} -d {DB_NAME} -h 127.0.0.1 -c \\\""
+    reset_sql = (
         f"DELETE FROM judge_job_attempts WHERE job_id IN (SELECT id FROM judge_jobs WHERE contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}')); "
         f"DELETE FROM judge_jobs WHERE contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}'); "
         f"DELETE FROM contest_submissions WHERE contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}'); "
-        f"DELETE FROM scoreboard_entries WHERE contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}'); "
-        f"\\\"\""
+        f"DELETE FROM scoreboard_entries WHERE contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}');"
     )
-    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    await proc.communicate()
+    try:
+        import asyncpg
+        db_url = os.getenv("DATABASE_URL")
+        if db_url and "postgresql" in db_url:
+            conn_str = db_url.replace("postgresql+asyncpg://", "postgresql://")
+            conn = await asyncpg.connect(conn_str)
+        else:
+            conn = await asyncpg.connect(
+                host=DB_HOST,
+                port=int(os.getenv("DB_PORT", "5432")),
+                user=DB_USER,
+                password=DB_PASS,
+                database=DB_NAME,
+            )
+        await conn.execute(reset_sql)
+        await conn.close()
+    except Exception as exc:
+        logger.warning("Could not execute DB reset (non-fatal): %s", exc)
 
 
 async def verify_database_invariants(contest_slug: str) -> Dict[str, Any]:
     """Inspects PostgreSQL directly to audit the 8 core distributed judge invariants."""
     logger.info("🔍 Connecting to PostgreSQL (%s) to verify architectural invariants...", DB_HOST)
 
-    # Filter strictly for submission jobs (excluding interactive Run Code sandbox jobs)
-    cmd = (
-        f"ssh -i $HOME/.ssh/shopground_era_key root@{DB_HOST} "
-        f"\"PGPASSWORD={DB_PASS} psql -U {DB_USER} -d {DB_NAME} -h 127.0.0.1 -t -A -F ',' -c \\\""
+    query = (
         f"SELECT "
         f"(SELECT COUNT(*) FROM contest_submissions cs JOIN offline_contests oc ON cs.contest_id = oc.id WHERE oc.slug = '{contest_slug}'), "
         f"(SELECT COUNT(*) FROM contest_submissions cs JOIN offline_contests oc ON cs.contest_id = oc.id WHERE oc.slug = '{contest_slug}' AND cs.verdict = 'ACCEPTED'), "
@@ -162,23 +172,29 @@ async def verify_database_invariants(contest_slug: str) -> Dict[str, Any]:
         f"(SELECT COUNT(*) FROM judge_job_attempts jja JOIN judge_jobs jj ON jja.job_id = jj.id JOIN offline_contests oc ON jj.contest_id = oc.id WHERE oc.slug = '{contest_slug}' AND jj.submission_id IS NOT NULL), "
         f"(SELECT COUNT(*) FROM scoreboard_entries se JOIN offline_contests oc ON se.contest_id = oc.id WHERE oc.slug = '{contest_slug}'), "
         f"(SELECT COUNT(*) FROM (SELECT job_id, COUNT(*) as cnt FROM judge_job_attempts jja JOIN judge_jobs jj ON jja.job_id = jj.id WHERE jj.contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}') AND jj.submission_id IS NOT NULL AND jja.state IN ('COMPLETED', 'FAILED') GROUP BY job_id HAVING COUNT(*) > 1) dup), "
-        f"(SELECT COUNT(*) FROM judge_jobs jj LEFT JOIN contest_submissions cs ON jj.submission_id = cs.id WHERE jj.contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}') AND jj.submission_id IS NOT NULL AND cs.id IS NULL) "
-        f";\\\"\""
+        f"(SELECT COUNT(*) FROM judge_jobs jj LEFT JOIN contest_submissions cs ON jj.submission_id = cs.id WHERE jj.contest_id = (SELECT id FROM offline_contests WHERE slug = '{contest_slug}') AND jj.submission_id IS NOT NULL AND cs.id IS NULL)"
     )
 
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    stdout, stderr = await proc.communicate()
-    output_str = stdout.decode().strip()
-
-    if proc.returncode != 0 or not output_str:
-        logger.error("Failed to query DB invariants: %s", stderr.decode())
-        return {"error": stderr.decode()}
-
-    parts = output_str.split(",")
+    try:
+        import asyncpg
+        db_url = os.getenv("DATABASE_URL")
+        if db_url and "postgresql" in db_url:
+            conn_str = db_url.replace("postgresql+asyncpg://", "postgresql://")
+            conn = await asyncpg.connect(conn_str)
+        else:
+            conn = await asyncpg.connect(
+                host=DB_HOST,
+                port=int(os.getenv("DB_PORT", "5432")),
+                user=DB_USER,
+                password=DB_PASS,
+                database=DB_NAME,
+            )
+        row = await conn.fetchrow(query)
+        await conn.close()
+        parts = [int(v or 0) for v in row.values()]
+    except Exception as exc:
+        logger.warning("Failed to query DB invariants via asyncpg: %s", exc)
+        return {"error": str(exc)}
     (
         total_subs,
         accepted_subs,

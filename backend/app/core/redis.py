@@ -31,12 +31,19 @@ def get_redis() -> aioredis.Redis:
         or _redis_loop is not current_loop
         or (_redis_loop is not None and _redis_loop.is_closed())
     ):
-        _redis_client = aioredis.Redis(
-            host=settings.REDIS_HOST,
-            port=settings.REDIS_PORT,
-            password=settings.REDIS_PASSWORD or None,
-            decode_responses=True,
-        )
+        if settings.REDIS_URL:
+            _redis_client = aioredis.from_url(
+                settings.REDIS_URL,
+                decode_responses=True,
+            )
+        else:
+            _redis_client = aioredis.Redis(
+                host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                password=settings.REDIS_PASSWORD or None,
+                ssl=settings.REDIS_SSL,
+                decode_responses=True,
+            )
         _redis_loop = current_loop
     return _redis_client
 

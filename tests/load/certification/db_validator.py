@@ -21,10 +21,10 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("ccc.certification.db_validator")
 
-DB_HOST = os.getenv("DB_HOST", "143.198.38.205")
-DB_USER = os.getenv("DB_USER", "ccc_admin")
-DB_PASS = os.getenv("DB_PASS", "ccc_medicaps_prod_db_2026")
-DB_NAME = os.getenv("DB_NAME", "ccc_medicaps")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASS = os.getenv("DB_PASS", "postgres")
+DB_NAME = os.getenv("DB_NAME", "arena_dev")
 
 
 @dataclass
@@ -98,33 +98,28 @@ class DatabaseInvariantValidator:
             );
         """
 
-        cmd = (
-            f"ssh -i $HOME/.ssh/shopground_era_key root@{DB_HOST} "
-            f"\"PGPASSWORD={DB_PASS} psql -U {DB_USER} -d {DB_NAME} -h 127.0.0.1 -t -A -F ',' -c \\\"{query}\\\"\""
-        )
-
-        proc = await asyncio.create_subprocess_shell(
-            cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await proc.communicate()
-        out_str = stdout.decode().strip()
-
-        if proc.returncode != 0 or not out_str:
-            err = stderr.decode().strip()
-            logger.error("DB invariant query failed: %s", err)
+        try:
+            import asyncpg
+            db_url = os.getenv("DATABASE_URL")
+            if db_url and "postgresql" in db_url:
+                conn_str = db_url.replace("postgresql+asyncpg://", "postgresql://")
+                conn = await asyncpg.connect(conn_str)
+            else:
+                conn = await asyncpg.connect(
+                    host=os.getenv("DB_HOST", "localhost"),
+                    port=int(os.getenv("DB_PORT", "5432")),
+                    user=os.getenv("DB_USER", "postgres"),
+                    password=os.getenv("DB_PASS", "postgres"),
+                    database=os.getenv("DB_NAME", "arena_dev"),
+                )
+            row = await conn.fetchrow(query)
+            await conn.close()
+            nums = [int(val or 0) for val in row.values()]
+        except Exception as exc:
+            logger.warning("Direct DB query execution skipped/failed: %s", exc)
             rep = DatabaseInvariantReport()
-            rep.violation_details.append(f"DB query execution error: {err}")
+            rep.violation_details.append(f"DB connection/query error: {exc}")
             return rep
-
-        parts = out_str.split(",")
-        if len(parts) < 13:
-            rep = DatabaseInvariantReport()
-            rep.violation_details.append(f"Unexpected DB query response shape: {out_str}")
-            return rep
-
-        nums = [int(p) for p in parts]
         rep = DatabaseInvariantReport(
             total_submissions=nums[0],
             accepted_submissions=nums[1],

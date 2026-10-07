@@ -9,6 +9,7 @@ from fastapi import HTTPException, UploadFile, status
 
 from app.models.db_models import MemberProfile
 from app.core.storage import storage_service
+from app.core.cloudinary_service import cloudinary_service
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -27,10 +28,18 @@ MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10MB
 
 
 class StorageAppService:
-    """Handles file validation, upload to MinIO, presigned URLs, and asset deletion."""
+    """Handles file validation, upload to Cloudinary/MinIO, presigned URLs, and asset deletion."""
 
     @staticmethod
     def get_storage_status() -> Dict[str, Any]:
+        if cloudinary_service.is_configured:
+            return {
+                "status": "online",
+                "storage": "Cloudinary CDN",
+                "cloud_name": cloudinary_service.cloud_name,
+                "public_url_prefix": f"https://res.cloudinary.com/{cloudinary_service.cloud_name}",
+                "max_size_mb": 5,
+            }
         return {
             "status": "online",
             "storage": "MinIO S3",
@@ -77,6 +86,35 @@ class StorageAppService:
         if safe_prefix.startswith("avatars"):
             safe_prefix = "avatars"
 
+        # Preferred Production Path: Cloudinary
+        if cloudinary_service.is_configured:
+            try:
+                c_res = await cloudinary_service.upload_image(
+                    file_bytes=file_bytes,
+                    filename=file.filename or "upload.bin",
+                    folder=safe_prefix,
+                    owner_id=current_member.id,
+                )
+                return {
+                    "status": "success",
+                    "message": "File uploaded successfully to Cloudinary",
+                    "data": {
+                        "bucket": "cloudinary",
+                        "object_name": c_res["public_id"],
+                        "public_url": c_res["secure_url"],
+                        "signed_url": c_res["secure_url"],
+                        "content_type": content_type,
+                        "size": len(file_bytes),
+                    },
+                }
+            except Exception as e:
+                logger.error(f"Failed to upload to Cloudinary: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Failed to upload to Cloudinary: {e}",
+                )
+
+        # Fallback Dev Path: MinIO
         try:
             result = storage_service.upload_file(
                 file_bytes=file_bytes,
@@ -95,6 +133,26 @@ class StorageAppService:
             "status": "success",
             "message": "File uploaded successfully",
             "data": result,
+        }
+
+    @staticmethod
+    def get_cloudinary_signature(
+        folder: str,
+        current_member: MemberProfile,
+    ) -> Dict[str, Any]:
+        if not cloudinary_service.is_configured:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Cloudinary is not configured on this environment.",
+            )
+        safe_folder = folder.strip().replace("..", "").strip("/") or "avatars"
+        sig = cloudinary_service.generate_upload_signature(
+            folder=safe_folder,
+            tags=f"member_{current_member.id}",
+        )
+        return {
+            "status": "success",
+            "data": sig,
         }
 
     @staticmethod

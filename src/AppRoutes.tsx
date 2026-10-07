@@ -430,6 +430,22 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="contests/:contestSlug/problems/:problemSlug/review"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <ContestArenaPage mode="review" />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contests/:contestSlug/problems/review"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <ContestArenaPage mode="review" />
+              </Suspense>
+            }
+          />
+          <Route
             path="contests/:contestSlug/problems/:problemSlug"
             element={
               <Suspense fallback={<AssessmentStudioSkeleton />}>

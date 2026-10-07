@@ -76,3 +76,18 @@ async def get_presigned_download_url(
         expires_minutes=expires_minutes,
         current_member=current_member,
     )
+
+
+@router.get("/cloudinary/signature")
+async def get_cloudinary_upload_signature(
+    folder: str = Query("avatars", max_length=50),
+    current_member: MemberProfile = Depends(get_current_member),
+):
+    """
+    Generates an HMAC-SHA1 upload signature allowing direct browser-to-Cloudinary uploads.
+    """
+    return StorageController.get_cloudinary_signature(
+        folder=folder,
+        current_member=current_member,
+    )
+

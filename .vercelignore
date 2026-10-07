@@ -1,0 +1,9 @@
+backend
+judge-agent
+node-agent
+tests
+infra
+.venv
+.planning
+docs
+architecture

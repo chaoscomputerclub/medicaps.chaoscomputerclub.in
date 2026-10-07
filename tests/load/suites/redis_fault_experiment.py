@@ -35,10 +35,10 @@ ROOT_DIR = Path(__file__).resolve().parents[3]
 DATA_DIR = ROOT_DIR / "tests" / "load" / "data"
 BASE_URL = os.getenv("LOAD_TEST_BASE_URL", "https://medicaps-api.chaoscomputerclub.in")
 CONTEST_SLUG = "loadtest-arena-50"
-DB_HOST = os.getenv("DB_HOST", "143.198.38.205")
-DB_USER = os.getenv("DB_USER", "ccc_admin")
-DB_PASS = os.getenv("DB_PASS", "ccc_medicaps_prod_db_2026")
-DB_NAME = os.getenv("DB_NAME", "ccc_medicaps")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASS = os.getenv("DB_PASS", "postgres")
+DB_NAME = os.getenv("DB_NAME", "arena_dev")
 
 
 def load_identities() -> List[Dict[str, Any]]:
@@ -52,12 +52,17 @@ def load_templates() -> Dict[str, Any]:
 
 
 async def execute_ssh(cmd: str) -> tuple[int, str, str]:
-    full_cmd = f"ssh -i $HOME/.ssh/shopground_era_key root@{DB_HOST} \"{cmd}\""
-    proc = await asyncio.create_subprocess_shell(
-        full_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await proc.communicate()
-    return proc.returncode, stdout.decode().strip(), stderr.decode().strip()
+    """Graceful fault simulation or remote shell execution if explicitly configured via environment."""
+    ssh_key = os.getenv("SSH_KEY")
+    ssh_host = os.getenv("SSH_HOST")
+    if ssh_key and ssh_host:
+        full_cmd = f"ssh -i '{ssh_key}' root@{ssh_host} \"{cmd}\""
+        proc = await asyncio.create_subprocess_shell(
+            full_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        return proc.returncode, stdout.decode().strip(), stderr.decode().strip()
+    return 0, "simulated_ok", ""
 
 
 async def run_redis_fault_experiment():

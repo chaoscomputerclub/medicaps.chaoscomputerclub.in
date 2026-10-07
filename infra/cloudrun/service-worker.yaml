@@ -1,0 +1,52 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ccc-worker
+  labels:
+    cloud.googleapis.com/location: asia-south1
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "2"
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/cpu-throttling: "false"
+    spec:
+      containerConcurrency: 10
+      timeoutSeconds: 300
+      serviceAccountName: ccc-backend-sa@medicaps-production.iam.gserviceaccount.com
+      containers:
+        - image: gcr.io/medicaps-production/ccc-backend:v1.0.10
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+          env:
+            - name: SERVICE_MODE
+              value: "worker"
+            - name: ENVIRONMENT
+              value: "production"
+            - name: VERSION
+              value: "1.0.10"
+            - name: DB_POOL_SIZE
+              value: "3"
+            - name: DB_MAX_OVERFLOW
+              value: "2"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ccc-supabase-db-url
+                  key: latest
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: ccc-redis-host
+                  key: latest
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ccc-redis-password
+                  key: latest

@@ -1,30 +1,35 @@
 # ==============================================================================
-# Cloudflare Tunnel Configuration (cloudflared)
-# Medi-Caps Chapter — Global Ingress
+# Cloudflare Edge Ingress & Routing Configuration
+# Chaos Computer Club — Medi-Caps Chapter
+#
+# NOTE: The legacy private stack tunnel to localhost:443 has been completely
+# decommissioned. Production traffic is routed directly at the Cloudflare Edge:
+#
+# 1. Main Student Portal:
+#    DNS: CNAME medicaps.chaoscomputerclub.in -> cname.vercel-dns.com
+#    Platform: Vercel Global Edge Network (React 19 / Vite SPA)
+#
+# 2. Production API & Control Plane:
+#    DNS: CNAME medicaps-api.chaoscomputerclub.in -> ghs.googlehosted.com
+#    Platform: Google Cloud Run (ccc-api service container)
+#
+# 3. Realtime Streaming & SSE:
+#    Route: /api/events/* via Cloudflare Worker (infra/cloudflare/worker.js)
+#    Platform: Google Cloud Run (ccc-realtime service container)
 # ==============================================================================
 
-tunnel: medicaps-production-fabric
+# Optional Cloudflare Zero Trust tunnel for private administrative database inspection
+# (Never handles public web ingress)
+tunnel: medicaps-cloud-admin-connector
 credentials-file: /etc/cloudflared/credentials.json
 
 ingress:
-  # 1. Main Student Portal & Web Application
-  - hostname: medicaps.chaoscomputerclub.in
-    service: https://localhost:443
+  # Internal admin telemetry & diagnostics probe (Private Zero Trust only)
+  - hostname: admin-internal.medicaps.chaoscomputerclub.in
+    service: http://127.0.0.1:8000
     originRequest:
-      originServerName: medicaps.chaoscomputerclub.in
-      noTLSVerify: false
-      http2Origin: true
-      connectTimeout: 10s
+      noTLSVerify: true
+      connectTimeout: 5s
 
-  # 2. Production API & WebSocket/SSE Gateway
-  - hostname: medicaps-api.chaoscomputerclub.in
-    service: https://localhost:443
-    originRequest:
-      originServerName: medicaps-api.chaoscomputerclub.in
-      noTLSVerify: false
-      http2Origin: true
-      connectTimeout: 10s
-      keepAliveTimeout: 300s
-
-  # Fallback 404
+  # Fallback
   - service: http_status:404

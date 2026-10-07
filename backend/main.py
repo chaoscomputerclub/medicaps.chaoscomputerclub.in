@@ -23,7 +23,7 @@ from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
 from app.core.queue import queue_manager
-from app.routers import admin, admin_contests, admin_loadtest, admin_problems, admin_qa, assessment, auth, contests, events, fabric, feed, jobs, leaderboard, metrics, nodes, passes, scoreboards, social, storage, verify, webhooks, workers
+from app.routers import admin, admin_contests, admin_loadtest, admin_problems, admin_qa, assessment, auth, contests, events, fabric, feed, jobs, leaderboard, metrics, nodes, passes, peer_fabric, scoreboards, social, storage, verify, webhooks, workers
 from app.api.v1.router import api_router_v1
 from app.core.resource_governor import get_resource_governor
 
@@ -45,66 +45,94 @@ async def lifespan(app: FastAPI):
             settings.FRONTEND_URL = "https://medicaps.chaoscomputerclub.in"
         print(f"✓ Production environment verified: FRONTEND_URL={settings.FRONTEND_URL}")
 
-    await init_db()
-    print("✓ Database verified & initialized successfully (clean state).")
+    # ── Service Mode Topology Execution ─────────────────────────────────────
+    service_mode = os.getenv("SERVICE_MODE", "all").strip().lower()
+    print(f"✓ Initializing backend in mode: '{service_mode}'")
 
-    # ── Production async queue workers ──────────────────────────────────────
-    queue_tasks = queue_manager.start_all()
-    print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
+    bg_tasks = []
+    realtime_relay_task = None
+    queue_tasks = []
+    governor = None
+    autoscaler = None
+    reconciliation_worker = None
 
-    # ── Production background tasks ──────────────────────────────────────────
-    bg_tasks = start_background_tasks(AsyncSessionLocal)
-    realtime_relay_task = start_redis_event_relay()
-    print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
+    # Database schema check only on API / Worker / All
+    if service_mode in ("api", "worker", "all"):
+        await init_db()
+        print("✓ Database verified & initialized successfully (clean state).")
 
-    # ── Prewarm Core Docker Engine sandboxes (only when docker is active) ──────
-    judge_choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
-    if judge_choice in {"docker", "core", "native"}:
-        try:
-            from app.engine.docker.pool import prewarm_containers
-            prewarm_containers()
-            print("✓ Core Docker sandboxes verified & prewarmed.")
-        except Exception as exc:
-            print(f"Notice during Docker prewarm: {exc}")
-    else:
-        print(f"✓ Judge engine provider '{judge_choice}' active.")
+    # 1. Background worker tasks (ccc-worker or monolithic dev)
+    if service_mode in ("worker", "all"):
+        queue_tasks = queue_manager.start_all()
+        print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
+        bg_tasks = start_background_tasks(AsyncSessionLocal)
+        print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
 
-    # ── Resource Governor (worker health sweep + autoscale signal loop) ─────
-    governor = get_resource_governor()
-    governor.start()
-    print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
+        governor = get_resource_governor()
+        governor.start()
+        print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
 
-    # ── Dynamic Autoscaler & Capacity Watcher ──────────────────────────────
-    from app.core.autoscaler import Autoscaler
-    autoscaler = Autoscaler.get_instance()
-    autoscaler.start()
-    print("✓ Dynamic Autoscaler started (interval=10s)")
+        from app.core.autoscaler import Autoscaler
+        autoscaler = Autoscaler.get_instance()
+        autoscaler.start()
+        print("✓ Dynamic Autoscaler started (interval=10s)")
 
-    # ── Judge Reconciliation Worker (stuck processing audit & lease recovery) ─
-    from app.core.reconciliation import ReconciliationWorker
-    reconciliation_worker = ReconciliationWorker.get_instance()
-    await reconciliation_worker.start()
-    print("✓ Judge Reconciliation Worker started (interval=15s)")
+        from app.core.reconciliation import ReconciliationWorker
+        reconciliation_worker = ReconciliationWorker.get_instance()
+        await reconciliation_worker.start()
+        print("✓ Judge Reconciliation Worker started (interval=15s)")
+
+        # Prewarm Docker only if explicitly permitted
+        judge_choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
+        if judge_choice in {"docker", "core", "native"}:
+            try:
+                from app.engine.docker.pool import prewarm_containers
+                prewarm_containers()
+                print("✓ Core Docker sandboxes verified & prewarmed.")
+            except Exception as exc:
+                print(f"Notice during Docker prewarm: {exc}")
+
+    # 2. Realtime SSE distribution (ccc-realtime or monolithic dev)
+    if service_mode in ("realtime", "all"):
+        realtime_relay_task = start_redis_event_relay()
+        print("✓ Realtime Redis Pub/Sub SSE relay task started.")
+
+    # 3. P2P Service Fabric Autonomous Enrollment & Telemetry
+    peer_agent = None
+    try:
+        from app.engine.peer_fabric.agent import PeerAgent
+        peer_agent = PeerAgent.get_instance()
+        await peer_agent.start()
+    except Exception as e:
+        print(f"Notice during P2P fabric agent initialization: {e}")
 
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
-    await reconciliation_worker.stop()
-    await autoscaler.stop()
-    await governor.stop()
-    await queue_manager.stop_all(drain_timeout=15.0)
-    for task in [*bg_tasks, realtime_relay_task]:
+    if peer_agent:
+        await peer_agent.stop()
+    if reconciliation_worker:
+        await reconciliation_worker.stop()
+    if autoscaler:
+        await autoscaler.stop()
+    if governor:
+        await governor.stop()
+    if queue_tasks:
+        await queue_manager.stop_all(drain_timeout=15.0)
+    tasks_to_cancel = [t for t in [*bg_tasks, realtime_relay_task] if t is not None]
+    for task in tasks_to_cancel:
         task.cancel()
-    await asyncio.gather(*bg_tasks, realtime_relay_task, return_exceptions=True)
-    print(f"🛑 Shutting down {settings.PROJECT_NAME}...")
+    if tasks_to_cancel:
+        await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
+    print(f"🛑 Shutting down {settings.PROJECT_NAME} (mode: {service_mode})...")
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description="Official Backend API for Chaos Computer Club Medi-Caps Chapter. "
-                "Provides offline contest management, LeetCode/CodeChef telemetry, "
-                "division rating ladders, and cryptographic Trust-of-Proof verification.",
+                "Provides online competitive programming contest management, "
+                "LeetCode/CodeChef telemetry, division rating ladders, and cryptographic Trust-of-Proof verification.",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -168,17 +196,27 @@ async def strix_verify():
     return "strix-verify-14cbf970e04612b8f26f423d9d0167d8"
 
 
-# ── Production Healthcheck ────────────────────────────────────────────────────
+# ── Production Healthcheck & System Probe ────────────────────────────────────
+@app.get("/health", tags=["System"], include_in_schema=False)
 @app.get("/api/health", tags=["System"])
 async def health_check():
     """
     Production readiness probe.
-    Returns 200 even if Redis/judge are degraded so the load-balancer stays up —
+    Returns 200 even if Redis/judge/db are degraded so the load-balancer stays up —
     degraded status is surfaced in the response body for observability.
     """
     from app.core.redis import ping_redis
 
     redis_ok = await ping_redis()
+    db_ok = False
+    try:
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+        db_ok = True
+    except Exception:
+        db_ok = False
+
     judge_provider = "unknown"
     judge_healthy = False
     judge_meta = {}
@@ -193,17 +231,30 @@ async def health_check():
         pass
 
     return {
-        "status": "operational",
+        "status": "operational" if (db_ok or redis_ok) else "degraded",
         "chapter": "Chaos Computer Club — Medi-Caps University",
-        "environment": "air_gapped_offline_ready",
+        "environment": settings.ENVIRONMENT,
         "version": settings.VERSION,
         "services": {
+            "database": "ok" if db_ok else "degraded",
             "redis": "ok" if redis_ok else "degraded",
             "judge_provider": judge_provider,
             "judge_healthy": judge_healthy,
             "judge_meta": judge_meta,
         },
     }
+
+
+@app.get("/", tags=["System"], include_in_schema=False)
+async def root_probe():
+    """Root entrypoint for container health probes."""
+    return {
+        "service": "CCC Medi-Caps Distributed Backend",
+        "version": settings.VERSION,
+        "docs": f"{settings.API_PREFIX}/docs",
+        "health": f"{settings.API_PREFIX}/health",
+    }
+
 
 
 # Mount API Routers
@@ -222,6 +273,7 @@ app.include_router(webhooks.router, prefix=settings.API_PREFIX)
 app.include_router(jobs.router, prefix=settings.API_PREFIX)
 app.include_router(workers.router, prefix=settings.API_PREFIX)
 app.include_router(nodes.router, prefix=settings.API_PREFIX)
+app.include_router(peer_fabric.router)
 app.include_router(fabric.router, prefix=settings.API_PREFIX)
 app.include_router(metrics.router, prefix=settings.API_PREFIX)
 app.include_router(metrics.router)  # Standard Prometheus root path GET /metrics

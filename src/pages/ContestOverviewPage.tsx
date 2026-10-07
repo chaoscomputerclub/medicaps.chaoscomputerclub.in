@@ -50,6 +50,7 @@ import { useRealtimeEvents } from "@/lib/realtime";
 import { ContestDetailSkeleton } from "@/organization/components/skeletons";
 import { slugifyProblem } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
+import { getProblemReviewUrl, getProblemSolveUrl, isContestConcluded } from "@/features/contest/navigation";
 
 /** Compute human-readable duration from two ISO datetime strings. */
 function contestDuration(startsAt: string, endsAt: string): string {
@@ -123,7 +124,8 @@ export function ContestOverviewPage() {
       : Boolean(contest?.registered));
   const isLive = contest?.status === "live";
   const isFinished = contest?.status === "finished";
-  const isUpcoming = contest?.status === "upcoming" || !contest?.status;
+  const isConcluded = isFinished || isContestConcluded(contest);
+  const isUpcoming = (contest?.status === "upcoming" || !contest?.status) && !isConcluded;
   const isSubmitted = Boolean(
     contest?.is_submitted ||
     registration?.status === "submitted" ||
@@ -131,6 +133,7 @@ export function ContestOverviewPage() {
     registration?.assessment_status === "submitted" ||
     registration?.assessment_status === "completed",
   );
+  const isReviewAction = isSubmitted || isConcluded;
 
   const onCountdownExpire = useCallback(() => {
     refreshDetail(true);
@@ -359,18 +362,25 @@ export function ContestOverviewPage() {
                     </Link>
                   </Button>
                 </motion.div>
-              ) : isFinished ? (
+              ) : isFinished || isConcluded ? (
                 <motion.div
                   key="finished-action"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-wrap items-center gap-3"
                 >
                   <Button asChild variant="default" size="hero">
                     <Link to={`/contests/${contestSlug}/results`}>
                       <Trophy className="size-4 mr-1.5" />
                       <span>View Final Standings</span>
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="hero">
+                    <Link to={`/contests/${contestSlug}/summary`}>
+                      <FileText className="size-4 mr-1.5" />
+                      <span>View Summary</span>
                     </Link>
                   </Button>
                 </motion.div>
@@ -516,7 +526,11 @@ export function ContestOverviewPage() {
                 </TableRow>
               ) : (
                 problems.map((p) => (
-                  <TableRow key={p.problem_index} className="border-white/4 hover:bg-white/5">
+                  <TableRow
+                    key={p.problem_index}
+                    data-testid={`problem-row-${p.problem_index}`}
+                    className="border-white/4 hover:bg-white/5"
+                  >
                     <TableCell className="font-sans text-xs font-bold text-lime-400">
                       {p.problem_index}
                     </TableCell>
@@ -525,23 +539,26 @@ export function ContestOverviewPage() {
                       {p.points} pts
                     </TableCell>
                     <TableCell className="text-right">
-                      {isSubmitted ? (
+                      {isReviewAction ? (
                         <Button
                           asChild
                           variant="outline"
                           size="sm"
-                          className="border-white/10 text-zinc-400 hover:text-white"
+                          data-testid={`review-btn-${p.problem_index}`}
+                          className="border-white/10 text-zinc-300 hover:text-white hover:border-lime-400/50"
                         >
-                          <Link to={`/contests/${contestSlug}/summary`}>Review →</Link>
+                          <Link to={getProblemReviewUrl(contestSlug, p.title, p.problem_index)}>
+                            <span>Review</span>
+                            <ArrowRight className="size-3 ml-1 text-lime-400" />
+                          </Link>
                         </Button>
                       ) : (
-                        <Button asChild variant="outline" size="sm">
+                        <Button asChild variant="outline" size="sm" className="hover:border-lime-400/50">
                           <Link
-                            to={`/contests/${contestSlug}/problems/${slugifyProblem(p.title, p.problem_index)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            to={getProblemSolveUrl(contestSlug, p.title, p.problem_index)}
                           >
-                            Solve →
+                            <span>Solve</span>
+                            <ArrowRight className="size-3 ml-1 text-lime-400" />
                           </Link>
                         </Button>
                       )}

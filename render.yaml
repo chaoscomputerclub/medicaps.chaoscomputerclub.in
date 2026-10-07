@@ -1,0 +1,59 @@
+# ==============================================================================
+# Render Blueprint Specification — CCC Medi-Caps P2P Fabric & Judge Infrastructure
+# Deploys the unified backend and dedicated judge execution sandbox on Render
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Main API & P2P Compute Peer
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: ccc-medicaps-peer
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    branch: main
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: SERVICE_MODE
+        value: all
+      - key: ENVIRONMENT
+        value: production
+      - key: FRONTEND_URL
+        value: https://medicaps.chaoscomputerclub.in
+      - key: BACKEND_URL
+        value: https://api-medicaps.chaoscomputerclub.in/api
+      - key: PEER_PROVIDER
+        value: render
+      - key: PEER_ID
+        value: peer-render-01
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ALLOW_UNSANDBOXED_EXECUTION
+        value: "true"
+      - key: DEV_MODE
+        value: "false"
+
+  # ----------------------------------------------------------------------------
+  # 2. Dedicated Multi-Language Judge Sandbox Container
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: ccc-judge-peer
+    runtime: docker
+    dockerfilePath: ./Dockerfile.judge
+    plan: free
+    region: singapore
+    branch: main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: "8080"
