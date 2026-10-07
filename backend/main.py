@@ -58,29 +58,35 @@ async def lifespan(app: FastAPI):
 
     # Database schema check only on API / Worker / All
     if service_mode in ("api", "worker", "all"):
-        await init_db()
-        print("✓ Database verified & initialized successfully (clean state).")
+        try:
+            await init_db()
+            print("✓ Database verified & initialized successfully (clean state).")
+        except Exception as db_err:
+            print(f"⚠ Notice on startup database initialization: {db_err}")
 
     # 1. Background worker tasks (ccc-worker or monolithic dev)
     if service_mode in ("worker", "all"):
-        queue_tasks = queue_manager.start_all()
-        print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
-        bg_tasks = start_background_tasks(AsyncSessionLocal)
-        print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
+        try:
+            queue_tasks = queue_manager.start_all()
+            print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
+            bg_tasks = start_background_tasks(AsyncSessionLocal)
+            print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
 
-        governor = get_resource_governor()
-        governor.start()
-        print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
+            governor = get_resource_governor()
+            governor.start()
+            print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
 
-        from app.core.autoscaler import Autoscaler
-        autoscaler = Autoscaler.get_instance()
-        autoscaler.start()
-        print("✓ Dynamic Autoscaler started (interval=10s)")
+            from app.core.autoscaler import Autoscaler
+            autoscaler = Autoscaler.get_instance()
+            autoscaler.start()
+            print("✓ Dynamic Autoscaler started (interval=10s)")
 
-        from app.core.reconciliation import ReconciliationWorker
-        reconciliation_worker = ReconciliationWorker.get_instance()
-        await reconciliation_worker.start()
-        print("✓ Judge Reconciliation Worker started (interval=15s)")
+            from app.core.reconciliation import ReconciliationWorker
+            reconciliation_worker = ReconciliationWorker.get_instance()
+            await reconciliation_worker.start()
+            print("✓ Judge Reconciliation Worker started (interval=15s)")
+        except Exception as bg_err:
+            print(f"⚠ Notice during background worker initialization: {bg_err}")
 
         # Prewarm Docker only if explicitly permitted
         judge_choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
@@ -94,8 +100,11 @@ async def lifespan(app: FastAPI):
 
     # 2. Realtime SSE distribution (ccc-realtime or monolithic dev)
     if service_mode in ("realtime", "all"):
-        realtime_relay_task = start_redis_event_relay()
-        print("✓ Realtime Redis Pub/Sub SSE relay task started.")
+        try:
+            realtime_relay_task = start_redis_event_relay()
+            print("✓ Realtime Redis Pub/Sub SSE relay task started.")
+        except Exception as r_err:
+            print(f"⚠ Notice during Redis Pub/Sub SSE initialization: {r_err}")
 
     # 3. P2P Service Fabric Autonomous Enrollment & Telemetry
     peer_agent = None

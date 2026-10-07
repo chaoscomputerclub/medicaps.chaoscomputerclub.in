@@ -270,12 +270,14 @@ async def run_single_submission(sub: SubmissionRequest) -> Dict[str, Any]:
         shutil.rmtree(work_dir, ignore_errors=True)
 
 
+@app.get("/")
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {
         "status": "healthy",
-        "service": "ccc-cloudrun-judge",
-        "version": "1.0.11",
+        "service": "ccc-judge-service",
+        "version": "1.0.13",
         "languages": list(LANGUAGES.keys()),
         "uptime": os.times()[4]
     }
