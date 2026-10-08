@@ -103,6 +103,23 @@ jobs:
           echo "→ Restarting/Reloading Nginx web server..."
           ssh production "systemctl restart nginx || systemctl start nginx"
 
+          echo "→ Diagnostic: Inspecting Nginx, Ports & Certificates..."
+          ssh production 'bash -s' << 'EOF'
+            echo "--- Nginx Config Test ---"
+            nginx -t || true
+            echo "--- Nginx Service Status ---"
+            systemctl status nginx --no-pager -l || true
+            echo "--- Listening Ports ---"
+            ss -tulpn | grep -E ':(80|443|8000|8002)' || true
+            echo "--- Direct curl to Backend 8002 ---"
+            curl -si http://127.0.0.1:8002/api/health || true
+            echo "--- Nginx Local Host Probes ---"
+            curl -si -k https://127.0.0.1/api/health -H "Host: medicaps.chaoscomputerclub.in" || true
+            curl -si -k https://127.0.0.1/api/health -H "Host: medicaps-api.chaoscomputerclub.in" || true
+            echo "--- Firewall / UFW Status ---"
+            ufw status || true
+          EOF
+
       - name: 🩺 Live Health Validation
         run: |
           sleep 3
