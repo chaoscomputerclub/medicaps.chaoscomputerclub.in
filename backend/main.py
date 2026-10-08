@@ -217,19 +217,23 @@ async def health_check():
     from app.core.redis import ping_redis
 
     redis_ok = False
+    redis_err = None
     try:
         redis_ok = await ping_redis()
-    except Exception:
+    except Exception as re:
         redis_ok = False
+        redis_err = str(re)
 
     db_ok = False
+    db_err = None
     try:
         from sqlalchemy import text
         async with AsyncSessionLocal() as session:
-            await asyncio.wait_for(session.execute(text("SELECT 1")), timeout=1.5)
+            await asyncio.wait_for(session.execute(text("SELECT 1")), timeout=2.5)
         db_ok = True
-    except Exception:
+    except Exception as de:
         db_ok = False
+        db_err = str(de)
 
     judge_provider = "unknown"
     judge_healthy = False
@@ -238,11 +242,11 @@ async def health_check():
         from app.engine.providers.factory import get_judge_provider
         provider = get_judge_provider()
         judge_provider = provider.name
-        judge_healthy = await asyncio.wait_for(provider.healthy(), timeout=1.0)
+        judge_healthy = await asyncio.wait_for(provider.healthy(), timeout=1.5)
         if hasattr(provider, "get_engine_status"):
-            judge_meta = await asyncio.wait_for(provider.get_engine_status(), timeout=1.0)
-    except Exception:
-        pass
+            judge_meta = await asyncio.wait_for(provider.get_engine_status(), timeout=1.5)
+    except Exception as je:
+        judge_meta["error"] = str(je)
 
     return {
         "status": "operational" if (db_ok or redis_ok) else "degraded",
@@ -250,8 +254,8 @@ async def health_check():
         "environment": settings.ENVIRONMENT,
         "version": settings.VERSION,
         "services": {
-            "database": "ok" if db_ok else "degraded",
-            "redis": "ok" if redis_ok else "degraded",
+            "database": "ok" if db_ok else f"degraded: {db_err}",
+            "redis": "ok" if redis_ok else f"degraded: {redis_err or 'unreachable'}",
             "judge_provider": judge_provider,
             "judge_healthy": judge_healthy,
             "judge_meta": judge_meta,
