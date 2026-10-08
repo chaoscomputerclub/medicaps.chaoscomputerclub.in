@@ -11,12 +11,12 @@ from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env", override=True)
+load_dotenv(BASE_DIR / ".env", override=False)
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
-    VERSION: str = os.getenv("VERSION", "1.0.19")
+    VERSION: str = os.getenv("VERSION", "1.0.20")
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
 
