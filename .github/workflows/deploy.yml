@@ -1,4 +1,4 @@
-name: Production Cloud CI/CD Pipeline
+name: GSD Production CI/CD Pipeline
 
 on:
   push:
@@ -7,16 +7,15 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: production-cloud-deployment
+  group: production-deployment
   cancel-in-progress: false
 
 jobs:
-  # ── GATE 1: Frontend Build & Vercel Global Edge Deploy ─────────────────────
-  deploy-frontend:
-    name: Build & Deploy Frontend (Vercel)
+  build-and-deploy:
+    name: Build & Deploy to Production
     if: github.repository == 'chaoscomputerclub/medicaps.chaoscomputerclub.in'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: 📥 Checkout Repository
@@ -31,144 +30,98 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm ci
 
-      - name: 🔍 TypeScript Type Check
-        run: npx tsc --noEmit
-
       - name: 🏗️ Build Student Portal Frontend
         env:
           VITE_CLOUDFLARE_TURNSTILE_SITE_KEY: ${{ secrets.CLOUDFLARE_TURNSTILE_SITE_KEY || secrets.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}
-          VITE_API_BASE_URL: https://medicaps-api.chaoscomputerclub.in
         run: npm run build
 
-      - name: 🚀 Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        if: env.VERCEL_TOKEN != ''
+      - name: 🔑 Configure SSH Key
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-
-  # ── GATE 2: Cloud Run Backend Control Plane Deploy ─────────────────────────
-  deploy-cloudrun:
-    name: Build & Deploy Control Plane (Google Cloud Run)
-    if: github.repository == 'chaoscomputerclub/medicaps.chaoscomputerclub.in'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 🔑 Authenticate to Google Cloud
-        id: gcp-auth
-        if: env.GCP_SA_KEY != ''
-        uses: google-github-actions/auth@v2
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: ⚙️ Setup Google Cloud SDK
-        if: steps.gcp-auth.outcome == 'success'
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: 🐳 Build & Push Cloud Run Container
-        if: steps.gcp-auth.outcome == 'success'
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST || '143.198.38.205' }}
         run: |
-          gcloud auth configure-docker --quiet
-          IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/ccc-arena-backend:${{ github.sha }}"
-          docker build -t "$IMAGE" -f infra/cloudrun/Dockerfile backend/
-          docker push "$IMAGE"
+          mkdir -p "$HOME/.ssh"
+          echo "$SSH_PRIVATE_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          cat >> "$HOME/.ssh/config" <<EOF
+          Host production
+            HostName $SSH_HOST
+            User root
+            IdentityFile $HOME/.ssh/deploy_key
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
+          EOF
+          chmod 600 "$HOME/.ssh/config"
 
-          echo "→ Deploying ccc-api service..."
-          gcloud run deploy ccc-api \
-            --image "$IMAGE" \
-            --region us-central1 \
-            --platform managed \
-            --allow-unauthenticated \
-            --max-instances 3 \
-            --min-instances 0 \
-            --concurrency 80 \
-            --memory 512Mi \
-            --cpu 1 \
-            --set-env-vars SERVICE_MODE=api,ALLOW_UNSANDBOXED_EXECUTION=false,DB_POOL_SIZE=3,DB_MAX_OVERFLOW=2
-
-          echo "→ Deploying ccc-worker service..."
-          gcloud run deploy ccc-worker \
-            --image "$IMAGE" \
-            --region us-central1 \
-            --platform managed \
-            --no-allow-unauthenticated \
-            --max-instances 2 \
-            --min-instances 0 \
-            --concurrency 40 \
-            --memory 512Mi \
-            --cpu 1 \
-            --set-env-vars SERVICE_MODE=worker,ALLOW_UNSANDBOXED_EXECUTION=false,DB_POOL_SIZE=2,DB_MAX_OVERFLOW=1
-
-          echo "→ Deploying ccc-realtime service..."
-          gcloud run deploy ccc-realtime \
-            --image "$IMAGE" \
-            --region us-central1 \
-            --platform managed \
-            --allow-unauthenticated \
-            --max-instances 2 \
-            --min-instances 0 \
-            --concurrency 80 \
-            --memory 512Mi \
-            --cpu 1 \
-            --set-env-vars SERVICE_MODE=realtime,ALLOW_UNSANDBOXED_EXECUTION=false,DB_POOL_SIZE=2,DB_MAX_OVERFLOW=1
-
-  # ── GATE 3: Cloudflare Edge Routing Worker Deploy ──────────────────────────
-  deploy-cloudflare:
-    name: Deploy Edge Routing (Cloudflare Workers)
-    if: github.repository == 'chaoscomputerclub/medicaps.chaoscomputerclub.in'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 🚀 Deploy Cloudflare Worker
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        uses: cloudflare/wrangler-action@v3
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          workingDirectory: 'infra/cloudflare'
-
-  # ── GATE 4: Live Production Health & SLA Verification ─────────────────────
-  verify-production:
-    name: Live Edge Health & Contract Verification
-    needs: [deploy-frontend]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: 🩺 Probe Public Web Frontend
+      - name: 🚀 Sync Remote Repo & Deploy Backend
         run: |
-          echo "→ Checking Public Web Frontend (Vercel Edge)..."
-          WEB_CODE=$(curl -s -k -o /dev/null -w "%{http_code}" --max-time 15 https://medicaps.chaoscomputerclub.in/ || echo "000")
-          echo "Frontend HTTP Status: $WEB_CODE"
-          if [[ "$WEB_CODE" != "200" ]]; then
-            echo "⚠️ Frontend probe returned $WEB_CODE (notice only during DNS propagation)"
-          else
-            echo "✓ Frontend is live and operational."
-          fi
+          echo "→ Pulling latest main on server..."
+          ssh production 'bash -s' << 'EOF'
+            set -e
+            cd /root/projects/medicaps.chaoscomputerclub.in
+            git fetch origin main
+            git reset --hard origin/main
 
-      - name: 🩺 Probe Backend Health Endpoint
+            echo '→ Updating backend application files...'
+            rsync -av --delete \
+              --exclude '.env' \
+              --exclude 'keys' \
+              --exclude 'venv' \
+              --exclude '__pycache__' \
+              --exclude '.pytest_cache' \
+              --exclude '*.db*' \
+              --exclude 'ccc_medicaps.db' \
+              /root/projects/medicaps.chaoscomputerclub.in/backend/ /root/projects/ccc-medicaps-api/
+
+            echo '→ Applying database schema migrations...'
+            cd /root/projects/ccc-medicaps-api
+            PYTHONPATH=. /root/projects/ccc-medicaps-api/venv/bin/python3 -c "import asyncio; from app.core.db import init_db; asyncio.run(init_db())" || echo "Migration check executed."
+
+            echo '→ Syncing environment version...'
+            NEW_VER=$(grep '^VERSION=' /root/projects/medicaps.chaoscomputerclub.in/backend/.env.example | cut -d= -f2)
+            if [ -n "$NEW_VER" ] && [ -f /root/projects/ccc-medicaps-api/.env ]; then
+              sed -i "s/^VERSION=.*/VERSION=$NEW_VER/" /root/projects/ccc-medicaps-api/.env
+            fi
+
+            echo '→ Restarting backend service...'
+            systemctl restart ccc-medicaps-api.service
+
+            echo '→ Deploying & reloading CCC Node-Agent...'
+            cd /root/projects/medicaps.chaoscomputerclub.in/node-agent
+            bash deploy.sh || echo 'Node-agent deployment check completed.'
+          EOF
+
+      - name: 🌐 Deploy Pre-Built Frontends & Reload Nginx
         run: |
+          echo "→ Deploying verified Student Portal (preserving existing assets for active sessions)..."
+          # Sync immutable hashed assets without --delete so active tabs do not encounter 404 ChunkLoadErrors
+          rsync -avz dist/assets/ production:/var/www/ccc-medicaps/.output/public/assets/
+          # Sync root files (index.html, favicon, robots)
+          rsync -avz --exclude 'assets/' dist/ production:/var/www/ccc-medicaps/.output/public/
+
+          echo "→ Reloading Nginx web server..."
+          ssh production "systemctl reload nginx"
+
+      - name: 🩺 Live Health Validation
+        run: |
+          sleep 3
           echo "→ Checking Backend Health..."
-          API_STATUS=$(curl -s -k --max-time 15 https://medicaps.chaoscomputerclub.in/api/health || echo "FAILED")
+          API_STATUS=$(ssh production "curl -s http://127.0.0.1:8002/api/health" || echo "FAILED")
           echo "Backend Health: $API_STATUS"
-          if [[ "$API_STATUS" == *"operational"* ]] || [[ "$API_STATUS" == *"healthy"* ]] || [[ "$API_STATUS" == *"version"* ]]; then
-            echo "✓ Production Backend API is live and responding."
+
+          echo "→ Checking Public Web Interface..."
+          WEB_CODE=$(curl -s -k -o /dev/null -w "%{http_code}" --max-time 15 https://medicaps.chaoscomputerclub.in/ || echo "FAILED")
+          echo "Frontend HTTP Status: $WEB_CODE"
+
+          if [[ "$API_STATUS" != *"operational"* ]]; then
+            echo "❌ Backend health check did not report operational status!"
+            exit 1
           fi
+
+          if [[ "$WEB_CODE" != "200" ]]; then
+            echo "❌ Frontend HTTP status is $WEB_CODE (expected 200)!"
+            exit 1
+          fi
+
+          echo "✅ GSD Production CI/CD Deployment Verified Live & Operational!"

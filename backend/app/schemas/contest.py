@@ -60,8 +60,6 @@ class ContestArenaResponse(BaseModel):
     chief_proctors: List[str]
     problems: List[ContestArenaProblemResponse]
     server_time: str
-    is_submitted: Optional[bool] = False
-    is_review_mode: Optional[bool] = False
 
 
 class ContestSummaryResponse(BaseModel):

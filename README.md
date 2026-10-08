@@ -194,7 +194,7 @@ sequenceDiagram
 | **Execution Engine** | `codebox-engine` (Node.js microservice), BullMQ, Docker Engine SDK, Linux cgroups, Isolate |
 | **Persistence & Cache** | PostgreSQL 16 (Cloud Production), Redis 7.0 for BullMQ queues and SWR caching |
 | **Security & Auth** | Passwordless institutional email verification (`@medicaps.ac.in` + OTP), JWT Bearer tokens, CORS regex |
-| **Deployment** | GitHub Actions Cloud CI/CD, Google Cloud Run, Vercel Global Edge, Supabase, Cloudflare |
+| **Deployment** | Systemd, Nginx, GSD Deployment Protocol, DigitalOcean Cloud droplet (`143.198.38.205`) |
 
 ---
 
@@ -390,8 +390,12 @@ All production code updates follow the strict **GET SHIT DONE (GSD)** continuous
 ### What the Sync Pipeline Automates:
 1. **Local Verification**: Executes `npm run build` locally to guarantee zero TypeScript or bundling defects.
 2. **Atomic Git Push**: Pushes verified changes directly to `origin/main`.
-3. **Automated Cloud CI/CD**: Triggers GitHub Actions to build and deploy the React SPA to Vercel and backend services to Google Cloud Run.
-4. **Live Verification Probes**: Pings production endpoints via Cloudflare Edge asserting operational health status.
+3. **Server Auto-Pull**: Connects over SSH to the production server (`root@143.198.38.205`) and syncs repository state.
+4. **Zero-Downtime Service Reload**:
+   - Synchronizes backend code and restarts `ccc-medicaps-api.service`.
+   - Rsyncs production frontend assets to `/var/www/ccc-medicaps/.output/public/`.
+   - Reloads Nginx reverse proxy configurations.
+5. **Live Verification Probes**: Pings production endpoints and asserts HTTP `200 OK` health status.
 
 ---
 

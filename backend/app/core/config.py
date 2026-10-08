@@ -11,12 +11,12 @@ from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env", override=False)
+load_dotenv(BASE_DIR / ".env", override=True)
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
-    VERSION: str = os.getenv("VERSION", "1.0.21")
+    VERSION: str = os.getenv("VERSION", "1.0.8")
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
 
@@ -161,12 +161,10 @@ class Settings(BaseSettings):
     # OTP expiry (minutes)
     OTP_EXPIRE_MINUTES: int = 10
 
-    # Redis (OTP session store, rate limits, P2P peer registry & SSE PubSub)
-    REDIS_URL: Optional[str] = os.getenv("REDIS_URL", None)
+    # Redis (OTP session store)
     REDIS_HOST: str = os.getenv("REDIS_HOST", "127.0.0.1")
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
-    REDIS_SSL: bool = os.getenv("REDIS_SSL", "false").lower() in ("true", "1", "yes")
 
     # CORS (strictly loaded via environment variables in O(1))
     CORS_ORIGINS: Optional[Union[List[str], str]] = None

@@ -20,7 +20,6 @@ from app.routers import (
     storage,
     verify,
     webhooks,
-    peer_fabric,
 )
 
 __all__ = [
@@ -40,6 +39,4 @@ __all__ = [
     "storage",
     "verify",
     "webhooks",
-    "peer_fabric",
 ]
-

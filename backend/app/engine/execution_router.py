@@ -164,31 +164,19 @@ class ExecutionRouter:
             cls._instance = cls()
         return cls._instance
 
-    async def _get_active_distributed_nodes(self, language: Optional[str] = None) -> List[str]:
-        """Returns list of online node IDs with active Redis heartbeats (P2P Judge Peers + legacy nodes)."""
-        active: List[str] = []
-        try:
-            from app.engine.peer_fabric.models import PeerType
-            from app.engine.peer_fabric.router import PeerRouter
-            judge_peers = await PeerRouter.select_peers(
-                required_role=PeerType.JUDGE_PEER,
-                required_language=language,
-            )
-            for p in judge_peers:
-                active.append(p.advertisement.peer_id)
-        except Exception as e:
-            logger.debug("PeerRouter query in ExecutionRouter: %s", e)
-
+    async def _get_active_distributed_nodes(self) -> List[str]:
+        """Returns list of online node IDs with active Redis heartbeats."""
         try:
             redis = get_redis()
             node_ids = await redis.smembers("ccc:nodes:registered")
+            active = []
             for nid in node_ids:
                 raw_id = nid.decode() if isinstance(nid, bytes) else str(nid)
-                if await redis.exists(f"ccc:node:{raw_id}:heartbeat") and raw_id not in active:
+                if await redis.exists(f"ccc:node:{raw_id}:heartbeat"):
                     active.append(raw_id)
+            return active
         except Exception:
-            pass
-        return active
+            return []
 
     async def execute(
         self,
@@ -217,8 +205,7 @@ class ExecutionRouter:
         self.obs.record_counter("judge_jobs_total")
 
         # 2. Check active distributed nodes
-        lang_str = language.value if hasattr(language, "value") else str(language)
-        active_nodes = await self._get_active_distributed_nodes(language=lang_str)
+        active_nodes = await self._get_active_distributed_nodes()
         has_active_nodes = len(active_nodes) > 0
 
         # Phase 7 & 8: Determine provider capability and preference.
@@ -798,7 +785,6 @@ class ExecutionRouter:
         await redis.set(f"ccc:job:{job_id}", json.dumps(job_payload), ex=86400)
         await redis.set(f"ccc:job:{job_id}:attempt", str(attempt.attempt_number), ex=86400)
         await redis.set(f"ccc:job:{job_id}:active_attempt_id", attempt.id, ex=86400)
-        await redis.rpush(f"ccc:queue:fabric:pending:{lang_str}", job_id)
         await redis.rpush("ccc:queue:fabric:pending", job_id)
 
         # 2. Wait for completion bounded by remaining deadline tracker

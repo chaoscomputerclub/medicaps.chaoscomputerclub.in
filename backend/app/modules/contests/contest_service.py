@@ -998,6 +998,11 @@ class ContestService:
         is_test_user = is_privileged_test_member(current_member)
 
         is_sub, sub_reason = await is_contest_attempt_submitted(current_member, contest, db)
+        if is_sub:
+            raise HTTPException(
+                status_code=403,
+                detail=sub_reason or "Contest attempt has already been submitted. Retakes are not permitted.",
+            )
 
         if not (settings.DEV_MODE and slug.startswith("dev-")):
             if contest.status == "upcoming":
@@ -1005,7 +1010,7 @@ class ContestService:
                     status_code=403,
                     detail="Contest has not started yet. The arena unlocks at the scheduled start time.",
                 )
-            if contest.status == "live" and not is_sub:
+            if contest.status == "live":
                 is_eligible, reason = await is_member_eligible_for_live_contest(
                     current_member, contest, db, require_checked_in=settings.FEATURE_ASSESSMENT_AND_QR_ENABLED
                 )
@@ -1084,8 +1089,6 @@ class ContestService:
             "check_in_status": check_in_status,
             "is_proctored": True,
             "is_faculty_proctored": True,
-            "is_submitted": is_sub,
-            "is_review_mode": is_sub or contest.status in ("finished", "concluded", "finalized"),
             "problems": arena_problems,
             "server_time": now_dt.isoformat(),
         }

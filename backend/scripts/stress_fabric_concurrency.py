@@ -4,21 +4,20 @@ Chaos Computer Club — Medi-Caps Chapter
 Global Distributed Fabric — Deep Dive Heavy Concurrency Stress Test Suite
 
 Orchestrates multi-phase, high-concurrency workloads against the distributed
-execution fabric (Cloud Control Plane <-> Distributed Compute Worker Nodes).
+execution fabric (Cloud Control Plane <-> Outbound Laptop Node 192.168.29.104).
 
 Measures:
-- End-to-end RTT latency (Cloudflare Edge -> Cloud Run -> Redis -> Node Agent Docker -> Client)
+- End-to-end RTT latency (Cloudflare Edge -> Cloud VPS -> Redis -> Laptop Docker -> Cloud VPS -> Client)
 - Execution container wall time inside in-memory RAM tmpfs
 - Concurrency scaling & queue drain dynamics (5, 15, and 30 parallel bursts)
 - Multi-language coverage (Python 3.11, GCC 13 C++, Node 20)
 - Edge cases & intentional fault injection (Runtime Errors, Compile Errors, Wrong Answers)
-- Telemetry & resource retention check on worker nodes
+- Telemetry & resource retention check on remote node
 """
 
 import asyncio
 import json
 import math
-import os
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -27,8 +26,10 @@ from typing import Any, Dict, List, Optional
 import urllib.request
 import urllib.error
 
-API_BASE_URL = os.getenv("FABRIC_DISPATCH_URL", "https://medicaps-api.chaoscomputerclub.in/api/v1/nodes/dispatch-test")
-REMOTE_HOST = os.getenv("BENCHMARK_REMOTE_HOST", "127.0.0.1")
+API_BASE_URL = "https://medicaps-api.chaoscomputerclub.in/api/v1/nodes/dispatch-test"
+REMOTE_HOST = "192.168.29.104"
+REMOTE_USER = "santusht"
+REMOTE_PASS = "santusht"
 
 # ── Test Payloads ──────────────────────────────────────────────────────────
 
@@ -159,18 +160,22 @@ class JobRecord:
     stderr: str = ""
 
 def get_remote_telemetry() -> Dict[str, Any]:
-    """Execute telemetry probe on worker node or return clean baseline stats."""
-    if os.getenv("BENCHMARK_SSH_ENABLED", "").lower() == "true":
-        ssh_user = os.getenv("BENCHMARK_SSH_USER", "node-runner")
-        ssh_key = os.getenv("BENCHMARK_SSH_KEY")
-        key_arg = f"-i '{ssh_key}'" if ssh_key else ""
-        cmd = f"ssh -o StrictHostKeyChecking=no {key_arg} {ssh_user}@{REMOTE_HOST} 'docker ps --format \"{{{{.ID}}}} {{{{.Image}}}}\"'"
-        try:
-            res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=8)
-            return {"raw": res.stdout.strip(), "ok": True}
-        except Exception as e:
-            return {"raw": str(e), "ok": False}
-    return {"raw": "Simulated node worker telemetry: healthy", "ok": True}
+    """Execute SSH probe on remote laptop node to gather live hardware & container stats."""
+    cmd = (
+        f"sshpass -p '{REMOTE_PASS}' ssh -o StrictHostKeyChecking=no {REMOTE_USER}@{REMOTE_HOST} "
+        "\"echo '---UPTIME---' && uptime && "
+        "echo '---MEM---' && free -m && "
+        "echo '---TMPFS---' && df -h /tmp && ls -la /tmp/ccc_workspaces 2>&1 | wc -l && "
+        "echo '---DOCKER_CONTAINERS---' && docker ps --format '{{.ID}} {{.Image}}' && "
+        "echo '---CLAIMED_JOBS---' && "
+        "echo -n 'UserAgent:' && (grep -c 'Claimed' ~/ccc-node/agent.log 2>/dev/null || echo 0) && "
+        "echo -n 'SystemdAgent:' && (journalctl -u ccc-judge-agent | grep -c 'Claimed' 2>/dev/null || echo 0)\""
+    )
+    try:
+        res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=8)
+        return {"raw": res.stdout.strip(), "ok": True}
+    except Exception as e:
+        return {"raw": str(e), "ok": False}
 
 async def execute_stress_job(session_pool: asyncio.Semaphore, record: JobRecord, payload: dict) -> JobRecord:
     async with session_pool:

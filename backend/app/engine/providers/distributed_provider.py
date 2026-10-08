@@ -37,13 +37,8 @@ class DistributedFabricProvider(JudgeProvider):
         self._fallback = fallback_provider or DockerSandboxProvider()
 
     async def healthy(self) -> bool:
-        """Healthy if either P2P judge peers exist, distributed nodes exist, or fallback engine is healthy."""
+        """Healthy if either distributed nodes exist or fallback engine is healthy."""
         try:
-            from app.engine.peer_fabric.models import PeerType
-            from app.engine.peer_fabric.registry import PeerRegistry
-            judge_peers = await PeerRegistry.get_healthy_peers(PeerType.JUDGE_PEER)
-            if judge_peers:
-                return True
             redis = get_redis()
             nodes = await redis.smembers("ccc:nodes:registered")
             for nid in nodes:
@@ -72,11 +67,10 @@ class DistributedFabricProvider(JudgeProvider):
         are available, else transparently falls back to local Docker engine.
         """
         redis = get_redis()
-        lang_str = language.value if hasattr(language, "value") else str(language)
-        online_nodes = await self._get_active_nodes(redis, lang_str=lang_str)
+        online_nodes = await self._get_active_nodes(redis)
 
         if not online_nodes:
-            logger.info("ℹ️ No active distributed peers in fabric — executing on local Cloud Docker engine.")
+            logger.info("ℹ️ No active distributed nodes in fabric — executing on local Cloud Docker engine.")
             return await self._fallback.execute_batch(
                 language=language,
                 code=code,
@@ -226,30 +220,15 @@ class DistributedFabricProvider(JudgeProvider):
             comparison_mode=comparison_mode,
         )
 
-    async def _get_active_nodes(self, redis: Any, lang_str: Optional[str] = None) -> List[str]:
-        """Returns list of node IDs whose heartbeats are currently active (P2P Judge Peers + legacy nodes)."""
-        active: List[str] = []
-        try:
-            from app.engine.peer_fabric.models import PeerType
-            from app.engine.peer_fabric.router import PeerRouter
-            peers = await PeerRouter.select_peers(
-                required_role=PeerType.JUDGE_PEER,
-                required_language=lang_str,
-            )
-            for p in peers:
-                active.append(p.advertisement.peer_id)
-        except Exception as e:
-            logger.debug("PeerRouter query in distributed provider: %s", e)
-
-        try:
-            node_ids = await redis.smembers("ccc:nodes:registered")
-            for nid in node_ids:
-                raw_id = nid.decode() if isinstance(nid, bytes) else str(nid)
-                is_alive = await redis.exists(f"ccc:node:{raw_id}:heartbeat")
-                if is_alive and raw_id not in active:
-                    active.append(raw_id)
-        except Exception:
-            pass
+    async def _get_active_nodes(self, redis: Any) -> List[str]:
+        """Returns list of node IDs whose heartbeats are currently active."""
+        node_ids = await redis.smembers("ccc:nodes:registered")
+        active = []
+        for nid in node_ids:
+            raw_id = nid.decode() if isinstance(nid, bytes) else str(nid)
+            is_alive = await redis.exists(f"ccc:node:{raw_id}:heartbeat")
+            if is_alive:
+                active.append(raw_id)
         return active
 
     def _format_execution_result(

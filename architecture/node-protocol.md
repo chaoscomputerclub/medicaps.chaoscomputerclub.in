@@ -61,7 +61,7 @@ Every physical machine connected to the distributed compute fabric transitions t
 ```json
 {
   "node_id": "node_32dc9245c062",
-  "hostname": "node-worker-primary",
+  "hostname": "santusht-legion-5",
   "os_name": "linux",
   "architecture": "x86_64",
   "cpu": {
