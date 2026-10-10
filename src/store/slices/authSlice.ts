@@ -206,7 +206,7 @@ export const reOnboardThunk = createAsyncThunk<
 });
 
 /**
- * Uploads avatar image file directly to MinIO and binds it to current user profile in real-time.
+ * Uploads avatar image file directly and binds it to current user profile in real-time.
  */
 export const uploadAvatarThunk = createAsyncThunk<
   { member: Member; avatar_url: string },
@@ -221,7 +221,7 @@ export const uploadAvatarThunk = createAsyncThunk<
       avatar_url: res.avatar_url,
     };
   } catch (err: any) {
-    return rejectWithValue(err?.message || "Failed to upload avatar to MinIO.");
+    return rejectWithValue(err?.message || "Failed to upload avatar.");
   }
 });
 

@@ -1,0 +1,470 @@
+import React, { useState, useEffect, useMemo, useTransition } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  Search,
+  CheckCircle2,
+  Clock,
+  Minus,
+  Sparkles,
+  Terminal,
+  Filter,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useAppSelector } from "@/store/hooks";
+import { Input } from "@/components/ui/input";
+import { PageHeader, SectionHeader, EmptyState } from "@/organization/components/ui";
+import { practiceApi } from "@/features/practice/api";
+import { useSwrData } from "@/lib/cache/swrCache";
+import type { PracticeProblemSummary, PracticeTopic, ProblemDifficulty } from "@/features/practice/types";
+
+export function PracticePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // Read URL query parameters as single source of truth
+  const queryParam = searchParams.get("q") || "";
+  const difficultyParam = searchParams.get("difficulty") || "ALL";
+  const topicParam = searchParams.get("topic") || "ALL";
+  const statusParam = searchParams.get("status") || "ALL";
+  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+
+  // Local state for snappy typing in search bar
+  const [searchInput, setSearchInput] = useState(queryParam);
+
+  // Keep searchInput in sync if URL changes externally (e.g., back/forward)
+  useEffect(() => {
+    setSearchInput(queryParam);
+  }, [queryParam]);
+
+  // Fetch canonical topics taxonomy
+  const { data: topicsData } = useSwrData<PracticeTopic[]>(
+    "practice:topics",
+    () => practiceApi.getTopics(),
+    { ttl: 10 * 60 * 1000, staleTime: 60 * 1000 }
+  );
+
+  // Fetch problems list matching filters
+  const { data: listData, loading, revalidate } = useSwrData(
+    `practice:problems:${searchParams.toString()}`,
+    () =>
+      practiceApi.listProblems({
+        q: queryParam || undefined,
+        difficulty: difficultyParam !== "ALL" ? difficultyParam : undefined,
+        topic: topicParam !== "ALL" ? topicParam : undefined,
+        status: statusParam !== "ALL" ? statusParam : undefined,
+        page: pageParam,
+        limit: 50,
+      }),
+    { ttl: 60 * 1000, staleTime: 10 * 1000 }
+  );
+
+  const problems = listData?.items || [];
+  const total = listData?.total || 0;
+  const summary = listData?.summary || {
+    total_published: 0,
+    solved_count: 0,
+    attempted_count: 0,
+  };
+  const totalPages = listData?.pages || Math.ceil(total / 50) || 1;
+
+  // Filter update handler updating URL search params
+  const updateFilter = (key: string, value: string) => {
+    startTransition(() => {
+      const nextParams = new URLSearchParams(searchParams);
+      if (!value || value === "ALL") {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, value);
+      }
+      // Reset to page 1 on filter changes
+      if (key !== "page") {
+        nextParams.delete("page");
+      }
+      setSearchParams(nextParams, { replace: true });
+    });
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateFilter("q", searchInput.trim());
+  };
+
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setSearchParams(new URLSearchParams(), { replace: true });
+  };
+
+  const hasActiveFilters =
+    Boolean(queryParam) ||
+    difficultyParam !== "ALL" ||
+    topicParam !== "ALL" ||
+    statusParam !== "ALL";
+
+  // Current authenticated member
+  const member = useAppSelector((state) => state.auth.member);
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const handleSeedSuite = async () => {
+    setIsSeeding(true);
+    try {
+      const res = await practiceApi.seedInstitutionalSuite();
+      toast.success(res.message || "Institutional challenge suite calibrated successfully.");
+      await revalidate();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to seed institutional challenges.");
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  // Prefetch problem details on mouse enter
+  const handlePrefetch = (slug: string) => {
+    void practiceApi.getProblem(slug);
+  };
+
+  const getDifficultyBadge = (diff: ProblemDifficulty) => {
+    switch (diff) {
+      case "EASY":
+        return (
+          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-emerald-400">
+            <span className="size-1.5 rounded-full bg-emerald-400" />
+            Easy
+          </span>
+        );
+      case "MEDIUM":
+        return (
+          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-amber-400">
+            <span className="size-1.5 rounded-full bg-amber-400" />
+            Medium
+          </span>
+        );
+      case "HARD":
+        return (
+          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-rose-400">
+            <span className="size-1.5 rounded-full bg-rose-400" />
+            Hard
+          </span>
+        );
+      default:
+        return <span className="font-mono text-[11px] text-zinc-500">{diff}</span>;
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      {/* Page Header */}
+      <PageHeader
+        kicker="03 // Evergreen Arena"
+        index="PRACTICE"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+            Master Repository
+          </span>
+        }
+        title="Practice Arena"
+        description="Sharpen your problem-solving skills across standard data structures and algorithms."
+        action={
+          <div className="flex size-12 items-center justify-center rounded-lg border border-white/8 bg-black text-lime-400">
+            <Terminal className="size-6" />
+          </div>
+        }
+      />
+
+
+
+      {/* Telemetry Header Strip */}
+      <section className="grid grid-cols-3 gap-3">
+        <div className="p-4 rounded-lg border border-white/8 bg-black space-y-1">
+          <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">
+            Problems Available
+          </div>
+          <div className="text-xl font-bold font-mono text-white tabular-nums">
+            {summary.total_published}
+          </div>
+          <div className="text-[11px] font-mono text-zinc-500">Active repository</div>
+        </div>
+
+        <div className="p-4 rounded-lg border border-lime-400/20 bg-lime-400/5 space-y-1">
+          <div className="text-[10px] uppercase font-mono tracking-wider text-lime-400/80">
+            Solved by You
+          </div>
+          <div className="text-xl font-bold font-mono text-lime-400 tabular-nums">
+            {summary.solved_count}
+          </div>
+          <div className="text-[11px] font-mono text-lime-400/70">Authoritative solves</div>
+        </div>
+
+        <div className="p-4 rounded-lg border border-white/8 bg-black space-y-1">
+          <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">
+            Attempted
+          </div>
+          <div className="text-xl font-bold font-mono text-amber-400 tabular-nums">
+            {summary.attempted_count}
+          </div>
+          <div className="text-[11px] font-mono text-zinc-500">Submissions logged</div>
+        </div>
+      </section>
+
+      {/* Search & Filter Toolbar */}
+      <section className="rounded-lg border border-white/8 bg-black p-4 space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          {/* Search Bar */}
+          <form onSubmit={handleSearchSubmit} className="relative flex-1">
+            <Search className="size-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              type="text"
+              placeholder="Search problems by title, topic, or keyword…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onBlur={() => {
+                if (searchInput.trim() !== queryParam) {
+                  updateFilter("q", searchInput.trim());
+                }
+              }}
+              className="h-9 pl-9 pr-3 text-xs bg-black border-white/10 font-mono rounded-md text-white placeholder:text-zinc-600 focus-visible:ring-1 focus-visible:ring-lime-400"
+            />
+          </form>
+
+          {/* Quick Filters */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Difficulty Selector */}
+            <select
+              aria-label="Filter by difficulty"
+              value={difficultyParam}
+              onChange={(e) => updateFilter("difficulty", e.target.value)}
+              className="h-9 px-3 text-xs font-mono bg-black border border-white/10 text-zinc-300 rounded-md focus-visible:ring-1 focus-visible:ring-lime-400 cursor-pointer"
+            >
+              <option value="ALL">All Difficulties</option>
+              <option value="EASY">Easy</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HARD">Hard</option>
+            </select>
+
+            {/* Topic Selector */}
+            <select
+              aria-label="Filter by topic"
+              value={topicParam}
+              onChange={(e) => updateFilter("topic", e.target.value)}
+              className="h-9 px-3 text-xs font-mono bg-black border border-white/10 text-zinc-300 rounded-md focus-visible:ring-1 focus-visible:ring-lime-400 cursor-pointer"
+            >
+              <option value="ALL">All Topics</option>
+              {(topicsData || []).map((t) => (
+                <option key={t.slug} value={t.slug}>
+                  {t.name} ({t.count})
+                </option>
+              ))}
+            </select>
+
+            {/* Status Selector */}
+            <select
+              aria-label="Filter by status"
+              value={statusParam}
+              onChange={(e) => updateFilter("status", e.target.value)}
+              className="h-9 px-3 text-xs font-mono bg-black border border-white/10 text-zinc-300 rounded-md focus-visible:ring-1 focus-visible:ring-lime-400 cursor-pointer"
+            >
+              <option value="ALL">All Status</option>
+              <option value="SOLVED">Solved</option>
+              <option value="ATTEMPTED">Attempted</option>
+              <option value="UNSOLVED">Unsolved</option>
+            </select>
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="h-9 px-2.5 text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-white/20 rounded-md transition-colors"
+                title="Reset all filters"
+              >
+                <RotateCcw className="size-3" />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Problems Dense Table */}
+      <section className="rounded-lg border border-white/8 bg-black overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
+        {loading && problems.length === 0 ? (
+          <div className="py-16 text-center font-mono text-xs text-zinc-500">
+            <span className="inline-block size-2 rounded-full bg-lime-400 animate-ping mr-2" />
+            Loading practice catalog…
+          </div>
+        ) : problems.length === 0 ? (
+          <div className="py-16 text-center space-y-4 font-mono px-4">
+            <div className="text-zinc-300 text-sm font-semibold">
+              {hasActiveFilters ? "No problems match these filters." : "No practice challenges available yet."}
+            </div>
+            <p className="text-xs text-zinc-500 max-w-md mx-auto leading-relaxed">
+              {hasActiveFilters
+                ? "Try relaxing your search query or selecting a different topic."
+                : member?.is_core_member
+                ? "Institutional problems are unseeded or currently in DRAFT status. Proctors can seed the canonical 8-problem suite or calibrate new challenges via Mission Control."
+                : "Institutional problems are being calibrated by CCC proctors."}
+            </p>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-lime-400 border border-lime-400/30 bg-lime-400/10 rounded-md hover:bg-lime-400/20 transition-colors cursor-pointer"
+              >
+                Clear all filters
+              </button>
+            ) : member?.is_core_member ? (
+              <div className="flex items-center justify-center gap-3 pt-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleSeedSuite}
+                  disabled={isSeeding}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-black bg-lime-400 hover:bg-lime-300 rounded-md transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSeeding ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+                  <span>Seed Canonical 8-Problem Suite</span>
+                </button>
+                <a
+                  href="http://localhost:8082"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] rounded-md transition-colors"
+                >
+                  <span>Open Mission Control Desk</span>
+                  <ExternalLink className="size-3.5 text-zinc-400" />
+                </a>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <thead>
+                <tr className="border-b border-white/8 text-[11px] text-zinc-500 uppercase tracking-wider bg-white/[0.01]">
+                  <th className="py-3 px-4 w-12 text-center">Status</th>
+                  <th className="py-3 px-4 w-16">#</th>
+                  <th className="py-3 px-4">Title</th>
+                  <th className="py-3 px-4 w-28">Difficulty</th>
+                  <th className="py-3 px-4 w-40">Topic</th>
+                  <th className="py-3 px-4 w-28 text-right">Acceptance</th>
+                  <th className="py-3 px-4 w-12"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {problems.map((p, idx) => {
+                  const displayIndex = p.problem_index || String((pageParam - 1) * 50 + idx + 1).padStart(3, "0");
+                  return (
+                    <tr
+                      key={p.id}
+                      onMouseEnter={() => handlePrefetch(p.slug)}
+                      onFocus={() => handlePrefetch(p.slug)}
+                      className="group hover:bg-white/[0.02] transition-colors"
+                    >
+                      {/* Solved Status Indicator */}
+                      <td className="py-3.5 px-4 text-center">
+                        {p.user_status === "SOLVED" ? (
+                          <span title="Solved">
+                            <CheckCircle2 className="size-4 text-lime-400 inline" />
+                          </span>
+                        ) : p.user_status === "ATTEMPTED" ? (
+                          <span title="Attempted">
+                            <Clock className="size-4 text-amber-400 inline" />
+                          </span>
+                        ) : (
+                          <span title="Unattempted">
+                            <Minus className="size-3 text-zinc-700 inline" />
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Problem Number */}
+                      <td className="py-3.5 px-4 text-zinc-500 tabular-nums">
+                        {displayIndex}
+                      </td>
+
+                      {/* Title + Link */}
+                      <td className="py-3.5 px-4">
+                        <Link
+                          to={`/practice/${p.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-white hover:text-lime-400 transition-colors inline-flex items-center gap-1.5"
+                        >
+                          <span>{p.title}</span>
+                        </Link>
+                      </td>
+
+                      {/* Difficulty */}
+                      <td className="py-3.5 px-4">
+                        {getDifficultyBadge(p.difficulty)}
+                      </td>
+
+                      {/* Topic */}
+                      <td className="py-3.5 px-4">
+                        <span className="inline-block px-2 py-0.5 rounded border border-white/8 bg-zinc-950 text-[11px] text-zinc-300">
+                          {p.topic}
+                        </span>
+                      </td>
+
+                      {/* Acceptance Rate */}
+                      <td className="py-3.5 px-4 text-right text-zinc-400 tabular-nums">
+                        {p.total_submissions > 0 ? `${p.acceptance_rate}%` : "—"}
+                      </td>
+
+                      {/* Action Chevron */}
+                      <td className="py-3.5 px-4 text-right">
+                        <Link
+                          to={`/practice/${p.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-zinc-600 group-hover:text-lime-400 transition-colors inline-block"
+                          aria-label={`Open problem ${p.title}`}
+                        >
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t border-white/8 font-mono text-xs text-zinc-400">
+            <div>
+              Page <strong className="text-white tabular-nums">{pageParam}</strong> of{" "}
+              <strong className="text-white tabular-nums">{totalPages}</strong>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={pageParam <= 1}
+                onClick={() => updateFilter("page", String(pageParam - 1))}
+                className="px-3 py-1.5 rounded border border-white/10 hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <ChevronLeft className="size-3.5" />
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={pageParam >= totalPages}
+                onClick={() => updateFilter("page", String(pageParam + 1))}
+                className="px-3 py-1.5 rounded border border-white/10 hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                Next
+                <ChevronRight className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}

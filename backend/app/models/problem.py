@@ -52,6 +52,9 @@ class Problem(Base):
     evaluation_config = Column(JSON, default=dict, nullable=False)  # match_type, float_tolerance, etc.
     sandbox_config = Column(JSON, default=dict, nullable=False)  # network, processes, etc.
     reference_solution = Column(JSON, default=dict, nullable=True)  # {python: "...", cpp: "..."}
+    hints = Column(JSON, default=list, nullable=True)  # List of textual hints
+    editorial = Column(JSON, default=dict, nullable=True)  # {approach: "...", code: "...", complexity: "..."}
+    tags = Column(JSON, default=list, nullable=True)  # ["arrays", "two-pointers"]
 
     # Lifecycle State Machine: DRAFT -> VALIDATING -> VALIDATED -> REVIEW -> PUBLISHED -> LOCKED -> ARCHIVED
     status = Column(String(20), default="DRAFT", nullable=False, index=True)
@@ -109,6 +112,9 @@ class ProblemVersion(Base):
     evaluation_config = Column(JSON, nullable=False)
     sandbox_config = Column(JSON, nullable=False)
     reference_solution = Column(JSON, nullable=True)
+    hints = Column(JSON, default=list, nullable=True)
+    editorial = Column(JSON, default=dict, nullable=True)
+    tags = Column(JSON, default=list, nullable=True)
 
     created_by = Column(String(36), nullable=True)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
@@ -151,3 +157,32 @@ class ProblemTestCase(Base):
 
     # Relationships
     problem = relationship("Problem", back_populates="testcases")
+
+
+class MemberProblemStats(Base):
+    """
+    Authoritative aggregated problem-solving state for a user/problem pair.
+    Reconcilable from canonical contest_submissions at any time.
+    """
+    __tablename__ = "member_problem_stats"
+
+    id = Column(String(36), primary_key=True, default=get_uuid)
+    member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    problem_id = Column(String(36), ForeignKey("problems.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(String(20), default="UNATTEMPTED", nullable=False, index=True)  # UNATTEMPTED, ATTEMPTED, SOLVED
+    attempt_count = Column(Integer, default=1, nullable=False)
+    first_attempt_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+    last_attempt_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
+    accepted_at = Column(DateTime(timezone=True), nullable=True)
+    best_runtime = Column(Float, nullable=True)
+    best_memory = Column(Integer, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("member_id", "problem_id", name="uq_member_problem_stats"),
+        Index("ix_member_problem_stats_lookup", "member_id", "status"),
+        Index("ix_problem_member_stats_lookup", "problem_id", "status"),
+    )
+
+    # Relationships
+    problem = relationship("Problem")
+    member = relationship("MemberProfile")

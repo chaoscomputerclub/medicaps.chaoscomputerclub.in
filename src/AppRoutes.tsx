@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useRef } from "react";
 import { Routes, Route, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { getPublicPortalData, getMemberProfileData, getUniversityLeaderboardData, getStudentProfileData } from "@/organization/data/portal.functions";
 import { contestApi } from "@/features/contest/api";
+import { practiceApi } from "@/features/practice/api";
 import { AuthGuard, GuestGuard } from "@/lib/guards/AuthGuard";
 import { usePrefetchOnIntent } from "@/hooks/usePrefetchOnIntent";
 import {
@@ -244,6 +245,8 @@ export const MyContestsPage = lazyWithRetry(() => import("./pages/MyContestsPage
 export const LeaderboardPage = lazyWithRetry(() => import("./pages/LeaderboardPage"), "LeaderboardPage");
 export const ProblemArchivePage = lazyWithRetry(() => import("./pages/ProblemArchivePage"), "ProblemArchivePage");
 export const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDetailPage"), "ProblemDetailPage");
+export const PracticePage = lazyWithRetry(() => import("./pages/PracticePage"), "PracticePage");
+export const PracticeProblemPage = lazyWithRetry(() => import("./pages/PracticeProblemPage"), "PracticeProblemPage");
 export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
 export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
 export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "TermsPage");
@@ -251,6 +254,7 @@ export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "Terms
 export const routePreloaders: Record<string, () => Promise<any>> = {
   "/": () => DashboardPage.preload(),
   "/contests": () => ContestsHubPage.preload(),
+  "/practice": () => PracticePage.preload(),
   "/my-contests": () => MyContestsPage.preload(),
   "/leaderboard": () => LeaderboardPage.preload(),
   "/problems": () => ProblemArchivePage.preload(),
@@ -265,6 +269,10 @@ export const routePreloaders: Record<string, () => Promise<any>> = {
 const routeDataPrefetchers: Record<string, () => void> = {
   "/contests": () => {
     getPublicPortalData().catch(() => {});
+  },
+  "/practice": () => {
+    practiceApi.listProblems().catch(() => {});
+    practiceApi.getTopics().catch(() => {});
   },
   "/": () => {
     getMemberProfileData().catch(() => {});
@@ -514,6 +522,24 @@ export function AppRoutes() {
             element={
               <Suspense fallback={<LeaderboardSkeleton />}>
                 <LeaderboardPage />
+              </Suspense>
+            }
+          />
+
+          {/* Practice Mode & Master Challenges */}
+          <Route
+            path="practice"
+            element={
+              <Suspense fallback={<ProblemArchiveSkeleton />}>
+                <PracticePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="practice/:slug"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <PracticeProblemPage />
               </Suspense>
             }
           />

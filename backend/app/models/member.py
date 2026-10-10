@@ -26,6 +26,15 @@ class MemberProfile(Base):
     id = Column(String(36), primary_key=True, default=get_uuid)
     handle = Column(String(50), unique=True, nullable=True, index=True)        # null until onboarding
     full_name = Column(String(100), nullable=True)                              # null until onboarding
+
+    @property
+    def name(self) -> str | None:
+        return self.full_name
+
+    @name.setter
+    def name(self, val: str | None) -> None:
+        self.full_name = val
+
     email = Column(String(120), unique=True, nullable=False, index=True)
     prn = Column(String(30), unique=True, nullable=True, index=True)            # Medi-Caps Enrollment ID
     department = Column(String(50), nullable=True)                              # CSE, IT, AIDS, Cyber Security

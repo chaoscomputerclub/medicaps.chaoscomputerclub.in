@@ -45,6 +45,11 @@ import {
   getStudentProfileData,
   getRatingDistribution,
 } from "@/organization/data/portal.functions";
+import { CodingActivityGraph } from "@/components/profile/CodingActivityGraph";
+import { SolvedProblemsCard } from "@/components/profile/SolvedProblemsCard";
+import { BadgesCard } from "@/components/profile/BadgesCard";
+import { RecentSubmissionsCard } from "@/components/profile/RecentSubmissionsCard";
+import { practiceApi } from "@/features/practice/api";
 import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
@@ -188,6 +193,24 @@ export function ProfilePage() {
     { ttl: 10 * 60 * 1000 },
   );
 
+  const { data: activityData, loading: activityLoading } = useSwrData(
+    `practice:activity:${isViewingSelf ? "me" : targetHandle}`,
+    () => practiceApi.getActivity(undefined, isViewingSelf ? undefined : targetHandle),
+    { ttl: 2 * 60 * 1000, staleTime: 30 * 1000 }
+  );
+
+  const { data: practiceStatsData, loading: practiceStatsLoading } = useSwrData(
+    `practice:stats:${isViewingSelf ? "me" : targetHandle}`,
+    () => practiceApi.getStats(isViewingSelf ? undefined : targetHandle),
+    { ttl: 2 * 60 * 1000, staleTime: 30 * 1000 }
+  );
+
+  const { data: recentSubmissionsData, loading: recentSubmissionsLoading } = useSwrData(
+    `practice:submissions:recent:${isViewingSelf ? "me" : targetHandle}`,
+    () => practiceApi.getRecentSubmissions(isViewingSelf ? undefined : targetHandle, false, 15),
+    { ttl: 60 * 1000, staleTime: 15 * 1000 }
+  );
+
   useEffect(() => {
     if (isAuthenticated()) {
       dispatch(fetchMySocialStatsThunk());
@@ -278,43 +301,8 @@ export function ProfilePage() {
   }
   const history = activeData?.history || activeData?.ratingHistory || [];
   const battles = activeData?.battles || activeData?.recentBattles || [];
-  let achievements = activeData?.achievements || [];
+  const achievements = activeData?.achievements || [];
   const proofs = activeData?.proofs || [];
-
-  // If achievements array is empty but member is a valid cadet, synthesize baseline achievements
-  if (achievements.length === 0 && m) {
-    achievements = [
-      {
-        id: "cadet_init",
-        code: "INIT",
-        title: "Cadet Commissioned",
-        name: "Cadet Commissioned",
-        icon: "⚡",
-        description: "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-        earned: true,
-      },
-      {
-        id: "tier_badge",
-        code: "TIER",
-        title: m.tier || "1★ Explorer",
-        name: m.tier || "1★ Explorer",
-        icon: "🏆",
-        description: `Reached official university tier ${m.tier || "1★ Explorer"}.`,
-        earned: true,
-      },
-    ];
-    if (m.is_core_member) {
-      achievements.push({
-        id: "core",
-        code: "CORE",
-        title: "CCC Core Organizer",
-        name: "CCC Core Organizer",
-        icon: "🛡️",
-        description: "Official Chapter Organizer and Proctor.",
-        earned: true,
-      });
-    }
-  }
 
   const isSelfUser = Boolean(
     isViewingSelf ||
@@ -684,11 +672,38 @@ export function ProfilePage() {
         );
       })()}
 
+      {/* Problem Solving Utilization & Badges Grid (Side by Side) */}
+      <section className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+        <div className="md:col-span-7">
+          <SolvedProblemsCard
+            stats={practiceStatsData || m.problem_stats}
+            loading={practiceStatsLoading && !m.problem_stats}
+          />
+        </div>
+        <div className="md:col-span-5">
+          <BadgesCard
+            achievements={achievements}
+            tier={m.tier}
+            rating={m.rating}
+          />
+        </div>
+      </section>
+
+      {/* 365-Day Coding Activity Heatmap */}
+      <CodingActivityGraph activityData={activityData} loading={activityLoading} />
+
+      {/* Recent Submissions Ledger */}
+      <RecentSubmissionsCard
+        submissions={recentSubmissionsData || []}
+        battles={battles}
+        loading={recentSubmissionsLoading && !recentSubmissionsData}
+      />
+
       {/* Trajectory & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
           <SectionHeader
-            kicker="01 // Rating History"
+            kicker="03 // Rating History"
             index="TRAJECTORY"
             title="Competitive Trajectory"
           />
@@ -705,7 +720,7 @@ export function ProfilePage() {
 
       {/* Contest Battle Logs */}
       <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
-        <SectionHeader kicker="02 // Record" index="CONTESTS" title="Attended Tournaments" />
+        <SectionHeader kicker="04 // Record" index="CONTESTS" title="Attended Tournaments" />
         <div className="divide-y divide-white/6 font-mono text-xs">
           {battles.length === 0 ? (
             <div className="text-center py-8 text-zinc-600">No recorded tournaments on file.</div>
@@ -767,7 +782,7 @@ export function ProfilePage() {
 
       {/* Achievements Ledger */}
       <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
-        <SectionHeader kicker="03 // Milestones" index="HONORS" title="Achievement Ledger" />
+        <SectionHeader kicker="05 // Milestones" index="HONORS" title="Achievement Ledger" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
           {achievements.length === 0 ? (
             <div className="text-center py-8 text-zinc-600 col-span-full">

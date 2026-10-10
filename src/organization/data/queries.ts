@@ -36,6 +36,8 @@ export type FullProfilePayload = {
   campusPass: CampusPass;
   proofs: TrustProof[];
   achievements: Achievement[];
+  problem_stats?: any;
+  problemStats?: any;
 };
 
 export const defaultMemberProfile: MemberProfile = {

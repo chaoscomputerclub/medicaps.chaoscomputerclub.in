@@ -362,13 +362,13 @@ export function SettingsPage() {
         return;
       }
       setIsUploadingAvatar(true);
-      const tid = toast.loading("Uploading photo to MinIO…");
+      const tid = toast.loading("Uploading profile photo…");
       try {
         const res = await dispatch(uploadAvatarThunk(file)).unwrap();
         setAvatarUrl(res.avatar_url);
         dispatch(fetchCurrentUserThunk());
         invalidateFullProfileCache();
-        toast.success("Profile photo updated in real time via MinIO!", { id: tid });
+        toast.success("Profile photo updated successfully!", { id: tid });
       } catch (err: any) {
         toast.error(typeof err === "string" ? err : err?.message || "Upload failed.", { id: tid });
       } finally {

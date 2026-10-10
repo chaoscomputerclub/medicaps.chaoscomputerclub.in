@@ -29,14 +29,11 @@ logger = logging.getLogger("ccc.core.origins")
 # Default production origins trusted for Medi-Caps and Chaos Computer Club services
 _DEFAULT_PRODUCTION_ORIGINS: Set[str] = {
     "https://medicaps.chaoscomputerclub.in",
+    "https://medicaps-api.chaoscomputerclub.in",
     "https://chaoscomputerclub.in",
     "https://www.chaoscomputerclub.in",
     "https://admin.chaoscomputerclub.in",
     "https://admin.medicaps.chaoscomputerclub.in",
-    "https://medicaps-api.chaoscomputerclub.in",
-    "https://ccc-medicaps.sharexpress.in",
-    "https://ccc-medicaps.shaxpress.in",
-    "https://ccc.sharexpress.in",
 }
 
 # Regex matching local development hostnames on any port

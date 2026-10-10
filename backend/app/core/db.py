@@ -267,19 +267,23 @@ async def ensure_database_integrity():
                 except Exception:
                     pass
 
-            # 5. Schema Evolution: Table version columns
-            try:
-                await session.execute(text("""
-                    ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
-                """))
-                await session.execute(text("""
-                    ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS ratings_finalized_at TIMESTAMPTZ;
-                """))
-                await session.execute(text("""
-                    ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1;
-                """))
-            except Exception:
-                pass
+            # 5. Schema Evolution: Table version and member profile columns
+            for col_stmt in [
+                "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1",
+                "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS ratings_finalized_at TIMESTAMPTZ",
+                "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS banner_url VARCHAR(500)",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 1",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS full_name VARCHAR(100)",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS github_username VARCHAR(100)",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(200)",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS is_core_member BOOLEAN DEFAULT FALSE",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS hashed_password VARCHAR(255)",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS google_id VARCHAR(120)",
+            ]:
+                try:
+                    await session.execute(text(col_stmt))
+                except Exception as mp_err:
+                    print(f"Notice on column evolution: {mp_err}")
 
             # 6. Schema Evolution: Problem Authoring & Function Execution Contract Tables
             await session.execute(text("""
@@ -462,6 +466,41 @@ async def ensure_database_integrity():
             ]:
                 await session.execute(text(outbox_ddl))
 
+            # 9. Schema Evolution: Practice Platform, Member Problem Stats, and Submissions Context
+            for practice_ddl in [
+                "ALTER TABLE contest_submissions ALTER COLUMN contest_id DROP NOT NULL",
+                "ALTER TABLE contest_submissions ALTER COLUMN problem_id DROP NOT NULL",
+                "ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS context VARCHAR(20) NOT NULL DEFAULT 'CONTEST'",
+                "ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS master_problem_id VARCHAR(36) REFERENCES problems(id) ON DELETE SET NULL",
+                "ALTER TABLE problems ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json",
+                "ALTER TABLE problems ADD COLUMN IF NOT EXISTS editorial JSON DEFAULT '{}'::json",
+                "ALTER TABLE problems ADD COLUMN IF NOT EXISTS tags JSON DEFAULT '[]'::json",
+                "ALTER TABLE problem_versions ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json",
+                "ALTER TABLE problem_versions ADD COLUMN IF NOT EXISTS editorial JSON DEFAULT '{}'::json",
+                "ALTER TABLE problem_versions ADD COLUMN IF NOT EXISTS tags JSON DEFAULT '[]'::json",
+                """CREATE TABLE IF NOT EXISTS member_problem_stats (
+                    id VARCHAR(36) PRIMARY KEY,
+                    member_id VARCHAR(36) NOT NULL REFERENCES member_profiles(id) ON DELETE CASCADE,
+                    problem_id VARCHAR(36) NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+                    status VARCHAR(20) NOT NULL DEFAULT 'UNATTEMPTED',
+                    attempt_count INTEGER NOT NULL DEFAULT 1,
+                    first_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    last_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    accepted_at TIMESTAMPTZ,
+                    best_runtime DOUBLE PRECISION,
+                    best_memory INTEGER,
+                    CONSTRAINT uq_member_problem_stats UNIQUE (member_id, problem_id)
+                )""",
+                "CREATE INDEX IF NOT EXISTS ix_contest_submissions_context_member ON contest_submissions (context, member_id, submitted_at DESC)",
+                "CREATE INDEX IF NOT EXISTS ix_contest_submissions_context_master_problem ON contest_submissions (context, master_problem_id, verdict)",
+                "CREATE INDEX IF NOT EXISTS ix_contest_submissions_master_problem_verdict ON contest_submissions (master_problem_id, verdict)",
+                "CREATE INDEX IF NOT EXISTS ix_member_problem_stats_lookup ON member_problem_stats (member_id, status)",
+                "CREATE INDEX IF NOT EXISTS ix_problem_member_stats_lookup ON member_problem_stats (problem_id, status)",
+            ]:
+                try:
+                    await session.execute(text(practice_ddl))
+                except Exception as p_err:
+                    print(f"Notice on practice DDL: {p_err}")
 
             await session.commit()
         except Exception as e:
@@ -504,3 +543,5 @@ async def init_db():
         print(f"Notice during init_db Base.metadata.create_all: {e}")
 
     await ensure_database_integrity()
+
+

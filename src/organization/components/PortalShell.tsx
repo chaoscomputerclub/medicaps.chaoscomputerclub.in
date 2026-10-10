@@ -10,6 +10,7 @@ import {
   BarChart2,
   Code2,
   Settings,
+  Terminal,
   LogOut,
   Menu,
   X,
@@ -41,7 +42,7 @@ import {
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/contests", label: "Contests", icon: Trophy, exact: false },
-  { to: "/my-contests", label: "My Contests", icon: Bookmark, exact: false },
+  { to: "/practice", label: "Practice", icon: Terminal, exact: false },
   { to: "/leaderboard", label: "Leaderboard", icon: BarChart2, exact: true },
   { to: "/problems", label: "Problems", icon: Code2, exact: false },
   { to: "/settings", label: "Settings", icon: Settings, exact: false },
@@ -83,6 +84,12 @@ function PortalRouteSkeleton() {
   }
   if (cleanPath.startsWith("/problems/")) {
     return <ProblemDetailSkeleton />;
+  }
+  if (cleanPath === "/practice") {
+    return <ProblemArchiveSkeleton />;
+  }
+  if (cleanPath.startsWith("/practice/")) {
+    return <AssessmentStudioSkeleton />;
   }
   if (cleanPath.startsWith("/settings")) {
     return <SettingsSkeleton />;
@@ -148,6 +155,7 @@ export function PortalShell() {
     cleanPath.includes("/lobby") ||
     cleanPath.includes("/summary") ||
     cleanPath.includes("/submit") ||
+    cleanPath.startsWith("/practice/") ||
     (cleanPath.includes("/contests/") && (
       cleanPath.includes("/problems") ||
       cleanPath.includes("/summary") ||

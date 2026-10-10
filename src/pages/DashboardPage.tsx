@@ -210,13 +210,40 @@ export function DashboardPage() {
         </div>
 
         <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Accepted Solutions</span>
+          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Problems Solved</span>
           <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
-            {(member as any)?.solved_count || 0}
+            {profile?.problem_stats?.problems?.solved ?? (profile?.problemStats as any)?.total_solved ?? (member as any)?.solved_count ?? 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">Problem Archive</span>
+          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">
+            {profile?.problem_stats?.problems?.attempted ?? (profile?.problemStats as any)?.total_submissions ?? 0} Attempted · Practice
+          </span>
         </div>
       </div>
+
+      {/* Practice Quick Progress Strip */}
+      <section className="p-4 rounded-lg border border-white/8 bg-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="size-1.5 rounded-full bg-lime-400" />
+            <span className="font-mono text-[10px] uppercase tracking-wider text-lime-400">Coding Practice</span>
+          </div>
+          <div className="text-sm font-semibold text-white font-mono flex items-center gap-3 flex-wrap">
+            <span>{profile?.problem_stats?.problems?.solved ?? 0} Solved</span>
+            <span className="text-zinc-600">·</span>
+            <span className="text-zinc-400">{profile?.problem_stats?.problems?.attempted ?? 0} Attempted</span>
+            <span className="text-zinc-600">·</span>
+            <span className="text-emerald-400">Easy: {profile?.problem_stats?.difficulty?.easy?.solved ?? 0}</span>
+            <span className="text-amber-400">Med: {profile?.problem_stats?.difficulty?.medium?.solved ?? 0}</span>
+            <span className="text-rose-400">Hard: {profile?.problem_stats?.difficulty?.hard?.solved ?? 0}</span>
+          </div>
+        </div>
+        <Button asChild variant="outline" size="sm" className="shrink-0 font-mono text-xs">
+          <Link to="/practice">
+            <span>Open Practice Arena</span>
+            <ArrowRight className="size-3.5 ml-1.5 text-lime-400" />
+          </Link>
+        </Button>
+      </section>
 
       {/* Live Contest Banner or Next Contest Alert */}
       {live ? (

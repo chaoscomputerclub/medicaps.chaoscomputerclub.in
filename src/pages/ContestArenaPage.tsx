@@ -5,7 +5,7 @@
  */
 
 import { Link, useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -45,6 +45,8 @@ import {
   XCircle,
   ListOrdered,
   Coins,
+  Sparkles,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +99,9 @@ import { slugifyProblem, resolveAvatarUrl, formatFullName, sanitizeCodeSnippet, 
 import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { contestApi } from "@/features/contest/api";
-import type { AssessmentRanking } from "@/features/contest/types";
+import { practiceApi } from "@/features/practice/api";
+import type { PracticeProblemDetail, PracticeProblemListResponse } from "@/features/practice/types";
+import type { AssessmentRanking, ContestArenaProblem, ArenaRunResult, ArenaSubmitResult } from "@/features/contest/types";
 import {
   getProblemReviewUrl,
   getProblemSolveUrl,
@@ -123,6 +127,39 @@ function formatTimer(totalSeconds: number): string {
 }
 
 export type ArenaLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "typescript";
+
+export type UnifiedArenaProblem = {
+  id: string;
+  slug?: string | undefined;
+  contest_id?: string | undefined;
+  problem_index: string;
+  title: string;
+  topic?: string | undefined;
+  points: number;
+  difficulty: "EASY" | "MEDIUM" | "HARD" | string;
+  description?: string | undefined;
+  input_format?: string | undefined;
+  output_format?: string | undefined;
+  constraints?: string | undefined;
+  time_limit?: number | undefined;
+  memory_limit?: number | undefined;
+  starter_code?: any;
+  starter_codes?: Record<string, string> | undefined;
+  sample_testcases?: Array<{
+    stdin?: string | undefined;
+    input?: string | undefined;
+    expected_output?: string | undefined;
+    output?: string | undefined;
+    explanation?: string | undefined;
+  }> | undefined;
+  function_signature?: any;
+  hints?: any;
+  editorial?: any;
+  tags?: any;
+  user_status?: string | undefined;
+  total_submissions?: number | undefined;
+  acceptance_rate?: number | undefined;
+};
 
 function getFallbackStarter(
   lang: ArenaLanguage,
@@ -154,15 +191,18 @@ function getFallbackStarter(
 }
 
 export interface ContestArenaPageProps {
-  mode?: "live" | "review";
+  mode?: "live" | "review" | "practice";
 }
 
 export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
-  const { contestSlug = "", problemSlug = "" } = useParams<{
-    contestSlug: string;
-    problemSlug?: string;
-  }>();
   const location = useLocation();
+  const isPracticeMode = mode === "practice" || location.pathname.startsWith("/practice");
+  const { contestSlug = "", problemSlug = "", slug = "" } = useParams<{
+    contestSlug?: string;
+    problemSlug?: string;
+    slug?: string;
+  }>();
+  const effectiveProblemSlug = isPracticeMode ? (slug || problemSlug || "") : (problemSlug || "");
   const [searchParams] = useSearchParams();
   const problemParam = searchParams.get("problem");
   const dispatch = useAppDispatch();
@@ -181,18 +221,38 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   } = useAppSelector((state) => state.contest);
   const member = useAppSelector((state) => state.auth.member);
 
-  const participation = myParticipations.find((p) => p.contest_slug === contestSlug);
+  // Practice Mode queries
+  const {
+    data: practiceProblemData,
+    loading: isPracticeLoading,
+    revalidate: revalidatePracticeProblem,
+  } = useSwrData<PracticeProblemDetail>(
+    isPracticeMode && effectiveProblemSlug
+      ? `practice:problem:${effectiveProblemSlug.toLowerCase()}`
+      : null,
+    () => practiceApi.getProblem(effectiveProblemSlug),
+    { ttl: 5 * 60 * 1000, staleTime: 30 * 1000, enabled: Boolean(isPracticeMode && effectiveProblemSlug) }
+  );
+
+  const { data: practiceCatalogData } = useSwrData<PracticeProblemListResponse>(
+    isPracticeMode ? "practice:catalog:all" : null,
+    () => practiceApi.listProblems({ limit: 100 }),
+    { ttl: 5 * 60 * 1000, staleTime: 60 * 1000, enabled: Boolean(isPracticeMode) }
+  );
+
+  const participation = !isPracticeMode ? myParticipations.find((p) => p.contest_slug === contestSlug) : undefined;
 
   const isAlreadySubmitted = Boolean(
+    !isPracticeMode &&
     !member?.is_core_member &&
     (registration?.status === "submitted" ||
       registration?.status === "completed" ||
       arenaData?.is_submitted)
   );
 
-  const isConcluded = isContestConcluded(arenaData);
-  const isReviewRoute = mode === "review" || location.pathname.includes("/review");
-  const isReviewMode = isReviewRoute || isConcluded || isAlreadySubmitted;
+  const isConcluded = !isPracticeMode && isContestConcluded(arenaData);
+  const isReviewRoute = !isPracticeMode && (mode === "review" || location.pathname.includes("/review"));
+  const isReviewMode = !isPracticeMode && (isReviewRoute || isConcluded || isAlreadySubmitted);
 
   useEffect(() => {
     if (!member && getToken()) {
@@ -215,7 +275,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         : "U";
 
   useEffect(() => {
-    if (contestSlug) {
+    if (!isPracticeMode && contestSlug) {
       dispatch(fetchContestArenaThunk(contestSlug));
       dispatch(fetchContestDetailThunk(contestSlug));
       dispatch(fetchMyParticipationsThunk(false));
@@ -223,12 +283,66 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     return () => {
       dispatch(clearArenaResults());
     };
-  }, [contestSlug, dispatch]);
+  }, [isPracticeMode, contestSlug, dispatch]);
 
-  const problems = arenaData?.problems || [];
+  const practiceProblems = useMemo<UnifiedArenaProblem[]>(() => {
+    if (!practiceCatalogData?.items || practiceCatalogData.items.length === 0) {
+      if (practiceProblemData) {
+        return [
+          {
+            id: practiceProblemData.id,
+            slug: practiceProblemData.slug,
+            title: practiceProblemData.title,
+            problem_index: practiceProblemData.problem_index || "001",
+            points: 100,
+            difficulty: practiceProblemData.difficulty,
+            topic: practiceProblemData.topic,
+            user_status: practiceProblemData.user_status,
+            total_submissions: practiceProblemData.total_submissions || 0,
+            acceptance_rate: practiceProblemData.acceptance_rate || 0,
+            description: practiceProblemData.description,
+            constraints: practiceProblemData.constraints,
+            time_limit: practiceProblemData.time_limit,
+            memory_limit: practiceProblemData.memory_limit,
+            sample_testcases: (practiceProblemData.sample_testcases || practiceProblemData.samples || []) as any,
+            starter_codes: practiceProblemData.starter_code as any,
+            function_signature: practiceProblemData.function_signature,
+            hints: practiceProblemData.hints,
+            editorial: practiceProblemData.editorial,
+            tags: practiceProblemData.tags,
+          },
+        ];
+      }
+      return [];
+    }
+    return practiceCatalogData.items.map((p, idx) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      problem_index: p.problem_index || String(idx + 1).padStart(3, "0"),
+      points: 100,
+      difficulty: p.difficulty,
+      topic: p.topic,
+      user_status: p.user_status,
+      total_submissions: p.total_submissions || 0,
+      acceptance_rate: p.acceptance_rate || 0,
+    }));
+  }, [practiceCatalogData, practiceProblemData]);
+
+  const problems: UnifiedArenaProblem[] = isPracticeMode ? practiceProblems : ((arenaData?.problems as any) || []);
 
   // LeetCode-style URL problem resolution
   const activeIndex = problems.findIndex((p) => {
+    if (isPracticeMode) {
+      if (!effectiveProblemSlug) return false;
+      const clean = effectiveProblemSlug.toLowerCase();
+      return (
+        (p.slug && p.slug.toLowerCase() === clean) ||
+        p.id.toLowerCase() === clean ||
+        (p.problem_index && p.problem_index.toLowerCase() === clean) ||
+        slugifyProblem(p.title, p.problem_index) === clean
+      );
+    }
     if (!problemSlug) return false;
     const clean = problemSlug.toLowerCase();
     return (
@@ -239,11 +353,52 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     );
   });
   const resolvedIndex = activeIndex >= 0 ? activeIndex : 0;
-  const activeProblem = problems[resolvedIndex] || problems[0];
+
+  const activeProblem = useMemo<UnifiedArenaProblem | null>(() => {
+    if (isPracticeMode) {
+      if (!practiceProblemData) return null;
+      const samples = (
+        practiceProblemData.sample_testcases ||
+        practiceProblemData.samples ||
+        []
+      ).map((tc: any) => ({
+        stdin: tc.input || tc.stdin || "",
+        input: tc.input || tc.stdin || "",
+        expected_output: tc.expected_output || tc.output || "",
+        output: tc.expected_output || tc.output || "",
+        explanation: tc.explanation,
+      }));
+      return {
+        id: practiceProblemData.id,
+        slug: practiceProblemData.slug,
+        title: practiceProblemData.title,
+        problem_index:
+          practiceProblemData.problem_index ||
+          problems[resolvedIndex]?.problem_index ||
+          "001",
+        difficulty: practiceProblemData.difficulty,
+        topic: practiceProblemData.topic,
+        points: 100,
+        description: practiceProblemData.description,
+        constraints: practiceProblemData.constraints,
+        time_limit: practiceProblemData.time_limit,
+        memory_limit: practiceProblemData.memory_limit,
+        sample_testcases: samples,
+        starter_code: practiceProblemData.starter_code,
+        starter_codes: practiceProblemData.starter_code,
+        function_signature: practiceProblemData.function_signature,
+        hints: practiceProblemData.hints,
+        editorial: practiceProblemData.editorial,
+        tags: practiceProblemData.tags,
+        user_status: practiceProblemData.user_status,
+      };
+    }
+    return problems[resolvedIndex] || problems[0] || null;
+  }, [isPracticeMode, practiceProblemData, problems, resolvedIndex]);
 
   // Auto-redirect to first problem's slug if URL is generic /arena or /problems or /review
   useEffect(() => {
-    if (problems.length > 0 && !problemSlug && contestSlug) {
+    if (!isPracticeMode && problems.length > 0 && !problemSlug && contestSlug) {
       const firstProblem = problems[0];
       if (firstProblem) {
         const targetUrl = isReviewRoute
@@ -252,7 +407,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         navigate(targetUrl, { replace: true });
       }
     }
-  }, [problems, problemSlug, contestSlug, navigate, isReviewRoute]);
+  }, [problems, problemSlug, contestSlug, navigate, isReviewRoute, isPracticeMode]);
 
   const [selectedLanguage, setSelectedLanguage] = useState<ArenaLanguage>("python");
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
@@ -266,6 +421,18 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const memberId = member?.id || "anon";
+
+  // Practice execution states
+  const [practiceRunResult, setPracticeRunResult] = useState<ArenaRunResult | null>(null);
+  const [practiceSubmitResult, setPracticeSubmitResult] = useState<ArenaSubmitResult | null>(null);
+  const [isPracticeRunning, setIsPracticeRunning] = useState(false);
+  const [isPracticeSubmitting, setIsPracticeSubmitting] = useState(false);
+
+  const effectiveRunResult: ArenaRunResult | null = isPracticeMode ? practiceRunResult : runResult;
+  const effectiveSubmitResult: ArenaSubmitResult | null = isPracticeMode ? practiceSubmitResult : submitResult;
+  const effectiveIsRunning = isPracticeMode ? isPracticeRunning : isRunningCode;
+  const effectiveIsSubmitting = isPracticeMode ? isPracticeSubmitting : isSubmittingCode;
+
   const [solvedProblemIds, setSolvedProblemIds] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(`ccc_solved_${member?.id || "anon"}_${contestSlug}`) ||
@@ -276,6 +443,19 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
   });
 
+  useEffect(() => {
+    if (isPracticeMode && practiceCatalogData?.items) {
+      const solved = new Set<string>();
+      practiceCatalogData.items.forEach((p) => {
+        if (p.user_status === "SOLVED") solved.add(p.id);
+      });
+      if (practiceProblemData?.user_status === "SOLVED") {
+        solved.add(practiceProblemData.id);
+      }
+      setSolvedProblemIds(solved);
+    }
+  }, [isPracticeMode, practiceCatalogData, practiceProblemData]);
+
   const [activeProblemTab, setActiveProblemTab] = useState<"description" | "submissions">(
     "description",
   );
@@ -283,9 +463,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   const [problemListTab, setProblemListTab] = useState<"problems" | "ranking">("problems");
 
   const { data: rankingData } = useSwrData<AssessmentRanking>(
-    contestSlug ? `contest:ranking:${contestSlug}` : null,
+    !isPracticeMode && contestSlug ? `contest:ranking:${contestSlug}` : null,
     () => contestApi.ranking(contestSlug),
-    { ttl: 30 * 1000 },
+    { ttl: 30 * 1000, enabled: !isPracticeMode && Boolean(contestSlug) },
   );
 
   const totalEarnedPoints = problems.reduce(
@@ -334,6 +514,32 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   });
 
   useEffect(() => {
+    if (isPracticeMode) {
+      if (!effectiveProblemSlug) return;
+      let cancelled = false;
+      practiceApi
+        .getSubmissions(effectiveProblemSlug)
+        .then((records) => {
+          if (cancelled || !Array.isArray(records)) return;
+          const normalized = records.map((r) => ({
+            id: r.id,
+            problem_id: effectiveProblemSlug,
+            verdict: r.verdict,
+            time: r.runtime !== null ? r.runtime / 1000 : null,
+            memory: r.memory,
+            language: r.language,
+            timestamp: new Date(r.submitted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            passed_testcases: r.score > 0 ? 1 : 0,
+            total_testcases: 1,
+          }));
+          setSubmissionHistory(normalized);
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }
+
     if (!activeProblem?.id || !contestSlug) return;
     let cancelled = false;
 
@@ -362,31 +568,39 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     return () => {
       cancelled = true;
     };
-  }, [activeProblem?.id, contestSlug, memberId]);
+  }, [isPracticeMode, effectiveProblemSlug, activeProblem?.id, contestSlug, memberId]);
 
   const handlePrevProblem = useCallback(() => {
     if (resolvedIndex > 0) {
       const prev = problems[resolvedIndex - 1];
       if (prev) {
-        const target = isReviewMode
-          ? getProblemReviewUrl(contestSlug, prev.title, prev.problem_index)
-          : getProblemSolveUrl(contestSlug, prev.title, prev.problem_index);
-        navigate(target);
+        if (isPracticeMode) {
+          navigate(`/practice/${(prev as any).slug || prev.id}`);
+        } else {
+          const target = isReviewMode
+            ? getProblemReviewUrl(contestSlug, prev.title, prev.problem_index)
+            : getProblemSolveUrl(contestSlug, prev.title, prev.problem_index);
+          navigate(target);
+        }
       }
     }
-  }, [resolvedIndex, problems, contestSlug, navigate, isReviewMode]);
+  }, [resolvedIndex, problems, contestSlug, navigate, isReviewMode, isPracticeMode]);
 
   const handleNextProblem = useCallback(() => {
     if (resolvedIndex < problems.length - 1) {
       const next = problems[resolvedIndex + 1];
       if (next) {
-        const target = isReviewMode
-          ? getProblemReviewUrl(contestSlug, next.title, next.problem_index)
-          : getProblemSolveUrl(contestSlug, next.title, next.problem_index);
-        navigate(target);
+        if (isPracticeMode) {
+          navigate(`/practice/${(next as any).slug || next.id}`);
+        } else {
+          const target = isReviewMode
+            ? getProblemReviewUrl(contestSlug, next.title, next.problem_index)
+            : getProblemSolveUrl(contestSlug, next.title, next.problem_index);
+          navigate(target);
+        }
       }
     }
-  }, [resolvedIndex, problems, contestSlug, navigate, isReviewMode]);
+  }, [resolvedIndex, problems, contestSlug, navigate, isReviewMode, isPracticeMode]);
 
   const contestOverRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -536,7 +750,8 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   }, [arenaData?.ends_at]);
 
   // Real-time arena clock push
-  useRealtimeEvents(contestSlug, (event) => {
+  useRealtimeEvents(isPracticeMode ? "" : contestSlug, (event) => {
+    if (isPracticeMode) return;
     const evSlug = event.contest_slug || event.data?.contest_slug;
     if (evSlug && evSlug !== contestSlug) return;
 
@@ -556,15 +771,16 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   });
 
   useEffect(() => {
+    if (isPracticeMode) return;
     const timer = setInterval(() => {
       setRemainingSeconds((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isPracticeMode]);
 
   // Contest over: lock arena and navigate to summary console for review (ONLY when in live contest mode)
   useEffect(() => {
-    if (isReviewMode) return; // In review mode, NEVER kick candidate out to summary!
+    if (isPracticeMode || isReviewMode) return; // In practice or review mode, NEVER kick candidate out to summary!
     if (remainingSeconds > 0 || isContestOver) return;
     setIsContestOver(true);
     let count = 5;
@@ -578,14 +794,13 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }, 1000);
     contestOverRedirectRef.current = tick;
     return () => clearInterval(tick);
-  }, [remainingSeconds, isContestOver, contestSlug, navigate, isReviewMode]);
+  }, [remainingSeconds, isContestOver, contestSlug, navigate, isReviewMode, isPracticeMode]);
 
-  const problemKey = `${activeProblem?.id || "p"}_${selectedLanguage}`;
-  const problemStorageKey = activeProblem
-    ? `ccc_code_v4_${memberId}_${contestSlug}_${activeProblem.id}_${selectedLanguage}`
-    : "";
+  const problemKey = `${activeProblem?.id || effectiveProblemSlug || "p"}_${selectedLanguage}`;
+  const problemStorageKey = isPracticeMode
+    ? (activeProblem?.id ? `ccc_practice_code_${memberId}_${activeProblem.id}_${selectedLanguage}` : "")
+    : (activeProblem ? `ccc_code_v4_${memberId}_${contestSlug}_${activeProblem.id}_${selectedLanguage}` : "");
 
-  // Load durable code: state -> validated localStorage -> official problem starter_code
   // Load durable code: state -> validated localStorage -> official problem starter_code
   const getInitialCode = (): string => {
     if (codeMap[problemKey]) {
@@ -605,7 +820,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (problemStorageKey && typeof window !== "undefined") {
       try {
         // Clean up legacy unversioned keys if any
-        if (activeProblem?.id) {
+        if (activeProblem?.id && !isPracticeMode) {
           localStorage.removeItem(
             `ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
           );
@@ -639,6 +854,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     const starter =
       activeProblem?.starter_codes?.[selectedLanguage] ??
+      (activeProblem as any)?.starter_code?.[selectedLanguage] ??
       getFallbackStarter(
         selectedLanguage,
         activeProblem?.title,
@@ -662,13 +878,14 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   const handleResetStarter = () => {
     const rawStarter =
       activeProblem?.starter_codes?.[selectedLanguage] ||
+      (activeProblem as any)?.starter_code?.[selectedLanguage] ||
       getFallbackStarter(selectedLanguage, activeProblem?.title);
     const defaultStarter = sanitizeCodeSnippet(rawStarter);
     setCodeMap((prev) => ({ ...prev, [problemKey]: defaultStarter }));
     if (typeof window !== "undefined") {
       try {
         if (problemStorageKey) localStorage.removeItem(problemStorageKey);
-        if (activeProblem?.id) {
+        if (activeProblem?.id && !isPracticeMode) {
           localStorage.removeItem(
             `ccc_code_${contestSlug}_${activeProblem.id}_${selectedLanguage}`,
           );
@@ -694,6 +911,46 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   };
 
   const handleRunCode = useCallback(async () => {
+    if (isPracticeMode) {
+      if (!effectiveProblemSlug || effectiveIsRunning || effectiveIsSubmitting) return;
+      setIsPracticeRunning(true);
+      setHasRunCode(true);
+      setIsDrawerCollapsed(false);
+      setActiveConsoleTab("output");
+      setLastAction("run");
+      setActiveRunCaseIndex(0);
+      try {
+        const res = await practiceApi.runCode(effectiveProblemSlug, currentCode, selectedLanguage);
+        const normalizedRunResult = {
+          verdict: res.verdict,
+          time: (res.runtime_ms || 0) / 1000,
+          passed_testcases: res.testcases?.filter((t) => t.passed).length ?? (res.verdict === "ACCEPTED" ? res.testcases?.length : 0),
+          total_testcases: res.testcases?.length || 0,
+          compile_output: res.compile_error,
+          testcase_results: res.testcases?.map((tc) => ({
+            status: tc.status,
+            passed: tc.passed,
+            input: tc.input,
+            expected_output: tc.expected_output,
+            actual_output: tc.actual_output,
+            runtime_ms: tc.runtime_ms,
+            error: tc.error,
+          })),
+        };
+        setPracticeRunResult(normalizedRunResult as any);
+        if (res.verdict === "ACCEPTED") {
+          toast.success("Sample testcases passed!");
+        } else {
+          toast.error(`Execution: ${res.verdict}`);
+        }
+      } catch (err: any) {
+        toast.error(err.message || "Failed to execute code");
+      } finally {
+        setIsPracticeRunning(false);
+      }
+      return;
+    }
+
     if (!activeProblem || isRunningCode || isSubmittingCode || isContestOver) return;
     setHasRunCode(true);
     setIsDrawerCollapsed(false);
@@ -721,6 +978,10 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       toast.error(String(result.payload || "Failed to execute code"));
     }
   }, [
+    isPracticeMode,
+    effectiveProblemSlug,
+    effectiveIsRunning,
+    effectiveIsSubmitting,
     activeProblem,
     isRunningCode,
     isSubmittingCode,
@@ -738,6 +999,69 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       toast.error("Contest submissions are locked in Review mode.");
       return;
     }
+    if (isPracticeMode) {
+      if (!effectiveProblemSlug || effectiveIsRunning || effectiveIsSubmitting) return;
+      setIsPracticeSubmitting(true);
+      setHasRunCode(true);
+      setIsDrawerCollapsed(false);
+      setActiveConsoleTab("output");
+      setLastAction("submit");
+      setActiveSubmitCaseIndex(0);
+      try {
+        const res = await practiceApi.submitCode(effectiveProblemSlug, currentCode, selectedLanguage);
+        const normalizedSubmitResult = {
+          verdict: res.verdict,
+          execution_time: (res.runtime || 0) / 1000,
+          memory: res.memory,
+          passed_testcases: res.passed_count,
+          total_testcases: res.total_testcases,
+          points_awarded: res.verdict === "ACCEPTED" ? (res.score || 100) : 0,
+          compile_output: res.compile_error,
+          testcase_results: res.first_failing_case ? [
+            {
+              status: res.verdict,
+              passed: false,
+              input: res.first_failing_case.input || "",
+              expected_output: res.first_failing_case.expected_output || "",
+              actual_output: res.first_failing_case.actual_output || "",
+              error: res.first_failing_case.error,
+            }
+          ] : undefined,
+        };
+        setPracticeSubmitResult(normalizedSubmitResult as any);
+
+        const newRecord = {
+          id: res.submission_id || String(Date.now()),
+          problem_id: activeProblem?.id || effectiveProblemSlug,
+          verdict: res.verdict,
+          time: (res.runtime || 0) / 1000,
+          memory: res.memory,
+          language: selectedLanguage,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          passed_testcases: res.passed_count,
+          total_testcases: res.total_testcases,
+        };
+        setSubmissionHistory((prev) => [newRecord, ...prev]);
+
+        if (res.verdict === "ACCEPTED") {
+          if (activeProblem?.id) {
+            setSolvedProblemIds((prev) => new Set([...prev, activeProblem.id]));
+          }
+          toast.success("Accepted! Problem solved successfully.");
+          if (revalidatePracticeProblem) {
+            void revalidatePracticeProblem();
+          }
+        } else {
+          toast.error(`Verdict: ${res.verdict} (${res.passed_count}/${res.total_testcases} passed)`);
+        }
+      } catch (err: any) {
+        toast.error(err.message || "Failed to submit code to judge");
+      } finally {
+        setIsPracticeSubmitting(false);
+      }
+      return;
+    }
+
     if (!activeProblem || isRunningCode || isSubmittingCode || isContestOver) return;
     setHasRunCode(true);
     setIsDrawerCollapsed(false);
@@ -797,6 +1121,10 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
   }, [
     isReviewMode,
+    isPracticeMode,
+    effectiveProblemSlug,
+    effectiveIsRunning,
+    effectiveIsSubmitting,
     activeProblem,
     isRunningCode,
     isSubmittingCode,
@@ -805,6 +1133,8 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     contestSlug,
     selectedLanguage,
     currentCode,
+    memberId,
+    revalidatePracticeProblem,
   ]);
 
   // Global Keyboard Shortcuts (⌘' Run, ⌘⏎ Submit, ⌥← Prev, ⌥→ Next)
@@ -858,11 +1188,47 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
   };
 
-  if (isLoadingArena || (!arenaData && !error)) {
-    return <AssessmentStudioSkeleton />;
+  if (isPracticeMode) {
+    if (isPracticeLoading && !practiceProblemData) {
+      return <AssessmentStudioSkeleton />;
+    }
+    if (!practiceProblemData) {
+      return (
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-lg border border-red-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(239,68,68,0.1)]">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+              <AlertTriangle className="size-7" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-semibold">
+                404 Not Found
+              </span>
+              <h1 className="text-xl font-semibold tracking-tight text-white">Problem Not Found</h1>
+              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                We could not find a practice problem matching &quot;{effectiveProblemSlug}&quot;.
+              </p>
+            </div>
+
+            <div className="pt-2">
+              <Button asChild className="w-full">
+                <Link to="/practice">
+                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <span>Return to Practice Catalog</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  } else {
+    if (isLoadingArena || (!arenaData && !error)) {
+      return <AssessmentStudioSkeleton />;
+    }
   }
 
-  if (!arenaData) {
+  if (!isPracticeMode && !arenaData) {
     const errLower = (error || "").toLowerCase();
     const isSubmitted =
       !member?.is_core_member &&
@@ -1138,7 +1504,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     );
   }
 
-  const title = arenaData?.title || contestSlug || "Contest Arena";
+  const title = isPracticeMode
+    ? (activeProblem?.title || "Practice Arena")
+    : (arenaData?.title || contestSlug || "Contest Arena");
 
   return (
     <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
@@ -1151,16 +1519,24 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             variant="outline"
             size="sm"
             onClick={() => {
-              if (isReviewMode) {
+              if (isPracticeMode) {
+                navigate("/practice");
+              } else if (isReviewMode) {
                 navigate(getContestOverviewUrl(contestSlug));
               } else {
                 setShowExitModal(true);
               }
             }}
-            title={isReviewMode ? "Return to Contest Overview" : "Exit to contest overview"}
+            title={
+              isPracticeMode
+                ? "Return to Practice Catalog"
+                : isReviewMode
+                  ? "Return to Contest Overview"
+                  : "Exit to contest overview"
+            }
           >
             <ChevronLeft className="size-4 mr-0.5" />
-            <span>{isReviewMode ? "Overview" : "Exit"}</span>
+            <span>{isPracticeMode ? "Catalog" : isReviewMode ? "Overview" : "Exit"}</span>
           </Button>
 
           <div className="h-3.5 w-px bg-white/10 shrink-0" />
@@ -1175,11 +1551,15 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <span className="font-semibold text-xs sm:text-sm text-white truncate max-w-[130px] sm:max-w-[200px] md:max-w-[280px]">
               {title}
             </span>
-            {arenaData?.status && (
+            {isPracticeMode ? (
+              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
+                PRACTICE
+              </span>
+            ) : arenaData?.status ? (
               <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
                 {arenaData.status}
               </span>
-            )}
+            ) : null}
             <ChevronRight className="size-3.5 text-zinc-400 group-hover:text-lime-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
           </button>
 
@@ -1226,16 +1606,18 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             </Button>
           </div>
 
-          <Button asChild variant="outline" size="icon-sm">
-            <Link
-              to={`/contests/${contestSlug}/results`}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Live Standings & Ranking"
-            >
-              <BarChart2 className="size-3.5" />
-            </Link>
-          </Button>
+          {!isPracticeMode && (
+            <Button asChild variant="outline" size="icon-sm">
+              <Link
+                to={`/contests/${contestSlug}/results`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Live Standings & Ranking"
+              >
+                <BarChart2 className="size-3.5" />
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Center: Run & Submit Action Buttons */}
@@ -1252,16 +1634,16 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={isRunningCode}
+                disabled={effectiveIsRunning}
                 onClick={handleRunCode}
                 title="Run code against sample testcases"
               >
-                {isRunningCode ? (
+                {effectiveIsRunning ? (
                   <WanderingEyes size="inline" className="h-3 mr-1.5" />
                 ) : (
                   <Play className="size-3 fill-current" />
                 )}
-                <span>{isRunningCode ? "Running…" : "Run"}</span>
+                <span>{effectiveIsRunning ? "Running…" : "Run"}</span>
                 <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
               </Button>
             </>
@@ -1271,15 +1653,15 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={isRunningCode || isSubmittingCode || isContestOver}
+                disabled={effectiveIsRunning || effectiveIsSubmitting || (!isPracticeMode && isContestOver)}
                 onClick={handleRunCode}
               >
-                {isRunningCode ? (
+                {effectiveIsRunning ? (
                   <WanderingEyes size="inline" className="h-3 mr-1.5" />
                 ) : (
                   <Play className="size-3 fill-current" />
                 )}
-                <span>{isRunningCode ? "Running…" : "Run"}</span>
+                <span>{effectiveIsRunning ? "Running…" : "Run"}</span>
                 <span className="hidden md:inline text-[10px] text-zinc-400 font-mono">⌘'</span>
               </Button>
 
@@ -1287,15 +1669,15 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 type="button"
                 variant="default"
                 size="sm"
-                disabled={isRunningCode || isSubmittingCode || isContestOver}
+                disabled={effectiveIsRunning || effectiveIsSubmitting || (!isPracticeMode && isContestOver)}
                 onClick={handleSubmitCode}
               >
-                {isSubmittingCode ? (
+                {effectiveIsSubmitting ? (
                   <WanderingEyes size="inline" className="h-3 mr-1.5" />
                 ) : (
                   <Send className="size-3 fill-current" />
                 )}
-                <span>{isSubmittingCode ? "Judging…" : "Submit"}</span>
+                <span>{effectiveIsSubmitting ? "Judging…" : "Submit"}</span>
                 <span className="hidden md:inline text-[10px] text-black/70 font-mono font-bold">
                   ⌘⏎
                 </span>
@@ -1350,7 +1732,12 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           </Button>
 
           {/* Timer Badge / Status */}
-          {isReviewMode ? (
+          {isPracticeMode ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs font-semibold shrink-0">
+              <Sparkles className="size-3 text-lime-400" />
+              <span>PRACTICE MODE</span>
+            </div>
+          ) : isReviewMode ? (
             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-400 font-mono text-xs font-semibold shrink-0">
               <span className="size-1.5 rounded-full bg-zinc-500" />
               <span>CONCLUDED</span>
@@ -1676,19 +2063,19 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   }`}
                 >
                   <span>Test Result</span>
-                  {submitResult && (
+                  {effectiveSubmitResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        submitResult.verdict === "ACCEPTED"
+                        effectiveSubmitResult.verdict === "ACCEPTED"
                           ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
                           : "bg-rose-400"
                       }`}
                     />
                   )}
-                  {!submitResult && runResult && (
+                  {!effectiveSubmitResult && effectiveRunResult && (
                     <span
                       className={`size-1.5 rounded-full ${
-                        runResult.verdict === "ACCEPTED"
+                        effectiveRunResult.verdict === "ACCEPTED"
                           ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
                           : "bg-amber-400"
                       }`}
@@ -1797,11 +2184,11 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 ) : (
                   /* Output / Test Result Tab */
                   <div className="space-y-3">
-                    {isRunningCode || isSubmittingCode ? (
+                    {effectiveIsRunning || effectiveIsSubmitting ? (
                       <div className="flex flex-col items-center justify-center py-12 space-y-3 font-mono">
                         <WanderingEyes size="modal" className="text-lime-400" />
                         <span className="text-xs text-zinc-400">
-                          {isRunningCode
+                          {effectiveIsRunning
                             ? "Running testcases in sandbox…"
                             : "Judging solution against evaluation suite…"}
                         </span>
@@ -1812,12 +2199,12 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         <Terminal className="size-6 text-zinc-600" />
                         <p className="text-xs">You must run your code first</p>
                       </div>
-                    ) : lastAction === "submit" && submitResult ? (
+                    ) : lastAction === "submit" && effectiveSubmitResult ? (
                       /* Comprehensive Submission Report */
                       <div className="space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 pb-3">
                           <div className="flex items-center gap-3">
-                            {submitResult.verdict === "ACCEPTED" ? (
+                            {effectiveSubmitResult.verdict === "ACCEPTED" ? (
                               <div className="flex items-center gap-2 text-lime-400 font-bold text-sm uppercase font-mono">
                                 <CheckCircle2 className="size-5 text-lime-400" />
                                 <span>Accepted</span>
@@ -1825,29 +2212,29 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                             ) : (
                               <div className="flex items-center gap-2 text-rose-400 font-bold text-sm uppercase font-mono">
                                 <XCircle className="size-5 text-rose-400" />
-                                <span>{submitResult.verdict}</span>
+                                <span>{effectiveSubmitResult.verdict}</span>
                               </div>
                             )}
                             <span className="text-zinc-600">·</span>
                             <span className="text-zinc-300 font-mono text-xs tabular-nums">
-                              {submitResult.passed_testcases} / {submitResult.total_testcases}{" "}
+                              {effectiveSubmitResult.passed_testcases} / {effectiveSubmitResult.total_testcases}{" "}
                               testcases passed
                             </span>
-                            {submitResult.points_awarded > 0 && (
+                            {effectiveSubmitResult.points_awarded > 0 && (
                               <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 text-[11px] font-mono font-bold">
-                                +{submitResult.points_awarded} pts
+                                +{effectiveSubmitResult.points_awarded} pts
                               </Badge>
                             )}
                           </div>
 
                           <div className="flex items-center gap-3 text-xs font-mono text-zinc-400 tabular-nums">
-                            {submitResult.execution_time !== undefined && (
+                            {effectiveSubmitResult.execution_time !== undefined && (
                               <span>
-                                Runtime: {Math.round(submitResult.execution_time * 1000)}ms
+                                Runtime: {Math.round(effectiveSubmitResult.execution_time * 1000)}ms
                               </span>
                             )}
-                            {submitResult.memory !== undefined && submitResult.memory > 0 && (
-                              <span>Memory: {submitResult.memory}MB</span>
+                            {effectiveSubmitResult.memory !== undefined && effectiveSubmitResult.memory > 0 && (
+                              <span>Memory: {effectiveSubmitResult.memory}MB</span>
                             )}
                           </div>
                         </div>
@@ -1856,12 +2243,12 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full transition-all duration-500 rounded-full ${
-                              submitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-rose-500"
+                              effectiveSubmitResult.verdict === "ACCEPTED" ? "bg-lime-400" : "bg-rose-500"
                             }`}
                             style={{
                               width: `${Math.round(
-                                (submitResult.passed_testcases /
-                                  Math.max(1, submitResult.total_testcases)) *
+                                (effectiveSubmitResult.passed_testcases /
+                                  Math.max(1, effectiveSubmitResult.total_testcases)) *
                                   100,
                               )}%`,
                             }}
@@ -1869,26 +2256,26 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         </div>
 
                         {/* Compiler Diagnostics if compilation error or compile output present */}
-                        {(submitResult.compile_output ||
-                          (submitResult.verdict === "COMPILATION_ERROR" &&
-                            submitResult.stderr)) && (
+                        {(effectiveSubmitResult.compile_output ||
+                          (effectiveSubmitResult.verdict === "COMPILATION_ERROR" &&
+                            effectiveSubmitResult.stderr)) && (
                           <div className="p-3 bg-black border border-rose-500/30 rounded font-mono text-xs space-y-1.5">
                             <div className="flex items-center gap-2 text-rose-400 font-semibold text-[11px] uppercase tracking-wider">
                               <AlertCircle className="size-3.5" />
                               <span>Compiler Diagnostics</span>
                             </div>
                             <pre className="text-rose-300/90 whitespace-pre-wrap font-mono text-xs max-h-48 overflow-y-auto leading-relaxed">
-                              {submitResult.compile_output || submitResult.stderr}
+                              {effectiveSubmitResult.compile_output || effectiveSubmitResult.stderr}
                             </pre>
                           </div>
                         )}
 
                         {/* Submission Testcases Breakdown */}
-                        {submitResult.testcase_results &&
-                          submitResult.testcase_results.length > 0 && (
+                        {effectiveSubmitResult.testcase_results &&
+                          effectiveSubmitResult.testcase_results.length > 0 && (
                             <div className="space-y-3">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                {submitResult.testcase_results.map((tc, idx) => (
+                                {effectiveSubmitResult.testcase_results.map((tc, idx) => (
                                   <button
                                     key={tc.testcase_id || idx}
                                     type="button"
@@ -1909,10 +2296,10 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                                 ))}
                               </div>
 
-                              {submitResult.testcase_results[activeSubmitCaseIndex] &&
+                              {effectiveSubmitResult.testcase_results[activeSubmitCaseIndex] &&
                                 (() => {
                                   const curTc =
-                                    submitResult.testcase_results[activeSubmitCaseIndex];
+                                    effectiveSubmitResult.testcase_results[activeSubmitCaseIndex];
                                   if (curTc.is_hidden) {
                                     return (
                                       <div className="p-3 bg-zinc-950 border border-white/10 rounded space-y-2">
@@ -1999,13 +2386,13 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                             </div>
                           )}
                       </div>
-                    ) : runResult ? (
+                    ) : effectiveRunResult ? (
                       /* Run Result Inspection */
                       <div className="space-y-3">
                         {/* Verdict Header */}
                         <div className="flex items-center justify-between border-b border-white/8 pb-2.5">
                           <div className="flex items-center gap-3">
-                            {runResult.verdict === "ACCEPTED" ? (
+                            {effectiveRunResult.verdict === "ACCEPTED" ? (
                               <div className="flex items-center gap-1.5 text-lime-400 font-bold text-xs font-mono uppercase">
                                 <CheckCircle2 className="size-4 text-lime-400" />
                                 <span>Accepted</span>
@@ -2013,43 +2400,43 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                             ) : (
                               <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs font-mono uppercase">
                                 <AlertCircle className="size-4 text-rose-400" />
-                                <span>{runResult.verdict}</span>
+                                <span>{effectiveRunResult.verdict}</span>
                               </div>
                             )}
-                            {runResult.passed_testcases !== undefined &&
-                              runResult.total_testcases !== undefined && (
+                            {effectiveRunResult.passed_testcases !== undefined &&
+                              effectiveRunResult.total_testcases !== undefined && (
                                 <span className="text-zinc-400 font-mono text-xs tabular-nums">
-                                  {runResult.passed_testcases} / {runResult.total_testcases} sample
+                                  {effectiveRunResult.passed_testcases} / {effectiveRunResult.total_testcases} sample
                                   cases passed
                                 </span>
                               )}
                           </div>
-                          {runResult.time !== undefined && (
+                          {effectiveRunResult.time !== undefined && (
                             <span className="text-zinc-500 text-xs font-mono tabular-nums">
-                              Runtime: {Math.round(runResult.time * 1000)}ms
+                              Runtime: {Math.round(effectiveRunResult.time * 1000)}ms
                             </span>
                           )}
                         </div>
 
                         {/* Compiler Diagnostics if compilation error or compile output present */}
-                        {(runResult.compile_output ||
-                          (runResult.verdict === "COMPILATION_ERROR" && runResult.stderr)) && (
+                        {(effectiveRunResult.compile_output ||
+                          (effectiveRunResult.verdict === "COMPILATION_ERROR" && effectiveRunResult.stderr)) && (
                           <div className="p-3 bg-black border border-rose-500/30 rounded font-mono text-xs space-y-1.5">
                             <div className="flex items-center gap-2 text-rose-400 font-semibold text-[11px] uppercase tracking-wider">
                               <AlertCircle className="size-3.5" />
                               <span>Compiler Diagnostics</span>
                             </div>
                             <pre className="text-rose-300/90 whitespace-pre-wrap font-mono text-xs max-h-48 overflow-y-auto leading-relaxed">
-                              {runResult.compile_output || runResult.stderr}
+                              {effectiveRunResult.compile_output || effectiveRunResult.stderr}
                             </pre>
                           </div>
                         )}
 
                         {/* Testcase Sub-tabs */}
-                        {runResult.testcase_results && runResult.testcase_results.length > 0 ? (
+                        {effectiveRunResult.testcase_results && effectiveRunResult.testcase_results.length > 0 ? (
                           <div className="space-y-3">
                             <div className="flex items-center gap-1.5">
-                              {runResult.testcase_results.map((tc, idx) => (
+                              {effectiveRunResult.testcase_results.map((tc, idx) => (
                                 <button
                                   key={tc.testcase_id || idx}
                                   type="button"
@@ -2070,9 +2457,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                               ))}
                             </div>
 
-                            {runResult.testcase_results[activeRunCaseIndex] &&
+                            {effectiveRunResult.testcase_results[activeRunCaseIndex] &&
                               (() => {
-                                const curTc = runResult.testcase_results[activeRunCaseIndex];
+                                const curTc = effectiveRunResult.testcase_results[activeRunCaseIndex];
                                 return (
                                   <div className="space-y-2.5">
                                     {curTc.stdin && (
@@ -2135,33 +2522,33 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                           </div>
                         ) : (
                           <div className="space-y-2">
-                            {runResult.compile_output && (
+                            {effectiveRunResult.compile_output && (
                               <div>
                                 <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">
                                   Compiler Output
                                 </span>
                                 <pre className="p-2 bg-black border border-rose-500/20 rounded text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap">
-                                  {runResult.compile_output}
+                                  {effectiveRunResult.compile_output}
                                 </pre>
                               </div>
                             )}
-                            {runResult.stdout && (
+                            {effectiveRunResult.stdout && (
                               <div>
                                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
                                   Stdout
                                 </span>
                                 <pre className="p-2 bg-zinc-950 border border-white/8 rounded text-xs text-white overflow-x-auto">
-                                  {runResult.stdout}
+                                  {effectiveRunResult.stdout}
                                 </pre>
                               </div>
                             )}
-                            {runResult.stderr && (
+                            {effectiveRunResult.stderr && (
                               <div>
                                 <span className="text-[10px] text-rose-400 uppercase tracking-wider font-mono">
                                   Stderr
                                 </span>
                                 <pre className="p-2 bg-black border border-rose-500/20 rounded text-xs text-rose-400 overflow-x-auto">
-                                  {runResult.stderr}
+                                  {effectiveRunResult.stderr}
                                 </pre>
                               </div>
                             )}
@@ -2421,7 +2808,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       )}
 
       {/* Contest Over Modal using official shadcn Dialog */}
-      <Dialog open={isContestOver && !isReviewMode}>
+      <Dialog open={!isPracticeMode && isContestOver && !isReviewMode}>
         <DialogContent className="max-w-md rounded-lg border border-lime-400/40 bg-black p-8 text-center space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(204,255,0,0.15)] [&>button]:hidden">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 mx-auto text-lime-400">
@@ -2488,7 +2875,11 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           <div className="flex items-center gap-2 min-w-0">
             <ListOrdered className="size-4 text-lime-400 shrink-0" />
             <h2 className="font-semibold text-xs text-white truncate max-w-[220px]">{title}</h2>
-            {arenaData?.status ? (
+            {isPracticeMode ? (
+              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
+                Practice Catalog
+              </span>
+            ) : arenaData?.status ? (
               <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
                 {arenaData.status} Arena
               </span>
@@ -2510,29 +2901,43 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         {/* Drawer Subheader: Problem List vs Standings Tabs + Score Badge */}
         <div className="px-4 py-2.5 border-b border-white/8 flex items-center justify-between gap-2 shrink-0 bg-black">
           {/* Sub-tabs: Challenges vs Standings */}
-          <Tabs
-            value={problemListTab}
-            onValueChange={(v) => setProblemListTab(v as "problems" | "ranking")}
-            className="gap-0"
-          >
-            <TabsList className="bg-zinc-950 p-0.5 rounded-md border border-white/10 gap-1">
-              <TabsTab value="problems" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
-                <ListOrdered className="size-3.5" />
-                <span>Challenges</span>
-              </TabsTab>
-              <TabsTab value="ranking" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
-                <BarChart2 className="size-3.5" />
-                <span>Standings</span>
-              </TabsTab>
-            </TabsList>
-          </Tabs>
+          {isPracticeMode ? (
+            <div className="flex items-center gap-1.5 text-xs font-sans font-semibold text-white px-1 py-1">
+              <ListOrdered className="size-3.5 text-lime-400" />
+              <span>Catalog Challenges</span>
+            </div>
+          ) : (
+            <Tabs
+              value={problemListTab}
+              onValueChange={(v) => setProblemListTab(v as "problems" | "ranking")}
+              className="gap-0"
+            >
+              <TabsList className="bg-zinc-950 p-0.5 rounded-md border border-white/10 gap-1">
+                <TabsTab value="problems" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
+                  <ListOrdered className="size-3.5" />
+                  <span>Challenges</span>
+                </TabsTab>
+                <TabsTab value="ranking" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
+                  <BarChart2 className="size-3.5" />
+                  <span>Standings</span>
+                </TabsTab>
+              </TabsList>
+            </Tabs>
+          )}
 
           {/* Points & Progress Pips */}
           <div className="flex items-center gap-2 font-mono">
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs font-semibold tabular-nums">
-              <Trophy className="size-3 text-lime-400" />
-              <span>{totalEarnedPoints}&nbsp;PTS</span>
-            </div>
+            {isPracticeMode ? (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs font-semibold tabular-nums">
+                <CheckCircle2 className="size-3 text-lime-400" />
+                <span>{solvedProblemIds.size} / {problems.length}&nbsp;SOLVED</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs font-semibold tabular-nums">
+                <Trophy className="size-3 text-lime-400" />
+                <span>{totalEarnedPoints}&nbsp;PTS</span>
+              </div>
+            )}
             <div className="flex items-center gap-1">
               {problems.map((p) => {
                 const isPsolved = solvedProblemIds.has(p.id);
@@ -2570,6 +2975,11 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   key={prob.id}
                   type="button"
                   onClick={() => {
+                    if (isPracticeMode) {
+                      navigate(`/practice/${prob.slug}`);
+                      setIsProblemListOpen(false);
+                      return;
+                    }
                     const target = isReviewMode
                       ? getProblemReviewUrl(contestSlug, prob.title, prob.problem_index)
                       : getProblemSolveUrl(contestSlug, prob.title, prob.problem_index);
@@ -2718,7 +3128,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       </aside>
 
       {/* Exit Confirmation Dialog (HackerRank Flow) */}
-      <Dialog open={showExitModal && !isReviewMode} onOpenChange={setShowExitModal}>
+      <Dialog open={!isPracticeMode && showExitModal && !isReviewMode} onOpenChange={setShowExitModal}>
         <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
           <DialogHeader className="space-y-3 text-left">
             <div className="flex items-center gap-3">

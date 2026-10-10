@@ -48,7 +48,7 @@ export function getFirstName(name?: string | null, fallback?: string | null): st
 }
 
 /**
- * Resolves avatar image URLs whether absolute (MinIO / S3) or relative (/media/...).
+ * Resolves avatar image URLs whether absolute (ImageKit / Cloud CDN) or relative (/media/...).
  */
 export function resolveAvatarUrl(url?: string | null): string | undefined {
   if (!url || typeof url !== "string") return undefined;

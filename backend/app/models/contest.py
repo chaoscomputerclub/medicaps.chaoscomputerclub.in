@@ -106,12 +106,14 @@ class ContestProblem(Base):
 
 
 class ContestSubmission(Base):
-    """Live Contest Arena Solution Code Submission."""
+    """Platform Solution Code Submission (Contest Arena or Practice Mode)."""
     __tablename__ = "contest_submissions"
 
     id = Column(String(36), primary_key=True, default=get_uuid)
-    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=False, index=True)
-    problem_id = Column(String(36), ForeignKey("contest_problems.id", ondelete="CASCADE"), nullable=False, index=True)
+    context = Column(String(20), default="CONTEST", nullable=False, index=True)  # CONTEST, PRACTICE
+    contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=True, index=True)
+    problem_id = Column(String(36), ForeignKey("contest_problems.id", ondelete="CASCADE"), nullable=True, index=True)
+    master_problem_id = Column(String(36), ForeignKey("problems.id", ondelete="SET NULL"), nullable=True, index=True)
     member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     handle = Column(String(50), nullable=False)
     language = Column(String(20), nullable=False)
@@ -128,11 +130,15 @@ class ContestSubmission(Base):
         Index("ix_contest_submissions_contest_problem_verdict", "contest_id", "problem_id", "verdict"),
         Index("ix_contest_submissions_contest_member_submitted", "contest_id", "member_id", "submitted_at"),
         Index("ix_contest_submissions_member_problem_verdict", "member_id", "problem_id", "verdict"),
+        Index("ix_contest_submissions_context_member", "context", "member_id", "submitted_at"),
+        Index("ix_contest_submissions_context_master_problem", "context", "master_problem_id", "verdict"),
+        Index("ix_contest_submissions_master_problem_verdict", "master_problem_id", "verdict"),
     )
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="submissions")
     problem = relationship("ContestProblem", back_populates="submissions")
+    master_problem = relationship("Problem", foreign_keys=[master_problem_id])
     member = relationship("MemberProfile", back_populates="contest_submissions")
 
 

@@ -99,6 +99,7 @@ export default defineConfig(({ mode }) => {
           target,
           changeOrigin: true,
           secure: false,
+          ws: true,
         },
       },
     },

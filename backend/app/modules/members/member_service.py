@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_minio_avatar_object(avatar_url: Optional[str]) -> Optional[str]:
-    """Extracts relative MinIO S3 key from avatar URL."""
+    """Extracts relative storage key from avatar URL (ImageKit CDN, Supabase, or legacy MinIO)."""
     if not avatar_url or not isinstance(avatar_url, str):
         return None
     external_domains = ("googleusercontent.com", "githubusercontent.com", "gravatar.com")
@@ -48,13 +48,20 @@ def _extract_minio_avatar_object(avatar_url: Optional[str]) -> Optional[str]:
         if path.startswith("media/"):
             return path[len("media/"):]
         bucket_prefix = f"{settings.MINIO_BUCKET_NAME}/"
-        if path.startswith(bucket_prefix):
+        if bucket_prefix and path.startswith(bucket_prefix):
             return path[len(bucket_prefix):]
+        if settings.IMAGEKIT_ID and path.startswith(f"{settings.IMAGEKIT_ID}/"):
+            return path[len(f"{settings.IMAGEKIT_ID}/"):]
+        if "avatars/" in path:
+            return path[path.find("avatars/"):]
         if path.startswith("avatars/"):
             return path
         return None
     except Exception:
         return None
+
+
+_extract_storage_avatar_object = _extract_minio_avatar_object
 
 
 def _compute_streak(dates: List[datetime]) -> int:
@@ -190,10 +197,10 @@ class MemberService:
                 prefix="avatars",
             )
         except Exception as e:
-            logger.error(f"Failed to store avatar in MinIO: {e}")
+            logger.error(f"Failed to store avatar in cloud storage: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to store avatar in MinIO object storage.",
+                detail="Failed to store avatar in cloud object storage.",
             )
 
         old_avatar = current_member.avatar_url
@@ -202,7 +209,7 @@ class MemberService:
             try:
                 storage_service.delete_file(old_object_key)
             except Exception as e:
-                logger.warning("Could not delete previous MinIO avatar %s: %s", old_object_key, e)
+                logger.warning("Could not delete previous avatar %s: %s", old_object_key, e)
 
         public_url = result.get("public_url")
         current_member.avatar_url = public_url
@@ -216,7 +223,7 @@ class MemberService:
 
         return {
             "success": True,
-            "message": "Avatar uploaded to MinIO and updated successfully.",
+            "message": "Avatar uploaded and updated successfully.",
             "avatar_url": public_url,
             "member": to_member_public(current_member).model_dump(),
         }
@@ -233,7 +240,7 @@ class MemberService:
                 from app.core.storage import storage_service
                 storage_service.delete_file(old_object_key)
             except Exception as e:
-                logger.warning("Could not delete MinIO avatar %s: %s", old_object_key, e)
+                logger.warning("Could not delete avatar %s: %s", old_object_key, e)
 
         current_member.avatar_url = None
         await MemberRepository.save(db, current_member)
@@ -250,6 +257,89 @@ class MemberService:
             "avatar_url": None,
             "member": to_member_public(current_member).model_dump(),
         }
+
+    @staticmethod
+    def compute_achievements(
+        rating: int,
+        attended: int,
+        podiums: int,
+        is_core_member: bool,
+        total_solved: int = 0,
+        streak_days: int = 0,
+    ) -> List[Dict[str, Any]]:
+        from app.services.rating_service import get_rating_tier
+        tier = get_rating_tier(rating or 1200)
+        achievements = [
+            {
+                "id": "cadet_init",
+                "code": "INIT",
+                "title": "Cadet Commissioned",
+                "name": "Cadet Commissioned",
+                "icon": "⚡",
+                "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
+                "earned": True,
+            },
+            {
+                "id": "tier_badge",
+                "code": "TIER",
+                "title": tier,
+                "name": tier,
+                "icon": "🏆",
+                "description": f"Reached official university tier {tier}.",
+                "earned": True,
+            },
+        ]
+        if (rating or 1200) >= 2000:
+            achievements.append({
+                "id": "elite",
+                "code": "ELITE",
+                "title": "Top 5% Elite",
+                "name": "Top 5% Elite",
+                "icon": "⚡",
+                "description": "Ranked among the top 5% competitive coders in Medi-Caps.",
+                "earned": True,
+            })
+        if attended >= 5:
+            achievements.append({
+                "id": "veteran",
+                "code": "VET",
+                "title": "Contest Veteran",
+                "name": "Contest Veteran",
+                "icon": "🎖️",
+                "description": f"Attended {attended} official offline lab contests.",
+                "earned": True,
+            })
+        if podiums > 0:
+            achievements.append({
+                "id": "podium",
+                "code": "PODIUM",
+                "title": f"{podiums}x Podium Finisher",
+                "name": f"{podiums}x Podium Finisher",
+                "icon": "🥇",
+                "description": f"Secured top 3 podium placements in {podiums} campus contests.",
+                "earned": True,
+            })
+        if total_solved >= 10:
+            achievements.append({
+                "id": "solver_10",
+                "code": "SOLVER_10",
+                "title": "Problem Solver",
+                "name": "Problem Solver",
+                "icon": "💡",
+                "description": f"Solved {total_solved} practice platform problems.",
+                "earned": True,
+            })
+        if is_core_member:
+            achievements.append({
+                "id": "core",
+                "code": "CORE",
+                "title": "CCC Core Organizer",
+                "name": "CCC Core Organizer",
+                "icon": "🛡️",
+                "description": "Official Chapter Organizer and Proctor.",
+                "earned": True,
+            })
+        return achievements
 
     @staticmethod
     async def get_full_profile(current_member: MemberProfile, db: AsyncSession) -> dict:
@@ -461,6 +551,38 @@ class MemberService:
             "sparkline_ratings": sparkline_ratings,
         }
 
+        try:
+            from app.services.practice_service import PracticeService
+            practice_problem_stats = await PracticeService.get_user_problem_stats(db, str(current_member.id))
+        except Exception as e:
+            logger.warning("Could not calculate practice stats for member %s: %s", current_member.id, e)
+            practice_problem_stats = {
+                "problems": {"solved": 0, "attempted": 0, "total": 0},
+                "difficulty": {
+                    "easy": {"solved": 0, "total": 0},
+                    "medium": {"solved": 0, "total": 0},
+                    "hard": {"solved": 0, "total": 0},
+                },
+            }
+
+        payload["problem_stats"] = practice_problem_stats
+        payload["problemStats"] = {
+            "total_solved": practice_problem_stats["problems"]["solved"],
+            "easy_solved": practice_problem_stats["difficulty"]["easy"]["solved"],
+            "medium_solved": practice_problem_stats["difficulty"]["medium"]["solved"],
+            "hard_solved": practice_problem_stats["difficulty"]["hard"]["solved"],
+            "problems": practice_problem_stats["problems"],
+            "difficulty": practice_problem_stats["difficulty"],
+        }
+        achievements = MemberService.compute_achievements(
+            rating=current_member.rating or 1200,
+            attended=attended,
+            podiums=podiums,
+            is_core_member=bool(current_member.is_core_member),
+            total_solved=practice_problem_stats["problems"]["solved"],
+        )
+        payload["achievements"] = achievements
+
         await set_cache(cache_key, payload, ttl_seconds=60)
         return payload
 
@@ -614,20 +736,7 @@ class MemberService:
             for p in tp_rows.scalars().all()
         ]
 
-        from app.services.rating_service import get_rating_tier
-        tier = get_rating_tier(student.rating or 1200)
-        achievements = [
-            {"id": "tier_badge", "title": tier, "icon": "🏆", "description": f"Reached official university tier {tier}."},
-        ]
-        if (student.rating or 1200) >= 2000:
-            achievements.append({"id": "elite", "title": "Top 5% Elite", "icon": "⚡", "description": "Ranked among the top 5% competitive coders in Medi-Caps."})
-        if attended >= 5:
-            achievements.append({"id": "veteran", "title": "Contest Veteran", "icon": "🎖️", "description": f"Attended {attended} official offline lab contests."})
         podiums = sum(1 for b in battles if (b.get("rank") or 999) <= 3)
-        if podiums > 0:
-            achievements.append({"id": "podium", "title": f"{podiums}x Podium Finisher", "icon": "🥇", "description": f"Secured top 3 podium placements in {podiums} campus contests."})
-        if student.is_core_member:
-            achievements.append({"id": "core", "title": "CCC Core Organizer", "icon": "🛡️", "description": "Official Chapter Organizer and Proctor."})
 
         is_self = bool(current_member and str(current_member.id) == str(student.id))
         solves_count = total_solved
@@ -709,25 +818,50 @@ class MemberService:
             "ratingHistory": detailed_rh,
             "ratings": sparkline,
             "sparkline_ratings": sparkline,
-            "problemStats": {
-                "total_solved": total_solved,
-                "easy_solved": easy_count,
-                "medium_solved": med_count,
-                "hard_solved": hard_count,
-                "total_submissions": total_submissions,
-                "acceptance_rate": round((len(accepted_subs) / total_submissions * 100), 1) if total_submissions > 0 else 0.0,
-                "topics": [
-                    {"topic": "Graph Algorithms", "solved": max(0, int(total_solved * 0.35))},
-                    {"topic": "Dynamic Programming", "solved": max(0, int(total_solved * 0.30))},
-                    {"topic": "Greedy Heuristics", "solved": max(0, int(total_solved * 0.25))},
-                    {"topic": "String Manipulation", "solved": max(0, int(total_solved * 0.20))},
-                    {"topic": "Tree Traversal", "solved": max(0, int(total_solved * 0.15))},
-                ],
-            },
-            "submissionCalendar": submission_calendar,
-            "proofs": proofs,
-            "achievements": achievements,
         }
+
+        try:
+            from app.services.practice_service import PracticeService
+            practice_problem_stats = await PracticeService.get_user_problem_stats(db, str(student.id))
+        except Exception as e:
+            logger.warning("Could not calculate practice stats for student %s: %s", student.id, e)
+            practice_problem_stats = {
+                "problems": {"solved": total_solved, "attempted": total_solved, "total": 0},
+                "difficulty": {
+                    "easy": {"solved": easy_count, "total": 0},
+                    "medium": {"solved": med_count, "total": 0},
+                    "hard": {"solved": hard_count, "total": 0},
+                },
+            }
+
+        payload["problem_stats"] = practice_problem_stats
+        payload["problemStats"] = {
+            "total_solved": practice_problem_stats["problems"]["solved"],
+            "easy_solved": practice_problem_stats["difficulty"]["easy"]["solved"],
+            "medium_solved": practice_problem_stats["difficulty"]["medium"]["solved"],
+            "hard_solved": practice_problem_stats["difficulty"]["hard"]["solved"],
+            "total_submissions": total_submissions,
+            "acceptance_rate": round((len(accepted_subs) / total_submissions * 100), 1) if total_submissions > 0 else 0.0,
+            "problems": practice_problem_stats["problems"],
+            "difficulty": practice_problem_stats["difficulty"],
+            "topics": [
+                {"topic": "Graph Algorithms", "solved": max(0, int(practice_problem_stats["problems"]["solved"] * 0.35))},
+                {"topic": "Dynamic Programming", "solved": max(0, int(practice_problem_stats["problems"]["solved"] * 0.30))},
+                {"topic": "Greedy Heuristics", "solved": max(0, int(practice_problem_stats["problems"]["solved"] * 0.25))},
+                {"topic": "String Manipulation", "solved": max(0, int(practice_problem_stats["problems"]["solved"] * 0.20))},
+                {"topic": "Tree Traversal", "solved": max(0, int(practice_problem_stats["problems"]["solved"] * 0.15))},
+            ],
+        }
+        payload["submissionCalendar"] = submission_calendar
+        payload["proofs"] = proofs
+        achievements = MemberService.compute_achievements(
+            rating=student.rating or 1200,
+            attended=attended,
+            podiums=podiums,
+            is_core_member=bool(student.is_core_member),
+            total_solved=practice_problem_stats["problems"]["solved"],
+        )
+        payload["achievements"] = achievements
 
         await set_cache(cache_key, payload, ttl_seconds=60)
         return payload
@@ -750,7 +884,7 @@ class MemberService:
                 from app.core.storage import storage_service
                 storage_service.delete_file(minio_object_key)
             except Exception as e:
-                logger.warning("Could not delete MinIO avatar %s: %s", minio_object_key, e)
+                logger.warning("Could not delete avatar %s: %s", minio_object_key, e)
 
         if request:
             token_candidate = (

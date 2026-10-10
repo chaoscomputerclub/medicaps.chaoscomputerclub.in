@@ -487,6 +487,354 @@ class ProblemService:
         return {"success": True, "message": f"Problem '{problem.slug}' archived."}
 
     @classmethod
+    async def unpublish_problem(cls, problem_id: str, admin_id: Optional[str], db: AsyncSession) -> Dict[str, Any]:
+        problem = await db.get(Problem, problem_id)
+        if not problem:
+            raise HTTPException(status_code=404, detail="Problem not found.")
+        problem.status = "DRAFT"
+        problem.updated_by = admin_id
+        problem.updated_at = now_utc()
+        await db.commit()
+        return {"success": True, "message": f"Problem '{problem.slug}' reverted to DRAFT status."}
+
+    @classmethod
+    async def seed_institutional_suite(cls, admin_id: Optional[str], db: AsyncSession) -> Dict[str, Any]:
+        """
+        Seeds canonical Medi-Caps algorithmic problem suite for the Practice Arena.
+        Ensures idempotency by checking existing slugs.
+        """
+        CANONICAL_SUITE = [
+            {
+                "index": "A",
+                "title": "Two Sum",
+                "slug": "two-sum",
+                "difficulty": "EASY",
+                "topic": "Arrays & Hashing",
+                "points": 100,
+                "description": "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
+                "constraints": "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9\n-10^9 <= target <= 10^9\nOnly one valid answer exists.",
+                "input_format": "`nums`: Array of integers, `target`: Target sum integer",
+                "output_format": "Array of 2 indices `[index1, index2]`",
+                "fn_name": "twoSum",
+                "params": [{"name": "nums", "type": "integer[]"}, {"name": "target", "type": "integer"}],
+                "ret_type": "integer[]",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"nums": [2, 7, 11, 15], "target": 9}, "out": [0, 1], "exp": "nums[0] + nums[1] = 2 + 7 = 9"},
+                    {"id": "SAMPLE-02", "in": {"nums": [3, 2, 4], "target": 6}, "out": [1, 2], "exp": "nums[1] + nums[2] = 2 + 4 = 6"},
+                    {"id": "SAMPLE-03", "in": {"nums": [3, 3], "target": 6}, "out": [0, 1], "exp": "nums[0] + nums[1] = 3 + 3 = 6"},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"nums": [-1, -2, -3, -4, -5], "target": -8}, "out": [2, 4]},
+                    {"id": "TC-02", "in": {"nums": [1000000000, 500, 1000000000], "target": 2000000000}, "out": [0, 2]},
+                    {"id": "TC-03", "in": {"nums": [0, 4, 3, 0], "target": 0}, "out": [0, 3]},
+                ],
+            },
+            {
+                "index": "B",
+                "title": "Valid Parentheses",
+                "slug": "valid-parentheses",
+                "difficulty": "EASY",
+                "topic": "Stacks",
+                "points": 100,
+                "description": "Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['` and `']'`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
+                "constraints": "1 <= s.length <= 10^4\n`s` consists of parentheses only `'()[]{}'`.",
+                "input_format": "`s`: String of brackets",
+                "output_format": "Boolean `true` if valid, `false` otherwise",
+                "fn_name": "isValid",
+                "params": [{"name": "s", "type": "string"}],
+                "ret_type": "boolean",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"s": "()"}, "out": True, "exp": "Matching parentheses pair"},
+                    {"id": "SAMPLE-02", "in": {"s": "()[]{}"}, "out": True, "exp": "Consecutive matching bracket pairs"},
+                    {"id": "SAMPLE-03", "in": {"s": "(]"}, "out": False, "exp": "Mismatched bracket pair"},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"s": "{[]}"}, "out": True},
+                    {"id": "TC-02", "in": {"s": "([)]"}, "out": False},
+                    {"id": "TC-03", "in": {"s": "["}, "out": False},
+                    {"id": "TC-04", "in": {"s": "]"}, "out": False},
+                ],
+            },
+            {
+                "index": "C",
+                "title": "Binary Search",
+                "slug": "binary-search",
+                "difficulty": "EASY",
+                "topic": "Binary Search",
+                "points": 100,
+                "description": "Given an array of integers `nums` which is sorted in ascending order, and an integer `target`, write a function to search `target` in `nums`. If `target` exists, then return its index. Otherwise, return `-1`.\n\nYou must write an algorithm with `O(log n)` runtime complexity.",
+                "constraints": "1 <= nums.length <= 10^4\n-10^4 < nums[i], target < 10^4\nAll integers in `nums` are unique and sorted in ascending order.",
+                "input_format": "`nums`: Sorted integer array, `target`: Search target",
+                "output_format": "Index of target or `-1` if not found",
+                "fn_name": "search",
+                "params": [{"name": "nums", "type": "integer[]"}, {"name": "target", "type": "integer"}],
+                "ret_type": "integer",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"nums": [-1, 0, 3, 5, 9, 12], "target": 9}, "out": 4, "exp": "9 exists in nums and its index is 4"},
+                    {"id": "SAMPLE-02", "in": {"nums": [-1, 0, 3, 5, 9, 12], "target": 2}, "out": -1, "exp": "2 does not exist in nums so return -1"},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"nums": [5], "target": 5}, "out": 0},
+                    {"id": "TC-02", "in": {"nums": [5], "target": -5}, "out": -1},
+                    {"id": "TC-03", "in": {"nums": [1, 3, 5, 7, 9, 11, 13, 15], "target": 15}, "out": 7},
+                ],
+            },
+            {
+                "index": "D",
+                "title": "Best Time to Buy and Sell Stock",
+                "slug": "best-time-to-buy-and-sell-stock",
+                "difficulty": "EASY",
+                "topic": "Greedy",
+                "points": 100,
+                "description": "You are given an array `prices` where `prices[i]` is the price of a given stock on the `i`th day.\n\nYou want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.\n\nReturn the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return `0`.",
+                "constraints": "1 <= prices.length <= 10^5\n0 <= prices[i] <= 10^4",
+                "input_format": "`prices`: Daily stock price array",
+                "output_format": "Maximum achievable profit integer",
+                "fn_name": "maxProfit",
+                "params": [{"name": "prices", "type": "integer[]"}],
+                "ret_type": "integer",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"prices": [7, 1, 5, 3, 6, 4]}, "out": 5, "exp": "Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6 - 1 = 5."},
+                    {"id": "SAMPLE-02", "in": {"prices": [7, 6, 4, 3, 1]}, "out": 0, "exp": "In this case, no transactions are done and the max profit = 0."},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"prices": [2, 4, 1]}, "out": 2},
+                    {"id": "TC-02", "in": {"prices": [1, 2, 3, 4, 5]}, "out": 4},
+                    {"id": "TC-03", "in": {"prices": [3, 3, 3, 3]}, "out": 0},
+                ],
+            },
+            {
+                "index": "E",
+                "title": "Maximum Subarray",
+                "slug": "maximum-subarray",
+                "difficulty": "MEDIUM",
+                "topic": "Dynamic Programming",
+                "points": 200,
+                "description": "Given an integer array `nums`, find the subarray with the largest sum, and return its sum.",
+                "constraints": "1 <= nums.length <= 10^5\n-10^4 <= nums[i] <= 10^4",
+                "input_format": "`nums`: Integer array",
+                "output_format": "Maximum subarray sum integer",
+                "fn_name": "maxSubArray",
+                "params": [{"name": "nums", "type": "integer[]"}],
+                "ret_type": "integer",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"nums": [-2, 1, -3, 4, -1, 2, 1, -5, 4]}, "out": 6, "exp": "The subarray [4,-1,2,1] has the largest sum 6."},
+                    {"id": "SAMPLE-02", "in": {"nums": [1]}, "out": 1, "exp": "The subarray [1] has the largest sum 1."},
+                    {"id": "SAMPLE-03", "in": {"nums": [5, 4, -1, 7, 8]}, "out": 23, "exp": "The subarray [5,4,-1,7,8] has the largest sum 23."},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"nums": [-5, -2, -8, -1]}, "out": -1},
+                    {"id": "TC-02", "in": {"nums": [-1, 0, -2]}, "out": 0},
+                ],
+            },
+            {
+                "index": "F",
+                "title": "Reverse Array",
+                "slug": "reverse-array",
+                "difficulty": "EASY",
+                "topic": "Arrays",
+                "points": 100,
+                "description": "Given an array of integers `arr`, return a new array containing the elements in reverse order.",
+                "constraints": "0 <= arr.length <= 10^4\n-10^9 <= arr[i] <= 10^9",
+                "input_format": "`arr`: Integer array",
+                "output_format": "Reversed integer array",
+                "fn_name": "reverseArray",
+                "params": [{"name": "arr", "type": "integer[]"}],
+                "ret_type": "integer[]",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"arr": [1, 2, 3, 4, 5]}, "out": [5, 4, 3, 2, 1], "exp": "Array reversed"},
+                    {"id": "SAMPLE-02", "in": {"arr": [1, 2]}, "out": [2, 1], "exp": "Two elements reversed"},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"arr": []}, "out": []},
+                    {"id": "TC-02", "in": {"arr": [42]}, "out": [42]},
+                ],
+            },
+            {
+                "index": "G",
+                "title": "Longest Substring Without Repeating Characters",
+                "slug": "longest-substring-without-repeating-characters",
+                "difficulty": "MEDIUM",
+                "topic": "Sliding Window",
+                "points": 200,
+                "description": "Given a string `s`, find the length of the longest substring without duplicate characters.",
+                "constraints": "0 <= s.length <= 5 * 10^4\n`s` consists of English letters, digits, symbols and spaces.",
+                "input_format": "`s`: String",
+                "output_format": "Length of longest non-repeating substring",
+                "fn_name": "lengthOfLongestSubstring",
+                "params": [{"name": "s", "type": "string"}],
+                "ret_type": "integer",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"s": "abcabcbb"}, "out": 3, "exp": "The answer is 'abc', with the length of 3."},
+                    {"id": "SAMPLE-02", "in": {"s": "bbbbb"}, "out": 1, "exp": "The answer is 'b', with the length of 1."},
+                    {"id": "SAMPLE-03", "in": {"s": "pwwkew"}, "out": 3, "exp": "The answer is 'wke', with the length of 3."},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"s": ""}, "out": 0},
+                    {"id": "TC-02", "in": {"s": " "}, "out": 1},
+                    {"id": "TC-03", "in": {"s": "dvdf"}, "out": 3},
+                ],
+            },
+            {
+                "index": "H",
+                "title": "Trapping Rain Water",
+                "slug": "trapping-rain-water",
+                "difficulty": "HARD",
+                "topic": "Two Pointers",
+                "points": 300,
+                "description": "Given `n` non-negative integers representing an elevation map where the width of each bar is `1`, compute how much water it can trap after raining.",
+                "constraints": "n == height.length\n1 <= n <= 2 * 10^4\n0 <= height[i] <= 10^5",
+                "input_format": "`height`: Elevation array",
+                "output_format": "Total trapped water integer",
+                "fn_name": "trap",
+                "params": [{"name": "height", "type": "integer[]"}],
+                "ret_type": "integer",
+                "samples": [
+                    {"id": "SAMPLE-01", "in": {"height": [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]}, "out": 6, "exp": "The above elevation map can trap 6 units of rain water."},
+                    {"id": "SAMPLE-02", "in": {"height": [4, 2, 0, 3, 2, 5]}, "out": 9, "exp": "Traps 9 units of rain water."},
+                ],
+                "hidden": [
+                    {"id": "TC-01", "in": {"height": [3, 0, 2, 0, 4]}, "out": 7},
+                    {"id": "TC-02", "in": {"height": [5, 4, 1, 2]}, "out": 1},
+                    {"id": "TC-03", "in": {"height": [1, 2, 3]}, "out": 0},
+                ],
+            },
+        ]
+
+        seeded_count = 0
+        published_count = 0
+
+        for item in CANONICAL_SUITE:
+            existing = await db.scalar(select(Problem).where(Problem.slug == item["slug"]))
+            if existing:
+                # If existing is in draft, publish it
+                if existing.status != "PUBLISHED":
+                    existing.status = "PUBLISHED"
+                    published_count += 1
+                continue
+
+            # Generate function signature and starter codes
+            fn_sig = FunctionSignature(
+                name=item["fn_name"],
+                parameters=item["params"],
+                return_type=item["ret_type"],
+            )
+            starter_dict = {}
+            for lang in ["python", "cpp", "c", "java", "javascript", "typescript"]:
+                try:
+                    adapter = get_adapter(lang)
+                    starter_dict[lang] = adapter.generate_starter_code(fn_sig)
+                except Exception:
+                    pass
+
+            problem = Problem(
+                problem_index=item["index"],
+                title=item["title"],
+                slug=item["slug"],
+                difficulty=item["difficulty"],
+                topic=item["topic"],
+                points=item["points"],
+                description=item["description"],
+                constraints=item["constraints"],
+                input_format=item["input_format"],
+                output_format=item["output_format"],
+                execution_mode="FUNCTION",
+                function_signature=fn_sig.model_dump(),
+                starter_code=starter_dict,
+                time_limit=2.0,
+                memory_limit=256,
+                evaluation_config={
+                    "match_type": "EXACT_MATCH",
+                    "float_tolerance": 1e-6,
+                    "ignore_whitespace": True,
+                    "ignore_case": False,
+                },
+                sandbox_config={
+                    "time_limit_sec": 2.0,
+                    "memory_limit_mb": 256,
+                    "network_enabled": False,
+                    "process_limit": 16,
+                    "output_limit_kb": 1024,
+                },
+                status="PUBLISHED",
+                version=1,
+                created_by=admin_id,
+            )
+            db.add(problem)
+            await db.flush()
+
+            # Add testcases
+            order_idx = 0
+            for sample in item["samples"]:
+                tc = ProblemTestCase(
+                    problem_id=problem.id,
+                    version=1,
+                    testcase_id=sample["id"],
+                    input_data=sample["in"],
+                    expected_output=sample["out"],
+                    explanation=sample.get("exp"),
+                    weight=1.0,
+                    is_hidden=False,
+                    order=order_idx,
+                    is_active=True,
+                    content_hash=cls._compute_testcase_hash(sample["in"], sample["out"]),
+                )
+                db.add(tc)
+                order_idx += 1
+
+            for h in item["hidden"]:
+                tc = ProblemTestCase(
+                    problem_id=problem.id,
+                    version=1,
+                    testcase_id=h["id"],
+                    input_data=h["in"],
+                    expected_output=h["out"],
+                    weight=1.0,
+                    is_hidden=True,
+                    order=order_idx,
+                    is_active=True,
+                    content_hash=cls._compute_testcase_hash(h["in"], h["out"]),
+                )
+                db.add(tc)
+                order_idx += 1
+
+            # Snapshot version 1
+            ver = ProblemVersion(
+                problem_id=problem.id,
+                version=1,
+                title=problem.title,
+                slug=problem.slug,
+                difficulty=problem.difficulty,
+                topic=problem.topic,
+                points=problem.points,
+                description=problem.description,
+                constraints=problem.constraints,
+                input_format=problem.input_format,
+                output_format=problem.output_format,
+                execution_mode=problem.execution_mode,
+                function_signature=problem.function_signature,
+                starter_code=problem.starter_code,
+                time_limit=problem.time_limit,
+                memory_limit=problem.memory_limit,
+                evaluation_config=problem.evaluation_config,
+                sandbox_config=problem.sandbox_config,
+                created_by=admin_id,
+                created_at=now_utc(),
+            )
+            db.add(ver)
+
+            seeded_count += 1
+            published_count += 1
+
+        await db.commit()
+        return {
+            "success": True,
+            "seeded_count": seeded_count,
+            "published_count": published_count,
+            "message": f"Successfully seeded {seeded_count} institutional practice problems.",
+        }
+
+    @classmethod
     async def create_new_version(cls, problem_id: str, admin_id: Optional[str], db: AsyncSession) -> Dict[str, Any]:
         problem = await db.get(Problem, problem_id)
         if not problem:

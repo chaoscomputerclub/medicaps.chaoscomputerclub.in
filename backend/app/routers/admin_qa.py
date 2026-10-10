@@ -6,8 +6,10 @@ Delegates to app.controllers.admin_qa_controller.AdminQAController
 from typing import Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.db import get_db
 from app.middleware.auth import require_admin_or_core
 from app.models.db_models import MemberProfile
 from app.services.qa_test_service import QAAuditReport
@@ -99,3 +101,59 @@ async def simulate_tournament(
         primary_name=req.primary_name,
         primary_prn=req.primary_prn,
     )
+
+
+@router.post(
+    "/dev-admin-token",
+    summary="Generate ephemeral admin bearer token for localhost development",
+)
+async def generate_dev_admin_token(
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Returns a valid administrator JWT token for the primary admin email.
+    Only permitted in non-production environments or on localhost.
+    """
+    from fastapi import HTTPException
+    from sqlalchemy import select
+    from app.core.security import create_access_token
+    from app.core.safety import is_production_environment
+
+    if is_production_environment() and not (settings.HOST in ("127.0.0.1", "0.0.0.0", "localhost")):
+        raise HTTPException(
+            status_code=403,
+            detail="Dev admin token generator is disabled in production.",
+        )
+
+    admin_email = settings.ADMIN_PRIMARY_EMAIL or "en23cs301927@medicaps.ac.in"
+    res = await db.execute(select(MemberProfile).where(MemberProfile.email == admin_email))
+    member = res.scalars().first()
+    if not member:
+        from uuid import uuid4
+        member = MemberProfile(
+            id=str(uuid4()),
+            email=admin_email,
+            handle="santusht",
+            full_name="Santusht Kotai",
+            name="Santusht Kotai",
+            prn="EN23CS301927",
+            department="Computer Science & Engineering",
+            batch="2023-27",
+            rating=1450,
+            peak_rating=1450,
+            is_core_member=True,
+            is_onboarded=True,
+        )
+        db.add(member)
+        await db.commit()
+        await db.refresh(member)
+
+    token = create_access_token({"sub": str(member.id), "email": member.email})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "email": member.email,
+        "handle": member.handle,
+        "is_core_member": member.is_core_member,
+    }
+

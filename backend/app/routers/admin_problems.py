@@ -63,6 +63,16 @@ async def list_problems(
     )
 
 
+@router.post("/seed-institutional-suite", summary="Seed standard Medi-Caps DSA challenges into Practice Arena")
+async def seed_institutional_suite(
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Seeds 8 standard DSA challenges (Two Sum, Valid Parentheses, etc.) with testcases and publishes them."""
+    admin_id = admin.id if admin else None
+    return await ProblemService.seed_institutional_suite(admin_id=admin_id, db=db)
+
+
 @router.get("/{problem_id}", summary="Get complete problem dossier with hidden testcases")
 async def get_problem(
     problem_id: str,
@@ -121,6 +131,21 @@ async def publish_problem(
     """Validates problem and transitions status to PUBLISHED with an immutable version snapshot."""
     admin_id = admin.id if admin else None
     return await ProblemService.publish_problem(
+        problem_id=problem_id,
+        admin_id=admin_id,
+        db=db,
+    )
+
+
+@router.post("/{problem_id}/unpublish", summary="Revert problem back to DRAFT state")
+async def unpublish_problem(
+    problem_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: Optional[MemberProfile] = Depends(require_admin_or_core),
+):
+    """Reverts problem status from PUBLISHED to DRAFT, withdrawing it from the Practice Arena."""
+    admin_id = admin.id if admin else None
+    return await ProblemService.unpublish_problem(
         problem_id=problem_id,
         admin_id=admin_id,
         db=db,

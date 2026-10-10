@@ -23,7 +23,7 @@ from .assessment import (
     AssessmentSession,
     AssessmentSubmission,
 )
-from .problem import Problem, ProblemVersion, ProblemTestCase
+from .problem import Problem, ProblemVersion, ProblemTestCase, MemberProblemStats
 from .proof import TrustProof
 from .campus_pass import CampusPass
 from .announcement import Announcement
@@ -49,6 +49,7 @@ __all__ = [
     "Problem",
     "ProblemVersion",
     "ProblemTestCase",
+    "MemberProblemStats",
     # Online Assessments
     "Assessment",
     "AssessmentProblem",
