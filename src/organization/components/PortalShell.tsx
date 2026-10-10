@@ -6,9 +6,7 @@ import { markNavigationClick } from "@/lib/navigationTelemetry";
 import {
   LayoutDashboard,
   Trophy,
-  Bookmark,
   BarChart2,
-  Code2,
   Settings,
   Terminal,
   LogOut,
@@ -44,7 +42,6 @@ const links = [
   { to: "/contests", label: "Contests", icon: Trophy, exact: false },
   { to: "/practice", label: "Practice", icon: Terminal, exact: false },
   { to: "/leaderboard", label: "Leaderboard", icon: BarChart2, exact: true },
-  { to: "/problems", label: "Problems", icon: Code2, exact: false },
   { to: "/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
 

@@ -93,9 +93,9 @@ export function AppShellSkeleton() {
           </div>
         </div>
 
-        {/* Nav Links (7 Items) */}
+        {/* Nav Links (5 Items: Dashboard, Contests, Practice, Leaderboard, Settings) */}
         <div className="flex flex-col gap-1 my-1 flex-1">
-          {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+          {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex items-center gap-2.5 px-2.5 py-2">
               <Skeleton className="w-4 h-4 rounded" />
               <Skeleton className="h-3 flex-1" />

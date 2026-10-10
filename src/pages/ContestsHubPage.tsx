@@ -466,11 +466,11 @@ export function ContestsHubPage() {
                 <Trophy className="size-10 text-zinc-600 mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-lime-400" />
                 <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
                 <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
-                  New official rounds will be announced shortly. Practice in the Problem Archive in the meantime.
+                  New official rounds will be announced shortly. Train in the Practice Arena in the meantime.
                 </p>
                 <Button asChild variant="outline" size="sm" className="mt-3 group/btn">
-                  <Link to="/problems" className="flex items-center gap-1.5">
-                    <span>Problem Archive</span>
+                  <Link to="/practice" className="flex items-center gap-1.5">
+                    <span>Practice Arena</span>
                     <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
                   </Link>
                 </Button>
@@ -978,12 +978,12 @@ export function ContestsHubPage() {
                         No Concluded Rounds Yet
                       </p>
                       <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                        Past weekly round challenges and editorial solutions will appear here for practice.
+                        Past weekly round challenges and curated practice problems are available in the Practice Arena.
                       </p>
                     </div>
                     <Button asChild size="default" variant="outline" className="group/btn">
-                      <Link to="/problems" className="flex items-center gap-1.5">
-                        <span>Explore Problem Archive</span>
+                      <Link to="/practice" className="flex items-center gap-1.5">
+                        <span>Explore Practice Arena</span>
                         <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
                       </Link>
                     </Button>

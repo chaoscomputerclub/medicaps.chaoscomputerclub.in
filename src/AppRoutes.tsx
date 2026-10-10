@@ -544,14 +544,10 @@ export function AppRoutes() {
             }
           />
 
-          {/* Problem Archive & Editorials */}
+          {/* Problem Archive redirected to consolidated Practice Arena */}
           <Route
             path="problems"
-            element={
-              <Suspense fallback={<ProblemArchiveSkeleton />}>
-                <ProblemArchivePage />
-              </Suspense>
-            }
+            element={<Navigate to="/practice" replace />}
           />
           <Route
             path="problems/:problemSlug"
