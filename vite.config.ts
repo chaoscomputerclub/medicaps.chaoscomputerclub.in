@@ -100,6 +100,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           ws: true,
+          // Strip the production domain from Set-Cookie headers so auth cookies
+          // (refresh_token, access_token) are stored for localhost instead of
+          // .chaoscomputerclub.in — without this, the browser never sends them
+          // back on proxied requests and every /auth/refresh returns 401.
+          cookieDomainRewrite: "",
         },
       },
     },
