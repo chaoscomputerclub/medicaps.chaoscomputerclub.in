@@ -124,8 +124,8 @@ function SettingSection({
       className={cn(
         "border rounded-[24px] overflow-hidden",
         danger
-          ? "border-red-500/20 bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
-          : "border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
+          ? "border-red-500/20 bg-[#1F1F1F]"
+          : "border-white/[0.08] bg-[#1F1F1F]",
       )}
     >
       <div className={cn("px-6 py-4.5 border-b", danger ? "border-red-500/15" : "border-white/[0.08]")}>
@@ -560,7 +560,7 @@ export function SettingsPage() {
                       onDrop={handleDrop}
                       onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
                       className={cn(
-                        "rounded-lg border border-dashed px-5 py-6 text-center cursor-pointer transition-colors bg-black",
+                        "rounded-lg border border-dashed px-5 py-6 text-center cursor-pointer transition-colors bg-[#171717]",
                         isDragging
                           ? "border-lime-400 bg-lime-400/5"
                           : "border-white/10 hover:border-white/25 hover:bg-white/[0.02]",
@@ -624,7 +624,7 @@ export function SettingsPage() {
                         e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })
                       }
                       placeholder="Full Name"
-                      className="h-10 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
+                      className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                     />
                     <SaveButton
                       onClick={() => saveField("full_name", { full_name: fullName.trim() })}
@@ -648,7 +648,7 @@ export function SettingsPage() {
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
                       placeholder="Competitive programmer, building expertise in algorithms…"
-                      className="text-base md:text-xs font-sans resize-none bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
+                      className="text-base md:text-xs font-sans resize-none bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                     />
                     <div className="flex items-center justify-between font-sans">
                       <span className="text-[11px] text-zinc-500 tabular-nums">
@@ -677,11 +677,11 @@ export function SettingsPage() {
                   >
                     <SelectTrigger
                       id="s-dept"
-                      className="h-10 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                      className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
                     >
                       <SelectValue placeholder="Select Department…" />
                     </SelectTrigger>
-                    <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
+                    <SelectContent className="bg-[#1F1F1F] border-white/10 text-white font-sans rounded-md">
                       <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">
                         Not Specified
                       </SelectItem>
@@ -705,11 +705,11 @@ export function SettingsPage() {
                   >
                     <SelectTrigger
                       id="s-batch"
-                      className="h-10 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                      className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
                     >
                       <SelectValue placeholder="Select Graduation Batch…" />
                     </SelectTrigger>
-                    <SelectContent className="bg-black border-white/10 text-white font-sans rounded-md">
+                    <SelectContent className="bg-[#1F1F1F] border-white/10 text-white font-sans rounded-md">
                       <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">
                         Not Specified
                       </SelectItem>
@@ -748,7 +748,7 @@ export function SettingsPage() {
                           saveField("github", { github_username: github.trim() })
                         }
                         placeholder="octocat"
-                        className="h-10 pl-8 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
+                        className="h-10 pl-8 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                       />
                     </div>
                     <SaveButton
@@ -792,7 +792,7 @@ export function SettingsPage() {
                           saveField("linkedin", { linkedin_url: linkedin.trim() })
                         }
                         placeholder="https://linkedin.com/in/username"
-                        className="h-10 pl-8 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
+                        className="h-10 pl-8 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
                       />
                     </div>
                     <SaveButton
@@ -815,7 +815,7 @@ export function SettingsPage() {
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Lock size={11} /> Enrollment Number
                     </Label>
-                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-sans text-xs select-all">
+                    <div className="h-9 px-3 flex items-center bg-[#171717] border border-white/8 rounded-md text-zinc-400 font-sans text-xs select-all">
                       {member.prn && member.prn !== "N/A" && member.prn !== "—"
                         ? member.prn
                         : member.email?.includes("@")
@@ -827,7 +827,7 @@ export function SettingsPage() {
                     <Label className="text-[11px] text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Lock size={11} /> Institutional Email
                     </Label>
-                    <div className="h-9 px-3 flex items-center bg-black border border-white/8 rounded-md text-zinc-400 font-sans text-xs truncate select-all">
+                    <div className="h-9 px-3 flex items-center bg-[#171717] border border-white/8 rounded-md text-zinc-400 font-sans text-xs truncate select-all">
                       {member.email}
                     </div>
                   </div>
@@ -862,7 +862,7 @@ export function SettingsPage() {
                             setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
                           }
                           className={cn(
-                            "h-10 pl-7 text-base md:text-xs font-sans bg-black border-white/12 text-white rounded-md focus-visible:ring-0",
+                            "h-10 pl-7 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:ring-0",
                             isHandleChanged &&
                               handleStatus === "available" &&
                               "border-emerald-500/60 focus-visible:border-emerald-500",
@@ -930,7 +930,7 @@ export function SettingsPage() {
               >
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-3">
-                    <div className="size-9 bg-black border border-white/10 rounded-md flex items-center justify-center shrink-0">
+                    <div className="size-9 bg-[#171717] border border-white/10 rounded-md flex items-center justify-center shrink-0">
                       <span className="font-bold text-sm text-white">G</span>
                     </div>
                     <div>
@@ -1024,7 +1024,7 @@ export function SettingsPage() {
                 title="Active Session"
                 description="Current terminal device authorization and cryptographic token parameters."
               >
-                <div className="flex items-start justify-between gap-4 p-4 bg-black border border-white/8 rounded-lg">
+                <div className="flex items-start justify-between gap-4 p-4 bg-[#171717] border border-white/8 rounded-lg">
                   <div className="flex items-start gap-3">
                     <Monitor size={18} className="text-lime-400 mt-0.5 shrink-0" />
                     <div>
@@ -1073,7 +1073,7 @@ export function SettingsPage() {
                       Delete account
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-black border border-red-500/40 rounded-lg text-white sm:max-w-md p-6">
+                  <AlertDialogContent className="bg-[#1F1F1F] border border-red-500/40 rounded-lg text-white sm:max-w-md p-6">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-red-400 flex items-center gap-2 text-base">
                         <ShieldAlert size={18} />
@@ -1100,7 +1100,7 @@ export function SettingsPage() {
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
                         placeholder={member.handle || "handle"}
-                        className="font-sans text-sm bg-black border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
+                        className="font-sans text-sm bg-[#171717] border-red-500/40 text-white rounded-md focus-visible:ring-0 focus-visible:border-red-400"
                       />
                     </div>
                     <AlertDialogFooter className="mt-4 flex justify-end gap-2">

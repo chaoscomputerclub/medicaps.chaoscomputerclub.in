@@ -237,7 +237,7 @@ export function ContestOverviewPage() {
       </div>
 
       {/* ── HERO BANNER ── */}
-      <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+      <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
@@ -290,7 +290,7 @@ export function ContestOverviewPage() {
           </div>
 
           {/* Right Side: Countdown Card */}
-          <div className="rounded-[18px] border border-white/[0.08] bg-[#171717] p-5 md:min-w-[280px] text-center space-y-3.5 shrink-0 shadow-inner">
+          <div className="rounded-[18px] border border-white/[0.08] bg-[#171717] p-5 md:min-w-[280px] text-center space-y-3.5 shrink-0">
             <span className="font-heading font-bold text-[10px] uppercase tracking-widest text-zinc-400 block">
               {isLive ? "Contest Closes In" : isFinished ? "Contest Status" : "Contest Starts In"}
             </span>
@@ -484,7 +484,7 @@ export function ContestOverviewPage() {
 
       {/* ── LIVE / FINISHED PROBLEM SET TABLE ── */}
       {!isUpcoming && (
-        <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
             <div className="flex items-center gap-2">
               <Code2 className="size-4 text-[#B1FA63]" />
@@ -586,7 +586,7 @@ export function ContestOverviewPage() {
         {/* Left Column: Important Notes & Prohibited Actions */}
         <div className="lg:col-span-7 space-y-6">
           {/* 📌 Important Notes */}
-          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-2">
                 <span className="text-base">📌</span>
@@ -696,7 +696,7 @@ export function ContestOverviewPage() {
           </div>
 
           {/* 🚨 Contest Violations & Prohibited Actions */}
-          <div className="rounded-[24px] border border-red-500/20 bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="rounded-[24px] border border-red-500/20 bg-[#1F1F1F] p-6 sm:p-7 space-y-5">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="size-4 text-red-400" />
@@ -763,7 +763,7 @@ export function ContestOverviewPage() {
         {/* Right Column: Zero-Tolerance Penalties, Fair Play Whistleblowing & Waiting Lobby */}
         <div className="lg:col-span-5 space-y-6">
           {/* ⚖️ Enforcement & Penalties */}
-          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5">
             <div className="flex items-center gap-2 border-b border-white/[0.08] pb-4">
               <Scale className="size-4 text-[#B1FA63]" />
               <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
@@ -808,7 +808,7 @@ export function ContestOverviewPage() {
           </div>
 
           {/* 🛡️ Community Whistleblowing & Fair Play */}
-          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5">
             <div className="flex items-center gap-2 border-b border-white/[0.08] pb-4">
               <Flag className="size-4 text-[#B1FA63]" />
               <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
@@ -835,7 +835,7 @@ export function ContestOverviewPage() {
 
           {/* 🔒 Waiting Room / Arena Gate Status (when upcoming) */}
           {isUpcoming && (
-            <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5">
               <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
                 <div className="flex items-center gap-2">
                   <Lock className="size-4 text-[#B1FA63]" />

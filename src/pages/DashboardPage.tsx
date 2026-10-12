@@ -181,7 +181,7 @@ export function DashboardPage() {
 
       {/* Telemetry Bento Strip (4 Columns) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0">
-        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
           <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Campus Standings</span>
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.is_ranked && member?.university_rank ? `#${member.university_rank}` : "Unranked"}
@@ -191,7 +191,7 @@ export function DashboardPage() {
           </span>
         </div>
 
-        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
           <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Global Rating</span>
           <strong className="block text-3xl sm:text-4xl font-display text-[#B1FA63] mt-1 tabular-nums truncate tracking-wide">
             {member?.rating ?? 1200}
@@ -199,7 +199,7 @@ export function DashboardPage() {
           <span className="block text-xs font-heading font-bold text-[#B1FA63]/80 mt-1 truncate uppercase">{member?.tier || "1★ Explorer"}</span>
         </div>
 
-        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
           <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Contests Logged</span>
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.attendance_count ?? 0}
@@ -209,7 +209,7 @@ export function DashboardPage() {
           </span>
         </div>
 
-        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
           <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Problems Solved</span>
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {profile?.problem_stats?.problems?.solved ?? (profile?.problemStats as any)?.total_solved ?? (member as any)?.solved_count ?? 0}
@@ -221,7 +221,7 @@ export function DashboardPage() {
       </div>
 
       {/* Practice Quick Progress Strip */}
-      <section className="p-5 sm:p-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+      <section className="p-5 sm:p-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#B1FA63]" />
@@ -281,7 +281,7 @@ export function DashboardPage() {
           </div>
         </section>
       ) : next ? (
-        <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5 min-w-0 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+        <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5 min-w-0 overflow-hidden">
           <div className="space-y-1.5 min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <StatusDot status="upcoming" />
@@ -306,7 +306,7 @@ export function DashboardPage() {
       ) : null}
 
       {/* Rating Analytics */}
-      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden">
         <SectionHeader
           kicker="01 // Rating Trajectory"
           index="PROGRESS"
@@ -323,7 +323,7 @@ export function DashboardPage() {
       </section>
 
       {/* Live Tournament Scoreboard Radar */}
-      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden">
         <SectionHeader
           kicker="02 // Tournament Radar"
           index="LIVE"
@@ -345,7 +345,7 @@ export function DashboardPage() {
       </section>
 
       {/* Live Campus Activity Stream */}
-      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden">
         <SectionHeader
           kicker="03 // Network Feed"
           index="TELEMETRY"

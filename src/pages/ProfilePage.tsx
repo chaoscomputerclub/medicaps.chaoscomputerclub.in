@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Users,
@@ -12,8 +12,6 @@ import {
   Award,
   LockKeyhole,
   Zap,
-  Camera,
-  Trash2,
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,8 +26,6 @@ import {
 import { fetchContestsThunk } from "@/store/slices/contestSlice";
 import { SocialFollowStats } from "@/organization/components/SocialFollowStats";
 import {
-  uploadAvatarThunk,
-  removeAvatarThunk,
   fetchCurrentUserThunk,
 } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -54,16 +50,6 @@ import { ProfileSkeleton } from "@/organization/components/skeletons";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import { markNavigationMount, markNavigationContentReady } from "@/lib/navigationTelemetry";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
 
 export function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -86,7 +72,6 @@ export function ProfilePage() {
 
   const [copied, setCopied] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
-  const [showRemoveAvatarModal, setShowRemoveAvatarModal] = useState(false);
 
   // Determine if viewing own profile or another student's profile
   const isViewingSelf =
@@ -107,74 +92,6 @@ export function ProfilePage() {
     () => getMemberProfileData(false),
     { ttl: 5 * 60 * 1000, staleTime: 30 * 1000, enabled: isViewingSelf && isAuthenticated() },
   );
-
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a PNG, JPG, WebP, or GIF image.");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File exceeds 10MB limit.");
-      return;
-    }
-
-    setIsUploadingAvatar(true);
-    const tid = toast.loading("Uploading photo…");
-    try {
-      const res = await dispatch(uploadAvatarThunk(file)).unwrap();
-      if (mutateOwnProfile) {
-        mutateOwnProfile((prev: any) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            member: {
-              ...prev.member,
-              avatar_url: res.avatar_url,
-            },
-          };
-        });
-      }
-      toast.success("Profile photo updated!", { id: tid });
-      await dispatch(fetchCurrentUserThunk());
-      if (revalidateOwnProfile) await revalidateOwnProfile();
-    } catch (err: any) {
-      toast.error(typeof err === "string" ? err : "Failed to upload photo", { id: tid });
-    } finally {
-      setIsUploadingAvatar(false);
-    }
-  };
-
-  const handleAvatarRemove = async () => {
-    setShowRemoveAvatarModal(false);
-    const tid = toast.loading("Removing photo…");
-    try {
-      await dispatch(removeAvatarThunk()).unwrap();
-      if (mutateOwnProfile) {
-        mutateOwnProfile((prev: any) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            member: {
-              ...prev.member,
-              avatar_url: null,
-            },
-          };
-        });
-      }
-      toast.success("Profile photo removed", { id: tid });
-      await dispatch(fetchCurrentUserThunk());
-      if (revalidateOwnProfile) await revalidateOwnProfile();
-    } catch (err: any) {
-      toast.error(typeof err === "string" ? err : "Failed to remove photo", { id: tid });
-    }
-  };
 
   const targetHandle = handle || currentMember?.handle || "me";
 
@@ -412,7 +329,7 @@ export function ProfilePage() {
       <header className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <div className="flex items-start gap-5">
           {/* Avatar Container */}
-          <div className="relative group shrink-0">
+          <div className="relative shrink-0">
             <Avatar className="size-16 sm:size-20 rounded-[20px] border border-white/[0.08] bg-[#171717] overflow-hidden shadow-lg">
               {resolvedAvatar ? (
                 <AvatarImage
@@ -425,38 +342,7 @@ export function ProfilePage() {
                 {initials}
               </AvatarFallback>
             </Avatar>
-
-            {isSelfUser && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
-                  disabled={isUploadingAvatar}
-                  aria-label="Change photo"
-                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-[20px] flex flex-col items-center justify-center gap-1 cursor-pointer text-[#B1FA63] font-sans text-xs font-semibold p-1 text-center"
-                >
-                  {isUploadingAvatar ? (
-                    <WanderingEyes size="sm" className="h-4 text-[#B1FA63]" />
-                  ) : (
-                    <>
-                      <Camera className="size-3.5" />
-                      <span>Upload</span>
-                    </>
-                  )}
-                </button>
-              </>
-            )}
           </div>
-
-          {isSelfUser && (
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-          )}
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -470,40 +356,16 @@ export function ProfilePage() {
               </h1>
 
               {isSelfUser ? (
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
                   <Button
-                    type="button"
-                    onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
-                    disabled={isUploadingAvatar}
+                    asChild
                     variant="outline"
                     size="sm"
                     className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs"
                   >
-                    {isUploadingAvatar ? (
-                      <WanderingEyes size="inline" className="h-3 mr-1" />
-                    ) : (
-                      <Camera size={11} className="text-[#B1FA63]" />
-                    )}
-                    <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
-                  </Button>
-
-                  {resolvedAvatar && (
-                    <Button
-                      type="button"
-                      onClick={() => setShowRemoveAvatarModal(true)}
-                      variant="destructive"
-                      size="sm"
-                      className="rounded-[10px] font-heading font-bold uppercase tracking-wider text-xs"
-                    >
-                      <Trash2 size={10} />
-                      <span>Remove</span>
-                    </Button>
-                  )}
-
-                  <Button asChild variant="outline" size="sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs">
                     <Link to="/settings">
                       <Edit3 size={11} className="text-[#B1FA63]" />
-                      <span>Settings</span>
+                      <span>Edit</span>
                     </Link>
                   </Button>
                 </div>
@@ -697,8 +559,8 @@ export function ProfilePage() {
 
       {/* Recent Submissions Ledger */}
       <RecentSubmissionsCard
-        submissions={recentSubmissionsData || []}
-        battles={battles}
+        submissions={Array.isArray(recentSubmissionsData) ? recentSubmissionsData : []}
+        battles={Array.isArray(battles) ? battles : []}
         loading={recentSubmissionsLoading && !recentSubmissionsData}
       />
 
@@ -862,36 +724,6 @@ export function ProfilePage() {
           Ratings and achievements derive exclusively from physically proctored campus tournaments.
         </p>
       </footer>
-
-      {/* Remove Avatar Confirmation Modal */}
-      <AlertDialog open={showRemoveAvatarModal} onOpenChange={setShowRemoveAvatarModal}>
-        <AlertDialogContent className="border border-white/[0.08] bg-[#1F1F1F] text-white p-6 max-w-md rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.9)]">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <AlertDialogTitle className="text-lg font-heading font-bold text-white">
-              Remove profile photo?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-zinc-400 font-sans leading-relaxed">
-              Are you sure you want to remove your custom profile photo? This will revert your
-              avatar to your initials placeholder.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter className="mt-5 flex justify-end gap-2.5">
-            <AlertDialogCancel
-              onClick={() => setShowRemoveAvatarModal(false)}
-              className="bg-transparent border border-white/[0.08] text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-heading font-bold uppercase tracking-wider rounded-[8px] cursor-pointer"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleAvatarRemove}
-              className="bg-red-600 hover:bg-red-700 text-white font-heading font-bold uppercase tracking-wider px-4 py-2 text-xs rounded-[8px] cursor-pointer"
-            >
-              Remove Photo
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

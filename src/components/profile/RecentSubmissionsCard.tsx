@@ -72,13 +72,16 @@ export function RecentSubmissionsCard({
 }: RecentSubmissionsCardProps) {
   const [activeTab, setActiveTab] = useState<"recent_ac" | "all" | "tournaments">("recent_ac");
 
-  const acceptedSubmissions = submissions.filter((s) => {
+  const safeSubmissions = Array.isArray(submissions) ? submissions : [];
+  const safeBattles = Array.isArray(battles) ? battles : [];
+
+  const acceptedSubmissions = safeSubmissions.filter((s) => {
     const v = (s.verdict || "").toUpperCase();
     return v === "ACCEPTED" || v === "AC";
   });
 
   return (
-    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)] space-y-4">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4">
       {/* Tabs Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3.5 text-xs">
         <div className="flex items-center gap-1.5 bg-[#171717] p-1 rounded-[12px] border border-white/[0.08]">
@@ -87,7 +90,7 @@ export function RecentSubmissionsCard({
             onClick={() => setActiveTab("recent_ac")}
             className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "recent_ac"
-                ? "bg-[#B1FA63] text-black shadow-sm font-extrabold"
+                ? "bg-[#B1FA63] text-black font-extrabold"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
@@ -100,7 +103,7 @@ export function RecentSubmissionsCard({
             onClick={() => setActiveTab("all")}
             className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "all"
-                ? "bg-[#B1FA63] text-black shadow-sm font-extrabold"
+                ? "bg-[#B1FA63] text-black font-extrabold"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
@@ -113,7 +116,7 @@ export function RecentSubmissionsCard({
             onClick={() => setActiveTab("tournaments")}
             className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "tournaments"
-                ? "bg-[#B1FA63] text-black shadow-sm font-extrabold"
+                ? "bg-[#B1FA63] text-black font-extrabold"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
@@ -197,7 +200,7 @@ export function RecentSubmissionsCard({
             <div className="py-8 text-center text-zinc-500 font-mono text-xs">
               Loading submissions…
             </div>
-          ) : submissions.length === 0 ? (
+          ) : safeSubmissions.length === 0 ? (
             <div className="py-8 text-center space-y-2">
               <p className="text-zinc-500 font-mono text-xs">
                 No submissions logged on file yet.
@@ -210,7 +213,7 @@ export function RecentSubmissionsCard({
               </Link>
             </div>
           ) : (
-            submissions.slice(0, 6).map((item) => {
+            safeSubmissions.slice(0, 6).map((item) => {
               const diffBadge = getDifficultyBadge(item.difficulty);
               const verdictBadge = getVerdictBadge(item.verdict);
               const targetUrl = item.problem_slug
@@ -253,7 +256,7 @@ export function RecentSubmissionsCard({
       {/* Tab Body: Tournaments */}
       {activeTab === "tournaments" && (
         <div className="space-y-1">
-          {battles.length === 0 ? (
+          {safeBattles.length === 0 ? (
             <div className="py-8 text-center space-y-2">
               <p className="text-zinc-500 font-mono text-xs">
                 No official tournament records on file yet.
@@ -266,7 +269,7 @@ export function RecentSubmissionsCard({
               </Link>
             </div>
           ) : (
-            battles.slice(0, 6).map((b, idx) => (
+            safeBattles.slice(0, 6).map((b, idx) => (
               <div
                 key={b.certificate_id || idx}
                 className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"

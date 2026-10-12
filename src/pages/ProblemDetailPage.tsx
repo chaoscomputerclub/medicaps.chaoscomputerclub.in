@@ -85,7 +85,7 @@ export function ProblemDetailPage() {
         </div>
       </div>
 
-      <article className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+      <article className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6">
         <SectionHeader
           kicker="01 // Official Editorial"
           index={`ANALYSIS · ${problem.points} PTS`}

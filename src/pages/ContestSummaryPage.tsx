@@ -466,7 +466,7 @@ export function ContestSummaryPage() {
           </Button>
 
           {/* Live Timer Pill */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-white/10 bg-zinc-950 font-mono text-xs shadow-inner">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-white/10 bg-zinc-950 font-mono text-xs">
             <Clock
               className={`size-3.5 ${remainingSeconds < 300 ? "text-red-400 animate-pulse" : "text-lime-400"}`}
             />
@@ -566,7 +566,7 @@ export function ContestSummaryPage() {
 
         {/* HackerRank-style Metric Bento Grid */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          <div className="p-5 rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="p-5 rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col justify-between space-y-2.5">
             <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
               Total Challenges
             </span>
@@ -579,7 +579,7 @@ export function ContestSummaryPage() {
             <span className="font-sans text-[10px] text-zinc-500">Problem statements</span>
           </div>
 
-          <div className="p-5 rounded-[20px] border border-[#B1FA63]/25 bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="p-5 rounded-[20px] border border-[#B1FA63]/25 bg-[#1F1F1F] flex flex-col justify-between space-y-2.5">
             <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
               Solved &amp; Passed
             </span>
@@ -592,7 +592,7 @@ export function ContestSummaryPage() {
             <span className="font-sans text-[10px] text-[#B1FA63]/70">100% test cases accepted</span>
           </div>
 
-          <div className="p-5 rounded-[20px] border border-amber-500/25 bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="p-5 rounded-[20px] border border-amber-500/25 bg-[#1F1F1F] flex flex-col justify-between space-y-2.5">
             <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-amber-400">
               In Progress
             </span>
@@ -605,7 +605,7 @@ export function ContestSummaryPage() {
             <span className="font-sans text-[10px] text-amber-400/70">Draft code stored</span>
           </div>
 
-          <div className="p-5 rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="p-5 rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col justify-between space-y-2.5">
             <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
               Unattempted
             </span>
@@ -635,7 +635,7 @@ export function ContestSummaryPage() {
             </span>
           </div>
 
-          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.4)] divide-y divide-white/[0.06]">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden divide-y divide-white/[0.06]">
             {problems.map((problem) => {
               const status = problemStatusMap[problem.id] || "unattempted";
               const problemSlug = slugifyProblem(problem.title, problem.problem_index);
@@ -747,7 +747,7 @@ export function ContestSummaryPage() {
 
         {/* Final Submission Card */}
         {isAlreadySubmitted ? (
-          <section className="p-6 rounded-lg border border-lime-500/30 bg-zinc-950 space-y-4 shadow-xl">
+          <section className="p-6 rounded-lg border border-lime-500/30 bg-zinc-950 space-y-4">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400 shrink-0 mt-0.5">
                 <CheckCircle2 className="size-5" />
@@ -781,7 +781,7 @@ export function ContestSummaryPage() {
             </div>
           </section>
         ) : (
-          <section className="p-6 rounded-lg border border-white/10 bg-zinc-950 space-y-4 shadow-xl">
+          <section className="p-6 rounded-lg border border-white/10 bg-zinc-950 space-y-4">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-md border border-white/10 bg-zinc-900 text-lime-400 shrink-0 mt-0.5">
                 <Trophy className="size-5" />
@@ -849,7 +849,7 @@ export function ContestSummaryPage() {
 
       {/* Final Submission Confirmation Dialog */}
       <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
           <AlertDialogHeader className="space-y-2.5 text-left">
             <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <AlertTriangle className="size-5" />
@@ -863,7 +863,7 @@ export function ContestSummaryPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs">
             <div className="flex items-center justify-between">
               <span className="text-zinc-500">Total Solved:</span>
               <span className="font-semibold text-lime-400">

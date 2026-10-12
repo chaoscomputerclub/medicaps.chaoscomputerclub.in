@@ -223,7 +223,7 @@ export function CadetProfileHoverCard({
       <HoverCardTrigger asChild={asChild}>{children}</HoverCardTrigger>
 
       <HoverCardContent
-        className={`w-72 p-0 overflow-hidden z-[100] bg-zinc-950 border border-white/10 shadow-2xl shadow-black/90 rounded-lg pointer-events-auto ${
+        className={`w-72 p-0 overflow-hidden z-[100] bg-zinc-950 border border-white/10 rounded-lg pointer-events-auto ${
           className || ""
         }`}
         sideOffset={sideOffset}

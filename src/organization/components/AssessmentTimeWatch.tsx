@@ -116,7 +116,7 @@ export function AssessmentTimeWatch({
   }).format(new Date(unlockMs));
 
   return (
-    <div className={cn("rounded-none border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md shadow-xl space-y-4", className)}>
+    <div className={cn("rounded-none border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md  space-y-4", className)}>
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 font-mono text-[10px] uppercase font-bold tracking-widest text-lime-400">
           <Clock className="w-3.5 h-3.5 text-lime-400" />
@@ -136,7 +136,7 @@ export function AssessmentTimeWatch({
         </span>
       </div>
 
-      <div className="flex items-center justify-between gap-1 sm:gap-2 rounded-none border border-white/10 bg-zinc-950/60 p-4 font-mono shadow-inner">
+      <div className="flex items-center justify-between gap-1 sm:gap-2 rounded-none border border-white/10 bg-zinc-950/60 p-4 font-mono">
         <div className="flex flex-col items-center flex-1">
           <span className="text-2xl sm:text-3xl font-black tabular-nums text-white tracking-tight">{remaining.days}</span>
           <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">DAYS</span>

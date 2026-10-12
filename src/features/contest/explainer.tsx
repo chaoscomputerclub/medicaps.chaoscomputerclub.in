@@ -56,7 +56,7 @@ export function FirstContestExplainer() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : dismiss())}>
-      <DialogContent className="rounded-none border border-white/10 bg-zinc-950 text-white sm:max-w-lg p-6 shadow-2xl backdrop-blur-xl space-y-4">
+      <DialogContent className="rounded-none border border-white/10 bg-zinc-950 text-white sm:max-w-lg p-6 backdrop-blur-xl space-y-4">
         <DialogHeader className="space-y-2">
           <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
             How a CCC contest works · {step + 1} of {STEPS.length}

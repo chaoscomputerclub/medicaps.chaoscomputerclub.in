@@ -67,7 +67,7 @@ export function RegisterConfirmModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-lg bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden shadow-2xl">
+      <DialogContent className="max-w-lg rounded-lg bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden">
         {/* Modal Header */}
         <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">

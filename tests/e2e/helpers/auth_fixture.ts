@@ -109,6 +109,30 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
     });
   });
 
+  await page.route('**/practice/submissions/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    });
+  });
+
+  await page.route('**/practice/activity/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ total_solved: 0, calendar: [] }),
+    });
+  });
+
+  await page.route('**/practice/stats/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ easy: 0, medium: 0, hard: 0, total: 0 }),
+    });
+  });
+
   await page.route('**/leaderboard/distribution', async (route) => {
     await route.fulfill({
       status: 200,

@@ -69,7 +69,7 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
 // ─────────────────────────────────────────────
 const INPUT_BASE =
   "w-full h-11 rounded-[10px] border border-white/10 bg-[#171717] px-3.5 text-base md:text-sm text-white placeholder:text-zinc-500 " +
-  "focus:outline-none focus:border-[#B1FA63] focus-visible:ring-1 focus-visible:ring-[#B1FA63]/50 transition-colors duration-150 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]";
+  "focus:outline-none focus:border-[#B1FA63] focus-visible:ring-1 focus-visible:ring-[#B1FA63]/50 transition-colors duration-150 ";
 
 // ─────────────────────────────────────────────
 // Shared label style
@@ -470,7 +470,7 @@ export function AuthPage() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-md border border-white/15 bg-black text-lg sm:text-xl font-mono font-semibold text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)] transition-all duration-150"
+                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-md border border-white/15 bg-[#171717] text-lg sm:text-xl font-mono font-semibold text-white transition-all duration-150"
                     activeClassName="!border-[#CCFF00] ring-1 ring-[#CCFF00]/50"
                   />
                 ))}

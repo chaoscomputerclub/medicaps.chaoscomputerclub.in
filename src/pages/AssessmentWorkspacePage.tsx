@@ -306,7 +306,7 @@ export function AssessmentWorkspacePage() {
     const isDisqualified = session.status === "disqualified";
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#171717] text-white font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-center space-y-6">
+        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] text-center space-y-6">
           <div
             className={`size-14 rounded-[14px] flex items-center justify-center mx-auto border ${
               isDisqualified
@@ -387,7 +387,7 @@ export function AssessmentWorkspacePage() {
   if (assessment && !session) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#171717] text-white font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-center space-y-6">
+        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] text-center space-y-6">
           <div className="size-14 rounded-[14px] bg-[#171717] border border-white/10 flex items-center justify-center mx-auto text-[#B1FA63]">
             <Clock size={28} />
           </div>
@@ -438,7 +438,7 @@ export function AssessmentWorkspacePage() {
 
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#171717] text-white font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-center space-y-5">
+        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] text-center space-y-5">
           <div className="size-14 rounded-[14px] bg-[#171717] border border-white/10 flex items-center justify-center mx-auto">
             {isLifecycleErr ? (
               <Lock size={24} className="text-amber-400" />
@@ -576,10 +576,10 @@ export function AssessmentWorkspacePage() {
             value={selectedLanguage}
             onValueChange={(val: any) => dispatch(setSelectedLanguage(val))}
           >
-            <SelectTrigger className="h-7 w-[105px] border-white/10 bg-black text-xs font-mono text-zinc-300 focus:ring-0 rounded-md">
+            <SelectTrigger className="h-7 w-[105px] border-white/10 bg-[#171717] text-xs font-mono text-zinc-300 focus:ring-0 rounded-md">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="border-white/10 bg-black text-xs font-mono text-zinc-300 rounded-md">
+            <SelectContent className="border-white/10 bg-[#1F1F1F] text-xs font-mono text-zinc-300 rounded-md">
               <SelectItem value="python">Python 3</SelectItem>
               <SelectItem value="cpp">C++ 14</SelectItem>
               <SelectItem value="c">C (GCC)</SelectItem>
@@ -800,7 +800,7 @@ export function AssessmentWorkspacePage() {
                       value={customStdin}
                       onChange={(e) => dispatch(setCustomStdin(e.target.value))}
                       placeholder="Enter custom input to test arbitrary test cases..."
-                      className="w-full h-14 p-2 rounded bg-black border border-white/10 text-zinc-300 font-mono text-xs resize-none focus:outline-none focus:border-lime-400"
+                      className="w-full h-14 p-2 rounded bg-[#171717] border border-white/10 text-zinc-300 font-mono text-xs resize-none focus:outline-none focus:border-lime-400"
                     />
                   </div>
                 </div>
@@ -944,7 +944,7 @@ export function AssessmentWorkspacePage() {
           if (!open) dispatch(dismissAntiCheatWarning());
         }}
       >
-        <DialogContent className="max-w-md rounded-lg bg-zinc-950 border border-amber-500/40 text-center p-6 space-y-4 shadow-2xl">
+        <DialogContent className="max-w-md rounded-lg bg-zinc-950 border border-amber-500/40 text-center p-6 space-y-4">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="size-11 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
               <ShieldAlert size={22} />
@@ -974,7 +974,7 @@ export function AssessmentWorkspacePage() {
 
       {/* 1. Finalize Assessment Session Dialog */}
       <AlertDialog open={showFinishModal} onOpenChange={setShowFinishModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
           <AlertDialogHeader className="space-y-2 text-left">
             <AlertDialogTitle className="text-base font-semibold text-white">
               Finalize & Submit Assessment?
@@ -1003,7 +1003,7 @@ export function AssessmentWorkspacePage() {
 
       {/* 2. Exit Assessment Workspace Dialog */}
       <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
           <AlertDialogHeader className="space-y-2 text-left">
             <AlertDialogTitle className="text-base font-semibold text-white">
               Exit Assessment Workspace?
@@ -1032,7 +1032,7 @@ export function AssessmentWorkspacePage() {
 
       {/* 3. Reset Starter Code Dialog */}
       <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
           <AlertDialogHeader className="space-y-2 text-left">
             <AlertDialogTitle className="text-base font-semibold text-white">
               Reset to Default Starter Code?

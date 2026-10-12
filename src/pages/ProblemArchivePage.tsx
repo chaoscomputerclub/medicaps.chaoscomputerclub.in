@@ -111,7 +111,7 @@ export function ProblemArchivePage() {
               return (
                 <article
                   key={`${p.contestSlug}-${p.pIndex}-${p.id || ""}`}
-                  className="flex items-center justify-between p-4 rounded-[16px] border border-white/10 bg-[#171717] hover:border-[#B1FA63]/50 shadow-md transition-all duration-150 group"
+                  className="flex items-center justify-between p-4 rounded-[16px] border border-white/10 bg-[#171717] hover:border-[#B1FA63]/50 transition-all duration-150 group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <span className="font-heading font-bold text-base text-[#B1FA63] w-7 text-center shrink-0">

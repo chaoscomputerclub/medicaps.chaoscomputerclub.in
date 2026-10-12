@@ -118,7 +118,7 @@ export function ContestResultsPage() {
 
       {/* Your Standing Hero */}
       {myRow ? (
-        <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[16px] border border-[#B1FA63]/40 bg-[#171717] text-center text-[#B1FA63]">
@@ -177,12 +177,12 @@ export function ContestResultsPage() {
 
 
       {contest?.status === "upcoming" ? (
-        <div className="rounded-[24px] border border-amber-500/20 bg-[#1F1F1F] p-8 sm:p-10 text-center space-y-4 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="rounded-[24px] border border-amber-500/20 bg-[#1F1F1F] p-8 sm:p-10 text-center space-y-4">
           <div className="mx-auto flex size-14 items-center justify-center">
             <img
               src="/matiks-assets/icons/smart75-local-seatLock.png"
               alt="Standings sealed"
-              className="size-10 object-contain drop-shadow"
+              className="size-10 object-contain"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = "none";
               }}
@@ -256,7 +256,7 @@ export function ContestResultsPage() {
           </div>
 
           {/* Standings Table */}
-          <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-white/[0.08] hover:bg-transparent">

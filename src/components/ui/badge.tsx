@@ -10,7 +10,7 @@ const badgeVariants = cva(
       variant: {
         default: "border-[#B1FA63]/40 bg-[#B1FA63]/15 text-[#B1FA63]",
         lime: "border-[#B1FA63]/40 bg-[#B1FA63]/15 text-[#B1FA63]",
-        blitz: "border-[#B1FA63] bg-[#B1FA63] text-black font-black shadow-sm",
+        blitz: "border-[#B1FA63] bg-[#B1FA63] text-black font-black ",
         secondary: "border-white/10 bg-[#242424] text-zinc-300",
         destructive: "border-red-500/30 bg-red-500/10 text-red-400",
         outline: "border-white/15 text-white bg-transparent",

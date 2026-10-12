@@ -83,7 +83,7 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
   };
 
   return (
-    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4">
       {/* Top Header Bar matching LeetCode Utilization */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs pb-1">
         <div className="flex items-center gap-2 text-zinc-300">
@@ -152,7 +152,7 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
-                          className="bg-black/95 text-white border border-white/15 px-2.5 py-1.5 font-mono text-xs rounded shadow-2xl"
+                          className="bg-black/95 text-white border border-white/15 px-2.5 py-1.5 font-mono text-xs rounded"
                         >
                           <div className="font-semibold text-emerald-400 text-[11px]">
                             {dateFormatted}

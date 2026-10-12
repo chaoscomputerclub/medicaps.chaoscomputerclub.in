@@ -126,7 +126,7 @@ export function MyContestsPage() {
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+      <section className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
         <div className="flex items-center justify-between border-b border-white/[0.08] p-5 sm:p-6">
           <SectionHeader
             kicker="01 // Ledger"

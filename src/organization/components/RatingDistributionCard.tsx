@@ -69,7 +69,7 @@ export function RatingDistributionCard({
   const MAX_BAR_PX = 80;
 
   return (
-    <div className="flex flex-col justify-between h-full rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+    <div className="flex flex-col justify-between h-full rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7">
       {/* Top Percentile Display */}
       <div>
         <span className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 block">
@@ -84,7 +84,7 @@ export function RatingDistributionCard({
       <div className="my-auto py-6 relative">
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <span className="px-3 py-1.5 rounded-[8px] bg-[#171717]/90 border border-white/[0.08] text-[10px] font-mono tracking-widest text-zinc-400 uppercase shadow-lg backdrop-blur-sm">
+            <span className="px-3 py-1.5 rounded-[8px] bg-[#171717]/90 border border-white/[0.08] text-[10px] font-mono tracking-widest text-zinc-400 uppercase backdrop-blur-sm">
               NO CONTEST DATA RECORDED
             </span>
           </div>
@@ -111,7 +111,7 @@ export function RatingDistributionCard({
               >
                 {/* Tooltip */}
                 {isHovered && !isEmpty && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#171717] border border-white/[0.12] text-[10px] font-mono text-white rounded-[8px] whitespace-nowrap z-20 pointer-events-none shadow-xl">
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#171717] border border-white/[0.12] text-[10px] font-mono text-white rounded-[8px] whitespace-nowrap z-20 pointer-events-none">
                     {bucket.min}–{bucket.min + 50}:{" "}
                     <span className="tabular-nums font-bold text-[#B1FA63]">{count}</span>
                   </div>

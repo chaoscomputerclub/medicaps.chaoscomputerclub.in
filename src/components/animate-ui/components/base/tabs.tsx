@@ -269,7 +269,7 @@ export function TabsTab({
         <motion.span
           layoutId={layoutId}
           className={cn(
-            "absolute inset-0 rounded-[8px] bg-[#B1FA63] shadow-sm",
+            "absolute inset-0 rounded-[8px] bg-[#B1FA63] ",
             indicatorClassName,
           )}
           style={{ zIndex: -1 }}

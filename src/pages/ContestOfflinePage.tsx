@@ -106,13 +106,13 @@ export function ContestOfflinePage() {
         <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to contest
         </Link>
-        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardContent className="flex flex-col items-center gap-4 py-16 text-center font-sans">
             <div className="size-20 mb-1 flex items-center justify-center">
               <img
                 src="/matiks-assets/icons/smart75-local-seatLock.png"
                 alt="Workstation locked"
-                className="size-16 object-contain drop-shadow"
+                className="size-16 object-contain"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
@@ -156,7 +156,7 @@ export function ContestOfflinePage() {
       />
 
       {/* Hero Live Arena Launcher */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border border-[#B1FA63]/30 bg-[#1F1F1F] rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border border-[#B1FA63]/30 bg-[#1F1F1F] rounded-[24px]">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-[#B1FA63] animate-pulse" />
@@ -176,7 +176,7 @@ export function ContestOfflinePage() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         {/* Countdown Card */}
-        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardHeader className="p-5 pb-3">
             <CardTitle className="font-heading font-bold text-[10px] uppercase tracking-widest text-zinc-400">
               {started ? "Contest Remaining" : "Tournament Bell"}
@@ -188,7 +188,7 @@ export function ContestOfflinePage() {
         </Card>
 
         {/* Check-In Card */}
-        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardHeader className="flex-row items-center gap-2 p-5 pb-3">
             <QrCode className="size-4 text-[#B1FA63]" />
             <CardTitle className="text-sm font-bold text-white font-heading uppercase tracking-wide">
@@ -196,7 +196,7 @@ export function ContestOfflinePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 font-sans text-xs text-zinc-300 p-5 pt-0">
-            <div className="flex justify-center bg-white p-3.5 rounded-[14px] shadow-md">
+            <div className="flex justify-center bg-white p-3.5 rounded-[14px]">
               <QRCodeSVG value={pass?.qr_data || pass?.pass_code || "PENDING_QUALIFICATION"} size={95} level="M" />
             </div>
             <div className="flex justify-between items-center text-xs">
@@ -219,7 +219,7 @@ export function ContestOfflinePage() {
         </Card>
 
         {/* Workstation Lab Info Card */}
-        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardHeader className="flex-row items-center gap-2 p-5 pb-3">
             <Cpu className="size-4 text-[#B1FA63]" />
             <CardTitle className="text-sm font-bold text-white font-heading uppercase tracking-wide">
@@ -254,7 +254,7 @@ export function ContestOfflinePage() {
             </Link>
           </Button>
         </div>
-        <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <Table>
             <TableHeader>
               <TableRow className="border-b border-white/[0.08] hover:bg-transparent">

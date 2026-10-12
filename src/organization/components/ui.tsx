@@ -24,7 +24,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.5)]",
+        "rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6",
         className
       )}
     >
@@ -123,7 +123,7 @@ export function Metric({
   className?: string;
 }) {
   return (
-    <div className={cn("p-5 rounded-[20px] sm:rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200", className)}>
+    <div className={cn("p-5 rounded-[20px] sm:rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200", className)}>
       <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">{label}</span>
       <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">{value}</strong>
       {detail && <small className="block text-xs font-mono text-zinc-500 mt-1 truncate">{detail}</small>}
@@ -201,12 +201,12 @@ export function EmptyState({
       : "/matiks-assets/empty-states/no_duels_to_flex.png");
 
   return (
-    <div className={cn("flex flex-col items-center justify-center p-8 sm:p-12 text-center border border-white/[0.08] rounded-[24px] bg-[#1F1F1F] my-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)]", className)}>
+    <div className={cn("flex flex-col items-center justify-center p-8 sm:p-12 text-center border border-white/[0.08] rounded-[24px] bg-[#1F1F1F] my-6 ", className)}>
       <div className="size-20 mb-3 flex items-center justify-center">
         <img
           src={resolvedImage}
           alt={title}
-          className="size-full object-contain drop-shadow"
+          className="size-full object-contain"
           onError={(e) => {
             (e.target as HTMLElement).style.display = "none";
           }}

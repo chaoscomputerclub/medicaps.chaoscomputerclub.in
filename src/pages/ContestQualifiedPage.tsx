@@ -183,7 +183,7 @@ export function ContestQualifiedPage() {
           {pass ? (
             <div className="space-y-6">
               {/* QR Code Hero Card */}
-              <div className="flex flex-col items-center gap-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+              <div className="flex flex-col items-center gap-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-6 sm:p-8">
                 {/* Status Bar */}
                 <div className="flex items-center justify-between w-full border-b border-white/[0.08] pb-3.5">
                   <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
@@ -199,7 +199,7 @@ export function ContestQualifiedPage() {
                 </div>
 
                 {/* White QR Code container */}
-                <div className="flex flex-col items-center gap-2.5 rounded-[16px] bg-white p-5 shadow-lg">
+                <div className="flex flex-col items-center gap-2.5 rounded-[16px] bg-white p-5">
                   <QRCodeSVG
                     value={pass.qr_data || `CCC-PASS:${pass.pass_code}:${pass.seat || "UNASSIGNED"}:QUALIFIED`}
                     size={200}
@@ -276,7 +276,7 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Lab Instructions */}
-              <div className="space-y-4 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+              <div className="space-y-4 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6">
                 <SectionHeader kicker="01 // Protocol" index="LAB PROTOCOL" title="Venue Regulations" />
                 <ul className="space-y-2.5 font-sans text-xs text-zinc-300">
                   <li className="flex items-start gap-2.5">
@@ -311,7 +311,7 @@ export function ContestQualifiedPage() {
             <img
               src="/matiks-assets/icons/smart75-local-seatLock.png"
               alt="Pass Restricted"
-              className="size-12 object-contain drop-shadow"
+              className="size-12 object-contain"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = "none";
               }}

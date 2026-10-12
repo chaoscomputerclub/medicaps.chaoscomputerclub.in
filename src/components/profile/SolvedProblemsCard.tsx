@@ -36,7 +36,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
   const startAngle = 135;
 
   return (
-    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)] h-full flex flex-col justify-between">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 h-full flex flex-col justify-between">
       {/* Top Header */}
       <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
         <span className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">
@@ -142,7 +142,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
         {/* Right: 3 Difficulty Cards (LeetCode Utilization Style) */}
         <div className="sm:col-span-6 flex flex-col justify-center gap-2.5 font-sans">
           {/* Easy Card */}
-          <div className="rounded-[14px] bg-[#171717] border border-white/[0.08] px-4 py-3 space-y-2 shadow-sm hover:border-white/[0.16] transition-colors">
+          <div className="rounded-[14px] bg-[#171717] border border-white/[0.08] px-4 py-3 space-y-2 hover:border-white/[0.16] transition-colors">
             <div className="flex items-center justify-between">
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#00b8a3]">
                 Easy
@@ -163,7 +163,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
           </div>
 
           {/* Medium Card */}
-          <div className="rounded-[14px] bg-[#171717] border border-white/[0.08] px-4 py-3 space-y-2 shadow-sm hover:border-white/[0.16] transition-colors">
+          <div className="rounded-[14px] bg-[#171717] border border-white/[0.08] px-4 py-3 space-y-2 hover:border-white/[0.16] transition-colors">
             <div className="flex items-center justify-between">
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#ffc01e]">
                 Med.
@@ -184,7 +184,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
           </div>
 
           {/* Hard Card */}
-          <div className="rounded-[14px] bg-[#171717] border border-white/[0.08] px-4 py-3 space-y-2 shadow-sm hover:border-white/[0.16] transition-colors">
+          <div className="rounded-[14px] bg-[#171717] border border-white/[0.08] px-4 py-3 space-y-2 hover:border-white/[0.16] transition-colors">
             <div className="flex items-center justify-between">
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#ff375f]">
                 Hard

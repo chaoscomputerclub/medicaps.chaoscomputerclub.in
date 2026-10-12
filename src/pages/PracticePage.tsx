@@ -181,7 +181,7 @@ export function PracticePage() {
 
       {/* Telemetry Header Strip */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 hover:border-[#B1FA63]/30 transition-all duration-200">
           <div className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">
             Problems Available
           </div>
@@ -191,7 +191,7 @@ export function PracticePage() {
           <div className="text-xs font-mono text-zinc-500">Active repository</div>
         </div>
 
-        <div className="p-5 rounded-[24px] border border-[#B1FA63]/25 bg-[#1F1F1F] space-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/50 transition-all duration-200">
+        <div className="p-5 rounded-[24px] border border-[#B1FA63]/25 bg-[#1F1F1F] space-y-1 hover:border-[#B1FA63]/50 transition-all duration-200">
           <div className="text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63]">
             Solved by You
           </div>
@@ -201,7 +201,7 @@ export function PracticePage() {
           <div className="text-xs font-mono text-[#B1FA63]/70">Authoritative solves</div>
         </div>
 
-        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 hover:border-[#B1FA63]/30 transition-all duration-200">
           <div className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">
             Attempted
           </div>
@@ -213,7 +213,7 @@ export function PracticePage() {
       </section>
 
       {/* Search & Filter Toolbar */}
-      <section className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-4 space-y-3 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+      <section className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-4 space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Bar */}
           <form onSubmit={handleSearchSubmit} className="relative flex-1">
@@ -292,7 +292,7 @@ export function PracticePage() {
       </section>
 
       {/* Problems Dense Table */}
-      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden">
         {loading && problems.length === 0 ? (
           <div className="py-16 text-center font-mono text-xs text-zinc-500">
             <span className="inline-block size-2 rounded-full bg-lime-400 animate-ping mr-2" />

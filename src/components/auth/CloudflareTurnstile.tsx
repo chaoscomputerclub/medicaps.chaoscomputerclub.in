@@ -199,7 +199,7 @@ export function CloudflareTurnstile({
     <div
       className={cn(
         // Shell: fixed 65px = Turnstile's height, so nothing shifts on load.
-        "relative h-[65px] w-full overflow-hidden rounded-xl border bg-[#232323]",
+        "relative h-[65px] w-full overflow-hidden rounded-[12px] border bg-[#232323]",
         "transition-colors duration-200",
         status === "error" ? "border-amber-500/40" : "border-white/[0.08] hover:border-white/15",
         className,

@@ -151,7 +151,7 @@ export function LeaderboardPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Clean minimal header — Matiks Design Analogy */}
-      <header className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <header className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-2">
           <p className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#B1FA63]">
             (04 // University Standings)
@@ -163,7 +163,7 @@ export function LeaderboardPage() {
             Unified standings across Medi-Caps University computing departments.
           </p>
         </div>
-        <div className="flex flex-col items-start md:items-end justify-center rounded-[16px] border border-white/[0.08] bg-[#171717] p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+        <div className="flex flex-col items-start md:items-end justify-center rounded-[16px] border border-white/[0.08] bg-[#171717] p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0">
           <span className="font-heading font-bold text-xs uppercase tracking-wider text-zinc-400">Rating Season</span>
           <strong className="font-display text-2xl text-white mt-0.5 tracking-wide">2025–2026</strong>
           <small className="font-mono text-xs text-[#B1FA63] tabular-nums mt-0.5">{totalCount}&nbsp;ranked cadets</small>
@@ -178,7 +178,7 @@ export function LeaderboardPage() {
       </header>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -205,7 +205,7 @@ export function LeaderboardPage() {
                         <img
                           src="/matiks-assets/empty-states/empty_leaderboard.png"
                           alt="No ranked members"
-                          className="size-full object-contain drop-shadow"
+                          className="size-full object-contain"
                           onError={(e) => {
                             (e.target as HTMLElement).style.display = "none";
                           }}

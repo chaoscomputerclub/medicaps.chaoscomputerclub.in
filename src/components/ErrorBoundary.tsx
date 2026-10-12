@@ -75,7 +75,7 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
 
       return (
         <div className="min-h-[400px] flex items-center justify-center p-6 bg-zinc-950 text-white font-mono selection:bg-lime-400 selection:text-black">
-          <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-2xl rounded-lg relative">
+          <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 rounded-lg relative">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-md border border-rose-500/30 bg-rose-950/40 text-rose-400">

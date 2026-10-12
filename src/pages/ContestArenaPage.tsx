@@ -1195,7 +1195,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (!practiceProblemData) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-red-500/30 bg-red-500/10 text-red-400">
               <AlertTriangle className="size-7" />
             </div>
@@ -1241,7 +1241,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (isSubmitted) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-8 text-center shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-8 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#B1FA63] via-emerald-400 to-[#B1FA63]" />
             <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63]">
               <CheckCircle2 className="size-7" />
@@ -1318,7 +1318,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (isUnauthenticated) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63]">
               <Lock className="size-7" />
             </div>
@@ -1358,7 +1358,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (isUpcoming) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <Clock className="size-7" />
             </div>
@@ -1398,7 +1398,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (isNotFound) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-red-500/30 bg-red-500/10 text-red-400">
               <AlertTriangle className="size-7" />
             </div>
@@ -1430,7 +1430,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     if (isProctorGate) {
       return (
         <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <ShieldCheck className="size-7" />
             </div>
@@ -1469,7 +1469,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     // Generic fallback error
     return (
       <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-        <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+        <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center">
           <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-white/10 bg-white/5 text-zinc-400">
             <AlertCircle className="size-7" />
           </div>
@@ -1886,7 +1886,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               }`}
             />
             <div
-              className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-3.5 h-7 rounded-full border shadow-sm transition-all pointer-events-none ${
+              className={`absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-3.5 h-7 rounded-full border  transition-all pointer-events-none ${
                 isDraggingWidth
                   ? "bg-lime-400 border-lime-400 text-black scale-110"
                   : "bg-zinc-900 border-white/20 text-zinc-400 group-hover:border-lime-400 group-hover:bg-black group-hover:text-lime-400"
@@ -1917,10 +1917,10 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 value={selectedLanguage}
                 onValueChange={(val: any) => setSelectedLanguage(val)}
               >
-                <SelectTrigger className="h-6 w-[120px] text-xs font-mono bg-black border-white/15 text-zinc-200 hover:border-lime-400/60 rounded focus:ring-1 focus:ring-lime-400">
+                <SelectTrigger className="h-6 w-[120px] text-xs font-mono bg-[#171717] border-white/15 text-zinc-200 hover:border-lime-400/60 rounded focus:ring-1 focus:ring-lime-400">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-black border-white/15 text-white font-mono text-xs rounded-md">
+                <SelectContent className="bg-[#1F1F1F] border-white/15 text-white font-mono text-xs rounded-md">
                   <SelectItem value="python">Python 3</SelectItem>
                   <SelectItem value="cpp">C++</SelectItem>
                   <SelectItem value="c">C</SelectItem>
@@ -2015,7 +2015,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 }`}
               />
               <div
-                className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-3.5 w-7 rounded-full border shadow-sm transition-all pointer-events-none ${
+                className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-3.5 w-7 rounded-full border  transition-all pointer-events-none ${
                   isDraggingHeight
                     ? "bg-[#B1FA63] border-[#B1FA63] text-black scale-110"
                     : "bg-[#1F1F1F] border-white/20 text-zinc-400 group-hover:border-[#B1FA63] group-hover:bg-[#141414] group-hover:text-[#B1FA63]"
@@ -2145,7 +2145,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                             activeProblem?.sample_testcases?.[0]?.stdin ||
                             "Enter custom test inputs..."
                           }
-                          className="w-full h-24 p-2.5 bg-zinc-950 border border-white/10 rounded text-[13px] font-mono text-white resize-none focus:outline-none focus:border-lime-400/60 leading-relaxed"
+                          className="w-full h-24 p-2.5 bg-[#171717] border border-white/10 rounded text-[13px] font-mono text-white resize-none focus:outline-none focus:border-lime-400/60 leading-relaxed"
                         />
                       </div>
                     ) : (
@@ -2598,7 +2598,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="border border-white/10 bg-[#1F1F1F] text-white p-6 max-w-lg rounded-[24px] shadow-2xl">
+        <DialogContent className="border border-white/10 bg-[#1F1F1F] text-white p-6 max-w-lg rounded-[24px]">
           <DialogHeader className="space-y-1.5 text-left">
             <DialogTitle className="text-lg font-heading font-bold text-white tracking-tight flex items-center gap-2">
               <Settings className="size-4 text-[#B1FA63]" />
@@ -2809,7 +2809,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       {/* Contest Over Modal using official shadcn Dialog */}
       <Dialog open={!isPracticeMode && isContestOver && !isReviewMode}>
-        <DialogContent className="max-w-md rounded-[24px] border border-[#B1FA63]/40 bg-[#1F1F1F] p-8 text-center space-y-6 shadow-2xl [&>button]:hidden">
+        <DialogContent className="max-w-md rounded-[24px] border border-[#B1FA63]/40 bg-[#1F1F1F] p-8 text-center space-y-6 [&>button]:hidden">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 mx-auto text-[#B1FA63]">
               <Trophy className="size-7" />
@@ -2866,7 +2866,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       <aside
         aria-label="Contest Problem List and Standings"
-        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#141414] border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#141414] border-r border-white/10  flex flex-col transition-transform duration-200 ease-out ${
           isProblemListOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         }`}
       >
@@ -3129,7 +3129,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       {/* Exit Confirmation Dialog (HackerRank Flow) */}
       <Dialog open={!isPracticeMode && showExitModal && !isReviewMode} onOpenChange={setShowExitModal}>
-        <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg sm:rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg sm:rounded-lg">
           <DialogHeader className="space-y-3 text-left">
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">

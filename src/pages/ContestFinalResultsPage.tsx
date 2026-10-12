@@ -104,13 +104,13 @@ export function ContestFinalResultsPage() {
       />
 
       {rows.length === 0 ? (
-        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardContent className="flex flex-col items-center gap-3 py-16 text-center font-sans">
             <div className="size-20 mb-1 flex items-center justify-center">
               <img
                 src="/matiks-assets/empty-states/empty_leaderboard.png"
                 alt="Results pending verification"
-                className="size-full object-contain drop-shadow"
+                className="size-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
@@ -138,7 +138,7 @@ export function ContestFinalResultsPage() {
                 <Card
                   key={row.handle}
                   className={cn(
-                    "rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
+                    "rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] transition-all",
                     index === 0 && "border-[#B1FA63]/50 shadow-[0_0_25px_rgba(177,250,99,0.15)]",
                   )}
                 >
@@ -148,7 +148,7 @@ export function ContestFinalResultsPage() {
                         <img
                           src={medalSrc}
                           alt={`Rank #${index + 1}`}
-                          className="size-7 object-contain drop-shadow"
+                          className="size-7 object-contain"
                           onError={(e) => {
                             (e.target as HTMLElement).style.display = "none";
                           }}
@@ -183,7 +183,7 @@ export function ContestFinalResultsPage() {
         </section>
 
           {/* Full Standings Table */}
-          <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-white/[0.08] hover:bg-transparent">

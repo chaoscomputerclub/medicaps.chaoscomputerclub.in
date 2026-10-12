@@ -81,7 +81,7 @@ export function SocialDrawer() {
     >
       <SheetContent
         side="right"
-        className="w-full max-w-md bg-black border-l border-white/[0.08] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md shadow-[0_0_80px_rgba(0,0,0,0.95)]"
+        className="w-full max-w-md bg-black border-l border-white/[0.08] text-white p-0 flex flex-col gap-0 overflow-hidden sm:max-w-md"
       >
         {/* Top ambient accent highlight */}
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-lime-400/50 to-transparent pointer-events-none z-20" />
@@ -154,7 +154,7 @@ export function SocialDrawer() {
               value={searchQuery}
               onChange={(e) => dispatch(setSocialSearchQuery(e.target.value))}
               placeholder="Search handle, name, or department..."
-              className="h-9 pl-8.5 pr-8 text-xs font-sans bg-black/80 border border-white/[0.08] rounded-md text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60 focus-visible:ring-1 focus-visible:ring-lime-400/30 transition-[border-color,box-shadow] duration-150"
+              className="h-9 pl-8.5 pr-8 text-xs font-sans bg-[#171717] border border-white/[0.08] rounded-md text-white placeholder:text-zinc-500 focus-visible:border-lime-400/60 focus-visible:ring-1 focus-visible:ring-lime-400/30 transition-[border-color,box-shadow] duration-150"
             />
             {searchQuery && (
               <Button
@@ -197,7 +197,7 @@ export function SocialDrawer() {
                 <img
                   src="/matiks-assets/empty-states/no_Friends.webp"
                   alt="No connections recorded"
-                  className="size-full object-contain drop-shadow"
+                  className="size-full object-contain"
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = "none";
                   }}
@@ -237,7 +237,7 @@ export function SocialDrawer() {
               return (
                 <article
                   key={student.id}
-                  className="group flex items-center justify-between p-3 sm:p-3.5 border border-white/[0.08] bg-black/40 hover:bg-white/[0.03] hover:border-lime-400/35 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5"
+                  className="group flex items-center justify-between p-3 sm:p-3.5 border border-white/[0.08] bg-black/40 hover:bg-white/[0.03] hover:border-lime-400/35 rounded-lg transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5"
                 >
                   <CadetProfileHoverCard
                     handle={student.handle}

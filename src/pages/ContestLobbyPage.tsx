@@ -189,7 +189,7 @@ export function ContestLobbyPage() {
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (
-        <div className="space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 px-2.5 py-0.5 rounded-full border border-[#B1FA63]/30">
@@ -243,7 +243,7 @@ export function ContestLobbyPage() {
         </div>
       ) : (!isRegistered && !isDevBypass) ? (
         /* Not Registered */
-        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
@@ -268,7 +268,7 @@ export function ContestLobbyPage() {
         </div>
       ) : notYetOpen ? (
         /* Locked Waiting Room */
-        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 px-2.5 py-0.5 rounded-full border border-[#B1FA63]/30">
@@ -336,7 +336,7 @@ export function ContestLobbyPage() {
         </div>
       ) : (isFinished && !isDevBypass) ? (
         /* Closed */
-        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-wider text-red-400 font-heading font-bold bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full">
@@ -366,7 +366,7 @@ export function ContestLobbyPage() {
         </div>
       ) : (
         /* Ready to Attempt / Assessment Lobby */
-        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8">
           {/* Header */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -549,7 +549,7 @@ export function ContestLobbyPage() {
                   type="checkbox"
                   checked={ack}
                   onChange={(e) => setAck(e.target.checked)}
-                  className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-black text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400 cursor-pointer"
+                  className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-[#171717] text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400 cursor-pointer"
                 />
                 <span className="text-xs font-mono text-zinc-300 leading-relaxed">
                   I understand that this is my official competition attempt. The {durationMinutes}-minute contest clock begins immediately upon launching the arena.

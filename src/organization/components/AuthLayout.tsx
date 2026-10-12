@@ -94,7 +94,7 @@ export function AuthLayout({
         {/* Obsidian card — Matiks 24px Surface */}
         <div
           className={cn(
-            "w-full rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-7 sm:p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95)]",
+            "w-full rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-7 sm:p-8",
             cardMaxWidth,
           )}
         >

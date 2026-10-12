@@ -50,7 +50,7 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
   };
 
   return (
-    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)] h-full flex flex-col justify-between">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 h-full flex flex-col justify-between">
       {/* Header */}
       <div className="flex items-start justify-between pb-3.5 border-b border-white/[0.08]">
         <div>
@@ -110,7 +110,7 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
                   <img
                     src={certSrc}
                     alt={item.title || item.name}
-                    className="size-full object-contain drop-shadow"
+                    className="size-full object-contain"
                     onError={(e) => {
                       (e.target as HTMLElement).style.display = "none";
                     }}

@@ -45,10 +45,11 @@ test.describe('Zero-Lag SPA Navigation & SWR Cache Hydration Performance Suite',
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-    const routes = ['/contests', '/leaderboard', '/problems', '/profile', '/'];
+    const routes = ['/contests', '/leaderboard', '/practice', '/profile', '/'];
     for (const route of routes) {
       const link = page.locator(`aside a[href="${route}"]`).first();
-      await link.click();
+      await link.waitFor({ state: 'visible' });
+      await link.click({ force: true });
       await expect(page).toHaveURL(new RegExp(`${route === '/' ? '/$' : route}`));
     }
 

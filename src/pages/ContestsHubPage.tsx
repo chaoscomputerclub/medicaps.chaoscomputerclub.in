@@ -121,14 +121,14 @@ function ContestCountdownBadge({
   if (isLive) {
     if (cdEnds.isExpired) {
       return (
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-zinc-400 shadow-sm">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-zinc-400">
           <span>ROUND CONCLUDED</span>
         </div>
       );
     }
     const { days, hours, minutes, seconds } = cdEnds;
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-red-400 tabular-nums shadow-sm">
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-red-400 tabular-nums">
         <Clock className="size-3 text-red-400 animate-pulse" />
         <span>
           Closes {days > 0 ? `${days}d ` : ""}
@@ -140,7 +140,7 @@ function ContestCountdownBadge({
 
   if (cdStarts.isExpired) {
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-lime-400 tabular-nums shadow-sm">
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-lime-400 tabular-nums">
         <span className="size-1.5 rounded-full bg-lime-400 animate-ping" />
         <span>STARTING NOW</span>
       </div>
@@ -149,7 +149,7 @@ function ContestCountdownBadge({
 
   const { days, hours, minutes, seconds } = cdStarts;
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-white tabular-nums shadow-sm transition-colors group-hover:border-lime-400/40">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-white tabular-nums transition-colors group-hover:border-lime-400/40">
       <Clock className="size-3 text-lime-400 transition-transform duration-300 group-hover:rotate-45" />
       <span>
         {days > 0 ? `${days}d ` : ""}
@@ -437,7 +437,7 @@ export function ContestsHubPage() {
             <img
               src="/trophy.png"
               alt="Medi-Caps Contest Trophy"
-              className="relative w-28 h-32 sm:w-32 sm:h-36 object-contain filter drop-shadow-[0_12px_30px_rgba(203,255,0,0.22)] select-none pointer-events-none transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1 group-hover:drop-shadow-[0_16px_36px_rgba(203,255,0,0.4)]"
+              className="relative w-28 h-32 sm:w-32 sm:h-36 object-contain filter -[0_12px_30px_rgba(203,255,0,0.22)] select-none pointer-events-none transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1 group-hover:-[0_16px_36px_rgba(203,255,0,0.4)]"
             />
           </div>
 
@@ -462,7 +462,7 @@ export function ContestsHubPage() {
           {/* ─── UPCOMING CONTEST HERO CARDS (LEETCODE STYLE - LARGER SIZE) ───────────── */}
           <div className="w-full pt-4 max-w-5xl mx-auto">
             {upcomingContests.length === 0 ? (
-              <div className="rounded-lg border border-white/8 bg-black p-10 text-center space-y-3 group hover:border-white/18 shadow-[0_1px_2px_rgba(0,0,0,0.4)] transition-colors duration-150">
+              <div className="rounded-lg border border-white/8 bg-black p-10 text-center space-y-3 group hover:border-white/18 transition-colors duration-150">
                 <Trophy className="size-10 text-zinc-600 mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-lime-400" />
                 <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
                 <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
@@ -513,7 +513,7 @@ export function ContestsHubPage() {
                       key={contest.slug}
                       data-testid="hero-contest-card"
                       onClick={() => navigate(isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`)}
-                      className="group relative flex flex-col justify-between rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-[#B1FA63]/40 cursor-pointer"
+                      className="group relative flex flex-col justify-between rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden transition-all duration-200 hover:border-[#B1FA63]/40 cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
                       <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-[#1F1F1F] overflow-hidden border-b border-white/[0.08]">
@@ -543,7 +543,7 @@ export function ContestsHubPage() {
                             )}
 
                             {isUserCompleted && (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/70 backdrop-blur-sm px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-400 shadow-sm">
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/70 backdrop-blur-sm px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-400">
                                 <CheckCircle2 className="size-3 text-emerald-400" />
                                 <span>ATTEMPT SUBMITTED</span>
                               </span>
@@ -610,7 +610,7 @@ export function ContestsHubPage() {
                             <Button
                               asChild
                               size="hero"
-                              className="group/btn shadow-lg shadow-lime-400/20 active:scale-95"
+                              className="group/btn active:scale-95"
                             >
                               <Link to={`/contests/${contest.slug}/lobby`} className="flex items-center gap-1.5">
                                 <Play className="size-4 fill-black transition-transform duration-200 group-hover/btn:scale-125 group-hover/btn:translate-x-0.5" />
@@ -652,7 +652,7 @@ export function ContestsHubPage() {
                                 handleRegister(contest.slug);
                               }}
                               disabled={Boolean(registeringSlugs[contest.slug])}
-                              className="group/btn shadow-lg shadow-lime-400/20 active:scale-95"
+                              className="group/btn active:scale-95"
                             >
                               <Bell className="size-4 transition-transform duration-200 group-hover/btn:rotate-12 group-hover/btn:scale-110" />
                               <span>{Boolean(registeringSlugs[contest.slug]) ? "Registering..." : "Register"}</span>
@@ -680,7 +680,7 @@ export function ContestsHubPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
           {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
-          <div className="lg:col-span-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.4)] space-y-6">
+          <div className="lg:col-span-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-6">
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b border-white/[0.08] pb-4 cursor-default group">
               <Trophy className="size-5 text-[#B1FA63] transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
@@ -693,7 +693,7 @@ export function ContestsHubPage() {
             {myStanding && myStanding.entry && (
               <div className="p-4 sm:p-5 rounded-[16px] border border-[#B1FA63]/30 bg-[#B1FA63]/[0.05] flex items-center justify-between gap-3 group hover:border-[#B1FA63]/60 transition-all duration-200">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#B1FA63]/15 border border-[#B1FA63]/40 font-mono text-base font-bold text-[#B1FA63] shadow-sm">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#B1FA63]/15 border border-[#B1FA63]/40 font-mono text-base font-bold text-[#B1FA63]">
                     #{myStanding.rank}
                   </div>
                   <div className="min-w-0">
@@ -737,11 +737,11 @@ export function ContestsHubPage() {
                     className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 shadow-lg font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
                         <Medal className="size-3 text-zinc-300 transition-transform duration-300 group-hover:rotate-12" />
                         <span>#2</span>
                       </div>
-                      <Avatar className="size-16 sm:size-18 rounded-full border-2 border-zinc-400/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 shadow-xl overflow-hidden">
+                      <Avatar className="size-16 sm:size-18 rounded-full border-2 border-zinc-400/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank2?.avatar_url)} className="rounded-full object-cover" />
                         <AvatarFallback className="rounded-full bg-zinc-900 text-zinc-300 font-mono text-sm font-bold">
                           {rank2?.handle?.slice(0, 2).toUpperCase() || "02"}
@@ -780,14 +780,14 @@ export function ContestsHubPage() {
                     className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-lg border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-6 pb-3 flex flex-col items-center">
-                      <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 drop-shadow-[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
+                      <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 -[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
                       <Avatar className="size-18 sm:size-22 rounded-full border-2 border-lime-400 ring-4 ring-lime-400/25 shadow-[0_0_30px_rgba(203,255,0,0.35)] transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank1?.avatar_url)} className="rounded-full object-cover" />
                         <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-base font-bold">
                           {rank1?.handle?.slice(0, 2).toUpperCase() || "01"}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center px-2.5 py-0.5 rounded-full bg-lime-400 text-black font-mono text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider shadow-md transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center px-2.5 py-0.5 rounded-full bg-lime-400 text-black font-mono text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
                         #1 CHAMPION
                       </div>
                     </div>
@@ -795,7 +795,7 @@ export function ContestsHubPage() {
                       <p className="text-xs sm:text-sm font-bold text-white group-hover:text-lime-400 transition-colors truncate font-sans max-w-full" title={rank1?.handle || "Cadet 1"}>
                         {rank1?.handle || "Cadet 1"}
                       </p>
-                      <span className="inline-block mt-1.5 rounded-full border border-lime-400/50 bg-lime-400/15 px-3 py-0.5 font-mono text-xs font-bold tabular-nums text-lime-400 shadow-sm group-hover:bg-lime-400/25 transition-colors">
+                      <span className="inline-block mt-1.5 rounded-full border border-lime-400/50 bg-lime-400/15 px-3 py-0.5 font-mono text-xs font-bold tabular-nums text-lime-400 group-hover:bg-lime-400/25 transition-colors">
                         {rank1?.rating ?? 1200}
                       </span>
                       <span className="block font-mono text-[10px] text-lime-400/80 mt-1">
@@ -823,11 +823,11 @@ export function ContestsHubPage() {
                     className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 shadow-lg font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
                         <Medal className="size-3 text-amber-500 transition-transform duration-300 group-hover:rotate-12" />
                         <span>#3</span>
                       </div>
-                      <Avatar className="size-14 sm:size-16 rounded-full border-2 border-amber-600/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 shadow-xl overflow-hidden">
+                      <Avatar className="size-14 sm:size-16 rounded-full border-2 border-amber-600/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank3?.avatar_url)} className="rounded-full object-cover" />
                         <AvatarFallback className="rounded-full bg-zinc-900 text-amber-500 font-mono text-sm font-bold">
                           {rank3?.handle?.slice(0, 2).toUpperCase() || "03"}
@@ -928,7 +928,7 @@ export function ContestsHubPage() {
           </div>
 
           {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
-          <div className="lg:col-span-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.4)] space-y-6">
+          <div className="lg:col-span-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-6">
             {/* Header: Animated Tabs & Search */}
             <Tabs
               value={activeTab}
@@ -1009,7 +1009,7 @@ export function ContestsHubPage() {
                       >
                         {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] font-mono text-sm font-bold text-[#B1FA63] shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:border-[#B1FA63]/40">
+                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] font-mono text-sm font-bold text-[#B1FA63] transition-all duration-200 group-hover:scale-105 group-hover:border-[#B1FA63]/40">
                             <Trophy className="size-6 text-[#B1FA63]/80 group-hover:text-[#B1FA63] transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
 
@@ -1045,7 +1045,7 @@ export function ContestsHubPage() {
                             asChild
                             size="sm"
                             variant="ghost"
-                            className="border border-white/10 hover:border-lime-400 group-hover:shadow-sm"
+                            className="border border-white/10 hover:border-lime-400 group-hover:"
                           >
                             <Link to={`/contests/${contest.slug}`} className="flex items-center gap-1.5">
                               <Play className="size-3.5 fill-current transition-transform duration-200 group-hover:scale-110" />
@@ -1162,7 +1162,7 @@ export function ContestsHubPage() {
                     size="icon-sm"
                     variant={pg === currentPage ? "default" : "ghost"}
                     onClick={() => setCurrentPage(pg)}
-                    className={pg !== currentPage ? "text-zinc-400 hover:text-white" : "shadow-sm"}
+                    className={pg !== currentPage ? "text-zinc-400 hover:text-white" : ""}
                   >
                     {pg}
                   </Button>
@@ -1183,7 +1183,7 @@ export function ContestsHubPage() {
         </div>
 
         {/* ─── ABOUT THE CHAMPIONSHIP TROPHY ─────────────── */}
-        <div className="group rounded-lg border border-white/8 bg-black p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/18 shadow-[0_1px_2px_rgba(0,0,0,0.4)] transition-colors duration-150">
+        <div className="group rounded-lg border border-white/8 bg-black p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/18 transition-colors duration-150">
           <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold text-lime-400 uppercase tracking-widest">
             <Trophy className="size-4 sm:size-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
             <span>About the Medi-Caps Chapter Trophy</span>
