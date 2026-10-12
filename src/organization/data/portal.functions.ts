@@ -4,7 +4,7 @@
  * in-flight request deduplication, and immediate synchronous state returns.
  */
 
-import { getApiBase, getToken, clearToken, silentRefreshToken } from "@/lib/auth";
+import { getApiBase, getToken, clearToken, silentRefreshToken, isAuthenticated } from "@/lib/auth";
 import { swrFetch, invalidateSwrCache } from "@/lib/cache/swrCache";
 import type {
   AnnouncementFeedItem,
@@ -151,9 +151,11 @@ export async function getMemberProfileData(force = false) {
 
         clearTimeout(timer);
         if (res.status === 401) {
-          clearToken();
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+          if (!isAuthenticated()) {
+            clearToken();
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+            }
           }
           return {
             member: null,

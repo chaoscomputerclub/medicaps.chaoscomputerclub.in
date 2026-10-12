@@ -60,7 +60,7 @@ export function AppShellSkeleton() {
   };
 
   if (isFullscreen) {
-    return <main className="min-h-screen bg-black text-white">{renderContentSkeleton()}</main>;
+    return <main className="min-h-screen bg-[#171717] text-white">{renderContentSkeleton()}</main>;
   }
 
   return (
@@ -68,25 +68,25 @@ export function AppShellSkeleton() {
       role="status"
       aria-live="polite"
       aria-label="Loading application shell"
-      className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased select-none"
+      className="min-h-screen bg-[#171717] text-white flex flex-col md:flex-row antialiased select-none"
     >
       {/* Mobile Topbar Skeleton */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/8 bg-black sticky top-0 z-40">
+      <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#141414] sticky top-0 z-40">
         <div className="flex items-center gap-2.5">
-          <Skeleton className="w-7 h-7 rounded-md shrink-0" />
+          <Skeleton className="w-7 h-7 rounded-[8px] shrink-0" />
           <div className="flex flex-col gap-1">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-2 w-16" />
           </div>
         </div>
-        <Skeleton className="w-6 h-6 rounded-md" />
+        <Skeleton className="w-6 h-6 rounded-[8px]" />
       </div>
 
       {/* Desktop Sidebar Skeleton */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-black border-r border-white/8 px-4 py-4 flex-col z-50">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-[#141414] border-r border-white/10 px-4 py-4 flex-col z-50">
         {/* Brand Header */}
-        <div className="flex items-center gap-3 pb-4 mb-2 border-b border-white/8">
-          <Skeleton className="w-8 h-8 rounded-md shrink-0" />
+        <div className="flex items-center gap-3 pb-4 mb-2 border-b border-white/10">
+          <Skeleton className="w-8 h-8 rounded-[8px] shrink-0" />
           <div className="flex flex-col gap-1.5 flex-1">
             <Skeleton className="h-3 w-32" />
             <Skeleton className="h-2 w-20" />
@@ -104,7 +104,7 @@ export function AppShellSkeleton() {
         </div>
 
         {/* User Identity Footer */}
-        <div className="pt-3 border-t border-white/8 flex items-center justify-between gap-2">
+        <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <Skeleton className="w-7 h-7 rounded-full shrink-0" />
             <div className="space-y-1 flex-1">
@@ -117,7 +117,7 @@ export function AppShellSkeleton() {
       </aside>
 
       {/* Main Content Viewport Skeleton with Route-Specific Content */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 md:p-8">
+      <main className="flex-1 md:ml-64 min-h-screen bg-[#171717] p-4 md:p-8">
         {renderContentSkeleton()}
       </main>
     </div>

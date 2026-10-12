@@ -185,7 +185,7 @@ export function TabsList({
       tabIndex={-1}
       onKeyDown={handleKeyDown}
       className={cn(
-        "relative inline-flex items-center rounded-lg bg-black border border-white/10 p-1 gap-0.5",
+        "relative inline-flex items-center rounded-[12px] bg-[#171717] border border-white/[0.08] p-1 gap-1",
         orientation === "vertical" && "flex-col items-stretch",
         className,
       )}
@@ -253,12 +253,12 @@ export function TabsTab({
         }
       }}
       className={cn(
-        "relative z-10 flex items-center justify-center gap-2 rounded-md px-3 py-1.5 font-sans text-sm font-semibold whitespace-nowrap",
+        "relative z-10 flex items-center justify-center gap-2 rounded-[8px] px-3.5 py-1.5 font-heading text-xs font-bold uppercase tracking-wider whitespace-nowrap",
         "transition-colors duration-150 cursor-pointer select-none",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 focus-visible:ring-offset-1 focus-visible:ring-offset-black",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B1FA63] focus-visible:ring-offset-1 focus-visible:ring-offset-black",
         "disabled:pointer-events-none disabled:opacity-40",
         isActive
-          ? (activeClassName ?? "text-black font-semibold")
+          ? (activeClassName ?? "text-black font-extrabold")
           : (inactiveClassName ?? "text-zinc-400 hover:text-white"),
         className,
       )}
@@ -269,7 +269,7 @@ export function TabsTab({
         <motion.span
           layoutId={layoutId}
           className={cn(
-            "absolute inset-0 rounded-md bg-lime-400 shadow-sm",
+            "absolute inset-0 rounded-[8px] bg-[#B1FA63] shadow-sm",
             indicatorClassName,
           )}
           style={{ zIndex: -1 }}

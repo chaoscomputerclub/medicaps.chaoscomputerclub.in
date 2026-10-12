@@ -1,0 +1,36 @@
+{
+  "apiBaseUrl": "https://api.matiks.org",
+  "paymentApiBaseUrl": "https://api.matiks.org",
+  "cdnBaseUrl": "https://cdn0.matiks.org",
+  "updatedAt": "2026-10-07T00:00:00Z",
+  "cleverTapTrackingEnabled": true,
+  "sessionActivationRules": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "d1_s15",
+        "activeMinutes": 15,
+        "accountAgeHours": 24,
+        "enabled": true
+      },
+      {
+        "id": "d1_s20",
+        "activeMinutes": 20,
+        "accountAgeHours": 24,
+        "enabled": true
+      }
+    ]
+  },
+  "preSignupRules": {
+    "version": 1,
+    "rules": [
+      {
+        "id": "pre_signup_questions",
+        "enabled": true,
+        "countries": [
+          "US"
+        ]
+      }
+    ]
+  }
+}

@@ -75,38 +75,38 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
   }, [activityData]);
 
   const getIntensityClass = (activity: number) => {
-    if (activity === 0) return "bg-zinc-900/90 border-white/5 hover:border-white/20";
-    if (activity === 1) return "bg-[#0e4429] border-[#006d32]/40 hover:border-[#26a641]";
-    if (activity === 2) return "bg-[#006d32] border-[#26a641]/50 hover:border-[#39d353]";
-    if (activity === 3) return "bg-[#26a641] border-[#39d353]/60 hover:border-[#39d353]";
-    return "bg-[#39d353] border-[#39d353] shadow-[0_0_6px_rgba(57,211,83,0.4)]";
+    if (activity === 0) return "bg-[#171717] border-white/[0.06] hover:border-white/20";
+    if (activity === 1) return "bg-[#0e4429] border-[#006d32]/40 hover:border-[#B1FA63]";
+    if (activity === 2) return "bg-[#1a5d2c] border-[#22843b]/50 hover:border-[#B1FA63]";
+    if (activity === 3) return "bg-[#2eb846] border-[#B1FA63]/60 hover:border-[#B1FA63]";
+    return "bg-[#B1FA63] border-[#B1FA63] shadow-[0_0_8px_rgba(177,250,99,0.5)]";
   };
 
   return (
-    <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-5 space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.03)]">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
       {/* Top Header Bar matching LeetCode Utilization */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans pb-1">
-        <div className="flex items-center gap-1.5 text-zinc-300">
-          <strong className="text-white text-sm font-bold tabular-nums">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs pb-1">
+        <div className="flex items-center gap-2 text-zinc-300">
+          <strong className="text-white text-lg font-display tracking-wide tabular-nums">
             {loading ? "…" : totalSubmissions || summary.total_accepted || 0}
           </strong>
-          <span>submissions in the past one year</span>
+          <span className="font-sans text-zinc-400">submissions in the past one year</span>
           <span title="Counts unique problem solving activity logged in the academic ledger">
             <Info className="size-3.5 text-zinc-500 hover:text-zinc-300 transition-colors cursor-help" />
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 self-end sm:self-auto">
+        <div className="flex items-center gap-3 text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 self-end sm:self-auto">
           <span>
-            Total active days:{" "}
-            <strong className="text-white tabular-nums font-semibold">
+            Active Days:{" "}
+            <strong className="text-white tabular-nums font-mono font-bold">
               {loading ? "…" : summary.active_days}
             </strong>
           </span>
           <span className="text-zinc-700">|</span>
           <span>
-            Max streak:{" "}
-            <strong className="text-white tabular-nums font-semibold">
+            Max Streak:{" "}
+            <strong className="text-white tabular-nums font-mono font-bold">
               {loading ? "…" : summary.longest_streak}
             </strong>
           </span>

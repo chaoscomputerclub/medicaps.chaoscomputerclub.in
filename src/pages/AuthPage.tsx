@@ -68,13 +68,13 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
 // Shared input style (recessed dark)
 // ─────────────────────────────────────────────
 const INPUT_BASE =
-  "w-full h-11 rounded-md border border-white/12 bg-black px-3.5 text-base md:text-sm text-white placeholder:text-zinc-600 " +
-  "focus:outline-none focus:border-[#CCFF00] focus-visible:ring-1 focus-visible:ring-[#CCFF00]/50 transition-colors duration-150 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]";
+  "w-full h-11 rounded-[10px] border border-white/10 bg-[#171717] px-3.5 text-base md:text-sm text-white placeholder:text-zinc-500 " +
+  "focus:outline-none focus:border-[#B1FA63] focus-visible:ring-1 focus-visible:ring-[#B1FA63]/50 transition-colors duration-150 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]";
 
 // ─────────────────────────────────────────────
 // Shared label style
 // ─────────────────────────────────────────────
-const LABEL = "block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-2";
+const LABEL = "block text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 mb-2";
 
 // ─────────────────────────────────────────────
 // Domain guard

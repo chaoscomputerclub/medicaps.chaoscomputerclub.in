@@ -150,45 +150,45 @@ export function LeaderboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      {/* Clean minimal header — no ELO MATRIX / Verified Elo badges */}
-      <header className="rounded-lg border border-white/8 bg-black p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+      {/* Clean minimal header — Matiks Design Analogy */}
+      <header className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+        <div className="space-y-2">
+          <p className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#B1FA63]">
             (04 // University Standings)
           </p>
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white font-sans">
+          <h1 className="text-3xl sm:text-5xl font-display uppercase tracking-wide text-white leading-none">
             University Leaderboard
           </h1>
           <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 font-sans">
             Unified standings across Medi-Caps University computing departments.
           </p>
         </div>
-        <div className="flex flex-col items-start md:items-end justify-center rounded-lg border border-white/8 bg-black p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Rating Season</span>
-          <strong className="font-mono text-lg font-bold text-white mt-0.5">2025–2026</strong>
-          <small className="font-mono text-xs text-lime-400 tabular-nums mt-0.5">{totalCount}&nbsp;ranked cadets</small>
-          <div className="flex items-center gap-1.5 mt-1.5 font-mono text-[9px] uppercase tracking-wider text-emerald-400">
+        <div className="flex flex-col items-start md:items-end justify-center rounded-[16px] border border-white/[0.08] bg-[#171717] p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0 shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+          <span className="font-heading font-bold text-xs uppercase tracking-wider text-zinc-400">Rating Season</span>
+          <strong className="font-display text-2xl text-white mt-0.5 tracking-wide">2025–2026</strong>
+          <small className="font-mono text-xs text-[#B1FA63] tabular-nums mt-0.5">{totalCount}&nbsp;ranked cadets</small>
+          <div className="flex items-center gap-1.5 mt-1.5 font-heading text-[10px] uppercase tracking-wider text-[#B1FA63] font-bold">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B1FA63] opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#B1FA63]" />
             </span>
-            Real-Time Sync · SSE Active
+            Real-Time Sync · Active
           </div>
         </div>
       </header>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+      <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-white/8 hover:bg-transparent">
-                <TableHead className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold w-16">Rank</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold">Cadet</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden md:table-cell">Trend</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold">Rating</TableHead>
-                <TableHead className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden sm:table-cell">Peak</TableHead>
-                <TableHead className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-500 font-semibold hidden sm:table-cell">Attended</TableHead>
+              <TableRow className="border-b border-white/[0.08] hover:bg-transparent">
+                <TableHead className="py-3.5 pl-5 text-left font-heading text-xs uppercase text-zinc-400 font-bold tracking-wider w-16">Rank</TableHead>
+                <TableHead className="py-3.5 text-left font-heading text-xs uppercase text-zinc-400 font-bold tracking-wider">Cadet</TableHead>
+                <TableHead className="py-3.5 text-left font-heading text-xs uppercase text-zinc-400 font-bold tracking-wider hidden md:table-cell">Trend</TableHead>
+                <TableHead className="py-3.5 text-left font-heading text-xs uppercase text-zinc-400 font-bold tracking-wider">Rating</TableHead>
+                <TableHead className="py-3.5 text-left font-heading text-xs uppercase text-zinc-400 font-bold tracking-wider hidden sm:table-cell">Peak</TableHead>
+                <TableHead className="py-3.5 pr-5 text-left font-heading text-xs uppercase text-zinc-400 font-bold tracking-wider hidden sm:table-cell">Attended</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -198,9 +198,21 @@ export function LeaderboardPage() {
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="py-16 text-center font-mono text-xs text-zinc-600"
+                    className="py-12 text-center font-mono text-xs"
                   >
-                    No ranked members found in university standings.
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="size-20 mb-2 flex items-center justify-center">
+                        <img
+                          src="/matiks-assets/empty-states/empty_leaderboard.png"
+                          alt="No ranked members"
+                          className="size-full object-contain drop-shadow"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                      <span className="text-zinc-400">No ranked members found in university standings.</span>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -247,6 +259,25 @@ export function LeaderboardPage() {
                       {/* Rank + Change */}
                       <TableCell className="pl-5 py-3">
                         <div className="flex items-center gap-1.5 font-mono">
+                          {displayRank === 1 ? (
+                            <img
+                              src="/matiks-assets/ranks/gold_icon.webp"
+                              alt="1st"
+                              className="size-4 object-contain shrink-0"
+                            />
+                          ) : displayRank === 2 ? (
+                            <img
+                              src="/matiks-assets/ranks/silver_icon.webp"
+                              alt="2nd"
+                              className="size-4 object-contain shrink-0"
+                            />
+                          ) : displayRank === 3 ? (
+                            <img
+                              src="/matiks-assets/ranks/bronze_icon.webp"
+                              alt="3rd"
+                              className="size-4 object-contain shrink-0"
+                            />
+                          ) : null}
                           <strong className="text-xs font-bold tabular-nums text-white w-5 text-right">
                             {displayRank != null ? displayRank : "—"}
                           </strong>

@@ -24,7 +24,7 @@ export function ScoreboardMatrix({
 
   if (safeEntries.length === 0) {
     return (
-      <div className="text-center py-10 text-zinc-400 font-mono text-xs border border-dashed border-white/10">
+      <div className="text-center py-10 text-zinc-400 font-mono text-xs border border-white/[0.08] rounded-[16px] bg-[#171717]">
         No active tournament scoreboard on file.
       </div>
     );
@@ -33,9 +33,9 @@ export function ScoreboardMatrix({
   const safeProblems = problems || [];
 
   return (
-    <div className="w-full min-w-0 overflow-x-auto border border-white/8 bg-black rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+    <div className="w-full min-w-0 overflow-x-auto border border-white/[0.08] bg-[#171717] rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
       <table className="w-full min-w-[620px] text-left font-mono text-xs border-collapse">
-        <thead className="bg-black text-zinc-400 text-[10px] uppercase tracking-wider font-semibold border-b border-white/8">
+        <thead className="bg-[#171717] text-zinc-400 text-xs font-heading uppercase tracking-wider font-bold border-b border-white/[0.08]">
           <tr>
             <th className="p-3 w-12 text-center">#</th>
             <th className="p-3">Contestant</th>

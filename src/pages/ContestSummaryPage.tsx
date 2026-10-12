@@ -405,9 +405,9 @@ export function ContestSummaryPage() {
     : "";
 
   return (
-    <div className="min-h-[100dvh] w-full bg-black text-white font-sans selection:bg-lime-400 selection:text-black flex flex-col">
+    <div className="min-h-[100dvh] w-full bg-[#171717] text-white font-sans selection:bg-[#B1FA63] selection:text-black flex flex-col">
       {/* Top Microservice Header */}
-      <header className="sticky top-0 z-30 border-b border-white/8 bg-black/95 backdrop-blur-md px-4 sm:px-6 h-14 flex items-center justify-between gap-4 shrink-0">
+      <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#141414]/95 backdrop-blur-md px-4 sm:px-6 h-14 flex items-center justify-between gap-4 shrink-0">
         {/* Left: Microservice Brand & Navigation */}
         <div className="flex items-center gap-3.5 min-w-0">
           <Link
@@ -536,27 +536,27 @@ export function ContestSummaryPage() {
       {/* Main Content Area */}
       <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 space-y-8">
         {/* Title Header */}
-        <div className="space-y-2 border-b border-white/8 pb-6">
+        <div className="space-y-2 border-b border-white/[0.08] pb-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
-                Official Contest Assessment
+              <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 px-2.5 py-0.5 rounded-full border border-[#B1FA63]/30">
+                OFFICIAL ASSESSMENT
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mt-1">
+              <h1 className="text-3xl sm:text-4xl font-normal tracking-wider text-white font-display uppercase mt-2">
                 {contestTitle}
               </h1>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/8 bg-zinc-950">
-                <span className="size-1.5 rounded-full bg-lime-400" />
+            <div className="flex items-center gap-2 text-xs font-heading font-semibold text-zinc-400">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border border-white/[0.08] bg-[#1F1F1F]">
+                <span className="size-1.5 rounded-full bg-[#B1FA63]" />
                 <span>
-                  Candidate: <strong className="text-white">{member?.handle || "Cadet"}</strong>
+                  Candidate: <strong className="text-white font-mono">@{member?.handle || "Cadet"}</strong>
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/8 bg-zinc-950">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border border-[#B1FA63]/30 bg-[#1F1F1F]">
                 <span>
-                  Earned: <strong className="text-lime-400 tabular-nums">{earnedPoints}</strong> /{" "}
+                  Earned: <strong className="text-[#B1FA63] tabular-nums font-mono">{earnedPoints}</strong> /{" "}
                   {totalPossiblePoints} Pts
                 </span>
               </div>
@@ -566,56 +566,56 @@ export function ContestSummaryPage() {
 
         {/* HackerRank-style Metric Bento Grid */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          <div className="p-4 rounded-lg border border-white/8 bg-zinc-950 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+          <div className="p-5 rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
               Total Challenges
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-white tabular-nums">
+              <span className="text-3xl font-normal font-display text-white tabular-nums">
                 {problems.length}
               </span>
               <FileText className="size-4 text-zinc-500" />
             </div>
-            <span className="font-mono text-[10px] text-zinc-400">Problem statements</span>
+            <span className="font-sans text-[10px] text-zinc-500">Problem statements</span>
           </div>
 
-          <div className="p-4 rounded-lg border border-lime-400/20 bg-lime-400/5 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-lime-400">
+          <div className="p-5 rounded-[20px] border border-[#B1FA63]/25 bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
               Solved &amp; Passed
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-lime-400 tabular-nums">
+              <span className="text-3xl font-normal font-display text-[#B1FA63] tabular-nums">
                 {solvedCount}
               </span>
-              <CheckCircle2 className="size-4 text-lime-400" />
+              <CheckCircle2 className="size-4 text-[#B1FA63]" />
             </div>
-            <span className="font-mono text-[10px] text-lime-400/70">100% test cases accepted</span>
+            <span className="font-sans text-[10px] text-[#B1FA63]/70">100% test cases accepted</span>
           </div>
 
-          <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-500/5 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">
+          <div className="p-5 rounded-[20px] border border-amber-500/25 bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-amber-400">
               In Progress
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-amber-400 tabular-nums">
+              <span className="text-3xl font-normal font-display text-amber-400 tabular-nums">
                 {attemptedCount}
               </span>
               <Code2 className="size-4 text-amber-400" />
             </div>
-            <span className="font-mono text-[10px] text-amber-400/70">Draft code stored</span>
+            <span className="font-sans text-[10px] text-amber-400/70">Draft code stored</span>
           </div>
 
-          <div className="p-4 rounded-lg border border-white/8 bg-zinc-950 flex flex-col justify-between space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+          <div className="p-5 rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col justify-between space-y-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
               Unattempted
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-zinc-400 tabular-nums">
+              <span className="text-3xl font-normal font-display text-zinc-400 tabular-nums">
                 {unattemptedCount}
               </span>
               <MinusCircle className="size-4 text-zinc-600" />
             </div>
-            <span className="font-mono text-[10px] text-zinc-500">No submission yet</span>
+            <span className="font-sans text-[10px] text-zinc-500">No submission yet</span>
           </div>
         </section>
 
@@ -623,19 +623,19 @@ export function ContestSummaryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-semibold text-white tracking-tight">
+              <h2 className="text-base font-bold text-white tracking-wide font-heading uppercase">
                 Challenge Review &amp; Status
               </h2>
-              <p className="text-xs text-zinc-400 font-mono">
+              <p className="text-xs text-zinc-400 font-sans mt-0.5">
                 Click any challenge to return to the coding workspace and edit your solution.
               </p>
             </div>
-            <span className="font-mono text-xs text-zinc-500">
+            <span className="font-heading font-bold text-xs text-zinc-400 uppercase tracking-wider">
               {solvedCount} of {problems.length} Complete
             </span>
           </div>
 
-          <div className="rounded-lg border border-white/8 bg-zinc-950 overflow-hidden shadow-xl divide-y divide-white/6">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.4)] divide-y divide-white/[0.06]">
             {problems.map((problem) => {
               const status = problemStatusMap[problem.id] || "unattempted";
               const problemSlug = slugifyProblem(problem.title, problem.problem_index);

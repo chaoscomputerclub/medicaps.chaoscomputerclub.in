@@ -71,7 +71,7 @@ export function ProblemArchivePage() {
         }
       />
 
-      <section className="rounded-lg border border-white/8 bg-black p-5 sm:p-6 space-y-5">
+      <section className="rounded-[24px] border border-white/10 bg-[#1F1F1F] p-5 sm:p-6 space-y-5">
         <SectionHeader
           kicker="01 // Released Sets"
           index="PROBLEMS"
@@ -89,7 +89,7 @@ export function ProblemArchivePage() {
                     setSearchQuery(val);
                   });
                 }}
-                className="h-9 pl-8 pr-2.5 text-base md:text-xs bg-black border-white/10 font-mono rounded-md focus-visible:ring-1 focus-visible:ring-lime-400"
+                className="h-10 pl-8 pr-2.5 text-sm bg-[#171717] border-white/10 font-sans rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63]"
               />
             </div>
           }
@@ -111,36 +111,36 @@ export function ProblemArchivePage() {
               return (
                 <article
                   key={`${p.contestSlug}-${p.pIndex}-${p.id || ""}`}
-                  className="flex items-center justify-between p-4 rounded-lg border border-white/8 bg-black hover:border-white/18 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] transition-all duration-150 group content-auto-card"
+                  className="flex items-center justify-between p-4 rounded-[16px] border border-white/10 bg-[#171717] hover:border-[#B1FA63]/50 shadow-md transition-all duration-150 group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="font-mono text-base font-semibold text-lime-400 w-7 text-center shrink-0">
+                    <span className="font-heading font-bold text-base text-[#B1FA63] w-7 text-center shrink-0">
                       {p.pIndex}
                     </span>
                     <div className="min-w-0 space-y-0.5">
                       <Link
                         to={`/contests/${p.contestSlug}`}
-                        className="font-mono text-[9px] text-zinc-500 hover:text-zinc-300 uppercase tracking-wider block truncate transition-colors"
+                        className="font-heading text-[10px] text-zinc-500 hover:text-zinc-300 uppercase tracking-wider block truncate transition-colors"
                       >
                         {p.contestTitle}
                       </Link>
-                      <h2 className="text-sm font-semibold text-white group-hover:text-lime-400 transition-colors truncate">
+                      <h2 className="text-sm font-semibold text-white group-hover:text-[#B1FA63] transition-colors truncate">
                         <Link to={`/problems/${p.contestSlug}--${p.pSlug}`} className="hover:underline">
                           {p.title}
                         </Link>
                       </h2>
-                      <p className="font-mono text-[11px] text-zinc-500">
-                        {p.topic} · <span className="tabular-nums text-zinc-400">{p.solved_count ?? 0}</span>&nbsp;solves
+                      <p className="font-sans text-[11px] text-zinc-500">
+                        {p.topic} · <span className="tabular-nums text-zinc-400 font-mono">{p.solved_count ?? 0}</span>&nbsp;solves
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 pl-3">
-                    <strong className="font-mono text-xs tabular-nums text-zinc-400 font-semibold">
+                    <strong className="font-heading text-xs tabular-nums text-zinc-400 font-bold">
                       {p.points ?? 0}&nbsp;pts
                     </strong>
                     <Link
                       to={`/problems/${p.contestSlug}--${p.pSlug}`}
-                      className="size-8 rounded-md bg-black border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 text-zinc-400 transition-colors flex items-center justify-center active:scale-[0.96]"
+                      className="size-8 rounded-[10px] bg-[#1F1F1F] border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] text-zinc-400 transition-colors flex items-center justify-center active:scale-[0.96]"
                     >
                       <ArrowRight className="size-3.5" />
                     </Link>

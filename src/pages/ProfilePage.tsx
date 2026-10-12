@@ -409,19 +409,19 @@ export function ProfilePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Profile Header Card */}
-      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-lg border border-white/10 bg-black p-6 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
+      <header className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <div className="flex items-start gap-5">
           {/* Avatar Container */}
           <div className="relative group shrink-0">
-            <Avatar className="size-16 sm:size-20 rounded-lg border border-white/10 bg-black overflow-hidden">
+            <Avatar className="size-16 sm:size-20 rounded-[20px] border border-white/[0.08] bg-[#171717] overflow-hidden shadow-lg">
               {resolvedAvatar ? (
                 <AvatarImage
                   src={resolvedAvatar}
                   alt={displayName}
-                  className="object-cover rounded-lg"
+                  className="object-cover rounded-[20px]"
                 />
               ) : null}
-              <AvatarFallback className="rounded-lg bg-lime-400/10 text-lime-400 font-mono font-semibold text-lg flex items-center justify-center w-full h-full">
+              <AvatarFallback className="rounded-[20px] bg-[#B1FA63]/10 text-[#B1FA63] font-display text-2xl uppercase tracking-wider flex items-center justify-center w-full h-full">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -433,10 +433,10 @@ export function ProfilePage() {
                   onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
                   disabled={isUploadingAvatar}
                   aria-label="Change photo"
-                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer text-lime-400 font-sans text-xs font-semibold p-1 text-center"
+                  className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-[20px] flex flex-col items-center justify-center gap-1 cursor-pointer text-[#B1FA63] font-sans text-xs font-semibold p-1 text-center"
                 >
                   {isUploadingAvatar ? (
-                    <WanderingEyes size="sm" className="h-4 text-lime-400" />
+                    <WanderingEyes size="sm" className="h-4 text-[#B1FA63]" />
                   ) : (
                     <>
                       <Camera className="size-3.5" />
@@ -458,14 +458,14 @@ export function ProfilePage() {
             />
           )}
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
+              <span className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#B1FA63]">
                 (06 // Cadet Dossier)
               </span>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
+            <div className="flex items-center gap-3.5 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-display uppercase tracking-wide text-white leading-none">
                 {displayName}
               </h1>
 
@@ -477,11 +477,12 @@ export function ProfilePage() {
                     disabled={isUploadingAvatar}
                     variant="outline"
                     size="sm"
+                    className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs"
                   >
                     {isUploadingAvatar ? (
                       <WanderingEyes size="inline" className="h-3 mr-1" />
                     ) : (
-                      <Camera size={11} />
+                      <Camera size={11} className="text-[#B1FA63]" />
                     )}
                     <span>{resolvedAvatar ? "Photo" : "Upload"}</span>
                   </Button>
@@ -492,15 +493,16 @@ export function ProfilePage() {
                       onClick={() => setShowRemoveAvatarModal(true)}
                       variant="destructive"
                       size="sm"
+                      className="rounded-[10px] font-heading font-bold uppercase tracking-wider text-xs"
                     >
                       <Trash2 size={10} />
                       <span>Remove</span>
                     </Button>
                   )}
 
-                  <Button asChild variant="outline" size="sm">
+                  <Button asChild variant="outline" size="sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs">
                     <Link to="/settings">
-                      <Edit3 size={11} />
+                      <Edit3 size={11} className="text-[#B1FA63]" />
                       <span>Settings</span>
                     </Link>
                   </Button>
@@ -513,6 +515,7 @@ export function ProfilePage() {
                     disabled={isPendingFollowAction}
                     variant={isFollowing ? "secondary" : "outline"}
                     size="sm"
+                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs"}
                   >
                     {isFollowing ? (
                       <>
@@ -534,15 +537,15 @@ export function ProfilePage() {
                       </>
                     )}
                   </Button>
-                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm">
-                    {copied ? <Check size={11} className="text-lime-400" /> : <Share2 size={11} />}
+                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717]">
+                    {copied ? <Check size={11} className="text-[#B1FA63]" /> : <Share2 size={11} />}
                   </Button>
                 </div>
               )}
             </div>
 
             <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
-              <TierBadge>{m.tier || "1★ Explorer"}</TierBadge>
+              <TierBadge tier={m.tier} rating={m.rating}>{m.tier || "1★ Explorer"}</TierBadge>
               {m.department || (isSelfUser ? currentMember?.department : null) ? (
                 <>
                   <span>·</span>
@@ -556,7 +559,7 @@ export function ProfilePage() {
                 </>
               ) : null}
               <span>·</span>
-              <span className="text-lime-400">@{displayHandle || "cadet"}</span>
+              <span className="text-[#B1FA63] font-bold">@{displayHandle || "cadet"}</span>
             </div>
 
             {m.bio && (
@@ -581,9 +584,9 @@ export function ProfilePage() {
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono text-zinc-400 hover:text-white bg-black border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-md transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[10px] transition-colors"
                 >
-                  <Github size={11} />
+                  <Github size={11} className="text-[#B1FA63]" />
                   <span>{m.github_username}</span>
                 </a>
               )}
@@ -596,9 +599,9 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono text-zinc-400 hover:text-white bg-black border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-md transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[10px] transition-colors"
                 >
-                  <FaLinkedinIn size={11} />
+                  <FaLinkedinIn size={11} className="text-[#B1FA63]" />
                   <span>LinkedIn</span>
                 </a>
               )}
@@ -606,14 +609,14 @@ export function ProfilePage() {
           </div>
         </div>
 
-        <dl className="flex sm:flex-col gap-3 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6">
+        <dl className="flex sm:flex-col gap-3.5 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/[0.08] pt-4 lg:pt-0 lg:pl-6 relative z-10 shrink-0">
           <div>
-            <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Enrollment No.</dt>
-            <dd className="text-white font-medium tabular-nums">{enrollmentNo}</dd>
+            <dt className="text-zinc-500 uppercase text-[9px] font-heading font-bold tracking-wider">Enrollment No.</dt>
+            <dd className="text-white font-medium tabular-nums text-sm mt-0.5">{enrollmentNo}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500 uppercase text-[9px] tracking-wider">Email</dt>
-            <dd className="text-zinc-300">
+            <dt className="text-zinc-500 uppercase text-[9px] font-heading font-bold tracking-wider">Email</dt>
+            <dd className="text-zinc-300 mt-0.5">
               {isSelfUser
                 ? m.email || currentMember?.email || "—"
                 : m.email || "Protected (Campus Only)"}
@@ -701,7 +704,7 @@ export function ProfilePage() {
 
       {/* Trajectory & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
+        <div className="lg:col-span-2 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
           <SectionHeader
             kicker="03 // Rating History"
             index="TRAJECTORY"
@@ -709,7 +712,7 @@ export function ProfilePage() {
           />
           <RatingChart data={history} loading={isLoading && history.length === 0} />
         </div>
-        <div>
+        <div className="h-full">
           <RatingDistributionCard
             member={m}
             distribution={distribution}
@@ -719,18 +722,30 @@ export function ProfilePage() {
       </section>
 
       {/* Contest Battle Logs */}
-      <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <SectionHeader kicker="04 // Record" index="CONTESTS" title="Attended Tournaments" />
-        <div className="divide-y divide-white/6 font-mono text-xs">
+        <div className="space-y-2 font-mono text-xs">
           {battles.length === 0 ? (
-            <div className="text-center py-8 text-zinc-600">No recorded tournaments on file.</div>
+            <div className="text-center py-8 flex flex-col items-center justify-center">
+              <div className="size-20 mb-2 flex items-center justify-center">
+                <img
+                  src="/matiks-assets/empty-states/no_duels_to_flex.png"
+                  alt="No tournaments on file"
+                  className="size-full object-contain drop-shadow"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
+              </div>
+              <p className="text-xs font-mono text-zinc-400">No recorded tournaments on file.</p>
+            </div>
           ) : (
             battles.map((b: any) => (
               <article
                 key={b.certificate_id}
-                className="py-3 px-2 rounded-md hover:bg-white/[0.02] transition-colors flex items-center justify-between flex-wrap gap-3"
+                className="py-3 px-3.5 rounded-[12px] bg-[#171717] border border-white/[0.04] hover:border-white/[0.12] transition-colors flex items-center justify-between flex-wrap gap-3"
               >
-                <time className="text-zinc-500">
+                <time className="text-zinc-500 font-mono text-xs">
                   {new Date(b.date).toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "short",
@@ -741,33 +756,33 @@ export function ProfilePage() {
                   {b.contest_slug || b.slug ? (
                     <Link
                       to={`/contests/${b.contest_slug || b.slug}/results`}
-                      className="font-semibold text-white hover:text-lime-400 transition-colors block"
+                      className="font-heading font-bold text-white hover:text-[#B1FA63] transition-colors block text-sm"
                     >
                       {b.contest}
                     </Link>
                   ) : (
-                    <h3 className="font-semibold text-white">{b.contest}</h3>
+                    <h3 className="font-heading font-bold text-white text-sm">{b.contest}</h3>
                   )}
                   {b.certificate_id ? (
-                    <span className="text-[10px] text-zinc-500 font-mono block">
+                    <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">
                       {b.certificate_id}
                     </span>
                   ) : null}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-zinc-400">
+                  <span className="text-zinc-400 font-sans">
                     Rank{" "}
-                    <strong className="text-white font-semibold tabular-nums">#{b.rank}</strong>
+                    <strong className="text-white font-mono font-bold tabular-nums">#{b.rank}</strong>
                   </span>
-                  <span className="text-zinc-400">
+                  <span className="text-zinc-400 font-sans">
                     Solved{" "}
-                    <strong className="text-white font-semibold tabular-nums">{b.solved}</strong>
+                    <strong className="text-white font-mono font-bold tabular-nums">{b.solved}</strong>
                   </span>
                   <em
                     className={
                       b.delta >= 0
-                        ? "text-lime-400 not-italic font-semibold tabular-nums"
-                        : "text-red-400 not-italic font-semibold tabular-nums"
+                        ? "text-[#B1FA63] not-italic font-mono font-bold tabular-nums"
+                        : "text-red-400 not-italic font-mono font-bold tabular-nums"
                     }
                   >
                     {b.delta > 0 ? "+" : ""}
@@ -781,44 +796,68 @@ export function ProfilePage() {
       </section>
 
       {/* Achievements Ledger */}
-      <section className="rounded-lg border border-white/10 bg-black p-5 sm:p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <SectionHeader kicker="05 // Milestones" index="HONORS" title="Achievement Ledger" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
           {achievements.length === 0 ? (
-            <div className="text-center py-8 text-zinc-600 col-span-full">
-              No achievements unlocked yet.
+            <div className="text-center py-8 text-zinc-500 col-span-full flex flex-col items-center justify-center">
+              <div className="size-16 mb-2 flex items-center justify-center">
+                <img
+                  src="/matiks-assets/badges/Novice.png"
+                  alt="Locked Badge"
+                  className="size-8 object-contain opacity-40 grayscale"
+                />
+              </div>
+              <span className="font-heading font-bold uppercase tracking-wider text-xs">No achievements unlocked yet.</span>
             </div>
           ) : (
-            achievements.map((a: any) => (
-              <article
-                key={a.code || a.id || a.name || a.title}
-                className={`p-3.5 rounded-lg border ${
-                  a.earned !== false
-                    ? "border-lime-400/30 bg-black shadow-[0_0_12px_rgba(204,255,0,0.04)]"
-                    : "border-white/6 bg-black opacity-40"
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  {a.earned !== false ? (
-                    <Award className="size-3.5 text-lime-400" />
-                  ) : (
-                    <LockKeyhole className="size-3.5 text-zinc-500" />
-                  )}
-                  <span className="text-[9px] uppercase tracking-wider text-zinc-500">
-                    {a.code || a.id || "ACH"}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-white">{a.name || a.title}</h3>
-                <p className="text-zinc-400 text-[11px] mt-0.5 leading-relaxed">{a.description}</p>
-              </article>
-            ))
+            achievements.map((a: any) => {
+              const code = (a.code || a.id || a.name || a.title || "").toLowerCase();
+              const certSrc =
+                code.includes("contest") || code.includes("tourn") || code.includes("podium")
+                  ? "/matiks-assets/achievements/ContestRecognition.webp"
+                  : code.includes("survival") || code.includes("streak") || code.includes("fire")
+                  ? "/matiks-assets/achievements/SurvivalSaturdayRecognition.webp"
+                  : code.includes("showdown") || code.includes("duel") || code.includes("battle")
+                  ? "/matiks-assets/achievements/ShowdownRecognition.webp"
+                  : "/matiks-assets/badges/badge.webp";
+
+              return (
+                <article
+                  key={a.code || a.id || a.name || a.title}
+                  className={`p-4 rounded-[16px] border bg-[#171717] transition-all ${
+                    a.earned !== false
+                      ? "border-[#B1FA63]/30 shadow-[0_0_16px_rgba(177,250,99,0.06)]"
+                      : "border-white/[0.06] opacity-40"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="size-6 shrink-0 flex items-center justify-center">
+                      <img
+                        src={certSrc}
+                        alt="Achievement badge"
+                        className="size-full object-contain drop-shadow"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                    <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">
+                      {a.code || a.id || "ACH"}
+                    </span>
+                  </div>
+                  <h3 className="font-heading font-bold text-white text-sm">{a.name || a.title}</h3>
+                  <p className="text-zinc-400 text-xs mt-1 leading-relaxed font-sans">{a.description}</p>
+                </article>
+              );
+            })
           )}
         </div>
       </section>
 
       {/* Trust Footer */}
-      <footer className="flex items-center gap-2.5 p-4 rounded-lg border border-white/10 bg-black text-zinc-500 font-mono text-xs">
-        <Zap className="size-3.5 text-lime-400 shrink-0" />
+      <footer className="flex items-center gap-3 p-5 rounded-[18px] border border-white/[0.08] bg-[#1F1F1F] text-zinc-400 font-sans text-xs">
+        <Zap className="size-4 text-[#B1FA63] shrink-0" />
         <p>
           Ratings and achievements derive exclusively from physically proctored campus tournaments.
         </p>
@@ -826,27 +865,27 @@ export function ProfilePage() {
 
       {/* Remove Avatar Confirmation Modal */}
       <AlertDialog open={showRemoveAvatarModal} onOpenChange={setShowRemoveAvatarModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <AlertDialogContent className="border border-white/[0.08] bg-[#1F1F1F] text-white p-6 max-w-md rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.9)]">
           <AlertDialogHeader className="space-y-2 text-left">
-            <AlertDialogTitle className="text-base font-semibold text-white">
+            <AlertDialogTitle className="text-lg font-heading font-bold text-white">
               Remove profile photo?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <AlertDialogDescription className="text-xs text-zinc-400 font-sans leading-relaxed">
               Are you sure you want to remove your custom profile photo? This will revert your
               avatar to your initials placeholder.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <AlertDialogFooter className="mt-4 flex justify-end gap-2">
+          <AlertDialogFooter className="mt-5 flex justify-end gap-2.5">
             <AlertDialogCancel
               onClick={() => setShowRemoveAvatarModal(false)}
-              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-transparent border border-white/[0.08] text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-heading font-bold uppercase tracking-wider rounded-[8px] cursor-pointer"
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleAvatarRemove}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-red-600 hover:bg-red-700 text-white font-heading font-bold uppercase tracking-wider px-4 py-2 text-xs rounded-[8px] cursor-pointer"
             >
               Remove Photo
             </AlertDialogAction>

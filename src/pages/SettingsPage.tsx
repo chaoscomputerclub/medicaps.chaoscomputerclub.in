@@ -122,26 +122,26 @@ function SettingSection({
   return (
     <section
       className={cn(
-        "border rounded-lg",
+        "border rounded-[24px] overflow-hidden",
         danger
-          ? "border-red-500/30 bg-black shadow-[0_1px_3px_rgba(0,0,0,0.8),0_0_0_1px_rgba(239,68,68,0.1)]"
-          : "border-white/10 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]",
+          ? "border-red-500/20 bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+          : "border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
       )}
     >
-      <div className={cn("px-6 py-4 border-b", danger ? "border-red-500/20" : "border-white/10")}>
+      <div className={cn("px-6 py-4.5 border-b", danger ? "border-red-500/15" : "border-white/[0.08]")}>
         <h2
           className={cn(
-            "text-sm font-semibold tracking-tight",
+            "text-base font-bold font-heading uppercase tracking-wide",
             danger ? "text-red-400" : "text-white",
           )}
         >
           {title}
         </h2>
         {description && (
-          <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-xs text-zinc-400 mt-1 font-sans leading-relaxed">{description}</p>
         )}
       </div>
-      <div className="px-6 py-5 space-y-5">{children}</div>
+      <div className="px-6 py-6 space-y-5">{children}</div>
     </section>
   );
 }
@@ -468,22 +468,22 @@ export function SettingsPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       {/* Page Title Header */}
-      <div className="flex items-center justify-between mb-6 pb-5 border-b border-white/10">
+      <div className="flex items-center justify-between mb-8 pb-5 border-b border-white/[0.08]">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
-              (07 // Platform Configuration)
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-2 py-0.5 rounded-full">
+              CONFIGURATION
             </span>
           </div>
-          <h1 className="text-xl font-semibold text-white tracking-tight">Settings</h1>
-          <p className="text-xs text-zinc-400 mt-0.5 font-sans">
+          <h1 className="text-3xl sm:text-4xl font-normal font-display tracking-wider text-white uppercase">Settings</h1>
+          <p className="text-xs text-zinc-400 mt-1 font-sans">
             Manage your competitive identity, security, and account preferences.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="hidden sm:flex border-white/15 bg-white/[0.02] hover:bg-white/[0.05]">
+        <Button asChild variant="outline" size="sm" className="hidden sm:flex rounded-[10px]">
           <Link to="/profile">
             View profile
-            <ExternalLink size={11} className="opacity-60" />
+            <ExternalLink size={12} className="opacity-70 ml-1.5" />
           </Link>
         </Button>
       </div>
@@ -494,7 +494,7 @@ export function SettingsPage() {
         className="flex flex-col md:flex-row gap-6 items-start"
       >
         {/* ── Left sidebar nav (Responsive TabsList) ───────────────────────── */}
-        <TabsList className="flex flex-row md:flex-col w-full md:w-52 shrink-0 md:sticky md:top-6 gap-1 p-1 rounded-lg border border-white/8 bg-black overflow-x-auto md:overflow-visible items-stretch no-scrollbar">
+        <TabsList className="flex flex-row md:flex-col w-full md:w-56 shrink-0 md:sticky md:top-6 gap-1.5 p-2 rounded-[16px] border border-white/[0.08] bg-[#1F1F1F] overflow-x-auto md:overflow-visible items-stretch no-scrollbar">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -502,22 +502,22 @@ export function SettingsPage() {
                 key={item.id}
                 value={item.id}
                 className={cn(
-                  "relative z-10 flex items-center gap-2.5 w-auto md:w-full px-3 py-2 text-sm font-sans font-semibold rounded-md transition-colors cursor-pointer select-none justify-start",
+                  "relative z-10 flex items-center gap-2.5 w-auto md:w-full px-3.5 py-2.5 text-xs font-heading font-bold uppercase tracking-wider rounded-[10px] transition-colors cursor-pointer select-none justify-start",
                   item.danger
-                    ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/5"
-                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]",
+                    ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/10"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.03]",
                 )}
-                activeClassName={item.danger ? "text-red-400 font-semibold" : "text-white font-semibold"}
+                activeClassName={item.danger ? "text-red-400 font-bold" : "text-black font-bold"}
                 indicatorClassName={
                   item.danger
-                    ? "bg-red-500/10 border border-red-500/30 shadow-none"
-                    : "bg-white/10 border border-white/15 shadow-none"
+                    ? "bg-red-500/20 border border-red-500/30 shadow-none rounded-[10px]"
+                    : "bg-[#B1FA63] text-black shadow-[0_2px_10px_rgba(177,250,99,0.3)] rounded-[10px]"
                 }
               >
                 <Icon size={14} className="shrink-0" />
                 <span className="truncate">{item.label}</span>
                 {activeTab === item.id && !item.danger && (
-                  <span className="hidden md:inline-block size-1.5 rounded-full bg-lime-400 ml-auto shadow-[0_0_6px_rgba(204,255,0,0.6)]" />
+                  <span className="hidden md:inline-block size-1.5 rounded-full bg-black ml-auto" />
                 )}
               </TabsTab>
             );

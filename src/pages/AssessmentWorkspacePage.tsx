@@ -305,23 +305,23 @@ export function AssessmentWorkspacePage() {
   if (session && (session.status === "submitted" || session.status === "disqualified")) {
     const isDisqualified = session.status === "disqualified";
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-lg bg-black border border-white/8 text-center space-y-6">
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#171717] text-white font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-center space-y-6">
           <div
-            className={`size-14 rounded-md flex items-center justify-center mx-auto border ${
+            className={`size-14 rounded-[14px] flex items-center justify-center mx-auto border ${
               isDisqualified
                 ? "bg-red-500/10 border-red-500/30 text-red-400"
-                : "bg-lime-400/10 border-lime-400/30 text-lime-400"
+                : "bg-[#B1FA63]/10 border-[#B1FA63]/30 text-[#B1FA63]"
             }`}
           >
             {isDisqualified ? <ShieldAlert size={26} /> : <CheckCircle2 size={26} />}
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight text-white">
+            <h2 className="text-2xl font-normal tracking-wider text-white font-display uppercase">
               {isDisqualified ? "Assessment Disqualified" : "Assessment Submitted"}
             </h2>
-            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
               {isDisqualified
                 ? "Your session was disqualified due to anti-cheat policy violations."
                 : "Your answers have been recorded. Results will update automatically."}
@@ -329,21 +329,21 @@ export function AssessmentWorkspacePage() {
           </div>
 
           {!isDisqualified && (
-            <div className="rounded-md bg-zinc-950 border border-white/8 p-4 space-y-2 font-mono text-xs">
+            <div className="rounded-[16px] bg-[#171717] border border-white/[0.06] p-4.5 space-y-2 font-sans text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-zinc-500">Score recorded</span>
-                <span className="text-lime-400 font-semibold tabular-nums">
+                <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Score recorded</span>
+                <span className="text-[#B1FA63] font-bold font-mono text-sm tabular-nums">
                   {session.total_score ?? 0} pts
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-zinc-500">Status</span>
-                <span className="text-white font-semibold uppercase tracking-wider">Submitted</span>
+                <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Status</span>
+                <span className="text-white font-heading font-bold text-xs uppercase tracking-wider">Submitted</span>
               </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-2 pt-2">
+          <div className="flex flex-col gap-2.5 pt-2">
             <Button
               type="button"
               variant="default"
@@ -355,7 +355,7 @@ export function AssessmentWorkspacePage() {
                   navigate(`/contests/${contestSlug}`);
                 }
               }}
-              className="w-full"
+              className="w-full rounded-[10px]"
             >
               Close Workspace
             </Button>
@@ -364,7 +364,7 @@ export function AssessmentWorkspacePage() {
               variant="outline"
               size="default"
               onClick={() => navigate(`/contests/${contestSlug}/results`)}
-              className="w-full"
+              className="w-full rounded-[10px]"
             >
               View Standings
             </Button>
@@ -373,7 +373,7 @@ export function AssessmentWorkspacePage() {
               variant="ghost"
               size="default"
               onClick={() => navigate(`/contests/${contestSlug}`)}
-              className="w-full"
+              className="w-full rounded-[10px]"
             >
               Return to Contest Details
             </Button>
@@ -386,25 +386,25 @@ export function AssessmentWorkspacePage() {
   // ── Waiting Room Gate ───────────────────────────────────────────────────
   if (assessment && !session) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
-        <div className="max-w-md w-full p-8 rounded-lg bg-black border border-white/8 text-center space-y-6">
-          <div className="size-14 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto text-lime-400">
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#171717] text-white font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-center space-y-6">
+          <div className="size-14 rounded-[14px] bg-[#171717] border border-white/10 flex items-center justify-center mx-auto text-[#B1FA63]">
             <Clock size={28} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight text-white">
+            <h2 className="text-2xl font-normal tracking-wider text-white font-display uppercase">
               Assessment Opens Soon
             </h2>
-            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
               You are registered. The assessment workspace unseals automatically at the contest
               start time.
             </p>
           </div>
-          <div className="p-4 rounded-md border border-white/8 bg-zinc-950">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 block">
+          <div className="p-5 rounded-[16px] border border-white/[0.06] bg-[#171717]">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400 block">
               Time Remaining Until Unseal
             </span>
-            <div className="font-mono text-2xl font-bold text-lime-400 mt-1 tabular-nums">
+            <div className="font-display text-3xl font-normal text-[#B1FA63] mt-1 tabular-nums">
               {formatTimer(assessment.opens_in_seconds || 0)}
             </div>
           </div>
@@ -415,7 +415,7 @@ export function AssessmentWorkspacePage() {
             }}
             variant="outline"
             size="default"
-            className="w-full"
+            className="w-full rounded-[10px]"
           >
             Close & Return
           </Button>
@@ -437,23 +437,23 @@ export function AssessmentWorkspacePage() {
       error.toLowerCase().includes("top 30");
 
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black text-white font-sans p-6">
-        <div className="max-w-md w-full p-6 rounded-lg bg-black border border-white/8 text-center space-y-4">
-          <div className="size-12 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto">
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#171717] text-white font-sans p-6">
+        <div className="max-w-md w-full p-8 rounded-[24px] bg-[#1F1F1F] border border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-center space-y-5">
+          <div className="size-14 rounded-[14px] bg-[#171717] border border-white/10 flex items-center justify-center mx-auto">
             {isLifecycleErr ? (
-              <Lock size={22} className="text-amber-400" />
+              <Lock size={24} className="text-amber-400" />
             ) : (
-              <ShieldAlert size={22} className="text-red-400" />
+              <ShieldAlert size={24} className="text-red-400" />
             )}
           </div>
-          <h2 className="text-base font-semibold font-mono text-white">
+          <h2 className="text-2xl font-normal font-display uppercase tracking-wider text-white">
             {isLifecycleErr ? "Contest Arena Closed" : "Contest Access Gate"}
           </h2>
-          <p className="text-xs text-zinc-400 font-mono leading-relaxed">{error}</p>
+          <p className="text-xs text-zinc-400 font-sans leading-relaxed">{error}</p>
 
-          <div className="pt-2 flex flex-col gap-2">
+          <div className="pt-2 flex flex-col gap-2.5">
             {isLifecycleErr && (
-              <Button asChild variant="outline" size="default" className="w-full">
+              <Button asChild variant="outline" size="default" className="w-full rounded-[10px]">
                 <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy size={14} className="mr-1.5" />
                   <span>View Standings</span>
@@ -464,29 +464,29 @@ export function AssessmentWorkspacePage() {
               <Button
                 onClick={handleDirectRegister}
                 disabled={isRegistering}
-                variant="outline"
+                variant="default"
                 size="default"
-                className="w-full"
+                className="w-full rounded-[10px]"
               >
                 <Users size={14} className="mr-1.5" />
                 <span>{isRegistering ? "Registering..." : "Register Now & Enter"}</span>
               </Button>
             )}
             {isAuthErr && (
-              <Button asChild variant="outline" size="default" className="w-full">
+              <Button asChild variant="default" size="default" className="w-full rounded-[10px]">
                 <Link to={`/auth?redirect=/assessments/${contestSlug}`}>Sign In to Continue</Link>
               </Button>
             )}
             <Button
-              variant="outline"
-              size="default"
               onClick={() => {
                 if (window.opener) window.close();
-                else window.location.href = `/contests/${contestSlug}`;
+                else navigate(`/contests/${contestSlug}`);
               }}
-              className="w-full"
+              variant="ghost"
+              size="default"
+              className="w-full rounded-[10px]"
             >
-              Return to Contest Details
+              Back to Overview
             </Button>
           </div>
         </div>
@@ -496,12 +496,12 @@ export function AssessmentWorkspacePage() {
 
   // ── Main Workspace ─────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen w-screen flex-col bg-black text-white font-sans select-none overflow-hidden">
-      {/* Top Header (44px) */}
-      <header className="flex h-11 shrink-0 items-center justify-between border-b border-white/8 bg-black px-3 z-20">
+    <div className="flex h-screen w-screen flex-col bg-[#171717] text-white font-sans select-none overflow-hidden">
+      {/* Top Header (48px) */}
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#141414] px-4 z-20">
         {/* Left: Problem selector pills */}
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-lime-400 mr-2 hidden sm:inline">
+          <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/30 px-2 py-0.5 rounded-full mr-2 hidden sm:inline">
             {assessment?.title ? assessment.title.slice(0, 24) : "CCC Assessment"}
           </span>
           <div className="h-3 w-px bg-white/10 mr-1 hidden sm:inline" />
@@ -516,10 +516,10 @@ export function AssessmentWorkspacePage() {
                 key={prob.id}
                 type="button"
                 onClick={() => dispatch(setActiveProblemIndex(idx))}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] font-heading text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-zinc-900 text-white border border-lime-400/40"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-950 border border-transparent"
+                    ? "bg-[#B1FA63]/15 text-[#B1FA63] border border-[#B1FA63]/50"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.04] border border-transparent"
                 }`}
               >
                 <span>Problem {prob.problem_index}</span>

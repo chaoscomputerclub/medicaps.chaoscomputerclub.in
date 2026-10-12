@@ -152,6 +152,26 @@ async def test_redis_refresh_token_rotation():
 
 
 @pytest.mark.asyncio
+async def test_redis_refresh_token_rotation_grace_window():
+    """Verify RTR with allow_grace=True allows concurrent/multi-tab replay within grace window."""
+    refresh_token = generate_refresh_token()
+    member_id = "mem-test-uuid-5678"
+    email = "cadet.grace@medicaps.ac.in"
+
+    await store_refresh_token(refresh_token, member_id, email)
+
+    # First call rotates token into grace set
+    payload = await verify_and_revoke_refresh_token(refresh_token, allow_grace=True)
+    assert payload is not None
+    assert payload["member_id"] == member_id
+
+    # Concurrent call within grace window succeeds
+    grace_payload = await verify_and_revoke_refresh_token(refresh_token, allow_grace=True)
+    assert grace_payload is not None
+    assert grace_payload["member_id"] == member_id
+
+
+@pytest.mark.asyncio
 async def test_redis_refresh_token_logout_revocation():
     """Verify explicit revocation on logout wipes the refresh token from Redis."""
     refresh_token = generate_refresh_token()

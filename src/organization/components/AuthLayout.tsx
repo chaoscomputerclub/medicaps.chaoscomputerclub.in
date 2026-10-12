@@ -57,7 +57,7 @@ export function AuthLayout({
   }, []);
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-between bg-black px-4 py-12 antialiased selection:bg-[#CCFF00]/30 selection:text-white">
+    <main className="flex min-h-screen w-full flex-col items-center justify-between bg-[#171717] px-4 py-12 antialiased selection:bg-[#B1FA63]/30 selection:text-white">
       {/* ── Centered auth shell ── */}
       <div className="flex w-full flex-1 flex-col items-center justify-center">
 
@@ -70,31 +70,31 @@ export function AuthLayout({
           <img
             src="/logo.webp"
             alt="Chaos Computer Club"
-            className="h-9 w-9 object-contain"
+            className="h-10 w-10 object-contain"
           />
         </Link>
 
         {/* Page title with smooth cross-fade */}
         <h1
           key={typeof title === "string" ? title : "auth-title"}
-          className="auth-title-transition mb-2 text-[24px] font-semibold tracking-tight text-white"
+          className="auth-title-transition mb-2 text-3xl sm:text-4xl font-display uppercase tracking-wide text-white leading-none"
         >
           {title}
         </h1>
 
         {/* Subtitle (only rendered if provided) */}
         {subtitle && (
-          <p className="auth-title-transition mb-7 max-w-xs text-center text-[13px] leading-snug text-zinc-400">
+          <p className="auth-title-transition mb-7 max-w-xs text-center text-xs leading-snug text-zinc-400 font-sans">
             {subtitle}
           </p>
         )}
 
         {!subtitle && <div className="mb-7" />}
 
-        {/* Obsidian card — Sleek Geometry with Smooth Dynamic Height Morph (No Overflow Clipping) */}
+        {/* Obsidian card — Matiks 24px Surface */}
         <div
           className={cn(
-            "w-full rounded-xl border border-white/[0.12] bg-[#0c0c0e] p-7 sm:p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.05)]",
+            "w-full rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-7 sm:p-8 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.95)]",
             cardMaxWidth,
           )}
         >

@@ -282,12 +282,24 @@ export function initAuthKeepalive(): () => void {
   }
   keepaliveInitialized = true;
 
+  let lastRefreshAttempt = 0;
+  const REFRESH_COOLDOWN_MS = 15000;
+
   const checkAndRefresh = async () => {
+    const now = Date.now();
+    if (now - lastRefreshAttempt < REFRESH_COOLDOWN_MS) {
+      return;
+    }
+
     const remaining = getTokenRemainingSeconds();
-    // Proactively refresh if token expires within 24 hours (86,400s) or has already expired
-    if (remaining !== null && remaining < 86400) {
-      await silentRefreshToken();
-    } else if (remaining === null && (getToken() || getStoredMember())) {
+    // Proactively refresh only if token is expired or expires within 2 minutes (120s)
+    if (remaining !== null) {
+      if (remaining <= 120) {
+        lastRefreshAttempt = now;
+        await silentRefreshToken();
+      }
+    } else if (getToken() || getStoredMember()) {
+      lastRefreshAttempt = now;
       await silentRefreshToken();
     }
   };
@@ -295,8 +307,8 @@ export function initAuthKeepalive(): () => void {
   // Run initial check
   void checkAndRefresh();
 
-  // Check every 10 minutes
-  const intervalId = setInterval(checkAndRefresh, 10 * 60 * 1000);
+  // Check every 60 seconds
+  const intervalId = setInterval(checkAndRefresh, 60 * 1000);
 
   const onVisibilityChange = () => {
     if (document.visibilityState === "visible") {
@@ -353,9 +365,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit, isRetry = fa
         if (refreshed) {
           return await apiFetch<T>(path, init, true);
         } else {
-          clearToken();
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+          // Only invalidate session if the stored access token is actually expired or missing
+          if (!isAuthenticated()) {
+            clearToken();
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("ccc:session-invalidated"));
+            }
           }
         }
       }

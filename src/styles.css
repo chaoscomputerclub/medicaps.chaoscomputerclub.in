@@ -20,78 +20,82 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-background: #000000;
+  --color-background: #171717;
   --color-foreground: #ffffff;
-  --color-card: #000000;
+  --color-card: #1F1F1F;
   --color-card-foreground: #ffffff;
-  --color-popover: #000000;
+  --color-popover: #1F1F1F;
   --color-popover-foreground: #ffffff;
 
-  --color-lime-300: #d8ff33;
-  --color-lime-400: #CCFF00;
-  --color-lime-500: #b3e600;
-  --color-lime-600: #99cc00;
-  --color-lime-950: #0a1400;
+  /* Matiks Signature Electric Lime (rgb(177, 250, 99)) */
+  --color-lime-300: #C9FF85;
+  --color-lime-400: #B1FA63;
+  --color-lime-500: #9CE84C;
+  --color-lime-600: #749F45;
+  --color-lime-950: #121A08;
 
-  --color-primary: #CCFF00;
+  --color-primary: #B1FA63;
   --color-primary-foreground: #000000;
-  --color-secondary: #000000;
+  --color-secondary: #242424;
   --color-secondary-foreground: #ffffff;
-  --color-muted: #050505;
-  --color-muted-foreground: #71717a;
-  --color-accent: #CCFF00;
+  --color-muted: #1F1F1F;
+  --color-muted-foreground: #A3A3A3;
+  --color-accent: #B1FA63;
   --color-accent-foreground: #000000;
   --color-destructive: #ff3344;
   --color-destructive-foreground: #ffffff;
-  --color-success: #10b981;
+  --color-success: #B1FA63;
   --color-success-foreground: #000000;
-  --color-signal-green: #00E676;
+  --color-signal-green: #B1FA63;
   --color-border: rgba(255, 255, 255, 0.08);
   --color-input: rgba(255, 255, 255, 0.12);
-  --color-ring: #CCFF00;
+  --color-ring: #B1FA63;
 
-  --color-canvas: #000000;
-  --color-surface: #000000;
-  --color-surface-1: #000000;
-  --color-surface-2: #000000;
-  --color-surface-3: #050505;
+  --color-canvas: #171717;
+  --color-surface: #1F1F1F;
+  --color-surface-1: #242424;
+  --color-surface-2: #2C2C2C;
+  --color-surface-3: #333333;
 
-  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* font-mono is intentionally set to sans-serif — monospace is UI-only for code editors & problem statements */
-  --font-mono: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-code: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --font-vscode: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  /* Matiks Typography Stack */
+  --font-sans: "Nunito Sans", "Montserrat", "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Bebas Neue", "Montserrat", sans-serif;
+  --font-heading: "Montserrat", "Nunito Sans", sans-serif;
+  --font-mono: "Space Mono", "Roboto Mono", "Menlo", "Monaco", monospace;
+  --font-code: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
+  --font-vscode: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  /* Matiks Component Radii: 10px buttons, 24px cards */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 24px;
 }
 
 :root {
   color-scheme: dark;
-  --background: #000000;
+  --background: #171717;
   --foreground: #ffffff;
-  --bg: #000000;
-  --surface: #000000;
-  --surface-1: #000000;
-  --surface-2: #000000;
-  --surface-3: #050505;
+  --bg: #171717;
+  --surface: #1F1F1F;
+  --surface-1: #242424;
+  --surface-2: #2C2C2C;
+  --surface-3: #333333;
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
-  --muted: #71717a;
-  --accent: #CCFF00;
+  --muted: #A3A3A3;
+  --accent: #B1FA63;
   --accent-ink: #000000;
   --warning: #f59e0b;
   --danger: #ff3344;
-  --cyan: #00e5ff;
-  --radius: 8px;
-  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* font-mono remapped to sans — monospace only lives in code editors & problem statements */
-  --font-mono: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-code: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --font-vscode: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --cyan: #00D4FF;
+  --radius: 10px;
+  --font-sans: "Nunito Sans", "Montserrat", "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Bebas Neue", "Montserrat", sans-serif;
+  --font-heading: "Montserrat", "Nunito Sans", sans-serif;
+  --font-mono: "Space Mono", "Roboto Mono", "Menlo", "Monaco", monospace;
+  --font-code: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
+  --font-vscode: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
 }
 
 *, *::before, *::after {
@@ -99,7 +103,7 @@
 }
 
 html {
-  background-color: #000000;
+  background-color: #171717;
   color: #ffffff;
   color-scheme: dark;
   scroll-behavior: smooth;
@@ -110,7 +114,7 @@ html {
 
 body {
   margin: 0;
-  background-color: #000000;
+  background-color: #171717;
   color: #ffffff;
   font-family: var(--font-sans);
   min-height: 100dvh;
@@ -166,6 +170,15 @@ button {
   font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.font-heading {
+  font-family: var(--font-heading), sans-serif;
 }
 
 /* Authentic VS Code Monospace Typography for Code, Editors, and Pre Blocks */

@@ -75,38 +75,38 @@ export function ProblemDetailPage() {
         }
       />
 
-      <div className="flex items-start gap-3 p-4 rounded-lg border border-white/8 bg-black text-zinc-300">
+      <div className="flex items-start gap-3.5 p-5 rounded-[18px] border border-white/[0.08] bg-[#1F1F1F] text-zinc-300">
         <Ban className="size-4 shrink-0 mt-0.5 text-zinc-500" />
-        <div className="space-y-0.5 font-mono text-xs">
-          <strong className="text-white block uppercase tracking-wider">Archived Reference Only</strong>
-          <p className="text-zinc-400">
+        <div className="space-y-0.5 text-xs">
+          <strong className="text-white block font-heading font-bold uppercase tracking-wider">Archived Reference Only</strong>
+          <p className="text-zinc-400 font-sans">
             This challenge is preserved for post-contest analysis. Live submission is closed.
           </p>
         </div>
       </div>
 
-      <article className="rounded-lg border border-white/8 bg-black p-6 space-y-6">
+      <article className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
         <SectionHeader
           kicker="01 // Official Editorial"
           index={`ANALYSIS · ${problem.points} PTS`}
           title="Solution Breakdown"
         />
 
-        <p className="text-zinc-300 text-xs font-mono leading-relaxed whitespace-pre-wrap">
+        <p className="text-zinc-300 text-sm font-sans leading-relaxed whitespace-pre-wrap">
           {problem.editorial}
         </p>
 
         <div className="space-y-2">
-          <h3 className="text-xs font-mono font-semibold text-white uppercase tracking-wider">
+          <h3 className="text-xs font-heading font-bold text-white uppercase tracking-wider">
             Complexity Boundary
           </h3>
-          <pre className="rounded-md p-3.5 bg-zinc-950 border border-white/8 font-mono text-xs text-lime-400 overflow-x-auto">
+          <pre className="rounded-[14px] p-4 bg-[#171717] border border-white/[0.08] font-mono text-xs text-[#B1FA63] overflow-x-auto">
             <code>{`complexity: O(n log n)\nspace: O(n)\nverdict: accepted`}</code>
           </pre>
         </div>
 
-        <div className="pt-4 border-t border-white/6 flex items-center gap-2 text-xs font-sans text-zinc-500">
-          <CheckCircle2 className="size-3.5 text-emerald-400 shrink-0" />
+        <div className="pt-4 border-t border-white/[0.06] flex items-center gap-2 text-xs font-sans text-zinc-400">
+          <CheckCircle2 className="size-3.5 text-[#B1FA63] shrink-0" />
           <span>Solve metrics reconciled against official campus judge replay.</span>
         </div>
       </article>

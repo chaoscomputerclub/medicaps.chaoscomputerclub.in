@@ -103,3 +103,8 @@ tests/load/__pycache__/
 .vercel
 .env*
 supabase/.temp/
+
+# Raw scrape directories
+/assets/
+/matiks_assets/
+matiks_assets_*.json

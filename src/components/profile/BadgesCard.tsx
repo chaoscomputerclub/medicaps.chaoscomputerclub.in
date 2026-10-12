@@ -50,28 +50,35 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
   };
 
   return (
-    <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.03)] h-full flex flex-col justify-between">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)] h-full flex flex-col justify-between">
       {/* Header */}
-      <div className="flex items-start justify-between pb-3 border-b border-white/6">
+      <div className="flex items-start justify-between pb-3.5 border-b border-white/[0.08]">
         <div>
-          <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold block">
+          <span className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 block">
             Badges
           </span>
-          <span className="text-2xl font-bold text-white font-mono tabular-nums mt-0.5 block">
+          <span className="text-3xl sm:text-4xl font-display text-white tabular-nums tracking-wide mt-1 block">
             {badgeCount}
           </span>
         </div>
-        <ArrowRight className="size-4 text-zinc-500 hover:text-white transition-colors cursor-pointer mt-1" />
+        <ArrowRight className="size-4 text-zinc-500 hover:text-[#B1FA63] transition-colors cursor-pointer mt-1" />
       </div>
 
       {/* Badges Display Area */}
       {earnedList.length === 0 ? (
         <div className="py-6 flex flex-col items-center justify-center text-center">
-          <div className="size-12 rounded-xl bg-zinc-900/80 border border-white/10 flex items-center justify-center text-zinc-600 mb-2">
-            <Lock className="size-5" />
+          <div className="size-14 rounded-[16px] bg-[#171717] border border-white/[0.08] flex items-center justify-center mb-2">
+            <img
+              src="/matiks-assets/badges/Novice.png"
+              alt="Locked Badge"
+              className="size-8 object-contain opacity-40 grayscale"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = "none";
+              }}
+            />
           </div>
-          <p className="text-xs font-mono text-zinc-400">No badges unlocked yet</p>
-          <span className="text-[11px] font-sans text-zinc-500 mt-0.5 max-w-xs">
+          <p className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">No badges unlocked yet</p>
+          <span className="text-xs font-sans text-zinc-500 mt-1 max-w-xs leading-relaxed">
             Participate in offline contests or solve practice problems to earn chapter badges.
           </span>
         </div>
@@ -79,6 +86,18 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
         <div className="py-4 flex items-center justify-center gap-5 flex-wrap">
           {earnedList.slice(0, 3).map((item, idx) => {
             const colors = getBadgeColors(item, idx);
+            const code = (item.code || item.id || item.title || item.name || "").toLowerCase();
+            const certSrc =
+              code.includes("contest") || code.includes("tourn") || code.includes("podium")
+                ? "/matiks-assets/achievements/ContestRecognition.webp"
+                : code.includes("survival") || code.includes("streak") || code.includes("fire")
+                ? "/matiks-assets/achievements/SurvivalSaturdayRecognition.webp"
+                : code.includes("showdown") || code.includes("duel") || code.includes("battle")
+                ? "/matiks-assets/achievements/ShowdownRecognition.webp"
+                : code.includes("novice") || code.includes("cadet") || code.includes("star")
+                ? "/matiks-assets/badges/Novice.png"
+                : "/matiks-assets/badges/badge.webp";
+
             return (
               <div
                 key={item.id || item.code || idx}
@@ -86,15 +105,18 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
                 className="relative group flex flex-col items-center"
               >
                 <div
-                  className={`size-16 rounded-xl bg-gradient-to-br ${colors.from} via-zinc-900 to-black border ${colors.border} flex items-center justify-center ${colors.shadow} group-hover:scale-105 transition-transform duration-200`}
+                  className={`size-16 rounded-[16px] bg-gradient-to-br ${colors.from} via-[#171717] to-black border ${colors.border} flex items-center justify-center ${colors.shadow} group-hover:scale-105 transition-transform duration-200 p-2`}
                 >
-                  {item.icon ? (
-                    <span className="text-2xl select-none">{item.icon}</span>
-                  ) : (
-                    <Award className={`size-8 ${colors.text}`} />
-                  )}
+                  <img
+                    src={certSrc}
+                    alt={item.title || item.name}
+                    className="size-full object-contain drop-shadow"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400 mt-2 font-medium max-w-[76px] truncate text-center">
+                <span className="text-[11px] font-heading font-bold text-zinc-300 mt-2 max-w-[80px] truncate text-center">
                   {item.title || item.name}
                 </span>
               </div>
@@ -104,13 +126,13 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
       )}
 
       {/* Footer: Most Recent Badge */}
-      <div className="pt-3 border-t border-white/6 font-sans">
-        <div className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">
+      <div className="pt-3.5 border-t border-white/[0.08]">
+        <div className="text-[10px] text-zinc-500 uppercase font-heading font-bold tracking-wider">
           Most Recent Badge
         </div>
-        <div className="text-xs font-semibold text-white mt-0.5 flex items-center gap-1.5">
+        <div className="text-xs font-heading font-bold text-white mt-1 flex items-center gap-2">
           <span
-            className={`size-1.5 rounded-full ${earnedList.length > 0 ? "bg-lime-400" : "bg-zinc-600"}`}
+            className={`size-2 rounded-full ${earnedList.length > 0 ? "bg-[#B1FA63]" : "bg-zinc-600"}`}
           />
           <span className="truncate">{mostRecent}</span>
         </div>

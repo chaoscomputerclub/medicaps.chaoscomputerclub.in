@@ -447,7 +447,7 @@ export function ContestsHubPage() {
                 (02 // Tournament Arena)
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            <h1 className="text-4xl sm:text-5xl font-normal tracking-wide text-white font-display uppercase">
               CCC Medi-Caps Contest
             </h1>
             <p className="text-sm sm:text-base text-zinc-400 font-sans max-w-lg mx-auto">
@@ -513,10 +513,10 @@ export function ContestsHubPage() {
                       key={contest.slug}
                       data-testid="hero-contest-card"
                       onClick={() => navigate(isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`)}
-                      className="group relative flex flex-col justify-between rounded-lg border border-white/8 bg-black overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.04)] transition-all duration-200 hover:border-lime-400/40 hover:shadow-[0_4px_30px_rgba(204,255,0,0.08)] cursor-pointer"
+                      className="group relative flex flex-col justify-between rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-[#B1FA63]/40 cursor-pointer"
                     >
                       {/* Top Tactical Banner Area - Larger Height & Spacious Padding */}
-                      <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-black overflow-hidden border-b border-white/8">
+                      <div className="relative h-52 sm:h-56 w-full p-6 sm:p-7 flex flex-col justify-between bg-[#1F1F1F] overflow-hidden border-b border-white/[0.08]">
                         {/* Mesh grid backdrop */}
                         <div
                           className="absolute inset-0 opacity-15 pointer-events-none"
@@ -562,7 +562,7 @@ export function ContestsHubPage() {
                           <div className="min-w-0">
                             <Link
                               to={isUserCompleted ? `/contests/${contest.slug}/results` : `/contests/${contest.slug}`}
-                              className="text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-lime-400 transition-colors font-sans flex items-center gap-2.5 truncate"
+                              className="text-2xl sm:text-3xl font-normal tracking-wide text-white group-hover:text-lime-400 transition-colors font-display uppercase flex items-center gap-2.5 truncate"
                             >
                               <span className="truncate">{contest.title}</span>
                               <ArrowRight className="size-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
@@ -581,7 +581,7 @@ export function ContestsHubPage() {
                       </div>
 
                       {/* Card Lower Info & Action Bar - Spacious & Click-Friendly */}
-                      <div className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-black border-t border-white/8">
+                      <div className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-[#1F1F1F] border-t border-white/[0.08]">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 font-mono text-xs sm:text-sm text-zinc-400 truncate">
                             <Calendar className="size-4 text-zinc-500 shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:text-lime-400" />
@@ -680,20 +680,20 @@ export function ContestsHubPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
           {/* ─── LEFT COLUMN: UNIVERSITY LEADERBOARD CARD (5 COLS - LARGER) ─ */}
-          <div className="lg:col-span-5 rounded-lg border border-white/8 bg-black p-6 sm:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] space-y-6">
+          <div className="lg:col-span-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.4)] space-y-6">
             {/* Header */}
-            <div className="flex items-center gap-2.5 border-b border-white/8 pb-4 cursor-default group">
-              <Trophy className="size-5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-              <h3 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+            <div className="flex items-center gap-2.5 border-b border-white/[0.08] pb-4 cursor-default group">
+              <Trophy className="size-5 text-[#B1FA63] transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
+              <h3 className="font-heading text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                 University Standings
               </h3>
             </div>
 
             {/* ─── CADET'S PERSONAL STANDING STRIP (LARGER BOX) ── */}
             {myStanding && myStanding.entry && (
-              <div className="p-4 sm:p-5 rounded-lg border border-lime-400/30 bg-lime-400/[0.04] flex items-center justify-between gap-3 group hover:border-lime-400/60 transition-all duration-200">
+              <div className="p-4 sm:p-5 rounded-[16px] border border-[#B1FA63]/30 bg-[#B1FA63]/[0.05] flex items-center justify-between gap-3 group hover:border-[#B1FA63]/60 transition-all duration-200">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-lime-400/15 border border-lime-400/40 font-mono text-base font-bold text-lime-400 shadow-sm">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#B1FA63]/15 border border-[#B1FA63]/40 font-mono text-base font-bold text-[#B1FA63] shadow-sm">
                     #{myStanding.rank}
                   </div>
                   <div className="min-w-0">
@@ -701,7 +701,7 @@ export function ContestsHubPage() {
                       Your University Standing
                     </p>
                     <p className="font-mono text-xs sm:text-sm text-zinc-400 mt-0.5">
-                      Rating: <span className="text-lime-400 font-bold tabular-nums">{myStanding.entry.rating}</span> · {myStanding.entry.tier || "Active"}
+                      Rating: <span className="text-[#B1FA63] font-bold tabular-nums">{myStanding.entry.rating}</span> · {myStanding.entry.tier || "Active"}
                     </p>
                   </div>
                 </div>
@@ -928,7 +928,7 @@ export function ContestsHubPage() {
           </div>
 
           {/* ─── RIGHT COLUMN: CONTESTS LIST CARD (7 COLS - LARGER BOXES) ───── */}
-          <div className="lg:col-span-7 rounded-lg border border-white/8 bg-black p-6 sm:p-7 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] space-y-6">
+          <div className="lg:col-span-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.4)] space-y-6">
             {/* Header: Animated Tabs & Search */}
             <Tabs
               value={activeTab}
@@ -940,7 +940,7 @@ export function ContestsHubPage() {
               }}
               className="gap-0"
             >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
               <TabsList>
                 <TabsTab value="past" id="tab-past-contests">Past Contests</TabsTab>
                 <TabsTab value="my" id="tab-my-contests">
@@ -950,7 +950,7 @@ export function ContestsHubPage() {
 
               {/* Search Filter */}
               <div className="relative w-full sm:w-64 group">
-                <Search className="size-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 group-hover:text-lime-400" />
+                <Search className="size-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 group-hover:text-[#B1FA63]" />
                 <Input
                   type="text"
                   placeholder="Filter rounds..."
@@ -959,7 +959,7 @@ export function ContestsHubPage() {
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-black/70 border-white/10 focus-visible:ring-1 focus-visible:ring-lime-400 font-mono rounded-md"
+                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-[#171717] border-white/10 focus-visible:ring-1 focus-visible:ring-[#B1FA63] font-mono rounded-[10px]"
                 />
               </div>
             </div>
@@ -969,9 +969,9 @@ export function ContestsHubPage() {
               <TabsPanel value="past">
               <div className="space-y-3.5">
                 {paginatedPastContests.length === 0 ? (
-                  <div className="group flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5 hover:border-white/15 transition-all">
-                    <div className="flex size-14 items-center justify-center rounded-lg border border-white/10 bg-zinc-900 transition-transform duration-300 group-hover:scale-110">
-                      <Code2 className="size-7 text-zinc-500 group-hover:text-lime-400 transition-colors" />
+                  <div className="group flex flex-col items-center justify-center py-14 text-center rounded-[20px] border border-white/[0.06] bg-[#171717] space-y-3.5 hover:border-white/15 transition-all">
+                    <div className="flex size-14 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] transition-transform duration-300 group-hover:scale-110">
+                      <Code2 className="size-7 text-zinc-500 group-hover:text-[#B1FA63] transition-colors" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-base font-semibold text-white font-sans">
@@ -1005,12 +1005,12 @@ export function ContestsHubPage() {
                     return (
                       <div
                         key={contest.slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px] content-auto-card"
+                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-[16px] border border-white/[0.08] bg-[#171717] hover:border-[#B1FA63]/30 transition-all duration-200 min-h-[92px] content-auto-card"
                       >
                         {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br from-zinc-800 to-zinc-950 font-mono text-sm font-bold text-lime-400 shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:border-lime-400/40">
-                            <Trophy className="size-6 text-lime-400/80 group-hover:text-lime-400 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
+                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] font-mono text-sm font-bold text-[#B1FA63] shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:border-[#B1FA63]/40">
+                            <Trophy className="size-6 text-[#B1FA63]/80 group-hover:text-[#B1FA63] transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
 
                           <div className="min-w-0">

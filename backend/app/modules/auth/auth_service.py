@@ -215,7 +215,7 @@ class AuthService:
                 detail="Refresh token required. Please sign in again.",
             )
 
-        payload = await verify_and_revoke_refresh_token(token_candidate.strip())
+        payload = await verify_and_revoke_refresh_token(token_candidate.strip(), allow_grace=True)
         if not payload:
             clear_auth_cookies(response, request)
             raise HTTPException(

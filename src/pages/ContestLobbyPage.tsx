@@ -189,22 +189,22 @@ export function ContestLobbyPage() {
 
       {/* Submitted State */}
       {isAssessmentSubmitted ? (
-        <div className="space-y-6 rounded-lg border border-lime-500/30 bg-black p-6 sm:p-8">
+        <div className="space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-semibold">
+              <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 px-2.5 py-0.5 rounded-full border border-[#B1FA63]/30">
                 Contest Concluded · Attempt Finalized
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-lime-950/40 border border-lime-500/30 text-lime-400">
-                <CheckCircle2 className="size-5 text-lime-400" />
+              <div className="p-2.5 rounded-[12px] bg-[#171717] border border-[#B1FA63]/30 text-[#B1FA63]">
+                <CheckCircle2 className="size-5 text-[#B1FA63]" />
               </div>
-              <h1 className="text-xl font-semibold text-white tracking-tight font-sans">
+              <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-wider font-display uppercase">
                 Contest Solutions Submitted
               </h1>
             </div>
-            <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+            <p className="text-xs font-sans text-zinc-300 leading-relaxed">
               Your contest submissions have concluded and your scores are safely recorded. Under the fair competition protocol, retakes and further attempts are not permitted.
             </p>
           </div>
@@ -213,6 +213,7 @@ export function ContestLobbyPage() {
               asChild
               variant="default"
               size="sm"
+              className="rounded-[10px]"
             >
               <Link to={`/contests/${contestSlug}/results`}>
                 <Trophy className="size-3.5 mr-1.5" />
@@ -223,6 +224,7 @@ export function ContestLobbyPage() {
               asChild
               variant="outline"
               size="sm"
+              className="rounded-[10px]"
             >
               <Link to={`/contests/${contestSlug}/summary`}>
                 <FileText className="size-3.5 mr-1.5" />
@@ -233,6 +235,7 @@ export function ContestLobbyPage() {
               asChild
               variant="ghost"
               size="sm"
+              className="rounded-[10px]"
             >
               <Link to={`/contests/${contestSlug}`}>Contest Overview</Link>
             </Button>
@@ -240,84 +243,84 @@ export function ContestLobbyPage() {
         </div>
       ) : (!isRegistered && !isDevBypass) ? (
         /* Not Registered */
-        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+              <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
                 Contest Registration Required
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-zinc-900 border border-white/10 text-zinc-400">
+              <div className="p-2.5 rounded-[12px] bg-[#171717] border border-white/10 text-zinc-400">
                 <Lock className="size-5" />
               </div>
-              <h1 className="text-xl font-semibold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-wider font-display uppercase">
                 Registration Required
               </h1>
             </div>
-            <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+            <p className="text-xs font-sans text-zinc-300 leading-relaxed">
               You must register for this tournament round before accessing the live contest arena.
             </p>
           </div>
-          <Button asChild variant="default" size="sm">
+          <Button asChild variant="default" size="sm" className="rounded-[10px]">
             <Link to={`/contests/${contestSlug}`}>Register Slot</Link>
           </Button>
         </div>
       ) : notYetOpen ? (
         /* Locked Waiting Room */
-        <div className="space-y-6 rounded-lg border border-white/10 bg-black p-6 sm:p-8 font-mono shadow-[0_1px_3px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-[#CCFF00]">
-                (LOBBY // Waiting Room)
+              <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 px-2.5 py-0.5 rounded-full border border-[#B1FA63]/30">
+                WAITING ROOM
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-white/[0.03] border border-white/12 text-zinc-400">
+              <div className="p-2.5 rounded-[12px] bg-[#171717] border border-white/10 text-zinc-400">
                 <Clock className="size-5" />
               </div>
-              <h1 className="text-xl font-semibold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-wider font-display uppercase">
                 Contest Arena Waiting Room
               </h1>
             </div>
-            <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2 text-xs font-sans text-emerald-400">
+            <div className="flex items-center gap-2 rounded-[12px] border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2.5 text-xs font-sans text-emerald-400">
               <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
               <span>Registered · Contest arena unlocks at start time</span>
             </div>
 
             {/* Live Countdown in Waiting Room */}
-            <div className="rounded-md border border-white/10 bg-black p-4 text-center space-y-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
-              <span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+            <div className="rounded-[16px] border border-white/[0.06] bg-[#171717] p-5 text-center space-y-3">
+              <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-heading font-bold block">
                 Arena Unlocks In
               </span>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-4 gap-2">
                 {[
                   { val: countdown.days, label: "Days" },
                   { val: countdown.hours, label: "Hrs" },
                   { val: countdown.minutes, label: "Min" },
                   { val: countdown.seconds, label: "Sec" },
                 ].map(({ val, label }) => (
-                  <div key={label} className="flex flex-col items-center bg-white/5 p-2 rounded">
-                    <span className="font-mono text-xl font-bold tabular-nums text-white">
+                  <div key={label} className="flex flex-col items-center bg-[#1F1F1F] border border-white/[0.06] p-2.5 rounded-[12px]">
+                    <span className="font-display text-2xl font-normal tabular-nums text-white leading-none">
                       {String(val).padStart(2, "0")}
                     </span>
-                    <span className="text-[9px] font-mono uppercase text-zinc-500">{label}</span>
+                    <span className="text-[9px] font-heading font-bold uppercase text-zinc-500 mt-1">{label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="p-4 rounded-md border border-white/10 bg-black text-xs space-y-2.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+            <div className="p-4.5 rounded-[16px] border border-white/[0.06] bg-[#171717] text-xs space-y-2.5 font-sans">
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Starts at:</span>
-                <span className="text-lime-400 font-semibold">{formatWhen(resolvedContest.starts_at)}</span>
+                <span className="font-heading font-semibold text-[11px] uppercase">Starts at:</span>
+                <span className="text-[#B1FA63] font-mono font-semibold">{formatWhen(resolvedContest.starts_at)}</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
-                <span>Duration:</span>
-                <span className="text-white font-semibold">{durationMinutes} Minutes</span>
+                <span className="font-heading font-semibold text-[11px] uppercase">Duration:</span>
+                <span className="text-white font-mono font-semibold">{durationMinutes} Minutes</span>
               </div>
-              <div className="flex items-center justify-between text-zinc-400 border-t border-white/6 pt-2">
-                <span>Access:</span>
+              <div className="flex items-center justify-between text-zinc-400 border-t border-white/[0.06] pt-2">
+                <span className="font-heading font-semibold text-[11px] uppercase">Access:</span>
                 <span className="text-zinc-300 font-semibold">Open to All Enrolled Students</span>
               </div>
             </div>
@@ -326,28 +329,29 @@ export function ContestLobbyPage() {
             variant="outline"
             size="sm"
             onClick={handleBack}
+            className="rounded-[10px]"
           >
             Back to Contest
           </Button>
         </div>
       ) : (isFinished && !isDevBypass) ? (
         /* Closed */
-        <div className="space-y-6 rounded-lg border border-white/8 bg-black p-6 sm:p-8 font-mono">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-red-400">
+              <span className="text-[10px] uppercase tracking-wider text-red-400 font-heading font-bold bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full">
                 Contest Concluded
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-red-500/10 border border-red-500/20 text-red-400">
+              <div className="p-2.5 rounded-[12px] bg-[#171717] border border-red-500/20 text-red-400">
                 <Lock className="size-5" />
               </div>
-              <h1 className="text-xl font-semibold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-wider font-display uppercase">
                 Contest Concluded
               </h1>
             </div>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-zinc-300 font-sans leading-relaxed">
               The contest session has concluded. Final scoring and Elo rating calculations are underway.
             </p>
           </div>
@@ -355,28 +359,29 @@ export function ContestLobbyPage() {
             variant="outline"
             size="sm"
             onClick={handleBack}
+            className="rounded-[10px]"
           >
             Back to Contest
           </Button>
         </div>
       ) : (
         /* Ready to Attempt / Assessment Lobby */
-        <div className="space-y-6 rounded-lg border border-white/10 bg-black p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.03)]">
+        <div className="space-y-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           {/* Header */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#CCFF00]">
-                (LOBBY // Live Check-in)
+              <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 px-2.5 py-0.5 rounded-full border border-[#B1FA63]/30">
+                LIVE CHECK-IN
               </span>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-white">{resolvedContest.title}</h1>
-            <p className="text-xs text-zinc-400 font-mono">
+            <h1 className="text-2xl sm:text-3xl font-normal tracking-wider text-white font-display uppercase">{resolvedContest.title}</h1>
+            <p className="text-xs text-zinc-400 font-sans">
               Review the competition guidelines and regulations before entering.
             </p>
           </div>
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-3 divide-x divide-white/10 rounded-md border border-white/10 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+          <div className="grid grid-cols-3 divide-x divide-white/[0.06] rounded-[16px] border border-white/[0.06] bg-[#171717]">
             {[
               {
                 label: "Time Limit",
@@ -386,46 +391,46 @@ export function ContestLobbyPage() {
               { label: "Attempt", value: "Single", sub: "Cannot pause or reset" },
               { label: "Rating Impact", value: "Elo Rated", sub: "Campus leaderboard" },
             ].map(({ label, value, sub }) => (
-              <div key={label} className="flex flex-col gap-0.5 p-3.5">
-                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+              <div key={label} className="flex flex-col gap-0.5 p-4">
+                <span className="font-heading font-bold text-[9px] uppercase tracking-wider text-zinc-400">
                   {label}
                 </span>
-                <span className="text-xs font-semibold text-white font-mono">{value}</span>
-                <span className="font-mono text-[10px] text-zinc-500">{sub}</span>
+                <span className="text-sm font-display font-normal text-white uppercase">{value}</span>
+                <span className="font-sans text-[10px] text-zinc-500">{sub}</span>
               </div>
             ))}
           </div>
 
           {/* Regulations Card */}
-          <div className="space-y-3 rounded-md border border-white/10 bg-black p-4 font-mono text-xs shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
-            <div className="flex items-center justify-between border-b border-white/6 pb-2.5">
-              <span className="text-[11px] font-semibold text-white flex items-center gap-2">
-                <Shield className="size-3.5 text-lime-400" />
+          <div className="space-y-3.5 rounded-[16px] border border-white/[0.06] bg-[#171717] p-5 text-xs font-sans">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <span className="text-xs font-bold text-white flex items-center gap-2 font-heading uppercase tracking-wider">
+                <Shield className="size-3.5 text-[#B1FA63]" />
                 Tournament Guidelines
               </span>
             </div>
 
-            <ul className="space-y-2.5 text-zinc-400">
+            <ul className="space-y-2.5 text-zinc-300 font-sans">
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-semibold shrink-0">01.</span>
+                <span className="text-[#B1FA63] font-heading font-bold shrink-0">01.</span>
                 <span>
                   <strong className="text-white">Continuous Timer:</strong> Once launched, the {durationMinutes}-minute countdown runs server-side and auto-submits at 00:00.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-semibold shrink-0">02.</span>
+                <span className="text-[#B1FA63] font-heading font-bold shrink-0">02.</span>
                 <span>
                   <strong className="text-white">Supported Languages:</strong> Python, C++, Java, and JavaScript are supported in the workspace.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-semibold shrink-0">03.</span>
+                <span className="text-[#B1FA63] font-heading font-bold shrink-0">03.</span>
                 <span>
                   <strong className="text-white">Automated Judging:</strong> Submissions are tested against hidden test cases with 2.0s time limit and 256MB memory cap.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="text-lime-400 font-semibold shrink-0">04.</span>
+                <span className="text-[#B1FA63] font-heading font-bold shrink-0">04.</span>
                 <span>
                   <strong className="text-white">Leaderboard & Rating:</strong> Official Elo ratings update on the university leaderboard after the contest concludes.
                 </span>

@@ -118,35 +118,35 @@ export function ContestResultsPage() {
 
       {/* Your Standing Hero */}
       {myRow ? (
-        <div className="relative overflow-hidden rounded-lg border border-white/10 bg-black p-6">
+        <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-lime-400/40 bg-lime-400/10 text-center font-mono text-lime-400">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[16px] border border-[#B1FA63]/40 bg-[#171717] text-center text-[#B1FA63]">
                 <div>
-                  <div className="text-xl font-semibold tabular-nums leading-none">
+                  <div className="text-2xl font-normal font-display tabular-nums leading-none">
                     #{myRow.rank}
                   </div>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-wider text-zinc-500">Rank</div>
+                  <div className="mt-1 font-heading font-bold text-[9px] uppercase tracking-wider text-zinc-400">Rank</div>
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
-                    <Trophy className="size-3 text-lime-400" />
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#B1FA63]/30 bg-[#B1FA63]/10 px-2.5 py-0.5 font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
+                    <Trophy className="size-3 text-[#B1FA63]" />
                     Verified Finish
                   </span>
                   {myRow.rank <= 3 && (
-                    <span className="inline-flex items-center gap-1 rounded border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 font-heading font-bold text-[10px] uppercase tracking-wider text-amber-300">
                       <Crown className="size-3 text-amber-400" />
                       Podium
                     </span>
                   )}
                 </div>
-                <p className="text-lg font-semibold text-white font-mono tabular-nums">
-                  {myRow.total_score} <span className="font-sans text-xs font-normal text-zinc-500">points</span>
+                <p className="text-2xl font-normal text-white font-display uppercase tracking-wide">
+                  {myRow.total_score} <span className="font-heading text-xs font-bold text-zinc-400">points</span>
                 </p>
-                <p className="text-xs text-zinc-400 font-mono">
+                <p className="text-xs text-zinc-400 font-sans">
                   {myRow.full_name} · {myRow.department || "Engineering"} · {myRow.penalty_minutes}m penalty
                 </p>
               </div>
@@ -154,7 +154,7 @@ export function ContestResultsPage() {
 
             {/* CTA */}
             <div className="flex items-center gap-2 shrink-0">
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="rounded-[10px]">
                 <Link to="/leaderboard">University Leaderboard →</Link>
               </Button>
             </div>
@@ -165,8 +165,8 @@ export function ContestResultsPage() {
           kicker="01 // Contest Standings"
           index="STANDINGS"
           badge={
-            <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
-              <Trophy className="size-3 text-lime-400" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B1FA63]/30 bg-[#B1FA63]/10 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
+              <Trophy className="size-3 text-[#B1FA63]" />
               Official Standings
             </span>
           }
@@ -177,18 +177,25 @@ export function ContestResultsPage() {
 
 
       {contest?.status === "upcoming" ? (
-        <div className="rounded-lg border border-amber-500/30 bg-zinc-950 p-8 text-center space-y-4 font-mono">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
-            <Lock className="size-6" />
+        <div className="rounded-[24px] border border-amber-500/20 bg-[#1F1F1F] p-8 sm:p-10 text-center space-y-4 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="mx-auto flex size-14 items-center justify-center">
+            <img
+              src="/matiks-assets/icons/smart75-local-seatLock.png"
+              alt="Standings sealed"
+              className="size-10 object-contain drop-shadow"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = "none";
+              }}
+            />
           </div>
           <div className="space-y-1.5">
-            <span className="text-[10px] uppercase tracking-widest text-amber-400 font-semibold block">
+            <span className="text-[10px] uppercase tracking-widest text-amber-400 font-heading font-bold block">
               Standings Sealed
             </span>
-            <h2 className="text-lg font-semibold text-white font-sans">
+            <h2 className="text-2xl font-normal text-white font-display uppercase tracking-wider">
               Standings Unlock When Contest Goes Live
             </h2>
-            <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
+            <p className="text-xs text-zinc-400 max-w-md mx-auto font-sans leading-relaxed">
               Official standings and scoreboards will populate once {contest.title} begins at{" "}
               {new Date(contest.starts_at).toLocaleString("en-IN", {
                 weekday: "short",
@@ -200,7 +207,7 @@ export function ContestResultsPage() {
               })}.
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="rounded-[10px]">
             <Link to={`/contests/${contestSlug}`}>Back to Contest Overview</Link>
           </Button>
         </div>
@@ -214,6 +221,7 @@ export function ContestResultsPage() {
                   variant={deptFilter === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setDeptFilter("all")}
+                  className="rounded-[10px]"
                 >
                   All
                 </Button>
@@ -223,6 +231,7 @@ export function ContestResultsPage() {
                     variant={deptFilter === dept ? "default" : "outline"}
                     size="sm"
                     onClick={() => setDeptFilter(dept)}
+                    className="rounded-[10px]"
                   >
                     {dept}
                   </Button>
@@ -231,38 +240,38 @@ export function ContestResultsPage() {
             )}
 
             <div className="relative min-w-[200px] flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500" />
               <Input
                 value={query}
                 onChange={(e) => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("query", e.target.value); return p; })}
                 placeholder="Search cadet or handle..."
-                className="rounded-md border-white/10 bg-black pl-8 font-mono text-xs text-white placeholder:text-zinc-600 focus-visible:border-lime-400"
+                className="rounded-[10px] border-white/[0.08] bg-[#171717] pl-9 font-sans text-xs text-white placeholder:text-zinc-500 focus-visible:border-[#B1FA63]"
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-2 text-xs text-zinc-500 font-mono">
+            <div className="ml-auto flex items-center gap-2 text-xs text-zinc-400 font-heading font-semibold">
               <Award className="size-3.5 text-zinc-400" />
-              <span><span className="tabular-nums font-semibold text-white">{ranking.total_participants}</span> competitors</span>
+              <span><span className="tabular-nums font-bold text-white font-mono">{ranking.total_participants}</span> competitors</span>
             </div>
           </div>
 
           {/* Standings Table */}
-          <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
+          <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-white/8 hover:bg-transparent">
-                  <TableHead className="w-16 font-mono text-[10px] uppercase text-zinc-500">Rank</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Cadet</TableHead>
-                  <TableHead className="hidden font-mono text-[10px] uppercase text-zinc-500 sm:table-cell">Dept</TableHead>
-                  <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Score</TableHead>
-                  <TableHead className="hidden text-right font-mono text-[10px] uppercase text-zinc-500 sm:table-cell">Penalty</TableHead>
-                  <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Standing</TableHead>
+                <TableRow className="border-b border-white/[0.08] hover:bg-transparent">
+                  <TableHead className="w-16 font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Rank</TableHead>
+                  <TableHead className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Cadet</TableHead>
+                  <TableHead className="hidden font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400 sm:table-cell">Dept</TableHead>
+                  <TableHead className="text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Score</TableHead>
+                  <TableHead className="hidden text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400 sm:table-cell">Penalty</TableHead>
+                  <TableHead className="text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Standing</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
-                  <TableRow className="border-b border-white/6">
-                    <TableCell colSpan={6} className="py-12 text-center font-mono text-xs text-zinc-600">
+                  <TableRow className="border-b border-white/[0.06]">
+                    <TableCell colSpan={6} className="py-12 text-center font-sans text-xs text-zinc-500">
                       {query ? "No submissions match this search filter." : "No contest submissions recorded yet."}
                     </TableCell>
                   </TableRow>
@@ -307,11 +316,19 @@ function RankRow({
       <TableCell className="font-mono text-xs font-semibold text-white">
         <span className="inline-flex items-center gap-1.5 tabular-nums">
           {isPodium && (
-            <Crown
-              className={cn(
-                "size-3",
-                row.rank === 1 ? "text-amber-400" : row.rank === 2 ? "text-zinc-300" : "text-amber-600"
-              )}
+            <img
+              src={
+                row.rank === 1
+                  ? "/matiks-assets/ranks/gold_icon.webp"
+                  : row.rank === 2
+                  ? "/matiks-assets/ranks/silver_icon.webp"
+                  : "/matiks-assets/ranks/bronze_icon.webp"
+              }
+              alt={`Rank #${row.rank}`}
+              className="size-3.5 object-contain shrink-0"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = "none";
+              }}
             />
           )}
           {row.rank}

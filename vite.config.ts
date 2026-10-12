@@ -105,6 +105,16 @@ export default defineConfig(({ mode }) => {
           // .chaoscomputerclub.in — without this, the browser never sends them
           // back on proxied requests and every /auth/refresh returns 401.
           cookieDomainRewrite: "",
+          configure: (proxy) => {
+            proxy.on("proxyRes", (proxyRes) => {
+              const sc = proxyRes.headers["set-cookie"];
+              if (sc) {
+                proxyRes.headers["set-cookie"] = (Array.isArray(sc) ? sc : [sc]).map((c) =>
+                  c.replace(/;\s*Secure/gi, "")
+                );
+              }
+            });
+          },
         },
       },
     },

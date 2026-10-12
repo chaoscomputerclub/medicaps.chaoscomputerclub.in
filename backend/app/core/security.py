@@ -233,9 +233,11 @@ async def store_refresh_token(refresh_token: str, member_id: str, email: str) ->
         logger.error("Failed to store refresh token in Redis: %s", e)
 
 
-async def verify_and_revoke_refresh_token(refresh_token: str) -> Optional[dict]:
+async def verify_and_revoke_refresh_token(refresh_token: str, allow_grace: bool = False) -> Optional[dict]:
     """
     Validate refresh token against Redis and atomically revoke it (Refresh Token Rotation - RTR).
+    When allow_grace=True, provides a 30-second leeway grace period to eliminate race conditions
+    between concurrent requests, multi-tab sync, and network retries.
     Returns the associated member payload dict if valid, or None if expired/invalid/reused.
     """
     if not refresh_token:
@@ -243,13 +245,25 @@ async def verify_and_revoke_refresh_token(refresh_token: str) -> Optional[dict]:
     try:
         from app.core.redis import get_redis
         redis = get_redis()
-        key = f"ccc:refresh:{refresh_token}"
-        raw = await redis.get(key)
-        if not raw:
-            return None
-        # Consume the refresh token immediately to prevent replay attacks
-        await redis.delete(key)
-        return json.loads(raw)
+        active_key = f"ccc:refresh:{refresh_token}"
+        grace_key = f"ccc:refresh_grace:{refresh_token}"
+
+        raw = await redis.get(active_key)
+        if raw:
+            # Token found in active set. Revoke active key and retain in grace set for 30s if grace enabled
+            await redis.delete(active_key)
+            if allow_grace:
+                await redis.set(grace_key, raw, ex=30)
+            return json.loads(raw)
+
+        if allow_grace:
+            # Check if presented during the 30-second concurrency grace window
+            grace_raw = await redis.get(grace_key)
+            if grace_raw:
+                logger.info("Refresh token matched within 30-second concurrency grace window.")
+                return json.loads(grace_raw)
+
+        return None
     except Exception as e:
         logger.error("Failed to verify/revoke refresh token in Redis: %s", e)
         return None
@@ -258,14 +272,16 @@ async def verify_and_revoke_refresh_token(refresh_token: str) -> Optional[dict]:
 async def revoke_refresh_token(refresh_token: str) -> bool:
     """
     Directly revoke a refresh token on explicit user logout.
+    Purges both active and grace keys immediately.
     """
     if not refresh_token:
         return False
     try:
         from app.core.redis import get_redis
         redis = get_redis()
-        key = f"ccc:refresh:{refresh_token}"
-        deleted = await redis.delete(key)
+        active_key = f"ccc:refresh:{refresh_token}"
+        grace_key = f"ccc:refresh_grace:{refresh_token}"
+        deleted = await redis.delete(active_key, grace_key)
         return bool(deleted > 0)
     except Exception as e:
         logger.error("Failed to revoke refresh token in Redis: %s", e)

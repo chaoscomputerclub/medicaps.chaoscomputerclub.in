@@ -86,18 +86,18 @@ export function MyContestsPage() {
         title="My Contests"
         description="All entered, active, and completed competitive programming tournaments."
         action={
-          <div className="flex gap-4 sm:gap-6 items-center flex-wrap">
-            <div className="flex flex-col border-l border-lime-400 pl-3">
-              <strong className="font-mono tabular-nums text-xl font-semibold text-white">{data.length}</strong>
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Total</span>
+          <div className="flex gap-2.5 sm:gap-3 items-center flex-wrap">
+            <div className="flex flex-col rounded-[14px] bg-[#1F1F1F] border border-white/[0.08] px-3.5 py-2 min-w-[70px]">
+              <strong className="font-display tabular-nums text-2xl font-normal text-white">{data.length}</strong>
+              <span className="font-heading font-bold text-[9px] text-zinc-400 uppercase tracking-wider">Total</span>
             </div>
-            <div className="flex flex-col border-l border-white/20 pl-3">
-              <strong className="font-mono tabular-nums text-xl font-semibold text-white">{registeredCount}</strong>
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Upcoming</span>
+            <div className="flex flex-col rounded-[14px] bg-[#1F1F1F] border border-white/[0.08] px-3.5 py-2 min-w-[70px]">
+              <strong className="font-display tabular-nums text-2xl font-normal text-white">{registeredCount}</strong>
+              <span className="font-heading font-bold text-[9px] text-zinc-400 uppercase tracking-wider">Upcoming</span>
             </div>
-            <div className="flex flex-col border-l border-lime-400/40 pl-3">
-              <strong className="font-mono tabular-nums text-xl font-semibold text-lime-400">{completedCount}</strong>
-              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">Completed</span>
+            <div className="flex flex-col rounded-[14px] bg-[#1F1F1F] border border-[#B1FA63]/30 px-3.5 py-2 min-w-[70px]">
+              <strong className="font-display tabular-nums text-2xl font-normal text-[#B1FA63]">{completedCount}</strong>
+              <span className="font-heading font-bold text-[9px] text-[#B1FA63]/80 uppercase tracking-wider">Completed</span>
             </div>
           </div>
         }
@@ -109,30 +109,30 @@ export function MyContestsPage() {
         onValueChange={(val: any) => startTransition(() => setFilter(val))}
         className="my-4 gap-0"
       >
-        <TabsList className="h-auto flex-wrap gap-1">
-          <TabsTab value="all" className="font-mono text-xs uppercase">
+        <TabsList className="h-auto flex-wrap gap-1 bg-[#1F1F1F] border border-white/[0.08] rounded-[14px] p-1.5">
+          <TabsTab value="all" className="font-heading font-bold text-xs uppercase tracking-wider rounded-[10px]">
             All (<span className="tabular-nums">{data.length}</span>)
           </TabsTab>
-          <TabsTab value="registered" className="font-mono text-xs uppercase">
+          <TabsTab value="registered" className="font-heading font-bold text-xs uppercase tracking-wider rounded-[10px]">
             Registered (<span className="tabular-nums">{registeredCount}</span>)
           </TabsTab>
-          <TabsTab value="live" className="font-mono text-xs uppercase">
+          <TabsTab value="live" className="font-heading font-bold text-xs uppercase tracking-wider rounded-[10px]">
             Live (<span className="tabular-nums">{liveCount}</span>)
           </TabsTab>
-          <TabsTab value="completed" className="font-mono text-xs uppercase">
+          <TabsTab value="completed" className="font-heading font-bold text-xs uppercase tracking-wider rounded-[10px]">
             Completed (<span className="tabular-nums">{completedCount}</span>)
           </TabsTab>
         </TabsList>
       </Tabs>
 
       {/* Main Participation List */}
-      <section className="overflow-hidden rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center justify-between border-b border-white/8 p-4 sm:p-5">
+      <section className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+        <div className="flex items-center justify-between border-b border-white/[0.08] p-5 sm:p-6">
           <SectionHeader
             kicker="01 // Ledger"
             title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
-          <Button variant="outline" size="sm" asChild className="active:scale-[0.98]">
+          <Button variant="outline" size="sm" asChild className="rounded-[10px]">
             <Link to="/contests">
               <span>Browse Contests</span>
               <ArrowRight className="w-3.5 h-3.5 ml-1" />

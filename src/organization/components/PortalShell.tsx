@@ -202,7 +202,7 @@ export function PortalShell() {
       : <AssessmentStudioSkeleton />;
 
     return (
-      <main className="min-h-screen bg-black text-white">
+      <main className="min-h-screen bg-background text-white">
         <Suspense fallback={workspaceFallback}>
           <Outlet />
         </Suspense>
@@ -211,9 +211,9 @@ export function PortalShell() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black w-full max-w-full overflow-x-hidden">
       {/* Mobile Topbar */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] border-b border-white/8 bg-black/95 backdrop-blur-md sticky top-0 z-40">
+      <header className="md:hidden flex items-center justify-between px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] border-b border-white/8 bg-background/95 backdrop-blur-md sticky top-0 z-40">
         <Link to="/" className="flex items-center gap-2.5 group">
           <img src="/logo.webp" alt="Chaos Computer Club" className="w-7 h-7 object-contain transition-transform duration-150 group-hover:scale-105" />
           <div className="flex flex-col">
@@ -241,51 +241,37 @@ export function PortalShell() {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-black border-r border-white/8 px-4 py-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] flex flex-col z-50 transition-transform duration-150 ease-out md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 w-64 bg-[#141414] border-r border-white/8 px-4 py-4 pt-[calc(1.2rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] flex flex-col z-50 transition-transform duration-150 ease-out md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Brand Header */}
+        {/* Brand Header — Matiks Double-Ring Aesthetic */}
         <Link
           to="/"
-          className="flex items-center gap-3 pb-4 mb-2 border-b border-white/8 group"
+          className="flex items-center gap-3 pb-5 mb-3 border-b border-white/8 group"
           onClick={() => dispatch(setSidebarOpen(false))}
         >
-          <img
-            src="/logo.webp"
-            alt="Chaos Computer Club Medi-Caps"
-            className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform duration-150"
-          />
+          <div className="flex items-center -space-x-1 shrink-0">
+            <div className="w-5 h-5 rounded-full border-2 border-[#B1FA63] bg-transparent shadow-[0_0_10px_rgba(177,250,99,0.4)]" />
+            <div className="w-5 h-5 rounded-full border-2 border-[#B1FA63] bg-transparent shadow-[0_0_10px_rgba(177,250,99,0.4)]" />
+          </div>
           <div className="flex flex-col min-w-0">
-            <strong className="font-sans text-xs font-bold tracking-wider text-white leading-tight">CHAOS COMPUTER CLUB</strong>
-            <span className="font-sans text-[9px] font-medium text-zinc-400 tracking-wider">MEDI-CAPS CHAPTER</span>
+            <div className="flex items-center gap-1.5">
+              <strong className="font-display text-base tracking-wider text-white uppercase">MATIKS // CCC</strong>
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="font-heading text-[9px] font-bold text-zinc-400 tracking-wider">MEDI-CAPS ARENA</span>
+              <span className="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-[#B1FA63]/15 border border-[#B1FA63]/40 text-[#B1FA63]">BLITZ</span>
+            </div>
           </div>
         </Link>
 
-        {/* Navigation Links with Premium SaaS Sliding Active Pill */}
+        {/* Navigation Links with Matiks 2px Lime Active Frame */}
         <nav
           ref={navRef}
           aria-label="Portal navigation"
-          className="relative flex flex-col gap-1 my-1 flex-1"
+          className="relative flex flex-col gap-1.5 my-1 flex-1"
         >
-          {/* Animated Active Sliding Indicator Pill */}
-          <div
-            aria-hidden="true"
-            className={`absolute left-0 right-0 pointer-events-none rounded-md bg-white/[0.06] border border-white/10 ${
-              indicatorStyle.ready
-                ? "transition-[transform,opacity] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                : "transition-none"
-            }`}
-            style={{
-              transform: `translate3d(0, ${indicatorStyle.top}px, 0)`,
-              height: indicatorStyle.height ? `${indicatorStyle.height}px` : "36px",
-              opacity: indicatorStyle.opacity,
-            }}
-          >
-            {/* Subtle left accent marker in Electric Lime */}
-            <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] bg-lime-400 rounded-r-full shadow-[0_0_8px_rgba(204,255,0,0.6)]" />
-          </div>
-
           {links.map((item) => {
             const active = item.exact
               ? cleanPath === item.to
@@ -305,69 +291,101 @@ export function PortalShell() {
                   markNavigationClick(item.to);
                   if (open) dispatch(setSidebarOpen(false));
                 }}
-                className={`relative z-10 flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-sans select-none group min-h-[38px] active:scale-[0.98] transition-colors duration-150 ${
+                className={`relative z-10 flex items-center gap-3 px-3.5 py-2.5 rounded-[12px] text-xs select-none group min-h-[42px] active:scale-[0.98] transition-all duration-150 ${
                   active
-                    ? "text-white font-medium"
-                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
+                    ? "border-2 border-[#B1FA63] bg-[#B1FA63]/10 text-[#B1FA63] font-heading font-extrabold shadow-[0_0_14px_rgba(177,250,99,0.15)]"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.04] border border-transparent font-heading font-semibold"
                 }`}
               >
                 <Icon
-                  size={16}
+                  size={18}
                   className={`shrink-0 transition-colors duration-150 ${
-                    active ? "text-lime-400" : "text-zinc-400 group-hover:text-zinc-200"
+                    active ? "text-[#B1FA63]" : "text-zinc-400 group-hover:text-zinc-200"
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                <span className="tracking-wide uppercase text-[11px] font-bold">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* User Identity Footer */}
-        <div className="pt-3 border-t border-white/8 flex items-center justify-between gap-2">
-          <Link
-            to="/profile"
-            onMouseEnter={() => prefetchRoute("/profile")}
-            onFocus={() => prefetchRoute("/profile")}
-            onTouchStart={() => prefetchRoute("/profile")}
-            onClick={() => markNavigationClick("/profile")}
-            className="flex items-center gap-2.5 min-w-0 flex-1 p-1.5 rounded-md hover:bg-white/[0.04] transition-colors"
-            title="View Profile"
-          >
-            <Avatar className="w-7 h-7 rounded-full border border-white/12 bg-black text-lime-400 shrink-0">
-              {resolvedAvatar ? (
-                <AvatarImage src={resolvedAvatar} alt={formattedName || displayHandle} className="object-cover" />
-              ) : null}
-              <AvatarFallback className="rounded-full bg-lime-400/10 text-lime-400 font-sans font-bold text-[10px]">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <span className="block font-sans text-xs font-medium text-white truncate">
-                {formattedName || displayHandle}
-              </span>
-              <span
-                className="block font-sans text-[10px] text-zinc-400 truncate"
-                title={displayEmail || `@${displayHandle}`}
-              >
-                {displayEmail || `@${displayHandle}`}
-              </span>
-            </div>
-          </Link>
-          <button
-            type="button"
-            onClick={handleLogout}
-            aria-label="Sign out"
-            title="Sign out of CCC Portal"
-            className="text-zinc-500 hover:text-red-400 p-2 rounded-md hover:bg-white/[0.05] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 active:scale-[0.96]"
-          >
-            <LogOut size={16} />
-          </button>
+        {/* User Identity Footer — Matiks PRO Card */}
+        <div className="pt-3 border-t border-white/8 flex flex-col gap-2">
+          <div className="bg-[#1F1F1F] border border-white/[0.08] rounded-[16px] p-2.5 flex items-center justify-between gap-2.5 shadow-sm">
+            <Link
+              to="/profile"
+              onMouseEnter={() => prefetchRoute("/profile")}
+              onFocus={() => prefetchRoute("/profile")}
+              onTouchStart={() => prefetchRoute("/profile")}
+              onClick={() => markNavigationClick("/profile")}
+              className="flex items-center gap-2.5 min-w-0 flex-1 group"
+              title="View Profile"
+            >
+              <div className="relative">
+                <Avatar className="w-8 h-8 rounded-full border border-[#B1FA63]/50 bg-[#171717] text-[#B1FA63] shrink-0">
+                  {resolvedAvatar ? (
+                    <AvatarImage src={resolvedAvatar} alt={formattedName || displayHandle} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="rounded-full bg-[#B1FA63]/15 text-[#B1FA63] font-heading font-black text-[11px]">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#B1FA63] border-2 border-[#1F1F1F]" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="block font-heading text-xs font-bold text-white truncate group-hover:text-[#B1FA63] transition-colors">
+                    {formattedName || displayHandle}
+                  </span>
+                  <span className="px-1 py-0.2 rounded text-[7px] font-black bg-[#B1FA63] text-black">PRO</span>
+                </div>
+                <span
+                  className="block font-sans text-[10px] text-zinc-400 truncate"
+                  title={displayEmail || `@${displayHandle}`}
+                >
+                  {displayEmail || `@${displayHandle}`}
+                </span>
+              </div>
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Sign out"
+              title="Sign out of CCC Portal"
+              className="text-zinc-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B1FA63] active:scale-[0.96]"
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Viewport */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-black p-4 sm:p-6 md:p-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] relative min-w-0 max-w-full overflow-x-hidden">
+      <main className="flex-1 md:ml-64 min-h-screen bg-background p-4 sm:p-6 md:p-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] relative min-w-0 max-w-full overflow-x-hidden">
+        {/* Top Telemetry Header Bar (Desktop) */}
+        <div className="hidden md:flex items-center justify-between pb-6 mb-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono font-bold tracking-widest text-zinc-500 uppercase">MEDI-CAPS COMPETITIVE ARENA</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B1FA63]" />
+            <span className="text-[11px] font-heading font-bold text-[#B1FA63] uppercase tracking-wider">LIVE SYSTEM</span>
+          </div>
+          {/* Matiks Telemetry Pills: Currency, Streak, XP */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5 bg-[#1F1F1F] border border-white/10 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              <span className="text-[#B1FA63]">🪙</span>
+              <span className="tabular-nums font-mono font-bold">270</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-[#1F1F1F] border border-white/10 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              <span className="text-orange-400">🔥</span>
+              <span className="tabular-nums font-mono font-bold">1</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-[#1F1F1F] border border-white/10 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              <span className="text-[#B1FA63]">⚡</span>
+              <span className="tabular-nums font-mono font-bold">120 XP</span>
+            </div>
+          </div>
+        </div>
+
         <Outlet />
       </main>
 

@@ -183,76 +183,76 @@ export function ContestQualifiedPage() {
           {pass ? (
             <div className="space-y-6">
               {/* QR Code Hero Card */}
-              <div className="flex flex-col items-center gap-6 rounded-lg border border-lime-400/30 bg-black p-6 sm:p-8">
+              <div className="flex flex-col items-center gap-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
                 {/* Status Bar */}
-                <div className="flex items-center justify-between w-full border-b border-white/8 pb-3">
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+                <div className="flex items-center justify-between w-full border-b border-white/[0.08] pb-3.5">
+                  <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
                     Medi-Caps Campus Gate Pass
                   </span>
-                  <span className={`font-sans text-[10px] uppercase font-semibold rounded px-2 py-0.5 border ${
+                  <span className={`font-heading text-[10px] uppercase font-bold rounded-full px-2.5 py-0.5 border ${
                     isCheckedIn
                       ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/40"
-                      : "text-amber-400 border-amber-500/30 bg-black"
+                      : "text-amber-400 border-amber-500/30 bg-[#171717]"
                   }`}>
                     ● {isCheckedIn ? "CHECKED IN · GATE VERIFIED" : "ISSUED · AWAITING SCAN"}
                   </span>
                 </div>
 
                 {/* White QR Code container */}
-                <div className="flex flex-col items-center gap-2 rounded-md bg-white p-5">
+                <div className="flex flex-col items-center gap-2.5 rounded-[16px] bg-white p-5 shadow-lg">
                   <QRCodeSVG
                     value={pass.qr_data || `CCC-PASS:${pass.pass_code}:${pass.seat || "UNASSIGNED"}:QUALIFIED`}
                     size={200}
                     level="H"
                   />
-                  <p className="font-mono text-xs font-semibold uppercase tracking-widest text-black">
+                  <p className="font-mono text-xs font-bold uppercase tracking-widest text-black">
                     {pass.pass_code}
                   </p>
                 </div>
 
                 {/* Pass details tiles */}
                 <div className="w-full space-y-3">
-                  <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+                  <div className="grid grid-cols-2 gap-2.5 font-sans text-xs">
                     {[
                       { label: "Cadet", value: pass.member_name },
                       { label: "Handle", value: `@${pass.handle}` },
                       { label: "Workstation", value: pass.seat || "Assigned on Check-in", hi: true },
                       { label: "Qualifier", value: `#${rank} (${score} pts)` },
                     ].map(({ label, value, hi }) => (
-                      <div key={label} className="rounded-md border border-white/8 bg-zinc-950 p-3">
-                        <p className="text-[9px] uppercase tracking-wider text-zinc-500">{label}</p>
-                        <p className={`mt-0.5 font-semibold ${hi ? "text-lime-400" : "text-white"}`}>{value}</p>
+                      <div key={label} className="rounded-[14px] border border-white/[0.06] bg-[#171717] p-3.5">
+                        <p className="text-[9px] uppercase tracking-wider text-zinc-400 font-heading font-bold">{label}</p>
+                        <p className={`mt-0.5 font-semibold ${hi ? "text-[#B1FA63] font-mono" : "text-white"}`}>{value}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Check-in time */}
-                  <div className="flex items-center gap-2.5 rounded-md border border-white/8 bg-zinc-950 px-3.5 py-2.5 font-mono text-xs">
-                    <Clock className="size-3.5 shrink-0 text-lime-400" />
+                  <div className="flex items-center gap-2.5 rounded-[14px] border border-white/[0.06] bg-[#171717] px-4 py-3 font-sans text-xs">
+                    <Clock className="size-3.5 shrink-0 text-[#B1FA63]" />
                     <div>
-                      <span className="text-zinc-500">Gate Opens: </span>
-                      <span className="text-white font-medium">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</span>
+                      <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Gate Opens: </span>
+                      <span className="text-white font-mono font-medium">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</span>
                     </div>
                   </div>
 
                   {/* Countdown to Final */}
                   {!finalCountdown.started && (finalCountdown.h > 0 || finalCountdown.m > 0 || finalCountdown.s > 0) && contest.status !== "live" && (
-                    <div className="rounded-md border border-lime-400/30 bg-black p-4">
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 mb-2 flex items-center gap-1.5">
-                        <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
+                    <div className="rounded-[16px] border border-[#B1FA63]/30 bg-[#171717] p-4 text-center space-y-2.5">
+                      <p className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400 flex items-center justify-center gap-1.5">
+                        <span className="size-1.5 rounded-full bg-[#B1FA63] animate-pulse" />
                         Round 2 Final Starts In
                       </p>
-                      <div className="grid grid-cols-3 divide-x divide-white/8 rounded border border-white/8 bg-zinc-950">
+                      <div className="grid grid-cols-3 divide-x divide-white/[0.06] rounded-[12px] border border-white/[0.06] bg-[#1F1F1F]">
                         {[
                           { label: "Hours", value: finalCountdown.h },
                           { label: "Minutes", value: finalCountdown.m },
                           { label: "Seconds", value: finalCountdown.s },
                         ].map(({ label, value }) => (
                           <div key={label} className="flex flex-col items-center gap-0.5 py-2.5">
-                            <span className="text-xl font-bold font-mono text-lime-400 tabular-nums">
+                            <span className="text-2xl font-normal font-display text-[#B1FA63] tabular-nums">
                               {String(value).padStart(2, "0")}
                             </span>
-                            <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">{label}</span>
+                            <span className="font-heading font-bold text-[9px] uppercase tracking-widest text-zinc-400">{label}</span>
                           </div>
                         ))}
                       </div>
@@ -260,12 +260,12 @@ export function ContestQualifiedPage() {
                   )}
 
                   {finalCountdown.started && contest.status === "live" && (
-                    <div className="flex items-center justify-between rounded-md border border-lime-400/40 bg-lime-400/10 p-3">
+                    <div className="flex items-center justify-between rounded-[14px] border border-[#B1FA63]/40 bg-[#B1FA63]/10 p-3.5">
                       <div className="flex items-center gap-2">
-                        <span className="size-2 rounded-full bg-lime-400 animate-pulse" />
-                        <span className="font-mono text-xs font-semibold text-lime-400 uppercase tracking-wider">Round 2 Is Live</span>
+                        <span className="size-2 rounded-full bg-[#B1FA63] animate-pulse" />
+                        <span className="font-heading font-bold text-xs text-[#B1FA63] uppercase tracking-wider">Round 2 Is Live</span>
                       </div>
-                      <Button asChild variant="outline" size="sm">
+                      <Button asChild variant="outline" size="sm" className="rounded-[10px]">
                         <a href={`/contests/${contestSlug}/lobby`} target="_blank" rel="noopener noreferrer">
                           <Play className="mr-1 size-3 fill-current" /> Enter Arena
                         </a>
@@ -276,19 +276,19 @@ export function ContestQualifiedPage() {
               </div>
 
               {/* Lab Instructions */}
-              <div className="space-y-3 rounded-lg border border-white/8 bg-black p-5">
+              <div className="space-y-4 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
                 <SectionHeader kicker="01 // Protocol" index="LAB PROTOCOL" title="Venue Regulations" />
-                <ul className="space-y-2 font-mono text-xs text-zinc-400">
-                  <li className="flex items-start gap-2">
-                    <span className="text-lime-400 font-semibold shrink-0">01.</span>
+                <ul className="space-y-2.5 font-sans text-xs text-zinc-300">
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B1FA63] font-heading font-bold shrink-0">01.</span>
                     <span>Present this digital pass at the entrance of the Medi-Caps Computing Complex for proctor scan.</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-lime-400 font-semibold shrink-0">02.</span>
-                    <span>Take your designated workstation (<strong className="text-white">{pass.seat || "Assigned Seat"}</strong>). External laptops, phones, or storage devices are banned.</span>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B1FA63] font-heading font-bold shrink-0">02.</span>
+                    <span>Take your designated workstation (<strong className="text-white font-mono">{pass.seat || "Assigned Seat"}</strong>). External laptops, phones, or storage devices are banned.</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-lime-400 font-semibold shrink-0">03.</span>
+                  <li className="flex items-start gap-2.5">
+                    <span className="text-[#B1FA63] font-heading font-bold shrink-0">03.</span>
                     <span>The live contest arena is air-gapped and synchronized with the proctor operations command.</span>
                   </li>
                 </ul>
@@ -307,8 +307,15 @@ export function ContestQualifiedPage() {
       ) : (
         /* Not Qualified State */
         <div className="rounded-lg border border-white/8 bg-black p-8 text-center space-y-4 font-mono">
-          <div className="size-12 rounded-md bg-zinc-950 border border-white/10 flex items-center justify-center mx-auto text-zinc-400">
-            <Lock size={22} />
+          <div className="size-16 mx-auto flex items-center justify-center">
+            <img
+              src="/matiks-assets/icons/smart75-local-seatLock.png"
+              alt="Pass Restricted"
+              className="size-12 object-contain drop-shadow"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = "none";
+              }}
+            />
           </div>
           <div className="space-y-1">
             <h2 className="text-base font-semibold text-white">Campus Pass Restricted</h2>

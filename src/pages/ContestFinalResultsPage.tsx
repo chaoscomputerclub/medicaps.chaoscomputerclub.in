@@ -104,11 +104,20 @@ export function ContestFinalResultsPage() {
       />
 
       {rows.length === 0 ? (
-        <Card className="rounded-lg border border-white/8 bg-black">
-          <CardContent className="flex flex-col items-center gap-2 py-16 text-center font-mono">
-            <Trophy className="size-8 text-zinc-600" />
-            <strong className="text-sm font-semibold text-white">Results Pending Verification</strong>
-            <p className="max-w-sm text-xs text-zinc-500 leading-relaxed">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <CardContent className="flex flex-col items-center gap-3 py-16 text-center font-sans">
+            <div className="size-20 mb-1 flex items-center justify-center">
+              <img
+                src="/matiks-assets/empty-states/empty_leaderboard.png"
+                alt="Results pending verification"
+                className="size-full object-contain drop-shadow"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            </div>
+            <strong className="text-sm font-heading font-bold uppercase tracking-wider text-white">Results Pending Verification</strong>
+            <p className="max-w-sm text-xs text-zinc-400 leading-relaxed font-sans">
               Official standings will be unlocked once proctors certify all lab workstation submissions.
             </p>
           </CardContent>
@@ -117,66 +126,78 @@ export function ContestFinalResultsPage() {
         <>
           {/* Top 3 Podium Cards */}
           <section className="grid gap-4 sm:grid-cols-3">
-            {podium.map((row, index) => (
-              <Card
-                key={row.handle}
-                className={cn(
-                  "rounded-lg border border-white/8 bg-black transition-colors",
-                  index === 0 && "border-lime-400/40",
-                )}
-              >
-                <CardHeader className="gap-2 p-5">
-                  <div className="flex items-center justify-between">
-                    {index === 0 ? (
-                      <Trophy className="size-5 text-lime-400" />
-                    ) : index === 1 ? (
-                      <Medal className="size-5 text-zinc-400" />
-                    ) : (
-                      <Award className="size-5 text-amber-400" />
-                    )}
-                    <span className="font-mono text-xs font-semibold tabular-nums text-zinc-500">
-                      #{index + 1}
-                    </span>
-                  </div>
-                  <CardTitle className="text-base font-semibold text-white tracking-tight">
+            {podium.map((row, index) => {
+              const medalSrc =
+                index === 0
+                  ? "/matiks-assets/ranks/Gold.webp"
+                  : index === 1
+                  ? "/matiks-assets/ranks/Silver.webp"
+                  : "/matiks-assets/ranks/Bronze.webp";
+
+              return (
+                <Card
+                  key={row.handle}
+                  className={cn(
+                    "rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
+                    index === 0 && "border-[#B1FA63]/50 shadow-[0_0_25px_rgba(177,250,99,0.15)]",
+                  )}
+                >
+                  <CardHeader className="gap-2 p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="size-8 flex items-center justify-center">
+                        <img
+                          src={medalSrc}
+                          alt={`Rank #${index + 1}`}
+                          className="size-7 object-contain drop-shadow"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                      <span className="font-display text-xl tabular-nums text-zinc-400">
+                        #{index + 1}
+                      </span>
+                    </div>
+                  <CardTitle className="text-lg font-normal text-white font-display uppercase tracking-wider">
                     {row.full_name}
                   </CardTitle>
-                  <p className="font-mono text-xs text-zinc-500">@{row.handle}</p>
+                  <p className="font-mono text-xs text-zinc-400">@{row.handle}</p>
                 </CardHeader>
-                <CardContent className="space-y-2 px-5 pb-5 pt-0 font-mono text-xs">
-                  <div className="flex items-center justify-between border-t border-white/6 pt-3">
-                    <span className="text-zinc-500">Total Score</span>
-                    <span className="font-semibold text-lime-400 tabular-nums">{row.total_score} pts</span>
+                <CardContent className="space-y-2.5 px-6 pb-6 pt-0 font-sans text-xs">
+                  <div className="flex items-center justify-between border-t border-white/[0.06] pt-3">
+                    <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Total Score</span>
+                    <span className="font-bold text-[#B1FA63] font-mono tabular-nums text-sm">{row.total_score} pts</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">Penalty</span>
-                    <span className="text-zinc-300 tabular-nums">{row.penalty_minutes}m</span>
+                    <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Penalty</span>
+                    <span className="text-zinc-300 font-mono tabular-nums">{row.penalty_minutes}m</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">Workstation</span>
-                    <span className="text-zinc-300">{row.seat || "Lab"}</span>
+                    <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Workstation</span>
+                    <span className="text-white font-mono">{row.seat || "Lab"}</span>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </section>
+            );
+          })}
+        </section>
 
           {/* Full Standings Table */}
-          <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
+          <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-white/8 hover:bg-transparent">
-                  <TableHead className="w-16 font-mono text-[10px] uppercase text-zinc-500">Rank</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Cadet</TableHead>
-                  <TableHead className="hidden font-mono text-[10px] uppercase text-zinc-500 sm:table-cell">Dept</TableHead>
-                  <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Score</TableHead>
-                  <TableHead className="hidden text-right font-mono text-[10px] uppercase text-zinc-500 sm:table-cell">Penalty</TableHead>
-                  <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Workstation</TableHead>
+                <TableRow className="border-b border-white/[0.08] hover:bg-transparent">
+                  <TableHead className="w-16 font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Rank</TableHead>
+                  <TableHead className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Cadet</TableHead>
+                  <TableHead className="hidden font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400 sm:table-cell">Dept</TableHead>
+                  <TableHead className="text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Score</TableHead>
+                  <TableHead className="hidden text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400 sm:table-cell">Penalty</TableHead>
+                  <TableHead className="text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Workstation</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.handle} className="border-b border-white/6 hover:bg-zinc-950 transition-colors">
+                  <TableRow key={row.handle} className="border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors">
                     <TableCell className="font-mono text-xs font-semibold text-white tabular-nums">
                       #{row.rank}
                     </TableCell>
@@ -192,25 +213,25 @@ export function ContestFinalResultsPage() {
                         align="start"
                       >
                         <div className="inline-flex flex-col cursor-pointer">
-                          <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
+                          <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-[#B1FA63] transition-colors">
                             {row.full_name}
                           </Link>
-                          <span className="font-mono text-[10px] text-zinc-500">
+                          <span className="font-mono text-[10px] text-zinc-400">
                             @{row.handle}
                           </span>
                         </div>
                       </CadetProfileHoverCard>
                     </TableCell>
-                    <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
+                    <TableCell className="hidden font-sans text-xs text-zinc-400 sm:table-cell">
                       {row.department}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs font-semibold tabular-nums text-lime-400">
+                    <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-[#B1FA63]">
                       {row.total_score}
                     </TableCell>
-                    <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-500 sm:table-cell">
+                    <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-400 sm:table-cell">
                       {row.penalty_minutes}m
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-zinc-400">
+                    <TableCell className="text-right font-mono text-xs text-zinc-300">
                       {row.seat || "—"}
                     </TableCell>
                   </TableRow>
@@ -222,7 +243,7 @@ export function ContestFinalResultsPage() {
       )}
 
       <div className="pt-2">
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="rounded-[10px]">
           <Link to={`/contests/${contestSlug}`}>Back to Contest Details</Link>
         </Button>
       </div>

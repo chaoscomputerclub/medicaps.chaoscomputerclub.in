@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 
 export function TermsPage() {
   return (
-    <main className="min-h-screen w-full bg-black text-zinc-300 antialiased selection:bg-[#CCFF00]/30 selection:text-white">
+    <main className="min-h-screen w-full bg-[#171717] text-zinc-300 antialiased selection:bg-[#B1FA63]/30 selection:text-white font-sans">
       <div className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
         {/* Centered Application Logo */}
         <div className="flex justify-center mb-10">
@@ -31,7 +31,7 @@ export function TermsPage() {
 
         {/* Document Header */}
         <header className="border-b border-white/[0.08] pb-8 text-center sm:text-left">
-          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-heading font-bold tracking-tight text-white sm:text-4xl">
             Terms of Service
           </h1>
           <p className="mt-3 text-sm text-zinc-400">

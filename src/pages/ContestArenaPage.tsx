@@ -1194,18 +1194,18 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
     if (!practiceProblemData) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-red-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(239,68,68,0.1)]">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-red-500/30 bg-red-500/10 text-red-400">
               <AlertTriangle className="size-7" />
             </div>
 
             <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-semibold">
+              <span className="font-heading font-bold text-xs uppercase tracking-widest text-red-400">
                 404 Not Found
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white">Problem Not Found</h1>
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              <h1 className="font-display text-2xl uppercase tracking-wide text-white">Problem Not Found</h1>
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 We could not find a practice problem matching &quot;{effectiveProblemSlug}&quot;.
               </p>
             </div>
@@ -1240,21 +1240,21 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isSubmitted) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-lg border border-lime-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(204,255,0,0.15)] relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-lime-500 via-emerald-400 to-lime-500" />
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-lime-500/30 bg-lime-500/10 text-lime-400">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-8 text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#B1FA63] via-emerald-400 to-[#B1FA63]" />
+            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63]">
               <CheckCircle2 className="size-7" />
             </div>
 
             <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-semibold">
+              <span className="font-heading font-bold text-xs uppercase tracking-widest text-[#B1FA63]">
                 Contest Attempt Concluded · Final Record
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white font-sans">
+              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
                 Contest Already Submitted
               </h1>
-              <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 You have officially finalized and submitted your contest attempt. In accordance with
                 the fair competition protocol, retakes and further code executions are strictly
                 prohibited.
@@ -1317,20 +1317,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isUnauthenticated) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-white/12 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)]">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63]">
               <Lock className="size-7" />
             </div>
 
             <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-semibold">
+              <span className="font-heading font-bold text-xs uppercase tracking-widest text-[#B1FA63]">
                 Contest Authentication Required
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white">
+              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
                 Sign In to Enter Arena
               </h1>
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 You must be signed in with your Medi-Caps account to enter the contest workspace,
                 run test cases, and submit solutions.
               </p>
@@ -1357,20 +1357,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isUpcoming) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-amber-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(245,158,11,0.1)]">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <Clock className="size-7" />
             </div>
 
             <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
+              <span className="font-heading font-bold text-xs uppercase tracking-widest text-amber-400">
                 Contest Scheduled
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white">
+              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
                 Arena Has Not Started Yet
               </h1>
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 The competition arena and problem statements unlock automatically when the scheduled
                 contest countdown reaches zero.
               </p>
@@ -1397,18 +1397,18 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isNotFound) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-lg border border-red-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(239,68,68,0.1)]">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-red-500/30 bg-red-500/10 text-red-400">
               <AlertTriangle className="size-7" />
             </div>
 
             <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-semibold">
+              <span className="font-heading font-bold text-xs uppercase tracking-widest text-red-400">
                 404 Not Found
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white">Contest Not Found</h1>
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              <h1 className="font-display text-2xl uppercase tracking-wide text-white">Contest Not Found</h1>
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 We could not find a contest matching &quot;{contestSlug}&quot;. It may have
                 concluded or the URL may be incorrect.
               </p>
@@ -1429,20 +1429,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isProctorGate) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-lg border border-amber-500/30 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(245,158,11,0.1)]">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-amber-500/30 bg-amber-500/10 text-amber-400">
               <ShieldCheck className="size-7" />
             </div>
 
             <div className="space-y-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400 font-semibold">
+              <span className="font-heading font-bold text-xs uppercase tracking-widest text-amber-400">
                 Contest Access Restricted
               </span>
-              <h1 className="text-xl font-semibold tracking-tight text-white">
+              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
                 Contest Registration Required
               </h1>
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 {error ||
                   "Active contest registration required. Please register for the contest to access problem statements and submit solutions."}
               </p>
@@ -1468,20 +1468,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     // Generic fallback error
     return (
-      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-black p-4 text-white font-sans">
-        <div className="w-full max-w-md space-y-6 rounded-lg border border-white/12 bg-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)]">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-md border border-white/10 bg-zinc-900 text-zinc-400">
+      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
+        <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center shadow-2xl">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-white/10 bg-white/5 text-zinc-400">
             <AlertCircle className="size-7" />
           </div>
 
           <div className="space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
+            <span className="font-heading font-bold text-xs uppercase tracking-widest text-zinc-400">
               Arena Access Notice
             </span>
-            <h1 className="text-xl font-semibold tracking-tight text-white">
+            <h1 className="font-display text-2xl uppercase tracking-wide text-white">
               Unable to Access Arena
             </h1>
-            <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed">
               {error || "An unexpected error occurred while loading the contest workspace."}
             </p>
           </div>
@@ -1509,9 +1509,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     : (arenaData?.title || contestSlug || "Contest Arena");
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-black text-white select-none overflow-hidden font-sans">
-      {/* Top Navigation Bar — LeetCode Weekly Contest Architecture in Strix AI Dark Theme */}
-      <header className="h-12 shrink-0 px-3 bg-black border-b border-white/8 flex items-center justify-between gap-2 z-30">
+    <div className="flex flex-col h-[100dvh] w-full bg-[#171717] text-white select-none overflow-hidden font-sans">
+      {/* Top Navigation Bar — Tactical Header in Matiks Dark Theme */}
+      <header className="h-12 shrink-0 px-3 bg-[#141414] border-b border-white/10 flex items-center justify-between gap-2 z-30">
         {/* Left: Exit, Separator, Title (Drawer Opener), Question Switcher & Chevrons */}
         <div className="flex items-center gap-2 min-w-0">
           <Button
@@ -1778,7 +1778,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         {!isFocusMode && (
           <div
             style={{ width: `${leftWidthPercent}%` }}
-            className="flex flex-col bg-black border-r border-white/8 shrink-0 min-w-[280px] max-w-[calc(100%-300px)] h-full overflow-hidden"
+            className="flex flex-col bg-[#171717] border-r border-white/10 shrink-0 min-w-[280px] max-w-[calc(100%-300px)] h-full overflow-hidden"
           >
             <Tabs
               value={activeProblemTab}
@@ -1786,7 +1786,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               className="h-full flex flex-col gap-0"
             >
               {/* Panel Tabs Header */}
-              <div className="h-9 shrink-0 px-3 border-b border-white/8 bg-black flex items-center">
+              <div className="h-9 shrink-0 px-3 border-b border-white/10 bg-[#141414] flex items-center">
                 <TabsList className="bg-transparent border-none p-0 gap-1 h-auto">
                   <TabsTab value="description" className="px-3 py-1 text-sm font-sans font-semibold gap-1.5">
                     <FileText className="size-3.5" />
@@ -1900,10 +1900,10 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         {/* Right: Code Editor & Console Drawer */}
         <div
           ref={rightPaneRef}
-          className="flex-1 flex flex-col bg-black min-w-0 h-full overflow-hidden relative"
+          className="flex-1 flex flex-col bg-[#171717] min-w-0 h-full overflow-hidden relative"
         >
           {/* Top: Editor Toolbar Header */}
-          <div className="h-9 shrink-0 px-3 bg-black border-b border-white/8 flex items-center justify-between gap-2">
+          <div className="h-9 shrink-0 px-3 bg-[#141414] border-b border-white/10 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 px-2 py-0.5 text-xs font-mono font-semibold text-lime-400 bg-lime-400/10 border border-lime-400/30 rounded">
                 <Code2 className="size-3" />
@@ -1980,9 +1980,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           </div>
 
           {/* Editor Status Bar */}
-          <div className="h-6 px-3 bg-black border-t border-white/6 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
+          <div className="h-6 px-3 bg-[#141414] border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
             <div className="flex items-center gap-1.5 text-zinc-400">
-              <Check className="size-3 text-lime-400" />
+              <Check className="size-3 text-[#B1FA63]" />
               <span>Saved</span>
             </div>
             <div className="flex items-center gap-3 tabular-nums">
@@ -2003,22 +2003,22 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               onTouchStart={() => setIsDraggingHeight(true)}
               onDoubleClick={handleResetHeight}
               className={`group relative flex items-center justify-center h-2 -my-1 z-20 cursor-row-resize select-none shrink-0 transition-colors ${
-                isDraggingHeight ? "bg-lime-400/20" : "hover:bg-lime-400/10"
+                isDraggingHeight ? "bg-[#B1FA63]/20" : "hover:bg-[#B1FA63]/10"
               }`}
               title="Drag to adjust console height · Double-click to reset (240px)"
             >
               <div
                 className={`h-px w-full transition-colors ${
                   isDraggingHeight
-                    ? "bg-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.8)]"
-                    : "bg-white/10 group-hover:bg-lime-400/80"
+                    ? "bg-[#B1FA63] shadow-[0_0_10px_rgba(177,250,99,0.8)]"
+                    : "bg-white/10 group-hover:bg-[#B1FA63]/80"
                 }`}
               />
               <div
                 className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-3.5 w-7 rounded-full border shadow-sm transition-all pointer-events-none ${
                   isDraggingHeight
-                    ? "bg-lime-400 border-lime-400 text-black scale-110"
-                    : "bg-zinc-900 border-white/20 text-zinc-400 group-hover:border-lime-400 group-hover:bg-black group-hover:text-lime-400"
+                    ? "bg-[#B1FA63] border-[#B1FA63] text-black scale-110"
+                    : "bg-[#1F1F1F] border-white/20 text-zinc-400 group-hover:border-[#B1FA63] group-hover:bg-[#141414] group-hover:text-[#B1FA63]"
                 }`}
               >
                 <GripHorizontal className="size-2.5" />
@@ -2029,12 +2029,12 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           {/* Console & Execution Drawer */}
           <div
             style={{ height: isDrawerCollapsed ? "0px" : `${drawerHeight}px` }}
-            className={`flex flex-col border-t border-white/8 bg-black shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
+            className={`flex flex-col border-t border-white/10 bg-[#171717] shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
               isDrawerCollapsed ? "border-t-0" : ""
             }`}
           >
             {/* Drawer Tab Header */}
-            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
+            <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/10 px-3 bg-[#141414]">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -2566,17 +2566,17 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             )}
           </div>
 
-          {/* Action Footer in Strix AI Dark Theme */}
-          <div className="h-11 px-4 border-t border-white/8 flex items-center justify-between bg-black shrink-0">
+          {/* Action Footer in Tactical Dark Theme */}
+          <div className="h-11 px-4 border-t border-white/10 flex items-center justify-between bg-[#141414] shrink-0">
             <div className="flex items-center gap-3">
               {/* LeetCode-style Console Toggle */}
               <button
                 type="button"
                 onClick={() => setIsDrawerCollapsed((prev) => !prev)}
-                className="flex items-center gap-1.5 text-sm font-sans font-semibold text-zinc-400 hover:text-white px-2.5 py-1 rounded-md bg-zinc-950 border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 text-sm font-sans font-semibold text-zinc-400 hover:text-white px-2.5 py-1 rounded-[8px] bg-[#1F1F1F] border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
                 title={isDrawerCollapsed ? "Open Console Drawer" : "Close Console Drawer"}
               >
-                <Terminal className="size-3 text-lime-400" />
+                <Terminal className="size-3 text-[#B1FA63]" />
                 <span>Console</span>
                 {isDrawerCollapsed ? (
                   <ChevronUp className="size-3 text-zinc-500" />
@@ -2587,7 +2587,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
                 <span
-                  className={`size-1.5 rounded-full ${isContestOver ? "bg-red-500" : "bg-lime-400"}`}
+                  className={`size-1.5 rounded-full ${isContestOver ? "bg-red-500" : "bg-[#B1FA63]"}`}
                 />
                 <span>{isContestOver ? "Contest locked" : "Workstation online"}</span>
               </div>
@@ -2596,12 +2596,12 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         </div>
       </div>
 
-      {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) in Strix AI Theme */}
+      {/* Settings Modal (Editor Preferences & Keyboard Shortcuts) */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="border border-white/12 bg-black text-white p-6 max-w-lg rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <DialogContent className="border border-white/10 bg-[#1F1F1F] text-white p-6 max-w-lg rounded-[24px] shadow-2xl">
           <DialogHeader className="space-y-1.5 text-left">
-            <DialogTitle className="text-base font-semibold text-white tracking-tight flex items-center gap-2">
-              <Settings className="size-4 text-lime-400" />
+            <DialogTitle className="text-lg font-heading font-bold text-white tracking-tight flex items-center gap-2">
+              <Settings className="size-4 text-[#B1FA63]" />
               <span>Contest Workspace Settings</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-zinc-400 font-mono">
@@ -2809,20 +2809,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       {/* Contest Over Modal using official shadcn Dialog */}
       <Dialog open={!isPracticeMode && isContestOver && !isReviewMode}>
-        <DialogContent className="max-w-md rounded-lg border border-lime-400/40 bg-black p-8 text-center space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_0_1px_rgba(204,255,0,0.15)] [&>button]:hidden">
+        <DialogContent className="max-w-md rounded-[24px] border border-[#B1FA63]/40 bg-[#1F1F1F] p-8 text-center space-y-6 shadow-2xl [&>button]:hidden">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
-            <div className="flex size-14 items-center justify-center rounded-md border border-lime-400/30 bg-lime-400/10 mx-auto text-lime-400">
+            <div className="flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 mx-auto text-[#B1FA63]">
               <Trophy className="size-7" />
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] uppercase tracking-widest text-lime-400 font-semibold block font-mono">
+              <span className="text-xs uppercase tracking-widest text-[#B1FA63] font-bold block font-heading">
                 Official Contest Bell
               </span>
-              <DialogTitle className="text-2xl font-bold text-white tracking-tight font-sans">
+              <DialogTitle className="text-2xl uppercase tracking-wide text-white font-display">
                 Contest Concluded
               </DialogTitle>
-              <DialogDescription className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
+              <DialogDescription className="text-sm text-zinc-400 font-sans leading-relaxed max-w-xs mx-auto">
                 The competition clock has expired. Code execution is now locked. Proceed to the
                 Contest Summary console to inspect your questions and finalize your submission.
               </DialogDescription>
@@ -2830,8 +2830,8 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-md border border-lime-400 bg-lime-400/10">
-              <span className="text-xl font-bold text-lime-400 tabular-nums">
+            <div className="flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63] bg-[#B1FA63]/10">
+              <span className="text-2xl font-display text-[#B1FA63] tabular-nums">
                 {redirectCountdown}
               </span>
             </div>
@@ -2855,7 +2855,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         </DialogContent>
       </Dialog>
 
-      {/* Slide-out Problem List Drawer (Strix AI Theme: Pitch Black × Electric Lime) */}
+      {/* Slide-out Problem List Drawer */}
       {isProblemListOpen && (
         <div
           role="presentation"
@@ -2866,21 +2866,21 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       <aside
         aria-label="Contest Problem List and Standings"
-        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-black border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#141414] border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-200 ease-out ${
           isProblemListOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         }`}
       >
         {/* Drawer Header: Title + Live Arena badge + ✕ Close */}
-        <div className="h-12 px-4 border-b border-white/8 flex items-center justify-between shrink-0 bg-black">
+        <div className="h-12 px-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#141414]">
           <div className="flex items-center gap-2 min-w-0">
-            <ListOrdered className="size-4 text-lime-400 shrink-0" />
-            <h2 className="font-semibold text-xs text-white truncate max-w-[220px]">{title}</h2>
+            <ListOrdered className="size-4 text-[#B1FA63] shrink-0" />
+            <h2 className="font-heading font-bold text-xs text-white truncate max-w-[220px]">{title}</h2>
             {isPracticeMode ? (
-              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
+              <span className="border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63] font-heading text-[10px] uppercase px-2 py-0.5 rounded-full font-bold shrink-0">
                 Practice Catalog
               </span>
             ) : arenaData?.status ? (
-              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold shrink-0">
+              <span className="border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63] font-heading text-[10px] uppercase px-2 py-0.5 rounded-full font-bold shrink-0">
                 {arenaData.status} Arena
               </span>
             ) : null}
@@ -2899,7 +2899,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         </div>
 
         {/* Drawer Subheader: Problem List vs Standings Tabs + Score Badge */}
-        <div className="px-4 py-2.5 border-b border-white/8 flex items-center justify-between gap-2 shrink-0 bg-black">
+        <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 shrink-0 bg-[#141414]">
           {/* Sub-tabs: Challenges vs Standings */}
           {isPracticeMode ? (
             <div className="flex items-center gap-1.5 text-xs font-sans font-semibold text-white px-1 py-1">

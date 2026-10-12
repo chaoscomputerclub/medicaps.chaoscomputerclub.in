@@ -78,53 +78,53 @@ export function RecentSubmissionsCard({
   });
 
   return (
-    <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.03)] space-y-4">
+    <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)] space-y-4">
       {/* Tabs Header */}
-      <div className="flex items-center justify-between border-b border-white/6 pb-3 text-xs font-sans">
-        <div className="flex items-center gap-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3.5 text-xs">
+        <div className="flex items-center gap-1.5 bg-[#171717] p-1 rounded-[12px] border border-white/[0.08]">
           <button
             type="button"
             onClick={() => setActiveTab("recent_ac")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "recent_ac"
-                ? "bg-white/10 text-white font-semibold"
+                ? "bg-[#B1FA63] text-black shadow-sm font-extrabold"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
-            <CheckCircle2 className="size-3.5 text-emerald-400" />
+            <CheckCircle2 className={`size-3.5 ${activeTab === "recent_ac" ? "text-black" : "text-[#B1FA63]"}`} />
             <span>Recent AC</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("all")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "all"
-                ? "bg-white/10 text-white font-semibold"
+                ? "bg-[#B1FA63] text-black shadow-sm font-extrabold"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
-            <History className="size-3.5 text-zinc-400" />
+            <History className="size-3.5" />
             <span>All Submissions</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("tournaments")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 font-medium transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "tournaments"
-                ? "bg-white/10 text-white font-semibold"
+                ? "bg-[#B1FA63] text-black shadow-sm font-extrabold"
                 : "text-zinc-400 hover:text-white"
             }`}
           >
-            <Trophy className="size-3.5 text-zinc-400" />
+            <Trophy className="size-3.5" />
             <span>Tournaments</span>
           </button>
         </div>
 
         <Link
           to={activeTab === "tournaments" ? "/contests" : "/practice"}
-          className="text-zinc-500 hover:text-lime-400 text-xs font-mono transition-colors flex items-center gap-1"
+          className="text-zinc-400 hover:text-[#B1FA63] text-xs font-heading font-bold uppercase tracking-wider transition-colors flex items-center gap-1 self-end sm:self-auto"
         >
           <span>{activeTab === "tournaments" ? "All contests" : "Practice arena"}</span>
           <ChevronRight className="size-3" />
@@ -160,22 +160,22 @@ export function RecentSubmissionsCard({
               return (
                 <div
                   key={item.id}
-                  className="py-2.5 px-3 rounded-md hover:bg-white/[0.02] flex items-center justify-between text-xs transition-colors group"
+                  className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-3">
                     <span
-                      className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border shrink-0 ${diffBadge.color}`}
+                      className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-[6px] border shrink-0 ${diffBadge.color}`}
                     >
                       {diffBadge.label}
                     </span>
                     <Link
                       to={targetUrl}
-                      className="font-medium text-white group-hover:text-lime-400 transition-colors truncate max-w-sm sm:max-w-md"
+                      className="font-medium text-white group-hover:text-[#B1FA63] transition-colors truncate max-w-sm sm:max-w-md"
                     >
                       {item.problem_title || "Practice Problem"}
                     </Link>
                     {item.language && (
-                      <span className="hidden sm:inline text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-white/6 px-1.5 py-0.5 rounded">
+                      <span className="hidden sm:inline text-[10px] font-mono text-zinc-500 bg-[#171717] border border-white/[0.06] px-1.5 py-0.5 rounded-[6px]">
                         {item.language}
                       </span>
                     )}
@@ -204,7 +204,7 @@ export function RecentSubmissionsCard({
               </p>
               <Link
                 to="/practice"
-                className="inline-block text-xs font-mono text-lime-400 hover:underline"
+                className="inline-block text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63] hover:underline"
               >
                 Start practicing →
               </Link>
@@ -220,22 +220,22 @@ export function RecentSubmissionsCard({
               return (
                 <div
                   key={item.id}
-                  className="py-2.5 px-3 rounded-md hover:bg-white/[0.02] flex items-center justify-between text-xs transition-colors group"
+                  className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-3">
                     <span
-                      className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border shrink-0 ${diffBadge.color}`}
+                      className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-[6px] border shrink-0 ${diffBadge.color}`}
                     >
                       {diffBadge.label}
                     </span>
                     <Link
                       to={targetUrl}
-                      className="font-medium text-white group-hover:text-lime-400 transition-colors truncate max-w-xs sm:max-w-sm"
+                      className="font-medium text-white group-hover:text-[#B1FA63] transition-colors truncate max-w-xs sm:max-w-sm"
                     >
                       {item.problem_title || "Practice Problem"}
                     </Link>
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded border shrink-0 ${verdictBadge.color}`}
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded-[6px] border shrink-0 ${verdictBadge.color}`}
                     >
                       {verdictBadge.label}
                     </span>
@@ -260,7 +260,7 @@ export function RecentSubmissionsCard({
               </p>
               <Link
                 to="/contests"
-                className="inline-block text-xs font-mono text-lime-400 hover:underline"
+                className="inline-block text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63] hover:underline"
               >
                 View upcoming contests →
               </Link>
@@ -269,15 +269,15 @@ export function RecentSubmissionsCard({
             battles.slice(0, 6).map((b, idx) => (
               <div
                 key={b.certificate_id || idx}
-                className="py-2.5 px-3 rounded-md hover:bg-white/[0.02] flex items-center justify-between text-xs transition-colors group"
+                className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"
               >
                 <div className="flex items-center gap-2 min-w-0 pr-3">
-                  <span className="text-[10px] font-mono text-lime-400 bg-lime-400/10 border border-lime-400/20 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-[10px] font-mono text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-1.5 py-0.5 rounded-[6px] shrink-0 font-bold">
                     Rank #{b.rank}
                   </span>
                   <Link
                     to={b.contest_slug ? `/contests/${b.contest_slug}/results` : `/contests`}
-                    className="font-medium text-white group-hover:text-lime-400 transition-colors truncate max-w-xs sm:max-w-sm"
+                    className="font-medium text-white group-hover:text-[#B1FA63] transition-colors truncate max-w-xs sm:max-w-sm"
                   >
                     {b.contest}
                   </Link>
@@ -286,7 +286,7 @@ export function RecentSubmissionsCard({
                   <span className="text-zinc-400">Solved: {b.solved}</span>
                   <span
                     className={
-                      b.delta >= 0 ? "text-lime-400 font-semibold" : "text-red-400 font-semibold"
+                      b.delta >= 0 ? "text-[#B1FA63] font-semibold" : "text-red-400 font-semibold"
                     }
                   >
                     {b.delta > 0 ? `+${b.delta}` : b.delta}

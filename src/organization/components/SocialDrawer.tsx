@@ -193,8 +193,15 @@ export function SocialDrawer() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="size-14 rounded-full border border-lime-400/20 bg-lime-400/5 text-lime-400 flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(163,230,53,0.1)]">
-                <Users size={22} />
+              <div className="size-24 mx-auto mb-3 flex items-center justify-center">
+                <img
+                  src="/matiks-assets/empty-states/no_Friends.webp"
+                  alt="No connections recorded"
+                  className="size-full object-contain drop-shadow"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
               </div>
               <h3 className="font-sans text-xs font-bold text-white uppercase tracking-wider">
                 {searchQuery ? "No matching peers" : "No connections recorded"}

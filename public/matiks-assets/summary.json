@@ -1,0 +1,41 @@
+{
+  "total_assets_discovered": 317,
+  "total_downloaded": 316,
+  "total_failed": 1,
+  "unique_content_hashes": 308,
+  "category_counts": {
+    "icons": 29,
+    "other": 133,
+    "mascots": 5,
+    "rewards": 6,
+    "logos": 6,
+    "ranks": 22,
+    "empty-states": 7,
+    "illustrations": 11,
+    "backgrounds": 17,
+    "badges": 7,
+    "animations": 1,
+    "navigation": 7,
+    "avatars": 2,
+    "achievements": 3,
+    "fonts": 61
+  },
+  "format_counts": {
+    "raster": 237,
+    "font": 61,
+    "audio": 18,
+    "svg": 1
+  },
+  "mime_counts": {
+    "image/png": 107,
+    "image/webp": 126,
+    "image/gif": 1,
+    "font/ttf": 61,
+    "audio/mpeg": 13,
+    "audio/wav": 5,
+    "unknown": 1,
+    "application/json": 1,
+    "image/svg+xml": 1,
+    "image/vnd.microsoft.icon": 1
+  }
+}

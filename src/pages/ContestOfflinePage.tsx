@@ -106,19 +106,26 @@ export function ContestOfflinePage() {
         <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to contest
         </Link>
-        <Card className="rounded-lg border border-white/8 bg-black">
-          <CardContent className="flex flex-col items-center gap-3 py-16 text-center font-mono">
-            <div className="flex size-12 items-center justify-center rounded-md border border-white/10 bg-zinc-950 text-zinc-400">
-              <Lock className="size-6" />
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <CardContent className="flex flex-col items-center gap-4 py-16 text-center font-sans">
+            <div className="size-20 mb-1 flex items-center justify-center">
+              <img
+                src="/matiks-assets/icons/smart75-local-seatLock.png"
+                alt="Workstation locked"
+                className="size-16 object-contain drop-shadow"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
             </div>
-            <h1 className="text-base font-semibold text-white">
+            <h1 className="text-2xl font-normal text-white font-display uppercase tracking-wider">
               Finalist Area Restricted
             </h1>
-            <p className="max-w-md text-xs text-zinc-400 leading-relaxed">
+            <p className="max-w-md text-xs text-zinc-400 leading-relaxed font-sans">
               {registration?.eligibility_message ??
                 `This workstation portal is accessible only to Top ${FINALIST_SEATS} verified qualifiers.`}
             </p>
-            <Button asChild variant="outline" className="mt-2">
+            <Button asChild variant="outline" className="mt-2 rounded-[10px]">
               <Link to={`/contests/${contestSlug}/results`}>
                 View Round 1 Standings
                 <ArrowRight className="ml-1.5 size-3" />
@@ -140,7 +147,7 @@ export function ContestOfflinePage() {
         kicker="02 // Campus Lab Final"
         index="ROUND 2 · ON-PREMISE"
         badge={
-          <span className="rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+          <span className="rounded-full border border-[#B1FA63]/30 bg-[#B1FA63]/10 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
             Finalist Access Granted
           </span>
         }
@@ -149,17 +156,17 @@ export function ContestOfflinePage() {
       />
 
       {/* Hero Live Arena Launcher */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 border border-lime-400/30 bg-black rounded-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border border-[#B1FA63]/30 bg-[#1F1F1F] rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-lime-400 animate-pulse" />
-            <h3 className="font-semibold text-white text-sm">Air-Gapped Final Arena</h3>
+            <span className="size-2 rounded-full bg-[#B1FA63] animate-pulse" />
+            <h3 className="font-heading font-bold uppercase tracking-wider text-white text-sm">Air-Gapped Final Arena</h3>
           </div>
-          <p className="text-xs text-zinc-400 font-mono">
-            Seat: <strong className="text-lime-400">{pass?.seat || "Unassigned"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
+          <p className="text-xs text-zinc-400 font-sans">
+            Seat: <strong className="text-[#B1FA63] font-mono">{pass?.seat || "Unassigned"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </p>
         </div>
-        <Button asChild variant="outline" size="lg">
+        <Button asChild variant="outline" size="lg" className="rounded-[10px]">
           <a href={`/contests/${contestSlug}/lobby`} target="_blank" rel="noopener noreferrer">
             <Play className="size-3.5 fill-current mr-1.5" />
             Enter Arena
@@ -169,9 +176,9 @@ export function ContestOfflinePage() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         {/* Countdown Card */}
-        <Card className="rounded-lg border border-white/8 bg-black">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <CardHeader className="p-5 pb-3">
-            <CardTitle className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+            <CardTitle className="font-heading font-bold text-[10px] uppercase tracking-widest text-zinc-400">
               {started ? "Contest Remaining" : "Tournament Bell"}
             </CardTitle>
           </CardHeader>
@@ -181,28 +188,28 @@ export function ContestOfflinePage() {
         </Card>
 
         {/* Check-In Card */}
-        <Card className="rounded-lg border border-white/8 bg-black">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <CardHeader className="flex-row items-center gap-2 p-5 pb-3">
-            <QrCode className="size-4 text-lime-400" />
-            <CardTitle className="text-sm font-semibold text-white">
+            <QrCode className="size-4 text-[#B1FA63]" />
+            <CardTitle className="text-sm font-bold text-white font-heading uppercase tracking-wide">
               Gate Pass
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 font-mono text-xs text-zinc-400 p-5 pt-0">
-            <div className="flex justify-center bg-white p-3 rounded-md">
+          <CardContent className="space-y-3 font-sans text-xs text-zinc-300 p-5 pt-0">
+            <div className="flex justify-center bg-white p-3.5 rounded-[14px] shadow-md">
               <QRCodeSVG value={pass?.qr_data || pass?.pass_code || "PENDING_QUALIFICATION"} size={95} level="M" />
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-zinc-500">Code:</span>
-              <span className="text-lime-400 font-semibold">{pass?.pass_code || "Pending Qualification"}</span>
+              <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Code:</span>
+              <span className="text-[#B1FA63] font-mono font-semibold">{pass?.pass_code || "Pending Qualification"}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-zinc-500">Workstation:</span>
-              <span className="text-white font-semibold">{pass?.seat || "Unassigned"}</span>
+              <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Workstation:</span>
+              <span className="text-white font-mono font-semibold">{pass?.seat || "Unassigned"}</span>
             </div>
             <Button
-              className="w-full"
-              variant={checkedIn ? "secondary" : "outline"}
+              className="w-full rounded-[10px]"
+              variant={checkedIn ? "secondary" : "default"}
               disabled={checkedIn || isCheckingIn || !pass?.pass_code}
               onClick={handleCheckIn}
             >
@@ -212,23 +219,23 @@ export function ContestOfflinePage() {
         </Card>
 
         {/* Workstation Lab Info Card */}
-        <Card className="rounded-lg border border-white/8 bg-black">
+        <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <CardHeader className="flex-row items-center gap-2 p-5 pb-3">
-            <Cpu className="size-4 text-lime-400" />
-            <CardTitle className="text-sm font-semibold text-white">
+            <Cpu className="size-4 text-[#B1FA63]" />
+            <CardTitle className="text-sm font-bold text-white font-heading uppercase tracking-wide">
               Workstation Spec
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 font-mono text-xs text-zinc-400 p-5 pt-0">
-            <p className="text-white">{contest.environment || "Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20"}</p>
-            <p className="text-zinc-500">{contest.venue}</p>
+          <CardContent className="space-y-2 font-sans text-xs text-zinc-300 p-5 pt-0">
+            <p className="text-white font-mono text-[11px]">{contest.environment || "Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20"}</p>
+            <p className="text-zinc-400">{contest.venue}</p>
             <p className="flex items-center gap-2 pt-1">
-              <Users className="size-3.5 text-zinc-500" />
-              <span><span className="font-semibold text-white tabular-nums">{contest.registered_count}</span> finalists seated</span>
+              <Users className="size-3.5 text-zinc-400" />
+              <span><span className="font-semibold text-white tabular-nums font-mono">{contest.registered_count}</span> finalists seated</span>
             </p>
-            <div className="pt-2 border-t border-white/6">
-              <p className="text-[10px] text-zinc-500">Proctors:</p>
-              <p className="text-zinc-300 text-xs">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</p>
+            <div className="pt-2 border-t border-white/[0.06]">
+              <p className="text-[10px] text-zinc-400 font-heading font-semibold uppercase">Proctors:</p>
+              <p className="text-zinc-300 text-xs mt-0.5">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</p>
             </div>
           </CardContent>
         </Card>
@@ -237,42 +244,42 @@ export function ContestOfflinePage() {
       {/* Problem Set Table */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+          <h2 className="font-heading font-bold text-xs uppercase tracking-wider text-zinc-400">
             Final Problem Set
           </h2>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="rounded-[10px]">
             <Link to={`/contests/${contestSlug}/problems`}>
-              <Play className="size-3 text-lime-400" />
+              <Play className="size-3 text-[#B1FA63]" />
               <span>Open in Arena</span>
             </Link>
           </Button>
         </div>
-        <div className="overflow-hidden rounded-lg border border-white/8 bg-black">
+        <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-white/8 hover:bg-transparent">
-                <TableHead className="w-16 font-mono text-[10px] uppercase text-zinc-500">#</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Problem</TableHead>
-                <TableHead className="font-mono text-[10px] uppercase text-zinc-500">Topic</TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Points</TableHead>
-                <TableHead className="text-right font-mono text-[10px] uppercase text-zinc-500">Action</TableHead>
+              <TableRow className="border-b border-white/[0.08] hover:bg-transparent">
+                <TableHead className="w-16 font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">#</TableHead>
+                <TableHead className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Problem</TableHead>
+                <TableHead className="font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Topic</TableHead>
+                <TableHead className="text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Points</TableHead>
+                <TableHead className="text-right font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {problems.length === 0 ? (
-                <TableRow className="border-b border-white/6">
-                  <TableCell colSpan={5} className="py-12 text-center text-xs text-zinc-600 font-mono">
-                    <Timer className="mx-auto mb-2 size-5 text-zinc-600" />
+                <TableRow className="border-b border-white/[0.06]">
+                  <TableCell colSpan={5} className="py-12 text-center text-xs text-zinc-500 font-sans">
+                    <Timer className="mx-auto mb-2 size-5 text-zinc-500" />
                     Problem set unseals at the start bell.
                   </TableCell>
                 </TableRow>
               ) : (
                 problems.map((problem) => (
-                  <TableRow key={problem.problem_index} className="border-b border-white/6 hover:bg-zinc-950 transition-colors">
-                    <TableCell className="font-mono text-xs font-semibold text-lime-400">{problem.problem_index}</TableCell>
+                  <TableRow key={problem.problem_index} className="border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors">
+                    <TableCell className="font-mono text-xs font-semibold text-[#B1FA63]">{problem.problem_index}</TableCell>
                     <TableCell className="font-medium text-xs text-white">{problem.title}</TableCell>
-                    <TableCell className="font-mono text-xs text-zinc-400">{problem.topic}</TableCell>
-                    <TableCell className="text-right font-mono text-xs tabular-nums text-lime-400">{problem.points}</TableCell>
+                    <TableCell className="font-sans text-xs text-zinc-400">{problem.topic}</TableCell>
+                    <TableCell className="text-right font-mono text-xs tabular-nums text-[#B1FA63]">{problem.points}</TableCell>
                     <TableCell className="text-right">
                       <Link
                         to={`/contests/${contestSlug}/problems/${slugifyProblem(problem.title, problem.problem_index)}`}

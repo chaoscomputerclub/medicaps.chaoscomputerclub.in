@@ -7,7 +7,7 @@ import { RatingDistributionSkeleton } from "./skeletons";
 /**
  * RatingDistributionCard
  * Renders a histogram sourced from the backend's /leaderboard/distribution endpoint.
- * Strix AI pure black + electric lime styling.
+ * Matiks dark theme with #1F1F1F cards, #171717 inner containers, and #B1FA63 accents.
  */
 export function RatingDistributionCard({
   member,
@@ -26,14 +26,11 @@ export function RatingDistributionCard({
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const attendanceCount = member?.attendance_count ?? 0;
   const isRanked = Boolean(member?.is_ranked && member?.university_rank);
 
   let percentileDisplay = "Unranked";
-  let rankDisplay = "Unranked";
 
   if (isRanked && member?.university_rank) {
-    rankDisplay = `#${member.university_rank}`;
     // Strictly consume authoritative canonical standing from backend RankingService
     if (member?.standing) {
       percentileDisplay = member.standing;
@@ -43,7 +40,6 @@ export function RatingDistributionCard({
       percentileDisplay = "Ranked";
     }
   } else {
-    rankDisplay = "Unranked";
     percentileDisplay = "Unranked";
   }
 
@@ -70,38 +66,38 @@ export function RatingDistributionCard({
   }));
 
   const displayBuckets = isEmpty ? PLACEHOLDER_BUCKETS : buckets;
-  const MAX_BAR_PX = 72;
+  const MAX_BAR_PX = 80;
 
   return (
-    <div className="flex flex-col justify-between h-full rounded-lg border border-white/8 bg-black p-5 sm:p-6">
+    <div className="flex flex-col justify-between h-full rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
       {/* Top Percentile Display */}
       <div>
-        <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block">
+        <span className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 block">
           {isRanked ? "Cohort Standing" : "Standing"}
         </span>
-        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mt-1 font-sans">
+        <h2 className="text-3xl sm:text-4xl font-display uppercase tracking-wide text-white mt-1">
           {percentileDisplay}
         </h2>
       </div>
 
       {/* Histogram Bar Chart */}
-      <div className="my-6 relative">
+      <div className="my-auto py-6 relative">
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <span className="text-[9px] font-mono text-zinc-600 tracking-widest uppercase">
+            <span className="px-3 py-1.5 rounded-[8px] bg-[#171717]/90 border border-white/[0.08] text-[10px] font-mono tracking-widest text-zinc-400 uppercase shadow-lg backdrop-blur-sm">
               NO CONTEST DATA RECORDED
             </span>
           </div>
         )}
         <div
-          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[80px] w-full"
+          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[96px] w-full"
           aria-label="Rating distribution histogram"
         >
           {displayBuckets.map((bucket, index) => {
             const count = isEmpty ? 0 : (bucket.count ?? 0);
             const barHeightPx = isEmpty
-              ? 3
-              : Math.max(3, Math.round((count / maxCount) * MAX_BAR_PX));
+              ? 4
+              : Math.max(4, Math.round((count / maxCount) * MAX_BAR_PX));
 
             const isUserBucket = !isEmpty && index === activeBucketIndex;
             const isHovered = hoveredIndex === index;
@@ -109,14 +105,15 @@ export function RatingDistributionCard({
             return (
               <div
                 key={`${bucket.min}-${index}`}
-                className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer"
+                className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer group"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
                 {/* Tooltip */}
                 {isHovered && !isEmpty && (
-                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black border border-white/10 text-[9px] font-mono text-white rounded whitespace-nowrap z-20 pointer-events-none shadow-lg">
-                    {bucket.min}–{bucket.min + 50}: <span className="tabular-nums font-semibold text-lime-400">{count}</span>
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#171717] border border-white/[0.12] text-[10px] font-mono text-white rounded-[8px] whitespace-nowrap z-20 pointer-events-none shadow-xl">
+                    {bucket.min}–{bucket.min + 50}:{" "}
+                    <span className="tabular-nums font-bold text-[#B1FA63]">{count}</span>
                   </div>
                 )}
                 {/* Bar */}
@@ -125,47 +122,19 @@ export function RatingDistributionCard({
                   className={cn(
                     "w-full rounded-t-[2px] transition-colors",
                     isEmpty
-                      ? "bg-zinc-900"
+                      ? "bg-[#171717] border-t border-white/[0.06]"
                       : isUserBucket
-                      ? "bg-lime-400"
+                      ? "bg-[#B1FA63] shadow-[0_0_10px_rgba(177,250,99,0.4)]"
                       : isHovered
-                      ? "bg-zinc-400"
+                      ? "bg-zinc-300"
                       : count === 0
-                      ? "bg-zinc-900"
-                      : "bg-zinc-800"
+                      ? "bg-[#171717]"
+                      : "bg-white/[0.12]"
                   )}
                 />
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Stats Summary Footer */}
-      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/6 text-left font-mono">
-        <div>
-          <span className="text-[9px] text-zinc-500 uppercase block">
-            Elo Rating
-          </span>
-          <strong className="text-xs font-semibold text-lime-400 block mt-0.5 tabular-nums">
-            {(userRating ?? member?.rating)?.toLocaleString() ?? 1200}
-          </strong>
-        </div>
-        <div>
-          <span className="text-[9px] text-zinc-500 uppercase block">
-            Rank
-          </span>
-          <strong className="text-xs font-semibold text-white block mt-0.5 tabular-nums">
-            {rankDisplay}
-          </strong>
-        </div>
-        <div>
-          <span className="text-[9px] text-zinc-500 uppercase block">
-            Attended
-          </span>
-          <strong className="text-xs font-semibold text-white block mt-0.5 tabular-nums">
-            {attendanceCount}
-          </strong>
         </div>
       </div>
     </div>

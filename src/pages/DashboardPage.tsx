@@ -163,69 +163,69 @@ export function DashboardPage() {
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 min-w-0 overflow-x-hidden">
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/8 pb-4 sm:pb-5 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/[0.08] pb-4 sm:pb-5 min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400">
+            <span className="font-heading font-extrabold text-xs uppercase tracking-widest text-[#B1FA63]">
               (01 // Command Center)
             </span>
           </div>
-          <h1 className="text-xl md:text-2xl font-semibold text-white font-sans tracking-tight truncate">
+          <h1 className="text-3xl sm:text-5xl font-display uppercase tracking-wide text-white leading-none truncate">
             Dashboard
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5 truncate">
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1 truncate">
             Welcome back, {greetingName}. Medi-Caps competitive programming arena.
           </p>
         </div>
       </div>
 
       {/* Telemetry Bento Strip (4 Columns) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 min-w-0">
-        <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Campus Standings</span>
-          <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+          <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Campus Standings</span>
+          <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.is_ranked && member?.university_rank ? `#${member.university_rank}` : "Unranked"}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">
+          <span className="block text-xs font-mono text-zinc-500 mt-1 truncate">
             {member?.is_ranked && member?.standing ? `${member.standing} · Medi-Caps` : "Attend 1 contest to rank"}
           </span>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Global Rating</span>
-          <strong className="block text-xl sm:text-2xl font-mono font-bold text-lime-400 mt-1 tabular-nums truncate">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+          <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Global Rating</span>
+          <strong className="block text-3xl sm:text-4xl font-display text-[#B1FA63] mt-1 tabular-nums truncate tracking-wide">
             {member?.rating ?? 1200}
           </strong>
-          <span className="block text-[10px] font-mono text-lime-400/80 mt-1 truncate">{member?.tier || "1★ Explorer"}</span>
+          <span className="block text-xs font-heading font-bold text-[#B1FA63]/80 mt-1 truncate uppercase">{member?.tier || "1★ Explorer"}</span>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Contests Logged</span>
-          <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+          <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Contests Logged</span>
+          <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.attendance_count ?? 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">
+          <span className="block text-xs font-mono text-zinc-500 mt-1 truncate">
             {(member?.attendance_count ?? 0) === 1 ? "1 Verified Tournament" : `${member?.attendance_count ?? 0} Verified Tournaments`}
           </span>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] hover:border-white/18 transition-colors duration-150 min-w-0 overflow-hidden">
-          <span className="block text-[10px] font-mono text-zinc-400 uppercase tracking-wider truncate">Problems Solved</span>
-          <strong className="block text-xl sm:text-2xl font-mono font-bold text-white mt-1 tabular-nums truncate">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
+          <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Problems Solved</span>
+          <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {profile?.problem_stats?.problems?.solved ?? (profile?.problemStats as any)?.total_solved ?? (member as any)?.solved_count ?? 0}
           </strong>
-          <span className="block text-[10px] font-mono text-zinc-500 mt-1 truncate">
+          <span className="block text-xs font-mono text-zinc-500 mt-1 truncate">
             {profile?.problem_stats?.problems?.attempted ?? (profile?.problemStats as any)?.total_submissions ?? 0} Attempted · Practice
           </span>
         </div>
       </div>
 
       {/* Practice Quick Progress Strip */}
-      <section className="p-4 rounded-lg border border-white/8 bg-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+      <section className="p-5 sm:p-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-lime-400" />
-            <span className="font-mono text-[10px] uppercase tracking-wider text-lime-400">Coding Practice</span>
+            <span className="size-2 rounded-full bg-[#B1FA63]" />
+            <span className="font-heading font-bold text-xs uppercase tracking-wider text-[#B1FA63]">Coding Practice</span>
           </div>
           <div className="text-sm font-semibold text-white font-mono flex items-center gap-3 flex-wrap">
             <span>{profile?.problem_stats?.problems?.solved ?? 0} Solved</span>
@@ -237,28 +237,28 @@ export function DashboardPage() {
             <span className="text-rose-400">Hard: {profile?.problem_stats?.difficulty?.hard?.solved ?? 0}</span>
           </div>
         </div>
-        <Button asChild variant="outline" size="sm" className="shrink-0 font-mono text-xs">
+        <Button asChild variant="outline" size="sm" className="shrink-0 font-heading font-bold text-xs">
           <Link to="/practice">
             <span>Open Practice Arena</span>
-            <ArrowRight className="size-3.5 ml-1.5 text-lime-400" />
+            <ArrowRight className="size-3.5 ml-1.5 text-[#B1FA63]" />
           </Link>
         </Button>
       </section>
 
       {/* Live Contest Banner or Next Contest Alert */}
       {live ? (
-        <section className="rounded-lg border border-lime-400/40 bg-black p-4 sm:p-6 relative overflow-hidden min-w-0 shadow-[0_4px_20px_rgba(204,255,0,0.08),0_0_0_1px_rgba(204,255,0,0.2)]">
+        <section className="rounded-[24px] border-2 border-[#B1FA63] bg-[#1F1F1F] p-6 sm:p-7 relative overflow-hidden min-w-0 shadow-[0_0_35px_rgba(177,250,99,0.12)]">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 min-w-0">
             <div className="space-y-2 min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <StatusDot status="live" />
-                <span className="font-mono text-xs text-lime-400 uppercase tracking-wider">Tournament Live</span>
+                <span className="font-heading font-bold text-xs text-[#B1FA63] uppercase tracking-wider">Tournament Live</span>
               </div>
-              <h2 className="text-xl md:text-2xl font-semibold text-white font-sans break-words">{live.title}</h2>
-              <p className="text-xs text-zinc-400 max-w-2xl leading-normal break-words">{live.summary}</p>
+              <h2 className="text-2xl md:text-3xl font-display uppercase tracking-wide text-white break-words">{live.title}</h2>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-normal break-words">{live.summary}</p>
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-mono text-zinc-500 pt-1">
                 <span className="flex items-center gap-1.5 text-zinc-300">
-                  <MapPin className="w-3.5 h-3.5 text-lime-400 shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-[#B1FA63] shrink-0" />
                   <span className="truncate">{live.venue}</span>
                 </span>
                 <span className="flex items-center gap-1.5 text-zinc-300">
@@ -271,7 +271,7 @@ export function DashboardPage() {
               </div>
             </div>
             <div className="shrink-0 w-full sm:w-auto">
-              <Button asChild variant="outline" className="w-full sm:w-auto justify-center group/btn active:scale-[0.98]">
+              <Button asChild className="w-full sm:w-auto justify-center group/btn shadow-[0_4px_16px_rgba(177,250,99,0.25)]">
                 <Link to={`/contests/${live.slug}`}>
                   <span>Enter Live Arena</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform duration-150 group-hover/btn:translate-x-0.5" />
@@ -281,21 +281,21 @@ export function DashboardPage() {
           </div>
         </section>
       ) : next ? (
-        <section className="rounded-lg border border-white/8 bg-black p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5 min-w-0 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+        <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5 min-w-0 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
           <div className="space-y-1.5 min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <StatusDot status="upcoming" />
-              <span className="font-mono text-xs text-zinc-400 uppercase tracking-wider">Next Campus Tournament</span>
+              <span className="font-heading font-bold text-xs text-zinc-400 uppercase tracking-wider">Next Campus Tournament</span>
             </div>
-            <h2 className="text-lg md:text-xl font-semibold text-white font-sans break-words">{next.title}</h2>
-            <p className="text-xs text-zinc-400 max-w-xl break-words">{next.summary}</p>
+            <h2 className="text-xl md:text-2xl font-display uppercase tracking-wide text-white break-words">{next.title}</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl break-words">{next.summary}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-mono text-xs shrink-0 w-full md:w-auto justify-between md:justify-end">
             <div>
               <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
               <strong className="block text-zinc-200 text-xs mt-0.5 tabular-nums">{formatContestDate(next.starts_at)}</strong>
             </div>
-            <Button asChild variant="outline" className="w-full sm:w-auto justify-center group/btn active:scale-[0.98]">
+            <Button asChild variant="outline" className="w-full sm:w-auto justify-center group/btn">
               <Link to={`/contests/${next.slug}`}>
                 <span>View Contest</span>
                 <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform duration-150 group-hover/btn:translate-x-0.5" />
@@ -306,13 +306,13 @@ export function DashboardPage() {
       ) : null}
 
       {/* Rating Analytics */}
-      <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <SectionHeader
           kicker="01 // Rating Trajectory"
           index="PROGRESS"
           title="University Elo Progression"
           action={
-            <Link to="/profile" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+            <Link to="/profile" className="text-xs font-heading font-bold text-[#B1FA63] hover:underline uppercase tracking-wider">
               Profile Dossier →
             </Link>
           }
@@ -323,17 +323,17 @@ export function DashboardPage() {
       </section>
 
       {/* Live Tournament Scoreboard Radar */}
-      <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <SectionHeader
           kicker="02 // Tournament Radar"
           index="LIVE"
           title="Tournament Scoreboard"
           action={
             <div className="flex items-center gap-3">
-              <Link to="/contests" className="text-xs font-mono font-medium text-zinc-400 hover:text-white transition-colors">
+              <Link to="/contests" className="text-xs font-heading font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider">
                 All Contests →
               </Link>
-              <Link to="/leaderboard" className="text-xs font-mono font-medium text-lime-400 hover:underline">
+              <Link to="/leaderboard" className="text-xs font-heading font-bold text-[#B1FA63] hover:underline uppercase tracking-wider">
                 Campus Leaderboard →
               </Link>
             </div>
@@ -345,7 +345,7 @@ export function DashboardPage() {
       </section>
 
       {/* Live Campus Activity Stream */}
-      <section className="p-4 sm:p-5 rounded-lg border border-white/8 bg-black min-w-0 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+      <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         <SectionHeader
           kicker="03 // Network Feed"
           index="TELEMETRY"

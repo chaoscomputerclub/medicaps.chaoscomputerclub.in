@@ -20,6 +20,7 @@ import { useAppSelector } from "@/store/hooks";
 import { Input } from "@/components/ui/input";
 import { PageHeader, SectionHeader, EmptyState } from "@/organization/components/ui";
 import { practiceApi } from "@/features/practice/api";
+import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import type { PracticeProblemSummary, PracticeTopic, ProblemDifficulty } from "@/features/practice/types";
 
@@ -179,44 +180,44 @@ export function PracticePage() {
 
 
       {/* Telemetry Header Strip */}
-      <section className="grid grid-cols-3 gap-3">
-        <div className="p-4 rounded-lg border border-white/8 bg-black space-y-1">
-          <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200">
+          <div className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">
             Problems Available
           </div>
-          <div className="text-xl font-bold font-mono text-white tabular-nums">
+          <div className="text-3xl sm:text-4xl font-display text-white tabular-nums tracking-wide">
             {summary.total_published}
           </div>
-          <div className="text-[11px] font-mono text-zinc-500">Active repository</div>
+          <div className="text-xs font-mono text-zinc-500">Active repository</div>
         </div>
 
-        <div className="p-4 rounded-lg border border-lime-400/20 bg-lime-400/5 space-y-1">
-          <div className="text-[10px] uppercase font-mono tracking-wider text-lime-400/80">
+        <div className="p-5 rounded-[24px] border border-[#B1FA63]/25 bg-[#1F1F1F] space-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/50 transition-all duration-200">
+          <div className="text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63]">
             Solved by You
           </div>
-          <div className="text-xl font-bold font-mono text-lime-400 tabular-nums">
+          <div className="text-3xl sm:text-4xl font-display text-[#B1FA63] tabular-nums tracking-wide">
             {summary.solved_count}
           </div>
-          <div className="text-[11px] font-mono text-lime-400/70">Authoritative solves</div>
+          <div className="text-xs font-mono text-[#B1FA63]/70">Authoritative solves</div>
         </div>
 
-        <div className="p-4 rounded-lg border border-white/8 bg-black space-y-1">
-          <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-500">
+        <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[#B1FA63]/30 transition-all duration-200">
+          <div className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">
             Attempted
           </div>
-          <div className="text-xl font-bold font-mono text-amber-400 tabular-nums">
+          <div className="text-3xl sm:text-4xl font-display text-amber-400 tabular-nums tracking-wide">
             {summary.attempted_count}
           </div>
-          <div className="text-[11px] font-mono text-zinc-500">Submissions logged</div>
+          <div className="text-xs font-mono text-zinc-500">Submissions logged</div>
         </div>
       </section>
 
       {/* Search & Filter Toolbar */}
-      <section className="rounded-lg border border-white/8 bg-black p-4 space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+      <section className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-4 space-y-3 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Bar */}
           <form onSubmit={handleSearchSubmit} className="relative flex-1">
-            <Search className="size-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="size-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               type="text"
               placeholder="Search problems by title, topic, or keyword…"
@@ -227,7 +228,7 @@ export function PracticePage() {
                   updateFilter("q", searchInput.trim());
                 }
               }}
-              className="h-9 pl-9 pr-3 text-xs bg-black border-white/10 font-mono rounded-md text-white placeholder:text-zinc-600 focus-visible:ring-1 focus-visible:ring-lime-400"
+              className="h-10 pl-9 pr-3 text-xs bg-[#171717] border-white/10 font-mono rounded-[10px] text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-[#B1FA63]"
             />
           </form>
 
@@ -238,7 +239,7 @@ export function PracticePage() {
               aria-label="Filter by difficulty"
               value={difficultyParam}
               onChange={(e) => updateFilter("difficulty", e.target.value)}
-              className="h-9 px-3 text-xs font-mono bg-black border border-white/10 text-zinc-300 rounded-md focus-visible:ring-1 focus-visible:ring-lime-400 cursor-pointer"
+              className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
             >
               <option value="ALL">All Difficulties</option>
               <option value="EASY">Easy</option>
@@ -251,7 +252,7 @@ export function PracticePage() {
               aria-label="Filter by topic"
               value={topicParam}
               onChange={(e) => updateFilter("topic", e.target.value)}
-              className="h-9 px-3 text-xs font-mono bg-black border border-white/10 text-zinc-300 rounded-md focus-visible:ring-1 focus-visible:ring-lime-400 cursor-pointer"
+              className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
             >
               <option value="ALL">All Topics</option>
               {(topicsData || []).map((t) => (
@@ -266,7 +267,7 @@ export function PracticePage() {
               aria-label="Filter by status"
               value={statusParam}
               onChange={(e) => updateFilter("status", e.target.value)}
-              className="h-9 px-3 text-xs font-mono bg-black border border-white/10 text-zinc-300 rounded-md focus-visible:ring-1 focus-visible:ring-lime-400 cursor-pointer"
+              className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
             >
               <option value="ALL">All Status</option>
               <option value="SOLVED">Solved</option>
@@ -279,7 +280,7 @@ export function PracticePage() {
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="h-9 px-2.5 text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-white/20 rounded-md transition-colors"
+                className="h-10 px-3 text-xs font-heading font-bold uppercase text-zinc-400 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-white/20 rounded-[10px] bg-[#171717] transition-colors"
                 title="Reset all filters"
               >
                 <RotateCcw className="size-3" />
@@ -291,7 +292,7 @@ export function PracticePage() {
       </section>
 
       {/* Problems Dense Table */}
-      <section className="rounded-lg border border-white/8 bg-black overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
         {loading && problems.length === 0 ? (
           <div className="py-16 text-center font-mono text-xs text-zinc-500">
             <span className="inline-block size-2 rounded-full bg-lime-400 animate-ping mr-2" />
@@ -329,7 +330,15 @@ export function PracticePage() {
                   <span>Seed Canonical 8-Problem Suite</span>
                 </button>
                 <a
-                  href="http://localhost:8082"
+                  href={
+                    typeof window !== "undefined" && window.location.hostname === "localhost"
+                      ? getToken()
+                        ? `http://localhost:8082?token=${encodeURIComponent(getToken()!)}`
+                        : "http://localhost:8082"
+                      : getToken()
+                        ? `https://admin.chaoscomputerclub.in?token=${encodeURIComponent(getToken()!)}`
+                        : "https://admin.chaoscomputerclub.in"
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] rounded-md transition-colors"

@@ -237,79 +237,79 @@ export function ContestOverviewPage() {
       </div>
 
       {/* ── HERO BANNER ── */}
-      <div className="rounded-lg border border-white/8 bg-black p-6 sm:p-8 space-y-6">
+      <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded border border-lime-400/30 bg-lime-400/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-lime-400 flex items-center gap-1">
-                <Flame className="size-3 text-lime-400" /> Rated Contest
+              <span className="rounded-full border border-[#B1FA63]/30 bg-[#B1FA63]/10 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] flex items-center gap-1.5">
+                <Flame className="size-3 text-[#B1FA63]" /> Rated Contest
               </span>
-              <span className="font-mono text-xs text-zinc-500">
+              <span className="font-heading font-bold text-xs text-zinc-400 uppercase tracking-wider">
                 Edition #{contest.edition ?? 1}
               </span>
               {isLive && (
-                <span className="rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-red-400 flex items-center gap-1">
+                <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-red-400 flex items-center gap-1.5">
                   <span className="size-1.5 rounded-full bg-red-400 animate-pulse" /> LIVE NOW
                 </span>
               )}
               {isFinished && (
-                <span className="rounded border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-zinc-400">
                   CONCLUDED
                 </span>
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-normal text-white font-display uppercase tracking-wider">
               {contest.title}
             </h1>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-sm text-zinc-300 font-sans leading-relaxed">
               {contest.summary ||
                 "Official Medi-Caps University algorithmic programming tournament. Solve challenges under strict timing constraints to increase your university rating."}
             </p>
 
             {/* Quick Meta Row */}
-            <div className="flex flex-wrap items-center gap-5 pt-1 text-xs font-mono text-zinc-400">
+            <div className="flex flex-wrap items-center gap-5 pt-1 text-xs font-heading font-semibold text-zinc-400">
               <span className="flex items-center gap-1.5 text-zinc-300">
-                <Calendar className="size-3.5 text-lime-400" />
+                <Calendar className="size-3.5 text-[#B1FA63]" />
                 {startDateFormatted}
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="size-3.5 text-lime-400" />
+                <Clock className="size-3.5 text-[#B1FA63]" />
                 {durationLabel}
               </span>
               <span className="flex items-center gap-1.5">
-                <Code2 className="size-3.5 text-lime-400" />
+                <Code2 className="size-3.5 text-[#B1FA63]" />
                 {problemCount} Problem{problemCount !== 1 ? "s" : ""}
               </span>
               <span className="flex items-center gap-1.5 text-zinc-300">
-                <Users className="size-3.5 text-lime-400" />
-                <span className="tabular-nums">{contest.registered_count.toLocaleString()}</span>
+                <Users className="size-3.5 text-[#B1FA63]" />
+                <span className="tabular-nums font-mono">{contest.registered_count.toLocaleString()}</span>
                 &nbsp;Cadet{contest.registered_count === 1 ? "" : "s"} Registered
               </span>
             </div>
           </div>
 
           {/* Right Side: Countdown Card */}
-          <div className="rounded-lg border border-white/8 bg-black p-4 md:min-w-[260px] text-center space-y-3 shrink-0">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 block">
+          <div className="rounded-[18px] border border-white/[0.08] bg-[#171717] p-5 md:min-w-[280px] text-center space-y-3.5 shrink-0 shadow-inner">
+            <span className="font-heading font-bold text-[10px] uppercase tracking-widest text-zinc-400 block">
               {isLive ? "Contest Closes In" : isFinished ? "Contest Status" : "Contest Starts In"}
             </span>
 
             {isFinished ? (
-              <div className="py-2 font-mono text-sm font-bold text-zinc-400">CONCLUDED</div>
+              <div className="py-2 font-display text-xl tracking-wider text-zinc-400">CONCLUDED</div>
             ) : (
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-4 gap-2">
                 {[
                   { val: countdown.days, label: "Days" },
                   { val: countdown.hours, label: "Hrs" },
                   { val: countdown.minutes, label: "Min" },
                   { val: countdown.seconds, label: "Sec" },
                 ].map(({ val, label }) => (
-                  <div key={label} className="flex flex-col items-center bg-white/5 p-2 rounded">
-                    <span className="font-mono text-xl font-bold tabular-nums text-white">
+                  <div key={label} className="flex flex-col items-center bg-[#1F1F1F] border border-white/[0.06] p-2.5 rounded-[12px]">
+                    <span className="font-display text-2xl font-normal tabular-nums text-white leading-none">
                       {String(val).padStart(2, "0")}
                     </span>
-                    <span className="text-[9px] font-mono uppercase text-zinc-500">{label}</span>
+                    <span className="text-[9px] font-heading font-bold uppercase text-zinc-500 mt-1">{label}</span>
                   </div>
                 ))}
               </div>
@@ -463,14 +463,14 @@ export function ContestOverviewPage() {
       </div>
 
       {/* ── OFFICIAL ANNOUNCEMENTS BANNER ── */}
-      <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.04] p-4 flex items-start gap-3.5">
-        <div className="size-8 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5 text-amber-400">
+      <div className="rounded-[18px] border border-amber-500/20 bg-amber-500/[0.04] p-5 flex items-start gap-3.5">
+        <div className="size-8 rounded-[10px] bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5 text-amber-400">
           <Megaphone className="size-4" />
         </div>
         <div className="space-y-1 text-sm font-sans flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">📢 Official Announcements</span>
-            <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 uppercase tracking-wide">
+            <span className="font-heading font-bold text-white uppercase text-xs tracking-wider">📢 Official Announcements</span>
+            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-heading font-bold text-amber-400 uppercase tracking-wider">
               Mandatory Notice
             </span>
           </div>
@@ -484,15 +484,15 @@ export function ContestOverviewPage() {
 
       {/* ── LIVE / FINISHED PROBLEM SET TABLE ── */}
       {!isUpcoming && (
-        <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/8 pb-3">
+        <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
             <div className="flex items-center gap-2">
-              <Code2 className="size-4 text-lime-400" />
-              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+              <Code2 className="size-4 text-[#B1FA63]" />
+              <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
                 Problem Set
               </h2>
             </div>
-            <span className="text-xs font-sans text-zinc-500">
+            <span className="text-xs font-heading font-semibold text-zinc-400 uppercase tracking-wider">
               {problemCount} Challenge{problemCount !== 1 ? "s" : ""}
             </span>
           </div>
@@ -586,15 +586,15 @@ export function ContestOverviewPage() {
         {/* Left Column: Important Notes & Prohibited Actions */}
         <div className="lg:col-span-7 space-y-6">
           {/* 📌 Important Notes */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/8 pb-3">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-2">
                 <span className="text-base">📌</span>
-                <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
                   Important Notes & Contest Rules
                 </h2>
               </div>
-              <span className="text-xs font-sans text-zinc-500">Fairness Protocol</span>
+              <span className="text-xs font-heading font-semibold text-zinc-400 uppercase tracking-wider">Fairness Protocol</span>
             </div>
 
             <ol className="space-y-4 font-sans text-xs leading-relaxed text-zinc-400">
@@ -696,15 +696,15 @@ export function ContestOverviewPage() {
           </div>
 
           {/* 🚨 Contest Violations & Prohibited Actions */}
-          <div className="rounded-lg border border-red-500/20 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center justify-between border-b border-white/8 pb-3">
+          <div className="rounded-[24px] border border-red-500/20 bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="size-4 text-red-400" />
-                <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+                <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
                   Contest Violations & Prohibited Actions
                 </h2>
               </div>
-              <span className="rounded bg-red-500/10 border border-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-400 uppercase tracking-wide">
+              <span className="rounded-full bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 text-[9px] font-heading font-bold text-red-400 uppercase tracking-wider">
                 Strict Zero-Tolerance
               </span>
             </div>
@@ -763,10 +763,10 @@ export function ContestOverviewPage() {
         {/* Right Column: Zero-Tolerance Penalties, Fair Play Whistleblowing & Waiting Lobby */}
         <div className="lg:col-span-5 space-y-6">
           {/* ⚖️ Enforcement & Penalties */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center gap-2 border-b border-white/8 pb-3">
-              <Scale className="size-4 text-lime-400" />
-              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center gap-2 border-b border-white/[0.08] pb-4">
+              <Scale className="size-4 text-[#B1FA63]" />
+              <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
                 Zero-Tolerance Violation Penalties
               </h2>
             </div>
@@ -779,12 +779,12 @@ export function ContestOverviewPage() {
             </p>
 
             <div className="space-y-3 pt-1">
-              <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+              <div className="rounded-[16px] border border-white/[0.06] bg-[#171717] p-4 space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 uppercase">
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-heading font-bold text-amber-400 uppercase tracking-wider">
                     First Violation
                   </span>
-                  <span className="text-xs font-semibold text-white">Temporary Ban & Reset</span>
+                  <span className="text-xs font-bold font-heading uppercase text-white">Temporary Ban & Reset</span>
                 </div>
                 <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
                   Contest score resets to zero, complete disqualification from the tournament
@@ -792,12 +792,12 @@ export function ContestOverviewPage() {
                 </p>
               </div>
 
-              <div className="rounded-md border border-red-500/20 bg-red-950/20 p-3.5 space-y-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+              <div className="rounded-[16px] border border-red-500/20 bg-red-950/20 p-4 space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 uppercase">
+                  <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[9px] font-heading font-bold text-red-400 uppercase tracking-wider">
                     Second Violation
                   </span>
-                  <span className="text-xs font-semibold text-white">Permanent Deactivation</span>
+                  <span className="text-xs font-bold font-heading uppercase text-white">Permanent Deactivation</span>
                 </div>
                 <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
                   Contest score resets to zero, permanent account deactivation without appeal, and
@@ -808,10 +808,10 @@ export function ContestOverviewPage() {
           </div>
 
           {/* 🛡️ Community Whistleblowing & Fair Play */}
-          <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center gap-2 border-b border-white/8 pb-3">
-              <Flag className="size-4 text-lime-400" />
-              <h2 className="text-sm font-semibold text-white tracking-wide uppercase font-sans">
+          <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center gap-2 border-b border-white/[0.08] pb-4">
+              <Flag className="size-4 text-[#B1FA63]" />
+              <h2 className="text-sm font-bold text-white tracking-wide uppercase font-heading">
                 Community Fair Play & Reporting
               </h2>
             </div>
@@ -822,8 +822,8 @@ export function ContestOverviewPage() {
               submissions can file violation reports to proctors.
             </p>
 
-            <div className="rounded-md border border-lime-400/20 bg-lime-400/[0.03] p-3 text-xs font-sans text-zinc-300 space-y-1">
-              <span className="font-semibold text-lime-400 block">
+            <div className="rounded-[16px] border border-[#B1FA63]/20 bg-[#B1FA63]/[0.04] p-4 text-xs font-sans text-zinc-300 space-y-1.5">
+              <span className="font-bold font-heading uppercase text-[#B1FA63] block text-xs">
                 Verified Reporting Recognition:
               </span>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
@@ -835,15 +835,15 @@ export function ContestOverviewPage() {
 
           {/* 🔒 Waiting Room / Arena Gate Status (when upcoming) */}
           {isUpcoming && (
-            <div className="rounded-lg border border-white/8 bg-black p-6 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-              <div className="flex items-center justify-between border-b border-white/8 pb-3">
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-5 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
                 <div className="flex items-center gap-2">
-                  <Lock className="size-4 text-lime-400" />
-                  <h3 className="text-sm font-semibold text-white font-sans">
+                  <Lock className="size-4 text-[#B1FA63]" />
+                  <h3 className="text-sm font-bold text-white font-heading uppercase tracking-wide">
                     Challenge Vault Status
                   </h3>
                 </div>
-                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[9px] font-heading font-bold uppercase tracking-wider text-amber-400">
                   Locked Until Start
                 </span>
               </div>
