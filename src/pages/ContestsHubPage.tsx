@@ -777,11 +777,11 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank1.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-lg border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 shadow-[0_0_30px_rgba(203,255,0,0.12)] min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-lg border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-6 pb-3 flex flex-col items-center">
-                      <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 -[0_2px_10px_rgba(251,191,36,0.6)] transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
-                      <Avatar className="size-18 sm:size-22 rounded-full border-2 border-lime-400 ring-4 ring-lime-400/25 shadow-[0_0_30px_rgba(203,255,0,0.35)] transition-transform duration-300 group-hover:scale-105 overflow-hidden">
+                      <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
+                      <Avatar className="size-18 sm:size-22 rounded-full border-2 border-lime-400 ring-4 ring-lime-400/25 transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank1?.avatar_url)} className="rounded-full object-cover" />
                         <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-base font-bold">
                           {rank1?.handle?.slice(0, 2).toUpperCase() || "01"}

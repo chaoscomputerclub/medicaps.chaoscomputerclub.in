@@ -136,7 +136,7 @@ export const SocialFollowStats: React.FC<SocialFollowStatsProps> = ({
           "group relative inline-flex items-center gap-2 rounded-md border border-white/[0.08] bg-black/60",
           "hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white",
           "transition-[transform,border-color,background-color,box-shadow] duration-150 ease-out",
-          "hover:-translate-y-0.5 active:scale-[0.98] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)]",
+          "hover:-translate-y-0.5 active:scale-[0.98] ",
           "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 shrink-0 select-none whitespace-nowrap",
           isSmall ? "px-2 py-1 text-xs" : "px-3 py-1.5"
         )}
@@ -175,7 +175,7 @@ export const SocialFollowStats: React.FC<SocialFollowStatsProps> = ({
           "group relative inline-flex items-center gap-2 rounded-md border border-white/[0.08] bg-black/60",
           "hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white",
           "transition-[transform,border-color,background-color,box-shadow] duration-150 ease-out",
-          "hover:-translate-y-0.5 active:scale-[0.98] hover:shadow-[0_4px_20px_-4px_rgba(163,230,53,0.15)]",
+          "hover:-translate-y-0.5 active:scale-[0.98] ",
           "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 shrink-0 select-none whitespace-nowrap",
           isSmall ? "px-2 py-1 text-xs" : "px-3 py-1.5"
         )}

@@ -510,8 +510,8 @@ export function SettingsPage() {
                 activeClassName={item.danger ? "text-red-400 font-bold" : "text-black font-bold"}
                 indicatorClassName={
                   item.danger
-                    ? "bg-red-500/20 border border-red-500/30 shadow-none rounded-[10px]"
-                    : "bg-[#B1FA63] text-black shadow-[0_2px_10px_rgba(177,250,99,0.3)] rounded-[10px]"
+                    ? "bg-red-500/20 border border-red-500/30 rounded-[10px]"
+                    : "bg-[#B1FA63] text-black rounded-[10px]"
                 }
               >
                 <Icon size={14} className="shrink-0" />

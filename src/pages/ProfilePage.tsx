@@ -326,11 +326,11 @@ export function ProfilePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Profile Header Card */}
-      <header className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <header className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8">
         <div className="flex items-start gap-5">
           {/* Avatar Container */}
           <div className="relative shrink-0">
-            <Avatar className="size-16 sm:size-20 rounded-[20px] border border-white/[0.08] bg-[#171717] overflow-hidden shadow-lg">
+            <Avatar className="size-16 sm:size-20 rounded-[20px] border border-white/[0.08] bg-[#171717] overflow-hidden">
               {resolvedAvatar ? (
                 <AvatarImage
                   src={resolvedAvatar}
@@ -566,7 +566,7 @@ export function ProfilePage() {
 
       {/* Trajectory & Distribution */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+        <div className="lg:col-span-2 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-4">
           <SectionHeader
             kicker="03 // Rating History"
             index="TRAJECTORY"
@@ -584,7 +584,7 @@ export function ProfilePage() {
       </section>
 
       {/* Contest Battle Logs */}
-      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
         <SectionHeader kicker="04 // Record" index="CONTESTS" title="Attended Tournaments" />
         <div className="space-y-2 font-mono text-xs">
           {battles.length === 0 ? (
@@ -593,7 +593,7 @@ export function ProfilePage() {
                 <img
                   src="/matiks-assets/empty-states/no_duels_to_flex.png"
                   alt="No tournaments on file"
-                  className="size-full object-contain drop-shadow"
+                  className="size-full object-contain"
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = "none";
                   }}
@@ -658,7 +658,7 @@ export function ProfilePage() {
       </section>
 
       {/* Achievements Ledger */}
-      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
         <SectionHeader kicker="05 // Milestones" index="HONORS" title="Achievement Ledger" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
           {achievements.length === 0 ? (
@@ -689,7 +689,7 @@ export function ProfilePage() {
                   key={a.code || a.id || a.name || a.title}
                   className={`p-4 rounded-[16px] border bg-[#171717] transition-all ${
                     a.earned !== false
-                      ? "border-[#B1FA63]/30 shadow-[0_0_16px_rgba(177,250,99,0.06)]"
+                      ? "border-[#B1FA63]/30"
                       : "border-white/[0.06] opacity-40"
                   }`}
                 >
@@ -698,7 +698,7 @@ export function ProfilePage() {
                       <img
                         src={certSrc}
                         alt="Achievement badge"
-                        className="size-full object-contain drop-shadow"
+                        className="size-full object-contain"
                         onError={(e) => {
                           (e.target as HTMLElement).style.display = "none";
                         }}

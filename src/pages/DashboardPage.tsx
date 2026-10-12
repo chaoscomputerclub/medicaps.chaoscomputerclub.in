@@ -247,7 +247,7 @@ export function DashboardPage() {
 
       {/* Live Contest Banner or Next Contest Alert */}
       {live ? (
-        <section className="rounded-[24px] border-2 border-[#B1FA63] bg-[#1F1F1F] p-6 sm:p-7 relative overflow-hidden min-w-0 shadow-[0_0_35px_rgba(177,250,99,0.12)]">
+        <section className="rounded-[24px] border-2 border-[#B1FA63] bg-[#1F1F1F] p-6 sm:p-7 relative overflow-hidden min-w-0">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 min-w-0">
             <div className="space-y-2 min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export function DashboardPage() {
               </div>
             </div>
             <div className="shrink-0 w-full sm:w-auto">
-              <Button asChild className="w-full sm:w-auto justify-center group/btn shadow-[0_4px_16px_rgba(177,250,99,0.25)]">
+              <Button asChild className="w-full sm:w-auto justify-center group/btn">
                 <Link to={`/contests/${live.slug}`}>
                   <span>Enter Live Arena</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform duration-150 group-hover/btn:translate-x-0.5" />

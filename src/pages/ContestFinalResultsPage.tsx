@@ -139,7 +139,7 @@ export function ContestFinalResultsPage() {
                   key={row.handle}
                   className={cn(
                     "rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] transition-all",
-                    index === 0 && "border-[#B1FA63]/50 shadow-[0_0_25px_rgba(177,250,99,0.15)]",
+                    index === 0 && "border-[#B1FA63]/50 ",
                   )}
                 >
                   <CardHeader className="gap-2 p-6">

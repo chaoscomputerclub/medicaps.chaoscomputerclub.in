@@ -14,11 +14,11 @@ const buttonVariants = cva(
       variant: {
         // Primary: Matiks signature Electric Lime button
         default:
-          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] shadow-[0_2px_0_#749F45,0_4px_12px_rgba(177,250,99,0.2)] active:shadow-none",
+          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] ",
         primary:
-          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] shadow-[0_2px_0_#749F45,0_4px_12px_rgba(177,250,99,0.2)] active:shadow-none",
+          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] ",
         lime:
-          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] shadow-[0_2px_0_#749F45,0_4px_12px_rgba(177,250,99,0.2)] active:shadow-none",
+          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] ",
         // Destructive: transparent red border
         destructive:
           "bg-transparent text-red-400 border border-red-500/40 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500 active:bg-red-500/30 focus-visible:ring-red-500 shadow-none",

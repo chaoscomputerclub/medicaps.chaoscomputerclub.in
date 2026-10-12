@@ -21,7 +21,7 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
       return {
         border: "border-cyan-400/40",
         from: "from-cyan-400/20",
-        shadow: "shadow-[0_0_20px_rgba(6,182,212,0.15)]",
+        shadow: "",
         text: "text-cyan-400",
       };
     }
@@ -29,7 +29,7 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
       return {
         border: "border-amber-400/40",
         from: "from-amber-400/20",
-        shadow: "shadow-[0_0_20px_rgba(245,158,11,0.15)]",
+        shadow: "",
         text: "text-amber-400",
       };
     }
@@ -37,14 +37,14 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
       return {
         border: "border-purple-400/40",
         from: "from-purple-400/20",
-        shadow: "shadow-[0_0_20px_rgba(168,85,247,0.15)]",
+        shadow: "",
         text: "text-purple-400",
       };
     }
     return {
       border: "border-lime-400/40",
       from: "from-lime-400/20",
-      shadow: "shadow-[0_0_20px_rgba(204,255,0,0.15)]",
+      shadow: "",
       text: "text-lime-400",
     };
   };
@@ -105,7 +105,7 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
                 className="relative group flex flex-col items-center"
               >
                 <div
-                  className={`size-16 rounded-[16px] bg-gradient-to-br ${colors.from} via-[#171717] to-black border ${colors.border} flex items-center justify-center ${colors.shadow} group-hover:scale-105 transition-transform duration-200 p-2`}
+                  className={`size-16 rounded-[16px] bg-gradient-to-br ${colors.from} via-[#171717] to-black border ${colors.border} flex items-center justify-center group-hover:scale-105 transition-transform duration-200 p-2`}
                 >
                   <img
                     src={certSrc}

@@ -255,7 +255,7 @@ export function PracticePage() {
               className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
             >
               <option value="ALL">All Topics</option>
-              {(topicsData || []).map((t) => (
+              {(Array.isArray(topicsData) ? topicsData : []).map((t) => (
                 <option key={t.slug} value={t.slug}>
                   {t.name} ({t.count})
                 </option>

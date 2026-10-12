@@ -283,7 +283,7 @@ export function PortalShell() {
             }}
           >
             {/* Subtle left accent marker in Electric Lime */}
-            <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] bg-[#B1FA63] rounded-r-full shadow-[0_0_8px_rgba(177,250,99,0.6)]" />
+            <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] bg-[#B1FA63] rounded-r-full " />
           </div>
 
           {links.map((item) => {

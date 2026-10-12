@@ -381,7 +381,7 @@ export function AuthPage() {
               variant="default"
               size="lg"
               disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all shadow-[0_2px_8px_rgba(204,255,0,0.15)]"
+              className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all"
             >
               {pending ? (
                 <span className="inline-flex items-center gap-2">
@@ -600,7 +600,7 @@ export function AuthPage() {
               handleStatus === "taken" ||
               handleStatus === "checking"
             }
-            className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all shadow-[0_2px_8px_rgba(204,255,0,0.15)]"
+            className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all"
           >
             {pending ? (
               <span className="inline-flex items-center gap-2">

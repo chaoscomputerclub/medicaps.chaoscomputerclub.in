@@ -79,7 +79,7 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
     if (activity === 1) return "bg-[#0e4429] border-[#006d32]/40 hover:border-[#B1FA63]";
     if (activity === 2) return "bg-[#1a5d2c] border-[#22843b]/50 hover:border-[#B1FA63]";
     if (activity === 3) return "bg-[#2eb846] border-[#B1FA63]/60 hover:border-[#B1FA63]";
-    return "bg-[#B1FA63] border-[#B1FA63] shadow-[0_0_8px_rgba(177,250,99,0.5)]";
+    return "bg-[#B1FA63] border-[#B1FA63]";
   };
 
   return (

@@ -124,7 +124,7 @@ export function RatingDistributionCard({
                     isEmpty
                       ? "bg-[#171717] border-t border-white/[0.06]"
                       : isUserBucket
-                      ? "bg-[#B1FA63] shadow-[0_0_10px_rgba(177,250,99,0.4)]"
+                      ? "bg-[#B1FA63]"
                       : isHovered
                       ? "bg-zinc-300"
                       : count === 0

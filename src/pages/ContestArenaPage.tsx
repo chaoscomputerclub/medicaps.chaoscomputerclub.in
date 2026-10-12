@@ -1881,7 +1881,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <div
               className={`w-px h-full transition-colors ${
                 isDraggingWidth
-                  ? "bg-lime-400 shadow-[0_0_10px_rgba(204,255,0,0.8)]"
+                  ? "bg-lime-400 "
                   : "bg-white/10 group-hover:bg-lime-400/80"
               }`}
             />
@@ -2010,7 +2010,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <div
                 className={`h-px w-full transition-colors ${
                   isDraggingHeight
-                    ? "bg-[#B1FA63] shadow-[0_0_10px_rgba(177,250,99,0.8)]"
+                    ? "bg-[#B1FA63] "
                     : "bg-white/10 group-hover:bg-[#B1FA63]/80"
                 }`}
               />
@@ -2067,7 +2067,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                     <span
                       className={`size-1.5 rounded-full ${
                         effectiveSubmitResult.verdict === "ACCEPTED"
-                          ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
+                          ? "bg-lime-400 "
                           : "bg-rose-400"
                       }`}
                     />
@@ -2076,7 +2076,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                     <span
                       className={`size-1.5 rounded-full ${
                         effectiveRunResult.verdict === "ACCEPTED"
-                          ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
+                          ? "bg-lime-400 "
                           : "bg-amber-400"
                       }`}
                     />
@@ -2946,7 +2946,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                     key={p.id}
                     className={`size-2 rounded-full transition-colors ${
                       isPsolved
-                        ? "bg-lime-400 shadow-[0_0_6px_#a3e635]"
+                        ? "bg-lime-400 "
                         : "bg-zinc-800 border border-white/10"
                     }`}
                     title={`Q${p.problem_index}: ${p.title} (${isPsolved ? "Solved" : "Unsolved"})`}
@@ -2989,13 +2989,13 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   }}
                   className={`w-full text-left p-3 rounded-md border transition-all cursor-pointer flex items-center justify-between gap-3 group relative overflow-hidden ${
                     isActive
-                      ? "bg-black border-lime-400/60 shadow-[0_0_24px_rgba(204,255,0,0.12)] ring-1 ring-lime-400/30"
+                      ? "bg-black border-lime-400/60 ring-1 ring-lime-400/30"
                       : "bg-black hover:bg-white/[0.03] border-white/10 hover:border-white/20 text-zinc-300 hover:text-white"
                   }`}
                 >
                   {/* Left accent bar for active challenge */}
                   {isActive && (
-                    <div className="absolute left-0 inset-y-0 w-1 bg-lime-400 shadow-[0_0_10px_#a3e635]" />
+                    <div className="absolute left-0 inset-y-0 w-1 bg-lime-400 " />
                   )}
 
                   {/* Left: Indicator, Question Title */}
@@ -3003,7 +3003,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                     {isSolved ? (
                       <CheckCircle2 className="size-4 text-lime-400 shrink-0" />
                     ) : isActive ? (
-                      <span className="size-2 rounded-full bg-lime-400 shadow-[0_0_8px_#a3e635] shrink-0" />
+                      <span className="size-2 rounded-full bg-lime-400 shrink-0" />
                     ) : (
                       <span className="size-1.5 rounded-full bg-zinc-700 group-hover:bg-zinc-400 transition-colors shrink-0" />
                     )}

@@ -133,6 +133,22 @@ export async function authenticateCadetSession(page: Page, options?: { handle?: 
     });
   });
 
+  await page.route('**/practice/topics**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    });
+  });
+
+  await page.route('**/practice/problems**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [], total: 0, pages: 1, page: 1, limit: 50 }),
+    });
+  });
+
   await page.route('**/leaderboard/distribution', async (route) => {
     await route.fulfill({
       status: 200,
