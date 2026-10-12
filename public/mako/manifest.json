@@ -1,0 +1,294 @@
+[
+  {
+    "name": "mako-coder",
+    "file": "/mako/mako-coder.webp",
+    "width": 604,
+    "height": 512,
+    "sizeKb": 59.2,
+    "description": "Mako typing on laptop with infinity symbol, backpack and hoodie",
+    "roles": [
+      "auth_welcome",
+      "coding_arena",
+      "dev_mode"
+    ]
+  },
+  {
+    "name": "mako-workspace",
+    "file": "/mako/mako-workspace.webp",
+    "width": 629,
+    "height": 512,
+    "sizeKb": 70.3,
+    "description": "Mako working at laptop with focused expression",
+    "roles": [
+      "practice_arena",
+      "problem_solving"
+    ]
+  },
+  {
+    "name": "mako-welcome",
+    "file": "/mako/mako-welcome.webp",
+    "width": 565,
+    "height": 512,
+    "sizeKb": 58.6,
+    "description": "Mako waving cheerfully with sparkling aura",
+    "roles": [
+      "welcome_banner",
+      "onboarding",
+      "greeting"
+    ]
+  },
+  {
+    "name": "mako-search",
+    "file": "/mako/mako-search.webp",
+    "width": 606,
+    "height": 512,
+    "sizeKb": 61.4,
+    "description": "Mako detective holding magnifying glass searching for clues",
+    "roles": [
+      "empty_search",
+      "problem_filter_empty"
+    ]
+  },
+  {
+    "name": "mako-detective-winking",
+    "file": "/mako/mako-detective-winking.webp",
+    "width": 577,
+    "height": 512,
+    "sizeKb": 64.5,
+    "description": "Mako detective winking with magnifying glass",
+    "roles": [
+      "search_found",
+      "hint_revealed"
+    ]
+  },
+  {
+    "name": "mako-excited",
+    "file": "/mako/mako-excited.webp",
+    "width": 558,
+    "height": 512,
+    "sizeKb": 61.1,
+    "description": "Mako cheering with fist pump and sparkling stars",
+    "roles": [
+      "contest_registered",
+      "challenge_accepted"
+    ]
+  },
+  {
+    "name": "mako-celebrating",
+    "file": "/mako/mako-celebrating.webp",
+    "width": 588,
+    "height": 512,
+    "sizeKb": 51.7,
+    "description": "Mako jumping with hands up and colorful confetti",
+    "roles": [
+      "achievement_unlocked",
+      "rating_up",
+      "level_up"
+    ]
+  },
+  {
+    "name": "mako-superhero",
+    "file": "/mako/mako-superhero.webp",
+    "width": 614,
+    "height": 512,
+    "sizeKb": 56.9,
+    "description": "Mako flying superhero with flowing red cape",
+    "roles": [
+      "top_rank_1",
+      "grandmaster",
+      "podium_gold"
+    ]
+  },
+  {
+    "name": "mako-chill",
+    "file": "/mako/mako-chill.webp",
+    "width": 636,
+    "height": 512,
+    "sizeKb": 73.3,
+    "description": "Mako relaxing with steaming coffee mug and laptop",
+    "roles": [
+      "all_caught_up",
+      "break_time",
+      "idle"
+    ]
+  },
+  {
+    "name": "mako-ready",
+    "file": "/mako/mako-ready.webp",
+    "width": 548,
+    "height": 512,
+    "sizeKb": 64.0,
+    "description": "Mako energetic and ready to sprint into battle",
+    "roles": [
+      "contest_start",
+      "warmup"
+    ]
+  },
+  {
+    "name": "mako-thinking",
+    "file": "/mako/mako-thinking.webp",
+    "width": 498,
+    "height": 512,
+    "sizeKb": 58.9,
+    "description": "Mako thoughtful with paw on chin pondering solutions",
+    "roles": [
+      "problem_hints",
+      "editorial",
+      "thinking"
+    ]
+  },
+  {
+    "name": "mako-gamer",
+    "file": "/mako/mako-gamer.webp",
+    "width": 568,
+    "height": 512,
+    "sizeKb": 72.4,
+    "description": "Mako gamer with headset headphones typing",
+    "roles": [
+      "competitive_arena",
+      "proctor_session"
+    ]
+  },
+  {
+    "name": "mako-success",
+    "file": "/mako/mako-success.webp",
+    "width": 518,
+    "height": 512,
+    "sizeKb": 62.5,
+    "description": "Mako winking with enthusiastic thumbs up",
+    "roles": [
+      "submission_accepted",
+      "testcases_passed",
+      "success"
+    ]
+  },
+  {
+    "name": "mako-loading",
+    "file": "/mako/mako-loading.webp",
+    "width": 616,
+    "height": 500,
+    "sizeKb": 81.1,
+    "description": "Mako sprinting fast with speed lines",
+    "roles": [
+      "page_loading",
+      "judging_in_progress"
+    ]
+  },
+  {
+    "name": "mako-idea",
+    "file": "/mako/mako-idea.webp",
+    "width": 574,
+    "height": 520,
+    "sizeKb": 78.3,
+    "description": "Mako holding glowing yellow lightbulb",
+    "roles": [
+      "problem_hints",
+      "tips_card",
+      "solutions"
+    ]
+  },
+  {
+    "name": "mako-not-found",
+    "file": "/mako/mako-not-found.webp",
+    "width": 440,
+    "height": 522,
+    "sizeKb": 67.1,
+    "description": "Mako confused with blue question mark",
+    "roles": [
+      "not_found_404",
+      "missing_resource",
+      "empty_state"
+    ]
+  },
+  {
+    "name": "mako-learning",
+    "file": "/mako/mako-learning.webp",
+    "width": 602,
+    "height": 474,
+    "sizeKb": 71.8,
+    "description": "Mako reading purple book sitting on stack of books",
+    "roles": [
+      "learning_tracks",
+      "documentation",
+      "practice_archive"
+    ]
+  },
+  {
+    "name": "mako-tasks",
+    "file": "/mako/mako-tasks.webp",
+    "width": 556,
+    "height": 464,
+    "sizeKb": 67.7,
+    "description": "Mako holding clipboard with checklist",
+    "roles": [
+      "submissions_empty",
+      "checklist",
+      "to_do"
+    ]
+  },
+  {
+    "name": "mako-winner",
+    "file": "/mako/mako-winner.webp",
+    "width": 536,
+    "height": 494,
+    "sizeKb": 78.9,
+    "description": "Mako winking holding gold championship trophy cup",
+    "roles": [
+      "contest_podium",
+      "contest_winner",
+      "tournament_first"
+    ]
+  },
+  {
+    "name": "mako-error",
+    "file": "/mako/mako-error.webp",
+    "width": 622,
+    "height": 460,
+    "sizeKb": 68.3,
+    "description": "Mako holding red X warning badge",
+    "roles": [
+      "submission_error",
+      "access_denied",
+      "compile_failed"
+    ]
+  },
+  {
+    "name": "mako-sleeping",
+    "file": "/mako/mako-sleeping.webp",
+    "width": 578,
+    "height": 442,
+    "sizeKb": 63.9,
+    "description": "Mako sleeping peacefully with Zzz snoring",
+    "roles": [
+      "contest_offline",
+      "system_idle",
+      "after_hours"
+    ]
+  },
+  {
+    "name": "mako-roadmap",
+    "file": "/mako/mako-roadmap.webp",
+    "width": 568,
+    "height": 478,
+    "sizeKb": 66.8,
+    "description": "Mako holding unfolded exploration map",
+    "roles": [
+      "learning_roadmap",
+      "curriculum",
+      "tracks"
+    ]
+  },
+  {
+    "name": "mako-maintenance",
+    "file": "/mako/mako-maintenance.webp",
+    "width": 482,
+    "height": 462,
+    "sizeKb": 62.6,
+    "description": "Mako wearing yellow hardhat and holding wrench",
+    "roles": [
+      "system_maintenance",
+      "platform_upgrade",
+      "under_construction"
+    ]
+  }
+]

@@ -25,6 +25,7 @@ import {
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { PortalShell } from "@/organization/components/PortalShell";
 import { AuthPage } from "./pages/AuthPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import {
@@ -595,8 +596,8 @@ export function AppRoutes() {
       {/* Direct Shortlink for Profiles: /u/:handle */}
       <Route path="/u/:handle" element={<ProfileHandleRedirect />} />
 
-      {/* Catch-all fallback to root */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Outer catch-all fallback */}
+      <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

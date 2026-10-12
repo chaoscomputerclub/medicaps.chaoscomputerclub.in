@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
+import { MakoMascot } from "@/components/common/MakoMascot";
 import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
 import {
   fetchMySocialStatsThunk,
@@ -201,11 +202,9 @@ export function ProfilePage() {
   if (!m) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center mb-4 text-zinc-500">
-          <User className="size-6" />
-        </div>
+        <MakoMascot variant="not-found" size="xl" className="mb-4" />
         <h2 className="text-lg font-bold text-white mb-2">Member Profile Not Found</h2>
-        <p className="text-sm text-zinc-400 max-w-md mb-6">
+        <p className="text-sm text-zinc-400 max-w-md mb-6 font-sans">
           The requested cadet profile could not be found or you may need to sign in.
         </p>
         <Button asChild>

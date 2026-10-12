@@ -9,6 +9,7 @@ import {
   Clock,
   Code2,
 } from "lucide-react";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 interface RecentSubmissionsCardProps {
   submissions?: any[];
@@ -142,7 +143,8 @@ export function RecentSubmissionsCard({
               Loading recent submissions…
             </div>
           ) : acceptedSubmissions.length === 0 ? (
-            <div className="py-8 text-center space-y-2">
+            <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
+              <MakoMascot variant="tasks" size="md" className="opacity-90" />
               <p className="text-zinc-500 font-mono text-xs">
                 No accepted problem submissions on file yet.
               </p>
@@ -257,7 +259,8 @@ export function RecentSubmissionsCard({
       {activeTab === "tournaments" && (
         <div className="space-y-1">
           {safeBattles.length === 0 ? (
-            <div className="py-8 text-center space-y-2">
+            <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
+              <MakoMascot variant="chill" size="md" className="opacity-90" />
               <p className="text-zinc-500 font-mono text-xs">
                 No official tournament records on file yet.
               </p>

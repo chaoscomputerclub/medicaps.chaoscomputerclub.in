@@ -15,6 +15,7 @@ import { Check, X, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
+import { MakoMascot } from "@/components/common/MakoMascot";
 import { AuthLayout } from "@/organization/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -518,6 +519,10 @@ export function AuthPage() {
           ════════════════════════════════════════════ */}
       {step === "onboarding" && (
         <form onSubmit={handleOnboardingSubmit} className="auth-transition-forward space-y-4">
+          <div className="flex justify-center mb-1">
+            <MakoMascot variant="welcome" size="lg" className="animate-in fade-in zoom-in-95 duration-300" />
+          </div>
+
           {/* Full name */}
           <div>
             <label htmlFor="ob-name" className={LABEL}>

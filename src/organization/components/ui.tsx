@@ -180,37 +180,55 @@ export function EmptyState({
   action,
   className,
   imageSrc,
+  makoVariant,
 }: {
   title: string;
   body: string;
   action?: ReactNode;
   className?: string;
   imageSrc?: string;
+  makoVariant?: import("@/components/common/MakoMascot").MakoVariant;
 }) {
   const t = title.toLowerCase();
-  const resolvedImage =
-    imageSrc ||
-    (t.includes("duel") || t.includes("contest") || t.includes("tournament") || t.includes("match")
-      ? "/matiks-assets/empty-states/no_duels_to_flex.png"
+  const resolvedVariant: import("@/components/common/MakoMascot").MakoVariant =
+    makoVariant ||
+    (t.includes("search") || t.includes("find") || t.includes("filter")
+      ? "search"
+      : t.includes("not found") || t.includes("missing") || t.includes("empty")
+      ? "not-found"
+      : t.includes("duel") || t.includes("contest") || t.includes("tournament") || t.includes("match")
+      ? "chill"
       : t.includes("friend") || t.includes("peer") || t.includes("connection") || t.includes("follower")
-      ? "/matiks-assets/empty-states/no_Friends.webp"
-      : t.includes("leaderboard") || t.includes("standing") || t.includes("rank") || t.includes("cadet")
-      ? "/matiks-assets/empty-states/empty_leaderboard.png"
-      : t.includes("feed") || t.includes("post") || t.includes("announcement")
-      ? "/matiks-assets/empty-states/no_feed.webp"
-      : "/matiks-assets/empty-states/no_duels_to_flex.png");
+      ? "welcome"
+      : t.includes("task") || t.includes("submission") || t.includes("checklist")
+      ? "tasks"
+      : t.includes("leaderboard") || t.includes("standing") || t.includes("rank")
+      ? "superhero"
+      : t.includes("error") || t.includes("fail") || t.includes("denied")
+      ? "error"
+      : "coder");
 
   return (
-    <div className={cn("flex flex-col items-center justify-center p-8 sm:p-12 text-center border border-white/[0.08] rounded-[24px] bg-[#1F1F1F] my-6 ", className)}>
-      <div className="size-20 mb-3 flex items-center justify-center">
-        <img
-          src={resolvedImage}
-          alt={title}
-          className="size-full object-contain"
-          onError={(e) => {
-            (e.target as HTMLElement).style.display = "none";
-          }}
-        />
+    <div className={cn("flex flex-col items-center justify-center p-8 sm:p-12 text-center border border-white/[0.08] rounded-[24px] bg-[#1F1F1F] my-6", className)}>
+      <div className="mb-4 flex items-center justify-center">
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={title}
+            className="size-20 object-contain"
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <img
+            src={`/mako/mako-${resolvedVariant}.webp`}
+            alt={title}
+            loading="lazy"
+            decoding="async"
+            className="w-24 h-24 sm:w-28 sm:h-28 object-contain select-none pointer-events-none"
+          />
+        )}
       </div>
       <h3 className="text-xl font-display uppercase tracking-wide text-white">{title}</h3>
       <p className="text-xs text-zinc-400 max-w-md mt-1.5 leading-relaxed font-sans">{body}</p>

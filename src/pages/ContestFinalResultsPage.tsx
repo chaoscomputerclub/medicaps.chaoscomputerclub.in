@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/organization/components/ui";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 import { formatWhen } from "@/features/contest/lifecycle";
 import { cn } from "@/lib/utils";
@@ -106,16 +107,7 @@ export function ContestFinalResultsPage() {
       {rows.length === 0 ? (
         <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardContent className="flex flex-col items-center gap-3 py-16 text-center font-sans">
-            <div className="size-20 mb-1 flex items-center justify-center">
-              <img
-                src="/matiks-assets/empty-states/empty_leaderboard.png"
-                alt="Results pending verification"
-                className="size-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = "none";
-                }}
-              />
-            </div>
+            <MakoMascot variant="winner" size="lg" className="mb-2" />
             <strong className="text-sm font-heading font-bold uppercase tracking-wider text-white">Results Pending Verification</strong>
             <p className="max-w-sm text-xs text-zinc-400 leading-relaxed font-sans">
               Official standings will be unlocked once proctors certify all lab workstation submissions.
