@@ -215,8 +215,8 @@ export function ProofBadgeSkeleton({ compact = false }: { compact?: boolean }) {
 export function ScoreboardMatrixSkeleton({ compact = false }: { compact?: boolean }) {
   return (
     <div className="overflow-x-auto rounded-[24px] border border-white/10 bg-[#1F1F1F]">
-      <table className="w-full text-left font-mono text-xs">
-        <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
+      <table className="w-full text-left font-sans text-xs">
+        <thead className="bg-[#171717] text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
           <tr className="border-b border-white/8 bg-white/[0.02]">
             <th className="p-3.5 w-12 text-zinc-300">#</th>
             <th className="p-3.5 text-zinc-300">Contestant</th>
@@ -602,15 +602,15 @@ export function LeaderboardSkeleton() {
       </header>
 
       <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[#1F1F1F]">
-        <table className="w-full text-left font-mono text-xs">
-          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider">
+        <table className="w-full text-left font-sans text-xs">
+          <thead className="bg-[#171717] text-zinc-300 text-[10px] uppercase tracking-wider">
             <tr className="border-b border-white/8 bg-white/[0.02]">
-              <th className="py-3.5 pl-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rank</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Cadet / Handle</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Trend</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Rating</th>
-              <th className="py-3.5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Peak</th>
-              <th className="py-3.5 pr-5 text-left font-mono text-[10px] uppercase text-zinc-300 font-semibold">Attendance</th>
+              <th className="py-3.5 pl-5 text-left font-sans text-[10px] uppercase text-zinc-300 font-semibold">Rank</th>
+              <th className="py-3.5 text-left font-sans text-[10px] uppercase text-zinc-300 font-semibold">Cadet / Handle</th>
+              <th className="py-3.5 text-left font-sans text-[10px] uppercase text-zinc-300 font-semibold">Trend</th>
+              <th className="py-3.5 text-left font-sans text-[10px] uppercase text-zinc-300 font-semibold">Rating</th>
+              <th className="py-3.5 text-left font-sans text-[10px] uppercase text-zinc-300 font-semibold">Peak</th>
+              <th className="py-3.5 pr-5 text-left font-sans text-[10px] uppercase text-zinc-300 font-semibold">Attendance</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/8">
@@ -909,7 +909,7 @@ export function ContestSummarySkeleton() {
       </header>
 
       {/* Microservice Sub-bar */}
-      <div className="border-b border-white/6 bg-zinc-950/80 px-4 sm:px-8 py-2 flex items-center justify-between text-[11px] shrink-0">
+      <div className="border-b border-white/6 bg-[#171717]/80 px-4 sm:px-8 py-2 flex items-center justify-between text-[11px] shrink-0">
         <div className="flex items-center gap-3">
           <Skeleton className="h-3 w-48" />
           <Skeleton className="h-3 w-32 hidden sm:block" />
@@ -936,7 +936,7 @@ export function ContestSummarySkeleton() {
         {/* 4 Metric Bento Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="p-4 rounded-lg border border-white/8 bg-zinc-950 space-y-2">
+            <div key={i} className="p-4 rounded-lg border border-white/8 bg-[#171717] space-y-2">
               <Skeleton className="h-2.5 w-24" />
               <Skeleton className="h-7 w-16" />
               <Skeleton className="h-2.5 w-20" />
@@ -945,7 +945,7 @@ export function ContestSummarySkeleton() {
         </div>
 
         {/* Problem Checklist Card */}
-        <div className="rounded-lg border border-white/8 bg-zinc-950 overflow-hidden space-y-4 p-5">
+        <div className="rounded-lg border border-white/8 bg-[#171717] overflow-hidden space-y-4 p-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/8">
             <div className="space-y-1">
               <Skeleton className="h-4 w-40" />
@@ -974,7 +974,7 @@ export function ContestSummarySkeleton() {
         </div>
 
         {/* Final Submission Card */}
-        <div className="rounded-lg border border-white/8 bg-zinc-950 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="rounded-lg border border-white/8 bg-[#171717] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1.5 flex-1">
             <Skeleton className="h-4 w-52" />
             <Skeleton className="h-3 w-96 max-w-full" />
@@ -1013,8 +1013,8 @@ export function ContestResultsSkeleton() {
 
       {/* Standings Table */}
       <div className="overflow-x-auto rounded-[24px] border border-white/10 bg-[#1F1F1F]">
-        <table className="w-full text-left font-mono text-xs">
-          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
+        <table className="w-full text-left font-sans text-xs">
+          <thead className="bg-[#171717] text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
             <tr className="border-b border-white/8 bg-white/[0.02]">
               <th className="p-3 text-zinc-300">Rank</th>
               <th className="p-3 text-zinc-300">Candidate</th>
@@ -1090,8 +1090,8 @@ export function ContestFinalResultsSkeleton() {
 
       {/* Full Matrix Table */}
       <div className="overflow-x-auto rounded-[24px] border border-white/10 bg-[#1F1F1F]">
-        <table className="w-full text-left font-mono text-xs">
-          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
+        <table className="w-full text-left font-sans text-xs">
+          <thead className="bg-[#171717] text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
             <tr className="border-b border-white/8 bg-white/[0.02]">
               <th className="p-3 text-zinc-300">Rank</th>
               <th className="p-3 text-zinc-300">Finalist</th>
@@ -1322,7 +1322,7 @@ export function ProfileSkeleton() {
           </div>
         </div>
 
-        <dl className="flex sm:flex-col gap-3 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6 shrink-0">
+        <dl className="flex sm:flex-col gap-3 font-sans text-xs border-t lg:border-t-0 lg:border-l border-white/8 pt-4 lg:pt-0 lg:pl-6 shrink-0">
           <div className="space-y-1">
             <Skeleton className="h-2 w-20" />
             <Skeleton className="h-4 w-28" />
@@ -1375,7 +1375,7 @@ export function ProfileSkeleton() {
             <Skeleton className="h-4 w-40" />
           </div>
         </div>
-        <div className="divide-y divide-white/6 font-mono text-xs">
+        <div className="divide-y divide-white/6 font-sans text-xs">
           {[1, 2, 3].map((i) => (
             <article key={i} className="py-3 flex items-center justify-between flex-wrap gap-3">
               <Skeleton className="h-3 w-20" />
@@ -1401,7 +1401,7 @@ export function ProfileSkeleton() {
             <Skeleton className="h-4 w-36" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 font-sans text-xs">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <article key={i} className="p-3.5 rounded-[24px] border border-white/10 bg-[#1F1F1F] space-y-2">
               <div className="flex items-center gap-1.5">
@@ -1416,7 +1416,7 @@ export function ProfileSkeleton() {
       </section>
 
       {/* Trust Footer */}
-      <footer className="flex items-center gap-2.5 p-4 rounded-[24px] border border-white/10 bg-[#1F1F1F] text-zinc-500 font-mono text-xs">
+      <footer className="flex items-center gap-2.5 p-4 rounded-[24px] border border-white/10 bg-[#1F1F1F] text-zinc-500 font-sans text-xs">
         <Skeleton className="size-3.5 rounded shrink-0" />
         <Skeleton className="h-3 w-3/4 max-w-md" />
       </footer>
@@ -1716,8 +1716,8 @@ export function AssessmentLeaderboardSkeleton() {
         <Skeleton className="h-8 w-44 rounded-md" />
       </div>
       <div className="overflow-x-auto rounded-[24px] border border-white/10 bg-[#1F1F1F]">
-        <table className="w-full text-left font-mono text-xs">
-          <thead className="bg-zinc-950 text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
+        <table className="w-full text-left font-sans text-xs">
+          <thead className="bg-[#171717] text-zinc-300 text-[10px] uppercase tracking-wider border-b border-white/10">
             <tr className="border-b border-white/8 bg-white/[0.02]">
               <th className="p-3 text-zinc-300">Rank</th>
               <th className="p-3 text-zinc-300">Status</th>
@@ -1802,6 +1802,117 @@ export function AuthSkeleton() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * PracticeRowSkeleton: Dense tabular skeleton rows for practice challenge listings.
+ */
+export function PracticeRowSkeleton({ count = 8 }: { count?: number }) {
+  const widths = ["w-48", "w-64", "w-56", "w-72", "w-40", "w-60", "w-52", "w-68"];
+  const diffWidths = ["w-14", "w-16", "w-12"];
+  const topicWidths = ["w-24", "w-28", "w-20", "w-32"];
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
+        <tr key={i} className="border-b border-white/5 hover:bg-white/[0.01]">
+          {/* Solved Status */}
+          <td className="py-3.5 px-4 text-center">
+            <Skeleton className="size-3.5 rounded-full mx-auto" />
+          </td>
+
+          {/* Problem Index Number */}
+          <td className="py-3.5 px-4">
+            <Skeleton className="h-3 w-7 rounded" />
+          </td>
+
+          {/* Problem Title */}
+          <td className="py-3.5 px-4">
+            <Skeleton className={cn("h-4 rounded", widths[i % widths.length])} />
+          </td>
+
+          {/* Difficulty Badge */}
+          <td className="py-3.5 px-4">
+            <Skeleton className={cn("h-3.5 rounded-full", diffWidths[i % diffWidths.length])} />
+          </td>
+
+          {/* Topic Badge */}
+          <td className="py-3.5 px-4">
+            <Skeleton className={cn("h-5 rounded", topicWidths[i % topicWidths.length])} />
+          </td>
+
+          {/* Acceptance Rate */}
+          <td className="py-3.5 px-4 text-right">
+            <Skeleton className="h-3.5 w-10 ml-auto rounded" />
+          </td>
+
+          {/* Action Chevron */}
+          <td className="py-3.5 px-4 text-right">
+            <Skeleton className="size-3.5 ml-auto rounded" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+}
+
+/**
+ * PracticeSkeleton: Full page-level skeleton for Practice Arena.
+ */
+export function PracticeSkeleton() {
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6 animate-in fade-in duration-200">
+      {/* Header */}
+      <header className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-3">
+        <Skeleton className="h-9 sm:h-12 w-64 rounded-md" />
+        <Skeleton className="h-4 w-96 max-w-full rounded" />
+      </header>
+
+      {/* Telemetry Strip */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        {[1, 2, 3].map((idx) => (
+          <div key={idx} className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-2">
+            <Skeleton className="h-3 w-32 rounded" />
+            <Skeleton className="h-9 w-16 rounded-md" />
+            <Skeleton className="h-2.5 w-24 rounded" />
+          </div>
+        ))}
+      </section>
+
+      {/* Search & Filter Toolbar */}
+      <section className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full">
+          <Skeleton className="h-10 flex-1 rounded-md" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-10 w-[140px] rounded-md shrink-0" />
+            <Skeleton className="h-10 w-[140px] rounded-md shrink-0" />
+            <Skeleton className="h-10 w-[140px] rounded-md shrink-0" />
+          </div>
+        </div>
+      </section>
+
+      {/* Problems Table */}
+      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left font-sans text-xs">
+            <thead>
+              <tr className="border-b border-white/8 text-[11px] text-zinc-500 uppercase tracking-wider bg-white/[0.01]">
+                <th className="py-3 px-4 w-12 text-center">Status</th>
+                <th className="py-3 px-4 w-16">#</th>
+                <th className="py-3 px-4">Title</th>
+                <th className="py-3 px-4 w-28">Difficulty</th>
+                <th className="py-3 px-4 w-40">Topic</th>
+                <th className="py-3 px-4 w-28 text-right">Acceptance</th>
+                <th className="py-3 px-4 w-12"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              <PracticeRowSkeleton count={8} />
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

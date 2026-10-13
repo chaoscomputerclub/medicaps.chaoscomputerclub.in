@@ -14,6 +14,7 @@ export type MakoVariant =
   | "ready"
   | "thinking"
   | "gamer"
+  | "focused"
   | "success"
   | "loading"
   | "idea"
@@ -74,6 +75,10 @@ const MAKO_ASSETS: Record<MakoVariant, { src: string; alt: string }> = {
   gamer: {
     src: "/mako/mako-gamer.webp",
     alt: "Mako gaming with headset headphones",
+  },
+  focused: {
+    src: "/mako/mako-focused.webp",
+    alt: "Mako deeply focused studying terminal",
   },
   success: {
     src: "/mako/mako-success.webp",

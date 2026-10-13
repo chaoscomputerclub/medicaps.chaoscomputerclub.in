@@ -92,10 +92,10 @@ export function ContestOfflinePage() {
   if (!contest) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-        <Link to="/contests" className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+        <Link to="/contests" className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to contests
         </Link>
-        <p className="text-xs font-mono text-zinc-500">Contest not found.</p>
+        <p className="text-xs font-sans text-zinc-500">Contest not found.</p>
       </div>
     );
   }
@@ -103,20 +103,13 @@ export function ContestOfflinePage() {
   if (!qualified) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-        <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+        <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to contest
         </Link>
         <Card className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
           <CardContent className="flex flex-col items-center gap-4 py-16 text-center font-sans">
-            <div className="size-20 mb-1 flex items-center justify-center">
-              <img
-                src="/matiks-assets/icons/smart75-local-seatLock.png"
-                alt="Workstation locked"
-                className="size-16 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = "none";
-                }}
-              />
+            <div className="size-16 rounded-[16px] bg-[#171717] border border-white/[0.08] mb-1 flex items-center justify-center">
+              <Lock className="size-8 text-[#B1FA63]" />
             </div>
             <h1 className="text-2xl font-normal text-white font-display uppercase tracking-wider">
               Finalist Area Restricted
@@ -139,13 +132,11 @@ export function ContestOfflinePage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
-      <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors">
+      <Link to={`/contests/${contestSlug}`} className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors">
         <ArrowLeft className="size-3.5" /> Back to contest
       </Link>
 
       <PageHeader
-        kicker="02 // Campus Lab Final"
-        index="ROUND 2 · ON-PREMISE"
         badge={
           <span className="rounded-full border border-[#B1FA63]/30 bg-[#B1FA63]/10 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
             Finalist Access Granted
@@ -163,7 +154,7 @@ export function ContestOfflinePage() {
             <h3 className="font-heading font-bold uppercase tracking-wider text-white text-sm">Air-Gapped Final Arena</h3>
           </div>
           <p className="text-xs text-zinc-400 font-sans">
-            Seat: <strong className="text-[#B1FA63] font-mono">{pass?.seat || "Unassigned"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
+            Seat: <strong className="text-[#B1FA63] font-sans">{pass?.seat || "Unassigned"}</strong> · Proctors: <span className="text-zinc-300">{contest.chief_proctors?.length ? contest.chief_proctors.join(", ") : "CCC Operations Desk"}</span>
           </p>
         </div>
         <Button asChild variant="outline" size="lg" className="rounded-[10px]">
@@ -201,11 +192,11 @@ export function ContestOfflinePage() {
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Code:</span>
-              <span className="text-[#B1FA63] font-mono font-semibold">{pass?.pass_code || "Pending Qualification"}</span>
+              <span className="text-[#B1FA63] font-sans font-semibold">{pass?.pass_code || "Pending Qualification"}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Workstation:</span>
-              <span className="text-white font-mono font-semibold">{pass?.seat || "Unassigned"}</span>
+              <span className="text-white font-sans font-semibold">{pass?.seat || "Unassigned"}</span>
             </div>
             <Button
               className="w-full rounded-[10px]"
@@ -227,11 +218,11 @@ export function ContestOfflinePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 font-sans text-xs text-zinc-300 p-5 pt-0">
-            <p className="text-white font-mono text-[11px]">{contest.environment || "Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20"}</p>
+            <p className="text-white font-sans text-[11px]">{contest.environment || "Ubuntu 24.04 LTS · GCC 14.2 / Python 3.12 / Node 20"}</p>
             <p className="text-zinc-400">{contest.venue}</p>
             <p className="flex items-center gap-2 pt-1">
               <Users className="size-3.5 text-zinc-400" />
-              <span><span className="font-semibold text-white tabular-nums font-mono">{contest.registered_count}</span> finalists seated</span>
+              <span><span className="font-semibold text-white tabular-nums font-sans">{contest.registered_count}</span> finalists seated</span>
             </p>
             <div className="pt-2 border-t border-white/[0.06]">
               <p className="text-[10px] text-zinc-400 font-heading font-semibold uppercase">Proctors:</p>
@@ -276,14 +267,14 @@ export function ContestOfflinePage() {
               ) : (
                 problems.map((problem) => (
                   <TableRow key={problem.problem_index} className="border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors">
-                    <TableCell className="font-mono text-xs font-semibold text-[#B1FA63]">{problem.problem_index}</TableCell>
+                    <TableCell className="font-sans text-xs font-semibold text-[#B1FA63]">{problem.problem_index}</TableCell>
                     <TableCell className="font-medium text-xs text-white">{problem.title}</TableCell>
                     <TableCell className="font-sans text-xs text-zinc-400">{problem.topic}</TableCell>
-                    <TableCell className="text-right font-mono text-xs tabular-nums text-[#B1FA63]">{problem.points}</TableCell>
+                    <TableCell className="text-right font-sans text-xs tabular-nums text-[#B1FA63]">{problem.points}</TableCell>
                     <TableCell className="text-right">
                       <Link
                         to={`/contests/${contestSlug}/problems/${slugifyProblem(problem.title, problem.problem_index)}`}
-                        className="font-mono text-xs text-lime-400 hover:underline"
+                        className="font-sans text-xs text-lime-400 hover:underline"
                       >
                         Solve →
                       </Link>

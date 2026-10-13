@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" width="180" height="140" fill="none">
+  <defs>
+    <linearGradient id="sepass-grid" x1="0" y1="0" x2="180" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#242428"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="sepass-cyan" x1="50" y1="30" x2="130" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <filter id="sepass-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00E5FF" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="25" y="15" width="130" height="110" rx="16" fill="url(#sepass-grid)" stroke="#27272A" stroke-width="1.5"/>
+  <!-- Pass Badge Ticket -->
+  <rect x="62" y="32" width="56" height="76" rx="8" fill="#18181B" stroke="url(#sepass-cyan)" stroke-width="2" filter="url(#sepass-glow)"/>
+  <!-- Cutout Notches on Ticket Sides -->
+  <circle cx="62" cy="70" r="4" fill="#171717" stroke="url(#sepass-cyan)" stroke-width="1.5"/>
+  <circle cx="118" cy="70" r="4" fill="#171717" stroke="url(#sepass-cyan)" stroke-width="1.5"/>
+  <!-- QR Silhouette Box -->
+  <rect x="74" y="44" width="32" height="32" rx="4" fill="#0C1B24" stroke="#00E5FF" stroke-width="1.5" stroke-dasharray="2 1.5"/>
+  <!-- Scanner Beam -->
+  <line x1="70" y1="60" x2="110" y2="60" stroke="#CCFF00" stroke-width="2" stroke-linecap="round"/>
+  <!-- Lock Icon on Ticket Bottom -->
+  <path d="M85 91v-2a5 5 0 0 1 10 0v2" stroke="#71717A" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="83" y="91" width="14" height="10" rx="2" fill="#27272A" stroke="#71717A" stroke-width="1.5"/>
+</svg>

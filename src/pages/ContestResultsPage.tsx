@@ -111,7 +111,7 @@ export function ContestResultsPage() {
       {/* Back button */}
       <Link
         to={`/contests/${contestSlug}`}
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
+        className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Back to {contest?.title ?? "Contest"}
       </Link>
@@ -162,8 +162,6 @@ export function ContestResultsPage() {
         </div>
       ) : (
         <PageHeader
-          kicker="01 // Contest Standings"
-          index="STANDINGS"
           badge={
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B1FA63]/30 bg-[#B1FA63]/10 px-3 py-1 font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
               <Trophy className="size-3 text-[#B1FA63]" />
@@ -178,15 +176,8 @@ export function ContestResultsPage() {
 
       {contest?.status === "upcoming" ? (
         <div className="rounded-[24px] border border-amber-500/20 bg-[#1F1F1F] p-8 sm:p-10 text-center space-y-4">
-          <div className="mx-auto flex size-14 items-center justify-center">
-            <img
-              src="/matiks-assets/icons/smart75-local-seatLock.png"
-              alt="Standings sealed"
-              className="size-10 object-contain"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = "none";
-              }}
-            />
+          <div className="mx-auto flex size-14 items-center justify-center rounded-[16px] bg-[#171717] border border-amber-500/30">
+            <Lock className="size-6 text-amber-400" />
           </div>
           <div className="space-y-1.5">
             <span className="text-[10px] uppercase tracking-widest text-amber-400 font-heading font-bold block">
@@ -251,7 +242,7 @@ export function ContestResultsPage() {
 
             <div className="ml-auto flex items-center gap-2 text-xs text-zinc-400 font-heading font-semibold">
               <Award className="size-3.5 text-zinc-400" />
-              <span><span className="tabular-nums font-bold text-white font-mono">{ranking.total_participants}</span> competitors</span>
+              <span><span className="tabular-nums font-bold text-white font-sans">{ranking.total_participants}</span> competitors</span>
             </div>
           </div>
 
@@ -312,17 +303,17 @@ function RankRow({
 }) {
   const isPodium = row.rank <= 3;
   return (
-    <TableRow className={cn("border-b border-white/6 hover:bg-zinc-950 transition-colors", isMe && "bg-lime-400/10 hover:bg-lime-400/15")}>
-      <TableCell className="font-mono text-xs font-semibold text-white">
+    <TableRow className={cn("border-b border-white/6 hover:bg-white/[0.04] transition-colors", isMe && "bg-lime-400/10 hover:bg-lime-400/15")}>
+      <TableCell className="font-sans text-xs font-semibold text-white">
         <span className="inline-flex items-center gap-1.5 tabular-nums">
           {isPodium && (
             <img
               src={
                 row.rank === 1
-                  ? "/matiks-assets/ranks/gold_icon.webp"
+                  ? "/graphics/ranks/medal-gold.svg"
                   : row.rank === 2
-                  ? "/matiks-assets/ranks/silver_icon.webp"
-                  : "/matiks-assets/ranks/bronze_icon.webp"
+                  ? "/graphics/ranks/medal-silver.svg"
+                  : "/graphics/ranks/medal-bronze.svg"
               }
               alt={`Rank #${row.rank}`}
               className="size-3.5 object-contain shrink-0"
@@ -349,29 +340,29 @@ function RankRow({
             <Link to={`/profile/${row.handle}`} className="text-xs font-semibold text-white hover:text-lime-400 transition-colors">
               {row.full_name}
             </Link>
-            <span className="font-mono text-[10px] text-zinc-500">
+            <span className="font-sans text-[10px] text-zinc-500">
               @{row.handle}
             </span>
           </div>
         </CadetProfileHoverCard>
       </TableCell>
-      <TableCell className="hidden font-mono text-xs text-zinc-400 sm:table-cell">
+      <TableCell className="hidden font-sans text-xs text-zinc-400 sm:table-cell">
         {row.department || "—"}
       </TableCell>
-      <TableCell className="text-right font-mono text-xs font-semibold tabular-nums text-lime-400">
+      <TableCell className="text-right font-sans text-xs font-semibold tabular-nums text-[#B1FA63]">
         {row.total_score}
       </TableCell>
-      <TableCell className="hidden text-right font-mono text-xs tabular-nums text-zinc-500 sm:table-cell">
+      <TableCell className="hidden text-right font-sans text-xs tabular-nums text-zinc-500 sm:table-cell">
         {row.penalty_minutes}m
       </TableCell>
       <TableCell className="text-right">
         <span className={cn(
-          "rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider font-semibold",
+          "rounded-md px-1.5 py-0.5 font-sans text-[9px] uppercase tracking-wider font-semibold",
           isPodium
             ? "border border-amber-400/30 bg-amber-400/10 text-amber-300"
             : row.status === "in_progress"
-            ? "border border-blue-500/30 bg-blue-500/10 text-blue-400"
-            : "border border-white/8 bg-black text-zinc-400"
+            ? "border border-cyan-400/30 bg-cyan-400/10 text-cyan-400"
+            : "border border-white/8 bg-[#171717] text-zinc-400"
         )}>
           {isPodium ? "Podium" : row.status === "in_progress" ? "In Progress" : "Ranked"}
         </span>

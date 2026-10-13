@@ -211,7 +211,7 @@ export function PortalShell() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-white flex flex-col md:flex-row antialiased selection:bg-lime-400 selection:text-black w-full max-w-full overflow-x-clip">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] border-b border-white/8 bg-background/95 backdrop-blur-md sticky top-0 z-40">
         <Link to="/" className="flex items-center gap-2.5 group">
@@ -367,7 +367,7 @@ export function PortalShell() {
       </aside>
 
       {/* Main Viewport */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-background p-4 sm:p-6 md:p-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] relative min-w-0 max-w-full overflow-x-hidden">
+      <main className="flex-1 md:ml-64 min-h-screen bg-background p-4 sm:p-6 md:p-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] relative min-w-0 max-w-full overflow-x-clip">
         <Outlet />
       </main>
 

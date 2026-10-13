@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchContestDetailThunk, selectIsContestRegistered } from "@/store/slices/contestSlice";
 import { ContestLobbySkeleton } from "@/organization/components/skeletons";
+import { EmptyState } from "@/organization/components/ui";
 import { globalSwrStore } from "@/lib/cache/swrCache";
 import {
   formatWhen,
@@ -154,19 +155,21 @@ export function ContestLobbyPage() {
       <div className="flex min-h-[100dvh] max-w-2xl mx-auto px-4 sm:px-6 py-10 flex-col justify-center space-y-6">
         <Link
           to="/contests"
-          className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors self-start"
+          className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors self-start"
         >
           <ArrowLeft className="size-3.5" /> Back to Contests Hub
         </Link>
-        <div className="rounded-lg border border-white/8 bg-black p-6 sm:p-8 space-y-4">
-          <h1 className="text-xl font-semibold text-white tracking-tight">Contest Not Found</h1>
-          <p className="text-xs font-mono text-zinc-400 leading-relaxed">
-            The requested contest tournament could not be found or has not been initialized yet.
-          </p>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/contests">Explore All Contests</Link>
-          </Button>
-        </div>
+        <EmptyState
+          title="Contest Not Found"
+          body="The requested contest tournament could not be found or has not been initialized yet."
+          makoVariant="not-found"
+          className="my-0"
+          action={
+            <Button asChild variant="outline" size="default" className="rounded-[10px] bg-[#171717] border-white/10 hover:border-[#B1FA63]/30 text-white hover:text-white">
+              <Link to="/contests">Explore All Contests</Link>
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -313,11 +316,11 @@ export function ContestLobbyPage() {
             <div className="p-4.5 rounded-[16px] border border-white/[0.06] bg-[#171717] text-xs space-y-2.5 font-sans">
               <div className="flex items-center justify-between text-zinc-400">
                 <span className="font-heading font-semibold text-[11px] uppercase">Starts at:</span>
-                <span className="text-[#B1FA63] font-mono font-semibold">{formatWhen(resolvedContest.starts_at)}</span>
+                <span className="text-[#B1FA63] font-sans font-semibold">{formatWhen(resolvedContest.starts_at)}</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
                 <span className="font-heading font-semibold text-[11px] uppercase">Duration:</span>
-                <span className="text-white font-mono font-semibold">{durationMinutes} Minutes</span>
+                <span className="text-white font-sans font-semibold">{durationMinutes} Minutes</span>
               </div>
               <div className="flex items-center justify-between text-zinc-400 border-t border-white/[0.06] pt-2">
                 <span className="font-heading font-semibold text-[11px] uppercase">Access:</span>
@@ -441,7 +444,7 @@ export function ContestLobbyPage() {
           {/* Contest Concluded or Attempt Submitted Alert */}
           {isFinished ? (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 rounded-md border border-white/10 bg-zinc-900/60 text-zinc-300 font-mono text-xs">
+              <div className="flex items-start gap-3 p-4 rounded-[16px] border border-white/[0.08] bg-[#1F1F1F] text-zinc-300 font-sans text-xs">
                 <Trophy className="size-4 shrink-0 text-lime-400 mt-0.5" />
                 <div className="space-y-1">
                   <div className="font-semibold uppercase tracking-wider text-lime-400">
@@ -475,7 +478,7 @@ export function ContestLobbyPage() {
             </div>
           ) : isAssessmentSubmitted ? (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 rounded-md border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 font-mono text-xs">
+              <div className="flex items-start gap-3 p-4 rounded-md border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 font-sans text-xs">
                 <CheckCircle2 className="size-4 shrink-0 text-emerald-400 mt-0.5" />
                 <div className="space-y-1">
                   <div className="font-semibold uppercase tracking-wider text-emerald-400">
@@ -509,7 +512,7 @@ export function ContestLobbyPage() {
             </div>
           ) : isInProgress ? (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 rounded-md border border-amber-500/30 bg-black text-amber-300 font-mono text-xs">
+              <div className="flex items-start gap-3 p-4 rounded-md border border-amber-500/30 bg-black text-amber-300 font-sans text-xs">
                 <ShieldAlert className="size-4 shrink-0 text-amber-400 mt-0.5" />
                 <div className="space-y-1">
                   <div className="font-semibold uppercase tracking-wider text-amber-400">
@@ -551,7 +554,7 @@ export function ContestLobbyPage() {
                   onChange={(e) => setAck(e.target.checked)}
                   className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-[#171717] text-lime-400 accent-[#CCFF00] focus:ring-1 focus:ring-lime-400 cursor-pointer"
                 />
-                <span className="text-xs font-mono text-zinc-300 leading-relaxed">
+                <span className="text-xs font-sans text-zinc-300 leading-relaxed">
                   I understand that this is my official competition attempt. The {durationMinutes}-minute contest clock begins immediately upon launching the arena.
                 </span>
               </label>
@@ -585,7 +588,7 @@ export function ContestLobbyPage() {
               </div>
 
               {!canStart && !notYetOpen && (
-                <p className="font-mono text-xs text-amber-400">
+                <p className="font-sans text-xs text-amber-400">
                   {resolvedRegistration?.eligibility_message ?? "Contest arena is currently closed."}
                 </p>
               )}

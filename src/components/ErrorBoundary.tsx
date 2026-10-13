@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Terminal, Home, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 interface Props {
   children: ReactNode;
@@ -74,35 +75,35 @@ ${this.state.errorInfo?.componentStack || "No component stack available"}`;
         this.state.error?.name === "ChunkLoadError";
 
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-6 bg-zinc-950 text-white font-mono selection:bg-lime-400 selection:text-black">
-          <div className="max-w-2xl w-full border border-rose-500/30 bg-zinc-900/80 backdrop-blur-md p-6 sm:p-8 space-y-6 rounded-lg relative">
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+        <div className="min-h-[400px] flex items-center justify-center p-6 bg-[#171717] text-white font-sans selection:bg-lime-400 selection:text-black">
+          <div className="max-w-2xl w-full border border-rose-500/30 bg-[#1F1F1F] p-6 sm:p-8 space-y-6 rounded-[24px] relative">
+            <div className="flex items-start justify-between gap-4 border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-md border border-rose-500/30 bg-rose-950/40 text-rose-400">
-                  <AlertTriangle size={20} />
+                <div className="p-2 rounded-[12px] border border-rose-500/30 bg-rose-950/40 text-rose-400 flex items-center justify-center">
+                  <MakoMascot variant="error" size="sm" />
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold tracking-widest text-rose-400 block">
                     {isChunkError ? "APPLICATION UPDATE • STALE CHUNK" : "RUNTIME SECURITY TRAP • ERROR BOUNDARY"}
                   </span>
-                  <h2 className="text-lg sm:text-xl font-bold font-mono uppercase text-white tracking-tight">
+                  <h2 className="text-lg sm:text-xl font-bold font-sans uppercase text-white tracking-tight">
                     {isChunkError ? "Module Updated — Sync Required" : (this.props.fallbackTitle || "Execution Circuit Interrupted")}
                   </h2>
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-white/10 px-2.5 py-1 rounded">
+              <span className="text-[10px] font-sans text-zinc-400 bg-[#242424] border border-white/[0.08] px-2.5 py-1 rounded-[8px]">
                 {isChunkError ? "CHUNK-REFRESH" : "500-CLI-CRASH"}
               </span>
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+              <p className="text-xs text-zinc-300 font-sans leading-relaxed">
                 An unexpected component rendering state was isolated by the CCC integrity watchdog. 
                 Your session and cryptographic contest seals remain intact.
               </p>
 
               {this.state.error && (
-                <div className="p-3.5 bg-zinc-950/90 border border-white/10 rounded-md font-mono text-xs text-rose-300 overflow-x-auto max-h-40">
+                <div className="p-3.5 bg-[#171717] border border-white/[0.08] rounded-[12px] font-sans text-xs text-rose-300 overflow-x-auto max-h-40">
                   <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] pb-1 border-b border-white/5 uppercase">
                     <Terminal size={12} />
                     <span>Exception Message</span>

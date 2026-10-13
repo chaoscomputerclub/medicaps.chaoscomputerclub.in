@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="ac-rim" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#65A30D"/>
+    </linearGradient>
+    <filter id="ac-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#CCFF00" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Circle Stamp -->
+  <circle cx="24" cy="24" r="20" fill="#141E09" stroke="url(#ac-rim)" stroke-width="2.5" filter="url(#ac-glow)"/>
+  <circle cx="24" cy="24" r="16" fill="#1A280D" stroke="#84CC16" stroke-width="1.2" stroke-dasharray="2 1.5"/>
+  <!-- Bold Accepted Checkmark -->
+  <path d="M16 24l5.5 5.5L33 17" stroke="#CCFF00" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

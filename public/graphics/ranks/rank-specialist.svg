@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="spec-border" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="50%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <linearGradient id="spec-core" x1="12" y1="8" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#092131"/>
+      <stop offset="100%" stop-color="#030C14"/>
+    </linearGradient>
+    <filter id="spec-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00E5FF" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Outer Shield Badge -->
+  <path d="M24 4L7 11v13c0 10.5 7.2 20.3 17 23 9.8-2.7 17-12.5 17-23V11L24 4z" fill="url(#spec-core)" stroke="url(#spec-border)" stroke-width="2.5" stroke-linejoin="round" filter="url(#spec-glow)"/>
+  <!-- Inner Rim -->
+  <path d="M24 8l-13 5.4v10.5c0 8.3 5.5 16 13 18.2 7.5-2.2 13-9.9 13-18.2V13.4L24 8z" fill="#041522" stroke="#00E5FF" stroke-width="1.2" stroke-opacity="0.5"/>
+  <!-- Central Cyber Prism / Diamond Delta -->
+  <polygon points="24,14 33,25 24,31 15,25" fill="#0284C7" stroke="#00E5FF" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="24,14 24,31 15,25" fill="#00E5FF" fill-opacity="0.4"/>
+  <circle cx="24" cy="23" r="2.5" fill="#FFFFFF"/>
+  <!-- 3 Stars at Bottom -->
+  <polygon points="16,38 16.8,39.6 18.6,39.8 17.3,41 17.6,42.8 16,42 14.4,42.8 14.7,41 13.4,39.8 15.2,39.6" fill="#00E5FF"/>
+  <polygon points="24,37 24.8,38.6 26.6,38.8 25.3,40 25.6,41.8 24,41 22.4,41.8 22.7,40 21.4,38.8 23.2,38.6" fill="#00E5FF"/>
+  <polygon points="32,38 32.8,39.6 34.6,39.8 33.3,41 33.6,42.8 32,42 30.4,42.8 30.7,41 29.4,39.8 31.2,39.6" fill="#00E5FF"/>
+</svg>

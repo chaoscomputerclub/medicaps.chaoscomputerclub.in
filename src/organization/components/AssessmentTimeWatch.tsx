@@ -116,19 +116,19 @@ export function AssessmentTimeWatch({
   }).format(new Date(unlockMs));
 
   return (
-    <div className={cn("rounded-none border border-white/10 bg-zinc-900/60 p-5 backdrop-blur-md  space-y-4", className)}>
+    <div className={cn("rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-5 backdrop-blur-md space-y-4", className)}>
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 font-mono text-[10px] uppercase font-bold tracking-widest text-lime-400">
-          <Clock className="w-3.5 h-3.5 text-lime-400" />
+        <div className="flex items-center gap-2 font-sans text-[10px] uppercase font-bold tracking-widest text-[#B1FA63]">
+          <Clock className="w-3.5 h-3.5 text-[#B1FA63]" />
           <span>PHASE 1 SCREENING CLOCK</span>
         </div>
         <span
           className={cn(
-            "rounded-none border px-2.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider inline-flex items-center gap-1.5",
+            "rounded-md border px-2.5 py-0.5 font-sans text-[9px] uppercase font-bold tracking-wider inline-flex items-center gap-1.5",
             isLocked && "border-amber-500/30 bg-amber-950/30 text-amber-400",
             isUnlocked && !isLive && "border-emerald-500/30 bg-emerald-950/30 text-emerald-400",
-            isLive && "border-lime-400/40 bg-lime-400/10 text-lime-400 animate-pulse",
-            isConcluded && "border-white/10 bg-zinc-800/60 text-zinc-400",
+            isLive && "border-lime-400/40 bg-lime-400/10 text-[#B1FA63] animate-pulse",
+            isConcluded && "border-white/[0.08] bg-[#242424] text-zinc-400",
           )}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -136,7 +136,7 @@ export function AssessmentTimeWatch({
         </span>
       </div>
 
-      <div className="flex items-center justify-between gap-1 sm:gap-2 rounded-none border border-white/10 bg-zinc-950/60 p-4 font-mono">
+      <div className="flex items-center justify-between gap-1 sm:gap-2 rounded-[14px] border border-white/[0.08] bg-[#171717] p-4 font-sans">
         <div className="flex flex-col items-center flex-1">
           <span className="text-2xl sm:text-3xl font-black tabular-nums text-white tracking-tight">{remaining.days}</span>
           <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">DAYS</span>
@@ -153,12 +153,12 @@ export function AssessmentTimeWatch({
         </div>
         <span className="text-xl font-bold text-zinc-600 self-center -mt-3">:</span>
         <div className="flex flex-col items-center flex-1">
-          <span className="text-2xl sm:text-3xl font-black tabular-nums text-lime-400 tracking-tight">{remaining.seconds}</span>
+          <span className="text-2xl sm:text-3xl font-black tabular-nums text-[#B1FA63] tracking-tight">{remaining.seconds}</span>
           <span className="text-[9px] uppercase tracking-widest text-zinc-400 mt-0.5">SECS</span>
         </div>
       </div>
 
-      <div className="space-y-1.5 pt-2 border-t border-white/10 font-mono text-xs text-zinc-400">
+      <div className="space-y-1.5 pt-2 border-t border-white/[0.08] font-sans text-xs text-zinc-400">
         <div className="flex justify-between items-center">
           <span>Target:</span>
           <strong className="text-white">{targetLabel}</strong>
@@ -175,25 +175,25 @@ export function AssessmentTimeWatch({
 
       <div className="pt-1">
         {isLocked && (
-          <p className="rounded-none border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-mono text-amber-300 leading-relaxed">
+          <p className="rounded-[10px] border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-sans text-amber-300 leading-relaxed">
             <Lock className="w-3.5 h-3.5 inline mr-1.5 text-amber-400" />
             Assessment unlocks <strong>strictly 24 hours</strong> before live contest. Questions remain sealed.
           </p>
         )}
         {isUnlocked && !isLive && (
-          <p className="rounded-none border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs font-mono text-emerald-300 leading-relaxed">
+          <p className="rounded-[10px] border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs font-sans text-emerald-300 leading-relaxed">
             <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5 text-emerald-400" />
             Assessment option is <strong>unlocked</strong> for registered cadets!
           </p>
         )}
         {isLive && (
-          <p className="rounded-none border border-lime-400/30 bg-lime-950/20 p-3 text-xs font-mono text-lime-300 leading-relaxed">
-            <Sparkles className="w-3.5 h-3.5 inline mr-1.5 text-lime-400" />
+          <p className="rounded-[10px] border border-lime-400/30 bg-lime-950/20 p-3 text-xs font-sans text-[#B1FA63] leading-relaxed">
+            <Sparkles className="w-3.5 h-3.5 inline mr-1.5 text-[#B1FA63]" />
             Contest screening is <strong>live</strong>. All submissions actively scored.
           </p>
         )}
         {isConcluded && (
-          <p className="rounded-none border border-white/10 bg-zinc-800/40 p-3 text-xs font-mono text-zinc-400 leading-relaxed">
+          <p className="rounded-[10px] border border-white/[0.08] bg-[#242424] p-3 text-xs font-sans text-zinc-400 leading-relaxed">
             <AlertCircle className="w-3.5 h-3.5 inline mr-1.5 text-zinc-400" />
             Assessment window has ended.
           </p>

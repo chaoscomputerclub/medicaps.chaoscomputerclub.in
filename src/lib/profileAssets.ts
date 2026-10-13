@@ -1,6 +1,7 @@
 /**
  * Chaos Computer Club India — Profile Asset Resolution Engine
  * Maps user telemetry (rating, tier, league, status) to authoritative visual assets.
+ * Utilizes crisp vector SVGs from /graphics/ and high-res Mako WebP cutouts from /mako/.
  */
 
 export interface TierBadgeInfo {
@@ -25,35 +26,35 @@ export function getTierBadgeAsset(tier?: string | null, rating?: number | null):
 
   if (t.includes("grandmaster") || r >= 2000) {
     return {
-      src: "/matiks-assets/badges/GrandMaster.png",
+      src: "/graphics/ranks/rank-grandmaster.svg",
       name: "GRANDMASTER",
       color: "text-red-400",
     };
   }
   if (t.includes("master") || r >= 1800) {
     return {
-      src: "/matiks-assets/badges/Master.png",
+      src: "/graphics/ranks/rank-master.svg",
       name: "MASTER",
       color: "text-amber-400",
     };
   }
   if (t.includes("expert") || r >= 1600) {
     return {
-      src: "/matiks-assets/badges/Expert.png",
+      src: "/graphics/ranks/rank-expert.svg",
       name: "EXPERT",
-      color: "text-purple-400",
+      color: "text-[#B1FA63]",
     };
   }
   if (t.includes("specialist") || t.includes("candidate") || r >= 1400) {
     return {
-      src: "/matiks-assets/badges/Candidate.png",
+      src: "/graphics/ranks/rank-candidate.svg",
       name: "CANDIDATE",
       color: "text-sky-400",
     };
   }
   if (t.includes("guardian") || t.includes("amateur") || r >= 1200) {
     return {
-      src: "/matiks-assets/badges/Amateur.png",
+      src: "/graphics/ranks/rank-specialist.svg",
       name: "AMATEUR",
       color: "text-teal-400",
     };
@@ -61,9 +62,9 @@ export function getTierBadgeAsset(tier?: string | null, rating?: number | null):
 
   // Base Novice tier (e.g. 1★ Explorer or rating < 1200)
   return {
-    src: "/matiks-assets/badges/Novice.png",
+    src: "/graphics/ranks/rank-explorer.svg",
     name: "NOVICE",
-    color: "text-teal-400",
+    color: "text-[#B1FA63]",
   };
 }
 
@@ -74,20 +75,18 @@ export function getTierBannerAsset(tier?: string | null, rating?: number | null)
   const r = rating ?? 1000;
   const t = (tier || "").toLowerCase();
 
-  if (r >= 2100) return "/matiks-assets/ranks/goated.webp";
-  if (t.includes("grandmaster") || r >= 1900) return "/matiks-assets/ranks/grand_master.webp";
-  if (t.includes("master") || r >= 1700) return "/matiks-assets/ranks/master.webp";
-  if (t.includes("specialist") || t.includes("candidate") || r >= 1500) return "/matiks-assets/ranks/candidate.webp";
-  if (t.includes("expert") || r >= 1350) return "/matiks-assets/ranks/expert.webp";
-  if (t.includes("guardian") || t.includes("amateur") || r >= 1200) return "/matiks-assets/ranks/amatuer.webp";
-  if (r >= 1100) return "/matiks-assets/ranks/rookie.webp";
+  if (r >= 2100 || t.includes("grandmaster")) return "/graphics/ranks/rank-grandmaster.svg";
+  if (t.includes("master") || r >= 1900) return "/graphics/ranks/rank-master.svg";
+  if (t.includes("specialist") || t.includes("candidate") || r >= 1700) return "/graphics/ranks/rank-candidate.svg";
+  if (t.includes("expert") || r >= 1500) return "/graphics/ranks/rank-expert.svg";
+  if (t.includes("guardian") || t.includes("amateur") || r >= 1300) return "/graphics/ranks/rank-specialist.svg";
 
-  // Base Novice banner (the warm amber starburst banner from the user screenshot)
-  return "/matiks-assets/ranks/novice.webp";
+  // Base Novice banner
+  return "/graphics/ranks/rank-explorer.svg";
 }
 
 /**
- * Resolves league division icons and medals
+ * Resolves league division icons and medals using vector SVGs
  */
 export function getLeagueAsset(rating?: number | null): LeagueInfo {
   const r = rating ?? 1000;
@@ -95,40 +94,40 @@ export function getLeagueAsset(rating?: number | null): LeagueInfo {
   if (r >= 1900) {
     return {
       name: "DIAMOND",
-      iconSrc: "/matiks-assets/ranks/diamond_icon.webp",
-      medalSrc: "/matiks-assets/ranks/Diamond.webp",
+      iconSrc: "/graphics/ranks/league-diamond.svg",
+      medalSrc: "/graphics/ranks/league-diamond.svg",
       color: "text-cyan-400",
     };
   }
   if (r >= 1600) {
     return {
       name: "RUBY",
-      iconSrc: "/matiks-assets/ranks/ruby_icon.webp",
-      medalSrc: "/matiks-assets/ranks/Ruby.webp",
+      iconSrc: "/graphics/ranks/league-ruby.svg",
+      medalSrc: "/graphics/ranks/league-ruby.svg",
       color: "text-rose-400",
     };
   }
   if (r >= 1400) {
     return {
       name: "GOLD",
-      iconSrc: "/matiks-assets/ranks/gold_icon.webp",
-      medalSrc: "/matiks-assets/ranks/Gold.webp",
+      iconSrc: "/graphics/ranks/medal-gold.svg",
+      medalSrc: "/graphics/ranks/medal-gold.svg",
       color: "text-amber-400",
     };
   }
   if (r >= 1200) {
     return {
       name: "SILVER",
-      iconSrc: "/matiks-assets/ranks/silver_icon.webp",
-      medalSrc: "/matiks-assets/ranks/Silver.webp",
+      iconSrc: "/graphics/ranks/medal-silver.svg",
+      medalSrc: "/graphics/ranks/medal-silver.svg",
       color: "text-zinc-300",
     };
   }
 
   return {
     name: "BRONZE",
-    iconSrc: "/matiks-assets/ranks/bronze_icon.webp",
-    medalSrc: "/matiks-assets/ranks/Bronze.webp",
+    iconSrc: "/graphics/ranks/medal-bronze.svg",
+    medalSrc: "/graphics/ranks/medal-bronze.svg",
     color: "text-amber-600",
   };
 }
@@ -137,61 +136,61 @@ export function getLeagueAsset(rating?: number | null): LeagueInfo {
  * Common system icons and reward assets
  */
 export const ProfileVisualAssets = {
-  // Reward Coins
-  piCoin: "/matiks-assets/rewards/piCoin-transformed.webp",
-  piCoinSvg: "/matiks-assets/rewards/piCoinSvg.webp",
-  animatedCoin: "/matiks-assets/animations/coin.gif",
+  // Reward Coins & Tokens (Vector SVGs)
+  piCoin: "/graphics/rewards/reward-token-ccc.svg",
+  piCoinSvg: "/graphics/rewards/reward-token-ccc.svg",
+  animatedCoin: "/graphics/rewards/reward-token-ccc.svg",
 
-  // Stats Icons
-  streakFire: "/matiks-assets/icons/fire.png",
-  totalDuels: "/matiks-assets/other/duel.png",
-  matiksBolt: "/matiks-assets/icons/matiksBolt.png",
-  shield: "/matiks-assets/icons/shield_icon.png",
-  peakRating: "/matiks-assets/ranks/peak_rating.png",
-  division: "/matiks-assets/ranks/division.png",
-  ratingWhite: "/matiks-assets/icons/ratingIconWhite.png",
-  vsIcon: "/matiks-assets/icons/vs.png",
-  winLossIcon: "/matiks-assets/icons/win_loss.png",
-  fistIcon: "/matiks-assets/icons/fistIcon.png",
+  // Stats Icons (Vector SVGs)
+  streakFire: "/graphics/rewards/reward-streak-fire.svg",
+  totalDuels: "/graphics/ranks/rank-candidate.svg",
+  matiksBolt: "/graphics/rewards/reward-xp-spark.svg",
+  shield: "/graphics/competition/contest-gate-pass.svg",
+  peakRating: "/graphics/ranks/rank-master.svg",
+  division: "/graphics/ranks/league-diamond.svg",
+  ratingWhite: "/graphics/ranks/rank-explorer.svg",
+  vsIcon: "/graphics/competition/contest-type-hackathon.svg",
+  winLossIcon: "/graphics/competition/verdict-accepted.svg",
+  fistIcon: "/graphics/ranks/rank-specialist.svg",
 
   // Game / Track Mode Icons
-  blitzTrack: "/matiks-assets/icons/blitz_home.png",
-  classicTrack: "/matiks-assets/icons/classic_home.png",
-  memoryTrack: "/matiks-assets/icons/memory.png",
-  puzzleTrack: "/matiks-assets/icons/puzzle_icon.png",
+  blitzTrack: "/graphics/competition/contest-type-weekly.svg",
+  classicTrack: "/graphics/competition/contest-type-hackathon.svg",
+  memoryTrack: "/graphics/achievements/achievement-algorithm-master.svg",
+  puzzleTrack: "/graphics/achievements/achievement-clean-code.svg",
 
-  // Empty States
-  noDuels: "/matiks-assets/empty-states/no_duels_to_flex.png",
-  noFriends: "/matiks-assets/empty-states/no_Friends.webp",
-  noFeed: "/matiks-assets/empty-states/no_feed.webp",
-  emptyLeaderboard: "/matiks-assets/empty-states/empty_leaderboard.png",
-  oopsError: "/matiks-assets/empty-states/oops_error.webp",
-  noInternet: "/matiks-assets/empty-states/no_internet.webp",
-  error: "/matiks-assets/empty-states/error.png",
+  // Empty States (Standardized to unique Mako Mascot WebP cutouts)
+  noDuels: "/mako/mako-gamer.webp",
+  noFriends: "/mako/mako-welcome.webp",
+  noFeed: "/mako/mako-workspace.webp",
+  emptyLeaderboard: "/mako/mako-search.webp",
+  oopsError: "/mako/mako-not-found.webp",
+  noInternet: "/mako/mako-sleeping.webp",
+  error: "/mako/mako-error.webp",
 
-  // Mascots
-  mascotJoy: "/matiks-assets/mascots/mascot_joy.webp",
-  mascotCrying: "/matiks-assets/mascots/mascot_crying.webp",
-  noFriendsPookie: "/matiks-assets/mascots/no_friends_pookie.png",
-  mascotWithWeapon: "/matiks-assets/mascots/mascot_with_weapon.webp",
-  mascotPhone: "/matiks-assets/mascots/landingPageMascotWithPhone.webp",
+  // Mascots (Standardized to purposeful Mako Mascot roles)
+  mascotJoy: "/mako/mako-excited.webp",
+  mascotCrying: "/mako/mako-thinking.webp",
+  noFriendsPookie: "/mako/mako-chill.webp",
+  mascotWithWeapon: "/mako/mako-superhero.webp",
+  mascotPhone: "/mako/mako-tasks.webp",
 
   // Illustrations
-  victoryIllustration: "/matiks-assets/illustrations/victory.webp",
-  defeatIllustration: "/matiks-assets/illustrations/defeat.webp",
-  piBundleLarge: "/matiks-assets/illustrations/piBundleIllustrationLarge.webp",
-  piBundleMedium: "/matiks-assets/illustrations/piBundleIllustrationMedium.webp",
-  piBundleSmall: "/matiks-assets/illustrations/piBundleIllustrationSmall.webp",
+  victoryIllustration: "/mako/mako-celebrating.webp",
+  defeatIllustration: "/mako/mako-error.webp",
+  piBundleLarge: "/graphics/rewards/reward-token-ccc.svg",
+  piBundleMedium: "/graphics/rewards/reward-token-ccc.svg",
+  piBundleSmall: "/graphics/rewards/reward-token-ccc.svg",
 
-  // Achievements & Recognition Certificates
-  contestRecognition: "/matiks-assets/achievements/ContestRecognition.webp",
-  survivalRecognition: "/matiks-assets/achievements/SurvivalSaturdayRecognition.webp",
-  showdownRecognition: "/matiks-assets/achievements/ShowdownRecognition.webp",
-  meritBadge: "/matiks-assets/badges/badge.webp",
+  // Achievements & Recognition Certificates (Vector SVGs)
+  contestRecognition: "/graphics/achievements/achievement-podium-finish.svg",
+  survivalRecognition: "/graphics/achievements/achievement-streak-7.svg",
+  showdownRecognition: "/graphics/achievements/achievement-speed-demon.svg",
+  meritBadge: "/graphics/achievements/achievement-clean-code.svg",
 
   // Audio Effects
-  questCompleteAudio: "/matiks-assets/rewards/quest_complete.mp3",
-  victoryAudio: "/matiks-assets/illustrations/victory.mp3",
-  defeatAudio: "/matiks-assets/illustrations/defeat.mp3",
-  arrowWhooshAudio: "/matiks-assets/navigation/arrow_whoosh.wav",
+  questCompleteAudio: "",
+  victoryAudio: "",
+  defeatAudio: "",
+  arrowWhooshAudio: "",
 } as const;

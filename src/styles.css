@@ -57,10 +57,10 @@
   --color-surface-2: #2C2C2C;
   --color-surface-3: #333333;
 
-  /* Matiks Typography Stack */
-  --font-sans: "Nunito Sans", "Montserrat", "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Global Typography Stack: Inter (Clean Sans-Serif Secondary/Global UI), Space Mono (Code) */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: "Bebas Neue", "Montserrat", sans-serif;
-  --font-heading: "Montserrat", "Nunito Sans", sans-serif;
+  --font-heading: "Montserrat", "Inter", sans-serif;
   --font-mono: "Space Mono", "Roboto Mono", "Menlo", "Monaco", monospace;
   --font-code: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
   --font-vscode: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
@@ -90,9 +90,9 @@
   --danger: #ff3344;
   --cyan: #00D4FF;
   --radius: 10px;
-  --font-sans: "Nunito Sans", "Montserrat", "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: "Bebas Neue", "Montserrat", sans-serif;
-  --font-heading: "Montserrat", "Nunito Sans", sans-serif;
+  --font-heading: "Montserrat", "Inter", sans-serif;
   --font-mono: "Space Mono", "Roboto Mono", "Menlo", "Monaco", monospace;
   --font-code: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
   --font-vscode: "Space Mono", "Menlo", "Monaco", "Consolas", monospace;
@@ -109,7 +109,23 @@ html {
   scroll-behavior: smooth;
   font-family: var(--font-sans);
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+}
+
+/* ==========================================================================
+   Radix UI / react-remove-scroll Anti-Shrink & Layout Stability Fix
+   Unconditionally cancels body margin-right contraction and overflow clipping
+   so opening any dropdown never shrinks the viewport, page, or sticky sidebars.
+   ========================================================================== */
+html body[data-scroll-locked],
+html[class] body[data-scroll-locked],
+body[data-scroll-locked] {
+  overflow: visible !important;
+  overscroll-behavior: auto !important;
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+  position: static !important;
 }
 
 body {
@@ -119,14 +135,14 @@ body {
   font-family: var(--font-sans);
   min-height: 100dvh;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Global focus-visible rings in Electric Lime (for interactive buttons, links, controls) */
@@ -135,11 +151,14 @@ body {
   outline-offset: 2px !important;
 }
 
-/* Inputs, textareas, and OTP slots own their focused border — suppress duplicate outer focus outlines */
+/* Inputs, textareas, comboboxes, and OTP slots own their focused border — suppress duplicate outer focus outlines */
 input:focus,
 input:focus-visible,
 textarea:focus,
 textarea:focus-visible,
+[role="combobox"],
+[role="combobox"]:focus,
+[role="combobox"]:focus-visible,
 [data-input-otp],
 [data-input-otp]:focus,
 [data-input-otp]:focus-visible,
@@ -156,11 +175,13 @@ textarea:focus-visible,
   color: #000000;
 }
 
-/* Base Interface Typography */
+/* Base Interface Typography & Secondary Global Style */
 input,
 button,
 select,
+textarea,
 .font-sans,
+.font-secondary,
 .tabular-nums {
   font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
@@ -222,14 +243,14 @@ textarea {
   height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #171717;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #CCFF00;
+  background: #B1FA63;
 }
 
 /* High-level design bridges mapped via pure Tailwind @apply */
@@ -238,25 +259,25 @@ textarea {
     @apply max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8;
   }
   .page-header {
-    @apply flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/8 pb-6 mb-8;
+    @apply flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.08] pb-6 mb-8;
   }
   .kicker {
-    @apply font-sans text-[10px] font-semibold uppercase tracking-widest text-lime-400;
+    @apply font-sans text-[10px] font-semibold uppercase tracking-widest text-[#B1FA63];
   }
   .panel {
-    @apply p-6 rounded-lg border border-white/8 bg-black;
+    @apply p-6 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F];
   }
   .section-heading {
-    @apply flex items-end justify-between gap-4 border-b border-white/8 pb-4 mb-6;
+    @apply flex items-end justify-between gap-4 border-b border-white/[0.08] pb-4 mb-6;
   }
   .tier-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-sans font-semibold uppercase tracking-wider bg-lime-400/8 border border-lime-400/25 text-lime-400;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-sans font-semibold uppercase tracking-wider bg-lime-400/10 border border-lime-400/25 text-[#B1FA63];
   }
   .mono-tag {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-sans font-medium tracking-wide bg-black border border-white/10 text-zinc-300;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-sans font-medium tracking-wide bg-[#171717] border border-white/[0.08] text-zinc-300;
   }
   .metric {
-    @apply p-4 rounded-lg border border-white/8 bg-black;
+    @apply p-4 rounded-[16px] border border-white/[0.08] bg-[#1F1F1F];
   }
   .signal-green-badge {
     @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-500/30;

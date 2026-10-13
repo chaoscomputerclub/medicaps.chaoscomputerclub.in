@@ -36,7 +36,8 @@ export interface PracticeProblemListResponse {
   limit: number;
   pages: number;
   summary: {
-    total_published: number;
+    total_published?: number;
+    total_problems?: number;
     solved_count: number;
     attempted_count: number;
   };

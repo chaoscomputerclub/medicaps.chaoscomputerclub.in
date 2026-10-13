@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" width="180" height="140" fill="none">
+  <defs>
+    <linearGradient id="seh-grid" x1="0" y1="0" x2="180" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#242428"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="seh-lime" x1="60" y1="30" x2="120" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+    <filter id="seh-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#CCFF00" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="25" y="15" width="130" height="110" rx="16" fill="url(#seh-grid)" stroke="#27272A" stroke-width="1.5"/>
+  <!-- Tournament Ledger Book / Scroll Silhouette -->
+  <rect x="58" y="34" width="64" height="74" rx="6" fill="#18181B" stroke="#3F3F46" stroke-width="1.8" filter="url(#seh-glow)"/>
+  <!-- Shield Emblem on Ledger -->
+  <path d="M90 44l11 4.5v8c0 7-5 13-11 15-6-2-11-8-11-15v-8L90 44z" fill="#1E2816" stroke="url(#seh-lime)" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Star Inside Shield -->
+  <polygon points="90,49 91.5,52.5 95,53 92.5,55.5 93,59 90,57.5 87,59 87.5,55.5 85,53 88.5,52.5" fill="#CCFF00"/>
+  <!-- Ledger Ledger Rows -->
+  <path d="M68 80h44" stroke="#3F3F46" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M68 88h32" stroke="#3F3F46" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M68 96h24" stroke="#3F3F46" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

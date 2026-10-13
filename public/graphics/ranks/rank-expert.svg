@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="exp-p-border" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C084FC"/>
+      <stop offset="50%" stop-color="#9333EA"/>
+      <stop offset="100%" stop-color="#6B21A8"/>
+    </linearGradient>
+    <linearGradient id="exp-p-core" x1="12" y1="8" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#241038"/>
+      <stop offset="100%" stop-color="#0E0418"/>
+    </linearGradient>
+    <filter id="exp-p-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#A855F7" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Outer Shield Badge -->
+  <path d="M24 4L7 11v13c0 10.5 7.2 20.3 17 23 9.8-2.7 17-12.5 17-23V11L24 4z" fill="url(#exp-p-core)" stroke="url(#exp-p-border)" stroke-width="2.5" stroke-linejoin="round" filter="url(#exp-p-glow)"/>
+  <!-- Inner Rim -->
+  <path d="M24 8l-13 5.4v10.5c0 8.3 5.5 16 13 18.2 7.5-2.2 13-9.9 13-18.2V13.4L24 8z" fill="#170A24" stroke="#9333EA" stroke-width="1.2" stroke-opacity="0.5"/>
+  <!-- Central Expert Emblem: Hexagonal Cyber Shard -->
+  <polygon points="24,14 32,19 32,27 24,32 16,27 16,19" fill="#581C87" stroke="#C084FC" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="24,14 32,19 32,27 24,32" fill="#7E22CE" fill-opacity="0.5"/>
+  <circle cx="24" cy="23" r="3" fill="#E9D5FF"/>
+  <!-- 4 Stars at Bottom -->
+  <polygon points="14,39 14.7,40.4 16.3,40.6 15.1,41.7 15.4,43.2 14,42.5 12.6,43.2 12.9,41.7 11.7,40.6 13.3,40.4" fill="#C084FC"/>
+  <polygon points="20.5,38 21.2,39.4 22.8,39.6 21.6,40.7 21.9,42.2 20.5,41.5 19.1,42.2 19.4,40.7 18.2,39.6 19.8,39.4" fill="#C084FC"/>
+  <polygon points="27.5,38 28.2,39.4 29.8,39.6 28.6,40.7 28.9,42.2 27.5,41.5 26.1,42.2 26.4,40.7 25.2,39.6 26.8,39.4" fill="#C084FC"/>
+  <polygon points="34,39 34.7,40.4 36.3,40.6 35.1,41.7 35.4,43.2 34,42.5 32.6,43.2 32.9,41.7 31.7,40.6 33.3,40.4" fill="#C084FC"/>
+</svg>

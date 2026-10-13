@@ -41,11 +41,11 @@ export function ProblemDetailPage() {
   if (!data) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 space-y-4">
-        <Link to="/problems" className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors">
+        <Link to="/problems" className="inline-flex items-center gap-1.5 text-xs font-sans text-zinc-500 hover:text-white transition-colors">
           <ArrowLeft className="size-3.5" /> Back to problem archive
         </Link>
         <h1 className="text-xl font-semibold text-white">Archived Problem Not Found</h1>
-        <p className="text-zinc-500 text-xs font-mono">
+        <p className="text-zinc-500 text-xs font-sans">
           The requested problem is unreleased or invalid.
         </p>
       </div>
@@ -58,18 +58,16 @@ export function ProblemDetailPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Link
         to="/problems"
-        className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-sans text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Problem archive
       </Link>
 
       <PageHeader
-        kicker="05 // Problem Statement"
-        index={`PROBLEM ${problem.index} · ${problem.points} PTS`}
         title={problem.title}
         description={`${contest.title} · ${problem.topic} · ${problem.solved_count} verified solves.`}
         badge={
-          <span className="font-mono text-xs font-semibold text-lime-400 border border-lime-400/30 rounded px-2.5 py-0.5 bg-lime-400/10">
+          <span className="font-sans text-xs font-semibold text-lime-400 border border-lime-400/30 rounded px-2.5 py-0.5 bg-lime-400/10">
             PROBLEM {problem.index}
           </span>
         }
@@ -87,8 +85,6 @@ export function ProblemDetailPage() {
 
       <article className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-6">
         <SectionHeader
-          kicker="01 // Official Editorial"
-          index={`ANALYSIS · ${problem.points} PTS`}
           title="Solution Breakdown"
         />
 
@@ -100,7 +96,7 @@ export function ProblemDetailPage() {
           <h3 className="text-xs font-heading font-bold text-white uppercase tracking-wider">
             Complexity Boundary
           </h3>
-          <pre className="rounded-[14px] p-4 bg-[#171717] border border-white/[0.08] font-mono text-xs text-[#B1FA63] overflow-x-auto">
+          <pre className="rounded-[14px] p-4 bg-[#171717] border border-white/[0.08] font-sans text-xs text-[#B1FA63] overflow-x-auto">
             <code>{`complexity: O(n log n)\nspace: O(n)\nverdict: accepted`}</code>
           </pre>
         </div>

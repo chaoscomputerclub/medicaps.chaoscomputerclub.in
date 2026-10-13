@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="gm-border" x1="4" y1="2" x2="44" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="35%" stop-color="#E11D48"/>
+      <stop offset="70%" stop-color="#BE123C"/>
+      <stop offset="100%" stop-color="#881337"/>
+    </linearGradient>
+    <linearGradient id="gm-core" x1="12" y1="8" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#350614"/>
+      <stop offset="100%" stop-color="#140207"/>
+    </linearGradient>
+    <linearGradient id="gm-wings" x1="6" y1="12" x2="42" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="gm-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#E11D48" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <!-- Wing Accents behind shield -->
+  <path d="M7 16l-3 6 8 3-5-9z" fill="url(#gm-wings)"/>
+  <path d="M41 16l3 6-8 3 5-9z" fill="url(#gm-wings)"/>
+  <!-- Outer Shield Badge -->
+  <path d="M24 3L7 10v14c0 11 7.2 21 17 24 9.8-3 17-13 17-24V10L24 3z" fill="url(#gm-core)" stroke="url(#gm-border)" stroke-width="2.5" stroke-linejoin="round" filter="url(#gm-glow)"/>
+  <!-- Inner Rim -->
+  <path d="M24 7l-13 5.4v11c0 8.8 5.5 16.8 13 19.1 7.5-2.3 13-10.3 13-19.1V12.4L24 7z" fill="#20040D" stroke="#E11D48" stroke-width="1.2" stroke-opacity="0.6"/>
+  <!-- Central Grandmaster Ruby Shard Star -->
+  <polygon points="24,11 27.5,19.5 36.5,20.5 30,26.5 31.8,35.5 24,31 16.2,35.5 18,26.5 11.5,20.5 20.5,19.5" fill="#E11D48" stroke="#FB7185" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Central Diamond Highlight -->
+  <polygon points="24,16 27,22 24,27 21,22" fill="#FFFFFF"/>
+  <!-- 5 Gold Stars at Base -->
+  <polygon points="12,41 12.6,42.2 14,42.4 13,43.3 13.2,44.6 12,44 10.8,44.6 11,43.3 10,42.4 11.4,42.2" fill="#FDE047"/>
+  <polygon points="17.5,40 18.1,41.2 19.5,41.4 18.5,42.3 18.7,43.6 17.5,43 16.3,43.6 16.5,42.3 15.5,41.4 16.9,41.2" fill="#FDE047"/>
+  <polygon points="24,39 24.6,40.2 26,40.4 25,41.3 25.2,42.6 24,42 22.8,42.6 23,41.3 22,40.4 23.4,40.2" fill="#FDE047"/>
+  <polygon points="30.5,40 31.1,41.2 32.5,41.4 31.5,42.3 31.7,43.6 30.5,43 29.3,43.6 29.5,42.3 28.5,41.4 29.9,41.2" fill="#FDE047"/>
+  <polygon points="36,41 36.6,42.2 38,42.4 37,43.3 37.2,44.6 36,44 34.8,44.6 35,43.3 34,42.4 35.4,42.2" fill="#FDE047"/>
+</svg>

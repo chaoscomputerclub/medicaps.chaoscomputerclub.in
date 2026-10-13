@@ -80,63 +80,75 @@ export function RatingDistributionCard({
         </h2>
       </div>
 
-      {/* Histogram Bar Chart */}
-      <div className="my-auto py-6 relative">
-        {isEmpty && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <span className="px-3 py-1.5 rounded-[8px] bg-[#171717]/90 border border-white/[0.08] text-[10px] font-mono tracking-widest text-zinc-400 uppercase backdrop-blur-sm">
-              NO CONTEST DATA RECORDED
-            </span>
+      {/* Empty State / Histogram Bar Chart */}
+      {isEmpty ? (
+        <div className="my-auto py-5 flex flex-col items-center justify-center text-center">
+          <div className="size-20 mb-3 flex items-center justify-center">
+            <img
+              src="/matiks-assets/empty-states/empty_leaderboard.png"
+              alt="Leaderboard Standing"
+              className="w-16 h-auto object-contain opacity-90 select-none drop-shadow-md"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.src.includes("state-empty-leaderboard.svg")) {
+                  target.src = "/graphics/states/state-empty-leaderboard.svg";
+                }
+              }}
+            />
           </div>
-        )}
-        <div
-          className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[96px] w-full"
-          aria-label="Rating distribution histogram"
-        >
-          {displayBuckets.map((bucket, index) => {
-            const count = isEmpty ? 0 : (bucket.count ?? 0);
-            const barHeightPx = isEmpty
-              ? 4
-              : Math.max(4, Math.round((count / maxCount) * MAX_BAR_PX));
-
-            const isUserBucket = !isEmpty && index === activeBucketIndex;
-            const isHovered = hoveredIndex === index;
-
-            return (
-              <div
-                key={`${bucket.min}-${index}`}
-                className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer group"
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                {/* Tooltip */}
-                {isHovered && !isEmpty && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#171717] border border-white/[0.12] text-[10px] font-mono text-white rounded-[8px] whitespace-nowrap z-20 pointer-events-none">
-                    {bucket.min}–{bucket.min + 50}:{" "}
-                    <span className="tabular-nums font-bold text-[#B1FA63]">{count}</span>
-                  </div>
-                )}
-                {/* Bar */}
-                <div
-                  style={{ height: `${barHeightPx}px` }}
-                  className={cn(
-                    "w-full rounded-t-[2px] transition-colors",
-                    isEmpty
-                      ? "bg-[#171717] border-t border-white/[0.06]"
-                      : isUserBucket
-                      ? "bg-[#B1FA63]"
-                      : isHovered
-                      ? "bg-zinc-300"
-                      : count === 0
-                      ? "bg-[#171717]"
-                      : "bg-white/[0.12]"
-                  )}
-                />
-              </div>
-            );
-          })}
+          <span className="px-3 py-1 rounded-[8px] bg-[#171717] border border-white/[0.08] text-[10px] font-sans font-medium tracking-wider text-zinc-400 uppercase">
+            NO CONTEST DATA RECORDED
+          </span>
+          <p className="text-[11px] text-zinc-500 font-sans max-w-[220px] mt-2 leading-relaxed">
+            Attend rated contests to unlock your university cohort rank and standing.
+          </p>
         </div>
-      </div>
+      ) : (
+        <div className="my-auto py-6 relative">
+          <div
+            className="flex items-end justify-between gap-[2px] sm:gap-[3px] h-[96px] w-full"
+            aria-label="Rating distribution histogram"
+          >
+            {displayBuckets.map((bucket, index) => {
+              const count = bucket.count ?? 0;
+              const barHeightPx = Math.max(4, Math.round((count / maxCount) * MAX_BAR_PX));
+              const isUserBucket = index === activeBucketIndex;
+              const isHovered = hoveredIndex === index;
+
+              return (
+                <div
+                  key={`${bucket.min}-${index}`}
+                  className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer group"
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  {/* Tooltip */}
+                  {isHovered && (
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#171717] border border-white/[0.12] text-[10px] font-sans text-white rounded-[8px] whitespace-nowrap z-20 pointer-events-none">
+                      {bucket.min}–{bucket.min + 50}:{" "}
+                      <span className="tabular-nums font-bold text-[#B1FA63]">{count}</span>
+                    </div>
+                  )}
+                  {/* Bar */}
+                  <div
+                    style={{ height: `${barHeightPx}px` }}
+                    className={cn(
+                      "w-full rounded-t-[2px] transition-colors",
+                      isUserBucket
+                        ? "bg-[#B1FA63]"
+                        : isHovered
+                        ? "bg-zinc-300"
+                        : count === 0
+                        ? "bg-[#171717]"
+                        : "bg-white/[0.12]"
+                    )}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

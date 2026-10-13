@@ -223,7 +223,7 @@ export function CadetProfileHoverCard({
       <HoverCardTrigger asChild={asChild}>{children}</HoverCardTrigger>
 
       <HoverCardContent
-        className={`w-72 p-0 overflow-hidden z-[100] bg-zinc-950 border border-white/10 rounded-lg pointer-events-auto ${
+        className={`w-72 p-0 overflow-hidden z-[100] bg-[#1F1F1F] border border-white/10 rounded-[16px] pointer-events-auto ${
           className || ""
         }`}
         sideOffset={sideOffset}
@@ -241,7 +241,7 @@ export function CadetProfileHoverCard({
               alt={fullName || cleanHandle}
               className="object-cover"
             />
-            <AvatarFallback className="bg-zinc-900 text-lime-400 font-mono text-base font-bold rounded-full">
+            <AvatarFallback className="bg-[#242424] text-lime-400 font-sans text-base font-bold rounded-full">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -250,8 +250,8 @@ export function CadetProfileHoverCard({
             <p className="font-sans text-base font-bold text-white leading-tight truncate">
               {fullName || `@${cleanHandle}`}
             </p>
-            <p className="font-mono text-xs text-zinc-400 mt-0.5 truncate">@{cleanHandle}</p>
-            <p className="font-mono text-xs text-lime-400 tabular-nums mt-1 truncate">
+            <p className="font-sans text-xs text-zinc-400 mt-0.5 truncate">@{cleanHandle}</p>
+            <p className="font-sans text-xs text-lime-400 tabular-nums mt-1 truncate">
               Rank&nbsp;
               <span className="font-bold">{universityRank ? `#${universityRank}` : "Unranked"}</span>
               &nbsp;·&nbsp;
@@ -263,33 +263,33 @@ export function CadetProfileHoverCard({
         {/* Stats Grid */}
         <div className="grid grid-cols-3 divide-x divide-white/6 border-t border-white/6 text-center">
           <div className="py-2.5 px-2">
-            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Rating</p>
+            <p className="text-[9px] font-sans uppercase text-zinc-500 tracking-wider">Rating</p>
             {isLoading && !hasFullData ? (
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse mx-auto mt-1" />
             ) : (
-              <p className="font-mono text-sm font-bold text-lime-400 tabular-nums mt-0.5">
+              <p className="font-sans text-sm font-bold text-lime-400 tabular-nums mt-0.5">
                 {rating}
               </p>
             )}
           </div>
 
           <div className="py-2.5 px-2">
-            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Peak</p>
+            <p className="text-[9px] font-sans uppercase text-zinc-500 tracking-wider">Peak</p>
             {isLoading && !hasFullData ? (
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse mx-auto mt-1" />
             ) : (
-              <p className="font-mono text-sm font-bold text-white tabular-nums mt-0.5">
+              <p className="font-sans text-sm font-bold text-white tabular-nums mt-0.5">
                 {peakRating ?? "—"}
               </p>
             )}
           </div>
 
           <div className="py-2.5 px-2">
-            <p className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider">Rounds</p>
+            <p className="text-[9px] font-sans uppercase text-zinc-500 tracking-wider">Rounds</p>
             {isLoading && !hasFullData ? (
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse mx-auto mt-1" />
             ) : (
-              <p className="font-mono text-sm font-bold text-white tabular-nums mt-0.5">
+              <p className="font-sans text-sm font-bold text-white tabular-nums mt-0.5">
                 {attendanceCount}
               </p>
             )}
@@ -299,7 +299,7 @@ export function CadetProfileHoverCard({
         {/* Trend Sparkline */}
         {ratingsList.length >= 2 && (
           <div className="px-4 py-2 border-t border-white/6 flex items-center justify-between">
-            <span className="text-[9px] font-mono uppercase text-zinc-500 tracking-wider shrink-0">
+            <span className="text-[9px] font-sans uppercase text-zinc-500 tracking-wider shrink-0">
               Trend
             </span>
             <Spark data={ratingsList} />

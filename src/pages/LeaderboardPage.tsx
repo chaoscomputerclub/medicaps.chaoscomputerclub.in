@@ -22,9 +22,10 @@ import { resolveAvatarUrl } from "@/lib/utils";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import { prefetchProfileRoute } from "@/AppRoutes";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 function Spark({ data }: { data: number[] }) {
-  if (!data || data.length < 2) return <span className="inline-block h-1.5 w-12 rounded bg-zinc-900" aria-hidden="true" />;
+  if (!data || data.length < 2) return <span className="inline-block h-1.5 w-12 rounded bg-[#242424]" aria-hidden="true" />;
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;
@@ -153,9 +154,6 @@ export function LeaderboardPage() {
       {/* Clean minimal header — Matiks Design Analogy */}
       <header className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-2">
-          <p className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#B1FA63]">
-            (04 // University Standings)
-          </p>
           <h1 className="text-3xl sm:text-5xl font-display uppercase tracking-wide text-white leading-none">
             University Leaderboard
           </h1>
@@ -166,14 +164,7 @@ export function LeaderboardPage() {
         <div className="flex flex-col items-start md:items-end justify-center rounded-[16px] border border-white/[0.08] bg-[#171717] p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0">
           <span className="font-heading font-bold text-xs uppercase tracking-wider text-zinc-400">Rating Season</span>
           <strong className="font-display text-2xl text-white mt-0.5 tracking-wide">2025–2026</strong>
-          <small className="font-mono text-xs text-[#B1FA63] tabular-nums mt-0.5">{totalCount}&nbsp;ranked cadets</small>
-          <div className="flex items-center gap-1.5 mt-1.5 font-heading text-[10px] uppercase tracking-wider text-[#B1FA63] font-bold">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B1FA63] opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#B1FA63]" />
-            </span>
-            Real-Time Sync · Active
-          </div>
+          <small className="font-sans text-xs text-[#B1FA63] tabular-nums mt-0.5">{totalCount}&nbsp;ranked cadets</small>
         </div>
       </header>
 
@@ -198,18 +189,11 @@ export function LeaderboardPage() {
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="py-12 text-center font-mono text-xs"
+                    className="py-12 text-center font-sans text-xs"
                   >
                     <div className="flex flex-col items-center justify-center">
                       <div className="size-20 mb-2 flex items-center justify-center">
-                        <img
-                          src="/matiks-assets/empty-states/empty_leaderboard.png"
-                          alt="No ranked members"
-                          className="size-full object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                        />
+                        <MakoMascot variant="search" size="lg" />
                       </div>
                       <span className="text-zinc-400">No ranked members found in university standings.</span>
                     </div>
@@ -258,22 +242,22 @@ export function LeaderboardPage() {
                     >
                       {/* Rank + Change */}
                       <TableCell className="pl-5 py-3">
-                        <div className="flex items-center gap-1.5 font-mono">
+                        <div className="flex items-center gap-1.5 font-sans">
                           {displayRank === 1 ? (
                             <img
-                              src="/matiks-assets/ranks/gold_icon.webp"
+                              src="/graphics/ranks/medal-gold.svg"
                               alt="1st"
                               className="size-4 object-contain shrink-0"
                             />
                           ) : displayRank === 2 ? (
                             <img
-                              src="/matiks-assets/ranks/silver_icon.webp"
+                              src="/graphics/ranks/medal-silver.svg"
                               alt="2nd"
                               className="size-4 object-contain shrink-0"
                             />
                           ) : displayRank === 3 ? (
                             <img
-                              src="/matiks-assets/ranks/bronze_icon.webp"
+                              src="/graphics/ranks/medal-bronze.svg"
                               alt="3rd"
                               className="size-4 object-contain shrink-0"
                             />
@@ -324,12 +308,12 @@ export function LeaderboardPage() {
                                 alt={x.full_name || x.handle}
                                 className="object-cover"
                               />
-                              <AvatarFallback className="bg-zinc-900 text-lime-400 font-mono text-[10px] font-bold rounded-full">
+                              <AvatarFallback className="bg-[#242424] text-lime-400 font-sans text-[10px] font-bold rounded-full">
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <p className="font-mono text-xs font-semibold text-white group-hover/row:text-lime-400 transition-colors truncate">
+                              <p className="font-sans text-xs font-semibold text-white group-hover/row:text-lime-400 transition-colors truncate">
                                 @{x.handle}
                               </p>
                               {x.full_name && (
@@ -348,18 +332,18 @@ export function LeaderboardPage() {
                       </TableCell>
 
                       {/* Rating */}
-                      <TableCell className="py-3 font-mono font-bold text-sm tabular-nums text-lime-400">
+                      <TableCell className="py-3 font-sans font-bold text-sm tabular-nums text-lime-400">
                         {displayRating}
                       </TableCell>
 
                       {/* Peak */}
-                      <TableCell className="py-3 font-mono text-xs tabular-nums text-zinc-400 hidden sm:table-cell">
+                      <TableCell className="py-3 font-sans text-xs tabular-nums text-zinc-400 hidden sm:table-cell">
                         {displayPeak}
                       </TableCell>
 
                       {/* Attendance */}
                       <TableCell className="py-3 pr-5 hidden sm:table-cell">
-                        <span className="font-mono text-xs tabular-nums text-zinc-400">
+                        <span className="font-sans text-xs tabular-nums text-zinc-400">
                           {attendanceCount}/{attendanceTotal}
                         </span>
                       </TableCell>
@@ -373,7 +357,7 @@ export function LeaderboardPage() {
 
         {/* Pagination Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/8 bg-black/40 px-5 py-3.5">
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <div className="flex items-center gap-2 text-xs font-sans text-zinc-400">
             <span>
               Showing <strong className="tabular-nums text-white font-medium">{startRecord}–{endRecord}</strong> of{" "}
               <strong className="tabular-nums text-white font-medium">{totalCount}</strong> cadets
@@ -420,7 +404,7 @@ export function LeaderboardPage() {
                 <ChevronLeft className="size-3.5" />
               </Button>
 
-              <span className="px-2 font-mono text-xs tabular-nums text-zinc-400">
+              <span className="px-2 font-sans text-xs tabular-nums text-zinc-400">
                 {pageIndex + 1} / {totalPages}
               </span>
 

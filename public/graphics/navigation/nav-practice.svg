@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <defs>
+    <linearGradient id="p-lime" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+  </defs>
+  <!-- Window Container -->
+  <rect x="2.5" y="3.5" width="19" height="17" rx="3" fill="#18181B" stroke="#3F3F46" stroke-width="1.5"/>
+  <!-- Window Header Bar -->
+  <path d="M2.5 8.5h19" stroke="#3F3F46" stroke-width="1.2"/>
+  <circle cx="5.5" cy="6" r="1" fill="#EF4444"/>
+  <circle cx="8.5" cy="6" r="1" fill="#F59E0B"/>
+  <circle cx="11.5" cy="6" r="1" fill="#10B981"/>
+  <!-- Code Prompt & Cursor -->
+  <path d="M6.5 12l3 2.5-3 2.5" stroke="url(#p-lime)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12.5 17h4.5" stroke="url(#p-lime)" stroke-width="2" stroke-linecap="round"/>
+</svg>

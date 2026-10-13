@@ -202,7 +202,7 @@ export function ContestOverviewPage() {
   if (isLoadingDetail && !contest) return <ContestDetailSkeleton />;
   if (!contest) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20 text-center font-mono text-xs text-zinc-500">
+      <div className="max-w-5xl mx-auto px-4 py-20 text-center font-sans text-xs text-zinc-500">
         Contest not found.
       </div>
     );
@@ -230,7 +230,7 @@ export function ContestOverviewPage() {
       <div>
         <Link
           to="/contests"
-          className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors"
         >
           <ArrowLeft className="size-3.5" /> Back to Contests Hub
         </Link>
@@ -283,7 +283,7 @@ export function ContestOverviewPage() {
               </span>
               <span className="flex items-center gap-1.5 text-zinc-300">
                 <Users className="size-3.5 text-[#B1FA63]" />
-                <span className="tabular-nums font-mono">{contest.registered_count.toLocaleString()}</span>
+                <span className="tabular-nums font-sans">{contest.registered_count.toLocaleString()}</span>
                 &nbsp;Cadet{contest.registered_count === 1 ? "" : "s"} Registered
               </span>
             </div>
@@ -450,7 +450,7 @@ export function ContestOverviewPage() {
             </AnimatePresence>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-mono text-zinc-500">
+          <div className="flex items-center gap-3 text-xs font-sans text-zinc-500">
             <span className="flex items-center gap-1">
               <ShieldCheck className="size-3.5 text-lime-400" /> Open to all students
             </span>

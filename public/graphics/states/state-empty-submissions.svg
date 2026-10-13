@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" width="180" height="140" fill="none">
+  <defs>
+    <linearGradient id="ses-grid" x1="0" y1="0" x2="180" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#242428"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="ses-lime" x1="50" y1="30" x2="130" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+    <filter id="ses-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#CCFF00" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="25" y="15" width="130" height="110" rx="16" fill="url(#ses-grid)" stroke="#27272A" stroke-width="1.5"/>
+  <!-- Code Editor Window Silhouette -->
+  <rect x="45" y="32" width="90" height="76" rx="8" fill="#18181B" stroke="#3F3F46" stroke-width="1.5" filter="url(#ses-glow)"/>
+  <!-- Editor Header with Mac Dots -->
+  <path d="M45 44h90" stroke="#27272A" stroke-width="1"/>
+  <circle cx="53" cy="38" r="2" fill="#EF4444"/>
+  <circle cx="59" cy="38" r="2" fill="#F59E0B"/>
+  <circle cx="65" cy="38" r="2" fill="#10B981"/>
+  <!-- Code Prompt Bracket & Cursor -->
+  <path d="M60 58l5 5-5 5" stroke="url(#ses-lime)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="70" y="66" width="12" height="2.5" rx="1" fill="#CCFF00"/>
+  <!-- Ghost Code Lines in Background -->
+  <rect x="60" y="78" width="40" height="3" rx="1.5" fill="#3F3F46" fill-opacity="0.6"/>
+  <rect x="60" y="86" width="28" height="3" rx="1.5" fill="#3F3F46" fill-opacity="0.4"/>
+  <rect x="60" y="94" width="55" height="3" rx="1.5" fill="#3F3F46" fill-opacity="0.4"/>
+</svg>

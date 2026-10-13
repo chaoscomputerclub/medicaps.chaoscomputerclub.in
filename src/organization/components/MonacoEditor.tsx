@@ -110,7 +110,7 @@ export const MonacoEditor = memo(function MonacoEditor({
         onChange={handleChange}
         onMount={handleMount}
         loading={
-          <div className="p-4 text-xs font-mono text-zinc-500 animate-pulse">
+          <div className="p-4 text-xs font-sans text-zinc-500 animate-pulse">
             Initializing terminal code editor…
           </div>
         }

@@ -35,10 +35,10 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
     }
     if (code.includes("core")) {
       return {
-        border: "border-purple-400/40",
-        from: "from-purple-400/20",
+        border: "border-emerald-400/40",
+        from: "from-emerald-400/20",
         shadow: "",
-        text: "text-purple-400",
+        text: "text-emerald-400",
       };
     }
     return {
@@ -69,12 +69,9 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
         <div className="py-6 flex flex-col items-center justify-center text-center">
           <div className="size-14 rounded-[16px] bg-[#171717] border border-white/[0.08] flex items-center justify-center mb-2">
             <img
-              src="/matiks-assets/badges/Novice.png"
+              src="/graphics/ranks/rank-explorer.svg"
               alt="Locked Badge"
               className="size-8 object-contain opacity-40 grayscale"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = "none";
-              }}
             />
           </div>
           <p className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">No badges unlocked yet</p>
@@ -89,14 +86,14 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
             const code = (item.code || item.id || item.title || item.name || "").toLowerCase();
             const certSrc =
               code.includes("contest") || code.includes("tourn") || code.includes("podium")
-                ? "/matiks-assets/achievements/ContestRecognition.webp"
+                ? "/graphics/achievements/achievement-podium-finish.svg"
                 : code.includes("survival") || code.includes("streak") || code.includes("fire")
-                ? "/matiks-assets/achievements/SurvivalSaturdayRecognition.webp"
+                ? "/graphics/achievements/achievement-streak-7.svg"
                 : code.includes("showdown") || code.includes("duel") || code.includes("battle")
-                ? "/matiks-assets/achievements/ShowdownRecognition.webp"
+                ? "/graphics/achievements/achievement-speed-demon.svg"
                 : code.includes("novice") || code.includes("cadet") || code.includes("star")
-                ? "/matiks-assets/badges/Novice.png"
-                : "/matiks-assets/badges/badge.webp";
+                ? "/graphics/ranks/rank-explorer.svg"
+                : "/graphics/achievements/achievement-clean-code.svg";
 
             return (
               <div

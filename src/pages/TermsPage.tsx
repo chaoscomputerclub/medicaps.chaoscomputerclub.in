@@ -54,7 +54,7 @@ export function TermsPage() {
             <p className="mt-3">
               These Terms of Service (&ldquo;Terms&rdquo;) govern access to and use of the competitive programming,
               cybersecurity challenge, and skill assessment platform hosted at{" "}
-              <span className="font-mono text-xs text-zinc-200">medicaps.chaoscomputerclub.in</span>,
+              <span className="font-sans text-xs text-zinc-200">medicaps.chaoscomputerclub.in</span>,
               operated by Chaos Computer Club India (&ldquo;CCC&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;).
             </p>
             <p className="mt-3">
@@ -77,7 +77,7 @@ export function TermsPage() {
               <li>
                 <strong className="text-zinc-200">Organization Email:</strong> Account registration and OAuth
                 authentication require a verified university email address ending in{" "}
-                <span className="font-mono text-xs text-zinc-200">@medicaps.ac.in</span>.
+                <span className="font-sans text-xs text-zinc-200">@medicaps.ac.in</span>.
               </li>
               <li>
                 <strong className="text-zinc-200">Single Account Policy:</strong> Each student is permitted exactly
@@ -99,7 +99,7 @@ export function TermsPage() {
               The platform evaluates algorithmic proficiency and security problem-solving. To maintain institutional
               standards and fair evaluation, participants must adhere to the following rules:
             </p>
-            <div className="mt-4 rounded-lg border border-white/[0.08] bg-[#121214] p-5">
+            <div className="mt-4 rounded-[16px] border border-white/[0.08] bg-[#171717] p-5 sm:p-6">
               <h3 className="text-sm font-medium text-white">Prohibited Actions:</h3>
               <ul className="mt-2.5 list-inside list-disc space-y-2 text-xs leading-normal text-zinc-400">
                 <li>
@@ -199,10 +199,10 @@ export function TermsPage() {
             <p className="mt-3">
               Questions regarding these Terms, contest rules, or appeals may be directed to the Chapter Administration:
             </p>
-            <div className="mt-4 rounded-lg border border-white/[0.08] bg-[#121214] p-5 text-sm text-zinc-300">
+            <div className="mt-4 rounded-[16px] border border-white/[0.08] bg-[#171717] p-5 sm:p-6 text-sm text-zinc-300">
               <p className="font-medium text-white">Chaos Computer Club India — Medi-Caps Chapter</p>
               <p className="mt-1 text-zinc-400">Faculty Coordinator &amp; Student Technical Lead</p>
-              <p className="mt-2 font-mono text-xs text-lime-400">
+              <p className="mt-2 font-sans text-xs text-lime-400">
                 Email:{" "}
                 <a
                   href={`mailto:${(import.meta.env["VITE_CONTACT_EMAIL"] as string) || "info@chaoscomputerclub.in"}`}

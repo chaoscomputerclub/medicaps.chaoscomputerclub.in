@@ -38,7 +38,7 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
       <div className="space-y-3 pb-4 border-b border-white/8">
         <div className="flex flex-wrap items-baseline gap-2">
           {problem.problem_index && (
-            <span className="font-mono text-lg font-bold text-lime-400">
+            <span className="font-sans text-lg font-bold text-lime-400">
               {problem.problem_index}.
             </span>
           )}
@@ -49,34 +49,34 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span
-            className={`font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded border uppercase tracking-wider ${diffBadgeColor}`}
+            className={`font-sans text-[11px] font-semibold px-2.5 py-0.5 rounded border uppercase tracking-wider ${diffBadgeColor}`}
           >
             {difficulty}
           </span>
 
           {problem.points !== undefined && (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-400 bg-white/5 border border-white/8 px-2.5 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 font-sans text-[11px] text-zinc-400 bg-white/5 border border-white/8 px-2.5 py-0.5 rounded">
               <Award className="size-3 text-amber-400" />
               <span>{problem.points}&nbsp;pts</span>
             </span>
           )}
 
           {problem.topic && (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-400 bg-white/5 border border-white/8 px-2.5 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 font-sans text-[11px] text-zinc-400 bg-white/5 border border-white/8 px-2.5 py-0.5 rounded">
               <Tag className="size-3 text-zinc-400" />
               <span>{problem.topic}</span>
             </span>
           )}
 
           {problem.time_limit !== undefined && (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-500">
+            <span className="inline-flex items-center gap-1 font-sans text-[11px] text-zinc-500">
               <Clock className="size-3" />
               <span>{problem.time_limit}&nbsp;s</span>
             </span>
           )}
 
           {problem.memory_limit !== undefined && (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-500">
+            <span className="inline-flex items-center gap-1 font-sans text-[11px] text-zinc-500">
               <Cpu className="size-3" />
               <span>{problem.memory_limit}&nbsp;MB</span>
             </span>
@@ -94,10 +94,10 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
           {problem.input_format && (
             <div className="space-y-1.5">
-              <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
+              <span className="font-sans text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
                 Input Format
               </span>
-              <div className="bg-zinc-950 border border-white/8 rounded-lg p-3 text-xs">
+              <div className="bg-[#171717] border border-white/[0.08] rounded-[12px] p-3 text-xs">
                 <ReadmeRenderer content={problem.input_format} />
               </div>
             </div>
@@ -105,10 +105,10 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
 
           {problem.output_format && (
             <div className="space-y-1.5">
-              <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
+              <span className="font-sans text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
                 Output Format
               </span>
-              <div className="bg-zinc-950 border border-white/8 rounded-lg p-3 text-xs">
+              <div className="bg-[#171717] border border-white/[0.08] rounded-[12px] p-3 text-xs">
                 <ReadmeRenderer content={problem.output_format} />
               </div>
             </div>
@@ -119,7 +119,7 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
       {/* 4. Examples (Dynamic LeetCode renderer) */}
       {sampleCases.length > 0 && (
         <div className="space-y-3.5 pt-2">
-          <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
+          <span className="font-sans text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
             Examples
           </span>
 
@@ -139,10 +139,10 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
       {/* 5. Constraints Section */}
       {constraintsList.length > 0 && (
         <div className="space-y-2 pt-2">
-          <span className="font-mono text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
+          <span className="font-sans text-[11px] uppercase font-semibold text-zinc-400 tracking-wider block">
             Constraints
           </span>
-          <div className="bg-zinc-950 border border-white/8 rounded-lg p-3.5 space-y-1.5 text-xs">
+          <div className="bg-[#171717] border border-white/[0.08] rounded-[12px] p-3.5 space-y-1.5 text-xs">
             <ul className="space-y-1 list-disc list-inside">
               {constraintsList.map((c, i) => (
                 <li key={i} className="leading-relaxed text-zinc-200">

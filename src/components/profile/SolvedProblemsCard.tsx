@@ -42,7 +42,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
         <span className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-400">
           Solved Problems
         </span>
-        <span className="text-[10px] font-mono text-zinc-400 bg-[#171717] px-2.5 py-0.5 rounded-[6px] border border-white/[0.08] flex items-center gap-1">
+        <span className="text-[10px] font-sans text-zinc-400 bg-[#171717] px-2.5 py-0.5 rounded-[6px] border border-white/[0.08] flex items-center gap-1">
           <span>Authoritative</span>
         </span>
       </div>
@@ -122,7 +122,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
                 <span className="text-4xl sm:text-5xl font-display font-bold text-white tabular-nums tracking-wide">
                   {loading ? "…" : totalSolved}
                 </span>
-                <span className="text-xs font-mono text-zinc-500 tabular-nums">
+                <span className="text-xs font-sans text-zinc-500 tabular-nums">
                   /{loading ? "…" : totalPublished}
                 </span>
               </div>
@@ -132,7 +132,7 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
                 <span>Solved</span>
               </div>
 
-              <div className="text-[10px] font-mono text-zinc-500 mt-1 tabular-nums">
+              <div className="text-[10px] font-sans text-zinc-500 mt-1 tabular-nums">
                 {attemptingCount > 0 ? `${attemptingCount} Attempting` : `${problems.attempted} Attempted`}
               </div>
             </div>
@@ -147,12 +147,12 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#00b8a3]">
                 Easy
               </span>
-              <span className="font-mono text-xs tabular-nums">
+              <span className="font-sans text-xs tabular-nums">
                 <strong className="text-white font-bold">{diff.easy.solved}</strong>
                 <span className="text-zinc-500">/{diff.easy.total || 0}</span>
               </span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-white/[0.08] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#00b8a3] rounded-full transition-all duration-500"
                 style={{
@@ -168,12 +168,12 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#ffc01e]">
                 Med.
               </span>
-              <span className="font-mono text-xs tabular-nums">
+              <span className="font-sans text-xs tabular-nums">
                 <strong className="text-white font-bold">{diff.medium.solved}</strong>
                 <span className="text-zinc-500">/{diff.medium.total || 0}</span>
               </span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-white/[0.08] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#ffc01e] rounded-full transition-all duration-500"
                 style={{
@@ -189,12 +189,12 @@ export function SolvedProblemsCard({ stats, loading = false }: SolvedProblemsCar
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#ff375f]">
                 Hard
               </span>
-              <span className="font-mono text-xs tabular-nums">
+              <span className="font-sans text-xs tabular-nums">
                 <strong className="text-white font-bold">{diff.hard.solved}</strong>
                 <span className="text-zinc-500">/{diff.hard.total || 0}</span>
               </span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-white/[0.08] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#ff375f] rounded-full transition-all duration-500"
                 style={{

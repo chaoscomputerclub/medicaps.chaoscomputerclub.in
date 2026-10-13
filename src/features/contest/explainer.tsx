@@ -56,13 +56,13 @@ export function FirstContestExplainer() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : dismiss())}>
-      <DialogContent className="rounded-none border border-white/10 bg-zinc-950 text-white sm:max-w-lg p-6 backdrop-blur-xl space-y-4">
+      <DialogContent className="rounded-[24px] border border-white/10 bg-[#1F1F1F] text-white sm:max-w-lg p-6 backdrop-blur-xl space-y-4">
         <DialogHeader className="space-y-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400 font-bold">
+          <span className="font-sans text-[10px] uppercase tracking-widest text-[#B1FA63] font-bold">
             How a CCC contest works · {step + 1} of {STEPS.length}
           </span>
           <DialogTitle className="flex items-center gap-2.5 text-lg font-bold uppercase tracking-tight text-white">
-            <Icon className="size-5 text-lime-400" />
+            <Icon className="size-5 text-[#B1FA63]" />
             {current.title}
           </DialogTitle>
           <DialogDescription className="text-sm leading-relaxed text-zinc-400">
@@ -76,8 +76,8 @@ export function FirstContestExplainer() {
               key={s.title}
               className={
                 index <= step
-                  ? "h-1 flex-1 rounded bg-lime-400"
-                  : "h-1 flex-1 rounded bg-zinc-800"
+                  ? "h-1 flex-1 rounded-full bg-[#B1FA63]"
+                  : "h-1 flex-1 rounded-full bg-[#242424]"
               }
             />
           ))}

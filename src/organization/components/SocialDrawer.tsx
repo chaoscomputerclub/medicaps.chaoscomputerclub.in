@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { MakoMascot } from "@/components/common/MakoMascot";
 import { toast } from "sonner";
 import { cn, resolveAvatarUrl } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
@@ -88,21 +89,10 @@ export function SocialDrawer() {
 
         {/* Header Section */}
         <SheetHeader className="p-4 sm:p-5 border-b border-white/[0.08] bg-black/90 backdrop-blur-xl text-left space-y-0 relative z-10">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex size-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75" />
-                <span className="relative inline-flex rounded-full size-2 bg-lime-400" />
-              </span>
-              <div>
-                <p className="font-sans text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
-                  (· // Peer Network)
-                </p>
-                <SheetTitle className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight mt-0.5">
-                  {drawerTargetName || `@${drawerTargetHandle}`}
-                </SheetTitle>
-              </div>
-            </div>
+          <div>
+            <SheetTitle className="font-sans text-sm sm:text-base font-bold text-white uppercase tracking-tight">
+              {drawerTargetName || `@${drawerTargetHandle}`}
+            </SheetTitle>
           </div>
 
           {/* Animated Tab Switcher */}
@@ -180,28 +170,21 @@ export function SocialDrawer() {
                   className="flex items-center justify-between p-3.5 border border-white/[0.08] bg-black/40 rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <Skeleton className="w-10 h-10 bg-zinc-900 rounded-lg" />
+                    <Skeleton className="w-10 h-10 bg-[#242424] rounded-lg" />
                     <div className="space-y-1.5">
-                      <Skeleton className="h-3 w-24 bg-zinc-900" />
-                      <Skeleton className="h-2.5 w-32 bg-zinc-900" />
-                      <Skeleton className="h-2 w-16 bg-zinc-900" />
+                      <Skeleton className="h-3 w-24 bg-[#242424]" />
+                      <Skeleton className="h-2.5 w-32 bg-[#242424]" />
+                      <Skeleton className="h-2 w-16 bg-[#242424]" />
                     </div>
                   </div>
-                  <Skeleton className="h-7 w-20 bg-zinc-900 rounded-md" />
+                  <Skeleton className="h-7 w-20 bg-[#242424] rounded-md" />
                 </div>
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 px-4">
-              <div className="size-24 mx-auto mb-3 flex items-center justify-center">
-                <img
-                  src="/matiks-assets/empty-states/no_Friends.webp"
-                  alt="No connections recorded"
-                  className="size-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
-                />
+              <div className="size-20 mx-auto mb-3 flex items-center justify-center">
+                <MakoMascot variant={searchQuery ? "search" : "welcome"} size="md" />
               </div>
               <h3 className="font-sans text-xs font-bold text-white uppercase tracking-wider">
                 {searchQuery ? "No matching peers" : "No connections recorded"}
@@ -303,7 +286,7 @@ export function SocialDrawer() {
                   </CadetProfileHoverCard>
 
                   {student.is_self ? (
-                    <span className="px-2 py-0.5 text-[10px] font-mono font-semibold uppercase bg-white/[0.04] text-zinc-400 border border-white/[0.08] rounded shrink-0">
+                    <span className="px-2 py-0.5 text-[10px] font-sans font-semibold uppercase bg-white/[0.04] text-zinc-400 border border-white/[0.08] rounded shrink-0">
                       You
                     </span>
                   ) : (

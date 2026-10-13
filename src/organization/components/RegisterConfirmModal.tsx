@@ -67,14 +67,11 @@ export function RegisterConfirmModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-lg bg-zinc-950 border border-white/10 text-white p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-lg rounded-[24px] bg-[#1F1F1F] border border-white/10 text-white p-0 gap-0 overflow-hidden">
         {/* Modal Header */}
-        <DialogHeader className="p-4 border-b border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row items-center justify-between space-y-0">
+        <DialogHeader className="p-4 border-b border-white/10 bg-[#242424] backdrop-blur-md flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-lime-400">
-              (PROTOCOL // Registration Confirm)
-            </span>
-            <DialogTitle className="font-mono text-sm font-bold uppercase tracking-wider text-white">
+            <DialogTitle className="font-sans text-sm font-bold uppercase tracking-wider text-white">
               Confirm Registration
             </DialogTitle>
           </div>
@@ -83,21 +80,21 @@ export function RegisterConfirmModal({
         {/* Modal Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
           <div>
-            <span className="rounded border border-white/10 bg-zinc-800/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-300">
+            <span className="rounded-md border border-white/10 bg-[#242424] px-2.5 py-0.5 font-sans text-[10px] uppercase tracking-wider text-zinc-300">
               {contest.season}
             </span>
-            <h2 className="text-xl font-bold font-mono uppercase text-white mt-2 leading-snug">
+            <h2 className="text-xl font-bold font-sans uppercase text-white mt-2 leading-snug">
               {contest.title}
             </h2>
             <p className="text-xs text-zinc-400 mt-1">{contest.summary}</p>
           </div>
 
           {/* Key Facts Card */}
-          <div className="rounded-md border border-white/10 bg-zinc-900/60 p-4 space-y-3.5">
+          <div className="rounded-[14px] border border-white/10 bg-[#171717] p-4 space-y-3.5">
             <div className="flex items-start gap-3">
-              <Sparkles className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
+              <Sparkles className="w-4 h-4 text-[#B1FA63] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-xs font-mono uppercase text-white block">
+                <strong className="text-xs font-sans uppercase text-white block">
                   Live Algorithmic Arena
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
@@ -108,9 +105,9 @@ export function RegisterConfirmModal({
             </div>
 
             <div className="flex items-start gap-3">
-              <Users className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
+              <Users className="w-4 h-4 text-[#B1FA63] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-xs font-mono uppercase text-white block">
+                <strong className="text-xs font-sans uppercase text-white block">
                   Open Registration & Elo Rated
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
@@ -121,9 +118,9 @@ export function RegisterConfirmModal({
             </div>
 
             <div className="flex items-start gap-3">
-              <MapPin className="w-4 h-4 text-lime-400 shrink-0 mt-0.5" />
+              <MapPin className="w-4 h-4 text-[#B1FA63] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-xs font-mono uppercase text-white block">
+                <strong className="text-xs font-sans uppercase text-white block">
                   Contest Arena
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
@@ -134,11 +131,11 @@ export function RegisterConfirmModal({
           </div>
 
           {/* Agreement Checkbox */}
-          <label className="flex items-start gap-3 p-3.5 rounded-md bg-zinc-900/40 border border-white/10 cursor-pointer text-left hover:border-white/20 transition-colors">
+          <label className="flex items-start gap-3 p-3.5 rounded-[10px] bg-[#171717] border border-white/10 cursor-pointer text-left hover:border-white/20 transition-colors">
             <Checkbox
               checked={agreed}
               onCheckedChange={(checked) => setAgreed(checked === true)}
-              className="mt-0.5 border-white/20 data-[state=checked]:bg-lime-400 data-[state=checked]:text-black"
+              className="mt-0.5 border-white/20 data-[state=checked]:bg-[#B1FA63] data-[state=checked]:text-black"
             />
             <span className="text-xs text-zinc-300 leading-relaxed">
               I certify that I am an enrolled Medi-Caps University student. I agree to abide by the
@@ -148,7 +145,7 @@ export function RegisterConfirmModal({
         </div>
 
         {/* Modal Footer */}
-        <DialogFooter className="p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md flex flex-row justify-end gap-3 space-x-0">
+        <DialogFooter className="p-4 border-t border-white/10 bg-[#242424] backdrop-blur-md flex flex-row justify-end gap-3 space-x-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>

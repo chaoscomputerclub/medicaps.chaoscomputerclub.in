@@ -139,18 +139,18 @@ export function RecentSubmissionsCard({
       {activeTab === "recent_ac" && (
         <div className="space-y-1">
           {loading ? (
-            <div className="py-8 text-center text-zinc-500 font-mono text-xs">
+            <div className="py-8 text-center text-zinc-500 font-sans text-xs">
               Loading recent submissions…
             </div>
           ) : acceptedSubmissions.length === 0 ? (
             <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
               <MakoMascot variant="tasks" size="md" className="opacity-90" />
-              <p className="text-zinc-500 font-mono text-xs">
+              <p className="text-zinc-500 font-sans text-xs">
                 No accepted problem submissions on file yet.
               </p>
               <Link
                 to="/practice"
-                className="inline-block text-xs font-mono text-lime-400 hover:underline"
+                className="inline-block text-xs font-sans text-lime-400 hover:underline"
               >
                 Solve practice problems →
               </Link>
@@ -169,7 +169,7 @@ export function RecentSubmissionsCard({
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-3">
                     <span
-                      className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-[6px] border shrink-0 ${diffBadge.color}`}
+                      className={`text-[10px] font-sans font-semibold px-1.5 py-0.5 rounded-[6px] border shrink-0 ${diffBadge.color}`}
                     >
                       {diffBadge.label}
                     </span>
@@ -180,12 +180,12 @@ export function RecentSubmissionsCard({
                       {item.problem_title || "Practice Problem"}
                     </Link>
                     {item.language && (
-                      <span className="hidden sm:inline text-[10px] font-mono text-zinc-500 bg-[#171717] border border-white/[0.06] px-1.5 py-0.5 rounded-[6px]">
+                      <span className="hidden sm:inline text-[10px] font-sans text-zinc-500 bg-[#171717] border border-white/[0.06] px-1.5 py-0.5 rounded-[6px]">
                         {item.language}
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-[11px] text-zinc-500 tabular-nums shrink-0 ml-auto">
+                  <span className="font-sans text-[11px] text-zinc-500 tabular-nums shrink-0 ml-auto">
                     {formatTimeAgo(item.submitted_at)}
                   </span>
                 </div>
@@ -199,12 +199,12 @@ export function RecentSubmissionsCard({
       {activeTab === "all" && (
         <div className="space-y-1">
           {loading ? (
-            <div className="py-8 text-center text-zinc-500 font-mono text-xs">
+            <div className="py-8 text-center text-zinc-500 font-sans text-xs">
               Loading submissions…
             </div>
           ) : safeSubmissions.length === 0 ? (
             <div className="py-8 text-center space-y-2">
-              <p className="text-zinc-500 font-mono text-xs">
+              <p className="text-zinc-500 font-sans text-xs">
                 No submissions logged on file yet.
               </p>
               <Link
@@ -229,7 +229,7 @@ export function RecentSubmissionsCard({
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-3">
                     <span
-                      className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-[6px] border shrink-0 ${diffBadge.color}`}
+                      className={`text-[10px] font-sans font-semibold px-1.5 py-0.5 rounded-[6px] border shrink-0 ${diffBadge.color}`}
                     >
                       {diffBadge.label}
                     </span>
@@ -240,12 +240,12 @@ export function RecentSubmissionsCard({
                       {item.problem_title || "Practice Problem"}
                     </Link>
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded-[6px] border shrink-0 ${verdictBadge.color}`}
+                      className={`text-[10px] font-sans px-1.5 py-0.5 rounded-[6px] border shrink-0 ${verdictBadge.color}`}
                     >
                       {verdictBadge.label}
                     </span>
                   </div>
-                  <span className="font-mono text-[11px] text-zinc-500 tabular-nums shrink-0 ml-auto">
+                  <span className="font-sans text-[11px] text-zinc-500 tabular-nums shrink-0 ml-auto">
                     {formatTimeAgo(item.submitted_at)}
                   </span>
                 </div>
@@ -260,8 +260,8 @@ export function RecentSubmissionsCard({
         <div className="space-y-1">
           {safeBattles.length === 0 ? (
             <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
-              <MakoMascot variant="chill" size="md" className="opacity-90" />
-              <p className="text-zinc-500 font-mono text-xs">
+              <MakoMascot variant="ready" size="md" className="opacity-90" />
+              <p className="text-zinc-500 font-sans text-xs">
                 No official tournament records on file yet.
               </p>
               <Link
@@ -278,7 +278,7 @@ export function RecentSubmissionsCard({
                 className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"
               >
                 <div className="flex items-center gap-2 min-w-0 pr-3">
-                  <span className="text-[10px] font-mono text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-1.5 py-0.5 rounded-[6px] shrink-0 font-bold">
+                  <span className="text-[10px] font-sans text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-1.5 py-0.5 rounded-[6px] shrink-0 font-bold">
                     Rank #{b.rank}
                   </span>
                   <Link
@@ -288,7 +288,7 @@ export function RecentSubmissionsCard({
                     {b.contest}
                   </Link>
                 </div>
-                <div className="flex items-center gap-3 shrink-0 ml-auto font-mono text-[11px]">
+                <div className="flex items-center gap-3 shrink-0 ml-auto font-sans text-[11px]">
                   <span className="text-zinc-400">Solved: {b.solved}</span>
                   <span
                     className={

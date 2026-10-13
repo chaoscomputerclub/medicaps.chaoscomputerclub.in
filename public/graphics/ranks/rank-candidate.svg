@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="can-border" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <linearGradient id="can-core" x1="12" y1="8" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0C202E"/>
+      <stop offset="100%" stop-color="#030E17"/>
+    </linearGradient>
+    <filter id="can-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0284C7" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <!-- Outer Shield Badge -->
+  <path d="M24 4L7 11v13c0 10.5 7.2 20.3 17 23 9.8-2.7 17-12.5 17-23V11L24 4z" fill="url(#can-core)" stroke="url(#can-border)" stroke-width="2.5" stroke-linejoin="round" filter="url(#can-glow)"/>
+  <!-- Inner Rim -->
+  <path d="M24 8l-13 5.4v10.5c0 8.3 5.5 16 13 18.2 7.5-2.2 13-9.9 13-18.2V13.4L24 8z" fill="#061824" stroke="#0284C7" stroke-width="1.2" stroke-opacity="0.5"/>
+  <!-- Double Chevron Crest -->
+  <path d="M16 16l8 6 8-6" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 23l8 6 8-6" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 2 Stars at Bottom -->
+  <polygon points="19,38 20,40 22.2,40.3 20.6,41.8 21,44 19,43 17,44 17.4,41.8 15.8,40.3 18,40" fill="#38BDF8"/>
+  <polygon points="29,38 30,40 32.2,40.3 30.6,41.8 31,44 29,43 27,44 27.4,41.8 25.8,40.3 28,40" fill="#38BDF8"/>
+</svg>

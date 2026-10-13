@@ -165,11 +165,6 @@ export function DashboardPage() {
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/[0.08] pb-4 sm:pb-5 min-w-0">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-heading font-extrabold text-xs uppercase tracking-widest text-[#B1FA63]">
-              (01 // Command Center)
-            </span>
-          </div>
           <h1 className="text-3xl sm:text-5xl font-display uppercase tracking-wide text-white leading-none truncate">
             Dashboard
           </h1>
@@ -186,7 +181,7 @@ export function DashboardPage() {
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.is_ranked && member?.university_rank ? `#${member.university_rank}` : "Unranked"}
           </strong>
-          <span className="block text-xs font-mono text-zinc-500 mt-1 truncate">
+          <span className="block text-xs font-sans text-zinc-500 mt-1 truncate">
             {member?.is_ranked && member?.standing ? `${member.standing} · Medi-Caps` : "Attend 1 contest to rank"}
           </span>
         </div>
@@ -204,7 +199,7 @@ export function DashboardPage() {
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.attendance_count ?? 0}
           </strong>
-          <span className="block text-xs font-mono text-zinc-500 mt-1 truncate">
+          <span className="block text-xs font-sans text-zinc-500 mt-1 truncate">
             {(member?.attendance_count ?? 0) === 1 ? "1 Verified Tournament" : `${member?.attendance_count ?? 0} Verified Tournaments`}
           </span>
         </div>
@@ -214,7 +209,7 @@ export function DashboardPage() {
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {profile?.problem_stats?.problems?.solved ?? (profile?.problemStats as any)?.total_solved ?? (member as any)?.solved_count ?? 0}
           </strong>
-          <span className="block text-xs font-mono text-zinc-500 mt-1 truncate">
+          <span className="block text-xs font-sans text-zinc-500 mt-1 truncate">
             {profile?.problem_stats?.problems?.attempted ?? (profile?.problemStats as any)?.total_submissions ?? 0} Attempted · Practice
           </span>
         </div>
@@ -227,7 +222,7 @@ export function DashboardPage() {
             <span className="size-2 rounded-full bg-[#B1FA63]" />
             <span className="font-heading font-bold text-xs uppercase tracking-wider text-[#B1FA63]">Coding Practice</span>
           </div>
-          <div className="text-sm font-semibold text-white font-mono flex items-center gap-3 flex-wrap">
+          <div className="text-sm font-semibold text-white font-sans flex items-center gap-3 flex-wrap">
             <span>{profile?.problem_stats?.problems?.solved ?? 0} Solved</span>
             <span className="text-zinc-600">·</span>
             <span className="text-zinc-400">{profile?.problem_stats?.problems?.attempted ?? 0} Attempted</span>
@@ -256,7 +251,7 @@ export function DashboardPage() {
               </div>
               <h2 className="text-2xl md:text-3xl font-display uppercase tracking-wide text-white break-words">{live.title}</h2>
               <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-normal break-words">{live.summary}</p>
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-mono text-zinc-500 pt-1">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-sans text-zinc-500 pt-1">
                 <span className="flex items-center gap-1.5 text-zinc-300">
                   <MapPin className="w-3.5 h-3.5 text-[#B1FA63] shrink-0" />
                   <span className="truncate">{live.venue}</span>
@@ -290,7 +285,7 @@ export function DashboardPage() {
             <h2 className="text-xl md:text-2xl font-display uppercase tracking-wide text-white break-words">{next.title}</h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-xl break-words">{next.summary}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-mono text-xs shrink-0 w-full md:w-auto justify-between md:justify-end">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 font-sans text-xs shrink-0 w-full md:w-auto justify-between md:justify-end">
             <div>
               <span className="block text-[10px] text-zinc-500 uppercase tracking-wider">Scheduled Start</span>
               <strong className="block text-zinc-200 text-xs mt-0.5 tabular-nums">{formatContestDate(next.starts_at)}</strong>
@@ -308,8 +303,6 @@ export function DashboardPage() {
       {/* Rating Analytics */}
       <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden">
         <SectionHeader
-          kicker="01 // Rating Trajectory"
-          index="PROGRESS"
           title="University Elo Progression"
           action={
             <Link to="/profile" className="text-xs font-heading font-bold text-[#B1FA63] hover:underline uppercase tracking-wider">
@@ -325,8 +318,6 @@ export function DashboardPage() {
       {/* Live Tournament Scoreboard Radar */}
       <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden">
         <SectionHeader
-          kicker="02 // Tournament Radar"
-          index="LIVE"
           title="Tournament Scoreboard"
           action={
             <div className="flex items-center gap-3">
@@ -347,8 +338,6 @@ export function DashboardPage() {
       {/* Live Campus Activity Stream */}
       <section className="p-6 sm:p-7 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] min-w-0 overflow-hidden">
         <SectionHeader
-          kicker="03 // Network Feed"
-          index="TELEMETRY"
           title="Live Activity Stream"
         />
         <div className="w-full min-w-0">

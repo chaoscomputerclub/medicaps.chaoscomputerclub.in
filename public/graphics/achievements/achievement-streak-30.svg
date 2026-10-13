@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="stk30-rim" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="40%" stop-color="#E11D48"/>
+      <stop offset="100%" stop-color="#9F1239"/>
+    </linearGradient>
+    <linearGradient id="stk30-core" x1="16" y1="8" x2="48" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#330914"/>
+      <stop offset="100%" stop-color="#140206"/>
+    </linearGradient>
+    <linearGradient id="flame-ruby" x1="20" y1="14" x2="44" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FECDD3"/>
+      <stop offset="40%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#BE123C"/>
+    </linearGradient>
+    <filter id="stk30-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#E11D48" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <!-- Outer Shield Frame -->
+  <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="url(#stk30-core)" stroke="url(#stk30-rim)" stroke-width="2.5" stroke-linejoin="round" filter="url(#stk30-shadow)"/>
+  <polygon points="22,9 42,9 55,22 55,42 42,55 22,55 9,42 9,22" fill="#20040D" stroke="#BE123C" stroke-width="1.2" stroke-dasharray="2 1.5"/>
+  <!-- Ruby Fire Flame with Dual Phoenix Wings -->
+  <path d="M32 12c3 6 9 9 9 17 0 7.7-6.3 14-14 14s-14-6.3-14-14c0-6 4-12 9-15 0 5 3 7 5 7 2-5 4-8 7-9z" fill="url(#flame-ruby)" stroke="#FECDD3" stroke-width="1.2"/>
+  <path d="M32 26c1.5 3 4 5 4 9 0 4-3.3 7-7 7s-7-3-7-7c0-3 2-6 4-8 0 2.5 1.5 3.5 2.5 3.5 1.5-2.5 2-4.5 3.5-5.5z" fill="#FFF1F2"/>
+  <!-- "30" Badge Tag at bottom -->
+  <circle cx="46" cy="46" r="9" fill="#18181B" stroke="#FB7185" stroke-width="1.8"/>
+  <text x="46" y="50" font-family="monospace" font-size="10" font-weight="bold" fill="#FB7185" text-anchor="middle">30</text>
+</svg>

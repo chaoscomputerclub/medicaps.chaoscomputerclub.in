@@ -30,10 +30,10 @@ export function PhaseBadge({ phase }: { phase: ContestPhase }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-[10px] font-semibold uppercase tracking-wider",
+        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-sans text-[10px] font-semibold uppercase tracking-wider",
         isLive
           ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
-          : "border border-white/8 bg-zinc-950 text-zinc-400"
+          : "border border-white/8 bg-[#171717] text-zinc-400"
       )}
     >
       {isLive && <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />}
@@ -56,10 +56,10 @@ export function Countdown({ target, label }: { target: string | Date; label: str
   const ms = new Date(target).getTime() - now;
   return (
     <div className="flex flex-col gap-1">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+      <span className="font-sans text-[10px] uppercase tracking-widest text-zinc-500">
         {label}
       </span>
-      <span className="font-mono text-2xl font-bold tabular-nums text-lime-400">
+      <span className="font-sans text-2xl font-bold tabular-nums text-lime-400">
         {ms <= 0 ? "00:00:00" : formatCountdown(ms)}
       </span>
     </div>
@@ -106,12 +106,12 @@ export function RoundsTimeline({
         >
           <div
             className={cn(
-              "relative z-10 grid size-10 place-items-center rounded-md border font-mono text-xs font-semibold",
+              "relative z-10 grid size-10 place-items-center rounded-md border font-sans text-xs font-semibold",
               round.active
                 ? "border-lime-400 bg-black text-lime-400"
                 : round.done
-                ? "border-white/20 bg-zinc-950 text-white"
-                : "border-white/8 bg-black text-zinc-500",
+                ? "border-white/20 bg-[#242424] text-white"
+                : "border-white/8 bg-[#171717] text-zinc-500",
             )}
           >
             {round.done ? "✓" : `0${index + 1}`}
@@ -121,19 +121,19 @@ export function RoundsTimeline({
               <strong className="text-sm font-semibold text-white tracking-tight">{round.title}</strong>
               <span
                 className={cn(
-                  "px-2 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider",
+                  "px-2 py-0.5 rounded font-sans text-[10px] uppercase tracking-wider",
                   round.active
                     ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
                     : round.done
-                    ? "border border-white/8 bg-zinc-950 text-zinc-400"
-                    : "border border-white/8 bg-black text-zinc-600"
+                    ? "border border-white/8 bg-[#242424] text-zinc-400"
+                    : "border border-white/8 bg-[#171717] text-zinc-600"
                 )}
               >
                 {round.active ? "Live now" : round.done ? "Complete" : "Upcoming"}
               </span>
             </div>
-            <p className="mt-1 text-xs text-zinc-400 font-mono">{round.body}</p>
-            <p className="mt-0.5 text-xs text-zinc-500 font-mono">{round.note}</p>
+            <p className="mt-1 text-xs text-zinc-400 font-sans">{round.body}</p>
+            <p className="mt-0.5 text-xs text-zinc-500 font-sans">{round.note}</p>
           </div>
         </li>
       ))}
@@ -157,14 +157,14 @@ export function ContestCard({
   return (
     <Card
       className={cn(
-        "rounded-lg border border-white/8 bg-black transition-colors hover:border-white/20 flex flex-col justify-between",
+        "rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] transition-colors hover:border-white/20 flex flex-col justify-between",
         featured && "border-lime-400/30",
       )}
     >
       <CardHeader className="gap-2 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <PhaseBadge phase={phase} />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <span className="font-sans text-[10px] uppercase tracking-widest text-zinc-500">
             {cadenceLabel(contest)}
             {contest.edition ? ` · ${contest.edition}` : ""}
           </span>
@@ -176,7 +176,7 @@ export function ContestCard({
       </CardHeader>
 
       <CardContent className="space-y-4 px-5 pb-5 pt-0">
-        <dl className="grid grid-cols-2 gap-2.5 font-mono text-xs text-zinc-400 border-t border-white/6 pt-4">
+        <dl className="grid grid-cols-2 gap-2.5 font-sans text-xs text-zinc-400 border-t border-white/6 pt-4">
           <div className="flex items-center gap-2">
             <CalendarClock className="size-3.5 text-zinc-500 shrink-0" />
             <span className="truncate">{formatWhen(contest.starts_at)}</span>
@@ -195,8 +195,8 @@ export function ContestCard({
           </div>
         </dl>
         <div className="space-y-1.5">
-          <Progress value={fill} className="h-1 rounded bg-zinc-900 [&>div]:bg-lime-400" />
-          <p className="font-mono text-[10px] text-zinc-500 flex justify-between">
+          <Progress value={fill} className="h-1 rounded-full bg-[#242424] [&>div]:bg-[#B1FA63]" />
+          <p className="font-sans text-[10px] text-zinc-500 flex justify-between">
             <span>Seats Reserved</span>
             <span className="text-white font-semibold tabular-nums">{fill}%</span>
           </p>

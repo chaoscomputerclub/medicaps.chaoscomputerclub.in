@@ -1,0 +1,75 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/dist-admin/**": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true,
+    "**/backend/.venv/**": true,
+    "**/graphify-out/**": true,
+    "**/.pytest_cache/**": true,
+    "**/__pycache__/**": true,
+    "**/.agents/**": true,
+    "**/.planning/**": true,
+    "**/codebox-engine/**": true,
+    "**/judge-agent/bin/**": true,
+    "**/node-agent/bin/**": true,
+    "**/matiks_assets/**": true,
+    "**/public/matiks-assets/**": true,
+    "**/dist/matiks-assets/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/dist-admin": true,
+    "**/test-results": true,
+    "**/playwright-report": true,
+    "**/backend/.venv": true,
+    "**/graphify-out": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true,
+    "**/.agents": true,
+    "**/.planning": true,
+    "**/codebox-engine": true,
+    "**/judge-agent/bin": true,
+    "**/node-agent/bin": true,
+    "**/matiks_assets": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.tsserver.watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriority"
+  },
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/backend/.venv",
+    "**/graphify-out",
+    "**/test-results",
+    "**/playwright-report",
+    "**/dist",
+    "**/.agents",
+    "**/codebox-engine"
+  ],
+  "python.analysis.ignore": [
+    "**/node_modules",
+    "**/backend/.venv",
+    "**/graphify-out",
+    "**/test-results"
+  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+  "git.autorefresh": true,
+  "git.detectSubmodules": false,
+  "git.ignoreSubmodules": true
+}

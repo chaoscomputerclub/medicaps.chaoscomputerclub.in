@@ -344,11 +344,6 @@ export function ProfilePage() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#B1FA63]">
-                (06 // Cadet Dossier)
-              </span>
-            </div>
             <div className="flex items-center gap-3.5 flex-wrap">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-display uppercase tracking-wide text-white leading-none">
                 {displayName}
@@ -405,7 +400,7 @@ export function ProfilePage() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap text-xs font-mono text-zinc-400 pt-0.5">
+            <div className="flex items-center gap-2 flex-wrap text-xs font-sans text-zinc-400 pt-0.5">
               <TierBadge tier={m.tier} rating={m.rating}>{m.tier || "1★ Explorer"}</TierBadge>
               {m.department || (isSelfUser ? currentMember?.department : null) ? (
                 <>
@@ -430,7 +425,7 @@ export function ProfilePage() {
             )}
 
             {/* Campus Social & Peer Telemetry */}
-            <div className="flex items-center gap-2.5 flex-wrap pt-2.5">
+            <div className="flex items-center gap-3 flex-wrap pt-2.5">
               <SocialFollowStats
                 targetId={m.id}
                 targetHandle={m.handle}
@@ -440,12 +435,16 @@ export function ProfilePage() {
                 isSelf={isSelfUser}
               />
 
+              {(m.github_username || m.linkedin_url) && (
+                <span className="text-zinc-700 select-none hidden sm:inline text-xs" aria-hidden="true">·</span>
+              )}
+
               {m.github_username && (
                 <a
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[10px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[8px] transition-colors"
                 >
                   <Github size={11} className="text-[#B1FA63]" />
                   <span>{m.github_username}</span>
@@ -460,7 +459,7 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[10px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[8px] transition-colors"
                 >
                   <FaLinkedinIn size={11} className="text-[#B1FA63]" />
                   <span>LinkedIn</span>
@@ -470,7 +469,7 @@ export function ProfilePage() {
           </div>
         </div>
 
-        <dl className="flex sm:flex-col gap-3.5 font-mono text-xs border-t lg:border-t-0 lg:border-l border-white/[0.08] pt-4 lg:pt-0 lg:pl-6 relative z-10 shrink-0">
+        <dl className="flex sm:flex-col gap-3.5 font-sans text-xs border-t lg:border-t-0 lg:border-l border-white/[0.08] pt-4 lg:pt-0 lg:pl-6 relative z-10 shrink-0">
           <div>
             <dt className="text-zinc-500 uppercase text-[9px] font-heading font-bold tracking-wider">Enrollment No.</dt>
             <dd className="text-white font-medium tabular-nums text-sm mt-0.5">{enrollmentNo}</dd>
@@ -567,8 +566,6 @@ export function ProfilePage() {
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-7 space-y-4">
           <SectionHeader
-            kicker="03 // Rating History"
-            index="TRAJECTORY"
             title="Competitive Trajectory"
           />
           <RatingChart data={history} loading={isLoading && history.length === 0} />
@@ -584,21 +581,14 @@ export function ProfilePage() {
 
       {/* Contest Battle Logs */}
       <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
-        <SectionHeader kicker="04 // Record" index="CONTESTS" title="Attended Tournaments" />
-        <div className="space-y-2 font-mono text-xs">
+        <SectionHeader title="Attended Tournaments" />
+        <div className="space-y-2 font-sans text-xs">
           {battles.length === 0 ? (
             <div className="text-center py-8 flex flex-col items-center justify-center">
               <div className="size-20 mb-2 flex items-center justify-center">
-                <img
-                  src="/matiks-assets/empty-states/no_duels_to_flex.png"
-                  alt="No tournaments on file"
-                  className="size-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
-                />
+                <MakoMascot variant="gamer" size="md" />
               </div>
-              <p className="text-xs font-mono text-zinc-400">No recorded tournaments on file.</p>
+              <p className="text-xs font-sans text-zinc-400">No recorded tournaments on file.</p>
             </div>
           ) : (
             battles.map((b: any) => (
@@ -606,7 +596,7 @@ export function ProfilePage() {
                 key={b.certificate_id}
                 className="py-3 px-3.5 rounded-[12px] bg-[#171717] border border-white/[0.04] hover:border-white/[0.12] transition-colors flex items-center justify-between flex-wrap gap-3"
               >
-                <time className="text-zinc-500 font-mono text-xs">
+                <time className="text-zinc-500 font-sans text-xs">
                   {new Date(b.date).toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "short",
@@ -625,7 +615,7 @@ export function ProfilePage() {
                     <h3 className="font-heading font-bold text-white text-sm">{b.contest}</h3>
                   )}
                   {b.certificate_id ? (
-                    <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">
+                    <span className="text-[10px] text-zinc-500 font-sans block mt-0.5">
                       {b.certificate_id}
                     </span>
                   ) : null}
@@ -633,17 +623,17 @@ export function ProfilePage() {
                 <div className="flex items-center gap-3">
                   <span className="text-zinc-400 font-sans">
                     Rank{" "}
-                    <strong className="text-white font-mono font-bold tabular-nums">#{b.rank}</strong>
+                    <strong className="text-white font-sans font-bold tabular-nums">#{b.rank}</strong>
                   </span>
                   <span className="text-zinc-400 font-sans">
                     Solved{" "}
-                    <strong className="text-white font-mono font-bold tabular-nums">{b.solved}</strong>
+                    <strong className="text-white font-sans font-bold tabular-nums">{b.solved}</strong>
                   </span>
                   <em
                     className={
                       b.delta >= 0
-                        ? "text-[#B1FA63] not-italic font-mono font-bold tabular-nums"
-                        : "text-red-400 not-italic font-mono font-bold tabular-nums"
+                        ? "text-[#B1FA63] not-italic font-sans font-bold tabular-nums"
+                        : "text-red-400 not-italic font-sans font-bold tabular-nums"
                     }
                   >
                     {b.delta > 0 ? "+" : ""}
@@ -658,13 +648,13 @@ export function ProfilePage() {
 
       {/* Achievements Ledger */}
       <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
-        <SectionHeader kicker="05 // Milestones" index="HONORS" title="Achievement Ledger" />
+        <SectionHeader title="Achievement Ledger" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
           {achievements.length === 0 ? (
             <div className="text-center py-8 text-zinc-500 col-span-full flex flex-col items-center justify-center">
               <div className="size-16 mb-2 flex items-center justify-center">
                 <img
-                  src="/matiks-assets/badges/Novice.png"
+                  src="/graphics/ranks/rank-explorer.svg"
                   alt="Locked Badge"
                   className="size-8 object-contain opacity-40 grayscale"
                 />
@@ -676,12 +666,14 @@ export function ProfilePage() {
               const code = (a.code || a.id || a.name || a.title || "").toLowerCase();
               const certSrc =
                 code.includes("contest") || code.includes("tourn") || code.includes("podium")
-                  ? "/matiks-assets/achievements/ContestRecognition.webp"
+                  ? "/graphics/achievements/achievement-podium-finish.svg"
                   : code.includes("survival") || code.includes("streak") || code.includes("fire")
-                  ? "/matiks-assets/achievements/SurvivalSaturdayRecognition.webp"
+                  ? "/graphics/achievements/achievement-streak-7.svg"
                   : code.includes("showdown") || code.includes("duel") || code.includes("battle")
-                  ? "/matiks-assets/achievements/ShowdownRecognition.webp"
-                  : "/matiks-assets/badges/badge.webp";
+                  ? "/graphics/achievements/achievement-speed-demon.svg"
+                  : code.includes("novice") || code.includes("cadet") || code.includes("star")
+                  ? "/graphics/ranks/rank-explorer.svg"
+                  : "/graphics/achievements/achievement-clean-code.svg";
 
               return (
                 <article
@@ -703,7 +695,7 @@ export function ProfilePage() {
                         }}
                       />
                     </div>
-                    <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400">
+                    <span className="text-[10px] uppercase font-sans tracking-wider text-zinc-400">
                       {a.code || a.id || "ACH"}
                     </span>
                   </div>

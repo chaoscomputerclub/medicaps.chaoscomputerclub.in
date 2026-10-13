@@ -42,7 +42,7 @@ export function OtpStep({
       <div className="space-y-2">
         <Label
           htmlFor="otp"
-          className="font-mono text-[0.6875rem] tracking-wider text-zinc-400 uppercase"
+          className="font-sans text-[0.6875rem] tracking-wider text-zinc-400 uppercase"
         >
           Code sent to <span className="text-white font-medium">{email}</span>
         </Label>
@@ -52,18 +52,18 @@ export function OtpStep({
               <InputOTPSlot
                 key={i}
                 index={i}
-                className="size-11 rounded-md border border-white/10 bg-zinc-900/60 font-mono text-base tabular-nums focus:border-lime-400 focus:ring-1 focus:ring-lime-400 text-white"
+                className="size-11 rounded-[10px] border border-white/10 bg-[#171717] font-sans text-base tabular-nums focus:border-[#B1FA63] focus:ring-1 focus:ring-[#B1FA63] text-white"
               />
             ))}
           </InputOTPGroup>
         </InputOTP>
-        <p className="font-mono text-xs tabular-nums text-zinc-500">
+        <p className="font-sans text-xs tabular-nums text-zinc-500">
           Six digits · expires in 15 minutes
         </p>
       </div>
 
       {error ? (
-        <p role="alert" className="text-xs text-rose-400 font-mono">
+        <p role="alert" className="text-xs text-rose-400 font-sans">
           {error}
         </p>
       ) : null}

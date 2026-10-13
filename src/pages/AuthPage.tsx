@@ -382,7 +382,7 @@ export function AuthPage() {
               variant="default"
               size="lg"
               disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all"
+              className="w-full mt-4 h-11 text-sm font-sans font-medium rounded-md active:scale-[0.98] transition-all"
             >
               {pending ? (
                 <span className="inline-flex items-center gap-2">
@@ -415,7 +415,7 @@ export function AuthPage() {
               <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-[#0c0c0e] px-3 text-[11px] font-mono uppercase tracking-wider text-zinc-500 select-none">
+              <span className="bg-[#0c0c0e] px-3 text-[11px] font-sans uppercase tracking-wider text-zinc-500 select-none">
                 or
               </span>
             </div>
@@ -471,7 +471,7 @@ export function AuthPage() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-md border border-white/15 bg-[#171717] text-lg sm:text-xl font-mono font-semibold text-white transition-all duration-150"
+                    className="w-11 h-13 sm:w-12 sm:h-14 rounded-md border border-white/15 bg-[#171717] text-lg sm:text-xl font-sans font-semibold text-white transition-all duration-150"
                     activeClassName="!border-[#CCFF00] ring-1 ring-[#CCFF00]/50"
                   />
                 ))}
@@ -605,7 +605,7 @@ export function AuthPage() {
               handleStatus === "taken" ||
               handleStatus === "checking"
             }
-            className="w-full mt-4 h-11 text-sm font-mono font-medium rounded-md active:scale-[0.98] transition-all"
+            className="w-full mt-4 h-11 text-sm font-sans font-medium rounded-md active:scale-[0.98] transition-all"
           >
             {pending ? (
               <span className="inline-flex items-center gap-2">

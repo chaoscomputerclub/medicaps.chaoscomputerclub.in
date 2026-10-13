@@ -27,7 +27,7 @@ const buttonVariants = cva(
         outline:
           'bg-transparent text-white border border-white/20 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         secondary:
-          'bg-zinc-900 text-zinc-200 border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-[#242424] text-zinc-200 border border-white/10 hover:border-[#B1FA63]/50 hover:text-white shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         ghost:
           'bg-transparent text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent transition-colors duration-150 [&_svg]:transition-colors',
         link:

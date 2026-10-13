@@ -136,7 +136,7 @@ export function ContestQualifiedPage() {
 
   if (!contest) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center font-mono text-xs text-zinc-500">
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center font-sans text-xs text-zinc-500">
         Contest not found.
       </div>
     );
@@ -160,7 +160,7 @@ export function ContestQualifiedPage() {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <Link
         to={`/contests/${contestSlug}`}
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-500 hover:text-white transition-colors"
+        className="inline-flex items-center gap-1.5 font-sans text-xs text-zinc-500 hover:text-white transition-colors"
       >
         <ArrowLeft className="size-3.5" /> Back to {contest.title}
       </Link>
@@ -169,12 +169,10 @@ export function ContestQualifiedPage() {
       {isAssessmentEnded && isTop30Qualified ? (
         <>
           <PageHeader
-            kicker="02 // Finalist Credentials"
-            index="ROUND 2 FINAL"
             title={`${rank ? `Rank #${rank}` : "Top 30"} — Campus Pass Issued`}
             description="Verified air-gapped lab workstation pass for Round 2 Finals."
             badge={
-              <span className="rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-xs font-semibold text-lime-400 tabular-nums">
+              <span className="rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-sans text-xs font-semibold text-lime-400 tabular-nums">
                 {score} PTS
               </span>
             }
@@ -205,7 +203,7 @@ export function ContestQualifiedPage() {
                     size={200}
                     level="H"
                   />
-                  <p className="font-mono text-xs font-bold uppercase tracking-widest text-black">
+                  <p className="font-sans text-xs font-bold uppercase tracking-widest text-black">
                     {pass.pass_code}
                   </p>
                 </div>
@@ -221,7 +219,7 @@ export function ContestQualifiedPage() {
                     ].map(({ label, value, hi }) => (
                       <div key={label} className="rounded-[14px] border border-white/[0.06] bg-[#171717] p-3.5">
                         <p className="text-[9px] uppercase tracking-wider text-zinc-400 font-heading font-bold">{label}</p>
-                        <p className={`mt-0.5 font-semibold ${hi ? "text-[#B1FA63] font-mono" : "text-white"}`}>{value}</p>
+                        <p className={`mt-0.5 font-semibold ${hi ? "text-[#B1FA63] font-sans" : "text-white"}`}>{value}</p>
                       </div>
                     ))}
                   </div>
@@ -231,7 +229,7 @@ export function ContestQualifiedPage() {
                     <Clock className="size-3.5 shrink-0 text-[#B1FA63]" />
                     <div>
                       <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Gate Opens: </span>
-                      <span className="text-white font-mono font-medium">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</span>
+                      <span className="text-white font-sans font-medium">{formatWhen(pass.check_in_opens_at || contest.check_in_opens_at)}</span>
                     </div>
                   </div>
 
@@ -277,7 +275,7 @@ export function ContestQualifiedPage() {
 
               {/* Lab Instructions */}
               <div className="space-y-4 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6">
-                <SectionHeader kicker="01 // Protocol" index="LAB PROTOCOL" title="Venue Regulations" />
+                <SectionHeader title="Venue Regulations" />
                 <ul className="space-y-2.5 font-sans text-xs text-zinc-300">
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#B1FA63] font-heading font-bold shrink-0">01.</span>
@@ -285,7 +283,7 @@ export function ContestQualifiedPage() {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#B1FA63] font-heading font-bold shrink-0">02.</span>
-                    <span>Take your designated workstation (<strong className="text-white font-mono">{pass.seat || "Assigned Seat"}</strong>). External laptops, phones, or storage devices are banned.</span>
+                    <span>Take your designated workstation (<strong className="text-white font-sans">{pass.seat || "Assigned Seat"}</strong>). External laptops, phones, or storage devices are banned.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#B1FA63] font-heading font-bold shrink-0">03.</span>
@@ -295,27 +293,29 @@ export function ContestQualifiedPage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-white/8 bg-black p-8 text-center font-mono text-xs text-zinc-400 space-y-3">
-              <ShieldCheck className="size-8 mx-auto text-lime-400" />
-              <p>Top 30 qualification verified. Generating your secure QR pass...</p>
-              <Button onClick={() => refreshData(true)} variant="outline" size="sm">
-                Refresh Credentials
-              </Button>
+            <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center space-y-4 font-sans">
+              <div className="size-16 rounded-[16px] bg-[#171717] border border-white/[0.08] mx-auto flex items-center justify-center">
+                <ShieldCheck className="size-8 text-[#B1FA63]" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-white">Qualification Verified</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed max-w-md mx-auto">
+                  Top 30 qualification verified. Generating your secure cryptographic QR campus pass…
+                </p>
+              </div>
+              <div className="pt-2 flex justify-center">
+                <Button onClick={() => refreshData(true)} variant="outline" size="sm" className="rounded-[10px] bg-[#171717] border-white/10 hover:border-[#B1FA63]/30 text-white">
+                  Refresh Credentials
+                </Button>
+              </div>
             </div>
           )}
         </>
       ) : (
         /* Not Qualified State */
-        <div className="rounded-lg border border-white/8 bg-black p-8 text-center space-y-4 font-mono">
-          <div className="size-16 mx-auto flex items-center justify-center">
-            <img
-              src="/matiks-assets/icons/smart75-local-seatLock.png"
-              alt="Pass Restricted"
-              className="size-12 object-contain"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = "none";
-              }}
-            />
+        <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center space-y-4 font-sans">
+          <div className="size-16 rounded-[16px] bg-[#171717] border border-white/[0.08] mx-auto flex items-center justify-center">
+            <Lock className="size-8 text-[#B1FA63]" />
           </div>
           <div className="space-y-1">
             <h2 className="text-base font-semibold text-white">Campus Pass Restricted</h2>

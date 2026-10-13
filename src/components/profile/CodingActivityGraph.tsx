@@ -99,14 +99,14 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
         <div className="flex items-center gap-3 text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 self-end sm:self-auto">
           <span>
             Active Days:{" "}
-            <strong className="text-white tabular-nums font-mono font-bold">
+            <strong className="text-white tabular-nums font-sans font-bold">
               {loading ? "…" : summary.active_days}
             </strong>
           </span>
           <span className="text-zinc-700">|</span>
           <span>
             Max Streak:{" "}
-            <strong className="text-white tabular-nums font-mono font-bold">
+            <strong className="text-white tabular-nums font-sans font-bold">
               {loading ? "…" : summary.longest_streak}
             </strong>
           </span>
@@ -152,7 +152,7 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
-                          className="bg-black/95 text-white border border-white/15 px-2.5 py-1.5 font-mono text-xs rounded"
+                          className="bg-black/95 text-white border border-white/15 px-2.5 py-1.5 font-sans text-xs rounded"
                         >
                           <div className="font-semibold text-emerald-400 text-[11px]">
                             {dateFormatted}
@@ -171,7 +171,7 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
             </div>
 
             {/* Months Row Along the Bottom (Exactly like LeetCode) */}
-            <div className="flex text-[10px] font-mono text-zinc-500 pt-1 select-none">
+            <div className="flex text-[10px] font-sans text-zinc-500 pt-1 select-none">
               {weeks.map((_, idx) => {
                 const header = monthHeaders.find((m) => m.weekIndex === idx);
                 return (

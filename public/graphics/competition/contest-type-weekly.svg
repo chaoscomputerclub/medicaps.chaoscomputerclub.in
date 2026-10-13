@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <linearGradient id="cw-bg" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#242428"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="cw-lime" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+  </defs>
+  <!-- Hexagonal Tech Pad -->
+  <polygon points="24,3 43,14 43,34 24,45 5,34 5,14" fill="url(#cw-bg)" stroke="url(#cw-lime)" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Central Coding Bracket Trophy -->
+  <path d="M16 17l-4 5 4 5" stroke="#CCFF00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 17l4 5-4 5" stroke="#CCFF00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21 16h6v5c0 1.657-1.343 3-3 3s-3-1.343-3-3v-5z" fill="#CCFF00" fill-opacity="0.2" stroke="#CCFF00" stroke-width="1.6"/>
+  <path d="M24 24v4" stroke="#CCFF00" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M20 28h8" stroke="#CCFF00" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Bottom Ticker -->
+  <text x="24" y="38" font-family="monospace" font-size="7" font-weight="bold" fill="#A1A1AA" text-anchor="middle" letter-spacing="1">ROUND</text>
+</svg>

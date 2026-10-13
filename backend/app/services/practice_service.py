@@ -268,6 +268,7 @@ class PracticeService:
             )
         ) or 0
         user_summary["total_problems"] = total_published
+        user_summary["total_published"] = total_published
 
         return {
             "problems": items,

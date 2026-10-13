@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { contestSystemService } from "@/organization/data/contest-system";
-import { SectionHeader, PageHeader } from "@/organization/components/ui";
+import { SectionHeader, PageHeader, EmptyState } from "@/organization/components/ui";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTab } from "@/components/animate-ui/components/base/tabs";
 import { MyContestsSkeleton } from "@/organization/components/skeletons";
@@ -81,8 +81,6 @@ export function MyContestsPage() {
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       {/* Header with quick stats */}
       <PageHeader
-        kicker="03 // Participation Record"
-        index="RECORD"
         title="My Contests"
         description="All entered, active, and completed competitive programming tournaments."
         action={
@@ -129,7 +127,6 @@ export function MyContestsPage() {
       <section className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#1F1F1F]">
         <div className="flex items-center justify-between border-b border-white/[0.08] p-5 sm:p-6">
           <SectionHeader
-            kicker="01 // Ledger"
             title={`${filteredContests.length} ${filter === "all" ? "entries" : filter + " contests"}`}
           />
           <Button variant="outline" size="sm" asChild className="rounded-[10px]">
@@ -141,20 +138,21 @@ export function MyContestsPage() {
         </div>
 
         {filteredContests.length === 0 ? (
-          <div className="py-16 px-6 text-center font-mono">
-            <Trophy className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <h3 className="text-sm font-semibold text-white">
-              No contests found in this view
-            </h3>
-            <p className="text-xs text-zinc-400 max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
-              {filter === "registered"
+          <EmptyState
+            title="No Contests Found"
+            body={
+              filter === "registered"
                 ? "You have not registered for any upcoming tournament rounds yet."
-                : "Participate in campus contests to establish your university ranking."}
-            </p>
-            <Button asChild variant="outline" size="sm" className="active:scale-[0.98]">
-              <Link to="/contests">Explore Contests</Link>
-            </Button>
-          </div>
+                : "Participate in campus contests to establish your university ranking."
+            }
+            makoVariant="excited"
+            className="border-0 bg-transparent my-0 py-10"
+            action={
+              <Button asChild variant="outline" size="default" className="rounded-[10px] bg-[#171717] border-white/10 hover:border-[#B1FA63]/30 text-white hover:text-white">
+                <Link to="/contests">Explore Contests</Link>
+              </Button>
+            }
+          />
         ) : (
           <div className="divide-y divide-white/6">
             {filteredContests.map((c) => {
@@ -196,11 +194,11 @@ export function MyContestsPage() {
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-black text-zinc-400 border border-white/10">
+                        <span className="font-sans text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-black text-zinc-400 border border-white/10">
                           {c.season}
                         </span>
                         {isQualified && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
+                          <span className="inline-flex items-center gap-1 font-sans text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
                             <ShieldCheck size={10} />
                             Ranked
                           </span>
@@ -212,7 +210,7 @@ export function MyContestsPage() {
                           </span>
                         )}
                         {isLive && (
-                          <span className="inline-flex items-center gap-1 font-mono text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
+                          <span className="inline-flex items-center gap-1 font-sans text-[9px] font-semibold uppercase text-lime-400 bg-lime-400/10 px-1.5 py-0.5 rounded border border-lime-400/30">
                             <span className="size-1.5 rounded-full bg-lime-400 animate-pulse" />
                             Contest Live
                           </span>
@@ -225,7 +223,7 @@ export function MyContestsPage() {
                         </Link>
                       </h2>
 
-                      <div className="flex items-center gap-4 text-xs text-zinc-500 flex-wrap font-mono">
+                      <div className="flex items-center gap-4 text-xs text-zinc-500 flex-wrap font-sans">
                         <span className="inline-flex items-center gap-1.5">
                           <CalendarDays size={12} className="text-zinc-600" />
                           {c.starts_at
@@ -260,7 +258,7 @@ export function MyContestsPage() {
 
                   {/* Right: Scores & Actions */}
                   <div className="flex items-center gap-4 sm:gap-6 justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-white/6">
-                    <dl className="flex items-center gap-4 sm:gap-6 text-right font-mono">
+                    <dl className="flex items-center gap-4 sm:gap-6 text-right font-sans">
                       {c.rank !== null ? (
                         <div>
                           <dt className="text-[9px] text-zinc-500 uppercase">Rank</dt>

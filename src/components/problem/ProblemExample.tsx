@@ -46,7 +46,7 @@ export const ProblemExample: React.FC<ProblemExampleProps> = ({
 
   return (
     <div
-      className={`rounded-lg bg-zinc-950 border border-white/8 p-3.5 space-y-2.5 font-mono text-xs transition-colors hover:border-white/12 ${className}`}
+      className={`rounded-[14px] bg-[#171717] border border-white/[0.08] p-3.5 space-y-2.5 font-sans text-xs transition-colors hover:border-white/16 ${className}`}
       data-testid={`problem-example-${index}`}
     >
       <div className="flex items-center justify-between text-zinc-300 font-semibold tracking-wide">
@@ -88,7 +88,7 @@ export const ProblemExample: React.FC<ProblemExampleProps> = ({
 
         {testcase.explanation && (
           <div className="text-zinc-400 pt-0.5 font-sans text-xs">
-            <strong className="text-zinc-300 font-medium font-mono select-none block pb-0.5">
+            <strong className="text-zinc-300 font-medium font-sans select-none block pb-0.5">
               Explanation:
             </strong>
             <ReadmeRenderer

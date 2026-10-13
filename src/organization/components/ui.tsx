@@ -12,7 +12,7 @@ export function PageHeader({
   badge,
   className,
 }: {
-  kicker: string;
+  kicker?: string;
   index?: string;
   title: ReactNode;
   description?: ReactNode;
@@ -20,7 +20,6 @@ export function PageHeader({
   badge?: ReactNode;
   className?: string;
 }) {
-  const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
   return (
     <header
       className={cn(
@@ -29,17 +28,11 @@ export function PageHeader({
       )}
     >
       <div className="space-y-2 max-w-2xl min-w-0">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#B1FA63]">
-            {formattedKicker}
-          </span>
-          {index && (
-            <span className="font-mono text-xs uppercase tracking-wider text-zinc-400 tabular-nums">
-              · {index}
-            </span>
-          )}
-          {badge}
-        </div>
+        {badge && (
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {badge}
+          </div>
+        )}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-display uppercase tracking-wide text-white leading-none">
           {title}
         </h1>
@@ -61,27 +54,16 @@ export function SectionHeader({
   action,
   className,
 }: {
-  kicker: string;
+  kicker?: string;
   title: ReactNode;
   index?: string;
   action?: ReactNode;
   className?: string;
 }) {
-  const formattedKicker = kicker.startsWith("(") ? kicker : `(${kicker})`;
   return (
     <div className={cn("flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-4 border-b border-white/[0.08] pb-3 mb-5 min-w-0", className)}>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-xs font-heading font-bold tracking-wider text-[#B1FA63] uppercase">
-            {formattedKicker}
-          </p>
-          {index && (
-            <span className="text-xs font-mono tracking-wider text-zinc-400 uppercase tabular-nums">
-              · {index}
-            </span>
-          )}
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-display uppercase tracking-wide text-white mt-1 break-words">
+        <h2 className="text-2xl sm:text-3xl font-display uppercase tracking-wide text-white break-words">
           {title}
         </h2>
       </div>
@@ -126,7 +108,7 @@ export function Metric({
     <div className={cn("p-5 rounded-[20px] sm:rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200", className)}>
       <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">{label}</span>
       <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">{value}</strong>
-      {detail && <small className="block text-xs font-mono text-zinc-500 mt-1 truncate">{detail}</small>}
+      {detail && <small className="block text-xs font-sans text-zinc-500 mt-1 truncate">{detail}</small>}
     </div>
   );
 }
@@ -168,7 +150,7 @@ export function TierBadge({
 
 export function MonoTag({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <Badge variant="secondary" className={cn("rounded-[8px] font-mono text-[11px] font-medium tracking-wide bg-[#171717] border-white/10 text-zinc-300", className)}>
+    <Badge variant="secondary" className={cn("rounded-[8px] font-sans text-[11px] font-medium tracking-wide bg-[#171717] border-white/10 text-zinc-300", className)}>
       {children}
     </Badge>
   );
@@ -196,16 +178,22 @@ export function EmptyState({
       ? "search"
       : t.includes("not found") || t.includes("missing") || t.includes("empty")
       ? "not-found"
+      : t.includes("scheduled") || t.includes("offline") || t.includes("concluded")
+      ? "sleeping"
       : t.includes("duel") || t.includes("contest") || t.includes("tournament") || t.includes("match")
-      ? "chill"
+      ? "ready"
       : t.includes("friend") || t.includes("peer") || t.includes("connection") || t.includes("follower")
       ? "welcome"
-      : t.includes("task") || t.includes("submission") || t.includes("checklist")
+      : t.includes("task") || t.includes("submission") || t.includes("checklist") || t.includes("participation")
       ? "tasks"
       : t.includes("leaderboard") || t.includes("standing") || t.includes("rank")
       ? "superhero"
+      : t.includes("archive") || t.includes("practice") || t.includes("problem")
+      ? "learning"
       : t.includes("error") || t.includes("fail") || t.includes("denied")
       ? "error"
+      : t.includes("verification") || t.includes("judging")
+      ? "loading"
       : "coder");
 
   return (

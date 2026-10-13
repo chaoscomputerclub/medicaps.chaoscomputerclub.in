@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
 import { formatPenalty } from "./ui";
 import { ScoreboardMatrixSkeleton } from "./skeletons";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 export function ScoreboardMatrix({
   entries,
@@ -24,8 +25,28 @@ export function ScoreboardMatrix({
 
   if (safeEntries.length === 0) {
     return (
-      <div className="text-center py-10 text-zinc-400 font-mono text-xs border border-white/[0.08] rounded-[16px] bg-[#171717]">
-        No active tournament scoreboard on file.
+      <div className="flex flex-col items-center justify-center py-10 px-4 text-center border border-white/[0.08] rounded-[16px] bg-[#171717]">
+        <MakoMascot variant="chill" size="md" className="mb-3" />
+        <strong className="text-xs font-sans font-bold uppercase tracking-wider text-white">
+          No Active Tournament Scoreboard
+        </strong>
+        <p className="text-[11px] text-zinc-400 font-sans max-w-sm mt-1 leading-relaxed">
+          Tournament scoreboards stream live during official campus contests. Review upcoming rounds or train in the Practice Arena.
+        </p>
+        <div className="flex items-center gap-2 mt-4">
+          <Link
+            to="/contests"
+            className="px-3 py-1.5 rounded-[8px] bg-white/[0.04] border border-white/10 hover:border-white/20 text-xs font-sans text-white transition-colors"
+          >
+            All Contests
+          </Link>
+          <Link
+            to="/practice"
+            className="px-3 py-1.5 rounded-[8px] bg-[#B1FA63]/10 border border-[#B1FA63]/30 hover:bg-[#B1FA63]/20 text-xs font-sans text-[#B1FA63] font-medium transition-colors"
+          >
+            Practice Arena
+          </Link>
+        </div>
       </div>
     );
   }
@@ -34,7 +55,7 @@ export function ScoreboardMatrix({
 
   return (
     <div className="w-full min-w-0 overflow-x-auto border border-white/[0.08] bg-[#171717] rounded-[16px]">
-      <table className="w-full min-w-[620px] text-left font-mono text-xs border-collapse">
+      <table className="w-full min-w-[620px] text-left font-sans text-xs border-collapse">
         <thead className="bg-[#171717] text-zinc-400 text-xs font-heading uppercase tracking-wider font-bold border-b border-white/[0.08]">
           <tr>
             <th className="p-3 w-12 text-center">#</th>
@@ -95,7 +116,7 @@ export function ScoreboardMatrix({
               </td>
               {!compact && (
                 <td className="p-3">
-                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono bg-black border border-white/10 text-zinc-300 rounded">
+                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-sans bg-black border border-white/10 text-zinc-300 rounded">
                     {row.department} · {row.batch.slice(2)}
                   </span>
                 </td>
@@ -107,7 +128,7 @@ export function ScoreboardMatrix({
                   <td key={key} className="p-2 text-center">
                     <span
                       className={cn(
-                        "inline-flex items-center justify-center min-w-[3rem] px-1.5 py-0.5 text-[11px] font-mono tabular-nums",
+                        "inline-flex items-center justify-center min-w-[3rem] px-1.5 py-0.5 text-[11px] font-sans tabular-nums",
                         cell?.solved
                           ? cell.first_ac
                             ? "bg-lime-400 text-black font-bold border border-lime-400"

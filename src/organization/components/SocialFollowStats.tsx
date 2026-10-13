@@ -4,12 +4,10 @@
  *
  * Single Unified Global Social Metrics Pod
  * Connects directly to global Redux social state and renders Followers and
- * Following telemetry badges with zero local isolated drift, zero text truncation,
- * and instant drawer activation.
+ * Following stats with clean, iconless, background-free production-grade typography.
  */
 
 import React from "react";
-import { Users, UserCheck } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { openSocialDrawer } from "@/store/slices/socialSlice";
 import { cn } from "@/lib/utils";
@@ -126,83 +124,65 @@ export const SocialFollowStats: React.FC<SocialFollowStatsProps> = ({
   const isSmall = size === "sm";
 
   return (
-    <div className={cn("inline-flex items-center gap-2 flex-nowrap shrink-0", className)}>
-      {/* Followers Pod */}
+    <div className={cn("inline-flex items-center gap-2.5 font-sans flex-nowrap shrink-0", className)}>
+      {/* Followers Stat */}
       <button
         type="button"
         onClick={handleOpenFollowers}
-        aria-label={`${followersCount} Followers. Click to view student network.`}
+        aria-label={`${followersCount} followers. Click to view student network.`}
         className={cn(
-          "group relative inline-flex items-center gap-2 rounded-md border border-white/[0.08] bg-black/60",
-          "hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white",
-          "transition-[transform,border-color,background-color,box-shadow] duration-150 ease-out",
-          "hover:-translate-y-0.5 active:scale-[0.98] ",
-          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 shrink-0 select-none whitespace-nowrap",
-          isSmall ? "px-2 py-1 text-xs" : "px-3 py-1.5"
+          "group inline-flex items-baseline gap-1 cursor-pointer select-none bg-transparent border-0 p-0 text-left",
+          "hover:opacity-95 active:scale-[0.98] transition-all duration-150",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#B1FA63] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm"
         )}
       >
-        <div
+        <span
           className={cn(
-            "rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400",
-            "group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150 shrink-0",
-            isSmall ? "size-4" : "size-5"
+            "font-semibold text-white tabular-nums tracking-tight group-hover:text-[#B1FA63] transition-colors",
+            isSmall ? "text-xs" : "text-sm"
           )}
         >
-          <Users size={isSmall ? 10 : 11} />
-        </div>
-        <div className="flex items-baseline gap-1.5 font-sans whitespace-nowrap">
-          <strong
-            className={cn(
-              "font-mono font-bold text-white tabular-nums tracking-tight group-hover:text-lime-400 transition-colors",
-              isSmall ? "text-xs" : "text-sm"
-            )}
-          >
-            {followersCount}
-          </strong>
-          <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold whitespace-nowrap">
-            Followers
-          </span>
-        </div>
-        <span className="size-1 rounded-full bg-lime-400/40 group-hover:bg-lime-400 transition-colors shrink-0" />
+          {followersCount}
+        </span>
+        <span
+          className={cn(
+            "text-zinc-400 group-hover:text-zinc-200 transition-colors lowercase",
+            isSmall ? "text-[11px]" : "text-xs sm:text-sm"
+          )}
+        >
+          followers
+        </span>
       </button>
 
-      {/* Following Pod */}
+      <span className="text-zinc-600 select-none text-xs" aria-hidden="true">·</span>
+
+      {/* Following Stat */}
       <button
         type="button"
         onClick={handleOpenFollowing}
-        aria-label={`${followingCount} Following. Click to view followed cadets.`}
+        aria-label={`${followingCount} following. Click to view followed students.`}
         className={cn(
-          "group relative inline-flex items-center gap-2 rounded-md border border-white/[0.08] bg-black/60",
-          "hover:bg-white/[0.04] hover:border-lime-400/40 text-zinc-400 hover:text-white",
-          "transition-[transform,border-color,background-color,box-shadow] duration-150 ease-out",
-          "hover:-translate-y-0.5 active:scale-[0.98] ",
-          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 shrink-0 select-none whitespace-nowrap",
-          isSmall ? "px-2 py-1 text-xs" : "px-3 py-1.5"
+          "group inline-flex items-baseline gap-1 cursor-pointer select-none bg-transparent border-0 p-0 text-left",
+          "hover:opacity-95 active:scale-[0.98] transition-all duration-150",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#B1FA63] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm"
         )}
       >
-        <div
+        <span
           className={cn(
-            "rounded-md bg-lime-400/10 border border-lime-400/20 flex items-center justify-center text-lime-400",
-            "group-hover:bg-lime-400/20 group-hover:border-lime-400/40 transition-[background-color,border-color] duration-150 shrink-0",
-            isSmall ? "size-4" : "size-5"
+            "font-semibold text-white tabular-nums tracking-tight group-hover:text-[#B1FA63] transition-colors",
+            isSmall ? "text-xs" : "text-sm"
           )}
         >
-          <UserCheck size={isSmall ? 10 : 11} />
-        </div>
-        <div className="flex items-baseline gap-1.5 font-sans whitespace-nowrap">
-          <strong
-            className={cn(
-              "font-mono font-bold text-white tabular-nums tracking-tight group-hover:text-lime-400 transition-colors",
-              isSmall ? "text-xs" : "text-sm"
-            )}
-          >
-            {followingCount}
-          </strong>
-          <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold whitespace-nowrap">
-            Following
-          </span>
-        </div>
-        <span className="size-1 rounded-full bg-lime-400/40 group-hover:bg-lime-400 transition-colors shrink-0" />
+          {followingCount}
+        </span>
+        <span
+          className={cn(
+            "text-zinc-400 group-hover:text-zinc-200 transition-colors lowercase",
+            isSmall ? "text-[11px]" : "text-xs sm:text-sm"
+          )}
+        >
+          following
+        </span>
       </button>
     </div>
   );

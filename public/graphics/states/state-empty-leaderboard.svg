@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" width="180" height="140" fill="none">
+  <defs>
+    <linearGradient id="sel-grid" x1="0" y1="0" x2="180" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#242428"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="sel-lime" x1="70" y1="30" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+    <filter id="sel-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#CCFF00" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="25" y="15" width="130" height="110" rx="16" fill="url(#sel-grid)" stroke="#27272A" stroke-width="1.5"/>
+  <!-- 2nd Place Column (Left) -->
+  <rect x="52" y="65" width="22" height="42" rx="4" fill="#1C1C20" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="63" cy="54" r="5" fill="#27272A" stroke="#71717A" stroke-width="1.2"/>
+  <text x="63" y="85" font-family="monospace" font-size="10" font-weight="bold" fill="#71717A" text-anchor="middle">2</text>
+  <!-- 1st Place Column (Center) -->
+  <rect x="79" y="48" width="22" height="59" rx="4" fill="#18181B" stroke="url(#sel-lime)" stroke-width="2" filter="url(#sel-glow)"/>
+  <circle cx="90" cy="37" r="6" fill="#1E2914" stroke="#CCFF00" stroke-width="1.5"/>
+  <!-- Crown on 1st Place -->
+  <path d="M86 31l2 2 2-2 2 2 2-2v2.5h-8z" fill="#CCFF00"/>
+  <text x="90" y="75" font-family="monospace" font-size="12" font-weight="bold" fill="#CCFF00" text-anchor="middle">1</text>
+  <!-- 3rd Place Column (Right) -->
+  <rect x="106" y="74" width="22" height="33" rx="4" fill="#1C1C20" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="117" cy="63" r="5" fill="#27272A" stroke="#71717A" stroke-width="1.2"/>
+  <text x="117" y="93" font-family="monospace" font-size="10" font-weight="bold" fill="#71717A" text-anchor="middle">3</text>
+  <!-- Baseline Stand -->
+  <path d="M42 107h96" stroke="#3F3F46" stroke-width="2" stroke-linecap="round"/>
+</svg>

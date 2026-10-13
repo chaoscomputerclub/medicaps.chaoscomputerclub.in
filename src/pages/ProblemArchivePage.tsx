@@ -55,17 +55,15 @@ export function ProblemArchivePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <PageHeader
-        kicker="05 // Problem Repository"
-        index="ARCHIVE"
         badge={
-          <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
+          <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider text-lime-400">
             Institutional Archive
           </span>
         }
         title="Problem Archive"
         description="Official competitive programming problem statements and editorials from concluded tournaments."
         action={
-          <div className="flex size-12 items-center justify-center rounded-lg border border-white/8 bg-black text-lime-400">
+          <div className="flex size-12 items-center justify-center rounded-[12px] border border-white/[0.08] bg-[#171717] text-[#B1FA63]">
             <BookOpenCheck className="size-6" />
           </div>
         }
@@ -73,8 +71,6 @@ export function ProblemArchivePage() {
 
       <section className="rounded-[24px] border border-white/10 bg-[#1F1F1F] p-5 sm:p-6 space-y-5">
         <SectionHeader
-          kicker="01 // Released Sets"
-          index="PROBLEMS"
           title="Concluded Contest Challenges"
           action={
             <div className="relative w-48 sm:w-64">
@@ -99,11 +95,13 @@ export function ProblemArchivePage() {
           <EmptyState
             title="Archive Empty"
             body="No archived problem sets released yet. Concluded contest problems and official editorials will appear here."
+            makoVariant="learning"
           />
         ) : filteredProblems.length === 0 ? (
           <EmptyState
             title="No Problems Found"
             body={`No archived challenges matching "${deferredFilter}". Try another keyword or clear filter.`}
+            makoVariant="search"
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -130,7 +128,7 @@ export function ProblemArchivePage() {
                         </Link>
                       </h2>
                       <p className="font-sans text-[11px] text-zinc-500">
-                        {p.topic} · <span className="tabular-nums text-zinc-400 font-mono">{p.solved_count ?? 0}</span>&nbsp;solves
+                        {p.topic} · <span className="tabular-nums text-zinc-400 font-sans">{p.solved_count ?? 0}</span>&nbsp;solves
                       </p>
                     </div>
                   </div>

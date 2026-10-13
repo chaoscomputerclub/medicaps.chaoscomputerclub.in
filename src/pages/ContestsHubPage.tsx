@@ -42,6 +42,7 @@ import { ContestsHubSkeleton } from "@/organization/components/skeletons";
 import { toast } from "sonner";
 import { resolveAvatarUrl } from "@/lib/utils";
 import { CadetProfileHoverCard } from "@/components/ui/CadetProfileHoverCard";
+import { EmptyState } from "@/organization/components/ui";
 import LightRays from "./LightRays";
 import { Tabs, TabsList, TabsTab, TabsPanels, TabsPanel } from "@/components/animate-ui/components/base/tabs";
 import { prefetchContestRoute } from "@/AppRoutes";
@@ -121,14 +122,14 @@ function ContestCountdownBadge({
   if (isLive) {
     if (cdEnds.isExpired) {
       return (
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-zinc-400">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#171717]/80 backdrop-blur-md px-3 py-1 text-xs font-sans font-semibold text-zinc-400">
           <span>ROUND CONCLUDED</span>
         </div>
       );
     }
     const { days, hours, minutes, seconds } = cdEnds;
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-red-400 tabular-nums">
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-sans font-semibold text-red-400 tabular-nums">
         <Clock className="size-3 text-red-400 animate-pulse" />
         <span>
           Closes {days > 0 ? `${days}d ` : ""}
@@ -140,7 +141,7 @@ function ContestCountdownBadge({
 
   if (cdStarts.isExpired) {
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-lime-400 tabular-nums">
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-lime-400/40 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-sans font-semibold text-lime-400 tabular-nums">
         <span className="size-1.5 rounded-full bg-lime-400 animate-ping" />
         <span>STARTING NOW</span>
       </div>
@@ -149,7 +150,7 @@ function ContestCountdownBadge({
 
   const { days, hours, minutes, seconds } = cdStarts;
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-mono font-semibold text-white tabular-nums transition-colors group-hover:border-lime-400/40">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-black/75 backdrop-blur-md px-3 py-1 text-xs font-sans font-semibold text-white tabular-nums transition-colors group-hover:border-lime-400/40">
       <Clock className="size-3 text-lime-400 transition-transform duration-300 group-hover:rotate-45" />
       <span>
         {days > 0 ? `${days}d ` : ""}
@@ -442,18 +443,13 @@ export function ContestsHubPage() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-lime-400">
-                (02 // Tournament Arena)
-              </span>
-            </div>
             <h1 className="text-4xl sm:text-5xl font-normal tracking-wide text-white font-display uppercase">
               CCC Medi-Caps Contest
             </h1>
             <p className="text-sm sm:text-base text-zinc-400 font-sans max-w-lg mx-auto">
               Weekly competitive programming arena. Solve algorithmic challenges, elevate your rating, and claim the championship!
             </p>
-            <div className="group inline-flex items-center gap-2 text-xs font-mono text-zinc-400 bg-white/[0.03] border border-white/8 hover:border-lime-400/30 rounded-full px-3.5 py-1.5 mt-1 transition-all duration-200">
+            <div className="group inline-flex items-center gap-2 text-xs font-sans text-zinc-400 bg-white/[0.03] border border-white/8 hover:border-lime-400/30 rounded-full px-3.5 py-1.5 mt-1 transition-all duration-200">
               <Trophy className="size-3.5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
               <span>Official Medi-Caps Chapter Championship Trophy</span>
             </div>
@@ -462,19 +458,20 @@ export function ContestsHubPage() {
           {/* ─── UPCOMING CONTEST HERO CARDS (LEETCODE STYLE - LARGER SIZE) ───────────── */}
           <div className="w-full pt-4 max-w-5xl mx-auto">
             {upcomingContests.length === 0 ? (
-              <div className="rounded-lg border border-white/8 bg-black p-10 text-center space-y-3 group hover:border-white/18 transition-colors duration-150">
-                <Trophy className="size-10 text-zinc-600 mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-lime-400" />
-                <p className="text-base font-semibold text-white">No Upcoming Rounds Scheduled</p>
-                <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
-                  New official rounds will be announced shortly. Train in the Practice Arena in the meantime.
-                </p>
-                <Button asChild variant="outline" size="sm" className="mt-3 group/btn">
-                  <Link to="/practice" className="flex items-center gap-1.5">
-                    <span>Practice Arena</span>
-                    <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                  </Link>
-                </Button>
-              </div>
+              <EmptyState
+                title="No Upcoming Rounds Scheduled"
+                body="New official rounds will be announced shortly. Train in the Practice Arena in the meantime."
+                makoVariant="sleeping"
+                className="max-w-3xl mx-auto my-2"
+                action={
+                  <Button asChild size="default" variant="outline" className="rounded-[10px] bg-[#171717] border-white/10 hover:border-[#B1FA63]/30 text-white hover:text-white group/btn">
+                    <Link to="/practice" className="flex items-center gap-1.5">
+                      <span>Practice Arena</span>
+                      <ArrowRight className="size-4 text-[#B1FA63] transition-transform duration-200 group-hover/btn:translate-x-1" />
+                    </Link>
+                  </Button>
+                }
+              />
             ) : (
               <div
                 className={`grid gap-6 ${
@@ -531,19 +528,19 @@ export function ContestsHubPage() {
                         <div className="relative z-10 flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             {isLive ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-red-400">
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-sans font-semibold uppercase tracking-wider text-red-400">
                                 <span className="size-2 rounded-full bg-red-500 animate-ping" />
                                 <span>LIVE NOW</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400">
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-sans font-semibold uppercase tracking-wider text-zinc-400">
                                 <Calendar className="size-3 text-zinc-400" />
                                 <span>OFFICIAL ROUND</span>
                               </span>
                             )}
 
                             {isUserCompleted && (
-                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/70 backdrop-blur-sm px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-400">
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/70 backdrop-blur-sm px-2.5 py-1 text-[11px] font-sans font-semibold uppercase tracking-wider text-emerald-400">
                                 <CheckCircle2 className="size-3 text-emerald-400" />
                                 <span>ATTEMPT SUBMITTED</span>
                               </span>
@@ -567,7 +564,7 @@ export function ContestsHubPage() {
                               <span className="truncate">{contest.title}</span>
                               <ArrowRight className="size-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
                             </Link>
-                            <p className="text-xs font-mono text-zinc-400 flex items-center gap-2 mt-1.5">
+                            <p className="text-xs font-sans text-zinc-400 flex items-center gap-2 mt-1.5">
                               <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
                               <span>{contest.registered_count} cadets registered</span>
                               <span className="text-zinc-600">·</span>
@@ -583,11 +580,11 @@ export function ContestsHubPage() {
                       {/* Card Lower Info & Action Bar - Spacious & Click-Friendly */}
                       <div className="p-5 sm:p-6 flex items-center justify-between gap-4 bg-[#1F1F1F] border-t border-white/[0.08]">
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2 font-mono text-xs sm:text-sm text-zinc-400 truncate">
+                          <div className="flex items-center gap-2 font-sans text-xs sm:text-sm text-zinc-400 truncate">
                             <Calendar className="size-4 text-zinc-500 shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:text-lime-400" />
                             <span className="truncate">{startsAtFormatted}</span>
                           </div>
-                          <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mt-1">
+                          <span className="text-[11px] font-sans uppercase tracking-wider text-zinc-500 block mt-1">
                             4 Algorithmic Challenges · 90 Mins · Live Gate
                           </span>
                         </div>
@@ -667,7 +664,7 @@ export function ContestsHubPage() {
             )}
 
             {/* Sub-hero note with animated sparkles */}
-            <div className="group flex items-center justify-center gap-2 text-xs sm:text-sm font-mono text-zinc-500 mt-6 cursor-default">
+            <div className="group flex items-center justify-center gap-2 text-xs sm:text-sm font-sans text-zinc-500 mt-6 cursor-default">
               <Sparkles className="size-4 text-lime-400 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-125" />
               <span className="group-hover:text-zinc-400 transition-colors">
                 Campus Competitive Programming Arena • Medi-Caps University Cadets
@@ -693,14 +690,14 @@ export function ContestsHubPage() {
             {myStanding && myStanding.entry && (
               <div className="p-4 sm:p-5 rounded-[16px] border border-[#B1FA63]/30 bg-[#B1FA63]/[0.05] flex items-center justify-between gap-3 group hover:border-[#B1FA63]/60 transition-all duration-200">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#B1FA63]/15 border border-[#B1FA63]/40 font-mono text-base font-bold text-[#B1FA63]">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#B1FA63]/15 border border-[#B1FA63]/40 font-sans text-base font-bold text-[#B1FA63]">
                     #{myStanding.rank}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm sm:text-base font-semibold text-white truncate font-sans">
                       Your University Standing
                     </p>
-                    <p className="font-mono text-xs sm:text-sm text-zinc-400 mt-0.5">
+                    <p className="font-sans text-xs sm:text-sm text-zinc-400 mt-0.5">
                       Rating: <span className="text-[#B1FA63] font-bold tabular-nums">{myStanding.entry.rating}</span> · {myStanding.entry.tier || "Active"}
                     </p>
                   </div>
@@ -713,7 +710,7 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={myStanding.entry.handle ? `/profile/${myStanding.entry.handle}` : "/profile"}
-                    className="inline-flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-lime-400 hover:text-lime-300 shrink-0"
+                    className="inline-flex items-center gap-1.5 font-sans text-xs sm:text-sm font-semibold text-lime-400 hover:text-lime-300 shrink-0"
                   >
                     <span>Profile</span>
                     <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -734,16 +731,16 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank2.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-zinc-400/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-[20px] border border-white/[0.08] bg-[#171717] hover:bg-white/[0.04] hover:border-zinc-400/50 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-400/60 font-mono text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-[#242424] border border-zinc-400/60 font-sans text-[10px] font-bold text-zinc-200 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
                         <Medal className="size-3 text-zinc-300 transition-transform duration-300 group-hover:rotate-12" />
                         <span>#2</span>
                       </div>
                       <Avatar className="size-16 sm:size-18 rounded-full border-2 border-zinc-400/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank2?.avatar_url)} className="rounded-full object-cover" />
-                        <AvatarFallback className="rounded-full bg-zinc-900 text-zinc-300 font-mono text-sm font-bold">
+                        <AvatarFallback className="rounded-full bg-[#242424] text-zinc-300 font-sans text-sm font-bold">
                           {rank2?.handle?.slice(0, 2).toUpperCase() || "02"}
                         </AvatarFallback>
                       </Avatar>
@@ -752,18 +749,18 @@ export function ContestsHubPage() {
                       <p className="text-xs sm:text-sm font-bold text-white group-hover:text-zinc-200 transition-colors truncate font-sans max-w-full" title={rank2?.handle || "Cadet 2"}>
                         {rank2?.handle || "Cadet 2"}
                       </p>
-                      <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
+                      <span className="inline-block mt-1.5 rounded-lg bg-[#242424] border border-white/10 px-2.5 py-0.5 font-sans text-[11px] font-bold tabular-nums text-zinc-300 group-hover:border-zinc-400/40 transition-colors">
                         {rank2?.rating ?? 1200}
                       </span>
-                      <span className="block font-mono text-[10px] text-zinc-500 mt-1">
+                      <span className="block font-sans text-[10px] text-zinc-500 mt-1">
                         {rank2?.attendance_count ?? 0} rounds
                       </span>
                     </div>
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[225px] opacity-40">
-                  <span className="font-mono text-xs text-zinc-600">Rank #2</span>
+                <div className="flex flex-col items-center justify-center p-4 rounded-[20px] border border-white/[0.06] bg-[#171717]/50 min-h-[225px] opacity-40">
+                  <span className="font-sans text-xs text-zinc-600">Rank #2</span>
                 </div>
               )}
 
@@ -777,17 +774,17 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank1.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-lg border border-lime-400/40 bg-lime-400/[0.04] hover:bg-lime-400/[0.08] hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-5 -mt-5 rounded-[24px] border border-lime-400/40 bg-[#1F1F1F] hover:bg-[#1F1F1F]/90 hover:border-lime-400/70 hover:-translate-y-2 transition-all duration-300 min-h-[245px] sm:min-h-[270px] justify-between cursor-pointer shadow-[0_0_30px_rgba(177,250,99,0.08)]"
                   >
                     <div className="relative pt-6 pb-3 flex flex-col items-center">
                       <Crown className="size-6 text-amber-400 fill-amber-400 absolute top-0 left-1/2 -translate-x-1/2 transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1 z-20" />
                       <Avatar className="size-18 sm:size-22 rounded-full border-2 border-lime-400 ring-4 ring-lime-400/25 transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank1?.avatar_url)} className="rounded-full object-cover" />
-                        <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-base font-bold">
+                        <AvatarFallback className="rounded-full bg-black text-lime-400 font-sans text-base font-bold">
                           {rank1?.handle?.slice(0, 2).toUpperCase() || "01"}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center px-2.5 py-0.5 rounded-full bg-lime-400 text-black font-mono text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                      <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center px-2.5 py-0.5 rounded-full bg-lime-400 text-black font-sans text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
                         #1 CHAMPION
                       </div>
                     </div>
@@ -795,18 +792,18 @@ export function ContestsHubPage() {
                       <p className="text-xs sm:text-sm font-bold text-white group-hover:text-lime-400 transition-colors truncate font-sans max-w-full" title={rank1?.handle || "Cadet 1"}>
                         {rank1?.handle || "Cadet 1"}
                       </p>
-                      <span className="inline-block mt-1.5 rounded-full border border-lime-400/50 bg-lime-400/15 px-3 py-0.5 font-mono text-xs font-bold tabular-nums text-lime-400 group-hover:bg-lime-400/25 transition-colors">
+                      <span className="inline-block mt-1.5 rounded-full border border-lime-400/50 bg-lime-400/15 px-3 py-0.5 font-sans text-xs font-bold tabular-nums text-lime-400 group-hover:bg-lime-400/25 transition-colors">
                         {rank1?.rating ?? 1200}
                       </span>
-                      <span className="block font-mono text-[10px] text-lime-400/80 mt-1">
+                      <span className="block font-sans text-[10px] text-lime-400/80 mt-1">
                         {rank1?.attendance_count ?? 0} rounds
                       </span>
                     </div>
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[245px] opacity-40">
-                  <span className="font-mono text-xs text-zinc-600">Rank #1</span>
+                <div className="flex flex-col items-center justify-center p-4 rounded-[24px] border border-white/[0.06] bg-[#171717]/50 min-h-[245px] opacity-40">
+                  <span className="font-sans text-xs text-zinc-600">Rank #1</span>
                 </div>
               )}
 
@@ -820,16 +817,16 @@ export function ContestsHubPage() {
                 >
                   <Link
                     to={`/profile/${rank3.handle}`}
-                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-lg border border-white/8 bg-black/40 hover:bg-white/[0.04] hover:border-amber-600/40 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
+                    className="group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-[20px] border border-white/[0.08] bg-[#171717] hover:bg-white/[0.04] hover:border-amber-600/50 hover:-translate-y-1.5 transition-all duration-300 min-h-[225px] sm:min-h-[245px] justify-between cursor-pointer"
                   >
                     <div className="relative pt-4 pb-2 flex flex-col items-center">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 font-mono text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-600/60 font-sans text-[10px] font-bold text-amber-400 transition-transform duration-300 group-hover:scale-110 whitespace-nowrap">
                         <Medal className="size-3 text-amber-500 transition-transform duration-300 group-hover:rotate-12" />
                         <span>#3</span>
                       </div>
                       <Avatar className="size-14 sm:size-16 rounded-full border-2 border-amber-600/80 ring-2 ring-black transition-transform duration-300 group-hover:scale-105 overflow-hidden">
                         <AvatarImage src={resolveAvatarUrl(rank3?.avatar_url)} className="rounded-full object-cover" />
-                        <AvatarFallback className="rounded-full bg-zinc-900 text-amber-500 font-mono text-sm font-bold">
+                        <AvatarFallback className="rounded-full bg-[#242424] text-amber-500 font-sans text-sm font-bold">
                           {rank3?.handle?.slice(0, 2).toUpperCase() || "03"}
                         </AvatarFallback>
                       </Avatar>
@@ -838,18 +835,18 @@ export function ContestsHubPage() {
                       <p className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate font-sans max-w-full" title={rank3?.handle || "Cadet 3"}>
                         {rank3?.handle || "Cadet 3"}
                       </p>
-                      <span className="inline-block mt-1.5 rounded-lg bg-zinc-800/90 border border-white/10 px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
+                      <span className="inline-block mt-1.5 rounded-lg bg-[#242424] border border-white/10 px-2.5 py-0.5 font-sans text-[11px] font-bold tabular-nums text-amber-400/90 group-hover:border-amber-600/40 transition-colors">
                         {rank3?.rating ?? 1200}
                       </span>
-                      <span className="block font-mono text-[10px] text-zinc-500 mt-1">
+                      <span className="block font-sans text-[10px] text-zinc-500 mt-1">
                         {rank3?.attendance_count ?? 0} rounds
                       </span>
                     </div>
                   </Link>
                 </CadetProfileHoverCard>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 rounded-lg border border-white/5 bg-black/20 min-h-[225px] opacity-40">
-                  <span className="font-mono text-xs text-zinc-600">Rank #3</span>
+                <div className="flex flex-col items-center justify-center p-4 rounded-[20px] border border-white/[0.06] bg-[#171717]/50 min-h-[225px] opacity-40">
+                  <span className="font-sans text-xs text-zinc-600">Rank #3</span>
                 </div>
               )}
             </div>
@@ -857,7 +854,7 @@ export function ContestsHubPage() {
             {/* ─── RANKS 4 TO 10 LIST (LARGER ROWS & AVATARS) ───────────────── */}
             <div className="divide-y divide-white/5 space-y-1">
               {otherRankers.length === 0 ? (
-                <p className="py-6 text-center text-xs sm:text-sm font-mono text-zinc-500">
+                <p className="py-6 text-center text-xs sm:text-sm font-sans text-zinc-500">
                   Compete in weekly rounds to claim ranks 4–10.
                 </p>
               ) : (
@@ -876,13 +873,13 @@ export function ContestsHubPage() {
                         className="group flex items-center justify-between py-3.5 px-4 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/[0.04] transition-all duration-200 min-h-[64px] cursor-pointer"
                       >
                         <div className="flex items-center gap-3.5 min-w-0">
-                          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-zinc-900 border border-white/10 font-mono text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-[#242424] border border-white/10 font-sans text-xs sm:text-sm font-bold text-zinc-400 tabular-nums transition-all duration-200 group-hover:border-lime-400/40 group-hover:text-lime-400">
                             {String(rankNum).padStart(2, "0")}
                           </span>
 
                           <Avatar className="size-10 sm:size-11 shrink-0 rounded-full border border-white/10 transition-transform duration-200 group-hover:scale-105 overflow-hidden">
                             <AvatarImage src={resolveAvatarUrl(leader.avatar_url)} className="rounded-full object-cover" />
-                            <AvatarFallback className="rounded-full bg-black text-lime-400 font-mono text-xs font-bold">
+                            <AvatarFallback className="rounded-full bg-black text-lime-400 font-sans text-xs font-bold">
                               {leader.handle.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -891,7 +888,7 @@ export function ContestsHubPage() {
                             <p className="truncate text-xs sm:text-sm font-semibold text-white group-hover:text-lime-400 transition-colors font-sans">
                               {leader.handle}
                             </p>
-                            <p className="truncate font-mono text-[11px] sm:text-xs text-zinc-500 mt-0.5">
+                            <p className="truncate font-sans text-[11px] sm:text-xs text-zinc-500 mt-0.5">
                               {leader.department || "Medi-Caps"} · <span className="text-zinc-400">{leader.tier || "Active"}</span>
                             </p>
                           </div>
@@ -899,10 +896,10 @@ export function ContestsHubPage() {
 
                         <div className="flex items-center gap-3 shrink-0">
                           <div className="text-right">
-                            <span className="font-mono text-xs sm:text-sm font-bold tabular-nums text-white group-hover:text-lime-400 transition-colors">
+                            <span className="font-sans text-xs sm:text-sm font-bold tabular-nums text-white group-hover:text-lime-400 transition-colors">
                               {leader.rating}
                             </span>
-                            <span className="block font-mono text-[10px] sm:text-[11px] text-zinc-500">
+                            <span className="block font-sans text-[10px] sm:text-[11px] text-zinc-500">
                               {leader.attendance_count ?? 0} rounds
                             </span>
                           </div>
@@ -919,7 +916,7 @@ export function ContestsHubPage() {
             <div className="pt-3 text-center border-t border-white/6">
               <Link
                 to="/leaderboard"
-                className="group inline-flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-zinc-400 hover:text-lime-400 transition-colors"
+                className="group inline-flex items-center gap-1.5 font-sans text-xs sm:text-sm font-semibold text-zinc-400 hover:text-lime-400 transition-colors"
               >
                 <span>View Full University Leaderboard</span>
                 <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
@@ -959,7 +956,7 @@ export function ContestsHubPage() {
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-[#171717] border-white/10 focus-visible:ring-1 focus-visible:ring-[#B1FA63] font-mono rounded-[10px]"
+                  className="h-10 pl-9 pr-3 text-xs sm:text-sm bg-[#171717] border-white/10 focus-visible:ring-1 focus-visible:ring-[#B1FA63] font-sans rounded-[10px]"
                 />
               </div>
             </div>
@@ -969,25 +966,19 @@ export function ContestsHubPage() {
               <TabsPanel value="past">
               <div className="space-y-3.5">
                 {paginatedPastContests.length === 0 ? (
-                  <div className="group flex flex-col items-center justify-center py-14 text-center rounded-[20px] border border-white/[0.06] bg-[#171717] space-y-3.5 hover:border-white/15 transition-all">
-                    <div className="flex size-14 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] transition-transform duration-300 group-hover:scale-110">
-                      <Code2 className="size-7 text-zinc-500 group-hover:text-[#B1FA63] transition-colors" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold text-white font-sans">
-                        No Concluded Rounds Yet
-                      </p>
-                      <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                        Past weekly round challenges and curated practice problems are available in the Practice Arena.
-                      </p>
-                    </div>
-                    <Button asChild size="default" variant="outline" className="group/btn">
-                      <Link to="/practice" className="flex items-center gap-1.5">
-                        <span>Explore Practice Arena</span>
-                        <ArrowRight className="size-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                      </Link>
-                    </Button>
-                  </div>
+                  <EmptyState
+                    title="No Concluded Rounds Yet"
+                    body="Past weekly round challenges and curated practice problems are available in the Practice Arena."
+                    makoVariant="ready"
+                    action={
+                      <Button asChild size="default" variant="outline" className="rounded-[10px] bg-[#171717] border-white/10 hover:border-[#B1FA63]/30 text-white hover:text-white group/btn">
+                        <Link to="/practice" className="flex items-center gap-1.5">
+                          <span>Explore Practice Arena</span>
+                          <ArrowRight className="size-4 text-[#B1FA63] transition-transform duration-200 group-hover/btn:translate-x-1" />
+                        </Link>
+                      </Button>
+                    }
+                  />
                 ) : (
                   paginatedPastContests.map((contest) => {
                     const formattedDate = new Date(contest.starts_at).toLocaleString("en-IN", {
@@ -1009,7 +1000,7 @@ export function ContestsHubPage() {
                       >
                         {/* Left: Thumbnail Icon Cube with animated SVG - Larger Cube */}
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] font-mono text-sm font-bold text-[#B1FA63] transition-all duration-200 group-hover:scale-105 group-hover:border-[#B1FA63]/40">
+                          <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-[12px] border border-white/10 bg-[#1F1F1F] font-sans text-sm font-bold text-[#B1FA63] transition-all duration-200 group-hover:scale-105 group-hover:border-[#B1FA63]/40">
                             <Trophy className="size-6 text-[#B1FA63]/80 group-hover:text-[#B1FA63] transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
 
@@ -1021,7 +1012,7 @@ export function ContestsHubPage() {
                               <span className="truncate">{contest.title}</span>
                               <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
                             </Link>
-                            <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1 truncate">
+                            <p className="text-xs sm:text-sm font-sans text-zinc-500 mt-1 truncate">
                               {formattedDate} · {contest.registered_count} cadets
                             </p>
                           </div>
@@ -1030,10 +1021,10 @@ export function ContestsHubPage() {
                         {/* Right: Solved Status & Virtual Action */}
                         <div className="flex items-center gap-3 shrink-0">
                           <span
-                            className={`rounded-full px-3.5 py-1.5 font-mono text-xs sm:text-sm font-semibold tabular-nums border ${
+                            className={`rounded-full px-3.5 py-1.5 font-sans text-xs sm:text-sm font-semibold tabular-nums border ${
                               cadetSolved !== null && cadetSolved > 0
                                 ? "bg-lime-400/15 border-lime-400/30 text-lime-400"
-                                : "bg-zinc-900 border-white/10 text-zinc-400"
+                                : "bg-[#242424] border-white/10 text-zinc-400"
                             }`}
                           >
                             {cadetSolved !== null
@@ -1064,25 +1055,25 @@ export function ContestsHubPage() {
               <TabsPanel value="my">
               <div className="space-y-3.5">
                 {!member ? (
-                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5">
-                    <p className="text-base font-semibold text-white">Login Required</p>
-                    <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                      Sign in to view your contest participation history and ratings.
-                    </p>
-                    <Button asChild size="default" className="group/btn">
-                      <Link to="/auth" className="flex items-center gap-1.5">
-                        <span>Sign In</span>
-                        <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                      </Link>
-                    </Button>
-                  </div>
+                  <EmptyState
+                    title="Sign In Required"
+                    body="Sign in to view your contest participation history, performance rankings, and ratings."
+                    makoVariant="welcome"
+                    action={
+                      <Button asChild size="default" className="rounded-[10px] bg-[#B1FA63] text-black font-semibold hover:bg-[#B1FA63]/90 group/btn">
+                        <Link to="/auth" className="flex items-center gap-1.5">
+                          <span>Sign In</span>
+                          <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
+                        </Link>
+                      </Button>
+                    }
+                  />
                 ) : paginatedMyParticipations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-14 text-center rounded-lg border border-white/6 bg-black/30 space-y-3.5">
-                    <p className="text-base font-semibold text-white">No Participations Yet</p>
-                    <p className="text-xs sm:text-sm font-mono text-zinc-500 max-w-sm">
-                      You haven't participated in any contests yet. Register for Weekly Contest 1 above!
-                    </p>
-                  </div>
+                  <EmptyState
+                    title="No Participations Yet"
+                    body="You haven't participated in any contests yet. Register for upcoming weekly rounds above or hone your skills in practice mode!"
+                    makoVariant="tasks"
+                  />
                 ) : (
                   paginatedMyParticipations.map((record) => {
                     const isSubmitted = Boolean(
@@ -1097,7 +1088,7 @@ export function ContestsHubPage() {
                     return (
                       <div
                         key={record.contest_slug}
-                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-lg border border-white/8 bg-black/50 hover:bg-white/[0.03] hover:border-lime-400/30 transition-all duration-200 min-h-[92px] content-auto-card"
+                        className="group flex items-center justify-between gap-4 p-5 sm:p-6 rounded-[16px] border border-white/[0.08] bg-[#171717] hover:border-[#B1FA63]/30 transition-all duration-200 min-h-[92px] content-auto-card"
                       >
                         <div className="min-w-0">
                           <Link
@@ -1107,18 +1098,18 @@ export function ContestsHubPage() {
                             <span className="truncate">{record.contest_title}</span>
                             <ArrowRight className="size-4 opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-lime-400 shrink-0" />
                           </Link>
-                          <p className="text-xs sm:text-sm font-mono text-zinc-500 mt-1">
+                          <p className="text-xs sm:text-sm font-sans text-zinc-500 mt-1">
                             Score: {record.score ?? 0} pts · Rank: #{record.rank ?? "--"}
                           </p>
                         </div>
 
                         <div className="flex items-center gap-3 shrink-0">
                           {record.outcome === "qualified" ? (
-                            <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-mono text-xs font-bold uppercase text-lime-400">
+                            <span className="rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 font-sans text-xs font-bold uppercase text-lime-400">
                               Qualified
                             </span>
                           ) : isSubmitted ? (
-                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold uppercase text-emerald-400">
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-sans text-xs font-bold uppercase text-emerald-400">
                               Submitted
                             </span>
                           ) : null}
@@ -1183,8 +1174,8 @@ export function ContestsHubPage() {
         </div>
 
         {/* ─── ABOUT THE CHAMPIONSHIP TROPHY ─────────────── */}
-        <div className="group rounded-lg border border-white/8 bg-black p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-white/18 transition-colors duration-150">
-          <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold text-lime-400 uppercase tracking-widest">
+        <div className="group rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-[#B1FA63]/30 transition-all duration-200">
+          <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-bold text-[#B1FA63] uppercase tracking-wider">
             <Trophy className="size-4 sm:size-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
             <span>About the Medi-Caps Chapter Trophy</span>
           </div>

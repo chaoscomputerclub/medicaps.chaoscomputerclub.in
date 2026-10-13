@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="cc-rim" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="40%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <linearGradient id="cc-core" x1="16" y1="8" x2="48" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#092131"/>
+      <stop offset="100%" stop-color="#030C14"/>
+    </linearGradient>
+    <filter id="cc-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#00E5FF" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Outer Octagon Frame -->
+  <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="url(#cc-core)" stroke="url(#cc-rim)" stroke-width="2.5" stroke-linejoin="round" filter="url(#cc-shadow)"/>
+  <polygon points="22,9 42,9 55,22 55,42 42,55 22,55 9,42 9,22" fill="#041522" stroke="#0284C7" stroke-width="1.2" stroke-dasharray="2 1.5"/>
+  <!-- Central Diamond Shield with Pure Accepted Checkmark -->
+  <path d="M32 14L46 22V36C46 44 32 50 32 50C32 50 18 44 18 36V22L32 14Z" fill="#0284C7" stroke="#00E5FF" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Checkmark -->
+  <path d="M25 32l5 5 10-10" stroke="#CCFF00" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

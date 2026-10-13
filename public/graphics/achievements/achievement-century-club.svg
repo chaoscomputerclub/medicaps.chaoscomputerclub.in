@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="cent-rim" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="40%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <linearGradient id="cent-core" x1="16" y1="8" x2="48" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0C2333"/>
+      <stop offset="100%" stop-color="#030E17"/>
+    </linearGradient>
+    <filter id="cent-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0284C7" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Outer Octagon Shield Frame -->
+  <polygon points="20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20" fill="url(#cent-core)" stroke="url(#cent-rim)" stroke-width="2.5" stroke-linejoin="round" filter="url(#cent-shadow)"/>
+  <polygon points="22,9 42,9 55,22 55,42 42,55 22,55 9,42 9,22" fill="#061824" stroke="#0284C7" stroke-width="1.2" stroke-dasharray="2 1.5"/>
+  <!-- Target Reticle & '100' Centered -->
+  <circle cx="32" cy="32" r="16" stroke="#38BDF8" stroke-width="2" stroke-dasharray="3 2"/>
+  <circle cx="32" cy="32" r="12" fill="#0C2333" stroke="#BAE6FD" stroke-width="1.2"/>
+  <text x="32" y="37" font-family="monospace" font-size="14" font-weight="900" fill="#38BDF8" text-anchor="middle" letter-spacing="-1">100</text>
+  <!-- Tech Reticle Ticks -->
+  <path d="M32 10v4M32 50v4M10 32h4M50 32h4" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+</svg>

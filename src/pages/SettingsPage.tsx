@@ -4,7 +4,7 @@
  * Left sticky nav · Section cards · Field-level save · Zero border-radius.
  */
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
@@ -31,11 +31,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
+import { motion, AnimatePresence } from "motion/react";
 import { cn, resolveAvatarUrl, formatFullName } from "@/lib/utils";
 import {
   Tabs,
-  TabsList,
-  TabsTab,
   TabsPanels,
   TabsPanel,
 } from "@/components/animate-ui/components/base/tabs";
@@ -181,46 +180,78 @@ function SettingRow({
   );
 }
 
-function SaveIndicator({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
-  if (status === "idle") return null;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 text-[11px] font-sans ml-2 transition-opacity",
-        status === "saving" && "text-zinc-400",
-        status === "saved" && "text-lime-400",
-        status === "error" && "text-red-400",
-      )}
-    >
-      {status === "saving" && <WanderingEyes size="inline" className="h-3 mr-1 text-zinc-400" />}
-      {status === "saved" && <Check size={11} />}
-      {status === "error" && <X size={11} />}
-      {status === "saving" ? "Saving…" : status === "saved" ? "Saved" : "Error"}
-    </span>
-  );
-}
-
 function SaveButton({
   onClick,
   disabled,
   saving,
+  saved,
+  label = "Save",
+  savedLabel = "Saved",
+  className,
 }: {
   onClick: () => void;
   disabled?: boolean;
   saving?: boolean;
+  saved?: boolean;
+  label?: string;
+  savedLabel?: string;
+  className?: string;
 }) {
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      size="sm"
       disabled={disabled || saving}
       onClick={onClick}
-      className="h-10 text-xs font-mono font-medium rounded-md active:scale-[0.98] transition-all border-white/15 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/25"
+      className={cn(
+        "relative inline-flex items-center justify-center w-[80px] min-w-[80px] shrink-0 h-10 px-3 py-2 text-xs font-sans font-medium rounded-md transition-all duration-150 cursor-pointer select-none overflow-hidden",
+        "focus:outline-none focus-visible:ring-1 focus-visible:ring-lime-400 focus-visible:border-lime-400",
+        "disabled:cursor-not-allowed disabled:opacity-40 disabled:pointer-events-none disabled:border-white/8 disabled:bg-transparent",
+        saved
+          ? "border border-lime-400/40 bg-lime-400/10 text-lime-400"
+          : saving
+          ? "border border-white/15 bg-[#171717] text-zinc-300"
+          : "border border-white/12 bg-[#171717] hover:bg-[#222222] text-zinc-300 hover:text-white hover:border-white/20 active:bg-[#282828]",
+        className,
+      )}
     >
-      {saving ? <WanderingEyes size="inline" className="h-3 mr-1.5" /> : null}
-      {saving ? "Saving…" : "Save"}
-    </Button>
+      <AnimatePresence mode="wait" initial={false}>
+        {saved ? (
+          <motion.span
+            key="saved"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            className="flex items-center justify-center gap-1.5 font-medium text-lime-400"
+          >
+            <Check size={13} className="stroke-[2.5]" />
+            <span>{savedLabel}</span>
+          </motion.span>
+        ) : saving ? (
+          <motion.span
+            key="saving"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            className="flex items-center justify-center text-zinc-200"
+          >
+            <WanderingEyes size="sm" />
+          </motion.span>
+        ) : (
+          <motion.span
+            key="idle"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            className="flex items-center justify-center font-medium"
+          >
+            {label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
   );
 }
 
@@ -239,6 +270,51 @@ export function SettingsPage() {
   const raw = searchParams.get("tab") as SettingsTab;
   const activeTab: SettingsTab = raw && NAV_ITEMS.some((n) => n.id === raw) ? raw : "profile";
   const setActiveTab = (t: SettingsTab) => setSearchParams({ tab: t });
+
+  const tabListRef = useRef<HTMLDivElement | null>(null);
+  const tabItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    opacity: number;
+    ready: boolean;
+  }>({ top: 0, left: 0, width: 0, height: 38, opacity: 0, ready: false });
+
+  useLayoutEffect(() => {
+    const activeEl = tabItemRefs.current[activeTab];
+    if (activeEl) {
+      setIndicatorStyle({
+        top: activeEl.offsetTop,
+        left: activeEl.offsetLeft,
+        width: activeEl.offsetWidth,
+        height: activeEl.offsetHeight || 38,
+        opacity: 1,
+        ready: true,
+      });
+    } else {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeEl = tabItemRefs.current[activeTab];
+      if (activeEl) {
+        setIndicatorStyle({
+          top: activeEl.offsetTop,
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          height: activeEl.offsetHeight || 38,
+          opacity: 1,
+          ready: true,
+        });
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [activeTab]);
 
   const handleLogout = () => {
     dispatch(logoutAction());
@@ -470,11 +546,6 @@ export function SettingsPage() {
       {/* Page Title Header */}
       <div className="flex items-center justify-between mb-8 pb-5 border-b border-white/[0.08]">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-2 py-0.5 rounded-full">
-              CONFIGURATION
-            </span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-normal font-display tracking-wider text-white uppercase">Settings</h1>
           <p className="text-xs text-zinc-400 mt-1 font-sans">
             Manage your competitive identity, security, and account preferences.
@@ -493,36 +564,84 @@ export function SettingsPage() {
         onValueChange={(val) => setActiveTab(val as SettingsTab)}
         className="flex flex-col md:flex-row gap-6 items-start"
       >
-        {/* ── Left sidebar nav (Responsive TabsList) ───────────────────────── */}
-        <TabsList className="flex flex-row md:flex-col w-full md:w-56 shrink-0 md:sticky md:top-6 gap-1.5 p-2 rounded-[16px] border border-white/[0.08] bg-[#1F1F1F] overflow-x-auto md:overflow-visible items-stretch no-scrollbar">
+        {/* ── Left sidebar nav with Sidebar Navigation Slider ───────────────────────── */}
+        <div
+          ref={tabListRef}
+          role="tablist"
+          aria-label="Settings navigation"
+          className="relative flex flex-row md:flex-col w-full md:w-56 md:min-w-56 shrink-0 sticky top-16 md:top-8 self-start z-20 gap-1 p-2 rounded-[16px] border border-white/[0.08] bg-[#1F1F1F] overflow-x-auto md:overflow-visible items-stretch no-scrollbar"
+        >
+          {/* Animated Active Sliding Indicator Pill */}
+          <div
+            aria-hidden="true"
+            className={`absolute top-0 left-0 pointer-events-none rounded-md bg-white/[0.06] border border-white/10 ${
+              indicatorStyle.ready
+                ? "transition-[transform,width,height,opacity] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                : "transition-none"
+            }`}
+            style={{
+              transform: `translate3d(${indicatorStyle.left}px, ${indicatorStyle.top}px, 0)`,
+              width: indicatorStyle.width ? `${indicatorStyle.width}px` : "auto",
+              height: indicatorStyle.height ? `${indicatorStyle.height}px` : "38px",
+              opacity: indicatorStyle.opacity,
+            }}
+          >
+            {/* Subtle left accent marker in Electric Lime (or Red for Danger Zone) */}
+            <span
+              className={cn(
+                "absolute rounded-full transition-colors duration-150",
+                activeTab === "danger"
+                  ? "bg-red-500"
+                  : "bg-[#B1FA63]",
+                // Left marker on desktop (vertical), bottom marker on mobile (horizontal)
+                "max-md:bottom-0 max-md:left-2 max-md:right-2 max-md:h-[2.5px] max-md:w-auto max-md:rounded-t-full",
+                "md:left-0 md:top-1.5 md:bottom-1.5 md:w-[2.5px] md:h-auto md:rounded-r-full"
+              )}
+            />
+          </div>
+
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
+            const active = activeTab === item.id;
             return (
-              <TabsTab
+              <button
                 key={item.id}
-                value={item.id}
+                ref={(el) => {
+                  tabItemRefs.current[item.id] = el;
+                }}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "relative z-10 flex items-center gap-2.5 w-auto md:w-full px-3.5 py-2.5 text-xs font-heading font-bold uppercase tracking-wider rounded-[10px] transition-colors cursor-pointer select-none justify-start",
-                  item.danger
-                    ? "text-red-400/80 hover:text-red-300 hover:bg-red-500/10"
-                    : "text-zinc-400 hover:text-white hover:bg-white/[0.03]",
+                  "relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-md text-xs font-heading font-medium select-none group min-h-[38px] transition-colors duration-150 cursor-pointer w-auto md:w-full justify-start shrink-0",
+                  active
+                    ? item.danger
+                      ? "text-red-400 font-semibold"
+                      : "text-white font-semibold"
+                    : item.danger
+                    ? "text-red-400/70 hover:text-red-300 hover:bg-white/[0.02]"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                 )}
-                activeClassName={item.danger ? "text-red-400 font-bold" : "text-black font-bold"}
-                indicatorClassName={
-                  item.danger
-                    ? "bg-red-500/20 border border-red-500/30 rounded-[10px]"
-                    : "bg-[#B1FA63] text-black rounded-[10px]"
-                }
               >
-                <Icon size={14} className="shrink-0" />
+                <Icon
+                  size={16}
+                  className={cn(
+                    "shrink-0 transition-colors duration-150",
+                    active
+                      ? item.danger
+                        ? "text-red-400"
+                        : "text-[#B1FA63]"
+                      : item.danger
+                      ? "text-red-400/70 group-hover:text-red-300"
+                      : "text-zinc-400 group-hover:text-zinc-200"
+                  )}
+                />
                 <span className="truncate">{item.label}</span>
-                {activeTab === item.id && !item.danger && (
-                  <span className="hidden md:inline-block size-1.5 rounded-full bg-black ml-auto" />
-                )}
-              </TabsTab>
+              </button>
             );
           })}
-        </TabsList>
+        </div>
 
         {/* ── Right content panels ──────────────────────────────────────────── */}
         <TabsPanels className="flex-1 min-w-0 space-y-4">
@@ -615,23 +734,25 @@ export function SettingsPage() {
                   htmlFor="s-fullname"
                   hint="Your actual human name (e.g. Rahul Sharma). Medi-Caps Google accounts default to your enrollment number, so enter your real name here."
                 >
-                  <div className="flex gap-2">
-                    <Input
-                      id="s-fullname"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })
-                      }
-                      placeholder="Full Name"
-                      className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
-                    />
+                  <div className="flex gap-2 items-center">
+                    <div className="relative flex-1 min-w-0">
+                      <Input
+                        id="s-fullname"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && saveField("full_name", { full_name: fullName.trim() })
+                        }
+                        placeholder="Full Name"
+                        className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40 w-full"
+                      />
+                    </div>
                     <SaveButton
                       onClick={() => saveField("full_name", { full_name: fullName.trim() })}
                       disabled={fullName.trim() === (member?.full_name || "")}
                       saving={fieldStatus["full_name"] === "saving"}
+                      saved={fieldStatus["full_name"] === "saved"}
                     />
-                    <SaveIndicator status={fieldStatus["full_name"] || "idle"} />
                   </div>
                 </SettingRow>
 
@@ -640,86 +761,84 @@ export function SettingsPage() {
                   htmlFor="s-bio"
                   hint="Up to 500 characters. Share your competitive focus and learning trajectory."
                 >
-                  <div className="space-y-2">
-                    <Textarea
-                      id="s-bio"
-                      value={bio}
-                      maxLength={500}
-                      onChange={(e) => setBio(e.target.value)}
-                      rows={3}
-                      placeholder="Competitive programmer, building expertise in algorithms…"
-                      className="text-base md:text-xs font-sans resize-none bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
-                    />
-                    <div className="flex items-center justify-between font-sans">
-                      <span className="text-[11px] text-zinc-500 tabular-nums">
-                        {bio.length}/500
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <SaveButton
-                          onClick={() => saveField("bio", { bio: bio.trim() })}
-                          disabled={bio.trim() === (member?.bio || "")}
-                          saving={fieldStatus["bio"] === "saving"}
-                        />
-                        <SaveIndicator status={fieldStatus["bio"] || "idle"} />
+                  <div className="flex gap-2 items-start">
+                    <div className="relative flex-1 min-w-0">
+                      <Textarea
+                        id="s-bio"
+                        value={bio}
+                        maxLength={500}
+                        onChange={(e) => setBio(e.target.value)}
+                        rows={3}
+                        placeholder="Competitive programmer, building expertise in algorithms…"
+                        className="text-base md:text-xs font-sans resize-none bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40 w-full"
+                      />
+                      <div className="mt-1 font-sans">
+                        <span className="text-[11px] text-zinc-500 tabular-nums">
+                          {bio.length}/500
+                        </span>
                       </div>
                     </div>
+                    <SaveButton
+                      onClick={() => saveField("bio", { bio: bio.trim() })}
+                      disabled={bio.trim() === (member?.bio || "")}
+                      saving={fieldStatus["bio"] === "saving"}
+                      saved={fieldStatus["bio"] === "saved"}
+                    />
                   </div>
                 </SettingRow>
 
                 <SettingRow label="Department" htmlFor="s-dept">
-                  <Select
-                    value={department || "unspecified"}
-                    onValueChange={(v) => {
-                      const finalVal = v === "unspecified" ? "" : v;
-                      setDepartment(finalVal);
-                      saveField("department", { department: finalVal });
-                    }}
-                  >
-                    <SelectTrigger
-                      id="s-dept"
-                      className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={department || "unspecified"}
+                      onValueChange={(v) => {
+                        const finalVal = v === "unspecified" ? "" : v;
+                        setDepartment(finalVal);
+                        saveField("department", { department: finalVal });
+                      }}
                     >
-                      <SelectValue placeholder="Select Department…" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1F1F1F] border-white/10 text-white font-sans rounded-md">
-                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">
-                        Not Specified
-                      </SelectItem>
-                      {DEPARTMENTS.map((d) => (
-                        <SelectItem key={d.value} value={d.value} className="text-xs">
-                          {d.label}
+                      <SelectTrigger id="s-dept" className="min-w-[200px]">
+                        <SelectValue placeholder="Select Department…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unspecified" className="text-zinc-500 italic">
+                          Not Specified
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        {DEPARTMENTS.map((d) => (
+                          <SelectItem key={d.value} value={d.value}>
+                            {d.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </SettingRow>
 
                 <SettingRow label="Graduation Batch" htmlFor="s-batch" borderless>
-                  <Select
-                    value={batch || "unspecified"}
-                    onValueChange={(v) => {
-                      const finalVal = v === "unspecified" ? "" : v;
-                      setBatch(finalVal);
-                      saveField("batch", { batch: finalVal });
-                    }}
-                  >
-                    <SelectTrigger
-                      id="s-batch"
-                      className="h-10 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus:ring-0 focus:border-lime-400"
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={batch || "unspecified"}
+                      onValueChange={(v) => {
+                        const finalVal = v === "unspecified" ? "" : v;
+                        setBatch(finalVal);
+                        saveField("batch", { batch: finalVal });
+                      }}
                     >
-                      <SelectValue placeholder="Select Graduation Batch…" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1F1F1F] border-white/10 text-white font-sans rounded-md">
-                      <SelectItem value="unspecified" className="text-xs text-zinc-500 italic">
-                        Not Specified
-                      </SelectItem>
-                      {BATCHES.map((b) => (
-                        <SelectItem key={b} value={b} className="text-xs">
-                          {b}
+                      <SelectTrigger id="s-batch" className="min-w-[200px]">
+                        <SelectValue placeholder="Select Graduation Batch…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unspecified" className="text-zinc-500 italic">
+                          Not Specified
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        {BATCHES.map((b) => (
+                          <SelectItem key={b} value={b}>
+                            {b}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </SettingRow>
               </SettingSection>
 
@@ -733,8 +852,8 @@ export function SettingsPage() {
                   htmlFor="s-github"
                   hint="Your GitHub username (without @)."
                 >
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                  <div className="flex gap-2 items-center">
+                    <div className="relative flex-1 min-w-0">
                       <Github
                         size={13}
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
@@ -748,15 +867,15 @@ export function SettingsPage() {
                           saveField("github", { github_username: github.trim() })
                         }
                         placeholder="octocat"
-                        className="h-10 pl-8 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
+                        className="h-10 pl-8 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40 w-full"
                       />
                     </div>
                     <SaveButton
                       onClick={() => saveField("github", { github_username: github.trim() })}
                       disabled={github.trim() === (member?.github_username || "")}
                       saving={fieldStatus["github"] === "saving"}
+                      saved={fieldStatus["github"] === "saved"}
                     />
-                    <SaveIndicator status={fieldStatus["github"] || "idle"} />
                   </div>
                   {github && (
                     <a
@@ -777,8 +896,8 @@ export function SettingsPage() {
                   hint="Full profile URL or handle."
                   borderless
                 >
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                  <div className="flex gap-2 items-center">
+                    <div className="relative flex-1 min-w-0">
                       <FaLinkedinIn
                         size={13}
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
@@ -792,15 +911,15 @@ export function SettingsPage() {
                           saveField("linkedin", { linkedin_url: linkedin.trim() })
                         }
                         placeholder="https://linkedin.com/in/username"
-                        className="h-10 pl-8 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40"
+                        className="h-10 pl-8 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:border-lime-400 focus-visible:ring-1 focus-visible:ring-lime-400/40 w-full"
                       />
                     </div>
                     <SaveButton
                       onClick={() => saveField("linkedin", { linkedin_url: linkedin.trim() })}
                       disabled={linkedin.trim() === (member?.linkedin_url || "")}
                       saving={fieldStatus["linkedin"] === "saving"}
+                      saved={fieldStatus["linkedin"] === "saved"}
                     />
-                    <SaveIndicator status={fieldStatus["linkedin"] || "idle"} />
                   </div>
                 </SettingRow>
               </SettingSection>
@@ -849,9 +968,9 @@ export function SettingsPage() {
                   hint="Lowercase letters, numbers, and underscores only. Min 3 characters."
                   borderless
                 >
-                  <div className="space-y-2 max-w-xs">
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
+                  <div className="space-y-2">
+                    <div className="flex gap-2 items-center">
+                      <div className="relative flex-1 min-w-0">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-sans text-xs">
                           @
                         </span>
@@ -862,7 +981,7 @@ export function SettingsPage() {
                             setHandleInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
                           }
                           className={cn(
-                            "h-10 pl-7 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:ring-0",
+                            "h-10 pl-7 text-base md:text-xs font-sans bg-[#171717] border-white/12 text-white rounded-md focus-visible:ring-0 w-full",
                             isHandleChanged &&
                               handleStatus === "available" &&
                               "border-emerald-500/60 focus-visible:border-emerald-500",
@@ -875,25 +994,19 @@ export function SettingsPage() {
                           placeholder="handle"
                         />
                       </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
+                      <SaveButton
+                        label="Update"
+                        savedLabel="Updated"
+                        onClick={saveHandle}
                         disabled={
                           !isHandleChanged ||
                           handleInput.length < 3 ||
                           handleStatus !== "available" ||
                           fieldStatus["handle"] === "saving"
                         }
-                        onClick={saveHandle}
-                        className="h-10 text-xs font-mono font-medium rounded-md active:scale-[0.98] transition-all border-white/15 bg-white/[0.02] hover:bg-white/[0.05]"
-                      >
-                        {fieldStatus["handle"] === "saving" ? (
-                          <WanderingEyes size="inline" className="h-3 mr-1" />
-                        ) : (
-                          "Update"
-                        )}
-                      </Button>
+                        saving={fieldStatus["handle"] === "saving"}
+                        saved={fieldStatus["handle"] === "saved"}
+                      />
                     </div>
                     <div className="h-4 flex items-center">
                       {!isHandleChanged && (
@@ -918,7 +1031,6 @@ export function SettingsPage() {
                           <X size={11} /> Handle already taken
                         </span>
                       )}
-                      {fieldStatus["handle"] === "saved" && <SaveIndicator status="saved" />}
                     </div>
                   </div>
                 </SettingRow>

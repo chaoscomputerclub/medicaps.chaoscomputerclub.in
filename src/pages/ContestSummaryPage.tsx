@@ -423,10 +423,10 @@ export function ContestSummaryPage() {
               <img src="/logo.webp" alt="CCC" className="size-5 object-contain" />
             </div>
             <div className="hidden md:flex flex-col leading-none">
-              <span className="font-mono text-[11px] font-bold text-white tracking-wider">
+              <span className="font-sans text-[11px] font-bold text-white tracking-wider">
                 CCC CONTEST SERVICE
               </span>
-              <span className="font-mono text-[8px] text-lime-400 font-semibold tracking-widest mt-0.5">
+              <span className="font-sans text-[8px] text-lime-400 font-semibold tracking-widest mt-0.5">
                 MICROSERVICE RUNTIME
               </span>
             </div>
@@ -436,10 +436,10 @@ export function ContestSummaryPage() {
 
           {/* Breadcrumb / Title */}
           <div className="flex items-center gap-2 min-w-0">
-            <span className="font-mono text-xs text-zinc-300 font-medium truncate max-w-[200px] sm:max-w-[320px]">
+            <span className="font-sans text-xs text-zinc-300 font-medium truncate max-w-[200px] sm:max-w-[320px]">
               {contestTitle}
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-zinc-900 text-[10px] font-mono text-zinc-400">
+            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-[#242424] text-[10px] font-sans text-zinc-400">
               <span className={`size-1.5 rounded-full ${isReviewMode ? "bg-zinc-400" : "bg-lime-400 animate-pulse"}`} />
               {isReviewMode ? "REVIEW MODE" : "LIVE ASSESSMENT"}
             </span>
@@ -466,7 +466,7 @@ export function ContestSummaryPage() {
           </Button>
 
           {/* Live Timer Pill */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-white/10 bg-zinc-950 font-mono text-xs">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-white/10 bg-[#242424] font-sans text-xs">
             <Clock
               className={`size-3.5 ${remainingSeconds < 300 ? "text-red-400 animate-pulse" : "text-lime-400"}`}
             />
@@ -494,11 +494,11 @@ export function ContestSummaryPage() {
                   className="size-full rounded-full object-cover"
                 />
               ) : null}
-              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center">
+              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-sans font-bold text-xs flex items-center justify-center">
                 {userInitial}
               </AvatarFallback>
             </Avatar>
-            <span className="text-zinc-300 font-mono text-xs">
+            <span className="text-zinc-300 font-sans text-xs">
               @{member?.handle || displayName}
             </span>
           </Link>
@@ -512,7 +512,7 @@ export function ContestSummaryPage() {
       </header>
 
       {/* Microservice Sub-bar */}
-      <div className="border-b border-white/6 bg-zinc-950/80 px-4 sm:px-8 py-2 flex items-center justify-between text-[11px] font-mono text-zinc-400 shrink-0">
+      <div className="border-b border-white/[0.08] bg-[#1F1F1F] px-4 sm:px-8 py-2 flex items-center justify-between text-[11px] font-sans text-zinc-400 shrink-0">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-zinc-300">
             <span className="size-1.5 rounded-full bg-lime-400" />
@@ -551,12 +551,12 @@ export function ContestSummaryPage() {
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border border-white/[0.08] bg-[#1F1F1F]">
                 <span className="size-1.5 rounded-full bg-[#B1FA63]" />
                 <span>
-                  Candidate: <strong className="text-white font-mono">@{member?.handle || "Cadet"}</strong>
+                  Candidate: <strong className="text-white font-sans">@{member?.handle || "Cadet"}</strong>
                 </span>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] border border-[#B1FA63]/30 bg-[#1F1F1F]">
                 <span>
-                  Earned: <strong className="text-[#B1FA63] tabular-nums font-mono">{earnedPoints}</strong> /{" "}
+                  Earned: <strong className="text-[#B1FA63] tabular-nums font-sans">{earnedPoints}</strong> /{" "}
                   {totalPossiblePoints} Pts
                 </span>
               </div>
@@ -650,12 +650,12 @@ export function ContestSummaryPage() {
                 >
                   <div className="flex items-start gap-3.5 min-w-0">
                     <div
-                      className={`size-8 shrink-0 rounded flex items-center justify-center font-mono text-xs font-bold ${
+                      className={`size-8 shrink-0 rounded flex items-center justify-center font-sans text-xs font-bold ${
                         isSolved
                           ? "border border-lime-400/30 bg-lime-400/10 text-lime-400"
                           : isAttempted
                             ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
-                            : "border border-white/10 bg-zinc-900 text-zinc-400"
+                            : "border border-white/10 bg-[#242424] text-zinc-400"
                       }`}
                     >
                       {problem.problem_index}
@@ -675,7 +675,7 @@ export function ContestSummaryPage() {
                         </Link>
                         <Badge
                           variant="outline"
-                          className={`text-[9px] font-mono px-1.5 py-0 uppercase border ${
+                          className={`text-[9px] font-sans px-1.5 py-0 uppercase border ${
                             problem.difficulty === "HARD"
                               ? "border-red-500/30 text-red-400 bg-red-500/5"
                               : problem.difficulty === "MEDIUM"
@@ -687,7 +687,7 @@ export function ContestSummaryPage() {
                         </Badge>
                       </div>
 
-                      <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-500">
+                      <div className="flex items-center gap-3 font-sans text-[11px] text-zinc-500">
                         <span>{problem.topic || "Algorithmic"}</span>
                         <span>·</span>
                         <span>
@@ -701,17 +701,17 @@ export function ContestSummaryPage() {
                   <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/6">
                     {/* Status Pill */}
                     {isSolved ? (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-mono text-xs">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-sans text-xs">
                         <CheckCircle2 className="size-3.5" />
                         <span className="font-semibold">Accepted ({problem.points} pts)</span>
                       </div>
                     ) : isAttempted ? (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400 font-mono text-xs">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400 font-sans text-xs">
                         <Code2 className="size-3.5" />
                         <span>Draft Saved</span>
                       </div>
                     ) : (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/8 bg-zinc-900 text-zinc-500 font-mono text-xs">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/[0.08] bg-[#242424] text-zinc-500 font-sans text-xs">
                         <MinusCircle className="size-3.5" />
                         <span>Unattempted</span>
                       </div>
@@ -747,7 +747,7 @@ export function ContestSummaryPage() {
 
         {/* Final Submission Card */}
         {isAlreadySubmitted ? (
-          <section className="p-6 rounded-lg border border-lime-500/30 bg-zinc-950 space-y-4">
+          <section className="p-6 rounded-[20px] border border-lime-500/30 bg-[#1F1F1F] space-y-4">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-md border border-lime-400/30 bg-lime-400/10 text-lime-400 shrink-0 mt-0.5">
                 <CheckCircle2 className="size-5" />
@@ -756,7 +756,7 @@ export function ContestSummaryPage() {
                 <h3 className="text-base font-semibold text-white">
                   Contest Attempt Concluded &amp; Submitted
                 </h3>
-                <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+                <p className="text-xs text-zinc-300 font-sans leading-relaxed">
                   Your contest solutions have been officially submitted and recorded in the
                   Medi-Caps Chapter contest ledger. In accordance with the fair competition
                   protocol, retakes and further attempts are strictly locked.
@@ -781,14 +781,14 @@ export function ContestSummaryPage() {
             </div>
           </section>
         ) : (
-          <section className="p-6 rounded-lg border border-white/10 bg-zinc-950 space-y-4">
+          <section className="p-6 rounded-[20px] border border-white/10 bg-[#1F1F1F] space-y-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-md border border-white/10 bg-zinc-900 text-lime-400 shrink-0 mt-0.5">
+              <div className="p-2 rounded-md border border-white/10 bg-[#242424] text-lime-400 shrink-0 mt-0.5">
                 <Trophy className="size-5" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-base font-semibold text-white">Ready to Complete Contest?</h3>
-                <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                <p className="text-xs text-zinc-400 font-sans leading-relaxed">
                   {unattemptedCount > 0 ? (
                     <span className="text-amber-400">
                       You still have <strong>{unattemptedCount} unattempted question(s)</strong>.
@@ -834,7 +834,7 @@ export function ContestSummaryPage() {
       </main>
 
       {/* Microservice Architecture Telemetry Footer */}
-      <footer className="mt-auto border-t border-white/6 py-6 px-4 text-center font-mono text-xs text-zinc-500 bg-zinc-950/60">
+      <footer className="mt-auto border-t border-white/[0.08] py-6 px-4 text-center font-sans text-xs text-zinc-500 bg-[#171717]">
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <span className="flex items-center gap-1.5 text-zinc-400">
             <span className="size-1.5 rounded-full bg-lime-400" />
@@ -857,13 +857,13 @@ export function ContestSummaryPage() {
             <AlertDialogTitle className="text-base font-semibold text-white tracking-tight font-sans">
               Confirm Final Contest Submission?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-zinc-300 font-mono leading-relaxed">
+            <AlertDialogDescription className="text-xs text-zinc-300 font-sans leading-relaxed">
               Once submitted, your test attempt will be finalized and evaluated against the full
               testcase judge. You will no longer be able to edit your solutions for this contest.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-mono text-xs">
+          <div className="rounded-md border border-white/8 bg-black p-3.5 space-y-2 font-sans text-xs">
             <div className="flex items-center justify-between">
               <span className="text-zinc-500">Total Solved:</span>
               <span className="font-semibold text-lime-400">
@@ -887,7 +887,7 @@ export function ContestSummaryPage() {
           <AlertDialogFooter className="flex flex-row items-center justify-end gap-2 pt-2">
             <AlertDialogCancel
               disabled={isSubmittingFinal}
-              className="rounded-md font-mono text-xs border border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white mt-0 cursor-pointer px-4 py-2"
+              className="rounded-md font-sans text-xs border border-white/10 bg-black text-zinc-300 hover:bg-white/5 hover:text-white mt-0 cursor-pointer px-4 py-2"
             >
               Continue Solving
             </AlertDialogCancel>
@@ -897,7 +897,7 @@ export function ContestSummaryPage() {
                 handleFinalSubmit();
               }}
               disabled={isSubmittingFinal}
-              className="rounded-md font-mono text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer px-4 py-2"
+              className="rounded-md font-sans text-xs font-semibold bg-lime-400 text-black hover:bg-lime-300 cursor-pointer px-4 py-2"
             >
               {isSubmittingFinal ? (
                 <>

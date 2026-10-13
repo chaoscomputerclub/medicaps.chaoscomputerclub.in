@@ -6,7 +6,6 @@ import {
   Clock,
   Minus,
   Sparkles,
-  Terminal,
   Filter,
   ArrowRight,
   ChevronLeft,
@@ -18,7 +17,15 @@ import {
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader, SectionHeader, EmptyState } from "@/organization/components/ui";
+import { PracticeRowSkeleton, Skeleton } from "@/organization/components/skeletons";
 import { practiceApi } from "@/features/practice/api";
 import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
@@ -69,9 +76,15 @@ export function PracticePage() {
   const total = listData?.total || 0;
   const summary = listData?.summary || {
     total_published: 0,
+    total_problems: 0,
     solved_count: 0,
     attempted_count: 0,
   };
+  const totalPublishedCount =
+    summary.total_published ??
+    summary.total_problems ??
+    listData?.total ??
+    problems.length;
   const totalPages = listData?.pages || Math.ceil(total / 50) || 1;
 
   // Filter update handler updating URL search params
@@ -133,27 +146,27 @@ export function PracticePage() {
     switch (diff) {
       case "EASY":
         return (
-          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-emerald-400">
+          <span className="inline-flex items-center gap-1 font-sans text-[11px] font-semibold text-emerald-400">
             <span className="size-1.5 rounded-full bg-emerald-400" />
             Easy
           </span>
         );
       case "MEDIUM":
         return (
-          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-amber-400">
+          <span className="inline-flex items-center gap-1 font-sans text-[11px] font-semibold text-amber-400">
             <span className="size-1.5 rounded-full bg-amber-400" />
             Medium
           </span>
         );
       case "HARD":
         return (
-          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-rose-400">
+          <span className="inline-flex items-center gap-1 font-sans text-[11px] font-semibold text-rose-400">
             <span className="size-1.5 rounded-full bg-rose-400" />
             Hard
           </span>
         );
       default:
-        return <span className="font-mono text-[11px] text-zinc-500">{diff}</span>;
+        return <span className="font-sans text-[11px] text-zinc-500">{diff}</span>;
     }
   };
 
@@ -161,20 +174,8 @@ export function PracticePage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       {/* Page Header */}
       <PageHeader
-        kicker="03 // Evergreen Arena"
-        index="PRACTICE"
-        badge={
-          <span className="inline-flex items-center gap-1.5 rounded border border-lime-400/30 bg-lime-400/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-lime-400">
-            Master Repository
-          </span>
-        }
         title="Practice Arena"
         description="Sharpen your problem-solving skills across standard data structures and algorithms."
-        action={
-          <div className="flex size-12 items-center justify-center rounded-lg border border-white/8 bg-black text-lime-400">
-            <Terminal className="size-6" />
-          </div>
-        }
       />
 
 
@@ -186,9 +187,13 @@ export function PracticePage() {
             Problems Available
           </div>
           <div className="text-3xl sm:text-4xl font-display text-white tabular-nums tracking-wide">
-            {summary.total_published}
+            {loading && !listData ? (
+              <Skeleton className="h-9 sm:h-10 w-16 rounded-md my-1" />
+            ) : (
+              totalPublishedCount
+            )}
           </div>
-          <div className="text-xs font-mono text-zinc-500">Active repository</div>
+          <div className="text-xs font-sans text-zinc-500">Active repository</div>
         </div>
 
         <div className="p-5 rounded-[24px] border border-[#B1FA63]/25 bg-[#1F1F1F] space-y-1 hover:border-[#B1FA63]/50 transition-all duration-200">
@@ -196,9 +201,13 @@ export function PracticePage() {
             Solved by You
           </div>
           <div className="text-3xl sm:text-4xl font-display text-[#B1FA63] tabular-nums tracking-wide">
-            {summary.solved_count}
+            {loading && !listData ? (
+              <Skeleton className="h-9 sm:h-10 w-16 rounded-md my-1" />
+            ) : (
+              summary.solved_count
+            )}
           </div>
-          <div className="text-xs font-mono text-[#B1FA63]/70">Authoritative solves</div>
+          <div className="text-xs font-sans text-[#B1FA63]/70">Authoritative solves</div>
         </div>
 
         <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] space-y-1 hover:border-[#B1FA63]/30 transition-all duration-200">
@@ -206,17 +215,21 @@ export function PracticePage() {
             Attempted
           </div>
           <div className="text-3xl sm:text-4xl font-display text-amber-400 tabular-nums tracking-wide">
-            {summary.attempted_count}
+            {loading && !listData ? (
+              <Skeleton className="h-9 sm:h-10 w-16 rounded-md my-1" />
+            ) : (
+              summary.attempted_count
+            )}
           </div>
-          <div className="text-xs font-mono text-zinc-500">Submissions logged</div>
+          <div className="text-xs font-sans text-zinc-500">Submissions logged</div>
         </div>
       </section>
 
       {/* Search & Filter Toolbar */}
-      <section className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-4 space-y-3">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <section className="rounded-[20px] border border-white/[0.08] bg-[#1F1F1F] p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full">
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="relative flex-1">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-0">
             <Search className="size-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               type="text"
@@ -228,59 +241,77 @@ export function PracticePage() {
                   updateFilter("q", searchInput.trim());
                 }
               }}
-              className="h-10 pl-9 pr-3 text-xs bg-[#171717] border-white/10 font-mono rounded-[10px] text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-[#B1FA63]"
+              className="h-10 pl-9 pr-3 text-base md:text-xs bg-[#171717] border-white/12 font-sans rounded-md text-white placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-lime-400 focus-visible:border-lime-400 w-full"
             />
           </form>
 
-          {/* Quick Filters */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Quick Filters - All in one horizontal line */}
+          <div className="flex items-center gap-2 shrink-0 flex-nowrap overflow-x-auto no-scrollbar">
             {/* Difficulty Selector */}
-            <select
-              aria-label="Filter by difficulty"
+            <Select
               value={difficultyParam}
-              onChange={(e) => updateFilter("difficulty", e.target.value)}
-              className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
+              onValueChange={(val) => updateFilter("difficulty", val)}
             >
-              <option value="ALL">All Difficulties</option>
-              <option value="EASY">Easy</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HARD">Hard</option>
-            </select>
+              <SelectTrigger
+                aria-label="Filter by difficulty"
+                className="w-[140px] shrink-0"
+              >
+                <SelectValue placeholder="All Difficulties" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Difficulties</SelectItem>
+                <SelectItem value="EASY">Easy</SelectItem>
+                <SelectItem value="MEDIUM">Medium</SelectItem>
+                <SelectItem value="HARD">Hard</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Topic Selector */}
-            <select
-              aria-label="Filter by topic"
+            <Select
               value={topicParam}
-              onChange={(e) => updateFilter("topic", e.target.value)}
-              className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
+              onValueChange={(val) => updateFilter("topic", val)}
             >
-              <option value="ALL">All Topics</option>
-              {(Array.isArray(topicsData) ? topicsData : []).map((t) => (
-                <option key={t.slug} value={t.slug}>
-                  {t.name} ({t.count})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                aria-label="Filter by topic"
+                className="w-[140px] shrink-0"
+              >
+                <SelectValue placeholder="All Topics" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Topics</SelectItem>
+                {(Array.isArray(topicsData) ? topicsData : []).map((t) => (
+                  <SelectItem key={t.slug} value={t.slug}>
+                    {t.name}{typeof t.count === "number" && t.count > 0 ? ` (${t.count})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* Status Selector */}
-            <select
-              aria-label="Filter by status"
+            <Select
               value={statusParam}
-              onChange={(e) => updateFilter("status", e.target.value)}
-              className="h-10 px-3 text-xs font-heading font-bold uppercase bg-[#171717] border border-white/10 text-zinc-300 rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#B1FA63] cursor-pointer"
+              onValueChange={(val) => updateFilter("status", val)}
             >
-              <option value="ALL">All Status</option>
-              <option value="SOLVED">Solved</option>
-              <option value="ATTEMPTED">Attempted</option>
-              <option value="UNSOLVED">Unsolved</option>
-            </select>
+              <SelectTrigger
+                aria-label="Filter by status"
+                className="w-[140px] shrink-0"
+              >
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Status</SelectItem>
+                <SelectItem value="SOLVED">Solved</SelectItem>
+                <SelectItem value="ATTEMPTED">Attempted</SelectItem>
+                <SelectItem value="UNSOLVED">Unsolved</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Clear Filters Button */}
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="h-10 px-3 text-xs font-heading font-bold uppercase text-zinc-400 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-white/20 rounded-[10px] bg-[#171717] transition-colors"
+                className="h-10 px-3 shrink-0 text-xs font-sans font-medium text-zinc-400 hover:text-white flex items-center gap-1.5 border border-white/12 hover:border-white/20 rounded-md bg-[#171717] transition-colors cursor-pointer"
                 title="Reset all filters"
               >
                 <RotateCcw className="size-3" />
@@ -293,13 +324,18 @@ export function PracticePage() {
 
       {/* Problems Dense Table */}
       <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden">
-        {loading && problems.length === 0 ? (
-          <div className="py-16 text-center font-mono text-xs text-zinc-500">
-            <span className="inline-block size-2 rounded-full bg-lime-400 animate-ping mr-2" />
-            Loading practice catalog…
-          </div>
-        ) : problems.length === 0 ? (
-          <div className="py-16 text-center space-y-4 font-mono px-4">
+        {problems.length === 0 && !loading ? (
+          <div className="py-16 text-center space-y-4 font-sans px-4 flex flex-col items-center justify-center">
+            <div className="mb-2 flex items-center justify-center">
+              <img
+                src="/matiks-assets/empty-states/no_feed.webp"
+                alt="No matching practice problems"
+                className="w-36 h-36 sm:w-44 sm:h-44 object-contain select-none pointer-events-none"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            </div>
             <div className="text-zinc-300 text-sm font-semibold">
               {hasActiveFilters ? "No problems match these filters." : "No practice challenges available yet."}
             </div>
@@ -351,7 +387,7 @@ export function PracticePage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs">
+            <table className="w-full text-left font-sans text-xs">
               <thead>
                 <tr className="border-b border-white/8 text-[11px] text-zinc-500 uppercase tracking-wider bg-white/[0.01]">
                   <th className="py-3 px-4 w-12 text-center">Status</th>
@@ -364,9 +400,12 @@ export function PracticePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {problems.map((p, idx) => {
-                  const displayIndex = p.problem_index || String((pageParam - 1) * 50 + idx + 1).padStart(3, "0");
-                  return (
+                {loading ? (
+                  <PracticeRowSkeleton count={8} />
+                ) : (
+                  problems.map((p, idx) => {
+                    const displayIndex = p.problem_index || String((pageParam - 1) * 50 + idx + 1).padStart(3, "0");
+                    return (
                     <tr
                       key={p.id}
                       onMouseEnter={() => handlePrefetch(p.slug)}
@@ -414,7 +453,7 @@ export function PracticePage() {
 
                       {/* Topic */}
                       <td className="py-3.5 px-4">
-                        <span className="inline-block px-2 py-0.5 rounded border border-white/8 bg-zinc-950 text-[11px] text-zinc-300">
+                        <span className="inline-block px-2 py-0.5 rounded border border-white/8 bg-transparent text-[11px] text-zinc-300">
                           {p.topic}
                         </span>
                       </td>
@@ -438,7 +477,8 @@ export function PracticePage() {
                       </td>
                     </tr>
                   );
-                })}
+                })
+              )}
               </tbody>
             </table>
           </div>
@@ -446,7 +486,7 @@ export function PracticePage() {
 
         {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-white/8 font-mono text-xs text-zinc-400">
+          <div className="flex items-center justify-between p-4 border-t border-white/8 font-sans text-xs text-zinc-400">
             <div>
               Page <strong className="text-white tabular-nums">{pageParam}</strong> of{" "}
               <strong className="text-white tabular-nums">{totalPages}</strong>

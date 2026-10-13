@@ -17,6 +17,7 @@ import {
   MyContestsSkeleton,
   LeaderboardSkeleton,
   ProblemArchiveSkeleton,
+  PracticeSkeleton,
   ProblemDetailSkeleton,
   ProfileSkeleton,
   SettingsSkeleton,
@@ -531,7 +532,7 @@ export function AppRoutes() {
           <Route
             path="practice"
             element={
-              <Suspense fallback={<ProblemArchiveSkeleton />}>
+              <Suspense fallback={<PracticeSkeleton />}>
                 <PracticePage />
               </Suspense>
             }

@@ -174,7 +174,7 @@ export function GlobalLoader({
     <div className={cn("flex flex-col items-center justify-center select-none", className)}>
       <WanderingEyes size={size} className="text-white" {...props} />
       {text && (
-        <TextShimmer className="mt-5 text-[11px] font-mono tracking-[0.25em] text-white uppercase">
+        <TextShimmer className="mt-5 text-[11px] font-sans tracking-[0.25em] text-white uppercase">
           {text}
         </TextShimmer>
       )}

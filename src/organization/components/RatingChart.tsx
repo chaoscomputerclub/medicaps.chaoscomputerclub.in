@@ -7,6 +7,7 @@
 import { Suspense, lazy, memo } from "react";
 import type { RatingHistoryPoint } from "../data/types";
 import { RatingChartSkeleton } from "./skeletons";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 // Lazy import of the actual recharts-powered chart
 const RatingChartInner = lazy(() =>
@@ -26,8 +27,14 @@ export const RatingChart = memo(function RatingChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 w-full flex items-center justify-center text-zinc-400 font-mono text-xs border border-white/8 rounded-lg bg-black">
-        No rating history recorded yet.
+      <div className="h-64 w-full flex flex-col items-center justify-center text-center p-6 border border-white/8 rounded-lg bg-black/60">
+        <MakoMascot variant="focused" size="md" className="mb-2" />
+        <strong className="text-xs font-sans font-bold uppercase tracking-wider text-white">
+          No Rating History Recorded
+        </strong>
+        <p className="text-[11px] text-zinc-400 font-sans max-w-xs mt-1 leading-relaxed">
+          Participate in rated campus rounds to plot your official ELO performance curve.
+        </p>
       </div>
     );
   }

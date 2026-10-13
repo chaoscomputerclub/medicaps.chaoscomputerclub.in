@@ -332,7 +332,7 @@ export function AssessmentWorkspacePage() {
             <div className="rounded-[16px] bg-[#171717] border border-white/[0.06] p-4.5 space-y-2 font-sans text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-zinc-400 font-heading font-semibold text-[11px] uppercase">Score recorded</span>
-                <span className="text-[#B1FA63] font-bold font-mono text-sm tabular-nums">
+                <span className="text-[#B1FA63] font-bold font-sans text-sm tabular-nums">
                   {session.total_score ?? 0} pts
                 </span>
               </div>
@@ -535,10 +535,10 @@ export function AssessmentWorkspacePage() {
         <div className="flex items-center gap-2">
           {session && (
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-mono text-xs border ${
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-sans text-xs border ${
                 session.remaining_seconds < 600
                   ? "border-red-500/40 bg-red-950/20 text-red-400 animate-pulse"
-                  : "border-white/10 bg-zinc-950 text-zinc-200"
+                  : "border-white/10 bg-[#242424] text-zinc-200"
               }`}
             >
               <Clock size={12} className="text-lime-400" />
@@ -550,10 +550,10 @@ export function AssessmentWorkspacePage() {
 
           {session && (
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-mono text-xs border ${
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-sans text-xs border ${
                 (session.anti_cheat_violations || 0) > 0
                   ? "border-amber-500/40 bg-black text-amber-300 font-semibold"
-                  : "border-white/8 bg-zinc-950 text-zinc-500"
+                  : "border-white/[0.08] bg-[#242424] text-zinc-500"
               }`}
             >
               <ShieldAlert
@@ -576,10 +576,10 @@ export function AssessmentWorkspacePage() {
             value={selectedLanguage}
             onValueChange={(val: any) => dispatch(setSelectedLanguage(val))}
           >
-            <SelectTrigger className="h-7 w-[105px] border-white/10 bg-[#171717] text-xs font-mono text-zinc-300 focus:ring-0 rounded-md">
+            <SelectTrigger className="h-7 w-[105px] border-white/10 bg-[#171717] text-xs font-sans text-zinc-300 focus:ring-0 rounded-md">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="border-white/10 bg-[#1F1F1F] text-xs font-mono text-zinc-300 rounded-md">
+            <SelectContent className="border-white/10 bg-[#1F1F1F] text-xs font-sans text-zinc-300 rounded-md">
               <SelectItem value="python">Python 3</SelectItem>
               <SelectItem value="cpp">C++ 14</SelectItem>
               <SelectItem value="c">C (GCC)</SelectItem>
@@ -659,7 +659,7 @@ export function AssessmentWorkspacePage() {
                   className="size-full rounded-full object-cover"
                 />
               ) : null}
-              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-mono font-bold text-xs flex items-center justify-center">
+              <AvatarFallback className="size-full rounded-full bg-lime-400 text-black font-sans font-bold text-xs flex items-center justify-center">
                 {userInitial}
               </AvatarFallback>
             </Avatar>
@@ -677,7 +677,7 @@ export function AssessmentWorkspacePage() {
           {activeProblem ? (
             <ProblemStatementView problem={activeProblem as any} />
           ) : (
-            <div className="text-zinc-500 font-mono text-xs">
+            <div className="text-zinc-500 font-sans text-xs">
               Select a problem from the top bar.
             </div>
           )}
@@ -689,7 +689,7 @@ export function AssessmentWorkspacePage() {
           <div className="flex-1 relative overflow-hidden bg-black">
             <Suspense
               fallback={
-                <div className="h-full w-full flex items-center justify-center text-xs font-mono text-zinc-500 animate-pulse">
+                <div className="h-full w-full flex items-center justify-center text-xs font-sans text-zinc-500 animate-pulse">
                   Initializing terminal code editor…
                 </div>
               }
@@ -734,7 +734,7 @@ export function AssessmentWorkspacePage() {
                   onClick={() => dispatch(setActiveConsoleTab("testcases"))}
                   className={`px-2.5 py-1 text-sm font-sans font-semibold rounded-md cursor-pointer transition-colors ${
                     activeConsoleTab === "testcases"
-                      ? "bg-zinc-900 text-white"
+                      ? "bg-[#242424] text-white"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -745,7 +745,7 @@ export function AssessmentWorkspacePage() {
                   onClick={() => dispatch(setActiveConsoleTab("output"))}
                   className={`px-2.5 py-1 text-sm font-sans font-semibold rounded-md cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeConsoleTab === "output"
-                      ? "bg-zinc-900 text-white"
+                      ? "bg-[#242424] text-white"
                       : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
@@ -768,7 +768,7 @@ export function AssessmentWorkspacePage() {
               </div>
 
               {activeSubmission && (
-                <div className="text-[10px] font-mono text-zinc-500">
+                <div className="text-[10px] font-sans text-zinc-500">
                   Best Score:{" "}
                   <span className="text-lime-400 font-semibold tabular-nums">
                     {activeSubmission.score} / {activeProblem?.points}
@@ -778,14 +778,14 @@ export function AssessmentWorkspacePage() {
             </div>
 
             {/* Console Output Body */}
-            <div className="flex-1 overflow-y-auto p-3 font-mono text-xs">
+            <div className="flex-1 overflow-y-auto p-3 font-sans text-xs">
               {activeConsoleTab === "testcases" ? (
                 <div className="space-y-3">
                   <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
                     Sample Testcases Input
                   </div>
                   {activeProblem?.sample_testcases?.map((st, i) => (
-                    <div key={i} className="p-2 rounded bg-zinc-950 border border-white/8">
+                    <div key={i} className="p-2.5 rounded-[12px] bg-[#171717] border border-white/[0.08]">
                       <span className="text-zinc-500 text-[10px]">CASE {i + 1}</span>
                       <pre className="text-zinc-300 mt-0.5 whitespace-pre-wrap">
                         {formatTestcaseInput(st.stdin || (st as any).input, (activeProblem as any)?.function_signature)}
@@ -800,7 +800,7 @@ export function AssessmentWorkspacePage() {
                       value={customStdin}
                       onChange={(e) => dispatch(setCustomStdin(e.target.value))}
                       placeholder="Enter custom input to test arbitrary test cases..."
-                      className="w-full h-14 p-2 rounded bg-[#171717] border border-white/10 text-zinc-300 font-mono text-xs resize-none focus:outline-none focus:border-lime-400"
+                      className="w-full h-14 p-2 rounded bg-[#171717] border border-white/10 text-zinc-300 font-sans text-xs resize-none focus:outline-none focus:border-lime-400"
                     />
                   </div>
                 </div>
@@ -815,7 +815,7 @@ export function AssessmentWorkspacePage() {
                     </div>
                   ) : submitResult ? (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2.5 rounded bg-zinc-950 border border-white/8">
+                      <div className="flex items-center justify-between p-2.5 rounded-[12px] bg-[#171717] border border-white/[0.08]">
                         <div className="flex items-center gap-2">
                           {submitResult.verdict === "ACCEPTED" ? (
                             <CheckCircle2 size={16} className="text-emerald-400" />
@@ -865,7 +865,7 @@ export function AssessmentWorkspacePage() {
                     </div>
                   ) : runResult ? (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2.5 rounded bg-zinc-950 border border-white/8">
+                      <div className="flex items-center justify-between p-2.5 rounded-[12px] bg-[#171717] border border-white/[0.08]">
                         <div className="flex items-center gap-2">
                           {runResult.verdict === "ACCEPTED" ? (
                             <CheckCircle2 size={16} className="text-emerald-400" />
@@ -944,18 +944,18 @@ export function AssessmentWorkspacePage() {
           if (!open) dispatch(dismissAntiCheatWarning());
         }}
       >
-        <DialogContent className="max-w-md rounded-lg bg-zinc-950 border border-amber-500/40 text-center p-6 space-y-4">
+        <DialogContent className="max-w-md rounded-[24px] bg-[#1F1F1F] border border-amber-500/40 text-center p-6 space-y-4">
           <DialogHeader className="flex flex-col items-center space-y-3 text-center sm:text-center">
             <div className="size-11 rounded-md bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
               <ShieldAlert size={22} />
             </div>
-            <DialogTitle className="text-sm font-semibold font-mono text-white uppercase tracking-wider text-center">
+            <DialogTitle className="text-sm font-semibold font-sans text-white uppercase tracking-wider text-center">
               Proctored Session Warning
             </DialogTitle>
-            <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-mono text-xs tabular-nums">
+            <div className="inline-block px-2 py-0.5 rounded border border-amber-500/30 bg-black text-amber-300 font-sans text-xs tabular-nums">
               Warning {session?.anti_cheat_violations || 1} of {assessment?.max_violations || 3}
             </div>
-            <DialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed px-2 text-center">
+            <DialogDescription className="text-xs text-zinc-400 font-sans leading-relaxed px-2 text-center">
               {antiCheatWarningMessage ||
                 "Tab switch, disconnect, or window blur detected. All environment focus events are proctored."}
             </DialogDescription>
@@ -974,12 +974,12 @@ export function AssessmentWorkspacePage() {
 
       {/* 1. Finalize Assessment Session Dialog */}
       <AlertDialog open={showFinishModal} onOpenChange={setShowFinishModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
+        <AlertDialogContent className="border border-white/[0.08] bg-[#1F1F1F] text-white p-6 max-w-md rounded-[24px]">
           <AlertDialogHeader className="space-y-2 text-left">
             <AlertDialogTitle className="text-base font-semibold text-white">
               Finalize & Submit Assessment?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <AlertDialogDescription className="text-xs text-zinc-400 font-sans leading-relaxed">
               Are you sure you want to finalize and submit your assessment session? All your code
               submissions will be graded and your attempt will be permanently locked.
             </AlertDialogDescription>
@@ -987,13 +987,13 @@ export function AssessmentWorkspacePage() {
           <AlertDialogFooter className="mt-4 flex justify-end gap-2">
             <AlertDialogCancel
               onClick={() => setShowFinishModal(false)}
-              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-sans rounded-md cursor-pointer"
             >
               Continue Working
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleFinish}
-              className="bg-lime-400 hover:bg-lime-300 text-black font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-lime-400 hover:bg-lime-300 text-black font-semibold px-4 py-2 text-xs font-sans rounded-md cursor-pointer"
             >
               Yes, Finalize Session
             </AlertDialogAction>
@@ -1003,12 +1003,12 @@ export function AssessmentWorkspacePage() {
 
       {/* 2. Exit Assessment Workspace Dialog */}
       <AlertDialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
+        <AlertDialogContent className="border border-white/[0.08] bg-[#1F1F1F] text-white p-6 max-w-md rounded-[24px]">
           <AlertDialogHeader className="space-y-2 text-left">
             <AlertDialogTitle className="text-base font-semibold text-white">
               Exit Assessment Workspace?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <AlertDialogDescription className="text-xs text-zinc-400 font-sans leading-relaxed">
               Your code and progress are automatically saved on this device. You can resume this
               contest session before the assessment window closes. Close assessment window now?
             </AlertDialogDescription>
@@ -1016,13 +1016,13 @@ export function AssessmentWorkspacePage() {
           <AlertDialogFooter className="mt-4 flex justify-end gap-2">
             <AlertDialogCancel
               onClick={() => setShowExitModal(false)}
-              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-sans rounded-md cursor-pointer"
             >
               Stay in Assessment
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleExitWindow}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-[#242424] hover:bg-[#2C2C2C] text-white font-semibold px-4 py-2 text-xs font-sans rounded-md cursor-pointer"
             >
               Yes, Exit
             </AlertDialogAction>
@@ -1032,12 +1032,12 @@ export function AssessmentWorkspacePage() {
 
       {/* 3. Reset Starter Code Dialog */}
       <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
-        <AlertDialogContent className="border border-white/12 bg-black text-white p-6 max-w-md rounded-lg">
+        <AlertDialogContent className="border border-white/[0.08] bg-[#1F1F1F] text-white p-6 max-w-md rounded-[24px]">
           <AlertDialogHeader className="space-y-2 text-left">
             <AlertDialogTitle className="text-base font-semibold text-white">
               Reset to Default Starter Code?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <AlertDialogDescription className="text-xs text-zinc-400 font-sans leading-relaxed">
               This will discard your current unsaved edits for this problem and restore the
               initial starter code template. This action cannot be undone.
             </AlertDialogDescription>
@@ -1045,13 +1045,13 @@ export function AssessmentWorkspacePage() {
           <AlertDialogFooter className="mt-4 flex justify-end gap-2">
             <AlertDialogCancel
               onClick={() => setShowResetModal(false)}
-              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-transparent border border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white px-4 py-2 text-xs font-sans rounded-md cursor-pointer"
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleResetStarter}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-mono rounded-md cursor-pointer"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-xs font-sans rounded-md cursor-pointer"
             >
               Reset Code
             </AlertDialogAction>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <defs>
+    <linearGradient id="t-gold" x1="6" y1="2" x2="18" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#CA8A04"/>
+    </linearGradient>
+    <linearGradient id="t-lime" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#65A30D"/>
+    </linearGradient>
+  </defs>
+  <!-- Trophy Cup Body -->
+  <path d="M6 3h12v6c0 3.314-2.686 6-6 6s-6-2.686-6-6V3z" fill="#18181B" stroke="url(#t-gold)" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- Handles -->
+  <path d="M6 5H3.5C2.672 5 2 5.672 2 6.5v1C2 9.433 3.567 11 5.5 11H6" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M18 5h2.5c.828 0 1.5.672 1.5 1.5v1c0 1.933-1.567 3.5-3.5 3.5H18" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Stem & Pedestal -->
+  <path d="M12 15v3.5" stroke="url(#t-lime)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M8 21h8" stroke="url(#t-lime)" stroke-width="2" stroke-linecap="round"/>
+  <rect x="7" y="18.5" width="10" height="2.5" rx="1" fill="#27272A" stroke="url(#t-gold)" stroke-width="1.2"/>
+  <!-- Star on Cup -->
+  <path d="M12 6.5l.8 1.6 1.7.3-1.2 1.2.3 1.7L12 10.4l-1.6.9.3-1.7-1.2-1.2 1.7-.3z" fill="#CCFF00"/>
+</svg>

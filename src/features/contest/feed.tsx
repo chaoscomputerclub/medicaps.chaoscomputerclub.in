@@ -13,6 +13,7 @@ import {
 } from "./lifecycle";
 import type { ContestSummary } from "./types";
 import { ContestActivityFeedSkeleton } from "@/organization/components/skeletons";
+import { MakoMascot } from "@/components/common/MakoMascot";
 
 type FeedEvent = {
   key: string;
@@ -110,9 +111,15 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
 
   if (events.length === 0) {
     return (
-      <p className="py-8 text-center font-mono text-xs text-zinc-500">
-        No contest activity yet. New editions appear here as soon as they are scheduled.
-      </p>
+      <div className="flex flex-col items-center justify-center py-8 px-4 text-center border border-white/[0.08] rounded-[16px] bg-[#171717]">
+        <MakoMascot variant="detective-winking" size="md" className="mb-2.5" />
+        <strong className="text-xs font-sans font-bold uppercase tracking-wider text-white">
+          Telemetry Monitoring Active
+        </strong>
+        <p className="text-[11px] text-zinc-400 font-sans max-w-sm mt-1 leading-relaxed">
+          No contest activity recorded yet. Live registration updates, submission accepted bursts, and round broadcasts will stream here.
+        </p>
+      </div>
     );
   }
 
@@ -122,7 +129,7 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
         const Icon = event.icon;
         return (
           <article key={event.key} className="border-b border-white/10 pb-3 last:border-b-0">
-            <span className="font-mono text-[10px] uppercase text-lime-400 font-bold block tracking-wider mb-1">
+            <span className="font-sans text-[10px] uppercase text-lime-400 font-bold block tracking-wider mb-1">
               {event.kind}
             </span>
             <h3 className="font-bold text-sm text-white hover:text-lime-400 transition-colors">
@@ -131,7 +138,7 @@ export function ContestActivityFeed({ limit = 6 }: { limit?: number }) {
               </Link>
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">{event.body}</p>
-            <time className="inline-flex items-center gap-1 font-mono text-[10px] text-zinc-500 mt-1">
+            <time className="inline-flex items-center gap-1 font-sans text-[10px] text-zinc-500 mt-1">
               <Icon className="size-3 text-lime-400" />
               {formatWhen(new Date(event.at).toISOString())}
             </time>
