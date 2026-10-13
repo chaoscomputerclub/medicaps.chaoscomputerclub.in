@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { MakoMascot } from "@/components/common/MakoMascot";
 import { cn, formatFullName, resolveAvatarUrl } from "@/lib/utils";
+import { getChapterBadgeAsset, computeAuthoritativeBadges, isOfficialChapterBadge } from "@/lib/profileAssets";
 import {
   fetchMySocialStatsThunk,
   toggleFollowThunk,
@@ -217,7 +218,19 @@ export function ProfilePage() {
   }
   const history = activeData?.history || activeData?.ratingHistory || [];
   const battles = activeData?.battles || activeData?.recentBattles || [];
-  const achievements = activeData?.achievements || [];
+  const rawAchievements = activeData?.achievements || [];
+  const cadetSolves =
+    practiceStatsData?.problems?.solved ??
+    m?.problem_stats?.problems?.solved ??
+    m?.problemStats?.total_solved ??
+    0;
+  const achievements = computeAuthoritativeBadges({
+    rating: m?.rating,
+    attended: m?.attendance_count,
+    podiums: m?.podiums,
+    total_solved: cadetSolves,
+    rawAchievements,
+  });
   const proofs = activeData?.proofs || [];
 
   const isSelfUser = Boolean(
@@ -355,7 +368,7 @@ export function ProfilePage() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs"
+                    className="rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] font-heading font-bold uppercase tracking-wider text-xs"
                   >
                     <Link to="/settings">
                       <Edit3 size={11} className="text-[#B1FA63]" />
@@ -371,7 +384,7 @@ export function ProfilePage() {
                     disabled={isPendingFollowAction}
                     variant={isFollowing ? "secondary" : "outline"}
                     size="sm"
-                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717] text-zinc-300 hover:text-white font-heading font-bold uppercase tracking-wider text-xs"}
+                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] font-heading font-bold uppercase tracking-wider text-xs"}
                   >
                     {isFollowing ? (
                       <>
@@ -393,7 +406,7 @@ export function ProfilePage() {
                       </>
                     )}
                   </Button>
-                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:border-[#B1FA63]/30 hover:bg-[#171717]">
+                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63]">
                     {copied ? <Check size={11} className="text-[#B1FA63]" /> : <Share2 size={11} />}
                   </Button>
                 </div>
@@ -401,7 +414,7 @@ export function ProfilePage() {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap text-xs font-sans text-zinc-400 pt-0.5">
-              <TierBadge tier={m.tier} rating={m.rating}>{m.tier || "1★ Explorer"}</TierBadge>
+              <TierBadge tier={m.tier} rating={m.rating} attendanceCount={m.attendance_count} />
               {m.department || (isSelfUser ? currentMember?.department : null) ? (
                 <>
                   <span>·</span>
@@ -444,7 +457,7 @@ export function ProfilePage() {
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[8px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] [&:hover_svg]:text-black rounded-[8px] transition-colors"
                 >
                   <Github size={11} className="text-[#B1FA63]" />
                   <span>{m.github_username}</span>
@@ -459,7 +472,7 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 hover:text-white bg-[#171717] border border-white/[0.08] hover:border-[#B1FA63]/30 rounded-[8px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] [&:hover_svg]:text-black rounded-[8px] transition-colors"
                 >
                   <FaLinkedinIn size={11} className="text-[#B1FA63]" />
                   <span>LinkedIn</span>
@@ -648,59 +661,83 @@ export function ProfilePage() {
 
       {/* Achievements Ledger */}
       <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
-        <SectionHeader title="Achievement Ledger" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <SectionHeader title="Achievement Ledger" />
+          <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">
+            <span className="text-[#B1FA63]">{achievements.filter((a: any) => a.earned === true).length}</span> / {achievements.length} UNLOCKED
+          </span>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
           {achievements.length === 0 ? (
             <div className="text-center py-8 text-zinc-500 col-span-full flex flex-col items-center justify-center">
               <div className="size-16 mb-2 flex items-center justify-center">
                 <img
-                  src="/graphics/ranks/rank-explorer.svg"
-                  alt="Locked Badge"
-                  className="size-8 object-contain opacity-40 grayscale"
+                  src="/matiks-assets/badges/badge.webp"
+                  alt=""
+                  className="size-10 object-contain opacity-30 grayscale"
                 />
               </div>
-              <span className="font-heading font-bold uppercase tracking-wider text-xs">No achievements unlocked yet.</span>
+              <span className="font-heading font-bold uppercase tracking-wider text-xs">No achievements available.</span>
             </div>
           ) : (
-            achievements.map((a: any) => {
-              const code = (a.code || a.id || a.name || a.title || "").toLowerCase();
-              const certSrc =
-                code.includes("contest") || code.includes("tourn") || code.includes("podium")
-                  ? "/graphics/achievements/achievement-podium-finish.svg"
-                  : code.includes("survival") || code.includes("streak") || code.includes("fire")
-                  ? "/graphics/achievements/achievement-streak-7.svg"
-                  : code.includes("showdown") || code.includes("duel") || code.includes("battle")
-                  ? "/graphics/achievements/achievement-speed-demon.svg"
-                  : code.includes("novice") || code.includes("cadet") || code.includes("star")
-                  ? "/graphics/ranks/rank-explorer.svg"
-                  : "/graphics/achievements/achievement-clean-code.svg";
+            achievements.filter(isOfficialChapterBadge).map((a: any) => {
+              const isEarned = a.earned === true;
+              const badgeSrc = a.image_url || a.badge_url || getChapterBadgeAsset(a.title || a.name || a.code);
+              const title = a.title || a.name || "Badge";
 
               return (
                 <article
-                  key={a.code || a.id || a.name || a.title}
-                  className={`p-4 rounded-[16px] border bg-[#171717] transition-all ${
-                    a.earned !== false
-                      ? "border-[#B1FA63]/30"
-                      : "border-white/[0.06] opacity-40"
+                  key={a.code || a.id || title}
+                  className={`p-4 rounded-[18px] border transition-all flex flex-col justify-between ${
+                    isEarned
+                      ? "border-[#B1FA63]/30 bg-gradient-to-b from-[#222222] to-[#181818] shadow-sm shadow-[#B1FA63]/5"
+                      : "border-white/[0.06] bg-[#171717]/60 opacity-60"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="size-6 shrink-0 flex items-center justify-center">
-                      <img
-                        src={certSrc}
-                        alt="Achievement badge"
-                        className="size-full object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = "none";
-                        }}
-                      />
+                  <div>
+                    <div className="flex items-center justify-between gap-2.5 mb-3">
+                      <div className="size-14 rounded-[14px] bg-black/40 border border-white/[0.08] p-2 flex items-center justify-center shrink-0">
+                        <img
+                          src={badgeSrc}
+                          alt=""
+                          className={`size-full object-contain ${
+                            isEarned
+                              ? "filter drop-shadow-[0_2px_8px_rgba(177,250,99,0.25)]"
+                              : "grayscale opacity-30"
+                          }`}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/matiks-assets/badges/badge.webp";
+                          }}
+                        />
+                      </div>
+                      <span
+                        className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                          isEarned
+                            ? "bg-[#B1FA63]/10 text-[#B1FA63] border-[#B1FA63]/30 font-bold"
+                            : "bg-white/[0.03] text-zinc-500 border-white/[0.06]"
+                        }`}
+                      >
+                        {isEarned ? "UNLOCKED" : "LOCKED"}
+                      </span>
                     </div>
-                    <span className="text-[10px] uppercase font-sans tracking-wider text-zinc-400">
-                      {a.code || a.id || "ACH"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-heading font-bold text-white text-sm">{title}</h3>
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase">
+                        [{a.code || "CCC"}]
+                      </span>
+                    </div>
+                    <p className="text-zinc-400 text-xs mt-1.5 leading-relaxed font-sans">
+                      {a.description}
+                    </p>
                   </div>
-                  <h3 className="font-heading font-bold text-white text-sm">{a.name || a.title}</h3>
-                  <p className="text-zinc-400 text-xs mt-1 leading-relaxed font-sans">{a.description}</p>
+                  {a.criteria && (
+                    <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+                      <span>Requirement</span>
+                      <span className={isEarned ? "text-zinc-300 font-medium" : "text-zinc-500"}>
+                        {a.criteria}
+                      </span>
+                    </div>
+                  )}
                 </article>
               );
             })

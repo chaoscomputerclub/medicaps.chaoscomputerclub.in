@@ -22,6 +22,7 @@ import { fetchContestsThunk } from "@/store/slices/contestSlice";
 import { syncSocialCounts } from "@/store/slices/socialSlice";
 import type { ContestSummary } from "@/features/contest/types";
 import { getFirstName } from "@/lib/utils";
+import { getTierBadgeAsset } from "@/lib/profileAssets";
 import type { OfflineContest, AnnouncementFeedItem } from "@/organization/data/types";
 
 export function DashboardPage() {
@@ -191,7 +192,9 @@ export function DashboardPage() {
           <strong className="block text-3xl sm:text-4xl font-display text-[#B1FA63] mt-1 tabular-nums truncate tracking-wide">
             {member?.rating ?? 1200}
           </strong>
-          <span className="block text-xs font-heading font-bold text-[#B1FA63]/80 mt-1 truncate uppercase">{member?.tier || "1★ Explorer"}</span>
+          <span className="block text-xs font-heading font-bold text-[#B1FA63]/80 mt-1 truncate uppercase">
+            {getTierBadgeAsset(member?.tier, member?.rating).name}
+          </span>
         </div>
 
         <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">

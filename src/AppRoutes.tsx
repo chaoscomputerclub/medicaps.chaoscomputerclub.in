@@ -387,7 +387,7 @@ export function AppRoutes() {
       <Route
         path="/terms"
         element={
-          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+          <Suspense fallback={<div className="min-h-screen bg-[#171717]" />}>
             <TermsPage />
           </Suspense>
         }

@@ -613,3 +613,10 @@ textarea {
 }
 
 
+
+/* Monaco Editor Application Background Synchronization (#171717) */
+.monaco-editor,
+.monaco-editor .margin,
+.monaco-editor-background {
+  background-color: #171717 !important;
+}

@@ -10,6 +10,7 @@ import type {
   AnnouncementFeedItem,
   LeaderboardEntry,
 } from "./types";
+import { computeAuthoritativeBadges } from "@/lib/profileAssets";
 
 async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = 5000): Promise<Response> {
   const controller = new AbortController();
@@ -202,7 +203,16 @@ export async function getMemberProfileData(force = false) {
             battles: rBattles,
             campusPass: data.campusPass || null,
             proofs: Array.isArray(data.proofs) ? data.proofs : [],
-            achievements: Array.isArray(data.achievements) ? data.achievements : [],
+            achievements: computeAuthoritativeBadges({
+              rating: memberObj.rating,
+              attended: memberObj.attendance_count,
+              podiums: memberObj.podiums,
+              total_solved:
+                data.problem_stats?.problems?.solved ??
+                data.problemStats?.total_solved ??
+                0,
+              rawAchievements: data.achievements,
+            }),
           };
         }
       } catch {
@@ -376,7 +386,16 @@ export async function getStudentProfileData(handle: string, force = false) {
             },
             submissionCalendar: data.submissionCalendar || {},
             proofs: Array.isArray(data.proofs) ? data.proofs : [],
-            achievements: Array.isArray(data.achievements) ? data.achievements : [],
+            achievements: computeAuthoritativeBadges({
+              rating: memberObj?.rating ?? data.stats?.rating,
+              attended: memberObj?.attendance_count ?? data.stats?.attendance_count,
+              podiums: memberObj?.podiums ?? data.stats?.podiums,
+              total_solved:
+                data.problem_stats?.problems?.solved ??
+                data.problemStats?.total_solved ??
+                0,
+              rawAchievements: data.achievements,
+            }),
           };
         }
       } catch (err) {

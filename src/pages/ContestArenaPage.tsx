@@ -76,13 +76,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchContestArenaThunk,
@@ -127,6 +120,15 @@ function formatTimer(totalSeconds: number): string {
 }
 
 export type ArenaLanguage = "python" | "cpp" | "c" | "java" | "javascript" | "typescript";
+
+export const ARENA_LANGUAGES: { value: ArenaLanguage; label: string }[] = [
+  { value: "python", label: "Python 3" },
+  { value: "cpp", label: "C++" },
+  { value: "c", label: "C" },
+  { value: "java", label: "Java" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+];
 
 export type UnifiedArenaProblem = {
   id: string;
@@ -922,19 +924,30 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       try {
         const res = await practiceApi.runCode(effectiveProblemSlug, currentCode, selectedLanguage);
         const normalizedRunResult = {
+          success: res.verdict === "ACCEPTED",
           verdict: res.verdict,
           time: (res.runtime_ms || 0) / 1000,
           passed_testcases: res.testcases?.filter((t) => t.passed).length ?? (res.verdict === "ACCEPTED" ? res.testcases?.length : 0),
           total_testcases: res.testcases?.length || 0,
-          compile_output: res.compile_error,
-          testcase_results: res.testcases?.map((tc) => ({
-            status: tc.status,
+          compile_output: res.compile_error || (res as any).compile_output,
+          stdout: (res as any).stdout,
+          stderr: (res as any).stderr,
+          testcase_results: res.testcases?.map((tc: any, idx: number) => ({
+            testcase_id: tc.testcase_id || `sample_${idx + 1}`,
+            name: tc.name || `Case ${idx + 1}`,
+            status: tc.status || tc.verdict,
+            verdict: tc.verdict || tc.status,
             passed: tc.passed,
-            input: tc.input,
-            expected_output: tc.expected_output,
-            actual_output: tc.actual_output,
-            runtime_ms: tc.runtime_ms,
-            error: tc.error,
+            input: tc.input || tc.stdin || "",
+            stdin: tc.stdin || tc.input || "",
+            expected_output: tc.expected_output || "",
+            actual_output: tc.actual_output || tc.stdout || "",
+            stdout: tc.stdout || tc.actual_output || "",
+            stderr: tc.stderr || tc.error || "",
+            error: tc.error || tc.stderr,
+            compile_output: tc.compile_output || tc.compile_error || "",
+            runtime_ms: tc.runtime_ms || 0,
+            wall_time_ms: tc.wall_time_ms || tc.runtime_ms || 0,
           })),
         };
         setPracticeRunResult(normalizedRunResult as any);
@@ -1009,24 +1022,55 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       setActiveSubmitCaseIndex(0);
       try {
         const res = await practiceApi.submitCode(effectiveProblemSlug, currentCode, selectedLanguage);
+        const submitTcResults = ((res as any).testcase_results || (res as any).testcases)?.map((tc: any, idx: number) => ({
+          testcase_id: tc.testcase_id || `TC-${idx + 1}`,
+          name: tc.name || `Case ${idx + 1}`,
+          passed: tc.passed,
+          status: tc.status || tc.verdict,
+          verdict: tc.verdict || tc.status,
+          is_hidden: tc.is_hidden,
+          input: tc.input || tc.stdin || "",
+          stdin: tc.stdin || tc.input || "",
+          expected_output: tc.expected_output || "",
+          actual_output: tc.actual_output || tc.stdout || "",
+          stdout: tc.stdout || tc.actual_output || "",
+          stderr: tc.stderr || tc.error || "",
+          error: tc.error || tc.stderr || "",
+          compile_output: tc.compile_output || "",
+          wall_time_ms: tc.wall_time_ms || tc.runtime_ms || 0,
+        })) || (res.first_failing_case ? [
+          {
+            testcase_id: res.first_failing_case.testcase_id || "TC-1",
+            name: "Failing Testcase",
+            status: res.verdict,
+            verdict: res.verdict,
+            passed: false,
+            is_hidden: false,
+            input: res.first_failing_case.input || "",
+            stdin: res.first_failing_case.input || "",
+            expected_output: res.first_failing_case.expected_output || "",
+            actual_output: res.first_failing_case.actual_output || "",
+            stdout: res.first_failing_case.actual_output || "",
+            stderr: res.first_failing_case.error || "",
+            error: res.first_failing_case.error,
+            compile_output: "",
+            wall_time_ms: 0,
+          }
+        ] : undefined);
+
         const normalizedSubmitResult = {
+          submission_id: res.submission_id,
+          success: res.verdict === "ACCEPTED",
           verdict: res.verdict,
-          execution_time: (res.runtime || 0) / 1000,
+          execution_time: (res.runtime || (res as any).execution_time || 0) / 1000,
+          time: (res.runtime || (res as any).execution_time || 0) / 1000,
           memory: res.memory,
-          passed_testcases: res.passed_count,
-          total_testcases: res.total_testcases,
+          passed_testcases: res.passed_count ?? (res as any).passed_testcases ?? 0,
+          total_testcases: res.total_testcases ?? (res as any).total_count ?? 0,
           points_awarded: res.verdict === "ACCEPTED" ? (res.score || 100) : 0,
-          compile_output: res.compile_error,
-          testcase_results: res.first_failing_case ? [
-            {
-              status: res.verdict,
-              passed: false,
-              input: res.first_failing_case.input || "",
-              expected_output: res.first_failing_case.expected_output || "",
-              actual_output: res.first_failing_case.actual_output || "",
-              error: res.first_failing_case.error,
-            }
-          ] : undefined,
+          compile_output: res.compile_error || (res as any).compile_output,
+          message: (res as any).message || (res.verdict === "ACCEPTED" ? "Accepted! Problem solved successfully." : `Verdict: ${res.verdict}`),
+          testcase_results: submitTcResults,
         };
         setPracticeSubmitResult(normalizedSubmitResult as any);
 
@@ -1732,12 +1776,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           </Button>
 
           {/* Timer Badge / Status */}
-          {isPracticeMode ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-lime-400/30 bg-lime-400/10 text-lime-400 font-sans text-xs font-semibold shrink-0">
-              <Sparkles className="size-3 text-lime-400" />
-              <span>PRACTICE MODE</span>
-            </div>
-          ) : isReviewMode ? (
+          {isPracticeMode ? null : isReviewMode ? (
             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-400 font-sans text-xs font-semibold shrink-0">
               <span className="size-1.5 rounded-full bg-zinc-500" />
               <span>CONCLUDED</span>
@@ -1913,27 +1952,49 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
             <div className="flex items-center gap-2 text-xs font-sans text-zinc-400">
               {/* Language Selector */}
-              <Select
-                value={selectedLanguage}
-                onValueChange={(val: any) => setSelectedLanguage(val)}
-              >
-                <SelectTrigger className="h-6 w-[120px] text-xs font-sans bg-[#171717] border-white/15 text-zinc-200 hover:border-lime-400/60 rounded focus:ring-1 focus:ring-lime-400">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1F1F1F] border-white/15 text-white font-sans text-xs rounded-md">
-                  <SelectItem value="python">Python 3</SelectItem>
-                  <SelectItem value="cpp">C++</SelectItem>
-                  <SelectItem value="c">C</SelectItem>
-                  <SelectItem value="java">Java</SelectItem>
-                  <SelectItem value="javascript">JavaScript</SelectItem>
-                  <SelectItem value="typescript">TypeScript</SelectItem>
-                </SelectContent>
-              </Select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-0 h-7 px-2.5 text-xs font-sans gap-1.5 rounded-[8px]"
+                    title="Select Programming Language"
+                  >
+                    <span>
+                      {ARENA_LANGUAGES.find((l) => l.value === selectedLanguage)?.label || selectedLanguage}
+                    </span>
+                    <ChevronDown className="size-3 text-zinc-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-[#1F1F1F] border-white/10 text-white text-xs font-sans rounded-[12px] min-w-[140px] p-1.5"
+                >
+                  {ARENA_LANGUAGES.map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.value}
+                      onClick={() => setSelectedLanguage(lang.value)}
+                      className={`cursor-pointer flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-[8px] transition-colors ${
+                        selectedLanguage === lang.value
+                          ? "text-lime-400 font-semibold bg-white/5"
+                          : "text-zinc-300 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <span>{lang.label}</span>
+                      {selectedLanguage === lang.value && (
+                        <Check className="size-3.5 text-lime-400 shrink-0" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Reset to Starter */}
               <Button
                 variant="outline"
                 size="sm"
+                className="min-h-0 h-7 px-2.5 text-xs font-sans rounded-[8px]"
                 onClick={handleResetStarter}
                 title="Reset to official starter code"
               >
@@ -1946,6 +2007,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 type="button"
                 variant="outline"
                 size="icon-sm"
+                className="min-h-0 h-7 w-7 rounded-[8px]"
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
@@ -1959,7 +2021,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           </div>
 
           {/* Monaco Editor Pane */}
-          <div className="flex-1 relative overflow-hidden bg-black min-h-0">
+          <div className="flex-1 relative overflow-hidden bg-[#171717] min-h-0">
             <Suspense
               fallback={
                 <div className="h-full w-full flex items-center justify-center text-xs font-sans text-zinc-500 animate-pulse">
@@ -2669,7 +2731,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         className={`size-7 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorFontSize === size
                             ? "bg-lime-400 text-black border-lime-400"
-                            : "bg-black text-zinc-400 border-white/10 hover:border-lime-400 hover:text-white"
+                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400"
                         }`}
                       >
                         {size}
@@ -2727,7 +2789,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorTabSize === spaces
                             ? "bg-lime-400 text-black border-lime-400"
-                            : "bg-black text-zinc-400 border-white/10 hover:border-lime-400 hover:text-white"
+                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400"
                         }`}
                       >
                         {spaces} Spaces

@@ -410,15 +410,12 @@ export function AuthPage() {
           </form>
 
           {/* OR hairline divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-[#0c0c0e] px-3 text-[11px] font-sans uppercase tracking-wider text-zinc-500 select-none">
-                or
-              </span>
-            </div>
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-[11px] font-sans uppercase tracking-wider text-zinc-500 select-none">
+              or
+            </span>
+            <div className="h-px flex-1 bg-white/10" />
           </div>
 
           {/* OAuth button */}

@@ -279,7 +279,7 @@ export function SocialDrawer() {
                         </p>
 
                         <div className="flex items-center gap-1.5 pt-0.5">
-                          <TierBadge>{student.tier}</TierBadge>
+                          <TierBadge tier={student.tier} rating={student.rating} />
                         </div>
                       </div>
                     </div>

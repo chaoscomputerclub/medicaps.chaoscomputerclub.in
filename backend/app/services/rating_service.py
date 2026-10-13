@@ -8,28 +8,37 @@ from typing import Dict, List, Tuple
 
 
 def get_rating_tier(rating: int) -> str:
-    """Return CodeChef-style star bracket."""
-    if rating >= 2000:
-        return "5_star"
+    """Return official competitive division tier."""
+    if rating >= 2200:
+        return "GrandMaster"
+    elif rating >= 2000:
+        return "Master"
     elif rating >= 1800:
-        return "4_star"
+        return "Expert"
     elif rating >= 1600:
-        return "3_star"
+        return "Candidate"
     elif rating >= 1400:
-        return "2_star"
+        return "Amateur"
     else:
-        return "1_star"
+        return "Novice"
 
 
 def get_tier_label(tier: str) -> str:
     labels = {
-        "5_star": "5★ Grandmaster",
-        "4_star": "4★ Master",
-        "3_star": "3★ Specialist",
-        "2_star": "2★ Candidate",
-        "1_star": "1★ Explorer",
+        "grandmaster": "GrandMaster",
+        "master": "Master",
+        "expert": "Expert",
+        "candidate": "Candidate",
+        "amateur": "Amateur",
+        "novice": "Novice",
+        # Legacy backwards-compatibility
+        "5_star": "GrandMaster",
+        "4_star": "Master",
+        "3_star": "Expert",
+        "2_star": "Candidate",
+        "1_star": "Novice",
     }
-    return labels.get(tier, "1★ Explorer")
+    return labels.get((tier or "").lower(), tier or "Novice")
 
 
 def calculate_rating_deltas(standings: List[Dict[str, any]]) -> List[Tuple[str, int, int]]:

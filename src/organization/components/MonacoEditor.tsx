@@ -30,32 +30,39 @@ const LANG_TO_MONACO: Record<string, string> = {
 };
 
 // The CCC dark theme definition — pure pitch black with Electric Lime accents
-const CCC_DARK_THEME = {
+const CCC_DARK_THEME: monaco.editor.IStandaloneThemeData = {
   base: "vs-dark" as const,
   inherit: true,
   rules: [
-    { token: "comment", foreground: "52525b", fontStyle: "italic" },
-    { token: "keyword", foreground: "CCFF00", fontStyle: "bold" },
+    { token: "comment", foreground: "666666", fontStyle: "italic" },
+    { token: "keyword", foreground: "B1FA63", fontStyle: "bold" },
     { token: "identifier", foreground: "f4f4f5" },
     { token: "string", foreground: "a1a1aa" },
-    { token: "number", foreground: "CCFF00" },
+    { token: "number", foreground: "B1FA63" },
     { token: "type", foreground: "ffffff" },
     { token: "delimiter", foreground: "71717a" },
   ],
   colors: {
-    "editor.background": "#000000",
+    "editor.background": "#171717",
     "editor.foreground": "#f4f4f5",
-    "editorCursor.foreground": "#CCFF00",
-    "editor.lineHighlightBackground": "#0a0a0a",
-    "editorLineNumber.foreground": "#3f3f46",
-    "editorLineNumber.activeForeground": "#CCFF00",
-    "editor.selectionBackground": "#1f1f1f",
-    "editor.inactiveSelectionBackground": "#121212",
-    "editorGutter.background": "#000000",
-    "editorIndentGuide.background1": "#141414",
-    "editorIndentGuide.activeBackground1": "#242424",
+    "editorCursor.foreground": "#B1FA63",
+    "editor.lineHighlightBackground": "#1e1e1e",
+    "editorLineNumber.foreground": "#52525b",
+    "editorLineNumber.activeForeground": "#B1FA63",
+    "editor.selectionBackground": "#2e2e2e",
+    "editor.inactiveSelectionBackground": "#242424",
+    "editorGutter.background": "#171717",
+    "editorIndentGuide.background1": "#242424",
+    "editorIndentGuide.activeBackground1": "#333333",
   },
 };
+
+// Register CCC dark theme upfront so Monaco initializes with #171717 application background immediately
+try {
+  monaco.editor.defineTheme("ccc-dark", CCC_DARK_THEME);
+} catch {
+  // Ignore in non-browser or worker contexts
+}
 
 interface MonacoEditorProps {
   value: string;
@@ -101,13 +108,14 @@ export const MonacoEditor = memo(function MonacoEditor({
   const monacoLanguage = LANG_TO_MONACO[language] ?? "python";
 
   return (
-    <div className="relative w-full h-full bg-black overflow-hidden">
+    <div className="relative w-full h-full bg-[#171717] overflow-hidden">
       <Editor
         height={height}
         language={monacoLanguage}
         value={value}
-        theme="vs-dark"
+        theme="ccc-dark"
         onChange={handleChange}
+        beforeMount={(mon) => mon.editor.defineTheme("ccc-dark", CCC_DARK_THEME)}
         onMount={handleMount}
         loading={
           <div className="p-4 text-xs font-sans text-zinc-500 animate-pulse">

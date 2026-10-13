@@ -26,6 +26,7 @@ import {
   Trophy,
   FileText,
   Code2,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { registerForContest, getToken } from "@/lib/auth";
@@ -36,12 +37,11 @@ import { resolveAvatarUrl, formatFullName, formatTestcaseInput } from "@/lib/uti
 import { ProblemStatementView } from "@/components/problem/ProblemStatementView";
 import { fetchCurrentUserThunk } from "@/store/slices/authSlice";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +70,7 @@ import {
   finishAssessmentThunk,
   setActiveProblemIndex,
   setSelectedLanguage,
+  SupportedLanguage,
   setCode,
   resetStarterCode,
   setCustomStdin,
@@ -78,6 +79,15 @@ import {
   dismissAntiCheatWarning,
 } from "@/store/slices/assessmentSlice";
 import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
+
+const ASSESSMENT_LANGUAGES: { value: SupportedLanguage; label: string }[] = [
+  { value: "python", label: "Python 3" },
+  { value: "cpp", label: "C++ 14" },
+  { value: "c", label: "C (GCC)" },
+  { value: "java", label: "Java 21" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+];
 
 function formatTimer(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -572,22 +582,43 @@ export function AssessmentWorkspacePage() {
         {/* Right: Controls & Actions */}
         <div className="flex items-center gap-2">
           {/* Language Selector */}
-          <Select
-            value={selectedLanguage}
-            onValueChange={(val: any) => dispatch(setSelectedLanguage(val))}
-          >
-            <SelectTrigger className="h-7 w-[105px] border-white/10 bg-[#171717] text-xs font-sans text-zinc-300 focus:ring-0 rounded-md">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="border-white/10 bg-[#1F1F1F] text-xs font-sans text-zinc-300 rounded-md">
-              <SelectItem value="python">Python 3</SelectItem>
-              <SelectItem value="cpp">C++ 14</SelectItem>
-              <SelectItem value="c">C (GCC)</SelectItem>
-              <SelectItem value="java">Java 21</SelectItem>
-              <SelectItem value="javascript">JavaScript</SelectItem>
-              <SelectItem value="typescript">TypeScript</SelectItem>
-            </SelectContent>
-          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-0 h-7 px-2.5 text-xs font-sans gap-1.5 rounded-[8px]"
+                title="Select Programming Language"
+              >
+                <span>
+                  {ASSESSMENT_LANGUAGES.find((l) => l.value === selectedLanguage)?.label || selectedLanguage}
+                </span>
+                <ChevronDown className="size-3 text-zinc-500" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="bg-[#1F1F1F] border-white/10 text-white text-xs font-sans rounded-[12px] min-w-[130px] p-1.5"
+            >
+              {ASSESSMENT_LANGUAGES.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.value}
+                  onClick={() => dispatch(setSelectedLanguage(lang.value))}
+                  className={`cursor-pointer flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-[8px] transition-colors ${
+                    selectedLanguage === lang.value
+                      ? "text-lime-400 font-semibold bg-white/5"
+                      : "text-zinc-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span>{lang.label}</span>
+                  {selectedLanguage === lang.value && (
+                    <Check className="size-3.5 text-lime-400 shrink-0" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Fullscreen Toggle */}
           <Button
@@ -684,9 +715,9 @@ export function AssessmentWorkspacePage() {
         </div>
 
         {/* RIGHT PANE: Monaco Editor & Console */}
-        <div className="w-1/2 flex flex-col bg-black">
+        <div className="w-1/2 flex flex-col bg-[#171717]">
           {/* Editor Container */}
-          <div className="flex-1 relative overflow-hidden bg-black">
+          <div className="flex-1 relative overflow-hidden bg-[#171717]">
             <Suspense
               fallback={
                 <div className="h-full w-full flex items-center justify-center text-xs font-sans text-zinc-500 animate-pulse">
@@ -725,7 +756,7 @@ export function AssessmentWorkspacePage() {
           </div>
 
           {/* Output / Execution Drawer */}
-          <div className="h-56 flex flex-col border-t border-white/8 bg-black">
+          <div className="h-56 flex flex-col border-t border-white/8 bg-[#171717]">
             {/* Tab Bar */}
             <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/8 px-3 bg-black">
               <div className="flex items-center gap-1">

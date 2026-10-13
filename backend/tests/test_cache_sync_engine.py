@@ -374,8 +374,13 @@ async def test_end_to_end_outbox_to_cache_sync():
     cache_key = f"cache:{res_id}"
     await set_cache(cache_key, {"title": "Old Contest State"}, ttl_seconds=60)
 
+    from sqlalchemy import delete
+    from app.core.queue.outbox import OutboxEvent
+
     # 1. DB Transaction commits state and records OutboxEvent with monotonic version
     async with AsyncSessionLocal() as db:
+        await db.execute(delete(OutboxEvent))
+        await db.commit()
         next_ver = await get_next_resource_version(db, res_id)
         assert next_ver >= 1
 

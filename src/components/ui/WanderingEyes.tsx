@@ -165,19 +165,24 @@ function WanderingEyes({
 }
 
 export function GlobalLoader({
-  text = "Loading",
+  text,
   size = "large",
   className,
   ...props
 }: WanderingEyesProps & { text?: string }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center select-none", className)}>
+    <div
+      className={cn(
+        "min-h-screen w-full bg-[#171717] flex flex-col items-center justify-center select-none",
+        className
+      )}
+    >
       <WanderingEyes size={size} className="text-white" {...props} />
-      {text && (
+      {text ? (
         <TextShimmer className="mt-5 text-[11px] font-sans tracking-[0.25em] text-white uppercase">
           {text}
         </TextShimmer>
-      )}
+      ) : null}
     </div>
   );
 }

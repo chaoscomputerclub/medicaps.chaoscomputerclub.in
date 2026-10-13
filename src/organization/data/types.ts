@@ -147,7 +147,18 @@ export type MemberProfile = {
   scope?: string;
 };
 export type LeaderboardEntry = MemberProfile & { previous_rank: number; ratings: number[] };
-export type Achievement = { name: string; description: string; earned: boolean; code: string };
+export type Achievement = {
+  id?: string;
+  name: string;
+  title?: string;
+  description: string;
+  earned: boolean;
+  code: string;
+  icon?: string;
+  image_url?: string;
+  badge_url?: string;
+  criteria?: string;
+};
 
 export type StudentFollowItem = {
   id: string;

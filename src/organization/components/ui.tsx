@@ -118,14 +118,39 @@ export function TierBadge({
   className,
   tier,
   rating,
+  attendanceCount,
 }: {
   children?: ReactNode;
   className?: string;
   tier?: string | null;
   rating?: number | null;
+  attendanceCount?: number | null;
 }) {
-  const tierText = typeof children === "string" ? children : tier || "";
-  const badgeAsset = getTierBadgeAsset(tierText, rating);
+  const isUnranked = attendanceCount === 0 || rating === 0;
+
+  if (isUnranked) {
+    return (
+      <Badge
+        variant="outline"
+        className={cn(
+          "rounded-full font-mono text-[11px] font-medium tracking-wide bg-white/[0.03] border-white/10 text-zinc-400 inline-flex items-center gap-1.5 px-2.5 py-0.5",
+          className
+        )}
+      >
+        <span className="size-1.5 rounded-full bg-zinc-500 inline-block shrink-0" />
+        <span>Unranked</span>
+      </Badge>
+    );
+  }
+
+  const rawText = (typeof children === "string" ? children : tier || "").trim();
+  const badgeAsset = getTierBadgeAsset(rawText, rating);
+
+  // Format clean division name: never output raw slugs like "1_star" or "2_star"
+  let label = rawText;
+  if (!label || label.includes("_star") || label === "—" || label.toLowerCase().includes("explorer")) {
+    label = badgeAsset.name;
+  }
 
   return (
     <Badge
@@ -143,7 +168,7 @@ export function TierBadge({
           (e.target as HTMLElement).style.display = "none";
         }}
       />
-      <span>{children ?? badgeAsset.name}</span>
+      <span>{label}</span>
     </Badge>
   );
 }

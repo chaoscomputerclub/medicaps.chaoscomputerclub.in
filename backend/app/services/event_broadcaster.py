@@ -114,20 +114,22 @@ async def _fan_out(raw_message: str, contest_slug: Optional[str] = None) -> None
 
 async def broadcast_event(
     event_type: str,
-    data: Dict[str, Any],
+    data: Optional[Dict[str, Any]] = None,
     contest_slug: Optional[str] = None,
+    payload: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Backwards-compatible event broadcaster.
     Used for legacy endpoints and internal notifications.
     """
-    payload = {
+    event_data = data if data is not None else (payload or {})
+    event_payload = {
         "event": event_type,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "contest_slug": contest_slug,
-        "data": data,
+        "data": event_data,
     }
-    raw_message = json.dumps(payload)
+    raw_message = json.dumps(event_payload)
 
     await _fan_out(raw_message, contest_slug)
 

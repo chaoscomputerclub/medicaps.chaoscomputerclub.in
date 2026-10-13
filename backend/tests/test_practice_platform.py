@@ -493,3 +493,223 @@ async def test_reconcile_self_healing():
         await session.execute(delete(Problem).where(Problem.id == prob_id))
         await session.execute(delete(MemberProfile).where(MemberProfile.id == member_id))
         await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_execution_result_backward_compatibility_properties():
+    """Verify ExecutionResult and TestCaseResult expose backwards-compatible properties without throwing AttributeError."""
+    from app.engine.schemas import ExecutionResult, TestCaseResult, Verdict, ExecutionStatus
+
+    tc = TestCaseResult(
+        testcase_id="tc_1",
+        name="Sample 1",
+        verdict=Verdict.ACCEPTED,
+        runtime_ms=45.0,
+        peak_memory_mb=14.2,
+        stdout="hello",
+        stderr="",
+        compile_output="",
+    )
+    # Test TestCaseResult properties
+    assert tc.status == "ACCEPTED"
+    assert tc.execution_time == 0.045
+    assert tc.memory_used == 14.2
+    assert tc.compile_error == ""
+    assert tc.runtime_error == ""
+
+    # Test ExecutionResult properties
+    exec_res = ExecutionResult(
+        success=True,
+        verdict=Verdict.ACCEPTED,
+        status=ExecutionStatus.COMPLETED,
+        testcase_results=[tc],
+        passed_testcases=1,
+        total_testcases=1,
+    )
+    assert exec_res.testcases == [tc]
+    assert exec_res.passed_count == 1
+
+
+@pytest.mark.asyncio
+async def test_practice_run_code_contract():
+    """
+    Test practice run endpoint:
+    - Verifies ExecutionResult.testcases is properly supported and doesn't crash
+    - Verifies status, verdict, runtime, memory, and testcases list
+    """
+    prob_id = "test-prob-run-contract"
+    slug = "test-run-contract"
+
+    async with AsyncSessionLocal() as session:
+        await session.execute(delete(ProblemTestCase).where(ProblemTestCase.problem_id == prob_id))
+        await session.execute(delete(Problem).where(Problem.id == prob_id))
+        await session.commit()
+
+        p = Problem(
+            id=prob_id,
+            slug=slug,
+            title="Two Sum Practice Run",
+            difficulty="EASY",
+            description="Given nums and target, return indices.",
+            status="PUBLISHED",
+            execution_mode="FUNCTION",
+            function_signature={
+                "name": "twoSum",
+                "parameters": [
+                    {"name": "nums", "type": "integer[]"},
+                    {"name": "target", "type": "integer"},
+                ],
+                "return_type": "integer[]",
+            },
+            starter_code={"python": "class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        pass"},
+        )
+        tc1 = ProblemTestCase(
+            id="tc-run-s1",
+            problem_id=prob_id,
+            version=1,
+            testcase_id="sample_1",
+            input_data={"nums": [2, 7, 11, 15], "target": 9},
+            expected_output=[0, 1],
+            is_hidden=False,
+            is_active=True,
+        )
+        tc2 = ProblemTestCase(
+            id="tc-run-s2",
+            problem_id=prob_id,
+            version=1,
+            testcase_id="sample_2",
+            input_data={"nums": [3, 2, 4], "target": 6},
+            expected_output=[1, 2],
+            is_hidden=False,
+            is_active=True,
+        )
+        session.add_all([p, tc1, tc2])
+        await session.commit()
+
+        code = (
+            "class Solution:\n"
+            "    def twoSum(self, nums: list[int], target: int) -> list[int]:\n"
+            "        seen = {}\n"
+            "        for i, n in enumerate(nums):\n"
+            "            diff = target - n\n"
+            "            if diff in seen:\n"
+            "                return [seen[diff], i]\n"
+            "            seen[n] = i\n"
+            "        return []\n"
+        )
+        res = await PracticeService.run_practice_code(session, slug, code, "python")
+        assert res["verdict"] == "ACCEPTED"
+        assert res["passed_count"] == 2
+        assert res["total_count"] == 2
+        assert len(res["testcases"]) == 2
+        assert res["testcases"][0]["passed"] is True
+        assert res["testcases"][1]["passed"] is True
+        assert "stdin" in res["testcases"][0]
+        assert "stdout" in res["testcases"][0]
+
+    # Also test via HTTP router
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        http_res = await client.post(
+            f"/api/practice/problems/{slug}/run",
+            json={"code": code, "language": "python"},
+        )
+        assert http_res.status_code == 200
+        http_data = http_res.json()
+        assert http_data["verdict"] == "ACCEPTED"
+        assert http_data["passed_count"] == 2
+        assert len(http_data["testcases"]) == 2
+
+    # Cleanup
+    async with AsyncSessionLocal() as session:
+        await session.execute(delete(ProblemTestCase).where(ProblemTestCase.problem_id == prob_id))
+        await session.execute(delete(Problem).where(Problem.id == prob_id))
+        await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_practice_submit_code_contract():
+    """
+    Test practice submit endpoint:
+    - Verifies complete execution against visible + hidden testcases
+    - Verifies was_previously_solved tracking and first_solve flag
+    - Verifies hidden testcases are masked
+    """
+    prob_id = "test-prob-sub-contract"
+    slug = "test-sub-contract"
+    member_id = "cadet-sub-contract-user"
+
+    async with AsyncSessionLocal() as session:
+        await session.execute(delete(MemberProblemStats).where(MemberProblemStats.member_id == member_id))
+        await session.execute(delete(ContestSubmission).where(ContestSubmission.member_id == member_id))
+        await session.execute(delete(ProblemTestCase).where(ProblemTestCase.problem_id == prob_id))
+        await session.execute(delete(Problem).where(Problem.id == prob_id))
+        await session.execute(delete(MemberProfile).where(MemberProfile.id == member_id))
+        await session.commit()
+
+        member = make_test_member(member_id=member_id, handle="cadet_contract", email="contract@medicaps.ac.in")
+        p = Problem(
+            id=prob_id,
+            slug=slug,
+            title="Practice Submit Contract Problem",
+            difficulty="EASY",
+            description="Add two numbers.",
+            status="PUBLISHED",
+            execution_mode="FUNCTION",
+            function_signature={"name": "add", "parameters": [{"name": "a", "type": "integer"}, {"name": "b", "type": "integer"}], "return_type": "integer"},
+            starter_code={"python": "class Solution:\n    def add(self, a: int, b: int) -> int:\n        pass"},
+        )
+        tc_vis = ProblemTestCase(
+            id="tc-sub-c1",
+            problem_id=prob_id,
+            version=1,
+            testcase_id="sample_1",
+            input_data={"a": 1, "b": 2},
+            expected_output=3,
+            is_hidden=False,
+            is_active=True,
+        )
+        tc_hid = ProblemTestCase(
+            id="tc-sub-c2",
+            problem_id=prob_id,
+            version=1,
+            testcase_id="hidden_1",
+            input_data={"a": 100, "b": 200},
+            expected_output=300,
+            is_hidden=True,
+            is_active=True,
+        )
+        session.add_all([member, p, tc_vis, tc_hid])
+        await session.commit()
+
+        code = "class Solution:\n    def add(self, a: int, b: int) -> int:\n        return a + b\n"
+        res = await PracticeService.submit_practice_code(session, slug, code, "python", member)
+        assert res["verdict"] == "ACCEPTED"
+        assert res["is_accepted"] is True
+        assert res["is_first_solve"] is True
+        assert res["passed_count"] == 2
+        assert res["total_testcases"] == 2
+        # Verify hidden testcase privacy
+        hidden_res = next((tc for tc in res["testcases"] if tc["is_hidden"]), None)
+        assert hidden_res is not None
+        assert hidden_res["input"] == "[Hidden]"
+        assert hidden_res["expected_output"] == "[Hidden]"
+
+        # Check DB stats
+        stats = await session.scalar(
+            select(MemberProblemStats).where(
+                MemberProblemStats.member_id == member_id,
+                MemberProblemStats.problem_id == prob_id,
+            )
+        )
+        assert stats is not None
+        assert stats.status == "SOLVED"
+
+    # Cleanup
+    async with AsyncSessionLocal() as session:
+        await session.execute(delete(MemberProblemStats).where(MemberProblemStats.member_id == member_id))
+        await session.execute(delete(ContestSubmission).where(ContestSubmission.member_id == member_id))
+        await session.execute(delete(ProblemTestCase).where(ProblemTestCase.problem_id == prob_id))
+        await session.execute(delete(Problem).where(Problem.id == prob_id))
+        await session.execute(delete(MemberProfile).where(MemberProfile.id == member_id))
+        await session.commit()
+

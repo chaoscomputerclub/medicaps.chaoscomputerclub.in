@@ -350,7 +350,7 @@ export function PracticePage() {
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-lime-400 border border-lime-400/30 bg-lime-400/10 rounded-md hover:bg-lime-400/20 transition-colors cursor-pointer"
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-200 border border-white/10 bg-[#171717] rounded-md hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] transition-colors cursor-pointer"
               >
                 Clear all filters
               </button>

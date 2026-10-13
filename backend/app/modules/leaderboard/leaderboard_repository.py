@@ -39,19 +39,20 @@ class LeaderboardRepository:
             count_stmt = count_stmt.where(MemberProfile.batch == batch)
 
         if tier:
-            if tier == "5_star":
+            t = tier.lower().strip()
+            if t in ("grandmaster", "5_star"):
                 stmt = stmt.where(MemberProfile.rating >= 2000)
                 count_stmt = count_stmt.where(MemberProfile.rating >= 2000)
-            elif tier == "4_star":
+            elif t in ("master", "4_star"):
                 stmt = stmt.where((MemberProfile.rating >= 1800) & (MemberProfile.rating < 2000))
                 count_stmt = count_stmt.where((MemberProfile.rating >= 1800) & (MemberProfile.rating < 2000))
-            elif tier == "3_star":
+            elif t in ("expert", "3_star"):
                 stmt = stmt.where((MemberProfile.rating >= 1600) & (MemberProfile.rating < 1800))
                 count_stmt = count_stmt.where((MemberProfile.rating >= 1600) & (MemberProfile.rating < 1800))
-            elif tier == "2_star":
+            elif t in ("candidate", "2_star"):
                 stmt = stmt.where((MemberProfile.rating >= 1400) & (MemberProfile.rating < 1600))
                 count_stmt = count_stmt.where((MemberProfile.rating >= 1400) & (MemberProfile.rating < 1600))
-            elif tier == "1_star":
+            elif t in ("novice", "amateur", "1_star"):
                 stmt = stmt.where(MemberProfile.rating < 1400)
                 count_stmt = count_stmt.where(MemberProfile.rating < 1400)
 

@@ -61,11 +61,7 @@ export function AuthGuard() {
   }, [dispatch, reduxToken, reduxIsAuthenticated]);
 
   if (authStatus === "checking") {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center select-none">
-        <GlobalLoader text="Loading" size="large" />
-      </div>
-    );
+    return <GlobalLoader size="large" />;
   }
 
   if (authStatus === "unauthenticated") {
@@ -118,11 +114,7 @@ export function GuestGuard() {
   }, [hasPastSession, hasErrorOrLogout, dispatch]);
 
   if (isChecking) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center select-none">
-        <GlobalLoader text="Loading" size="large" />
-      </div>
-    );
+    return <GlobalLoader size="large" />;
   }
 
   if (isAuthenticated()) {

@@ -90,6 +90,26 @@ class TestCaseResult(BaseModel):
     weight: float = 1.0
     wall_time_fallback: bool = False
 
+    @property
+    def status(self) -> str:
+        return self.verdict.value if hasattr(self.verdict, "value") else str(self.verdict)
+
+    @property
+    def execution_time(self) -> float:
+        return (self.runtime_ms or self.wall_time_ms) / 1000.0
+
+    @property
+    def memory_used(self) -> float:
+        return self.peak_memory_mb
+
+    @property
+    def compile_error(self) -> str:
+        return self.compile_output
+
+    @property
+    def runtime_error(self) -> str:
+        return self.stderr
+
 
 class ScoringResult(BaseModel):
     verdict: Verdict
@@ -135,4 +155,12 @@ class ExecutionResult(BaseModel):
     build_plan: Optional[dict[str, Any]] = None
     error: Optional[str] = None
     completed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @property
+    def testcases(self) -> list[TestCaseResult]:
+        return self.testcase_results
+
+    @property
+    def passed_count(self) -> int:
+        return self.passed_testcases
 

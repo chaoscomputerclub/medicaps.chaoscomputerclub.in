@@ -267,79 +267,95 @@ class MemberService:
         total_solved: int = 0,
         streak_days: int = 0,
     ) -> List[Dict[str, Any]]:
-        from app.services.rating_service import get_rating_tier
-        tier = get_rating_tier(rating or 1200)
-        achievements = [
+        """
+        Compute authoritative chapter badges strictly based on performance metrics.
+        Badges map 1-to-1 to the official artwork in matiks_assets/badges:
+          - Novice (Novice.png): 10+ Solves & 1 Contest (or 15+ Solves)
+          - Amateur (Amateur.png): Rating >= 1400, 25+ Solves, 2+ Contests
+          - Candidate (Candidate.png): Rating >= 1600, 50+ Solves, 3+ Contests
+          - Expert (Expert.png): Rating >= 1800, 75+ Solves, 5+ Contests
+          - Master (Master.png): Rating >= 2000, 100+ Solves, 1+ Podium
+          - GrandMaster (GrandMaster.png): Rating >= 2200, 150+ Solves, 2+ Podiums
+        """
+        r = rating or 1200
+        solves = total_solved or 0
+        contests = attended or 0
+        pods = podiums or 0
+
+        return [
             {
-                "id": "cadet_init",
-                "code": "INIT",
-                "title": "Cadet Commissioned",
-                "name": "Cadet Commissioned",
+                "id": "badge_novice",
+                "code": "NOVICE",
+                "title": "Novice",
+                "name": "Novice",
                 "icon": "⚡",
-                "description": "Verified member of Chaos Computer Club Medi-Caps Chapter.",
-                "earned": True,
+                "image_url": "/matiks-assets/badges/Novice.png",
+                "badge_url": "/matiks-assets/badges/Novice.png",
+                "description": "Solved at least 10 competitive problems and participated in an official contest (or 15+ solved problems).",
+                "criteria": "10+ Solves & 1 Contest (or 15+ Solves)",
+                "earned": bool((solves >= 10 and contests >= 1) or solves >= 15),
             },
             {
-                "id": "tier_badge",
-                "code": "TIER",
-                "title": tier,
-                "name": tier,
+                "id": "badge_amateur",
+                "code": "AMATEUR",
+                "title": "Amateur",
+                "name": "Amateur",
+                "icon": "🛡️",
+                "image_url": "/matiks-assets/badges/Amateur.png",
+                "badge_url": "/matiks-assets/badges/Amateur.png",
+                "description": "Attained rating ≥ 1400 with 25+ solved problems and 2+ official contest participations.",
+                "criteria": "Rating ≥ 1400, 25+ Solves, 2+ Contests",
+                "earned": bool(r >= 1400 and solves >= 25 and contests >= 2),
+            },
+            {
+                "id": "badge_candidate",
+                "code": "CANDIDATE",
+                "title": "Candidate",
+                "name": "Candidate",
+                "icon": "🎯",
+                "image_url": "/matiks-assets/badges/Candidate.png",
+                "badge_url": "/matiks-assets/badges/Candidate.png",
+                "description": "Attained rating ≥ 1600 with 50+ solved problems and 3+ official contest participations.",
+                "criteria": "Rating ≥ 1600, 50+ Solves, 3+ Contests",
+                "earned": bool(r >= 1600 and solves >= 50 and contests >= 3),
+            },
+            {
+                "id": "badge_expert",
+                "code": "EXPERT",
+                "title": "Expert",
+                "name": "Expert",
+                "icon": "🔥",
+                "image_url": "/matiks-assets/badges/Expert.png",
+                "badge_url": "/matiks-assets/badges/Expert.png",
+                "description": "Elite tier: Attained rating ≥ 1800 with 75+ solved problems and 5+ tournament battles.",
+                "criteria": "Rating ≥ 1800, 75+ Solves, 5+ Contests",
+                "earned": bool(r >= 1800 and solves >= 75 and contests >= 5),
+            },
+            {
+                "id": "badge_master",
+                "code": "MASTER",
+                "title": "Master",
+                "name": "Master",
                 "icon": "🏆",
-                "description": f"Reached official university tier {tier}.",
-                "earned": True,
+                "image_url": "/matiks-assets/badges/Master.png",
+                "badge_url": "/matiks-assets/badges/Master.png",
+                "description": "Master tier: Attained rating ≥ 2000, 100+ solved problems, and secured at least 1 official podium.",
+                "criteria": "Rating ≥ 2000, 100+ Solves, 1+ Podium",
+                "earned": bool(r >= 2000 and solves >= 100 and pods >= 1),
+            },
+            {
+                "id": "badge_grandmaster",
+                "code": "GRANDMASTER",
+                "title": "GrandMaster",
+                "name": "GrandMaster",
+                "icon": "👑",
+                "image_url": "/matiks-assets/badges/GrandMaster.png",
+                "badge_url": "/matiks-assets/badges/GrandMaster.png",
+                "description": "Pinnacle GrandMaster: Attained rating ≥ 2200, 150+ problems solved, and multiple podium victories.",
+                "criteria": "Rating ≥ 2200, 150+ Solves, 2+ Podiums",
+                "earned": bool(r >= 2200 and solves >= 150 and pods >= 2),
             },
         ]
-        if (rating or 1200) >= 2000:
-            achievements.append({
-                "id": "elite",
-                "code": "ELITE",
-                "title": "Top 5% Elite",
-                "name": "Top 5% Elite",
-                "icon": "⚡",
-                "description": "Ranked among the top 5% competitive coders in Medi-Caps.",
-                "earned": True,
-            })
-        if attended >= 5:
-            achievements.append({
-                "id": "veteran",
-                "code": "VET",
-                "title": "Contest Veteran",
-                "name": "Contest Veteran",
-                "icon": "🎖️",
-                "description": f"Attended {attended} official offline lab contests.",
-                "earned": True,
-            })
-        if podiums > 0:
-            achievements.append({
-                "id": "podium",
-                "code": "PODIUM",
-                "title": f"{podiums}x Podium Finisher",
-                "name": f"{podiums}x Podium Finisher",
-                "icon": "🥇",
-                "description": f"Secured top 3 podium placements in {podiums} campus contests.",
-                "earned": True,
-            })
-        if total_solved >= 10:
-            achievements.append({
-                "id": "solver_10",
-                "code": "SOLVER_10",
-                "title": "Problem Solver",
-                "name": "Problem Solver",
-                "icon": "💡",
-                "description": f"Solved {total_solved} practice platform problems.",
-                "earned": True,
-            })
-        if is_core_member:
-            achievements.append({
-                "id": "core",
-                "code": "CORE",
-                "title": "CCC Core Organizer",
-                "name": "CCC Core Organizer",
-                "icon": "🛡️",
-                "description": "Official Chapter Organizer and Proctor.",
-                "earned": True,
-            })
-        return achievements
 
     @staticmethod
     async def get_full_profile(current_member: MemberProfile, db: AsyncSession) -> dict:
