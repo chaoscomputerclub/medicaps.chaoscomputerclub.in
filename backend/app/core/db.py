@@ -231,7 +231,7 @@ async def ensure_database_integrity():
                 "CREATE INDEX IF NOT EXISTS ix_announcements_contest_slug ON announcements (contest_slug)",
 
                 # Composite Indexes for Instantaneous University Leaderboard & Star Divisions
-                "CREATE INDEX IF NOT EXISTS ix_member_profiles_leaderboard_core ON member_profiles (is_onboarded, rating DESC, peak_rating DESC, id ASC)",
+                "CREATE INDEX IF NOT EXISTS ix_member_profiles_leaderboard_core ON member_profiles (is_onboarded, rating DESC, peak_rating DESC, attendance_count DESC, id ASC)",
                 "CREATE INDEX IF NOT EXISTS ix_member_profiles_dept_rating_peak ON member_profiles (is_onboarded, department, rating DESC, peak_rating DESC)",
                 "CREATE INDEX IF NOT EXISTS ix_member_profiles_batch_rating_peak ON member_profiles (is_onboarded, batch, rating DESC, peak_rating DESC)",
                 "CREATE INDEX IF NOT EXISTS ix_member_profiles_dept_batch_rating ON member_profiles (department, batch, rating DESC)",

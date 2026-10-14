@@ -140,20 +140,46 @@ class PracticeService:
                 )
             )
 
-        # Build query
-        base_query = select(Problem).where(and_(*conditions))
-
-        # Join member stats if user is authenticated or filtering by status
         member_id = current_member.id if current_member else None
-        if member_id:
-            base_query = base_query.outerjoin(
-                MemberProblemStats,
-                and_(
-                    MemberProblemStats.problem_id == Problem.id,
-                    MemberProblemStats.member_id == member_id,
-                ),
-            )
-            if status and status.strip() and status.upper() != "ALL":
+        is_user_status_filter = bool(status and status.strip() and status.upper() != "ALL")
+
+        # Cache key for public practice catalog (when not filtering by user's personal solved state)
+        catalog_cache_key = f"cache:practice:catalog:{difficulty or 'all'}:{topic or 'all'}:{tag or 'all'}:{q or 'none'}:{sort or 'default'}:{limit}:{offset}"
+        cached_catalog = None
+        if not is_user_status_filter:
+            cached_catalog = await get_cache(catalog_cache_key)
+
+        if cached_catalog is not None:
+            items = [dict(it) for it in cached_catalog.get("items", [])]
+            total_matching = cached_catalog.get("total", len(items))
+            prob_ids = [it["id"] for it in items]
+
+            # Overlay user's solved state if authenticated
+            if member_id and prob_ids:
+                stats_rows = await db.scalars(
+                    select(MemberProblemStats).where(
+                        MemberProblemStats.member_id == member_id,
+                        MemberProblemStats.problem_id.in_(prob_ids),
+                    )
+                )
+                user_states = {s.problem_id: s.status for s in stats_rows.all()}
+                for it in items:
+                    st = user_states.get(it["id"], "UNATTEMPTED")
+                    it["solved_status"] = st
+                    it["user_status"] = st
+        else:
+            # Build query
+            base_query = select(Problem).where(and_(*conditions))
+
+            # Join member stats only if filtering by personal status
+            if member_id and is_user_status_filter:
+                base_query = base_query.outerjoin(
+                    MemberProblemStats,
+                    and_(
+                        MemberProblemStats.problem_id == Problem.id,
+                        MemberProblemStats.member_id == member_id,
+                    ),
+                )
                 st = status.strip().upper()
                 if st == "SOLVED":
                     base_query = base_query.where(MemberProblemStats.status == "SOLVED")
@@ -167,88 +193,99 @@ class PracticeService:
                         )
                     )
 
-        # Count total matching
-        count_stmt = select(func.count()).select_from(base_query.subquery())
-        total_matching = (await db.scalar(count_stmt)) or 0
+            # Count total matching
+            count_stmt = select(func.count()).select_from(base_query.subquery())
+            total_matching = (await db.scalar(count_stmt)) or 0
 
-        # Sort order
-        if sort == "difficulty_asc":
-            order_case = case(
-                (func.upper(Problem.difficulty) == "EASY", 1),
-                (func.upper(Problem.difficulty) == "MEDIUM", 2),
-                (func.upper(Problem.difficulty) == "HARD", 3),
-                else_=4,
-            )
-            base_query = base_query.order_by(order_case.asc(), Problem.problem_index.asc())
-        elif sort == "difficulty_desc":
-            order_case = case(
-                (func.upper(Problem.difficulty) == "HARD", 1),
-                (func.upper(Problem.difficulty) == "MEDIUM", 2),
-                (func.upper(Problem.difficulty) == "EASY", 3),
-                else_=4,
-            )
-            base_query = base_query.order_by(order_case.asc(), Problem.problem_index.asc())
-        elif sort == "title_asc":
-            base_query = base_query.order_by(Problem.title.asc())
-        else:
-            base_query = base_query.order_by(Problem.created_at.asc(), Problem.problem_index.asc())
-
-        # Select items
-        items_stmt = base_query.offset(offset).limit(limit)
-        problems_rows = (await db.scalars(items_stmt)).all()
-
-        # Batch compute acceptance rates & user solved states
-        prob_ids = [p.id for p in problems_rows]
-        user_states: Dict[str, str] = {}
-        if member_id and prob_ids:
-            stats_rows = await db.scalars(
-                select(MemberProblemStats).where(
-                    MemberProblemStats.member_id == member_id,
-                    MemberProblemStats.problem_id.in_(prob_ids),
+            # Sort order
+            if sort == "difficulty_asc":
+                order_case = case(
+                    (func.upper(Problem.difficulty) == "EASY", 1),
+                    (func.upper(Problem.difficulty) == "MEDIUM", 2),
+                    (func.upper(Problem.difficulty) == "HARD", 3),
+                    else_=4,
                 )
-            )
-            for s in stats_rows.all():
-                user_states[s.problem_id] = s.status
-
-        # Aggregate submission metrics for these problems
-        acc_stats: Dict[str, Tuple[int, int]] = {}
-        if prob_ids:
-            subs_res = await db.execute(
-                select(
-                    ContestSubmission.master_problem_id,
-                    func.count(ContestSubmission.id).label("total_subs"),
-                    func.count(
-                        case((func.upper(ContestSubmission.verdict).in_(["ACCEPTED", "AC"]), 1))
-                    ).label("accepted_subs"),
+                base_query = base_query.order_by(order_case.asc(), Problem.problem_index.asc())
+            elif sort == "difficulty_desc":
+                order_case = case(
+                    (func.upper(Problem.difficulty) == "HARD", 1),
+                    (func.upper(Problem.difficulty) == "MEDIUM", 2),
+                    (func.upper(Problem.difficulty) == "EASY", 3),
+                    else_=4,
                 )
-                .where(
-                    ContestSubmission.master_problem_id.in_(prob_ids),
-                    ContestSubmission.context == "PRACTICE",
+                base_query = base_query.order_by(order_case.asc(), Problem.problem_index.asc())
+            elif sort == "title_asc":
+                base_query = base_query.order_by(Problem.title.asc())
+            else:
+                base_query = base_query.order_by(Problem.created_at.asc(), Problem.problem_index.asc())
+
+            # Select items
+            items_stmt = base_query.offset(offset).limit(limit)
+            problems_rows = (await db.scalars(items_stmt)).all()
+
+            # Batch compute acceptance rates & user solved states
+            prob_ids = [p.id for p in problems_rows]
+            user_states: Dict[str, str] = {}
+            if member_id and prob_ids:
+                stats_rows = await db.scalars(
+                    select(MemberProblemStats).where(
+                        MemberProblemStats.member_id == member_id,
+                        MemberProblemStats.problem_id.in_(prob_ids),
+                    )
                 )
-                .group_by(ContestSubmission.master_problem_id)
-            )
-            for row in subs_res.all():
-                acc_stats[row[0]] = (row[1] or 0, row[2] or 0)
+                for s in stats_rows.all():
+                    user_states[s.problem_id] = s.status
 
-        items = []
-        for p in problems_rows:
-            total_s, acc_s = acc_stats.get(p.id, (0, 0))
-            rate = round((acc_s / total_s) * 100, 1) if total_s > 0 else 0.0
-            solved_state = user_states.get(p.id, "UNATTEMPTED")
+            # Aggregate submission metrics for these problems
+            acc_stats: Dict[str, Tuple[int, int]] = {}
+            if prob_ids:
+                subs_res = await db.execute(
+                    select(
+                        ContestSubmission.master_problem_id,
+                        func.count(ContestSubmission.id).label("total_subs"),
+                        func.count(
+                            case((func.upper(ContestSubmission.verdict).in_(["ACCEPTED", "AC"]), 1))
+                        ).label("accepted_subs"),
+                    )
+                    .where(
+                        ContestSubmission.master_problem_id.in_(prob_ids),
+                        ContestSubmission.context == "PRACTICE",
+                    )
+                    .group_by(ContestSubmission.master_problem_id)
+                )
+                for row in subs_res.all():
+                    acc_stats[row[0]] = (row[1] or 0, row[2] or 0)
 
-            items.append({
-                "id": p.id,
-                "problem_index": p.problem_index,
-                "title": p.title,
-                "slug": p.slug,
-                "difficulty": p.difficulty,
-                "topic": p.topic,
-                "points": p.points,
-                "acceptance_rate": rate,
-                "submission_count": total_s,
-                "solved_status": solved_state,
-                "tags": p.tags or [],
-            })
+            items = []
+            public_cache_items = []
+            for p in problems_rows:
+                total_s, acc_s = acc_stats.get(p.id, (0, 0))
+                rate = round((acc_s / total_s) * 100, 1) if total_s > 0 else 0.0
+                solved_state = user_states.get(p.id, "UNATTEMPTED")
+
+                item_dict = {
+                    "id": p.id,
+                    "problem_index": p.problem_index,
+                    "title": p.title,
+                    "slug": p.slug,
+                    "difficulty": p.difficulty,
+                    "topic": p.topic,
+                    "points": p.points,
+                    "acceptance_rate": rate,
+                    "submission_count": total_s,
+                    "solved_status": solved_state,
+                    "user_status": solved_state,
+                    "tags": p.tags or [],
+                }
+                items.append(item_dict)
+
+                public_item = dict(item_dict)
+                public_item["solved_status"] = "UNATTEMPTED"
+                public_item["user_status"] = "UNATTEMPTED"
+                public_cache_items.append(public_item)
+
+            if not is_user_status_filter:
+                await set_cache(catalog_cache_key, {"items": public_cache_items, "total": total_matching}, ttl_seconds=60)
 
         # Summary telemetry
         user_summary = {"total_problems": total_matching, "solved_count": 0, "attempted_count": 0}

@@ -66,7 +66,7 @@ class MemberProfile(Base):
     trust_proofs = relationship("TrustProof", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
 
     __table_args__ = (
-        Index("ix_member_profiles_leaderboard_core", "is_onboarded", "rating", "peak_rating", "id"),
+        Index("ix_member_profiles_leaderboard_core", "is_onboarded", "rating", "peak_rating", "attendance_count", "id"),
         Index("ix_member_profiles_dept_rating_peak", "is_onboarded", "department", "rating", "peak_rating"),
         Index("ix_member_profiles_batch_rating_peak", "is_onboarded", "batch", "rating", "peak_rating"),
         Index("ix_member_profiles_dept_batch_rating", "department", "batch", "rating"),
