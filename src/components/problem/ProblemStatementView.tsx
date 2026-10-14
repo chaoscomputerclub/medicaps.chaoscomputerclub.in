@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, Cpu, Award, Tag } from "lucide-react";
+import { Clock, Cpu, Award, Tag, CheckCircle2 } from "lucide-react";
 import { ProblemExample } from "./ProblemExample";
 import { ReadmeRenderer } from "./ReadmeRenderer";
 import type { CanonicalProblem } from "@/lib/problemFormatter";
@@ -8,11 +8,13 @@ export interface ProblemStatementViewProps {
   problem: CanonicalProblem;
   className?: string;
   showStarterCodePreview?: boolean;
+  showPoints?: boolean;
 }
 
 export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
   problem,
   className = "",
+  showPoints = true,
 }) => {
   const difficulty = (problem.difficulty || "MEDIUM").toUpperCase();
   const diffBadgeColor =
@@ -32,19 +34,44 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
         .filter((c) => Boolean(c))
     : [];
 
+  const parsedNum = Number.parseInt(problem.problem_index || "", 10);
+  const displayIndex = !Number.isNaN(parsedNum) && parsedNum > 0
+    ? parsedNum
+    : (problem.problem_index && !/^[A-Z]$/i.test(problem.problem_index) ? problem.problem_index : null);
+
+  const userStatus = problem.user_status || (problem as any).solved_status;
+
   return (
     <div className={`space-y-6 text-zinc-300 font-sans ${className}`} data-testid="problem-statement-view">
       {/* 1. Header: Title, Index & Badges */}
       <div className="space-y-3 pb-4 border-b border-white/8">
-        <div className="flex flex-wrap items-baseline gap-2">
-          {problem.problem_index && (
+        <div className="flex flex-wrap items-center gap-2">
+          {displayIndex && (
             <span className="font-sans text-lg font-bold text-lime-400">
-              {problem.problem_index}.
+              {displayIndex}.
             </span>
           )}
           <h1 className="text-xl font-bold text-white tracking-tight">
             {problem.title}
           </h1>
+
+          {userStatus === "SOLVED" ? (
+            <span
+              title="Solved"
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-lime-400/10 text-lime-400 border border-lime-400/30"
+            >
+              <CheckCircle2 className="size-3.5 text-lime-400" />
+              <span>Solved</span>
+            </span>
+          ) : userStatus === "ATTEMPTED" ? (
+            <span
+              title="Attempted"
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-400/10 text-amber-400 border border-amber-400/30"
+            >
+              <Clock className="size-3.5 text-amber-400" />
+              <span>Attempted</span>
+            </span>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -54,7 +81,7 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
             {difficulty}
           </span>
 
-          {problem.points !== undefined && (
+          {showPoints && problem.points !== undefined && (
             <span className="inline-flex items-center gap-1 font-sans text-[11px] text-zinc-400 bg-white/5 border border-white/8 px-2.5 py-0.5 rounded">
               <Award className="size-3 text-amber-400" />
               <span>{problem.points}&nbsp;pts</span>

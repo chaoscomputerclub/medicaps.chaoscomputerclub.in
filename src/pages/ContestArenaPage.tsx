@@ -2050,7 +2050,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             </div>
 
             <div className="flex items-center gap-2 text-xs font-sans text-zinc-400">
-              {/* Language Selector */}
+              {/* Language Selector (Parent-Child DropdownMenu) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -2068,13 +2068,13 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="bg-[#1F1F1F] border-white/10 text-white text-xs font-sans rounded-[12px] min-w-[140px] p-1.5"
+                  className="bg-[#1F1F1F] border-white/10 text-white text-xs font-sans rounded-[10px] min-w-[140px] p-1.5"
                 >
                   {ARENA_LANGUAGES.map((lang) => (
                     <DropdownMenuItem
                       key={lang.value}
                       onClick={() => handleSelectLanguage(lang.value)}
-                      className={`cursor-pointer flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-[8px] transition-colors ${
+                      className={`cursor-pointer flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-[6px] text-xs font-sans transition-colors ${
                         selectedLanguage === lang.value
                           ? "text-lime-400 font-semibold bg-white/5"
                           : "text-zinc-300 hover:text-white hover:bg-white/5"

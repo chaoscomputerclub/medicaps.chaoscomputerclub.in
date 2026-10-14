@@ -1662,11 +1662,14 @@ export function AssessmentStudioSkeleton() {
           </div>
         </div>
         <div className="flex flex-col bg-[#171717]">
-          <div className="flex items-center justify-between border-b border-white/8 px-4 py-2 bg-[#171717]">
-            <Skeleton className="h-6 w-32" />
-            <div className="flex gap-2">
-              <Skeleton className="h-6 w-16 rounded" />
-              <Skeleton className="h-6 w-16 rounded" />
+          <div className="flex items-center justify-between border-b border-white/10 px-3 h-9 bg-[#141414]">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-16 rounded" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-[120px] rounded" />
+              <Skeleton className="h-7 w-16 rounded-[8px]" />
+              <Skeleton className="h-7 w-7 rounded-[8px]" />
             </div>
           </div>
           <div className="flex-1 p-4 space-y-2">
@@ -1842,11 +1845,6 @@ export function PracticeRowSkeleton({ count = 8 }: { count?: number }) {
             <Skeleton className={cn("h-5 rounded", topicWidths[i % topicWidths.length])} />
           </td>
 
-          {/* Acceptance Rate */}
-          <td className="py-3.5 px-4 text-right">
-            <Skeleton className="h-3.5 w-10 ml-auto rounded" />
-          </td>
-
           {/* Action Chevron */}
           <td className="py-3.5 px-4 text-right">
             <Skeleton className="size-3.5 ml-auto rounded" />
@@ -1903,7 +1901,6 @@ export function PracticeSkeleton() {
                 <th className="py-3 px-4">Title</th>
                 <th className="py-3 px-4 w-28">Difficulty</th>
                 <th className="py-3 px-4 w-40">Topic</th>
-                <th className="py-3 px-4 w-28 text-right">Acceptance</th>
                 <th className="py-3 px-4 w-12"></th>
               </tr>
             </thead>

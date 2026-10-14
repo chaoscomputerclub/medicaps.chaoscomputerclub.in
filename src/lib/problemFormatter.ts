@@ -71,6 +71,7 @@ export interface CanonicalProblem {
   time_limit?: number;
   memory_limit?: number;
   execution_mode?: string;
+  user_status?: string;
 }
 
 export interface ValidationReport {

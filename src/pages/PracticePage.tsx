@@ -395,7 +395,6 @@ export function PracticePage() {
                   <th className="py-3 px-4">Title</th>
                   <th className="py-3 px-4 w-28">Difficulty</th>
                   <th className="py-3 px-4 w-40">Topic</th>
-                  <th className="py-3 px-4 w-28 text-right">Acceptance</th>
                   <th className="py-3 px-4 w-12"></th>
                 </tr>
               </thead>
@@ -404,7 +403,11 @@ export function PracticePage() {
                   <PracticeRowSkeleton count={8} />
                 ) : (
                   problems.map((p, idx) => {
-                    const displayIndex = p.problem_index || String((pageParam - 1) * 50 + idx + 1).padStart(3, "0");
+                    const parsedNum = Number.parseInt(p.problem_index || "", 10);
+                    const displayIndex = !Number.isNaN(parsedNum) && parsedNum > 0
+                      ? parsedNum
+                      : (pageParam - 1) * 50 + idx + 1;
+                    const userStatus = p.user_status || (p as any).solved_status;
                     return (
                     <tr
                       key={p.id}
@@ -414,11 +417,11 @@ export function PracticePage() {
                     >
                       {/* Solved Status Indicator */}
                       <td className="py-3.5 px-4 text-center">
-                        {p.user_status === "SOLVED" ? (
+                        {userStatus === "SOLVED" ? (
                           <span title="Solved">
                             <CheckCircle2 className="size-4 text-lime-400 inline" />
                           </span>
-                        ) : p.user_status === "ATTEMPTED" ? (
+                        ) : userStatus === "ATTEMPTED" ? (
                           <span title="Attempted">
                             <Clock className="size-4 text-amber-400 inline" />
                           </span>
@@ -429,7 +432,7 @@ export function PracticePage() {
                         )}
                       </td>
 
-                      {/* Problem Number */}
+                      {/* Problem Number (Integer) */}
                       <td className="py-3.5 px-4 text-zinc-500 tabular-nums">
                         {displayIndex}
                       </td>
@@ -456,11 +459,6 @@ export function PracticePage() {
                         <span className="inline-block px-2 py-0.5 rounded border border-white/8 bg-transparent text-[11px] text-zinc-300">
                           {p.topic}
                         </span>
-                      </td>
-
-                      {/* Acceptance Rate */}
-                      <td className="py-3.5 px-4 text-right text-zinc-400 tabular-nums">
-                        {p.total_submissions > 0 ? `${p.acceptance_rate}%` : "—"}
                       </td>
 
                       {/* Action Chevron */}
