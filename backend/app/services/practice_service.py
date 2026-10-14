@@ -419,69 +419,57 @@ class PracticeService:
             "editorial": editorial_content,
         }
 
-    # ─── RUN PRACTICE CODE (SAMPLE TESTS) ────────────────────────────────────
+    # ─── INTERNAL: Resolve execution contract (mirrors ContestExecutionService) ──
     @classmethod
-    async def run_practice_code(
+    async def _resolve_practice_execution_contract(
         cls,
+        problem: Problem,
         db: AsyncSession,
-        slug_or_id: str,
-        code: str,
-        language: str,
-        current_member: Optional[MemberProfile] = None,
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Optional[FunctionSignature], Optional[EvaluationConfig], List[Dict[str, Any]], List[Dict[str, Any]], float, int, str]:
         """
-        Executes user code against visible sample test cases without persisting a submission.
-        Uses the same ExecutionRouter-based judge engine as the contest arena run_arena_code.
-        Architectural parity: matches run_arena_code in ContestExecutionService exactly.
+        Resolves fn_sig, eval_cfg, visible_cases, hidden_cases, time_limit, memory_limit, exec_mode.
+        Mirrors ContestExecutionService._resolve_problem_execution_contract exactly.
+        Raw input_data is passed as-is; InputBinder handles parsing internally.
         """
-        stmt = select(Problem).where(or_(Problem.id == slug_or_id, Problem.slug == slug_or_id))
-        problem = await db.scalar(stmt)
-        if not problem:
-            raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
-
-        # ── Resolve testcases and execution contract ──────────────────────────
         fn_sig = None
         eval_cfg = None
+        visible_cases: List[Dict[str, Any]] = []
+        hidden_cases: List[Dict[str, Any]] = []
         time_limit = getattr(problem, "time_limit", 2.0) or 2.0
         memory_limit = getattr(problem, "memory_limit", 256) or 256
-        exec_mode = getattr(problem, "execution_mode", None)
 
+        # Fetch all active testcases for this problem version
         tc_stmt = select(ProblemTestCase).where(
             ProblemTestCase.problem_id == problem.id,
             ProblemTestCase.version == (problem.version or 1),
             ProblemTestCase.is_active == True,
-            ProblemTestCase.is_hidden == False,
         ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
-        samples = (await db.scalars(tc_stmt)).all()
-        if not samples:
+        vault_cases = (await db.scalars(tc_stmt)).all()
+
+        if not vault_cases:
             fallback_stmt = select(ProblemTestCase).where(
                 ProblemTestCase.problem_id == problem.id,
                 ProblemTestCase.is_active == True,
-                ProblemTestCase.is_hidden == False,
             ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
-            samples = (await db.scalars(fallback_stmt)).all()
+            vault_cases = (await db.scalars(fallback_stmt)).all()
 
-        raw_cases = []
-        for vc in samples:
-            clean_inp = vc.input_data
-            if clean_inp is not None:
-                parsed_inp = InputBinder.parse_raw_input(clean_inp)
-                if isinstance(parsed_inp, dict) and "raw" in parsed_inp and len(parsed_inp) == 1:
-                    clean_inp = parsed_inp["raw"]
-                elif isinstance(parsed_inp, dict) and "input" in parsed_inp and len(parsed_inp) == 1:
-                    clean_inp = parsed_inp["input"]
-                elif isinstance(parsed_inp, (list, dict)):
-                    clean_inp = parsed_inp
-            raw_cases.append({
+        for vc in vault_cases:
+            # Pass raw input_data exactly as stored — identical to contest service
+            c_dict = {
                 "testcase_id": vc.testcase_id,
-                "name": f"Case {vc.order}" if vc.order else vc.testcase_id,
-                "input": clean_inp,
+                "input": vc.input_data,
                 "expected_output": vc.expected_output,
                 "explanation": vc.explanation,
-                "weight": vc.weight,
-                "is_hidden": False,
-            })
+                "weight": float(vc.weight or 1.0),
+                "is_hidden": bool(vc.is_hidden),
+                "order": vc.order,
+            }
+            if vc.is_hidden:
+                hidden_cases.append(c_dict)
+            else:
+                visible_cases.append(c_dict)
 
+        # Resolve function signature
         raw_sig = getattr(problem, "function_signature", None)
         if isinstance(raw_sig, str):
             try:
@@ -494,26 +482,20 @@ class PracticeService:
             except Exception:
                 pass
 
-        try:
-            lang_enum = LanguageRegistry.normalize(language)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=str(e))
-
-        # Fallback: Infer function signature from starter codes if missing or incomplete
+        # Fallback: infer fn_sig from starter codes (identical to contest service)
         if not fn_sig or not getattr(fn_sig, "name", "") or len(fn_sig.parameters) == 0:
-            starter_dict = getattr(problem, "starter_code", None)
+            starter_dict = getattr(problem, "starter_codes", None)
             if not isinstance(starter_dict, dict):
-                starter_dict = getattr(problem, "starter_codes", None)
+                starter_dict = getattr(problem, "starter_code", None)
             if isinstance(starter_dict, dict) and any(isinstance(v, str) for v in starter_dict.values()):
                 try:
                     from app.engine.build_plan import infer_function_signature_from_sources
+                    from app.engine.contracts import ParameterDefinition
                     inferred_fn, inferred_params = infer_function_signature_from_sources(
                         starter_codes=starter_dict,
-                        lang_str=lang_enum.value,
-                        user_source=code,
+                        lang_str="python",
                     )
                     if inferred_fn:
-                        from app.engine.contracts import ParameterDefinition
                         fn_sig = FunctionSignature(
                             class_name="Solution",
                             name=inferred_fn,
@@ -524,6 +506,7 @@ class PracticeService:
                 except Exception:
                     pass
 
+        # Resolve evaluation config
         raw_eval = getattr(problem, "evaluation_config", None)
         if isinstance(raw_eval, str):
             try:
@@ -536,21 +519,50 @@ class PracticeService:
             except Exception:
                 pass
 
+        exec_mode = getattr(problem, "execution_mode", None)
         if not exec_mode or exec_mode == "FUNCTION":
             exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
         elif fn_sig and exec_mode != "FULL_PROGRAM":
             exec_mode = "FUNCTION"
 
+        return fn_sig, eval_cfg, visible_cases, hidden_cases, time_limit, memory_limit, exec_mode
+
+    # ─── RUN PRACTICE CODE (SAMPLE TESTS) ────────────────────────────────────
+    @classmethod
+    async def run_practice_code(
+        cls,
+        db: AsyncSession,
+        slug_or_id: str,
+        code: str,
+        language: str,
+        current_member: Optional[MemberProfile] = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes user code against visible sample test cases without persisting a submission.
+        Uses the IDENTICAL architecture as ContestExecutionService.run_arena_code.
+        """
+        stmt = select(Problem).where(or_(Problem.id == slug_or_id, Problem.slug == slug_or_id))
+        problem = await db.scalar(stmt)
+        if not problem:
+            raise HTTPException(status_code=404, detail=f"Problem '{slug_or_id}' not found.")
+
+        fn_sig, eval_cfg, sample_list, _, time_limit, memory_limit, exec_mode = \
+            await cls._resolve_practice_execution_contract(problem, db)
+
+        try:
+            lang_enum = LanguageRegistry.normalize(language)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
         is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT")
+        submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
         adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
 
+        raw_cases = sample_list
         tc_binding_errors: dict = {}
         tcs: List[TestCaseSchema] = []
-        for i, rc in enumerate(raw_cases):
-            inp = rc.get("input", "")
-            exp_out = rc.get("expected_output", "")
-            tc_id = rc.get("testcase_id", f"tc_{i+1}")
-            tc_name = rc.get("name", f"Sample {i+1}")
+        for i, s in enumerate(raw_cases):
+            inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
             if is_fn_mode and adapter and fn_sig:
                 try:
                     stdin_payload = adapter.serialize_input(fn_sig, inp)
@@ -564,6 +576,7 @@ class PracticeService:
                 else:
                     stdin_payload = str(inp) if inp is not None else ""
 
+            exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
             clean_exp_out = exp_out
             if isinstance(clean_exp_out, str):
                 s_trimmed = clean_exp_out.strip()
@@ -573,19 +586,23 @@ class PracticeService:
                     except Exception:
                         clean_exp_out = s_trimmed[1:-1]
 
-            tcs.append(TestCaseSchema(id=tc_id, name=tc_name, stdin=stdin_payload, expected_output=str(clean_exp_out)))
+            tcs.append(TestCaseSchema(
+                id=s.get("testcase_id", f"sample_{i+1}"),
+                name=f"Sample Test {i+1}",
+                stdin=stdin_payload,
+                expected_output=str(clean_exp_out),
+            ))
 
         if not tcs:
             tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
-            raw_cases = [{"testcase_id": "sample_1", "name": "Sample 1", "input": "", "expected_output": "", "is_hidden": False}]
+            raw_cases = [{"testcase_id": "sample_1", "input": "", "expected_output": "", "is_hidden": False}]
 
-        submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
         build_plan = SourcePlanBuilder.build_plan(
             language=lang_enum,
             user_source=code,
             submission_mode=submission_mode,
             function_signature=fn_sig if is_fn_mode else None,
-            starter_codes=getattr(problem, "starter_code", None) or getattr(problem, "starter_codes", None) or {},
+            starter_codes=getattr(problem, "starter_codes", None) or getattr(problem, "starter_code", None) or {},
             method_name=fn_sig.name if (is_fn_mode and fn_sig) else None,
         )
         exec_code = build_plan.generated_source
@@ -594,7 +611,6 @@ class PracticeService:
         problem_id = str(problem.id)
         member_id_str = str(current_member.id) if current_member else None
 
-        # Release PostgreSQL connection back to pool prior to sandbox execution
         try:
             await db.rollback()
         except Exception:
@@ -627,27 +643,25 @@ class PracticeService:
 
         testcase_results = []
         passed_count = 0
-        raw_res_tcs = getattr(exec_result, "testcase_results", None) or getattr(exec_result, "testcases", [])
-        for i, tr in enumerate(raw_res_tcs):
-            rc = raw_cases[i] if i < len(raw_cases) else {}
-            exp_val = rc.get("expected_output", "")
+        for i, tr in enumerate(exec_result.testcase_results):
+            raw_case = raw_cases[i] if i < len(raw_cases) else {}
+            exp_val = raw_case.get("expected_output") if raw_case.get("expected_output") is not None else raw_case.get("output", "")
 
             if i in tc_binding_errors:
                 tr.passed = False
                 tr.verdict = "INPUT_FORMAT_ERROR"
                 tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
             elif str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",):
-                if tr.stdout:
-                    if is_fn_mode and fn_sig:
-                        passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
-                        if not passed:
-                            passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                        tr.passed = passed
-                        tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
-                    else:
+                if is_fn_mode and fn_sig:
+                    passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
+                    if not passed:
                         passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                        tr.passed = passed
-                        tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
+                    tr.passed = passed
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
+                else:
+                    passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
+                    tr.passed = passed
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
             else:
                 tr.passed = False
 
@@ -665,29 +679,25 @@ class PracticeService:
             v_str = tr.verdict.value if hasattr(tr.verdict, "value") else str(tr.verdict)
             wall_ms = getattr(tr, "wall_time_ms", 0.0) or 0.0
             run_ms = getattr(tr, "runtime_ms", 0.0) or wall_ms
-            peak_mb = getattr(tr, "peak_memory_mb", 0.0) or 0.0
 
             testcase_results.append({
                 "testcase_id": tr.testcase_id or f"sample_{i+1}",
                 "name": tr.name or f"Sample {i+1}",
-                "status": v_str,
-                "verdict": v_str,
                 "passed": tr.passed,
-                "execution_time": run_ms / 1000.0,
-                "runtime_ms": run_ms,
-                "wall_time_ms": wall_ms,
-                "memory_used": peak_mb,
-                "memory_kb": int(peak_mb * 1024),
+                "verdict": v_str,
+                "status": v_str,
                 "stdout": tr.stdout or "",
                 "actual_output": tr.stdout or "",
                 "expected_output": str(clean_exp),
-                "input": (tcs[i].stdin if i < len(tcs) else ""),
                 "stdin": (tcs[i].stdin if i < len(tcs) else ""),
+                "input": (tcs[i].stdin if i < len(tcs) else ""),
                 "stderr": tr.stderr or "",
                 "error": tr.stderr or "",
                 "compile_output": tr.compile_output or "",
                 "compile_error": tr.compile_output or "",
-                "runtime_error": tr.stderr or "",
+                "wall_time_ms": wall_ms,
+                "runtime_ms": run_ms,
+                "execution_time": run_ms / 1000.0,
             })
 
         if len(testcase_results) < len(tcs):
@@ -705,24 +715,21 @@ class PracticeService:
                 testcase_results.append({
                     "testcase_id": missing_tc.id,
                     "name": missing_tc.name,
-                    "status": tc_v,
-                    "verdict": tc_v,
                     "passed": False,
-                    "execution_time": 0.0,
-                    "runtime_ms": 0.0,
-                    "wall_time_ms": 0.0,
-                    "memory_used": 0.0,
-                    "memory_kb": 0,
+                    "verdict": tc_v,
+                    "status": tc_v,
                     "stdout": "",
                     "actual_output": "",
                     "expected_output": str(missing_tc.expected_output),
-                    "input": missing_tc.stdin,
                     "stdin": missing_tc.stdin,
+                    "input": missing_tc.stdin,
                     "stderr": tc_err,
                     "error": tc_err,
                     "compile_output": exec_result.compile_output or "",
                     "compile_error": exec_result.compile_output or "",
-                    "runtime_error": tc_err,
+                    "wall_time_ms": 0.0,
+                    "runtime_ms": 0.0,
+                    "execution_time": 0.0,
                 })
 
         all_passed = (passed_count == len(testcase_results)) and len(testcase_results) > 0
@@ -739,9 +746,9 @@ class PracticeService:
         else:
             final_verdict = "WRONG_ANSWER"
 
-        exec_status_str = exec_result.status.value if hasattr(exec_result.status, "value") else str(exec_result.status)
         runtime_ms = round((exec_result.time or 0.0) * 1000.0, 2)
         memory_kb = int((exec_result.memory or 0.0) * 1024)
+        exec_status_str = exec_result.status.value if hasattr(exec_result.status, "value") else str(exec_result.status)
 
         return {
             "success": all_passed,
@@ -759,16 +766,10 @@ class PracticeService:
             "stdout": exec_result.stdout or "",
             "stderr": exec_result.stderr or "",
             "compile_output": exec_result.compile_output or "",
-            "compile_error": exec_result.compile_output or "",
             "time": exec_result.time or 0.0,
-            "execution_time": exec_result.time or 0.0,
-            "runtime": runtime_ms,
-            "runtime_ms": runtime_ms,
             "compile_time_ms": getattr(exec_result, "compile_time_ms", 0.0),
             "execution_time_ms": getattr(exec_result, "execution_time_ms", 0.0),
-            "total_time_ms": getattr(exec_result, "total_time_ms", 0.0),
             "memory": exec_result.memory or 0.0,
-            "memory_used": exec_result.memory or 0.0,
             "memory_kb": memory_kb,
             "passed_count": passed_count,
             "passed_testcases": passed_count,
@@ -791,8 +792,7 @@ class PracticeService:
     ) -> Dict[str, Any]:
         """
         Executes user code against full judge test suite (sample + hidden testcases).
-        Uses the same ExecutionRouter-based judge engine as the contest arena submit_arena_code.
-        Architectural parity: matches submit_arena_code in ContestExecutionService exactly.
+        Uses the IDENTICAL architecture as ContestExecutionService.submit_arena_code.
         """
         if not current_member:
             raise HTTPException(status_code=401, detail="Authentication required to submit practice solutions.")
@@ -811,10 +811,10 @@ class PracticeService:
         problem_difficulty = problem.difficulty
 
         # Debounce duplicate submissions (2-second window)
+        import hashlib
         try:
             r = get_redis_client()
             if r:
-                import hashlib
                 code_hash = hashlib.sha256(code.strip().encode("utf-8")).hexdigest()[:16]
                 dedup_key = f"practice_debounce:{problem_id}:{member_id}:{code_hash}"
                 is_new = await r.set(dedup_key, "1", ex=2, nx=True)
@@ -830,124 +830,27 @@ class PracticeService:
 
         submission_id = str(uuid.uuid4())
 
-        # ── Resolve testcases and execution contract ──────────────────────────
-        fn_sig = None
-        eval_cfg = None
-        time_limit = getattr(problem, "time_limit", 2.0) or 2.0
-        memory_limit = getattr(problem, "memory_limit", 256) or 256
-        exec_mode = getattr(problem, "execution_mode", None)
+        # Resolve execution contract via shared helper (identical to contest service)
+        fn_sig, eval_cfg, samples, hidden, time_limit, memory_limit, exec_mode = \
+            await cls._resolve_practice_execution_contract(problem, db)
 
-        tc_stmt = select(ProblemTestCase).where(
-            ProblemTestCase.problem_id == problem.id,
-            ProblemTestCase.version == (problem.version or 1),
-            ProblemTestCase.is_active == True,
-        ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
-        vault_cases = (await db.scalars(tc_stmt)).all()
-        if not vault_cases:
-            fallback_stmt = select(ProblemTestCase).where(
-                ProblemTestCase.problem_id == problem.id,
-                ProblemTestCase.is_active == True,
-            ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
-            vault_cases = (await db.scalars(fallback_stmt)).all()
 
-        # Full suite: sample + hidden
-        samples = []
-        hidden = []
-        for vc in vault_cases:
-            clean_inp = vc.input_data
-            if clean_inp is not None:
-                parsed_inp = InputBinder.parse_raw_input(clean_inp)
-                if isinstance(parsed_inp, dict) and "raw" in parsed_inp and len(parsed_inp) == 1:
-                    clean_inp = parsed_inp["raw"]
-                elif isinstance(parsed_inp, dict) and "input" in parsed_inp and len(parsed_inp) == 1:
-                    clean_inp = parsed_inp["input"]
-                elif isinstance(parsed_inp, (list, dict)):
-                    clean_inp = parsed_inp
-            tc_dict = {
-                "testcase_id": vc.testcase_id,
-                "name": f"{'Hidden' if vc.is_hidden else 'Case'} {vc.order}" if vc.order else vc.testcase_id,
-                "input": clean_inp,
-                "expected_output": vc.expected_output,
-                "explanation": vc.explanation,
-                "weight": vc.weight,
-                "is_hidden": bool(vc.is_hidden),
-            }
-            if vc.is_hidden:
-                hidden.append(tc_dict)
-            else:
-                samples.append(tc_dict)
-        raw_cases = samples + hidden
-
-        raw_sig = getattr(problem, "function_signature", None)
-        if isinstance(raw_sig, str):
-            try:
-                raw_sig = json.loads(raw_sig)
-            except Exception:
-                pass
-        if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("function_name") or raw_sig.get("parameters")):
-            try:
-                fn_sig = FunctionSignature(**raw_sig)
-            except Exception:
-                pass
-
+        # Full suite: sample + hidden (mirrors contest submit_arena_code exactly)
+        all_raw = samples + hidden
         try:
             lang_enum = LanguageRegistry.normalize(language)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
-        # Fallback: Infer function signature from starter codes if missing or incomplete
-        if not fn_sig or not getattr(fn_sig, "name", "") or len(fn_sig.parameters) == 0:
-            starter_dict = getattr(problem, "starter_code", None)
-            if not isinstance(starter_dict, dict):
-                starter_dict = getattr(problem, "starter_codes", None)
-            if isinstance(starter_dict, dict) and any(isinstance(v, str) for v in starter_dict.values()):
-                try:
-                    from app.engine.build_plan import infer_function_signature_from_sources
-                    inferred_fn, inferred_params = infer_function_signature_from_sources(
-                        starter_codes=starter_dict,
-                        lang_str=lang_enum.value,
-                        user_source=code,
-                    )
-                    if inferred_fn:
-                        from app.engine.contracts import ParameterDefinition
-                        fn_sig = FunctionSignature(
-                            class_name="Solution",
-                            name=inferred_fn,
-                            function_name=inferred_fn,
-                            parameters=[ParameterDefinition(name=p[0], type=p[1]) for p in inferred_params],
-                            return_type="any",
-                        )
-                except Exception:
-                    pass
-
-        raw_eval = getattr(problem, "evaluation_config", None)
-        if isinstance(raw_eval, str):
-            try:
-                raw_eval = json.loads(raw_eval)
-            except Exception:
-                pass
-        if raw_eval and isinstance(raw_eval, dict):
-            try:
-                eval_cfg = EvaluationConfig(**raw_eval)
-            except Exception:
-                pass
-
-        if not exec_mode or exec_mode == "FUNCTION":
-            exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
-        elif fn_sig and exec_mode != "FULL_PROGRAM":
-            exec_mode = "FUNCTION"
-
         is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT")
+        submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
         adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
 
         tc_binding_errors: dict = {}
         tcs: List[TestCaseSchema] = []
-        for i, rc in enumerate(raw_cases):
-            inp = rc.get("input", "")
-            exp_out = rc.get("expected_output", "")
-            tc_id = rc.get("testcase_id", f"tc_{i+1}")
-            tc_name = rc.get("name", f"Test {i+1}")
-            is_hid = bool(rc.get("is_hidden", False))
+        for i, s in enumerate(all_raw):
+            inp = s.get("input") if s.get("input") is not None else s.get("stdin", "")
+            is_hid = bool(s.get("is_hidden", False))
             if is_fn_mode and adapter and fn_sig:
                 try:
                     stdin_payload = adapter.serialize_input(fn_sig, inp)
@@ -961,6 +864,7 @@ class PracticeService:
                 else:
                     stdin_payload = str(inp) if inp is not None else ""
 
+            exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
             clean_exp_out = exp_out
             if isinstance(clean_exp_out, str):
                 s_trimmed = clean_exp_out.strip()
@@ -970,20 +874,28 @@ class PracticeService:
                     except Exception:
                         clean_exp_out = s_trimmed[1:-1]
 
-            tcs.append(TestCaseSchema(id=tc_id, name=tc_name, stdin=stdin_payload, expected_output=str(clean_exp_out), hidden=is_hid))
+            tcs.append(TestCaseSchema(
+                id=s.get("testcase_id", f"tc_{i+1}"),
+                name=f"Test {i+1}",
+                stdin=stdin_payload,
+                expected_output=str(clean_exp_out),
+                hidden=is_hid,
+                weight=float(s.get("weight", 1.0) or 1.0),
+            ))
 
         if not tcs:
-            tcs = [TestCaseSchema(id="sample_1", name="Sample 1", stdin="", expected_output="")]
-            raw_cases = [{"testcase_id": "sample_1", "name": "Sample 1", "input": "", "expected_output": "", "is_hidden": False}]
-            samples = raw_cases
+            tcs = [TestCaseSchema(id="tc_1", name="Test 1", stdin="", expected_output="")]
+            all_raw = [{"testcase_id": "tc_1", "input": "", "expected_output": "", "is_hidden": False}]
+            samples = all_raw
 
-        submission_mode = SubmissionMode.FUNCTION if is_fn_mode else SubmissionMode.FULL_PROGRAM
+        raw_cases = all_raw
+
         build_plan = SourcePlanBuilder.build_plan(
             language=lang_enum,
             user_source=code,
             submission_mode=submission_mode,
             function_signature=fn_sig if is_fn_mode else None,
-            starter_codes=getattr(problem, "starter_code", None) or getattr(problem, "starter_codes", None) or {},
+            starter_codes=getattr(problem, "starter_codes", None) or getattr(problem, "starter_code", None) or {},
             method_name=fn_sig.name if (is_fn_mode and fn_sig) else None,
         )
         exec_code = build_plan.generated_source
@@ -1023,27 +935,25 @@ class PracticeService:
 
         testcase_results_raw = []
         passed_count = 0
-        raw_res_tcs = getattr(exec_result, "testcase_results", None) or getattr(exec_result, "testcases", [])
-        for i, tr in enumerate(raw_res_tcs):
+        for i, tr in enumerate(exec_result.testcase_results):
             rc = raw_cases[i] if i < len(raw_cases) else {}
-            exp_val = rc.get("expected_output", "")
+            exp_val = rc.get("expected_output") if rc.get("expected_output") is not None else rc.get("output", "")
 
             if i in tc_binding_errors:
                 tr.passed = False
                 tr.verdict = "INPUT_FORMAT_ERROR"
                 tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
             elif str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",):
-                if tr.stdout:
-                    if is_fn_mode and fn_sig:
-                        passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
-                        if not passed:
-                            passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                        tr.passed = passed
-                        tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
-                    else:
+                if is_fn_mode and fn_sig:
+                    passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
+                    if not passed:
                         passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                        tr.passed = passed
-                        tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
+                    tr.passed = passed
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
+                else:
+                    passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
+                    tr.passed = passed
+                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
             else:
                 tr.passed = False
 
@@ -1064,6 +974,7 @@ class PracticeService:
                 ftr.passed = False
                 ftr.verdict = tc_v
                 ftr.stdout = ""
+
                 ftr.stderr = ""
                 ftr.compile_output = exec_result.compile_output or ""
                 ftr.wall_time_ms = 0.0
