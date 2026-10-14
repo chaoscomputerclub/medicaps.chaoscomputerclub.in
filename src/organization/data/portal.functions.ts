@@ -5,7 +5,7 @@
  */
 
 import { getApiBase, getToken, clearToken, silentRefreshToken, isAuthenticated } from "@/lib/auth";
-import { swrFetch, invalidateSwrCache } from "@/lib/cache/swrCache";
+import { swrFetch, invalidateSwrCache, globalSwrStore } from "@/lib/cache/swrCache";
 import type {
   AnnouncementFeedItem,
   LeaderboardEntry,
@@ -32,21 +32,44 @@ export async function getPublicPortalData(force = false) {
     async () => {
       const backendUrl = getApiBase();
 
-      const [apiContests, apiAnnouncements] = await Promise.all([
-        fetchWithTimeout(`${backendUrl}/contests`)
-          .then((r) => (r.ok ? r.json() : []))
-          .catch(() => []),
-        fetchWithTimeout(`${backendUrl}/feed/announcements`)
-          .then((r) => (r.ok ? r.json() : []))
-          .catch(() => []),
-      ]);
+      // Check if active contest slug is already available from SWR store to eliminate waterfall
+      const cachedContests = globalSwrStore.get<any[]>("contests:list")?.data;
+      const cachedFirstSlug = cachedContests && cachedContests.length > 0 ? cachedContests[0]?.slug : null;
 
-      const firstSlug = apiContests && apiContests.length > 0 ? apiContests[0].slug : null;
-      const standings = firstSlug
-        ? await fetchWithTimeout(`${backendUrl}/scoreboards/${firstSlug}`)
+      // Start scoreboard request in parallel if slug is known from cache
+      const initialScoreboardPromise = cachedFirstSlug
+        ? swrFetch(`scoreboard:${cachedFirstSlug}`, () =>
+            fetchWithTimeout(`${backendUrl}/scoreboards/${cachedFirstSlug}`)
+              .then((r) => (r.ok ? r.json() : []))
+              .catch(() => [])
+          )
+        : null;
+
+      // Deduplicate contests request with fetchContestsThunk via canonical SWR key
+      const [apiContests, apiAnnouncements] = await Promise.all([
+        swrFetch("contests:list", () =>
+          fetchWithTimeout(`${backendUrl}/contests`)
             .then((r) => (r.ok ? r.json() : []))
             .catch(() => [])
-        : [];
+        ),
+        swrFetch("feed:announcements", () =>
+          fetchWithTimeout(`${backendUrl}/feed/announcements`)
+            .then((r) => (r.ok ? r.json() : []))
+            .catch(() => [])
+        ),
+      ]);
+
+      const firstSlug = (apiContests && apiContests.length > 0 ? apiContests[0].slug : null) || cachedFirstSlug;
+      let standings: any[] = [];
+      if (initialScoreboardPromise && cachedFirstSlug === firstSlug) {
+        standings = await initialScoreboardPromise;
+      } else if (firstSlug) {
+        standings = await swrFetch(`scoreboard:${firstSlug}`, () =>
+          fetchWithTimeout(`${backendUrl}/scoreboards/${firstSlug}`)
+            .then((r) => (r.ok ? r.json() : []))
+            .catch(() => [])
+        );
+      }
 
       const filteredContests = (apiContests || []).filter((r: any) => {
         const slug = String(r?.slug ?? "").toLowerCase();
