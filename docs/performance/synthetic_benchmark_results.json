@@ -1,0 +1,50 @@
+[
+  {
+    "profile": "Fast (20 Mbps, 20ms RTT)",
+    "loadTimeMs": 705,
+    "fcpMs": 0,
+    "lcpMs": 752,
+    "cls": 0,
+    "totalRequests": 32,
+    "fontRequests": 3,
+    "jsRequests": 18,
+    "apiRequests": 2,
+    "transferredBytes": 1817364
+  },
+  {
+    "profile": "Moderate (5 Mbps, 100ms RTT)",
+    "loadTimeMs": 2712,
+    "fcpMs": 0,
+    "lcpMs": 2844,
+    "cls": 0,
+    "totalRequests": 28,
+    "fontRequests": 3,
+    "jsRequests": 16,
+    "apiRequests": 2,
+    "transferredBytes": 1814814
+  },
+  {
+    "profile": "Slow (1 Mbps, 300ms RTT)",
+    "loadTimeMs": 12997,
+    "fcpMs": 0,
+    "lcpMs": 13340,
+    "cls": 0,
+    "totalRequests": 22,
+    "fontRequests": 3,
+    "jsRequests": 14,
+    "apiRequests": 2,
+    "transferredBytes": 1814521
+  },
+  {
+    "profile": "Degraded (400 Kbps, 500ms RTT)",
+    "loadTimeMs": 32641,
+    "fcpMs": 0,
+    "lcpMs": 33228,
+    "cls": 0.001,
+    "totalRequests": 22,
+    "fontRequests": 3,
+    "jsRequests": 14,
+    "apiRequests": 2,
+    "transferredBytes": 1779013
+  }
+]
