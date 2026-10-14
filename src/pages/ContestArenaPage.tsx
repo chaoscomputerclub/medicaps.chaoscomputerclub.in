@@ -27,6 +27,7 @@ import {
   FileText,
   GripHorizontal,
   GripVertical,
+  Home,
   Layout,
   Lock,
   LogIn,
@@ -59,6 +60,7 @@ import {
   TabsPanels,
   TabsPanel,
 } from "@/components/animate-ui/components/base/tabs";
+import { MakoMascot } from "@/components/common/MakoMascot";
 import { WanderingEyes } from "@/components/ui/WanderingEyes";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -157,6 +159,7 @@ export type UnifiedArenaProblem = {
   }> | undefined;
   function_signature?: any;
   hints?: any;
+  images?: any;
   editorial?: any;
   tags?: any;
   user_status?: string | undefined;
@@ -313,6 +316,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             starter_codes: practiceProblemData.starter_code as any,
             function_signature: practiceProblemData.function_signature,
             hints: practiceProblemData.hints,
+            images: practiceProblemData.images,
             editorial: practiceProblemData.editorial,
             tags: practiceProblemData.tags,
           },
@@ -398,6 +402,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         starter_codes: practiceProblemData.starter_code,
         function_signature: practiceProblemData.function_signature,
         hints: practiceProblemData.hints,
+        images: practiceProblemData.images,
         editorial: practiceProblemData.editorial,
         tags: practiceProblemData.tags,
         user_status: practiceProblemData.user_status,
@@ -1322,27 +1327,45 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
     if (!practiceProblemData) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-red-500/30 bg-red-500/10 text-red-400">
-              <AlertTriangle className="size-7" />
-            </div>
-
-            <div className="space-y-2">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-red-400">
-                404 Not Found
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+            <MakoMascot
+              variant="not-found"
+              size="2xl"
+              className="mb-4 drop-shadow-md select-none pointer-events-none"
+            />
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-zinc-400 bg-white/[0.05] border border-white/[0.08] mb-2 tracking-wide uppercase">
+              404 Not Found
+            </span>
+            <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+              Problem Not Found
+            </h1>
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
+              We couldn&apos;t find a practice problem matching{" "}
+              <span className="font-mono text-zinc-200 bg-white/[0.06] px-1.5 py-0.5 rounded border border-white/[0.08]">
+                &quot;{effectiveProblemSlug}&quot;
               </span>
-              <h1 className="font-display text-2xl uppercase tracking-wide text-white">Problem Not Found</h1>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                We could not find a practice problem matching &quot;{effectiveProblemSlug}&quot;.
-              </p>
-            </div>
+              . It may have been moved or the URL might be mistyped.
+            </p>
 
-            <div className="pt-2">
-              <Button asChild className="w-full">
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+              <Button
+                asChild
+                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >
                 <Link to="/practice">
                   <ArrowLeft className="size-3.5 mr-1.5" />
-                  <span>Return to Practice Catalog</span>
+                  <span>Return to Practice</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              >
+                <Link to="/">
+                  <Home className="size-3.5 mr-1.5" />
+                  <span>Dashboard</span>
                 </Link>
               </Button>
             </div>
@@ -1368,51 +1391,57 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isSubmitted) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-[#B1FA63]/30 bg-[#1F1F1F] p-8 text-center relative overflow-hidden">
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#B1FA63] via-emerald-400 to-[#B1FA63]" />
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63]">
-              <CheckCircle2 className="size-7" />
-            </div>
+            <MakoMascot
+              variant="celebrating"
+              size="2xl"
+              className="mb-4 drop-shadow-md select-none pointer-events-none"
+            />
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/20 mb-2 tracking-wide uppercase">
+              Attempt Concluded · Final Record
+            </span>
+            <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+              Contest Already Submitted
+            </h1>
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-md mt-2 mb-6">
+              You have officially finalized and submitted your contest attempt. In accordance with
+              the fair competition protocol, retakes and further code executions are concluded.
+            </p>
 
-            <div className="space-y-2">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-[#B1FA63]">
-                Contest Attempt Concluded · Final Record
-              </span>
-              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
-                Contest Already Submitted
-              </h1>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                You have officially finalized and submitted your contest attempt. In accordance with
-                the fair competition protocol, retakes and further code executions are strictly
-                prohibited.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
-              <Button asChild variant="default" className="w-full">
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+              <Button
+                asChild
+                variant="default"
+                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
+              >
                 <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy className="size-3.5 mr-1.5" />
-                  <span>View Official Standings</span>
+                  <span>Official Standings</span>
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full">
+              <Button
+                asChild
+                variant="outline"
+                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              >
                 <Link to={`/contests/${contestSlug}/summary`}>
                   <FileText className="size-3.5 mr-1.5" />
-                  <span>Review Submission Summary</span>
+                  <span>Review Summary</span>
                 </Link>
               </Button>
             </div>
 
-            <div className="pt-1">
+            <div className="pt-3">
               <Button
                 asChild
                 variant="ghost"
                 size="sm"
-                className="text-zinc-500 hover:text-zinc-300"
+                className="text-zinc-500 hover:text-zinc-300 font-sans text-xs"
               >
                 <Link to={`/contests/${contestSlug}`}>
-                  <ArrowLeft className="size-3.5 mr-1.5" />
+                  <ArrowLeft className="size-3 mr-1.5" />
                   <span>Back to Contest Overview</span>
                 </Link>
               </Button>
@@ -1445,33 +1474,35 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isUnauthenticated) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63]">
-              <Lock className="size-7" />
-            </div>
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+            <MakoMascot
+              variant="welcome"
+              size="2xl"
+              className="mb-4 drop-shadow-md select-none pointer-events-none"
+            />
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/20 mb-2 tracking-wide uppercase">
+              Authentication Required
+            </span>
+            <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+              Sign In to Enter Arena
+            </h1>
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
+              You must be signed in with your Medi-Caps cadet account to enter the contest workspace,
+              run test cases, and submit solutions.
+            </p>
 
-            <div className="space-y-2">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-[#B1FA63]">
-                Contest Authentication Required
-              </span>
-              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
-                Sign In to Enter Arena
-              </h1>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                You must be signed in with your Medi-Caps account to enter the contest workspace,
-                run test cases, and submit solutions.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-2.5 pt-2">
-              <Button asChild>
+            <div className="flex flex-col gap-2.5 w-full">
+              <Button
+                asChild
+                className="h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >
                 <Link to={`/auth?redirect=${encodeURIComponent(`/contests/${contestSlug}/arena`)}`}>
                   <LogIn className="size-3.5 mr-1.5" />
                   <span>Sign In to Continue</span>
                 </Link>
               </Button>
-              <Button asChild variant="ghost">
+              <Button asChild variant="ghost" className="text-zinc-400 hover:text-white">
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
                   <span>Return to Contest Overview</span>
@@ -1485,36 +1516,41 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isUpcoming) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-amber-500/30 bg-amber-500/10 text-amber-400">
-              <Clock className="size-7" />
-            </div>
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+            <MakoMascot
+              variant="sleeping"
+              size="2xl"
+              className="mb-4 drop-shadow-md select-none pointer-events-none"
+            />
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-amber-400 bg-amber-400/10 border border-amber-400/20 mb-2 tracking-wide uppercase">
+              Contest Scheduled
+            </span>
+            <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+              Arena Not Started Yet
+            </h1>
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
+              The competition arena and challenges unlock automatically once the countdown reaches zero.
+            </p>
 
-            <div className="space-y-2">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-amber-400">
-                Contest Scheduled
-              </span>
-              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
-                Arena Has Not Started Yet
-              </h1>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                The competition arena and problem statements unlock automatically when the scheduled
-                contest countdown reaches zero.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-2.5 pt-2">
-              <Button asChild variant="outline">
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+              <Button
+                asChild
+                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
+              >
                 <Link to={`/contests/${contestSlug}/lobby`}>
                   <Clock className="size-3.5 mr-1.5" />
-                  <span>Go to Contest Waiting Lobby</span>
+                  <span>Waiting Lobby</span>
                 </Link>
               </Button>
-              <Button asChild variant="ghost">
+              <Button
+                asChild
+                variant="outline"
+                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              >
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
-                  <span>Contest Overview</span>
+                  <span>Overview</span>
                 </Link>
               </Button>
             </div>
@@ -1525,28 +1561,45 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isNotFound) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-md space-y-6 rounded-[24px] border border-red-500/30 bg-[#1F1F1F] p-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-red-500/30 bg-red-500/10 text-red-400">
-              <AlertTriangle className="size-7" />
-            </div>
-
-            <div className="space-y-2">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-red-400">
-                404 Not Found
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+            <MakoMascot
+              variant="not-found"
+              size="2xl"
+              className="mb-4 drop-shadow-md select-none pointer-events-none"
+            />
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-zinc-400 bg-white/[0.05] border border-white/[0.08] mb-2 tracking-wide uppercase">
+              404 Not Found
+            </span>
+            <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+              Contest Not Found
+            </h1>
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
+              We couldn&apos;t find a contest matching{" "}
+              <span className="font-mono text-zinc-200 bg-white/[0.06] px-1.5 py-0.5 rounded border border-white/[0.08]">
+                &quot;{contestSlug}&quot;
               </span>
-              <h1 className="font-display text-2xl uppercase tracking-wide text-white">Contest Not Found</h1>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                We could not find a contest matching &quot;{contestSlug}&quot;. It may have
-                concluded or the URL may be incorrect.
-              </p>
-            </div>
+              . It may have concluded or the URL might be incorrect.
+            </p>
 
-            <div className="pt-2">
-              <Button asChild className="w-full">
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+              <Button
+                asChild
+                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >
                 <Link to="/contests">
                   <ArrowLeft className="size-3.5 mr-1.5" />
-                  <span>Explore All Contests</span>
+                  <span>Explore Contests</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              >
+                <Link to="/">
+                  <Home className="size-3.5 mr-1.5" />
+                  <span>Dashboard</span>
                 </Link>
               </Button>
             </div>
@@ -1557,36 +1610,40 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     if (isProctorGate) {
       return (
-        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-          <div className="w-full max-w-lg space-y-6 rounded-[24px] border border-amber-500/30 bg-[#1F1F1F] p-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-amber-500/30 bg-amber-500/10 text-amber-400">
-              <ShieldCheck className="size-7" />
-            </div>
+        <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+            <MakoMascot
+              variant="thinking"
+              size="2xl"
+              className="mb-4 drop-shadow-md select-none pointer-events-none"
+            />
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-amber-400 bg-amber-400/10 border border-amber-400/20 mb-2 tracking-wide uppercase">
+              Access Restricted
+            </span>
+            <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+              Contest Registration Required
+            </h1>
+            <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-md mt-2 mb-6">
+              {error ||
+                "Active contest registration required. Please register for the contest to access problem statements and submit solutions."}
+            </p>
 
-            <div className="space-y-2">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-amber-400">
-                Contest Access Restricted
-              </span>
-              <h1 className="font-display text-2xl uppercase tracking-wide text-white">
-                Contest Registration Required
-              </h1>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                {error ||
-                  "Active contest registration required. Please register for the contest to access problem statements and submit solutions."}
-              </p>
-            </div>
-
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
-                variant="outline"
-                className="w-full"
+                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
               >
-                <RotateCcw className="size-3 mr-1.5" />
+                <RotateCcw className="size-3.5 mr-1.5" />
                 <span>Re-check Status</span>
               </Button>
-              <Button asChild variant="ghost" className="w-full">
-                <Link to={`/contests/${contestSlug}`}>Exit to Overview</Link>
+              <Button
+                asChild
+                variant="outline"
+                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              >
+                <Link to={`/contests/${contestSlug}`}>
+                  <span>Exit to Overview</span>
+                </Link>
               </Button>
             </div>
           </div>
@@ -1596,35 +1653,46 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
     // Generic fallback error
     return (
-      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans">
-        <div className="w-full max-w-md space-y-6 rounded-[24px] border border-white/10 bg-[#1F1F1F] p-8 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-[12px] border border-white/10 bg-white/5 text-zinc-400">
-            <AlertCircle className="size-7" />
-          </div>
+      <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#171717] p-4 text-white font-sans animate-in fade-in duration-200">
+        <div className="w-full max-w-md rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+          <MakoMascot
+            variant="error"
+            size="2xl"
+            className="mb-4 drop-shadow-md select-none pointer-events-none"
+          />
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-zinc-400 bg-white/[0.05] border border-white/[0.08] mb-2 tracking-wide uppercase">
+            Notice
+          </span>
+          <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+            Unable to Access Arena
+          </h1>
+          <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
+            {error || "An unexpected error occurred while loading this competition workspace."}
+          </p>
 
-          <div className="space-y-2">
-            <span className="font-heading font-bold text-xs uppercase tracking-widest text-zinc-400">
-              Arena Access Notice
-            </span>
-            <h1 className="font-display text-2xl uppercase tracking-wide text-white">
-              Unable to Access Arena
-            </h1>
-            <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-              {error || "An unexpected error occurred while loading the contest workspace."}
-            </p>
-          </div>
-
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-col sm:flex-row gap-2.5 w-full">
             <Button
-              onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
-              variant="outline"
-              className="w-full"
+              onClick={() => {
+                if (isPracticeMode) {
+                  revalidatePracticeProblem?.();
+                } else {
+                  dispatch(fetchContestArenaThunk(contestSlug));
+                }
+              }}
+              className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
             >
-              <RotateCcw className="size-3 mr-1.5" />
-              <span>Retry Connection</span>
+              <RotateCcw className="size-3.5 mr-1.5" />
+              <span>Retry</span>
             </Button>
-            <Button asChild variant="ghost" className="w-full">
-              <Link to={`/contests/${contestSlug}`}>Back to Contest</Link>
+            <Button
+              asChild
+              variant="outline"
+              className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+            >
+              <Link to={isPracticeMode ? "/practice" : `/contests/${contestSlug}`}>
+                <ArrowLeft className="size-3.5 mr-1.5" />
+                <span>{isPracticeMode ? "Practice Catalog" : "Overview"}</span>
+              </Link>
             </Button>
           </div>
         </div>
@@ -2782,45 +2850,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Settings Tabs */}
-          <div className="flex items-center gap-1 border-b border-white/10 pb-2 pt-1">
-            <button
-              type="button"
-              onClick={() => setActiveSettingsTab("editor")}
-              className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
-                activeSettingsTab === "editor"
-                  ? "bg-[#242424] text-white border border-lime-400/40"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              Code Editor
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSettingsTab("shortcuts")}
-              className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
-                activeSettingsTab === "shortcuts"
-                  ? "bg-[#242424] text-white border border-lime-400/40"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              Shortcuts
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSettingsTab("timer")}
-              className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer ${
-                activeSettingsTab === "timer"
-                  ? "bg-[#242424] text-white border border-lime-400/40"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              Contest Clock
-            </button>
-          </div>
+          {/* Settings Tabs (animate-ui Base Tabs Architecture) */}
+          <Tabs
+            value={activeSettingsTab}
+            onValueChange={(val) => setActiveSettingsTab(val as "editor" | "shortcuts" | "timer")}
+            className="w-full gap-2"
+          >
+            <TabsList className="w-full grid grid-cols-3 bg-[#171717] border border-white/10 p-1 rounded-[10px] gap-1">
+              <TabsTab value="editor" className="py-1 text-xs">Code Editor</TabsTab>
+              <TabsTab value="shortcuts" className="py-1 text-xs">Shortcuts</TabsTab>
+              <TabsTab value="timer" className="py-1 text-xs">Contest Clock</TabsTab>
+            </TabsList>
 
-          <div className="py-3 text-xs font-sans">
-            {activeSettingsTab === "editor" && (
+            <TabsPanels className="py-2 text-xs font-sans">
+              <TabsPanel value="editor">
               <div className="space-y-4">
                 {/* Font Size */}
                 <div className="flex items-center justify-between">
@@ -2842,7 +2885,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         className={`size-7 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorFontSize === size
                             ? "bg-lime-400 text-black border-lime-400"
-                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black"
                         }`}
                       >
                         {size}
@@ -2900,7 +2943,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorTabSize === spaces
                             ? "bg-lime-400 text-black border-lime-400"
-                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black"
                         }`}
                       >
                         {spaces} Spaces
@@ -2909,9 +2952,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   </div>
                 </div>
               </div>
-            )}
+            </TabsPanel>
 
-            {activeSettingsTab === "shortcuts" && (
+            <TabsPanel value="shortcuts">
               <div className="space-y-2 font-sans text-xs">
                 <div className="flex items-center justify-between p-2 rounded bg-black border border-white/8">
                   <span className="text-zinc-300">Run Code</span>
@@ -2938,9 +2981,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   </kbd>
                 </div>
               </div>
-            )}
+            </TabsPanel>
 
-            {activeSettingsTab === "timer" && (
+            <TabsPanel value="timer">
               <div className="space-y-3 font-sans text-xs">
                 <div className="p-3 bg-black border border-white/8 rounded-md space-y-2">
                   <div className="flex items-center justify-between">
@@ -2959,8 +3002,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   submitted after the clock expires will not receive contest points.
                 </p>
               </div>
-            )}
-          </div>
+              </TabsPanel>
+            </TabsPanels>
+          </Tabs>
 
           <DialogFooter>
             <Button type="button" onClick={() => setShowSettingsModal(false)} className="w-full">

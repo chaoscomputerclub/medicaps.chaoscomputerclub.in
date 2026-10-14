@@ -23,6 +23,7 @@ export interface PracticeProblemSummary {
   time_limit: number;
   memory_limit: number;
   tags?: string[];
+  status?: string;
   user_status: MemberProblemStatus;
   total_submissions: number;
   accepted_submissions: number;
@@ -71,6 +72,7 @@ export interface PracticeProblemDetail {
   memory_limit: number;
   tags?: string[];
   hints?: string[];
+  images?: string[];
   editorial?: PracticeEditorial | null;
   execution_mode: string;
   function_signature?: any;

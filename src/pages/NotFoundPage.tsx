@@ -19,21 +19,21 @@ export function NotFoundPage() {
       aria-labelledby="not-found-title"
     >
       <div className="flex w-full max-w-md flex-col items-center text-center">
-        <MakoMascot variant="not-found" size="2xl" className="mb-8" />
+        <MakoMascot variant="not-found" size="2xl" className="mb-4 drop-shadow-md select-none pointer-events-none" />
 
-        <p className="mb-2 text-xs font-sans font-medium uppercase tracking-wider text-zinc-500">
-          Error 404
-        </p>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-zinc-400 bg-white/[0.05] border border-white/[0.08] mb-2 tracking-wide uppercase">
+          404 Not Found
+        </span>
 
         <h1
           id="not-found-title"
-          className="mb-3 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-white"
+          className="mb-2 text-2xl sm:text-3xl font-sans font-bold tracking-tight text-white"
         >
           Page not found
         </h1>
 
-        <p className="mb-8 text-sm leading-relaxed text-zinc-400 font-sans">
-          The page you're looking for doesn't exist or may have been moved.
+        <p className="mb-8 text-sm leading-relaxed text-zinc-400 font-sans max-w-sm">
+          The page you&apos;re looking for doesn&apos;t exist or may have been moved.
         </p>
 
         <div className="flex w-full flex-col-reverse justify-center gap-3 sm:w-auto sm:flex-row">

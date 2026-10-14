@@ -545,7 +545,7 @@ export function ContestOverviewPage() {
                           variant="outline"
                           size="sm"
                           data-testid={`review-btn-${p.problem_index}`}
-                          className="border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400"
+                          className="border-white/10 text-zinc-300 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black"
                         >
                           <Link to={getProblemReviewUrl(contestSlug, p.title, p.problem_index)}>
                             <span>Review</span>
@@ -553,7 +553,7 @@ export function ContestOverviewPage() {
                           </Link>
                         </Button>
                       ) : (
-                        <Button asChild variant="outline" size="sm" className="hover:bg-lime-400 hover:text-black hover:border-lime-400">
+                        <Button asChild variant="outline" size="sm" className="hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black">
                           <Link
                             to={getProblemSolveUrl(contestSlug, p.title, p.problem_index)}
                           >

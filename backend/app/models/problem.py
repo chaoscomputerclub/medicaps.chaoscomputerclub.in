@@ -53,6 +53,7 @@ class Problem(Base):
     sandbox_config = Column(JSON, default=dict, nullable=False)  # network, processes, etc.
     reference_solution = Column(JSON, default=dict, nullable=True)  # {python: "...", cpp: "..."}
     hints = Column(JSON, default=list, nullable=True)  # List of textual hints
+    images = Column(JSON, default=list, nullable=True)  # List of reference image URLs
     editorial = Column(JSON, default=dict, nullable=True)  # {approach: "...", code: "...", complexity: "..."}
     tags = Column(JSON, default=list, nullable=True)  # ["arrays", "two-pointers"]
 
@@ -113,6 +114,7 @@ class ProblemVersion(Base):
     sandbox_config = Column(JSON, nullable=False)
     reference_solution = Column(JSON, nullable=True)
     hints = Column(JSON, default=list, nullable=True)
+    images = Column(JSON, default=list, nullable=True)
     editorial = Column(JSON, default=dict, nullable=True)
     tags = Column(JSON, default=list, nullable=True)
 

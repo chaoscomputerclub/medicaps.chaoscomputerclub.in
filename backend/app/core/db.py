@@ -382,6 +382,30 @@ async def ensure_database_integrity():
             await session.execute(text("""
                 ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS sandbox_config JSON DEFAULT '{}'::json;
             """))
+            await session.execute(text("""
+                ALTER TABLE problems ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE problems ADD COLUMN IF NOT EXISTS images JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE problem_versions ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE problem_versions ADD COLUMN IF NOT EXISTS images JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE contest_problems ADD COLUMN IF NOT EXISTS images JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json;
+            """))
+            await session.execute(text("""
+                ALTER TABLE assessment_problems ADD COLUMN IF NOT EXISTS images JSON DEFAULT '[]'::json;
+            """))
 
             # 7. Schema Evolution: Distributed Judge Jobs & Execution Attempts with Strict Result Fencing
             await session.execute(text("""
@@ -471,7 +495,9 @@ async def ensure_database_integrity():
                 "ALTER TABLE contest_submissions ALTER COLUMN contest_id DROP NOT NULL",
                 "ALTER TABLE contest_submissions ALTER COLUMN problem_id DROP NOT NULL",
                 "ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS context VARCHAR(20) NOT NULL DEFAULT 'CONTEST'",
-                "ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS master_problem_id VARCHAR(36) REFERENCES problems(id) ON DELETE SET NULL",
+                "ALTER TABLE contest_submissions ADD COLUMN IF NOT EXISTS master_problem_id VARCHAR(36) REFERENCES problems(id) ON DELETE CASCADE",
+                "ALTER TABLE contest_submissions DROP CONSTRAINT IF EXISTS contest_submissions_master_problem_id_fkey",
+                "ALTER TABLE contest_submissions ADD CONSTRAINT contest_submissions_master_problem_id_fkey FOREIGN KEY (master_problem_id) REFERENCES problems(id) ON DELETE CASCADE",
                 "ALTER TABLE problems ADD COLUMN IF NOT EXISTS hints JSON DEFAULT '[]'::json",
                 "ALTER TABLE problems ADD COLUMN IF NOT EXISTS editorial JSON DEFAULT '{}'::json",
                 "ALTER TABLE problems ADD COLUMN IF NOT EXISTS tags JSON DEFAULT '[]'::json",

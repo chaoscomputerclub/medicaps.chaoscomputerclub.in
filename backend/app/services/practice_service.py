@@ -114,8 +114,19 @@ class PracticeService:
         limit = min(max(1, limit), 100)
         offset = (page - 1) * limit
 
-        # Base query for published problems
-        conditions = [Problem.status == "PUBLISHED"]
+        # RBAC: Only published problems are visible to students; Admins/Core can also preview DRAFT problems
+        is_admin = False
+        if current_member and current_member.email:
+            is_admin = (
+                current_member.email.strip().lower() in settings.core_team_emails_set
+                or getattr(current_member, "is_core_member", False)
+                or getattr(current_member, "role", "student") in ("admin", "proctor", "core")
+            )
+
+        if is_admin:
+            conditions = [Problem.status.in_(["PUBLISHED", "DRAFT", "VALIDATED"])]
+        else:
+            conditions = [Problem.status == "PUBLISHED"]
 
         if q and q.strip():
             clean_q = f"%{q.strip()}%"
@@ -143,10 +154,10 @@ class PracticeService:
         member_id = current_member.id if current_member else None
         is_user_status_filter = bool(status and status.strip() and status.upper() != "ALL")
 
-        # Cache key for public practice catalog (when not filtering by user's personal solved state)
+        # Cache key for public practice catalog (when not filtering by user's personal solved state, and not admin)
         catalog_cache_key = f"cache:practice:catalog:{difficulty or 'all'}:{topic or 'all'}:all:{q or 'none'}:{sort or 'default'}:{limit}:{offset}"
         cached_catalog = None
-        if not is_user_status_filter:
+        if not is_user_status_filter and not is_admin:
             cached_catalog = await get_cache(catalog_cache_key)
 
         if cached_catalog is not None:
@@ -276,6 +287,7 @@ class PracticeService:
                     "solved_status": solved_state,
                     "user_status": solved_state,
                     "tags": p.tags or [],
+                    "status": p.status,
                 }
                 items.append(item_dict)
 
@@ -284,7 +296,7 @@ class PracticeService:
                 public_item["user_status"] = "UNATTEMPTED"
                 public_cache_items.append(public_item)
 
-            if not is_user_status_filter:
+            if not is_user_status_filter and not is_admin:
                 await set_cache(catalog_cache_key, {"items": public_cache_items, "total": total_matching}, ttl_seconds=60)
 
         # Summary telemetry
@@ -445,6 +457,7 @@ class PracticeService:
             "time_limit": problem.time_limit,
             "memory_limit": problem.memory_limit,
             "hints": problem.hints or [],
+            "images": problem.images or [],
             "tags": problem.tags or [],
             "status": problem.status,
             "version": problem.version,
@@ -1227,13 +1240,11 @@ class PracticeService:
         """Returns the cadet's most recent practice submissions with joined problem details."""
         query = (
             select(ContestSubmission, Problem)
-            .outerjoin(Problem, ContestSubmission.master_problem_id == Problem.id)
+            .join(Problem, ContestSubmission.master_problem_id == Problem.id)
             .where(
                 ContestSubmission.member_id == member_id,
-                or_(
-                    ContestSubmission.context == "PRACTICE",
-                    ContestSubmission.master_problem_id.isnot(None),
-                ),
+                ContestSubmission.context == "PRACTICE",
+                ContestSubmission.master_problem_id.isnot(None),
             )
         )
         if only_accepted:
@@ -1248,9 +1259,9 @@ class PracticeService:
             results.append({
                 "id": s.id,
                 "problem_id": s.master_problem_id,
-                "problem_title": p.title if p else "Practice Challenge",
-                "problem_slug": p.slug if p else "",
-                "difficulty": p.difficulty if p else "MEDIUM",
+                "problem_title": p.title,
+                "problem_slug": p.slug,
+                "difficulty": p.difficulty or "MEDIUM",
                 "verdict": s.verdict,
                 "language": s.language,
                 "execution_time": s.execution_time,
@@ -1290,6 +1301,7 @@ class PracticeService:
                     case((func.upper(ContestSubmission.verdict).in_(["ACCEPTED", "AC"]), 1))
                 ).label("accepted_count"),
             )
+            .join(Problem, ContestSubmission.master_problem_id == Problem.id)
             .where(
                 ContestSubmission.member_id == member_id,
                 ContestSubmission.context == "PRACTICE",
@@ -1341,7 +1353,9 @@ class PracticeService:
 
         # Unique problems across the entire year
         unique_probs_res = await db.scalar(
-            select(func.count(distinct(ContestSubmission.master_problem_id))).where(
+            select(func.count(distinct(ContestSubmission.master_problem_id)))
+            .join(Problem, ContestSubmission.master_problem_id == Problem.id)
+            .where(
                 ContestSubmission.member_id == member_id,
                 ContestSubmission.context == "PRACTICE",
                 extract("year", ContestSubmission.submitted_at) == target_year,
@@ -1525,6 +1539,7 @@ class PracticeService:
         # Find all practice submissions for member
         subs_res = await db.execute(
             select(ContestSubmission)
+            .join(Problem, ContestSubmission.master_problem_id == Problem.id)
             .where(
                 ContestSubmission.member_id == member_id,
                 ContestSubmission.context == "PRACTICE",

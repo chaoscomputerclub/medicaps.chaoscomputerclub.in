@@ -44,6 +44,8 @@ class ContestArenaProblemResponse(BaseModel):
 
     starter_codes: Optional[Dict[str, str]] = None
     sample_testcases: Optional[List[Dict[str, Any]]] = None
+    hints: Optional[List[str]] = None
+    images: Optional[List[str]] = None
 
 
 

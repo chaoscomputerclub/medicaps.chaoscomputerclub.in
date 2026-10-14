@@ -165,7 +165,7 @@ export function ContestLobbyPage() {
           makoVariant="not-found"
           className="my-0"
           action={
-            <Button asChild variant="outline" size="default" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63]">
+            <Button asChild variant="outline" size="default" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black">
               <Link to="/contests">Explore All Contests</Link>
             </Button>
           }

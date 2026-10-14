@@ -14,23 +14,23 @@ const buttonVariants = cva(
       variant: {
         // Primary: Matiks signature Electric Lime button
         default:
-          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] ",
+          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] hover:text-black hover:[&_*]:!text-black hover:[&_svg]:!text-black ",
         primary:
-          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] ",
+          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] hover:text-black hover:[&_*]:!text-black hover:[&_svg]:!text-black ",
         lime:
-          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] ",
+          "bg-[#B1FA63] text-black font-extrabold border border-[#B1FA63] hover:bg-[#C2FF78] hover:border-[#C2FF78] hover:text-black hover:[&_*]:!text-black hover:[&_svg]:!text-black ",
         // Destructive: transparent red border
         destructive:
           "bg-transparent text-red-400 border border-red-500/40 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500 active:bg-red-500/30 focus-visible:ring-red-500 shadow-none",
         // Outline: Matiks dark button with lime border
         outline:
-          "bg-[#171717] text-white border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] shadow-none",
+          "bg-[#171717] text-white border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black shadow-none",
         // Secondary: Matiks dark neutral surface button
         secondary:
-          "bg-[#242424] text-zinc-200 border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] shadow-none",
+          "bg-[#242424] text-zinc-200 border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black shadow-none",
         // Ghost: fully transparent
         ghost:
-          "bg-transparent text-zinc-400 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] border border-transparent",
+          "bg-transparent text-zinc-400 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black border border-transparent",
         // Link: lime link
         link:
           "text-[#B1FA63] underline-offset-4 hover:underline p-0 h-auto border-none",

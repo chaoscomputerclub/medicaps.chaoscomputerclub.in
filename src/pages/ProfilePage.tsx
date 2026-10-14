@@ -126,7 +126,7 @@ export function ProfilePage() {
 
   const { data: recentSubmissionsData, loading: recentSubmissionsLoading } = useSwrData(
     `practice:submissions:recent:${isViewingSelf ? "me" : targetHandle}`,
-    () => practiceApi.getRecentSubmissions(isViewingSelf ? undefined : targetHandle, false, 15),
+    () => practiceApi.getRecentSubmissions(isViewingSelf ? undefined : targetHandle, false, 50),
     { ttl: 60 * 1000, staleTime: 15 * 1000 }
   );
 
@@ -368,7 +368,7 @@ export function ProfilePage() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] font-heading font-bold uppercase tracking-wider text-xs"
+                    className="rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black font-heading font-bold uppercase tracking-wider text-xs"
                   >
                     <Link to="/settings">
                       <Edit3 size={11} className="text-[#B1FA63]" />
@@ -384,7 +384,7 @@ export function ProfilePage() {
                     disabled={isPendingFollowAction}
                     variant={isFollowing ? "secondary" : "outline"}
                     size="sm"
-                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] font-heading font-bold uppercase tracking-wider text-xs"}
+                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black font-heading font-bold uppercase tracking-wider text-xs"}
                   >
                     {isFollowing ? (
                       <>
@@ -406,7 +406,7 @@ export function ProfilePage() {
                       </>
                     )}
                   </Button>
-                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63]">
+                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black">
                     {copied ? <Check size={11} className="text-[#B1FA63]" /> : <Share2 size={11} />}
                   </Button>
                 </div>
@@ -457,7 +457,7 @@ export function ProfilePage() {
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] [&:hover_svg]:text-black rounded-[8px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black [&:hover_svg]:text-black rounded-[8px] transition-colors"
                 >
                   <Github size={11} className="text-[#B1FA63]" />
                   <span>{m.github_username}</span>
@@ -472,7 +472,7 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] [&:hover_svg]:text-black rounded-[8px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black [&:hover_svg]:text-black rounded-[8px] transition-colors"
                 >
                   <FaLinkedinIn size={11} className="text-[#B1FA63]" />
                   <span>LinkedIn</span>

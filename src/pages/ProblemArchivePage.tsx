@@ -138,7 +138,7 @@ export function ProblemArchivePage() {
                     </strong>
                     <Link
                       to={`/problems/${p.contestSlug}--${p.pSlug}`}
-                      className="size-8 rounded-[10px] bg-[#1F1F1F] border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] text-zinc-400 transition-colors flex items-center justify-center active:scale-[0.96]"
+                      className="size-8 rounded-[10px] bg-[#1F1F1F] border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black text-zinc-400 transition-colors flex items-center justify-center active:scale-[0.96]"
                     >
                       <ArrowRight className="size-3.5" />
                     </Link>

@@ -42,7 +42,7 @@ export function ScoreboardMatrix({
           </Link>
           <Link
             to="/practice"
-            className="px-3 py-1.5 rounded-[8px] bg-[#171717] border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] text-xs font-sans text-zinc-300 font-medium transition-colors"
+            className="px-3 py-1.5 rounded-[8px] bg-[#171717] border border-white/10 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black text-xs font-sans text-zinc-300 font-medium transition-colors"
           >
             Practice Arena
           </Link>

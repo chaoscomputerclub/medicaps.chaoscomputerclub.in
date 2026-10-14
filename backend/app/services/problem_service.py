@@ -28,12 +28,22 @@ from app.schemas.problem import (
     ProblemVersionResponse,
 )
 from app.services.problem_validator import ProblemValidator, ValidationReport
+from app.core.cache import delete_cache_pattern
 
 logger = logging.getLogger("ccc.service.problem")
 
 
 class ProblemService:
     """Core domain service for Problem Authoring and Lifecycle Management."""
+
+    @classmethod
+    async def _invalidate_practice_caches(cls):
+        """Purges public catalog and practice cache entries on mutations."""
+        try:
+            await delete_cache_pattern("cache:practice:*")
+            await delete_cache_pattern("practice:*")
+        except Exception as e:
+            logger.warning("[ProblemService] Failed to purge practice cache: %s", e)
 
     @staticmethod
     def _compute_testcase_hash(input_data: Any, expected_output: Any) -> str:
@@ -103,6 +113,8 @@ class ProblemService:
             evaluation_config=eval_cfg_dict,
             sandbox_config=sandbox_cfg_dict,
             reference_solution=payload.reference_solution or {},
+            hints=payload.hints or [],
+            images=payload.images or [],
             status="DRAFT",
             version=1,
             created_by=admin_id,
@@ -154,6 +166,7 @@ class ProblemService:
 
         await db.commit()
         await db.refresh(problem)
+        await cls._invalidate_practice_caches()
 
         logger.info(
             "✓ [ProblemService] Created algorithmic challenge '%s' (id=%s, slug=%s, v=%s)",
@@ -263,6 +276,8 @@ class ProblemService:
             "sandbox_config": problem.sandbox_config or {},
             "status": problem.status,
             "version": problem.version,
+            "hints": problem.hints or [],
+            "images": problem.images or [],
             "created_at": problem.created_at.isoformat() if problem.created_at else None,
             "updated_at": problem.updated_at.isoformat() if problem.updated_at else None,
             "visible_testcases": visible_cases,
@@ -357,6 +372,10 @@ class ProblemService:
             problem.sandbox_config = payload.sandbox_config.model_dump()
         if payload.reference_solution is not None:
             problem.reference_solution = payload.reference_solution
+        if payload.hints is not None:
+            problem.hints = payload.hints
+        if payload.images is not None:
+            problem.images = payload.images
 
         problem.updated_by = admin_id
         problem.updated_at = now_utc()
@@ -366,6 +385,7 @@ class ProblemService:
 
         await db.commit()
         await db.refresh(problem)
+        await cls._invalidate_practice_caches()
         return await cls.get_problem_detail(problem.id, include_hidden=True, db=db)
 
     @classmethod
@@ -461,6 +481,8 @@ class ProblemService:
                 evaluation_config=problem.evaluation_config,
                 sandbox_config=problem.sandbox_config,
                 reference_solution=problem.reference_solution,
+                hints=problem.hints or [],
+                images=problem.images or [],
                 created_by=admin_id,
                 created_at=now_utc(),
             )
@@ -471,6 +493,7 @@ class ProblemService:
         problem.updated_at = now_utc()
         await db.commit()
         await db.refresh(problem)
+        await cls._invalidate_practice_caches()
 
         logger.info("⚡ [ProblemService] Published problem '%s' version v%s", problem.slug, problem.version)
         return await cls.get_problem_detail(problem.id, include_hidden=True, db=db)
@@ -484,6 +507,7 @@ class ProblemService:
         problem.updated_by = admin_id
         problem.updated_at = now_utc()
         await db.commit()
+        await cls._invalidate_practice_caches()
         return {"success": True, "message": f"Problem '{problem.slug}' archived."}
 
     @classmethod
@@ -495,6 +519,7 @@ class ProblemService:
         problem.updated_by = admin_id
         problem.updated_at = now_utc()
         await db.commit()
+        await cls._invalidate_practice_caches()
         return {"success": True, "message": f"Problem '{problem.slug}' reverted to DRAFT status."}
 
     @classmethod
@@ -1041,5 +1066,6 @@ class ProblemService:
 
         await db.delete(problem)
         await db.commit()
+        await cls._invalidate_practice_caches()
         return {"success": True, "message": f"Problem '{problem.slug}' deleted."}
 

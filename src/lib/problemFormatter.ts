@@ -72,6 +72,9 @@ export interface CanonicalProblem {
   memory_limit?: number;
   execution_mode?: string;
   user_status?: string;
+  hints?: string[];
+  images?: string[];
+  image_url?: string;
 }
 
 export interface ValidationReport {

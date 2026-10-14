@@ -1,5 +1,16 @@
-import React from "react";
-import { Clock, Cpu, Award, Tag, CheckCircle2 } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Clock,
+  Cpu,
+  Award,
+  Tag,
+  CheckCircle2,
+  Lightbulb,
+  Image as ImageIcon,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+} from "lucide-react";
 import { ProblemExample } from "./ProblemExample";
 import { ReadmeRenderer } from "./ReadmeRenderer";
 import type { CanonicalProblem } from "@/lib/problemFormatter";
@@ -33,6 +44,28 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
         .map((c) => c.trim())
         .filter((c) => Boolean(c))
     : [];
+
+  // Dynamic & Optional Images extraction
+  const rawImages: any[] = Array.isArray(problem.images)
+    ? problem.images
+    : (problem as any).image_url
+      ? [(problem as any).image_url]
+      : [];
+  const imagesList = rawImages
+    .map((img) => (typeof img === "string" ? { url: img, caption: "" } : img))
+    .filter((img) => Boolean(img?.url));
+
+  // Dynamic & Optional Hints extraction
+  const rawHints = Array.isArray(problem.hints) ? problem.hints : [];
+  const hintsList = rawHints
+    .map((h) => (typeof h === "string" ? h.trim() : String(h || "")))
+    .filter((h) => Boolean(h));
+
+  const [revealedHints, setRevealedHints] = useState<Record<number, boolean>>({});
+
+  const toggleHint = (idx: number) => {
+    setRevealedHints((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
   const parsedNum = Number.parseInt(problem.problem_index || "", 10);
   const displayIndex = !Number.isNaN(parsedNum) && parsedNum > 0
@@ -116,6 +149,57 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
         <ReadmeRenderer content={problem.description} />
       </div>
 
+      {/* 2b. Problem Reference Diagrams / Images (Dynamic & Optional) */}
+      {imagesList.length > 0 && (
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="size-3.5 text-lime-400" />
+            <span className="font-sans text-[11px] uppercase font-semibold text-zinc-400 tracking-wider">
+              Reference {imagesList.length > 1 ? "Images & Diagrams" : "Diagram"}
+            </span>
+            <span className="font-sans text-[10px] text-zinc-400 bg-white/5 border border-white/8 px-1.5 py-0.2 rounded tabular-nums">
+              {imagesList.length}
+            </span>
+          </div>
+
+          <div
+            className={`grid gap-3 ${
+              imagesList.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+            }`}
+          >
+            {imagesList.map((img, idx) => (
+              <div
+                key={idx}
+                className="group relative rounded-[14px] border border-white/[0.08] bg-[#171717] p-2.5 overflow-hidden flex flex-col justify-between"
+              >
+                <div className="relative overflow-hidden rounded-[8px] bg-black/40 flex items-center justify-center min-h-[160px] max-h-[360px]">
+                  <img
+                    src={img.url}
+                    alt={img.caption || `Problem diagram ${idx + 1}`}
+                    loading="lazy"
+                    className="max-h-[360px] w-auto max-w-full object-contain rounded-[8px] transition-transform duration-200 group-hover:scale-[1.01]"
+                  />
+                  <a
+                    href={img.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Open full resolution"
+                    className="absolute top-2 right-2 p-1.5 rounded-[8px] bg-black/70 hover:bg-black text-zinc-300 hover:text-white border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[11px]"
+                  >
+                    <ExternalLink className="size-3" />
+                  </a>
+                </div>
+                {img.caption && (
+                  <p className="font-sans text-[11px] text-zinc-400 text-center mt-2 px-1">
+                    {img.caption}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 3. Input & Output Format (if specified) */}
       {(problem.input_format || problem.output_format) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
@@ -180,6 +264,71 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Problem Hints Section (Dynamic & Optional) */}
+      {hintsList.length > 0 && (
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="size-3.5 text-amber-400" />
+              <span className="font-sans text-[11px] uppercase font-semibold text-zinc-400 tracking-wider">
+                Hints
+              </span>
+              <span className="font-sans text-[10px] text-zinc-400 bg-white/5 border border-white/8 px-1.5 py-0.2 rounded tabular-nums">
+                {hintsList.length}
+              </span>
+            </div>
+            <span className="text-[11px] font-sans text-zinc-500">
+              Click to reveal individual hints
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {hintsList.map((hintText, idx) => {
+              const isRevealed = Boolean(revealedHints[idx]);
+              return (
+                <div
+                  key={idx}
+                  className="rounded-[12px] border border-white/[0.08] bg-[#171717] overflow-hidden transition-colors"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleHint(idx)}
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 text-left text-xs font-medium hover:bg-white/[0.03] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-400"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Lightbulb
+                        className={`size-3.5 transition-colors ${
+                          isRevealed ? "text-amber-400" : "text-zinc-500"
+                        }`}
+                      />
+                      <span className="text-zinc-300 font-semibold">
+                        Hint {idx + 1}
+                      </span>
+                      {!isRevealed && (
+                        <span className="text-[10px] text-zinc-500 font-sans">
+                          (Hidden)
+                        </span>
+                      )}
+                    </div>
+                    {isRevealed ? (
+                      <ChevronUp className="size-3.5 text-zinc-400" />
+                    ) : (
+                      <ChevronDown className="size-3.5 text-zinc-400" />
+                    )}
+                  </button>
+
+                  {isRevealed && (
+                    <div className="px-3.5 pb-3 pt-1 border-t border-white/[0.06] text-xs leading-relaxed text-zinc-300">
+                      <ReadmeRenderer content={hintText} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -53,6 +53,8 @@ class ProblemCreateRequest(BaseModel):
     evaluation_config: Optional[EvaluationConfig] = None
     sandbox_config: Optional[SandboxConfig] = None
     reference_solution: Optional[Dict[str, str]] = None
+    hints: Optional[List[str]] = Field(default_factory=list, description="Optional textual hints for solving the challenge")
+    images: Optional[List[str]] = Field(default_factory=list, description="Optional reference image URLs or diagram figures")
     sample_testcases: Optional[List[TestCaseInputSchema]] = None
     hidden_testcases: Optional[List[TestCaseInputSchema]] = None
 
@@ -76,6 +78,8 @@ class ProblemUpdateRequest(BaseModel):
     evaluation_config: Optional[EvaluationConfig] = None
     sandbox_config: Optional[SandboxConfig] = None
     reference_solution: Optional[Dict[str, str]] = None
+    hints: Optional[List[str]] = None
+    images: Optional[List[str]] = None
 
 
 class TestCaseVaultResponse(BaseModel):
@@ -132,6 +136,8 @@ class ProblemDetailResponse(BaseModel):
     reference_solution: Optional[Dict[str, str]] = None
     status: str
     version: int
+    hints: Optional[List[str]] = []
+    images: Optional[List[str]] = []
     created_at: datetime
     updated_at: datetime
     visible_testcases: List[Dict[str, Any]] = []
@@ -152,4 +158,6 @@ class ProblemVersionResponse(BaseModel):
     starter_code: Dict[str, str]
     time_limit: float
     memory_limit: int
+    hints: Optional[List[str]] = []
+    images: Optional[List[str]] = []
     created_at: datetime

@@ -55,6 +55,8 @@ class ProblemCreateSchema(BaseModel):
     starter_codes: Dict[str, str] = Field(default_factory=dict, description="Boilerplate code per language: python, cpp, java, javascript")
     sample_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Visible sample testcases with optional explanations")
     hidden_testcases: List[TestCaseCreateSchema] = Field(default_factory=list, description="Hidden evaluation testcases for official grading")
+    hints: Optional[List[str]] = Field(default_factory=list, description="Optional hints for solving the problem")
+    images: Optional[List[str]] = Field(default_factory=list, description="Optional reference image URLs for problem diagrams/illustrations")
 
 
     @field_validator("starter_codes", mode="before")

@@ -97,6 +97,8 @@ class ContestProblem(Base):
     starter_codes = Column(JSON, default=dict, nullable=True)
     sample_testcases = Column(JSON, default=list, nullable=True)
     hidden_testcases = Column(JSON, default=list, nullable=True)
+    hints = Column(JSON, default=list, nullable=True)
+    images = Column(JSON, default=list, nullable=True)
 
     # Relationships
     contest = relationship("OfflineContest", back_populates="problems")
@@ -113,7 +115,7 @@ class ContestSubmission(Base):
     context = Column(String(20), default="CONTEST", nullable=False, index=True)  # CONTEST, PRACTICE
     contest_id = Column(String(36), ForeignKey("offline_contests.id", ondelete="CASCADE"), nullable=True, index=True)
     problem_id = Column(String(36), ForeignKey("contest_problems.id", ondelete="CASCADE"), nullable=True, index=True)
-    master_problem_id = Column(String(36), ForeignKey("problems.id", ondelete="SET NULL"), nullable=True, index=True)
+    master_problem_id = Column(String(36), ForeignKey("problems.id", ondelete="CASCADE"), nullable=True, index=True)
     member_id = Column(String(36), ForeignKey("member_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     handle = Column(String(50), nullable=False)
     language = Column(String(20), nullable=False)

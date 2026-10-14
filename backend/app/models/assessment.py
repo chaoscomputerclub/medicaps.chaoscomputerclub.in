@@ -62,6 +62,8 @@ class AssessmentProblem(Base):
     starter_codes = Column(JSON, default=dict, nullable=False)
     sample_testcases = Column(JSON, default=list, nullable=False)
     hidden_testcases = Column(JSON, default=list, nullable=False)
+    hints = Column(JSON, default=list, nullable=True)
+    images = Column(JSON, default=list, nullable=True)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
     # Relationships

@@ -666,3 +666,27 @@ textarea {
 .monaco-editor-background {
   background-color: #171717 !important;
 }
+
+/* LIME HOVER TEXT CONTRAST FIX */
+/* Automatically invert text and SVG icons to black whenever solid lime hover is active */
+button[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]),
+button[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]),
+button[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]),
+button[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]),
+a[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]),
+a[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]),
+a[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]),
+a[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]) {
+  color: #000000 !important;
+}
+
+button[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]) *,
+button[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]) *,
+button[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]) *,
+button[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]) *,
+a[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]) *,
+a[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]) *,
+a[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]) *,
+a[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]) * {
+  color: #000000 !important;
+}

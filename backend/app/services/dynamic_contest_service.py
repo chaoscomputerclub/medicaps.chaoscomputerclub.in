@@ -346,6 +346,8 @@ class DynamicContestService:
                 starter_codes=starter_codes,
                 sample_testcases=sample_tcs,
                 hidden_testcases=hidden_tcs,
+                hints=getattr(p, "hints", None) or [],
+                images=getattr(p, "images", None) or [],
                 created_at=now,
             )
             db.add(ap)
@@ -374,6 +376,8 @@ class DynamicContestService:
                 starter_codes=starter_codes,
                 sample_testcases=sample_tcs,
                 hidden_testcases=hidden_tcs,
+                hints=getattr(p, "hints", None) or [],
+                images=getattr(p, "images", None) or [],
             )
             db.add(cp)
             created_problems.append({
@@ -913,6 +917,10 @@ class DynamicContestService:
                 cp.starter_codes = starter_codes
                 cp.sample_testcases = sample_tcs
                 cp.hidden_testcases = hidden_tcs
+                if getattr(problem_data, "hints", None) is not None:
+                    cp.hints = problem_data.hints
+                if getattr(problem_data, "images", None) is not None:
+                    cp.images = problem_data.images
             else:
                 cp = ContestProblem(
                     contest_id=contest.id,
@@ -937,6 +945,8 @@ class DynamicContestService:
                     starter_codes=starter_codes,
                     sample_testcases=sample_tcs,
                     hidden_testcases=hidden_tcs,
+                    hints=getattr(problem_data, "hints", None) or [],
+                    images=getattr(problem_data, "images", None) or [],
                 )
                 db.add(cp)
 
@@ -982,6 +992,10 @@ class DynamicContestService:
                 ap.starter_codes = starter_codes
                 ap.sample_testcases = sample_tcs
                 ap.hidden_testcases = hidden_tcs
+                if getattr(problem_data, "hints", None) is not None:
+                    ap.hints = problem_data.hints
+                if getattr(problem_data, "images", None) is not None:
+                    ap.images = problem_data.images
             else:
                 ap = AssessmentProblem(
                     assessment_id=assessment.id,
@@ -998,6 +1012,8 @@ class DynamicContestService:
                     starter_codes=starter_codes,
                     sample_testcases=sample_tcs,
                     hidden_testcases=hidden_tcs,
+                    hints=getattr(problem_data, "hints", None) or [],
+                    images=getattr(problem_data, "images", None) or [],
                     created_at=now_utc(),
                 )
                 db.add(ap)

@@ -15,21 +15,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 hover:text-black hover:[&_*]:!text-black hover:[&_svg]:!text-black active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         primary:
-          'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 hover:text-black hover:[&_*]:!text-black hover:[&_svg]:!text-black active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         lime:
-          'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 hover:text-black hover:[&_*]:!text-black hover:[&_svg]:!text-black active:bg-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         accent:
           'bg-lime-400 text-black border border-lime-400 hover:bg-lime-300 hover:border-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         destructive:
           'bg-transparent text-red-400 border border-red-500/40 hover:bg-red-500 hover:text-white hover:border-red-500 active:bg-red-600 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         outline:
-          'bg-transparent text-white border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-transparent text-white border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black active:bg-lime-300 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         secondary:
-          'bg-[#242424] text-zinc-200 border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 shadow-none transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-[#242424] text-zinc-200 border border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black shadow-none transition-colors duration-150 [&_svg]:transition-colors',
         ghost:
-          'bg-transparent text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 border border-transparent transition-colors duration-150 [&_svg]:transition-colors',
+          'bg-transparent text-zinc-400 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black border border-transparent transition-colors duration-150 [&_svg]:transition-colors',
         link:
           'text-lime-400 underline-offset-4 hover:underline p-0 h-auto border-none',
       },

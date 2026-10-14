@@ -28,6 +28,8 @@ export interface AssessmentProblemData {
     expected_output: string;
     explanation?: string;
   }>;
+  hints?: string[];
+  images?: string[];
 }
 
 export interface AssessmentState {

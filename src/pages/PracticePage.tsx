@@ -5,14 +5,11 @@ import {
   CheckCircle2,
   Clock,
   Minus,
-  Sparkles,
   Filter,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
   RotateCcw,
-  ExternalLink,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
@@ -27,7 +24,6 @@ import {
 import { PageHeader, SectionHeader, EmptyState } from "@/organization/components/ui";
 import { PracticeRowSkeleton, Skeleton } from "@/organization/components/skeletons";
 import { practiceApi } from "@/features/practice/api";
-import { getToken } from "@/lib/auth";
 import { useSwrData } from "@/lib/cache/swrCache";
 import type { PracticeProblemSummary, PracticeTopic, ProblemDifficulty } from "@/features/practice/types";
 
@@ -122,20 +118,6 @@ export function PracticePage() {
 
   // Current authenticated member
   const member = useAppSelector((state) => state.auth.member);
-  const [isSeeding, setIsSeeding] = useState(false);
-
-  const handleSeedSuite = async () => {
-    setIsSeeding(true);
-    try {
-      const res = await practiceApi.seedInstitutionalSuite();
-      toast.success(res.message || "Institutional challenge suite calibrated successfully.");
-      await revalidate();
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to seed institutional challenges.");
-    } finally {
-      setIsSeeding(false);
-    }
-  };
 
   // Prefetch problem details on mouse enter
   const handlePrefetch = (slug: string) => {
@@ -342,47 +324,16 @@ export function PracticePage() {
             <p className="text-xs text-zinc-500 max-w-md mx-auto leading-relaxed">
               {hasActiveFilters
                 ? "Try relaxing your search query or selecting a different topic."
-                : member?.is_core_member
-                ? "Institutional problems are unseeded or currently in DRAFT status. Proctors can seed the canonical 8-problem suite or calibrate new challenges via Mission Control."
-                : "Institutional problems are being calibrated by CCC proctors."}
+                : "Institutional problems are being calibrated. Check back shortly."}
             </p>
             {hasActiveFilters ? (
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-200 border border-white/10 bg-[#171717] rounded-md hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] transition-colors cursor-pointer"
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-200 border border-white/10 bg-[#171717] rounded-md hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black transition-colors cursor-pointer"
               >
                 Clear all filters
               </button>
-            ) : member?.is_core_member ? (
-              <div className="flex items-center justify-center gap-3 pt-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleSeedSuite}
-                  disabled={isSeeding}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-black bg-lime-400 hover:bg-lime-300 rounded-md transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {isSeeding ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
-                  <span>Seed Canonical 8-Problem Suite</span>
-                </button>
-                <a
-                  href={
-                    typeof window !== "undefined" && window.location.hostname === "localhost"
-                      ? getToken()
-                        ? `http://localhost:8082?token=${encodeURIComponent(getToken()!)}`
-                        : "http://localhost:8082"
-                      : getToken()
-                        ? `https://admin.chaoscomputerclub.in?token=${encodeURIComponent(getToken()!)}`
-                        : "https://admin.chaoscomputerclub.in"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] rounded-md transition-colors"
-                >
-                  <span>Open Mission Control Desk</span>
-                  <ExternalLink className="size-3.5 text-zinc-400" />
-                </a>
-              </div>
             ) : null}
           </div>
         ) : (
@@ -443,9 +394,14 @@ export function PracticePage() {
                           to={`/practice/${p.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-medium text-white hover:text-lime-400 transition-colors inline-flex items-center gap-1.5"
+                          className="font-medium text-white hover:text-lime-400 transition-colors inline-flex items-center gap-2"
                         >
                           <span>{p.title}</span>
+                          {p.status && p.status !== "PUBLISHED" && (
+                            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-semibold tracking-wider">
+                              {p.status}
+                            </span>
+                          )}
                         </Link>
                       </td>
 

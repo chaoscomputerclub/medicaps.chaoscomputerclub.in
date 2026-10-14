@@ -1074,6 +1074,14 @@ class ContestService:
                 if master and master.function_signature:
                     fn_sig = master.function_signature
 
+            prob_hints = getattr(p, "hints", None)
+            if not prob_hints and getattr(p, "problem_id", None) and p.problem_id in master_probs_map:
+                prob_hints = getattr(master_probs_map[p.problem_id], "hints", None)
+
+            prob_images = getattr(p, "images", None)
+            if not prob_images and getattr(p, "problem_id", None) and p.problem_id in master_probs_map:
+                prob_images = getattr(master_probs_map[p.problem_id], "images", None)
+
             arena_problems.append({
                 "id": p.id,
                 "contest_id": p.contest_id,
@@ -1092,6 +1100,8 @@ class ContestService:
                 "function_signature": fn_sig,
                 "starter_codes": _clean_starter_codes(getattr(p, "starter_codes", None)),
                 "sample_testcases": getattr(p, "sample_testcases", None) or [],
+                "hints": prob_hints or [],
+                "images": prob_images or [],
             })
 
         now_dt = datetime.now(timezone.utc)

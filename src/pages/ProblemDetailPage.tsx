@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Ban, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle2, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MakoMascot } from "@/components/common/MakoMascot";
 import { getPublicPortalData } from "@/organization/data/portal.functions";
 import { ProblemDetailSkeleton } from "@/organization/components/skeletons";
 import { useSwrData } from "@/lib/cache/swrCache";
@@ -40,14 +42,44 @@ export function ProblemDetailPage() {
 
   if (!data) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 space-y-4">
-        <Link to="/problems" className="inline-flex items-center gap-1.5 text-xs font-sans text-zinc-500 hover:text-white transition-colors">
-          <ArrowLeft className="size-3.5" /> Back to problem archive
-        </Link>
-        <h1 className="text-xl font-semibold text-white">Archived Problem Not Found</h1>
-        <p className="text-zinc-500 text-xs font-sans">
-          The requested problem is unreleased or invalid.
-        </p>
+      <div className="min-h-[70vh] flex items-center justify-center px-4 sm:px-6 py-16 font-sans">
+        <div className="w-full max-w-md rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-8 text-center flex flex-col items-center">
+          <MakoMascot
+            variant="not-found"
+            size="2xl"
+            className="mb-4 drop-shadow-md select-none pointer-events-none"
+          />
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-sans font-medium text-zinc-400 bg-white/[0.05] border border-white/[0.08] mb-2 tracking-wide uppercase">
+            404 Not Found
+          </span>
+          <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+            Problem Not Found
+          </h1>
+          <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
+            The requested archived problem could not be found or is currently unreleased.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+            <Button
+              asChild
+              className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              <Link to="/practice">
+                <ArrowLeft className="size-3.5 mr-1.5" />
+                <span>Practice Arena</span>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+            >
+              <Link to="/">
+                <Home className="size-3.5 mr-1.5" />
+                <span>Dashboard</span>
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

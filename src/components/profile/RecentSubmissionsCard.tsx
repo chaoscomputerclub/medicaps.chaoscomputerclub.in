@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+import {
+  Tabs,
+  TabsPanel,
+  TabsPanels,
+  TabsList,
+  TabsTab,
+} from "@/components/animate-ui/components/base/tabs";
+import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   CheckCircle2,
@@ -76,67 +83,66 @@ export function RecentSubmissionsCard({
   const safeSubmissions = Array.isArray(submissions) ? submissions : [];
   const safeBattles = Array.isArray(battles) ? battles : [];
 
-  const acceptedSubmissions = safeSubmissions.filter((s) => {
-    const v = (s.verdict || "").toUpperCase();
-    return v === "ACCEPTED" || v === "AC";
-  });
+  // Deduplicate by question (problem slug / problem title / problem ID), showing only unique solved questions
+  const acceptedSubmissions = useMemo(() => {
+    const seenProblems = new Set<string>();
+    const uniqueList: typeof safeSubmissions = [];
+
+    for (const s of safeSubmissions) {
+      const v = (s.verdict || "").toUpperCase();
+      if (v === "ACCEPTED" || v === "AC") {
+        const problemKey = (
+          (s.problem_slug ? s.problem_slug.trim().toLowerCase() : "") ||
+          (s.problem_title ? s.problem_title.trim().toLowerCase() : "") ||
+          (s.problem_id ? String(s.problem_id) : "") ||
+          String(s.id)
+        );
+        if (!seenProblems.has(problemKey)) {
+          seenProblems.add(problemKey);
+          uniqueList.push(s);
+        }
+      }
+    }
+    return uniqueList;
+  }, [safeSubmissions]);
 
   return (
     <div className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 space-y-4">
-      {/* Tabs Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3.5 text-xs">
-        <div className="flex items-center gap-1.5 bg-[#171717] p-1 rounded-[12px] border border-white/[0.08]">
-          <button
-            type="button"
-            onClick={() => setActiveTab("recent_ac")}
-            className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === "recent_ac"
-                ? "bg-[#B1FA63] text-black font-extrabold"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            <CheckCircle2 className={`size-3.5 ${activeTab === "recent_ac" ? "text-black" : "text-[#B1FA63]"}`} />
-            <span>Recent AC</span>
-          </button>
+      {/* Tabs System */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(val as "recent_ac" | "all" | "tournaments")}
+        className="w-full gap-4"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3.5 text-xs">
+          <TabsList className="bg-[#171717] border border-white/[0.08] p-1 rounded-[12px] gap-1">
+            <TabsTab value="recent_ac" className="flex items-center gap-1.5 px-3 py-1.5 text-xs">
+              <CheckCircle2 className="size-3.5" />
+              <span>Recent AC</span>
+            </TabsTab>
+            <TabsTab value="all" className="flex items-center gap-1.5 px-3 py-1.5 text-xs">
+              <History className="size-3.5" />
+              <span>All Submissions</span>
+            </TabsTab>
+            <TabsTab value="tournaments" className="flex items-center gap-1.5 px-3 py-1.5 text-xs">
+              <Trophy className="size-3.5" />
+              <span>Tournaments</span>
+            </TabsTab>
+          </TabsList>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("all")}
-            className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === "all"
-                ? "bg-[#B1FA63] text-black font-extrabold"
-                : "text-zinc-400 hover:text-white"
-            }`}
+          <Link
+            to={activeTab === "tournaments" ? "/contests" : "/practice"}
+            className="text-zinc-400 hover:text-[#B1FA63] text-xs font-heading font-bold uppercase tracking-wider transition-colors flex items-center gap-1 self-end sm:self-auto"
           >
-            <History className="size-3.5" />
-            <span>All Submissions</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("tournaments")}
-            className={`px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-heading text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === "tournaments"
-                ? "bg-[#B1FA63] text-black font-extrabold"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            <Trophy className="size-3.5" />
-            <span>Tournaments</span>
-          </button>
+            <span>{activeTab === "tournaments" ? "All contests" : "Practice arena"}</span>
+            <ChevronRight className="size-3" />
+          </Link>
         </div>
 
-        <Link
-          to={activeTab === "tournaments" ? "/contests" : "/practice"}
-          className="text-zinc-400 hover:text-[#B1FA63] text-xs font-heading font-bold uppercase tracking-wider transition-colors flex items-center gap-1 self-end sm:self-auto"
-        >
-          <span>{activeTab === "tournaments" ? "All contests" : "Practice arena"}</span>
-          <ChevronRight className="size-3" />
-        </Link>
-      </div>
+        <TabsPanels className="w-full">
 
       {/* Tab Body: Recent AC */}
-      {activeTab === "recent_ac" && (
+          <TabsPanel value="recent_ac">
         <div className="space-y-1">
           {loading ? (
             <div className="py-8 text-center text-zinc-500 font-sans text-xs">
@@ -193,10 +199,10 @@ export function RecentSubmissionsCard({
             })
           )}
         </div>
-      )}
+      </TabsPanel>
 
-      {/* Tab Body: All Submissions */}
-      {activeTab === "all" && (
+          {/* Tab Body: All Submissions */}
+          <TabsPanel value="all">
         <div className="space-y-1">
           {loading ? (
             <div className="py-8 text-center text-zinc-500 font-sans text-xs">
@@ -253,56 +259,58 @@ export function RecentSubmissionsCard({
             })
           )}
         </div>
-      )}
+      </TabsPanel>
 
-      {/* Tab Body: Tournaments */}
-      {activeTab === "tournaments" && (
-        <div className="space-y-1">
-          {safeBattles.length === 0 ? (
-            <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
-              <MakoMascot variant="ready" size="md" className="opacity-90" />
-              <p className="text-zinc-500 font-sans text-xs">
-                No official tournament records on file yet.
-              </p>
-              <Link
-                to="/contests"
-                className="inline-block text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63] hover:underline"
-              >
-                View upcoming contests →
-              </Link>
-            </div>
-          ) : (
-            safeBattles.slice(0, 6).map((b, idx) => (
-              <div
-                key={b.certificate_id || idx}
-                className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"
-              >
-                <div className="flex items-center gap-2 min-w-0 pr-3">
-                  <span className="text-[10px] font-sans text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-1.5 py-0.5 rounded-[6px] shrink-0 font-bold">
-                    Rank #{b.rank}
-                  </span>
-                  <Link
-                    to={b.contest_slug ? `/contests/${b.contest_slug}/results` : `/contests`}
-                    className="font-medium text-white group-hover:text-[#B1FA63] transition-colors truncate max-w-xs sm:max-w-sm"
-                  >
-                    {b.contest}
-                  </Link>
-                </div>
-                <div className="flex items-center gap-3 shrink-0 ml-auto font-sans text-[11px]">
-                  <span className="text-zinc-400">Solved: {b.solved}</span>
-                  <span
-                    className={
-                      b.delta >= 0 ? "text-[#B1FA63] font-semibold" : "text-red-400 font-semibold"
-                    }
-                  >
-                    {b.delta > 0 ? `+${b.delta}` : b.delta}
-                  </span>
-                </div>
+        {/* Tab Body: Tournaments */}
+        <TabsPanel value="tournaments">
+          <div className="space-y-1">
+            {safeBattles.length === 0 ? (
+              <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
+                <MakoMascot variant="ready" size="md" className="opacity-90" />
+                <p className="text-zinc-500 font-sans text-xs">
+                  No official tournament records on file yet.
+                </p>
+                <Link
+                  to="/contests"
+                  className="inline-block text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63] hover:underline"
+                >
+                  View upcoming contests →
+                </Link>
               </div>
-            ))
-          )}
-        </div>
-      )}
+            ) : (
+              safeBattles.slice(0, 6).map((b, idx) => (
+                <div
+                  key={b.certificate_id || idx}
+                  className="py-2.5 px-3 rounded-[10px] hover:bg-white/[0.03] flex items-center justify-between text-xs transition-colors group"
+                >
+                  <div className="flex items-center gap-2 min-w-0 pr-3">
+                    <span className="text-[10px] font-sans text-[#B1FA63] bg-[#B1FA63]/10 border border-[#B1FA63]/25 px-1.5 py-0.5 rounded-[6px] shrink-0 font-bold">
+                      Rank #{b.rank}
+                    </span>
+                    <Link
+                      to={b.contest_slug ? `/contests/${b.contest_slug}/results` : `/contests`}
+                      className="font-medium text-white group-hover:text-[#B1FA63] transition-colors truncate max-w-xs sm:max-w-sm"
+                    >
+                      {b.contest}
+                    </Link>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-auto font-sans text-[11px]">
+                    <span className="text-zinc-400">Solved: {b.solved}</span>
+                    <span
+                      className={
+                        b.delta >= 0 ? "text-[#B1FA63] font-semibold" : "text-red-400 font-semibold"
+                      }
+                    >
+                      {b.delta > 0 ? `+${b.delta}` : b.delta}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </TabsPanel>
+      </TabsPanels>
+    </Tabs>
     </div>
   );
 }

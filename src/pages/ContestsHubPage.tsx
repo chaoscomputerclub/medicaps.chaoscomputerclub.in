@@ -464,7 +464,7 @@ export function ContestsHubPage() {
                 makoVariant="sleeping"
                 className="max-w-3xl mx-auto my-2"
                 action={
-                  <Button asChild size="default" variant="outline" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] group/btn">
+                  <Button asChild size="default" variant="outline" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black group/btn">
                     <Link to="/practice" className="flex items-center gap-1.5">
                       <span>Practice Arena</span>
                       <ArrowRight className="size-4 text-[#B1FA63] transition-transform duration-200 group-hover/btn:translate-x-1" />
@@ -971,7 +971,7 @@ export function ContestsHubPage() {
                     body="Past weekly round challenges and curated practice problems are available in the Practice Arena."
                     makoVariant="ready"
                     action={
-                      <Button asChild size="default" variant="outline" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] group/btn">
+                      <Button asChild size="default" variant="outline" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black group/btn">
                         <Link to="/practice" className="flex items-center gap-1.5">
                           <span>Explore Practice Arena</span>
                           <ArrowRight className="size-4 text-[#B1FA63] transition-transform duration-200 group-hover/btn:translate-x-1" />

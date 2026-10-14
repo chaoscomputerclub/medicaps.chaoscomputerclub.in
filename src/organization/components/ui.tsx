@@ -248,7 +248,7 @@ export function EmptyState({
           />
         )}
       </div>
-      <h3 className="text-xl font-display uppercase tracking-wide text-white">{title}</h3>
+      <h3 className="text-lg sm:text-xl font-sans font-bold text-white tracking-tight">{title}</h3>
       <p className="text-xs text-zinc-400 max-w-md mt-1.5 leading-relaxed font-sans">{body}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
