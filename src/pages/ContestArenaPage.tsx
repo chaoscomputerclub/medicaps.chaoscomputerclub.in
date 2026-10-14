@@ -47,6 +47,7 @@ import {
   Coins,
   Sparkles,
   Lightbulb,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -290,12 +291,14 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   const practiceProblems = useMemo<UnifiedArenaProblem[]>(() => {
     if (!practiceCatalogData?.items || practiceCatalogData.items.length === 0) {
       if (practiceProblemData) {
+        const parsedNum = Number.parseInt(practiceProblemData.problem_index || "", 10);
+        const integerIndex = !Number.isNaN(parsedNum) && parsedNum > 0 ? String(parsedNum) : "1";
         return [
           {
             id: practiceProblemData.id,
             slug: practiceProblemData.slug,
             title: practiceProblemData.title,
-            problem_index: practiceProblemData.problem_index || "001",
+            problem_index: integerIndex,
             points: 100,
             difficulty: practiceProblemData.difficulty,
             topic: practiceProblemData.topic,
@@ -317,18 +320,22 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
       }
       return [];
     }
-    return practiceCatalogData.items.map((p, idx) => ({
-      id: p.id,
-      slug: p.slug,
-      title: p.title,
-      problem_index: p.problem_index || String(idx + 1).padStart(3, "0"),
-      points: 100,
-      difficulty: p.difficulty,
-      topic: p.topic,
-      user_status: p.user_status,
-      total_submissions: p.total_submissions || 0,
-      acceptance_rate: p.acceptance_rate || 0,
-    }));
+    return practiceCatalogData.items.map((p, idx) => {
+      const parsedNum = Number.parseInt(p.problem_index || "", 10);
+      const integerIndex = !Number.isNaN(parsedNum) && parsedNum > 0 ? String(parsedNum) : String(idx + 1);
+      return {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        problem_index: integerIndex,
+        points: 100,
+        difficulty: p.difficulty,
+        topic: p.topic,
+        user_status: p.user_status || (p as any).solved_status,
+        total_submissions: p.total_submissions || 0,
+        acceptance_rate: p.acceptance_rate || 0,
+      };
+    });
   }, [practiceCatalogData, practiceProblemData]);
 
   const problems: UnifiedArenaProblem[] = isPracticeMode ? practiceProblems : ((arenaData?.problems as any) || []);
@@ -374,10 +381,11 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         id: practiceProblemData.id,
         slug: practiceProblemData.slug,
         title: practiceProblemData.title,
-        problem_index:
-          practiceProblemData.problem_index ||
-          problems[resolvedIndex]?.problem_index ||
-          "001",
+        problem_index: (() => {
+          const parsedPracticeNum = Number.parseInt(practiceProblemData.problem_index || "", 10);
+          if (!Number.isNaN(parsedPracticeNum) && parsedPracticeNum > 0) return String(parsedPracticeNum);
+          return problems[resolvedIndex]?.problem_index || String(resolvedIndex + 1);
+        })(),
         difficulty: practiceProblemData.difficulty,
         topic: practiceProblemData.topic,
         points: 100,
@@ -411,7 +419,23 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
   }, [problems, problemSlug, contestSlug, navigate, isReviewRoute, isPracticeMode]);
 
-  const [selectedLanguage, setSelectedLanguage] = useState<ArenaLanguage>("python");
+  const [selectedLanguage, setSelectedLanguage] = useState<ArenaLanguage>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("ccc_preferred_language") as ArenaLanguage | null;
+      if (saved && ARENA_LANGUAGES.some((l) => l.value === saved)) {
+        return saved;
+      }
+    }
+    return "python";
+  });
+
+  const handleSelectLanguage = (lang: ArenaLanguage) => {
+    setSelectedLanguage(lang);
+    try {
+      localStorage.setItem("ccc_preferred_language", lang);
+    } catch {}
+  };
+
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
   const [customStdin, setCustomStdin] = useState("");
   const [activeConsoleTab, setActiveConsoleTab] = useState<"testcases" | "output">("testcases");
@@ -420,7 +444,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   const [activeSubmitCaseIndex, setActiveSubmitCaseIndex] = useState(0);
   const [lastAction, setLastAction] = useState<"run" | "submit" | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(() => {
+    return typeof document !== "undefined" ? Boolean(document.fullscreenElement) : false;
+  });
   const [showExitModal, setShowExitModal] = useState(false);
   const memberId = member?.id || "anon";
 
@@ -445,16 +471,30 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     }
   });
 
+  const [attemptedProblemIds, setAttemptedProblemIds] = useState<Set<string>>(() => new Set<string>());
+
   useEffect(() => {
-    if (isPracticeMode && practiceCatalogData?.items) {
+    if (isPracticeMode) {
       const solved = new Set<string>();
-      practiceCatalogData.items.forEach((p) => {
-        if (p.user_status === "SOLVED") solved.add(p.id);
-      });
-      if (practiceProblemData?.user_status === "SOLVED") {
-        solved.add(practiceProblemData.id);
+      const attempted = new Set<string>();
+      if (practiceCatalogData?.items) {
+        practiceCatalogData.items.forEach((p) => {
+          const st = p.user_status || (p as any).solved_status;
+          if (st === "SOLVED") solved.add(p.id);
+          else if (st === "ATTEMPTED") attempted.add(p.id);
+        });
+      }
+      const activeSt = practiceProblemData?.user_status || (practiceProblemData as any)?.solved_status;
+      if (practiceProblemData?.id) {
+        if (activeSt === "SOLVED") {
+          solved.add(practiceProblemData.id);
+          attempted.delete(practiceProblemData.id);
+        } else if (activeSt === "ATTEMPTED" && !solved.has(practiceProblemData.id)) {
+          attempted.add(practiceProblemData.id);
+        }
       }
       setSolvedProblemIds(solved);
+      setAttemptedProblemIds(attempted);
     }
   }, [isPracticeMode, practiceCatalogData, practiceProblemData]);
 
@@ -463,6 +503,18 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   );
   const [isProblemListOpen, setIsProblemListOpen] = useState(false);
   const [problemListTab, setProblemListTab] = useState<"problems" | "ranking">("problems");
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState("");
+
+  const filteredDrawerProblems = useMemo(() => {
+    if (!catalogSearchQuery.trim()) return problems;
+    const q = catalogSearchQuery.toLowerCase().trim();
+    return problems.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        String(p.problem_index || "").toLowerCase().includes(q) ||
+        (p.topic && p.topic.toLowerCase().includes(q)),
+    );
+  }, [problems, catalogSearchQuery]);
 
   const { data: rankingData } = useSwrData<AssessmentRanking>(
     !isPracticeMode && contestSlug ? `contest:ranking:${contestSlug}` : null,
@@ -474,6 +526,13 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     (acc, p) => (solvedProblemIds.has(p.id) ? acc + (p.points || 0) : acc),
     0,
   );
+
+  const isCurrentSolved = activeProblem
+    ? (solvedProblemIds.has(activeProblem.id) || activeProblem.user_status === "SOLVED")
+    : false;
+  const isCurrentAttempted = activeProblem
+    ? (!isCurrentSolved && (attemptedProblemIds.has(activeProblem.id) || activeProblem.user_status === "ATTEMPTED"))
+    : false;
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeSettingsTab, setActiveSettingsTab] = useState<"editor" | "shortcuts" | "timer">(
@@ -954,6 +1013,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         if (res.verdict === "ACCEPTED") {
           toast.success("Sample testcases passed!");
         } else {
+          if (activeProblem?.id && !solvedProblemIds.has(activeProblem.id)) {
+            setAttemptedProblemIds((prev) => new Set([...prev, activeProblem.id]));
+          }
           toast.error(`Execution: ${res.verdict}`);
         }
       } catch (err: any) {
@@ -1090,12 +1152,23 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         if (res.verdict === "ACCEPTED") {
           if (activeProblem?.id) {
             setSolvedProblemIds((prev) => new Set([...prev, activeProblem.id]));
+            setAttemptedProblemIds((prev) => {
+              const next = new Set(prev);
+              next.delete(activeProblem.id);
+              return next;
+            });
           }
           toast.success("Accepted! Problem solved successfully.");
           if (revalidatePracticeProblem) {
             void revalidatePracticeProblem();
           }
         } else {
+          if (activeProblem?.id) {
+            setAttemptedProblemIds((prev) => {
+              if (solvedProblemIds.has(activeProblem.id)) return prev;
+              return new Set([...prev, activeProblem.id]);
+            });
+          }
           toast.error(`Verdict: ${res.verdict} (${res.passed_count}/${res.total_testcases} passed)`);
         }
       } catch (err: any) {
@@ -1154,7 +1227,11 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           } catch {}
           return next;
         });
-        toast.success(`Problem ${activeProblem.problem_index} Solved! +${res.points_awarded} pts`);
+        toast.success(
+          isPracticeMode
+            ? "Problem Solved! Accepted"
+            : `Problem ${activeProblem.problem_index} Solved! +${res.points_awarded} pts`,
+        );
       } else {
         toast.error(
           `Verdict: ${res.verdict} (${res.passed_testcases}/${res.total_testcases} passed)`,
@@ -1220,14 +1297,21 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleRunCode, handleSubmitCode, handlePrevProblem, handleNextProblem]);
 
+  // Sync fullscreen state with native DOM fullscreenchange (e.g. Esc press, F11, etc.)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      void document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
+      void document.documentElement.requestFullscreen().catch(() => {});
     } else {
       if (document.exitFullscreen) {
-        void document.exitFullscreen();
-        setIsFullscreen(false);
+        void document.exitFullscreen().catch(() => {});
       }
     }
   };
@@ -1555,9 +1639,9 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
   return (
     <div className="flex flex-col h-[100dvh] w-full bg-[#171717] text-white select-none overflow-hidden font-sans">
       {/* Top Navigation Bar — Tactical Header in Matiks Dark Theme */}
-      <header className="h-12 shrink-0 px-3 bg-[#141414] border-b border-white/10 flex items-center justify-between gap-2 z-30">
+      <header className="relative h-12 shrink-0 px-3 bg-[#141414] border-b border-white/10 flex items-center justify-between gap-2 z-30">
         {/* Left: Exit, Separator, Title (Drawer Opener), Question Switcher & Chevrons */}
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="relative z-10 flex items-center gap-2 min-w-0">
           <Button
             type="button"
             variant="outline"
@@ -1585,70 +1669,75 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
           <div className="h-3.5 w-px bg-white/10 shrink-0" />
 
-          {/* Drawer Opener via Contest Title button */}
+          {/* Drawer Opener via Problem List / Contest Title button */}
           <button
             type="button"
             onClick={() => setIsProblemListOpen(true)}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-zinc-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors cursor-pointer group min-w-0 text-left"
-            title="Open Problem List & Standings (⌥P)"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors cursor-pointer group min-w-0 text-left"
+            title="Open Problem List (⌥P)"
           >
-            <span className="font-semibold text-xs sm:text-sm text-white truncate max-w-[130px] sm:max-w-[200px] md:max-w-[280px]">
-              {title}
+            <ListOrdered className="size-3.5 text-lime-400 shrink-0" />
+            <span className="font-semibold text-xs sm:text-sm text-white truncate max-w-[140px] sm:max-w-[200px] md:max-w-[280px]">
+              {isPracticeMode ? "Problem List" : title}
             </span>
-            {isPracticeMode ? (
-              <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-sans text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
-                PRACTICE
-              </span>
-            ) : arenaData?.status ? (
+            {!isPracticeMode && arenaData?.status ? (
               <span className="border border-lime-400/30 bg-lime-400/10 text-lime-400 font-sans text-[9px] uppercase px-1.5 py-0.5 rounded font-semibold hidden sm:inline">
                 {arenaData.status}
               </span>
             ) : null}
-            <ChevronRight className="size-3.5 text-zinc-400 group-hover:text-lime-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
+            <ChevronRight className="size-3 text-zinc-400 group-hover:text-lime-400 transition-transform group-hover:translate-x-0.5 shrink-0" />
           </button>
 
-          {/* Question Nav Switcher Pill & Chevrons */}
-          <div className="flex items-center gap-0.5 ml-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              onClick={handlePrevProblem}
-              disabled={resolvedIndex <= 0}
-              title="Previous question (⌥←)"
-            >
-              <ChevronLeft className="size-3.5" />
-            </Button>
+          {/* Question Nav Switcher Pill & Chevrons (Contest Mode Only) */}
+          {!isPracticeMode && (
+            <div className="flex items-center gap-0.5 ml-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={handlePrevProblem}
+                disabled={resolvedIndex <= 0}
+                title="Previous question (⌥←)"
+              >
+                <ChevronLeft className="size-3.5" />
+              </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsProblemListOpen(true)}
-              title="Open Problem List (⌥P)"
-              className="shrink-0"
-            >
-              <ListOrdered className="size-3 text-lime-400 mr-1" />
-              <span className="font-semibold text-lime-400">
-                Q{activeProblem?.problem_index || resolvedIndex + 1}
-              </span>
-              <span className="text-zinc-500 hidden sm:inline text-xs ml-0.5">
-                / {problems.length}
-              </span>
-              <ChevronDown className="size-3 text-zinc-500 ml-0.5" />
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsProblemListOpen(true)}
+                title="Open Problem List (⌥P)"
+                className="shrink-0"
+              >
+                {isCurrentSolved ? (
+                  <CheckCircle2 className="size-3 text-lime-400 mr-1" />
+                ) : isCurrentAttempted ? (
+                  <Clock className="size-3 text-amber-400 mr-1" />
+                ) : (
+                  <ListOrdered className="size-3 text-lime-400 mr-1" />
+                )}
+                <span className="font-semibold text-lime-400">
+                  Q{activeProblem?.problem_index || resolvedIndex + 1}
+                </span>
+                <span className="text-zinc-500 hidden sm:inline text-xs ml-0.5">
+                  / {problems.length}
+                </span>
+                <ChevronDown className="size-3 text-zinc-500 ml-0.5" />
+              </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              onClick={handleNextProblem}
-              disabled={resolvedIndex >= problems.length - 1}
-              title="Next question (⌥→)"
-            >
-              <ChevronRight className="size-3.5" />
-            </Button>
-          </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={handleNextProblem}
+                disabled={resolvedIndex >= problems.length - 1}
+                title="Next question (⌥→)"
+              >
+                <ChevronRight className="size-3.5" />
+              </Button>
+            </div>
+          )}
 
           {!isPracticeMode && (
             <Button asChild variant="outline" size="icon-sm">
@@ -1664,8 +1753,8 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           )}
         </div>
 
-        {/* Center: Run & Submit Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Center: Run & Submit Action Buttons (Pinned to center of screen) */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-auto z-10">
           {isReviewMode ? (
             <>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-lime-400/40 bg-lime-400/10 text-lime-400 font-sans text-xs">
@@ -1731,7 +1820,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
         </div>
 
         {/* Right: Layout, Settings, Countdown Timer, Avatar */}
-        <div className="flex items-center gap-2">
+        <div className="relative z-10 flex items-center gap-2">
           {/* Layout Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -1847,7 +1936,17 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <TabsPanels className="flex-1 overflow-y-auto min-h-0" data-problem-panel>
                 <TabsPanel value="description" className="p-5 space-y-6 text-zinc-200">
                   {activeProblem ? (
-                    <ProblemStatementView problem={activeProblem as any} />
+                    <ProblemStatementView
+                      problem={{
+                        ...activeProblem,
+                        user_status: isCurrentSolved
+                          ? "SOLVED"
+                          : isCurrentAttempted
+                            ? "ATTEMPTED"
+                            : ((activeProblem as any).user_status || (activeProblem as any).solved_status || "UNATTEMPTED"),
+                      } as any}
+                      showPoints={!isPracticeMode}
+                    />
                   ) : (
                     <div className="text-zinc-500 font-sans text-xs">Select a question to begin.</div>
                   )}
@@ -1974,7 +2073,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   {ARENA_LANGUAGES.map((lang) => (
                     <DropdownMenuItem
                       key={lang.value}
-                      onClick={() => setSelectedLanguage(lang.value)}
+                      onClick={() => handleSelectLanguage(lang.value)}
                       className={`cursor-pointer flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-[8px] transition-colors ${
                         selectedLanguage === lang.value
                           ? "text-lime-400 font-semibold bg-white/5"
@@ -2024,8 +2123,20 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           <div className="flex-1 relative overflow-hidden bg-[#171717] min-h-0">
             <Suspense
               fallback={
-                <div className="h-full w-full flex items-center justify-center text-xs font-sans text-zinc-500 animate-pulse">
-                  Initializing terminal code editor…
+                <div className="h-full w-full bg-[#171717] text-zinc-600 font-mono text-[13px] p-4 flex select-none overflow-hidden">
+                  <div className="w-8 border-r border-white/5 pr-3 text-right text-zinc-600/50 space-y-1">
+                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div>
+                  </div>
+                  <div className="pl-4 space-y-2 flex-1">
+                    <div className="h-3.5 bg-zinc-800/60 rounded w-1/4 animate-pulse" />
+                    <div className="h-3.5 bg-zinc-800/40 rounded w-2/5 animate-pulse" />
+                    <div className="h-3.5 bg-zinc-800/30 rounded w-1/3 animate-pulse" />
+                    <div className="h-3.5 bg-zinc-800/50 rounded w-1/2 animate-pulse" />
+                    <div className="pt-2 text-xs text-zinc-500 font-sans flex items-center gap-2">
+                      <span className="inline-block size-2 rounded-full bg-[#B1FA63] animate-ping" />
+                      <span>Readying editor environment…</span>
+                    </div>
+                  </div>
                 </div>
               }
             >
@@ -2282,7 +2393,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                               {effectiveSubmitResult.passed_testcases} / {effectiveSubmitResult.total_testcases}{" "}
                               testcases passed
                             </span>
-                            {effectiveSubmitResult.points_awarded > 0 && (
+                            {!isPracticeMode && effectiveSubmitResult.points_awarded > 0 && (
                               <Badge className="bg-lime-400/15 text-lime-400 border border-lime-400/40 text-[11px] font-sans font-bold">
                                 +{effectiveSubmitResult.points_awarded} pts
                               </Badge>
@@ -2932,43 +3043,76 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           isProblemListOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         }`}
       >
-        {/* Drawer Header: Title + Live Arena badge + ✕ Close */}
-        <div className="h-12 px-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#141414]">
-          <div className="flex items-center gap-2 min-w-0">
-            <ListOrdered className="size-4 text-[#B1FA63] shrink-0" />
-            <h2 className="font-heading font-bold text-xs text-white truncate max-w-[220px]">{title}</h2>
-            {isPracticeMode ? (
-              <span className="border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63] font-heading text-[10px] uppercase px-2 py-0.5 rounded-full font-bold shrink-0">
-                Practice Catalog
-              </span>
-            ) : arenaData?.status ? (
-              <span className="border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63] font-heading text-[10px] uppercase px-2 py-0.5 rounded-full font-bold shrink-0">
-                {arenaData.status} Arena
-              </span>
-            ) : null}
-          </div>
-
-          {/* Close Button (✕) */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-sm"
-            onClick={() => setIsProblemListOpen(false)}
-            title="Close Problem List (Esc)"
-          >
-            <X className="size-3.5" />
-          </Button>
-        </div>
-
-        {/* Drawer Subheader: Problem List vs Standings Tabs + Score Badge */}
-        <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 shrink-0 bg-[#141414]">
-          {/* Sub-tabs: Challenges vs Standings */}
-          {isPracticeMode ? (
-            <div className="flex items-center gap-1.5 text-xs font-sans font-semibold text-white px-1 py-1">
-              <ListOrdered className="size-3.5 text-lime-400" />
-              <span>Catalog Challenges</span>
+        {/* Drawer Header */}
+        {isPracticeMode ? (
+          <div className="h-12 px-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#141414]">
+            <div className="flex items-center gap-1.5 text-zinc-100 font-medium text-sm">
+              <span>Problem List</span>
+              <ChevronRight className="size-3.5 text-zinc-500" />
             </div>
-          ) : (
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-sans tabular-nums">
+                <CheckCircle2 className="size-3.5 text-emerald-400" />
+                <span>
+                  {solvedProblemIds.size} / {problems.length} Solved
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setIsProblemListOpen(false)}
+                title="Close Problem List (Esc)"
+                className="text-zinc-400 hover:text-white hover:bg-white/10"
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="h-12 px-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#141414]">
+            <div className="flex items-center gap-2 min-w-0">
+              <ListOrdered className="size-4 text-[#B1FA63] shrink-0" />
+              <h2 className="font-heading font-bold text-xs text-white truncate max-w-[220px]">{title}</h2>
+              {arenaData?.status ? (
+                <span className="border border-[#B1FA63]/30 bg-[#B1FA63]/10 text-[#B1FA63] font-heading text-[10px] uppercase px-2 py-0.5 rounded-full font-bold shrink-0">
+                  {arenaData.status} Arena
+                </span>
+              ) : null}
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              onClick={() => setIsProblemListOpen(false)}
+              title="Close Problem List (Esc)"
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Practice Mode Search Input */}
+        {isPracticeMode && (
+          <div className="p-3 border-b border-white/10 bg-[#141414]">
+            <div className="relative flex items-center">
+              <Search className="absolute left-3 size-3.5 text-zinc-500 pointer-events-none" />
+              <input
+                type="text"
+                value={catalogSearchQuery}
+                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                placeholder="Search questions"
+                className="w-full bg-[#1c1c1c] text-xs text-zinc-200 placeholder-zinc-500 rounded-md pl-9 pr-3 py-1.5 border border-white/10 focus:border-lime-400/50 focus:outline-none transition-colors font-sans"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Contest Subheader: Problem List vs Standings Tabs + Score Badge (Contest Mode Only) */}
+        {!isPracticeMode && (
+          <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 shrink-0 bg-[#141414]">
             <Tabs
               value={problemListTab}
               onValueChange={(v) => setProblemListTab(v as "problems" | "ranking")}
@@ -2985,47 +3129,108 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                 </TabsTab>
               </TabsList>
             </Tabs>
-          )}
 
-          {/* Points & Progress Pips */}
-          <div className="flex items-center gap-2 font-sans">
-            {isPracticeMode ? (
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs font-semibold tabular-nums">
-                <CheckCircle2 className="size-3 text-lime-400" />
-                <span>{solvedProblemIds.size} / {problems.length}&nbsp;SOLVED</span>
-              </div>
-            ) : (
+            <div className="flex items-center gap-2 font-sans">
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs font-semibold tabular-nums">
                 <Trophy className="size-3 text-lime-400" />
                 <span>{totalEarnedPoints}&nbsp;PTS</span>
               </div>
-            )}
-            <div className="flex items-center gap-1">
-              {problems.map((p) => {
-                const isPsolved = solvedProblemIds.has(p.id);
-                return (
-                  <span
-                    key={p.id}
-                    className={`size-2 rounded-full transition-colors ${
-                      isPsolved
-                        ? "bg-lime-400 "
-                        : "bg-[#242424] border border-white/10"
-                    }`}
-                    title={`Q${p.problem_index}: ${p.title} (${isPsolved ? "Solved" : "Unsolved"})`}
-                  />
-                );
-              })}
+              <div className="flex items-center gap-1">
+                {problems.map((p) => {
+                  const isPsolved = solvedProblemIds.has(p.id) || p.user_status === "SOLVED";
+                  const isPattempted = !isPsolved && (attemptedProblemIds.has(p.id) || p.user_status === "ATTEMPTED");
+                  return (
+                    <span
+                      key={p.id}
+                      className={`size-2 rounded-full transition-colors ${
+                        isPsolved
+                          ? "bg-lime-400 "
+                          : isPattempted
+                            ? "bg-amber-400 "
+                            : "bg-[#242424] border border-white/10"
+                      }`}
+                      title={`Q${p.problem_index}: ${p.title} (${isPsolved ? "Solved" : isPattempted ? "Attempted" : "Unsolved"})`}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Drawer Body */}
-        {problemListTab === "problems" ? (
+        {isPracticeMode ? (
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {filteredDrawerProblems.length === 0 ? (
+              <div className="p-8 text-center text-xs text-zinc-500 font-sans">
+                No questions found matching &ldquo;{catalogSearchQuery}&rdquo;
+              </div>
+            ) : (
+              filteredDrawerProblems.map((prob) => {
+                const isActive = prob.slug === effectiveProblemSlug || prob.id === activeProblem?.id;
+                const isSolved = solvedProblemIds.has(prob.id) || prob.user_status === "SOLVED";
+                const isAttempted =
+                  !isSolved && (attemptedProblemIds.has(prob.id) || prob.user_status === "ATTEMPTED");
+
+                const diffUpper = (prob.difficulty || "EASY").toUpperCase();
+                const isHard = diffUpper === "HARD";
+                const isMed = diffUpper === "MEDIUM";
+                const diffLabel = isHard ? "Hard" : isMed ? "Med." : "Easy";
+
+                return (
+                  <button
+                    key={prob.id}
+                    type="button"
+                    onClick={() => {
+                      navigate(`/practice/${prob.slug}`);
+                      setIsProblemListOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-md border transition-all cursor-pointer flex items-center justify-between gap-3 group relative ${
+                      isActive
+                        ? "bg-white/[0.08] border-white/20 text-white"
+                        : "bg-transparent hover:bg-white/[0.04] border-transparent text-zinc-300 hover:text-white"
+                    }`}
+                  >
+                    {/* Left: Status indicator + Index + Title */}
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      {isSolved ? (
+                        <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+                      ) : isAttempted ? (
+                        <Clock className="size-4 text-amber-400 shrink-0" />
+                      ) : (
+                        <span className="size-4 shrink-0" />
+                      )}
+
+                      <span className="text-xs truncate font-medium">
+                        <span className="text-zinc-500 mr-1.5">{prob.problem_index}.</span>
+                        {prob.title}
+                      </span>
+                    </div>
+
+                    {/* Right: Difficulty badge (No points in practice mode) */}
+                    <span
+                      className={`text-[11px] font-semibold shrink-0 ${
+                        isHard
+                          ? "text-rose-400"
+                          : isMed
+                            ? "text-amber-400"
+                            : "text-emerald-400"
+                      }`}
+                    >
+                      {diffLabel}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        ) : problemListTab === "problems" ? (
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {problems.map((prob, idx) => {
               const pSlug = slugifyProblem(prob.title, prob.problem_index);
               const isActive = idx === resolvedIndex;
-              const isSolved = solvedProblemIds.has(prob.id);
+              const isSolved = solvedProblemIds.has(prob.id) || prob.user_status === "SOLVED";
+              const isAttempted = !isSolved && (attemptedProblemIds.has(prob.id) || prob.user_status === "ATTEMPTED");
 
               const diffUpper = (prob.difficulty || "EASY").toUpperCase();
               const isHard = diffUpper === "HARD";
@@ -3037,11 +3242,6 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   key={prob.id}
                   type="button"
                   onClick={() => {
-                    if (isPracticeMode) {
-                      navigate(`/practice/${prob.slug}`);
-                      setIsProblemListOpen(false);
-                      return;
-                    }
                     const target = isReviewMode
                       ? getProblemReviewUrl(contestSlug, prob.title, prob.problem_index)
                       : getProblemSolveUrl(contestSlug, prob.title, prob.problem_index);
@@ -3064,6 +3264,8 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   <div className="flex items-center gap-2.5 min-w-0 flex-1 pl-1">
                     {isSolved ? (
                       <CheckCircle2 className="size-4 text-lime-400 shrink-0" />
+                    ) : isAttempted ? (
+                      <Clock className="size-4 text-amber-400 shrink-0" />
                     ) : isActive ? (
                       <span className="size-2 rounded-full bg-lime-400 shrink-0" />
                     ) : (

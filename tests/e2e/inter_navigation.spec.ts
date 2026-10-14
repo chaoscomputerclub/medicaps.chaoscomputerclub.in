@@ -30,22 +30,17 @@ test.describe('Full Platform Inter-Navigation & Subpage Test Suite', () => {
     await expect(page).toHaveURL(/.*\/contests$/);
     await expect(page.locator('h1, h2, h3').filter({ hasText: /Contest|Arena|Tournament/i }).first()).toBeVisible({ timeout: 10000 });
 
-    // 3. Navigate to My Contests (/my-contests)
-    await page.locator('aside nav a[href="/my-contests"]').click();
-    await expect(page).toHaveURL(/.*\/my-contests$/);
-    await expect(page.locator('h1, h2, h3').filter({ hasText: /My Contests|Dossier/i }).first()).toBeVisible({ timeout: 10000 });
+    // 3. Navigate to Practice (/practice)
+    await page.locator('aside nav a[href="/practice"]').click();
+    await expect(page).toHaveURL(/.*\/practice$/);
+    await expect(page.locator('h1, h2, h3').filter({ hasText: /Practice|Archive|Challenges|Problems/i }).first()).toBeVisible({ timeout: 10000 });
 
     // 4. Navigate to Leaderboard (/leaderboard)
     await page.locator('aside nav a[href="/leaderboard"]').click();
     await expect(page).toHaveURL(/.*\/leaderboard$/);
     await expect(page.locator('h1, h2, h3').filter({ hasText: /Leaderboard|Standings/i }).first()).toBeVisible({ timeout: 10000 });
 
-    // 5. Navigate to Problems (/problems)
-    await page.locator('aside nav a[href="/problems"]').click();
-    await expect(page).toHaveURL(/.*\/problems$/);
-    await expect(page.locator('h1, h2, h3').filter({ hasText: /Problems|Archive|Challenges/i }).first()).toBeVisible({ timeout: 10000 });
-
-    // 6. Navigate to Settings (/settings)
+    // 5. Navigate to Settings (/settings)
     await page.locator('aside nav a[href="/settings"]').click();
     await expect(page).toHaveURL(/.*\/settings$/);
     await expect(page.locator('h1, h2, h3').filter({ hasText: /Settings|Profile|Account/i }).first()).toBeVisible({ timeout: 10000 });
