@@ -148,33 +148,18 @@ class InputBinder:
         elif isinstance(parsed, (list, tuple)):
             # Special case: single parameter expecting array/list or object
             # e.g. reverseList(nums: array<int>) where input is [1, 2, 3]
-            # or maxSubArray(nums) where input is wrapped in outer args list [[-2, 1, ...]]
             if num_params == 1:
                 p0 = params[0]
                 td = parse_type_descriptor(p0.type)
-                if td.kind == TypeKind.ARRAY and td.dimensions >= 2:
-                    val_as_is, _ = td.validate_value(parsed)
-                    if val_as_is:
-                        raw_args = [parsed]
-                    elif len(parsed) == 1:
-                        raw_args = [parsed[0]]
-                    else:
-                        raw_args = [parsed]
+                # If the single param expects an array, and the input is [1, 2, 3]
+                # Check if parsed itself is valid as the argument value
+                val_as_is, _ = td.validate_value(parsed)
+                if val_as_is:
+                    raw_args = [parsed]
                 elif len(parsed) == 1:
-                    val_inner, _ = td.validate_value(parsed[0])
-                    val_outer, _ = td.validate_value(parsed)
-                    if val_inner and not (td.kind == TypeKind.ARRAY and not isinstance(parsed[0], list)):
-                        raw_args = [parsed[0]]
-                    elif val_outer:
-                        raw_args = [parsed]
-                    else:
-                        raw_args = [parsed[0]]
+                    raw_args = [parsed[0]]
                 else:
-                    val_as_is, _ = td.validate_value(parsed)
-                    if val_as_is:
-                        raw_args = [parsed]
-                    else:
-                        raw_args = [parsed]
+                    raw_args = [parsed]
             else:
                 raw_args = list(parsed)
 

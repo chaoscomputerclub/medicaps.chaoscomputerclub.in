@@ -36,6 +36,8 @@ class JavaAdapter(BaseLanguageAdapter):
                 return "String"
             elif td.base == "object":
                 return "java.util.Map<String, Object>"
+            elif td.base == "void":
+                return "void"
             return "int"
         except Exception:
             return "int"
@@ -87,6 +89,12 @@ class JavaAdapter(BaseLanguageAdapter):
             decl_lines.append(self._build_param_extraction(p.type, pname, idx, p.name))
 
         args_str = ", ".join(call_args)
+        if ret_type == "void":
+            result_capture = f"""sol.{fn_name}({args_str});
+            Object result = {call_args[0] if call_args else "null"};"""
+        else:
+            result_capture = f"""var result = sol.{fn_name}({args_str});"""
+
         invoke_str = f"""
         {class_name} sol = null;
         try {{
@@ -99,7 +107,7 @@ class JavaAdapter(BaseLanguageAdapter):
         }}
 
         try {{
-            var result = sol.{fn_name}({args_str});
+            {result_capture}
             System.out.print("\\n<<<CCC_RUNNER_RESULT>>>\\n" + _toJsonEnvelope("SUCCESS", result, null) + "\\n<<<CCC_RUNNER_RESULT>>>\\n");
         }} catch (Throwable t) {{
             String msg = t.getMessage() != null ? t.getMessage() : t.toString();

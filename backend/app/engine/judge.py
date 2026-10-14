@@ -19,6 +19,8 @@ import math
 import re
 from typing import Optional
 
+from app.engine.adapters.evaluator import OutputEvaluator
+from app.engine.contracts import EvaluationConfig
 from app.engine.enums import ComparisonMode, Verdict
 from app.engine.schemas import (
     SandboxResult,
@@ -50,9 +52,10 @@ class JudgeEngine:
             user_stdout = (parts[0] + "".join(parts[2:])).strip()
             try:
                 envelope = json.loads(envelope_str)
-                return envelope, user_stdout
+                if isinstance(envelope, dict):
+                    return envelope, user_stdout
             except Exception:
-                pass
+                return {"status": "PROTOCOL_ERROR", "error": "Malformed runner result payload"}, user_stdout
         return None, raw_stdout
 
     @staticmethod
@@ -60,10 +63,18 @@ class JudgeEngine:
         sandbox_result: SandboxResult,
         testcase: TestCaseSchema,
         compile_output: str = "",
-        compile_failed: bool = False,          # NEW: explicit flag, not inferred from text
+        compile_failed: bool = False,
         comparison_mode: ComparisonMode = ComparisonMode.TRIMMED,
+        return_type: Optional[str] = None,
+        eval_config: Optional[EvaluationConfig] = None,
     ) -> TestCaseResult:
         effective_mode = testcase.comparison_mode or comparison_mode
+        effective_ret_type = getattr(testcase, "return_type", None) or return_type
+        expected_target = (
+            getattr(testcase, "expected_val", None)
+            if getattr(testcase, "expected_val", None) is not None
+            else testcase.expected_output
+        )
 
         # Check if runner result envelope is present in stdout
         envelope, user_stdout = JudgeEngine.parse_runner_envelope(sandbox_result.stdout)
@@ -98,7 +109,9 @@ class JudgeEngine:
             hidden=testcase.hidden,
             category=testcase.category.value if testcase.category else None,
             stdout="" if testcase.hidden else display_stdout,
-            expected_output="" if testcase.hidden else testcase.expected_output,
+            expected_output="" if testcase.hidden else str(testcase.expected_output),
+            actual_value=None if testcase.hidden else (envelope.get("return_value") if envelope else None),
+            expected_value=None if testcase.hidden else expected_target,
             stderr="" if testcase.hidden else display_stderr,
             compile_output=compile_output,
             wall_time_ms=sandbox_result.wall_time_ms,
@@ -132,7 +145,7 @@ class JudgeEngine:
             result.passed = False
             return result
 
-        # 5. Check Compilation Error — use the explicit flag, NOT text presence.
+        # 5. Check Compilation Error — use explicit flag, NOT text presence.
         if compile_failed:
             result.verdict = Verdict.COMPILATION_ERROR
             result.passed = False
@@ -145,51 +158,80 @@ class JudgeEngine:
                 result.verdict = Verdict.RUNTIME_ERROR
                 result.passed = False
                 err_msg = envelope.get("error") or ""
-                if err_msg:
+                if err_msg and not testcase.hidden:
                     result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
                 return result
             elif status == "FUNCTION_NOT_FOUND":
                 result.verdict = Verdict.FUNCTION_NOT_FOUND
                 result.passed = False
                 err_msg = envelope.get("error") or "Function not found in submission"
-                result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
+                if not testcase.hidden:
+                    result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
+                return result
+            elif status == "PROTOCOL_ERROR":
+                result.verdict = Verdict.RUNTIME_ERROR
+                result.passed = False
+                err_msg = envelope.get("error") or "Malformed runner result payload"
+                if not testcase.hidden:
+                    result.stderr = (result.stderr + "\n" if result.stderr else "") + str(err_msg)
                 return result
             elif status == "SUCCESS":
                 ret_val = envelope.get("return_value")
-                if isinstance(ret_val, bool):
-                    actual_cmp_str = "true" if ret_val else "false"
-                elif ret_val is None:
-                    actual_cmp_str = "null"
-                elif isinstance(ret_val, (list, dict)):
-                    actual_cmp_str = json.dumps(ret_val, ensure_ascii=False)
-                elif isinstance(ret_val, (int, float)):
-                    actual_cmp_str = str(ret_val)
-                elif isinstance(ret_val, str):
-                    actual_cmp_str = ret_val
-                else:
-                    actual_cmp_str = str(ret_val)
+                result.actual_value = None if testcase.hidden else ret_val
 
-                passed = JudgeEngine.compare(
-                    actual=actual_cmp_str,
-                    expected=testcase.expected_output,
-                    mode=effective_mode,
-                )
+                if effective_ret_type:
+                    passed, msg, _ = OutputEvaluator.compare(
+                        actual_raw=envelope,
+                        expected_val=expected_target,
+                        return_type=effective_ret_type,
+                        eval_config=eval_config,
+                        is_typed_result=True,
+                    )
+                else:
+                    passed, msg, _ = OutputEvaluator.compare(
+                        actual_raw=envelope,
+                        expected_val=expected_target,
+                        return_type="any",
+                        eval_config=eval_config,
+                        is_typed_result=True,
+                    )
+                    if not passed:
+                        actual_cmp = json.dumps(ret_val, ensure_ascii=False) if isinstance(ret_val, (list, dict)) else str(ret_val)
+                        passed = JudgeEngine.compare(
+                            actual=actual_cmp,
+                            expected=str(testcase.expected_output),
+                            mode=effective_mode,
+                        )
+
                 result.passed = passed
                 result.verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
+                if not passed and msg and not testcase.hidden:
+                    result.error_message = msg
+                    if msg not in (result.stderr or ""):
+                        result.stderr = (result.stderr + "\n" if result.stderr else "") + str(msg)
                 return result
 
-        # 7. Check Runtime Error (when envelope is not present or exited non-zero)
+        # 7. Check Runtime Error (when envelope is not present and exited non-zero)
         if sandbox_result.exit_code != 0:
             result.verdict = Verdict.RUNTIME_ERROR
             result.passed = False
             return result
 
         # 8. Output comparison (for FULL_PROGRAM mode or legacy stdout submissions)
-        passed = JudgeEngine.compare(
-            actual=sandbox_result.stdout,
-            expected=testcase.expected_output,
-            mode=effective_mode,
-        )
+        if effective_ret_type:
+            passed, msg, _ = OutputEvaluator.compare(
+                actual_raw=sandbox_result.stdout,
+                expected_val=expected_target,
+                return_type=effective_ret_type,
+                eval_config=eval_config,
+                is_typed_result=False,
+            )
+        else:
+            passed = JudgeEngine.compare(
+                actual=sandbox_result.stdout,
+                expected=str(testcase.expected_output),
+                mode=effective_mode,
+            )
 
         result.passed = passed
         result.verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER

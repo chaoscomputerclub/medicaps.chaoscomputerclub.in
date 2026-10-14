@@ -80,6 +80,11 @@ class PythonAdapter(BaseLanguageAdapter):
         snake_fn_name = re.sub(r'(?<!^)(?=[A-Z])', '_', fn_name).lower()
         param_names = [p.name for p in signature.parameters]
         param_names_repr = json.dumps(param_names)
+        try:
+            ret_td = parse_type_descriptor(signature.return_type)
+            is_void = (ret_td.base == "void")
+        except Exception:
+            is_void = False
 
         # Trusted harness script appended after contestant's Solution
         driver = f"""
@@ -255,7 +260,10 @@ if __name__ == '__main__':
 
     try:
         result = target_method(*args)
-        canonical_val = result if isinstance(result, (bool, int, float, str, list, dict)) or result is None else str(result)
+        if {"True" if is_void else "False"} and result is None and args:
+            canonical_val = args[0]
+        else:
+            canonical_val = result if isinstance(result, (bool, int, float, str, list, dict)) or result is None else str(result)
         sys.stdout.write(f"\\n<<<CCC_RUNNER_RESULT>>>\\n" + json.dumps({{"status": "SUCCESS", "return_value": canonical_val}}, ensure_ascii=False) + "\\n<<<CCC_RUNNER_RESULT>>>\\n")
         sys.stdout.flush()
     except Exception as e:

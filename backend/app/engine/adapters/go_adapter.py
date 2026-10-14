@@ -36,6 +36,8 @@ class GoAdapter(BaseLanguageAdapter):
                 return "string"
             elif td.base == "object":
                 return "map[string]interface{}"
+            elif td.base == "void":
+                return ""
             return "int"
         except Exception:
             return "int"
@@ -47,8 +49,9 @@ class GoAdapter(BaseLanguageAdapter):
         params_list = [f"{p.name} {self._map_type(p.type)}" for p in signature.parameters]
         params_str = ", ".join(params_list)
 
+        ret_clause = f" {ret_type}" if ret_type else ""
         return (
-            f"func {fn_name}({params_str}) {ret_type} {{\n"
+            f"func {fn_name}({params_str}){ret_clause} {{\n"
             "    \n"
             "}\n"
         )
@@ -191,7 +194,16 @@ func main() {{
 	lines := strings.Split(strings.TrimSpace(fullInput), "\\n")
 """
         exec_lines = "\n".join(decl_lines)
-        invoke_block = f"""
+        if not ret_type:
+            invoke_block = f"""
+	{fn_name}({args_str})
+	resBytes, _ := json.Marshal({call_args[0] if call_args else "nil"})
+	resStr := string(resBytes)
+	fmt.Printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%s}}\\n<<<CCC_RUNNER_RESULT>>>\\n", resStr)
+}}
+"""
+        else:
+            invoke_block = f"""
 	result := {fn_name}({args_str})
 	resBytes, _ := json.Marshal(result)
 	resStr := string(resBytes)

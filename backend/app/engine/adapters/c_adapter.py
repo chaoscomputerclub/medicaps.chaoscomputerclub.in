@@ -130,39 +130,58 @@ class CAdapter(BaseLanguageAdapter):
         args_str = ", ".join(call_args)
 
         # Output printer & envelope
-        if ret_type == "int":
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
-            )
-        elif ret_type == "long long":
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%lld}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
-            )
-        elif ret_type in ("double", "float"):
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%f}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
-            )
-        elif ret_type == "bool":
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%s}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? "true" : "false");'
-            )
-        elif ret_type == "char*":
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":\\"%s\\"}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? result : "");'
-            )
-        elif ret_td.kind == TypeKind.ARRAY:
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":[");\n'
-                '    for (int _i = 0; _i < _returnSize; _i++) {\n'
-                '        if (_i > 0) printf(", ");\n'
-                '        printf("%d", result[_i]);\n'
-                '    }\n'
-                '    printf("]}\\n<<<CCC_RUNNER_RESULT>>>\\n");'
-            )
+        if ret_type == "void":
+            first_p = signature.parameters[0] if signature.parameters else None
+            first_td = parse_type_descriptor(first_p.type) if first_p else None
+            call_invocation = f"    {fn_name}({args_str});"
+            if first_p and first_td and first_td.kind == TypeKind.ARRAY:
+                print_call = (
+                    f'    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":[");\n'
+                    f'    for (int _i = 0; _i < _{first_p.name}Size; _i++) {{\n'
+                    f'        if (_i > 0) printf(", ");\n'
+                    f'        printf("%d", _{first_p.name}[_i]);\n'
+                    f'    }}\n'
+                    f'    printf("]}}\\n<<<CCC_RUNNER_RESULT>>>\\n");'
+                )
+            else:
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":null}\\n<<<CCC_RUNNER_RESULT>>>\\n");'
+                )
         else:
-            print_call = (
-                '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", (int)result);'
-            )
+            call_invocation = f"    {ret_type} result = {fn_name}({args_str});"
+            if ret_type == "int":
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
+                )
+            elif ret_type == "long long":
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%lld}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
+                )
+            elif ret_type in ("double", "float"):
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%f}\\n<<<CCC_RUNNER_RESULT>>>\\n", result);'
+                )
+            elif ret_type == "bool":
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%s}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? "true" : "false");'
+                )
+            elif ret_type == "char*":
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":\\"%s\\"}\\n<<<CCC_RUNNER_RESULT>>>\\n", result ? result : "");'
+                )
+            elif ret_td.kind == TypeKind.ARRAY:
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":[");\n'
+                    '    for (int _i = 0; _i < _returnSize; _i++) {\n'
+                    '        if (_i > 0) printf(", ");\n'
+                    '        printf("%d", result[_i]);\n'
+                    '    }\n'
+                    '    printf("]}\\n<<<CCC_RUNNER_RESULT>>>\\n");'
+                )
+            else:
+                print_call = (
+                    '    printf("\\n<<<CCC_RUNNER_RESULT>>>\\n{\\"status\\":\\"SUCCESS\\",\\"return_value\\":%d}\\n<<<CCC_RUNNER_RESULT>>>\\n", (int)result);'
+                )
 
         driver = f"""
 
@@ -385,7 +404,7 @@ int main(void) {{
 
 {parse_block}
 {ret_size_decl}
-    {ret_type} result = {fn_name}({args_str});
+{call_invocation}
 {print_call}
     free(buf);
     return 0;

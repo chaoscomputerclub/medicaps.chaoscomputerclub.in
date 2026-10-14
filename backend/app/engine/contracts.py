@@ -135,10 +135,10 @@ class TypeDescriptor(BaseModel):
             return True, None
 
         elif self.kind == TypeKind.OBJECT:
-            if self.base in ("any", "unknown", "auto") or self.raw_type in ("any", "unknown", "auto"):
+            if self.base in ("any", "unknown", "auto", "object") or self.raw_type in ("any", "unknown", "auto", "object"):
                 return True, None
             if not isinstance(value, dict):
-                return False, f"Expected object/dictionary, got {type(value).__name__}"
+                return False, f"Expected map/dictionary, got {type(value).__name__}"
             return True, None
 
         elif self.kind == TypeKind.VOID:

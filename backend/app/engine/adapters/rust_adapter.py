@@ -33,6 +33,8 @@ class RustAdapter(BaseLanguageAdapter):
                 return "bool"
             elif td.base == "string":
                 return "String"
+            elif td.base == "void":
+                return "()"
             return "i32"
         except Exception:
             return "i32"
@@ -128,7 +130,14 @@ fn main() {
     let lines: Vec<&str> = full_input.lines().collect();
 """
         exec_lines = "\n".join(decl_lines)
-        invoke_block = f"""
+        if ret_type == "()":
+            invoke_block = f"""
+    Solution::{fn_name}({args_str});
+    println!("\\n<<<CCC_RUNNER_RESULT>>>\\n{{\\"status\\":\\"SUCCESS\\",\\"return_value\\":null}}\\n<<<CCC_RUNNER_RESULT>>>");
+}}
+"""
+        else:
+            invoke_block = f"""
     let result = {{
         // Invoke Solution method (support both original name and snake_case)
         Solution::{fn_name}({args_str})

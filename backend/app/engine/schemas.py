@@ -49,6 +49,8 @@ class TestCaseSchema(BaseModel):
     memory_limit: Optional[int] = None
     name: Optional[str] = None
     comparison_mode: Optional[ComparisonMode] = None
+    return_type: Optional[str] = None
+    expected_val: Optional[Any] = None
 
 
 class SandboxResult(BaseModel):
@@ -80,6 +82,9 @@ class TestCaseResult(BaseModel):
     category: Optional[str] = None
     stdout: str = ""
     expected_output: str = ""
+    actual_value: Optional[Any] = None
+    expected_value: Optional[Any] = None
+    error_message: Optional[str] = None
     stderr: str = ""
     compile_output: str = ""
     wall_time_ms: float = 0.0  # Measured wall-clock duration of testcase execution

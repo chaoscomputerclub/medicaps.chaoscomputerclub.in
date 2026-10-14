@@ -325,6 +325,8 @@ class ContestExecutionService:
                         name=f"Sample Test {i+1}",
                         stdin=stdin_payload,
                         expected_output=str(exp_out),
+                        return_type=fn_sig.return_type if (is_fn_mode and fn_sig) else None,
+                        expected_val=exp_out,
                     )
                 )
             if not tcs:
@@ -392,21 +394,8 @@ class ContestExecutionService:
                 tr.passed = False
                 tr.verdict = "INPUT_FORMAT_ERROR"
                 tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
-            elif str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",):
-                if is_fn_mode and fn_sig:
-                    passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
-                    if not passed:
-                        # Fallback: if OutputEvaluator fails (e.g., mismatched declared type),
-                        # use JudgeEngine semantic comparison (handles [0, 1] vs [0,1] etc.)
-                        passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                    tr.passed = passed
-                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
-                else:
-                    passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                    tr.passed = passed
-                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
             else:
-                tr.passed = False
+                tr.passed = str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",)
 
             if tr.passed:
                 passed_count += 1
@@ -649,6 +638,8 @@ class ContestExecutionService:
                     expected_output=str(clean_exp_out),
                     hidden=(i >= len(samples)),
                     weight=float(s.get("weight", 1.0) or 1.0),
+                    return_type=fn_sig.return_type if (is_fn_mode and fn_sig) else None,
+                    expected_val=clean_exp_out,
                 )
             )
         if not all_tcs:
@@ -736,20 +727,8 @@ class ContestExecutionService:
                 tr.passed = False
                 tr.verdict = "INPUT_FORMAT_ERROR"
                 tr.stderr = f"Input binding error: {tc_binding_errors[i]}"
-            elif str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",):
-                if is_fn_mode and fn_sig:
-                    passed, msg, _ = OutputEvaluator.compare(tr.stdout or "", exp_val, fn_sig.return_type, eval_cfg)
-                    if not passed:
-                        # Fallback: semantic comparison if OutputEvaluator fails type parsing
-                        passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                    tr.passed = passed
-                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
-                else:
-                    passed = JudgeEngine.compare(tr.stdout or "", str(exp_val), ComparisonMode.TRIMMED)
-                    tr.passed = passed
-                    tr.verdict = Verdict.ACCEPTED.value if passed else Verdict.WRONG_ANSWER.value
             else:
-                tr.passed = False
+                tr.passed = str(getattr(tr.verdict, "value", tr.verdict)).upper() in ("ACCEPTED",)
 
             if tr.passed:
                 passed_count += 1

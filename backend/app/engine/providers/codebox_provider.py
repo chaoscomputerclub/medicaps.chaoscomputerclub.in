@@ -30,7 +30,7 @@ from app.engine.deadlines import ExecutionDeadlineTracker
 from app.engine.enums import ComparisonMode, ExecutionStatus, Language, Verdict
 from app.engine.errors import ErrorCode, JudgeExecutionException
 from app.engine.judge import JudgeEngine
-from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema
+from app.engine.schemas import ExecutionResult, TestCaseResult, TestCaseSchema, SandboxResult
 from app.lib.chunking import gather_with_concurrency
 from .base import JudgeProvider, ProviderCapabilities, ProviderRunRequest, ProviderRunResult
 
@@ -452,78 +452,39 @@ class CodeboxProvider(JudgeProvider):
             mem_kb = float(data.get("memory") or 0.0)
             mem_mb = mem_kb / 1024.0
 
-            passed = False
-            final_verdict = raw_verdict
+            compile_failed = (status_id == 6)
+            is_timeout = (status_id == 5)
+            is_oom = (status_id == 11)
+            is_ole = (status_id == 12)
+            is_rte = (status_id in {7, 8, 9, 10})
+            is_sys_err = (status_id == 13 or raw_verdict == Verdict.SYSTEM_ERROR)
+            exit_code = int(data.get("exit_code") or (0 if status_id == 3 else 1))
+            if is_rte and exit_code == 0:
+                exit_code = 1
 
-            if status_id == 6:
-                final_verdict = Verdict.COMPILATION_ERROR
-                if not compile_out:
-                    compile_out = stderr or status_desc or "Compilation error"
-                if not stderr:
-                    stderr = compile_out
-            elif status_id == 5:
-                final_verdict = Verdict.TIME_LIMIT_EXCEEDED
-                if not stderr:
-                    stderr = "Time Limit Exceeded"
-            elif status_id in {7, 8, 9, 10, 11, 12}:
-                final_verdict = Verdict.RUNTIME_ERROR
-                if not stderr:
-                    stderr = compile_out or status_desc or "Runtime error"
-            env, user_out = JudgeEngine.parse_runner_envelope(stdout)
-            display_out = user_out if env is not None else stdout
-            if env is not None:
-                if env.get("status") in ("RUNTIME_ERROR", "FUNCTION_NOT_FOUND"):
-                    final_verdict = Verdict.RUNTIME_ERROR
-                    if env.get("error"):
-                        stderr = (stderr + "\n" if stderr else "") + str(env["error"])
-                elif env.get("status") == "SUCCESS":
-                    ret_val = env.get("return_value")
-                    if isinstance(ret_val, bool):
-                        actual_cmp_str = "true" if ret_val else "false"
-                    elif ret_val is None:
-                        actual_cmp_str = "null"
-                    elif isinstance(ret_val, (list, dict)):
-                        actual_cmp_str = json.dumps(ret_val, ensure_ascii=False)
-                    elif isinstance(ret_val, (int, float)):
-                        actual_cmp_str = str(ret_val)
-                    elif isinstance(ret_val, str):
-                        actual_cmp_str = ret_val
-                    else:
-                        actual_cmp_str = str(ret_val)
-
-                    passed = JudgeEngine.compare(
-                        actual=actual_cmp_str,
-                        expected=tc.expected_output or "",
-                        mode=tc.comparison_mode or comparison_mode,
-                    )
-                    final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
-            elif status_id == 3 or raw_verdict == Verdict.ACCEPTED or status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
-                passed = JudgeEngine.compare(
-                    actual=stdout,
-                    expected=tc.expected_output or "",
-                    mode=tc.comparison_mode or comparison_mode,
-                )
-                final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
-
-            tc_results.append(TestCaseResult(
-                testcase_id=tc.id,
-                name=tc.name,
-                hidden=bool(tc.hidden),
-                category=getattr(tc.category, "value", None) if tc.category else None,
-                stdout=display_out,
-                expected_output=tc.expected_output or "",
+            sandbox_res = SandboxResult(
+                stdout=stdout,
                 stderr=stderr,
-                compile_output=compile_out,
+                exit_code=exit_code,
                 wall_time_ms=round(tc_wall_ms, 2),
-                runtime_ms=round(cpu_time_ms, 2),
-                cpu_time_ms=round(cpu_time_ms, 2),
-                peak_memory_mb=mem_mb,
-                exit_code=int(data.get("exit_code") or 0),
-                weight=tc.weight,
-                passed=passed,
-                verdict=final_verdict,
-                wall_time_fallback=is_fallback_wall,
-            ))
+                peak_memory_mb=round(mem_mb, 2),
+                timed_out=is_timeout,
+                oom_killed=is_oom,
+                output_limit_exceeded=is_ole,
+                system_error=is_sys_err,
+            )
+
+            eval_res = JudgeEngine.evaluate(
+                sandbox_result=sandbox_res,
+                testcase=tc,
+                compile_output=compile_out,
+                compile_failed=compile_failed,
+                comparison_mode=tc.comparison_mode or comparison_mode,
+            )
+            eval_res.runtime_ms = round(cpu_time_ms, 2)
+            eval_res.cpu_time_ms = round(cpu_time_ms, 2)
+            eval_res.wall_time_fallback = is_fallback_wall
+            tc_results.append(eval_res)
 
         t_norm_end = time.perf_counter()
         norm_ms = (t_norm_end - t_norm_start) * 1000.0
@@ -657,79 +618,39 @@ class CodeboxProvider(JudgeProvider):
         mem_kb = float(data.get("memory") or 0.0)
         mem_mb = mem_kb / 1024.0
 
-        # Perform rigorous comparison
-        passed = False
-        final_verdict = raw_verdict
+        compile_failed = (status_id == 6)
+        is_timeout = (status_id == 5)
+        is_oom = (status_id == 11)
+        is_ole = (status_id == 12)
+        is_rte = (status_id in {7, 8, 9, 10})
+        is_sys_err = (status_id == 13 or raw_verdict == Verdict.SYSTEM_ERROR)
+        exit_code = int(data.get("exit_code") or (0 if status_id == 3 else 1))
+        if is_rte and exit_code == 0:
+            exit_code = 1
 
-        if status_id == 6:
-            final_verdict = Verdict.COMPILATION_ERROR
-            if not compile_out:
-                compile_out = stderr or status_desc or "Compilation error"
-            if not stderr:
-                stderr = compile_out
-        elif status_id == 5:
-            final_verdict = Verdict.TIME_LIMIT_EXCEEDED
-            if not stderr:
-                stderr = "Time Limit Exceeded"
-        elif status_id in {7, 8, 9, 10, 11, 12}:
-            final_verdict = Verdict.RUNTIME_ERROR
-            if not stderr:
-                stderr = compile_out or status_desc or "Runtime error"
-        env, user_out = JudgeEngine.parse_runner_envelope(stdout)
-        display_out = user_out if env is not None else stdout
-        if env is not None:
-            if env.get("status") in ("RUNTIME_ERROR", "FUNCTION_NOT_FOUND"):
-                final_verdict = Verdict.RUNTIME_ERROR
-                if env.get("error"):
-                    stderr = (stderr + "\n" if stderr else "") + str(env["error"])
-            elif env.get("status") == "SUCCESS":
-                ret_val = env.get("return_value")
-                if isinstance(ret_val, bool):
-                    actual_cmp_str = "true" if ret_val else "false"
-                elif ret_val is None:
-                    actual_cmp_str = "null"
-                elif isinstance(ret_val, (list, dict)):
-                    actual_cmp_str = json.dumps(ret_val, ensure_ascii=False)
-                elif isinstance(ret_val, (int, float)):
-                    actual_cmp_str = str(ret_val)
-                elif isinstance(ret_val, str):
-                    actual_cmp_str = ret_val
-                else:
-                    actual_cmp_str = str(ret_val)
-
-                passed = JudgeEngine.compare(
-                    actual=actual_cmp_str,
-                    expected=tc.expected_output or "",
-                    mode=tc.comparison_mode or comparison_mode,
-                )
-                final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
-        elif status_id == 3 or raw_verdict == Verdict.ACCEPTED or status_id == 4 or raw_verdict == Verdict.WRONG_ANSWER:
-            passed = JudgeEngine.compare(
-                actual=stdout,
-                expected=tc.expected_output or "",
-                mode=tc.comparison_mode or comparison_mode,
-            )
-            final_verdict = Verdict.ACCEPTED if passed else Verdict.WRONG_ANSWER
-
-        return TestCaseResult(
-            testcase_id=tc.id,
-            name=tc.name,
-            hidden=bool(tc.hidden),
-            category=getattr(tc.category, "value", None) if tc.category else None,
-            stdout=display_out,
-            expected_output=tc.expected_output or "",
+        sandbox_res = SandboxResult(
+            stdout=stdout,
             stderr=stderr,
-            compile_output=compile_out,
-            wall_time_ms=round(tc_wall_ms, 2),  # Actual measured testcase execution wall-clock time
-            runtime_ms=round(cpu_time_ms, 2),   # CPU / sandbox process runtime
-            cpu_time_ms=round(cpu_time_ms, 2),  # Explicit sandbox CPU runtime
-            peak_memory_mb=mem_mb,
-            exit_code=int(data.get("exit_code") or 0),
-            weight=tc.weight,
-            passed=passed,
-            verdict=final_verdict,
-            wall_time_fallback=is_fallback_wall,
+            exit_code=exit_code,
+            wall_time_ms=round(tc_wall_ms, 2),
+            peak_memory_mb=round(mem_mb, 2),
+            timed_out=is_timeout,
+            oom_killed=is_oom,
+            output_limit_exceeded=is_ole,
+            system_error=is_sys_err,
         )
+
+        eval_res = JudgeEngine.evaluate(
+            sandbox_result=sandbox_res,
+            testcase=tc,
+            compile_output=compile_out,
+            compile_failed=compile_failed,
+            comparison_mode=tc.comparison_mode or comparison_mode,
+        )
+        eval_res.runtime_ms = round(cpu_time_ms, 2)
+        eval_res.cpu_time_ms = round(cpu_time_ms, 2)
+        eval_res.wall_time_fallback = is_fallback_wall
+        return eval_res
 
 
     async def execute_batch(

@@ -63,6 +63,11 @@ class JavaScriptAdapter(BaseLanguageAdapter):
         fn_name = signature.name or signature.function_name or "solution"
         param_names = [p.name for p in signature.parameters]
         param_names_repr = json.dumps(param_names)
+        try:
+            ret_td = parse_type_descriptor(signature.return_type)
+            is_void = (ret_td.base == "void")
+        except Exception:
+            is_void = False
 
         driver = f"""
 // ==========================================
@@ -278,8 +283,11 @@ class JavaScriptAdapter(BaseLanguageAdapter):
     try {{
         const result = targetFn.apply(null, args);
         let canonicalVal = result;
-        if (result === undefined) {{
-            canonicalVal = "undefined";
+        if ({"true" if is_void else "false"}) {{
+            canonicalVal = (args.length > 0) ? args[0] : null;
+            process.stdout.write('undefined\\n');
+        }} else if (result === undefined) {{
+            canonicalVal = null;
             process.stdout.write('undefined\\n');
         }}
         process.stdout.write("\\n<<<CCC_RUNNER_RESULT>>>\\n" + JSON.stringify({{
