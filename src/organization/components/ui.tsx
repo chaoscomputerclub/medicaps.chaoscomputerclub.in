@@ -126,7 +126,14 @@ export function TierBadge({
   rating?: number | null;
   attendanceCount?: number | null;
 }) {
-  const isUnranked = attendanceCount === 0 || rating === 0;
+  const rawText = (typeof children === "string" ? children : tier || "").trim();
+  const isUnranked =
+    attendanceCount === 0 ||
+    rating === 0 ||
+    !rawText ||
+    rawText.toLowerCase() === "unranked" ||
+    rawText.toLowerCase() === "unrated" ||
+    rawText === "—";
 
   if (isUnranked) {
     return (
@@ -142,8 +149,6 @@ export function TierBadge({
       </Badge>
     );
   }
-
-  const rawText = (typeof children === "string" ? children : tier || "").trim();
   const badgeAsset = getTierBadgeAsset(rawText, rating);
 
   // Format clean division name: never output raw slugs like "1_star" or "2_star"

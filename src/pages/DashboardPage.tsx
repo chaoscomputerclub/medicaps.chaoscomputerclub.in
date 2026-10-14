@@ -192,9 +192,15 @@ export function DashboardPage() {
           <strong className="block text-3xl sm:text-4xl font-display text-[#B1FA63] mt-1 tabular-nums truncate tracking-wide">
             {member?.rating ?? 1200}
           </strong>
-          <span className="block text-xs font-heading font-bold text-[#B1FA63]/80 mt-1 truncate uppercase">
-            {getTierBadgeAsset(member?.tier, member?.rating).name}
-          </span>
+          {member?.is_ranked && (member?.attendance_count ?? 0) > 0 && (member?.tier || "").toLowerCase() !== "unranked" ? (
+            <span className="block text-xs font-heading font-bold text-[#B1FA63]/80 mt-1 truncate uppercase">
+              {getTierBadgeAsset(member?.tier, member?.rating).name}
+            </span>
+          ) : (
+            <span className="block text-xs font-mono font-medium text-zinc-500 mt-1 truncate uppercase">
+              Unranked
+            </span>
+          )}
         </div>
 
         <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">

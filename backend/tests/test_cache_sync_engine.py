@@ -369,10 +369,17 @@ async def test_end_to_end_outbox_to_cache_sync():
     Full End-to-End Pipeline:
     PostgreSQL Transaction -> OutboxEvent -> ChaosQueue -> CacheSyncWorker -> Redis CAS -> SSE
     """
-    await init_db()
     res_id = f"contest:{uuid4().hex[:8]}"
     cache_key = f"cache:{res_id}"
     await set_cache(cache_key, {"title": "Old Contest State"}, ttl_seconds=60)
+
+    # Purge residual queue keys to prevent orphan test jobs from earlier test suites
+    from app.core.redis import get_redis
+    redis = get_redis()
+    await redis.delete(
+        RedisQueueEngine._pending_key("cache_sync"),
+        RedisQueueEngine._processing_key("cache_sync"),
+    )
 
     from sqlalchemy import delete
     from app.core.queue.outbox import OutboxEvent

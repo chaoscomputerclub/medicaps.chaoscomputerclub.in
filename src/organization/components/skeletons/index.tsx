@@ -51,7 +51,7 @@ export function MetricsGridSkeleton() {
 
 export function RatingChartSkeleton() {
   return (
-    <div className="flex flex-col justify-between p-5 rounded-[24px] border border-white/10 bg-[#1F1F1F] min-h-[220px]">
+    <div className="flex flex-col justify-between p-5 rounded-[16px] border border-white/[0.08] bg-[#171717] min-h-[220px] h-64">
       <div className="flex justify-between items-center mb-3">
         <Skeleton className="h-3 w-32" />
         <Skeleton className="h-3 w-20" />

@@ -22,7 +22,16 @@ export interface LeagueInfo {
  */
 export function getTierBadgeAsset(tier?: string | null, rating?: number | null): TierBadgeInfo {
   const r = rating ?? 1200;
-  const t = (tier || "").toLowerCase();
+  const t = (tier || "").toLowerCase().trim();
+
+  // If unranked, unrated, empty, or unconfirmed baseline
+  if (t === "unranked" || t === "unrated" || t === "none" || (!tier && r <= 1200)) {
+    return {
+      src: "/graphics/ranks/rank-explorer.svg",
+      name: "UNRANKED",
+      color: "text-zinc-500",
+    };
+  }
 
   if (t.includes("grandmaster") || r >= 2200) {
     return {
@@ -59,12 +68,18 @@ export function getTierBadgeAsset(tier?: string | null, rating?: number | null):
       color: "text-teal-400",
     };
   }
+  if (t.includes("novice") || (t && r < 1400)) {
+    return {
+      src: "/graphics/ranks/rank-explorer.svg",
+      name: "NOVICE",
+      color: "text-[#B1FA63]",
+    };
+  }
 
-  // Base Novice tier (rating < 1400)
   return {
     src: "/graphics/ranks/rank-explorer.svg",
-    name: "NOVICE",
-    color: "text-[#B1FA63]",
+    name: "UNRANKED",
+    color: "text-zinc-500",
   };
 }
 

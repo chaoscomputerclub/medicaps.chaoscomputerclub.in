@@ -7,8 +7,10 @@ import math
 from typing import Dict, List, Tuple
 
 
-def get_rating_tier(rating: int) -> str:
+def get_rating_tier(rating: int, attendance_count: int = 1) -> str:
     """Return official competitive division tier."""
+    if attendance_count <= 0:
+        return "Unranked"
     if rating >= 2200:
         return "GrandMaster"
     elif rating >= 2000:
@@ -31,6 +33,7 @@ def get_tier_label(tier: str) -> str:
         "candidate": "Candidate",
         "amateur": "Amateur",
         "novice": "Novice",
+        "unranked": "Unranked",
         # Legacy backwards-compatibility
         "5_star": "GrandMaster",
         "4_star": "Master",
@@ -38,7 +41,7 @@ def get_tier_label(tier: str) -> str:
         "2_star": "Candidate",
         "1_star": "Novice",
     }
-    return labels.get((tier or "").lower(), tier or "Novice")
+    return labels.get((tier or "").lower(), tier or "Unranked")
 
 
 def calculate_rating_deltas(standings: List[Dict[str, any]]) -> List[Tuple[str, int, int]]:

@@ -29,6 +29,7 @@ export interface CadetProfileSummary {
   batch?: string | undefined;
   is_following?: boolean | undefined;
   is_self?: boolean | undefined;
+  is_ranked?: boolean | undefined;
 }
 
 export interface CadetProfileHoverCardProps {
@@ -148,10 +149,14 @@ export function CadetProfileHoverCard({
   const avatarUrl = profile?.avatar_url ?? memberObj?.avatar_url ?? null;
   const rating = profile?.rating ?? memberObj?.rating ?? 1200;
   const peakRating = profile?.peak_rating ?? memberObj?.peak_rating ?? null;
-  const tier = profile?.tier ?? memberObj?.tier ?? "Active";
-  const universityRank = profile?.university_rank ?? memberObj?.university_rank ?? null;
   const attendanceCount =
     profile?.attendance_count ?? memberObj?.attendance_count ?? (fetchedData?.battles?.length || 0);
+  const isRanked = profile?.is_ranked ?? memberObj?.is_ranked ?? (attendanceCount > 0);
+  const rawTier = profile?.tier ?? memberObj?.tier;
+  const tier = (attendanceCount === 0 || !isRanked || (rawTier && rawTier.toLowerCase() === "unranked"))
+    ? "Unranked"
+    : (rawTier ?? "Unranked");
+  const universityRank = profile?.university_rank ?? memberObj?.university_rank ?? null;
 
   const ratingsList =
     profile?.ratings ??

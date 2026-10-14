@@ -197,6 +197,28 @@ export function formatValue(val: any, paramType?: string): string {
  * e.g. "nums = [2,7,11,15], target = 9"
  * Positional mapping: parameter[0] -> input[0], parameter[1] -> input[1]...
  */
+export function unwrapContainerInput(val: any): any {
+  if (val === null || val === undefined) return val;
+  let cur = val;
+  if (typeof cur === "string") {
+    cur = safeParseJson(cur);
+  }
+  let iterations = 0;
+  while (cur && typeof cur === "object" && !Array.isArray(cur) && iterations < 5) {
+    iterations++;
+    if ("raw" in cur && cur.raw !== undefined) {
+      cur = typeof cur.raw === "string" ? safeParseJson(cur.raw) : cur.raw;
+    } else if ("input" in cur && cur.input !== undefined) {
+      cur = typeof cur.input === "string" ? safeParseJson(cur.input) : cur.input;
+    } else if ("args" in cur && cur.args !== undefined) {
+      cur = typeof cur.args === "string" ? safeParseJson(cur.args) : cur.args;
+    } else {
+      break;
+    }
+  }
+  return cur;
+}
+
 export function formatExampleInput(
   functionSignature?: FunctionSignatureContract | null,
   rawInput?: any
@@ -206,20 +228,18 @@ export function formatExampleInput(
   }
 
   const parameters = functionSignature?.parameters || [];
-  const parsed = safeParseJson(rawInput);
+  let parsed = unwrapContainerInput(rawInput);
 
-  // If no parameters are defined, format raw value directly
+  // If no parameters are defined, format unwrapped value directly
   if (parameters.length === 0) {
+    if (Array.isArray(parsed) && parsed.length === 1 && (Array.isArray(parsed[0]) || typeof parsed[0] === "number" || typeof parsed[0] === "string")) {
+      return formatValue(parsed[0]);
+    }
     return formatValue(parsed);
   }
 
   // Case 1: parsed is a Dictionary / Object (mapping parameter names -> values)
   if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-    // If it has a "raw" field
-    if ("raw" in parsed && typeof parsed.raw === "string") {
-      return formatExampleInput(functionSignature, parsed.raw);
-    }
-
     const segments: string[] = [];
     for (const p of parameters) {
       if (p.name in parsed) {
@@ -238,16 +258,22 @@ export function formatExampleInput(
   // Case 2: parsed is an Array of arguments
   if (Array.isArray(parsed)) {
     const firstParam = parameters[0];
-    // Sub-case: function has exactly 1 parameter of array type, but parsed is the array itself (e.g. [1,2,3,4] instead of [[1,2,3,4]])
-    if (
-      parameters.length === 1 &&
-      firstParam &&
-      parsed.length > 0 &&
-      firstParam.type.includes("[]") &&
-      !Array.isArray(parsed[0]) &&
-      typeof parsed[0] !== "object"
-    ) {
-      return `${firstParam.name} = ${formatValue(parsed, firstParam.type)}`;
+    if (parameters.length === 1 && firstParam) {
+      // If parsed is [ [-2, 1, ...] ] (outer args wrapper array)
+      if (parsed.length === 1 && Array.isArray(parsed[0]) && !firstParam.type.includes("[][]")) {
+        return `${firstParam.name} = ${formatValue(parsed[0], firstParam.type)}`;
+      }
+      if (
+        parsed.length > 0 &&
+        firstParam.type.includes("[]") &&
+        !Array.isArray(parsed[0]) &&
+        typeof parsed[0] !== "object"
+      ) {
+        return `${firstParam.name} = ${formatValue(parsed, firstParam.type)}`;
+      }
+      if (parsed.length === 1) {
+        return `${firstParam.name} = ${formatValue(parsed[0], firstParam.type)}`;
+      }
     }
 
     // Standard positional mapping:

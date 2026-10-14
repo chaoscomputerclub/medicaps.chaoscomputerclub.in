@@ -466,7 +466,7 @@ class MemberService:
         accuracy_pct = round((acc_subs_count / total_subs) * 100, 1) if total_subs > 0 else 0.0
 
         from app.services.rating_service import get_rating_tier
-        tier = get_rating_tier(current_member.rating or 1200)
+        tier = get_rating_tier(current_member.rating or 1200, attended)
 
         member_dto = to_member_public(current_member).model_dump()
         member_dto["attendance_count"] = attended
@@ -628,6 +628,9 @@ class MemberService:
         followers_count, following_count = await MemberRepository.get_social_counts(db, student.id)
         attended, total_contests = await MemberRepository.get_attendance_and_contest_counts(db, student.id)
         rank_res = await MemberRepository.compute_ranks(db, student)
+
+        from app.services.rating_service import get_rating_tier
+        tier = get_rating_tier(student.rating or 1200, attended)
 
         is_following = False
         if current_member and current_member.id != student.id:

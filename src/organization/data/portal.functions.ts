@@ -192,6 +192,9 @@ export async function getMemberProfileData(force = false) {
                 memberObj.following_count = data.stats.following_count;
               }
             }
+            if ((memberObj.attendance_count ?? 0) === 0 || !memberObj.is_ranked) {
+              memberObj.tier = "Unranked";
+            }
           }
 
           return {
@@ -365,6 +368,9 @@ export async function getStudentProfileData(handle: string, force = false) {
               if (typeof memberObj.following_count !== "number" && typeof data.stats.following_count === "number") {
                 memberObj.following_count = data.stats.following_count;
               }
+            }
+            if ((memberObj.attendance_count ?? 0) === 0 || !memberObj.is_ranked) {
+              memberObj.tier = "Unranked";
             }
           }
 

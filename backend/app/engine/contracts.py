@@ -135,6 +135,8 @@ class TypeDescriptor(BaseModel):
             return True, None
 
         elif self.kind == TypeKind.OBJECT:
+            if self.base in ("any", "unknown", "auto") or self.raw_type in ("any", "unknown", "auto"):
+                return True, None
             if not isinstance(value, dict):
                 return False, f"Expected object/dictionary, got {type(value).__name__}"
             return True, None
@@ -237,7 +239,9 @@ def parse_type_descriptor(type_input: Union[str, DataType, TypeDescriptor]) -> T
         return TypeDescriptor(raw_type="boolean", kind=TypeKind.PRIMITIVE, base="boolean", dimensions=0)
     elif s in ("string", "str", "char*", "char", "&str", "string_view"):
         return TypeDescriptor(raw_type="string", kind=TypeKind.PRIMITIVE, base="string", dimensions=0)
-    elif s in ("object", "map", "dict", "any", "unknown", "auto"):
+    elif s in ("any", "unknown", "auto"):
+        return TypeDescriptor(raw_type="any", kind=TypeKind.OBJECT, base="any", dimensions=0)
+    elif s in ("object", "map", "dict"):
         return TypeDescriptor(raw_type="object", kind=TypeKind.OBJECT, base="object", dimensions=0)
     elif s in ("void", "none"):
         return TypeDescriptor(raw_type="void", kind=TypeKind.VOID, base="void", dimensions=0)

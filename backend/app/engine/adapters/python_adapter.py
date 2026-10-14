@@ -179,6 +179,17 @@ if __name__ == '__main__':
                 # 2. Try JSON parse
                 try:
                     parsed = json.loads(raw_trimmed)
+                    if isinstance(parsed, dict):
+                        for k in ('raw', 'input', 'args'):
+                            if k in parsed:
+                                inner = parsed[k]
+                                if isinstance(inner, str):
+                                    try:
+                                        inner = json.loads(inner)
+                                    except Exception:
+                                        pass
+                                parsed = inner
+                                break
                     if isinstance(parsed, dict) and param_names:
                         if all(p in parsed for p in param_names):
                             args = [parsed[p] for p in param_names]

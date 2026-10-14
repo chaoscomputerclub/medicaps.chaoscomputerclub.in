@@ -158,7 +158,17 @@ class JavaScriptAdapter(BaseLanguageAdapter):
             }} else {{
                 // 2. Try JSON parse
                 try {{
-                    const parsed = JSON.parse(rawTrimmed);
+                    let parsed = JSON.parse(rawTrimmed);
+                    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
+                        if ('raw' in parsed || 'input' in parsed || 'args' in parsed) {{
+                            const inner = parsed.raw !== undefined ? parsed.raw : (parsed.input !== undefined ? parsed.input : parsed.args);
+                            try {{
+                                parsed = typeof inner === 'string' ? JSON.parse(inner) : inner;
+                            }} catch(e) {{
+                                parsed = inner;
+                            }}
+                        }}
+                    }}
                     if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
                         if (paramNames.length > 0 && paramNames.every(p => p in parsed)) {{
                             args = paramNames.map(p => parsed[p]);
