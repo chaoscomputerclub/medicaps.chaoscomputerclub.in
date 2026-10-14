@@ -98,11 +98,9 @@ export function LeaderboardPage() {
 
   useEffect(() => {
     window.addEventListener("contest:concluded", handleRefresh);
-    window.addEventListener("contest:cache_invalidated", handleRefresh);
     window.addEventListener("leaderboard:invalidate", handleRefresh);
     return () => {
       window.removeEventListener("contest:concluded", handleRefresh);
-      window.removeEventListener("contest:cache_invalidated", handleRefresh);
       window.removeEventListener("leaderboard:invalidate", handleRefresh);
     };
   }, [handleRefresh]);

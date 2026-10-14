@@ -29,8 +29,11 @@ interface CacheRecord<T> {
 class SwrMemoryStore {
   private cache = new Map<string, CacheRecord<any>>();
   private inFlight = new Map<string, Promise<any>>();
+  private inFlightGenerations = new Map<string, number>();
   private generations = new Map<string, number>();
   private subscribers = new Map<string, Set<(data: any) => void>>();
+  private invalidationListeners = new Map<string, Set<() => void>>();
+  private pendingRevalidation = new Map<string, boolean>();
 
   constructor() {
     // Hydrate from sessionStorage if available
@@ -110,32 +113,84 @@ class SwrMemoryStore {
     return this.inFlight.get(key);
   }
 
-  public setInFlight<T>(key: string, promise: Promise<T>): void {
+  public getInFlightGeneration(key: string): number | undefined {
+    return this.inFlightGenerations.get(key);
+  }
+
+  public setInFlight<T>(key: string, promise: Promise<T>, generation?: number): void {
     this.inFlight.set(key, promise);
+    this.inFlightGenerations.set(key, generation ?? this.generation(key));
   }
 
   public clearInFlight(key: string, promise?: Promise<any>): void {
-    if (!promise || this.inFlight.get(key) === promise) this.inFlight.delete(key);
+    if (!promise || this.inFlight.get(key) === promise) {
+      this.inFlight.delete(key);
+      this.inFlightGenerations.delete(key);
+    }
+  }
+
+  public isPendingRevalidation(key: string): boolean {
+    return Boolean(this.pendingRevalidation.get(key));
+  }
+
+  public clearPendingRevalidation(key: string): void {
+    this.pendingRevalidation.delete(key);
   }
 
   public invalidate(patternOrKey: string): void {
-    const matches = patternOrKey.includes("*")
-      ? (key: string) => new RegExp("^" + patternOrKey.replace(/\*/g, ".*") + "$").test(key)
-      : (key: string) => key === patternOrKey;
-    const keys = new Set([...this.cache.keys(), ...this.inFlight.keys()]);
-    for (const key of keys) {
+    const isWildcard = patternOrKey.includes("*");
+    const regex = isWildcard ? new RegExp("^" + patternOrKey.replace(/\*/g, ".*") + "$") : null;
+    const matches = (key: string) => (regex ? regex.test(key) : key === patternOrKey);
+
+    // Collect all candidate keys from cache, inFlight, and registered invalidation listeners
+    const candidateKeys = new Set([
+      ...this.cache.keys(),
+      ...this.inFlight.keys(),
+      ...this.invalidationListeners.keys(),
+    ]);
+
+    const affectedKeys: string[] = [];
+    for (const key of candidateKeys) {
       if (matches(key)) {
+        affectedKeys.push(key);
         this.cache.delete(key);
-        this.generations.set(key, this.generation(key) + 1);
+        const nextGen = this.generation(key) + 1;
+        this.generations.set(key, nextGen);
+
+        // If an in-flight request is currently running for this key, mark that a follow-up
+        // revalidation is needed so the newest invalidation is never lost
+        if (this.inFlight.has(key)) {
+          this.pendingRevalidation.set(key, true);
+        }
       }
     }
+
     this.saveToSession();
+
+    // Notify targeted invalidation listeners only for affected keys
+    for (const key of affectedKeys) {
+      const listeners = this.invalidationListeners.get(key);
+      if (listeners && listeners.size > 0) {
+        listeners.forEach((cb) => {
+          try {
+            cb();
+          } catch (err) {
+            console.error(`SWR invalidation listener error for ${key}:`, err);
+          }
+        });
+      }
+    }
   }
 
   public clear(): void {
-    for (const key of this.inFlight.keys()) this.generations.set(key, this.generation(key) + 1);
+    for (const key of this.inFlight.keys()) {
+      this.generations.set(key, this.generation(key) + 1);
+    }
     this.cache.clear();
-    for (const [key, promise] of this.inFlight) this.clearInFlight(key, promise);
+    for (const [key, promise] of this.inFlight) {
+      this.clearInFlight(key, promise);
+    }
+    this.pendingRevalidation.clear();
     if (typeof window !== "undefined" && window.sessionStorage) {
       window.sessionStorage.removeItem(this.storageKey());
     }
@@ -152,6 +207,22 @@ class SwrMemoryStore {
         set.delete(callback);
         if (set.size === 0) {
           this.subscribers.delete(key);
+        }
+      }
+    };
+  }
+
+  public subscribeInvalidate(key: string, callback: () => void): () => void {
+    if (!this.invalidationListeners.has(key)) {
+      this.invalidationListeners.set(key, new Set());
+    }
+    this.invalidationListeners.get(key)!.add(callback);
+    return () => {
+      const set = this.invalidationListeners.get(key);
+      if (set) {
+        set.delete(callback);
+        if (set.size === 0) {
+          this.invalidationListeners.delete(key);
         }
       }
     };
@@ -202,8 +273,18 @@ export async function swrFetch<T>(
 
   // 2. Check in-flight promise for deduplication
   const existingPromise = globalSwrStore.getInFlight<T>(key);
-  if (!forceRefresh && existingPromise) {
-    return existingPromise;
+  const inFlightGen = globalSwrStore.getInFlightGeneration(key);
+  const currentGen = globalSwrStore.generation(key);
+
+  if (existingPromise) {
+    if (!forceRefresh) {
+      return existingPromise;
+    }
+    // Coalesce concurrent forced refreshes: if an in-flight fetch is already
+    // running for the current (or newer) generation, share that promise
+    if (inFlightGen !== undefined && inFlightGen >= currentGen) {
+      return existingPromise;
+    }
   }
 
   // 3. Dispatch new network request
@@ -212,16 +293,22 @@ export async function swrFetch<T>(
   fetchPromise = (async () => {
     try {
       const freshData = await fetcher();
+      // Stale-response protection: Only commit if no newer invalidation happened while in flight
       if (freshData !== undefined && freshData !== null && globalSwrStore.generation(key) === generation) {
         globalSwrStore.set(key, freshData, persistSession);
       }
       return freshData;
     } finally {
       globalSwrStore.clearInFlight(key, fetchPromise);
+      // If an invalidation arrived during this fetch, execute exactly one follow-up revalidation
+      if (globalSwrStore.isPendingRevalidation(key)) {
+        globalSwrStore.clearPendingRevalidation(key);
+        triggerBackgroundRevalidate(key, fetcher, persistSession);
+      }
     }
   })();
 
-  globalSwrStore.setInFlight(key, fetchPromise);
+  globalSwrStore.setInFlight(key, fetchPromise, generation);
   return fetchPromise;
 }
 
@@ -240,14 +327,18 @@ function triggerBackgroundRevalidate<T>(
       if (freshData !== undefined && freshData !== null && globalSwrStore.generation(key) === generation) {
         globalSwrStore.set(key, freshData, persistSession);
       }
-    } catch (e) {
+    } catch {
       // Silent background catch
     } finally {
       globalSwrStore.clearInFlight(key, bgPromise);
+      if (globalSwrStore.isPendingRevalidation(key)) {
+        globalSwrStore.clearPendingRevalidation(key);
+        triggerBackgroundRevalidate(key, fetcher, persistSession);
+      }
     }
   })();
 
-  globalSwrStore.setInFlight(key, bgPromise);
+  globalSwrStore.setInFlight(key, bgPromise, generation);
 }
 
 /**
@@ -337,18 +428,14 @@ export function useSwrData<T>(
       setLoading(false);
     });
 
-    const handleInvalidateEvent = () => {
+    // Targeted key invalidation: only revalidate when this specific canonical key or matching pattern is invalidated
+    const unsubscribeInvalidate = globalSwrStore.subscribeInvalidate(key, () => {
       void executeFetch(true);
-    };
-    if (typeof window !== "undefined") {
-      window.addEventListener("contest:cache_invalidated", handleInvalidateEvent);
-    }
+    });
 
     return () => {
       unsubscribe();
-      if (typeof window !== "undefined") {
-        window.removeEventListener("contest:cache_invalidated", handleInvalidateEvent);
-      }
+      unsubscribeInvalidate();
     };
   }, [key, enabled, executeFetch, forceRefresh, ttl]);
 

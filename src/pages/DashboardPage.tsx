@@ -100,11 +100,9 @@ export function DashboardPage() {
       handleRefresh();
     };
     window.addEventListener("contest:concluded", handleConcluded);
-    window.addEventListener("contest:cache_invalidated", handleConcluded);
     window.addEventListener("contest:status_changed", handleConcluded);
     return () => {
       window.removeEventListener("contest:concluded", handleConcluded);
-      window.removeEventListener("contest:cache_invalidated", handleConcluded);
       window.removeEventListener("contest:status_changed", handleConcluded);
     };
   }, [handleRefresh]);

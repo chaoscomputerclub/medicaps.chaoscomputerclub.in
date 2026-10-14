@@ -50,11 +50,113 @@ const CONTEST_CACHE_PATTERNS = [
   "system:contests:*",
 ];
 
-let cacheInvalidateTimer: ReturnType<typeof setTimeout> | null = null;
+export interface InvalidationSpec {
+  patterns: string[];
+  immediate: boolean;
+}
 
-export function invalidateContestCaches(immediate = false): void {
-  const execute = () => {
-    for (const pattern of CONTEST_CACHE_PATTERNS) {
+export function getEventInvalidationPatterns(event: string, contestSlug?: string | null): InvalidationSpec {
+  const isImmediate = [
+    "contest_status_changed",
+    "contest_concluded",
+    "contest_finished",
+    "contest_registered",
+    "contest_unregistered",
+    "contest_timer_reset",
+    "resync_required",
+    "cache_sync",
+  ].includes(event);
+
+  let patterns: string[] = [];
+
+  switch (event) {
+    case "leaderboard_updated":
+    case "leaderboard.updated":
+    case "scoreboard_updated":
+    case "scoreboard.updated":
+      patterns = contestSlug
+        ? [
+            `scoreboard:${contestSlug}`,
+            `leaderboard:${contestSlug}`,
+            `ranking:${contestSlug}`,
+            "scoreboard:*",
+            "leaderboard:*",
+            "portal:public_data",
+          ]
+        : ["scoreboard:*", "leaderboard:*", "ranking:*", "portal:public_data"];
+      break;
+
+    case "contest_status_changed":
+    case "contest_concluded":
+    case "contest_finished":
+    case "contest_created":
+    case "contest_updated":
+    case "contest.updated":
+    case "contest_deleted":
+    case "contest_timer_reset":
+      patterns = contestSlug
+        ? [
+            `contest:${contestSlug}`,
+            "contests:*",
+            "portal:public_data",
+            "system:contests:*",
+            `scoreboard:${contestSlug}`,
+          ]
+        : ["contests:*", "contest:*", "portal:public_data", "system:contests:*"];
+      break;
+
+    case "contest_registered":
+    case "contest_unregistered":
+    case "pass_checked_in":
+      patterns = contestSlug
+        ? [
+            `contest:${contestSlug}`,
+            "contests:*",
+            "passes:*",
+            "member:profile:*",
+            "student:*",
+            "portal:public_data",
+          ]
+        : ["contests:*", "passes:*", "member:profile:*", "student:*", "portal:public_data"];
+      break;
+
+    case "ratings_updated":
+    case "member_profile_updated":
+      patterns = ["member:profile:*", "profile:*", "student:*", "social:my-stats", "leaderboard:*"];
+      break;
+
+    case "submission_evaluated":
+    case "submission_completed":
+    case "assessment_finished":
+      patterns = contestSlug
+        ? [`scoreboard:${contestSlug}`, `leaderboard:${contestSlug}`, "submissions:*"]
+        : ["submissions:*", "scoreboard:*", "leaderboard:*"];
+      break;
+
+    case "resync_required":
+    case "cache_sync":
+      patterns = CONTEST_CACHE_PATTERNS;
+      break;
+
+    default:
+      patterns = contestSlug ? [`contest:${contestSlug}`, "contests:*"] : ["contests:*"];
+  }
+
+  return { patterns, immediate: isImmediate };
+}
+
+let realtimeCoalesceTimer: ReturnType<typeof setTimeout> | null = null;
+const pendingPatternsToInvalidate = new Set<string>();
+
+export function invalidateRealtimePatterns(patterns: string[], immediate = false): void {
+  for (const p of patterns) {
+    pendingPatternsToInvalidate.add(p);
+  }
+
+  const flush = () => {
+    const list = Array.from(pendingPatternsToInvalidate);
+    pendingPatternsToInvalidate.clear();
+    for (const pattern of list) {
       invalidateSwrCache(pattern);
     }
     if (typeof window !== "undefined") {
@@ -65,21 +167,24 @@ export function invalidateContestCaches(immediate = false): void {
   };
 
   if (immediate) {
-    if (cacheInvalidateTimer) {
-      clearTimeout(cacheInvalidateTimer);
-      cacheInvalidateTimer = null;
+    if (realtimeCoalesceTimer) {
+      clearTimeout(realtimeCoalesceTimer);
+      realtimeCoalesceTimer = null;
     }
-    execute();
+    flush();
     return;
   }
 
-  if (cacheInvalidateTimer) {
-    clearTimeout(cacheInvalidateTimer);
+  if (!realtimeCoalesceTimer) {
+    realtimeCoalesceTimer = setTimeout(() => {
+      realtimeCoalesceTimer = null;
+      flush();
+    }, 150);
   }
-  cacheInvalidateTimer = setTimeout(() => {
-    cacheInvalidateTimer = null;
-    execute();
-  }, 350);
+}
+
+export function invalidateContestCaches(immediate = false): void {
+  invalidateRealtimePatterns(CONTEST_CACHE_PATTERNS, immediate);
 }
 
 interface InternalSubscriber {
@@ -409,36 +514,11 @@ class GlobalSseMultiplexer {
       const parsed: RealtimeEvent = JSON.parse(rawData);
       if (sourceChannel.startsWith("contest:") && !["submission_evaluated", "submission_completed"].includes(parsed.event)) return;
 
-      // 1. Process Global Platform Cache & Lifecycle Invalidation (Executed ONCE per event)
-      if (
-        parsed.event === "pass_checked_in" ||
-        parsed.event === "contest_status_changed" ||
-        parsed.event === "contest_concluded" ||
-        parsed.event === "contest_finished" ||
-        parsed.event === "contest_created" ||
-        parsed.event === "contest_updated" ||
-        parsed.event === "contest.updated" ||
-        parsed.event === "contest_deleted" ||
-        parsed.event === "contest_timer_reset" ||
-        parsed.event === "contest_registered" ||
-        parsed.event === "contest_unregistered" ||
-        parsed.event === "top30_qualified" ||
-        parsed.event === "assessment_finished" ||
-        parsed.event === "leaderboard_updated" ||
-        parsed.event === "leaderboard.updated" ||
-        parsed.event === "scoreboard_updated" ||
-        parsed.event === "scoreboard.updated" ||
-        parsed.event === "ratings_updated" ||
-        parsed.event === "member_profile_updated" ||
-        parsed.event === "resync_required" ||
-        parsed.event === "cache_sync"
-      ) {
-        const isImmediate =
-          parsed.event === "contest_registered" ||
-          parsed.event === "contest_unregistered" ||
-          parsed.event === "resync_required" ||
-          parsed.event === "cache_sync";
-        invalidateContestCaches(isImmediate);
+      // 1. Process Targeted Platform Cache & Lifecycle Invalidation
+      const slug = parsed.contest_slug || (parsed.data as any)?.slug || (parsed.data as any)?.contest_slug;
+      const invalidationSpec = getEventInvalidationPatterns(parsed.event, slug);
+      if (invalidationSpec.patterns.length > 0) {
+        invalidateRealtimePatterns(invalidationSpec.patterns, invalidationSpec.immediate);
       }
 
       if (
