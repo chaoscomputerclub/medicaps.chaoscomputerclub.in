@@ -26,41 +26,89 @@ from .base import JudgeProvider, ProviderRunRequest, ProviderRunResult
 logger = logging.getLogger("ccc.judge.docker")
 
 
+import time
+
+_DOCKER_SEMAPHORE = asyncio.Semaphore(4)
+_HEALTH_CACHE: Dict[str, Any] = {"healthy": False, "timestamp": 0.0}
+_STATUS_CACHE: Dict[str, Any] = {"status": None, "timestamp": 0.0}
+_CACHE_TTL_HEALTH = 5.0   # 5-second TTL prevents thundering herd on /api/health
+_CACHE_TTL_STATUS = 10.0  # 10-second TTL prevents expensive container enumeration
+
+
 class DockerSandboxProvider(JudgeProvider):
     name = "docker"
 
     def __init__(self) -> None:
         self.client = get_docker_client()
 
-    async def healthy(self) -> bool:
-        """Verify Docker daemon is responsive and python sandbox is available."""
-        if not self.client:
-            self.client = get_docker_client()
-        if not self.client:
-            return False
-        try:
-            self.client.ping()
-            cnt = get_container("interleet-python:latest")
-            return cnt is not None and cnt.status == "running"
-        except Exception:
-            return False
+    async def healthy(self, force: bool = False) -> bool:
+        """Verify Docker daemon is responsive and python sandbox is available (non-blocking)."""
+        now = time.monotonic()
+        if not force and (now - _HEALTH_CACHE["timestamp"]) < _CACHE_TTL_HEALTH:
+            return bool(_HEALTH_CACHE["healthy"])
+
+        async with _DOCKER_SEMAPHORE:
+            now = time.monotonic()
+            if not force and (now - _HEALTH_CACHE["timestamp"]) < _CACHE_TTL_HEALTH:
+                return bool(_HEALTH_CACHE["healthy"])
+
+            def _check() -> bool:
+                if not self.client:
+                    self.client = get_docker_client()
+                if not self.client:
+                    return False
+                try:
+                    self.client.ping()
+                    cnt = get_container("interleet-python:latest")
+                    return cnt is not None and getattr(cnt, "status", None) == "running"
+                except Exception:
+                    return False
+
+            try:
+                is_healthy = await asyncio.wait_for(asyncio.to_thread(_check), timeout=2.0)
+            except (asyncio.TimeoutError, Exception) as exc:
+                logger.warning(f"Docker health check probe failed or timed out: {exc}")
+                is_healthy = False
+
+            _HEALTH_CACHE["healthy"] = is_healthy
+            _HEALTH_CACHE["timestamp"] = time.monotonic()
+            return is_healthy
 
     async def get_engine_status(self) -> Dict[str, Any]:
-        """Observability telemetry for /api/health probe."""
-        client = get_docker_client()
-        if not client:
-            return {"status": "docker_daemon_unavailable"}
-        try:
-            containers = client.containers.list(filters={"name": "interleet-engine-"})
-            return {
-                "engine": "ccc-core-docker-v1",
-                "mode": "direct_in_process",
-                "running_containers": len(containers),
-                "containers": [c.name for c in containers],
-                "active_threads": 16,
-            }
-        except Exception as exc:
-            return {"status": "error", "detail": str(exc)}
+        """Observability telemetry for /api/health probe (non-blocking, cached)."""
+        now = time.monotonic()
+        if (now - _STATUS_CACHE["timestamp"]) < _CACHE_TTL_STATUS and _STATUS_CACHE["status"] is not None:
+            return dict(_STATUS_CACHE["status"])
+
+        async with _DOCKER_SEMAPHORE:
+            now = time.monotonic()
+            if (now - _STATUS_CACHE["timestamp"]) < _CACHE_TTL_STATUS and _STATUS_CACHE["status"] is not None:
+                return dict(_STATUS_CACHE["status"])
+
+            def _inspect() -> Dict[str, Any]:
+                client = get_docker_client()
+                if not client:
+                    return {"status": "docker_daemon_unavailable"}
+                try:
+                    containers = client.containers.list(filters={"name": "interleet-engine-"})
+                    return {
+                        "engine": "ccc-core-docker-v1",
+                        "mode": "direct_in_process",
+                        "running_containers": len(containers),
+                        "containers": [getattr(c, "name", str(c)) for c in containers],
+                        "active_threads": 16,
+                    }
+                except Exception as exc:
+                    return {"status": "error", "detail": str(exc)}
+
+            try:
+                status_res = await asyncio.wait_for(asyncio.to_thread(_inspect), timeout=2.0)
+            except (asyncio.TimeoutError, Exception) as exc:
+                status_res = {"status": "timeout_or_error", "detail": str(exc)}
+
+            _STATUS_CACHE["status"] = status_res
+            _STATUS_CACHE["timestamp"] = time.monotonic()
+            return status_res
 
     async def execute_batch(
         self,
