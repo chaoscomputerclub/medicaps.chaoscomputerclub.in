@@ -71,49 +71,76 @@ class ContestService:
         limit: Optional[int] = None,
         offset: Optional[int] = 0,
     ) -> List[Dict[str, Any]]:
-        member_key = current_member.id if current_member else "anon"
-        cache_key = contest_list_cache_key(status, division, member_key)
-        cached = await get_cache(cache_key)
-        if cached is not None:
-            response.headers["X-Cache"] = "HIT"
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            if limit is not None:
-                safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
-                inject_pagination_headers(response, len(cached), safe_limit, safe_offset)
-                return slice_page(cached, safe_limit, safe_offset)
-            return cached
+        public_cache_key = contest_list_cache_key(status, division, "public")
 
-        async def _fetch():
+        async def _fetch_public():
             all_contests = await ContestRepository.list_contests(db, status=status, division=division)
             filtered_contests = [c for c in all_contests if c.slug not in ("dev-assessment-round", "dev-offline-final")]
-
-            registered_contest_ids = set()
-            submitted_contest_ids = set()
-            if current_member:
-                registered_contest_ids, submitted_contest_ids = await ContestRepository.get_user_registrations_and_submissions(
-                    db, current_member.id
-                )
 
             payload = []
             for c in filtered_contests:
                 c_dict = OfflineContestResponse.model_validate(c).model_dump()
-                c_dict["registered"] = c.id in registered_contest_ids
-                c_dict["is_submitted"] = c.id in submitted_contest_ids
+                c_dict["registered"] = False
+                c_dict["is_submitted"] = False
                 payload.append(c_dict)
 
-            await set_cache(cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
+            await set_cache(public_cache_key, payload, ttl_seconds=TTL_CONTESTS_LIST)
             return payload
 
-        payload = await single_flight.execute(cache_key, _fetch)
-        response.headers["X-Cache"] = "MISS"
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        # Case 1: Anonymous visitor — purely public contest catalog
+        if not current_member:
+            cached_public = await get_cache(public_cache_key)
+            if cached_public is not None:
+                response.headers["X-Cache"] = "HIT"
+                response.headers["Cache-Control"] = "public, max-age=15, stale-while-revalidate=30"
+                response.headers["Vary"] = "Accept-Encoding"
+                if limit is not None:
+                    safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
+                    inject_pagination_headers(response, len(cached_public), safe_limit, safe_offset)
+                    return slice_page(cached_public, safe_limit, safe_offset)
+                return cached_public
+
+            payload = await single_flight.execute(public_cache_key, _fetch_public)
+            response.headers["X-Cache"] = "MISS"
+            response.headers["Cache-Control"] = "public, max-age=15, stale-while-revalidate=30"
+            response.headers["Vary"] = "Accept-Encoding"
+
+            if limit is not None:
+                safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
+                inject_pagination_headers(response, len(payload), safe_limit, safe_offset)
+                return slice_page(payload, safe_limit, safe_offset)
+
+            return payload
+
+        # Case 2: Authenticated cadet — leverage shared public contest metadata and overlay personal registration
+        cached_public = await get_cache(public_cache_key)
+        was_cached = cached_public is not None
+        if cached_public is None:
+            cached_public = await single_flight.execute(public_cache_key, _fetch_public)
+
+        registered_contest_ids, submitted_contest_ids = await ContestRepository.get_user_registrations_and_submissions(
+            db, current_member.id
+        )
+
+        personalized_payload = []
+        for c in cached_public:
+            c_dict = dict(c)
+            c_id = c_dict.get("id")
+            c_dict["registered"] = c_id in registered_contest_ids
+            c_dict["is_submitted"] = c_id in submitted_contest_ids
+            personalized_payload.append(c_dict)
+
+        response.headers["X-Cache"] = "PRIVATE-HIT" if was_cached else "PRIVATE-MISS"
+        response.headers["Cache-Control"] = "private, no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Vary"] = "Authorization, Cookie, Accept-Encoding"
 
         if limit is not None:
             safe_limit, safe_offset = normalize_pagination(limit, offset, default_limit=50, max_limit=100)
-            inject_pagination_headers(response, len(payload), safe_limit, safe_offset)
-            return slice_page(payload, safe_limit, safe_offset)
+            inject_pagination_headers(response, len(personalized_payload), safe_limit, safe_offset)
+            return slice_page(personalized_payload, safe_limit, safe_offset)
 
-        return payload
+        return personalized_payload
 
     @staticmethod
     async def get_my_participated_contests(
