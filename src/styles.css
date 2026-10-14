@@ -535,7 +535,8 @@ textarea {
   color: #e4e4e7;
 }
 
-.readme-renderer code {
+.readme-renderer code,
+.readme-renderer-inline code {
   font-family: var(--font-code);
   font-size: 0.85em;
   padding: 0.15em 0.4em;

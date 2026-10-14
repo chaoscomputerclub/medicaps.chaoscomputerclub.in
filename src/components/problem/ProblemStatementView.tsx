@@ -254,13 +254,19 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
             Constraints
           </span>
           <div className="bg-[#171717] border border-white/[0.08] rounded-[12px] p-3.5 space-y-1.5 text-xs">
-            <ul className="space-y-1 list-disc list-inside">
+            <ul className="space-y-1.5 list-none p-0 m-0">
               {constraintsList.map((c, i) => (
-                <li key={i} className="leading-relaxed text-zinc-200">
-                  <ReadmeRenderer
-                    content={c.replace(/^-\s*/, "")}
-                    className="inline text-zinc-200"
-                  />
+                <li key={i} className="flex items-start gap-2.5 text-zinc-200">
+                  <span className="text-zinc-500 select-none text-[13px] leading-5 shrink-0">
+                    •
+                  </span>
+                  <div className="flex-1 min-w-0 font-mono text-[12.5px] leading-5">
+                    <ReadmeRenderer
+                      inline
+                      content={c.replace(/^[•·]\s*|^[-*]\s+/, "")}
+                      className="text-zinc-200 font-mono"
+                    />
+                  </div>
                 </li>
               ))}
             </ul>
